@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { ProfileMenu } from "@/components/common/ProfileMenu";
 import { Button } from "@/components/ui/button";
-import { LucideBell, LucideMenu, LucidePlus, LucideSearch } from "lucide-react";
+import { LucideBell, LucideMenu, LucidePlus, LucideSearch, LucideZap } from "lucide-react";
+import { APP_NAME } from "@/lib/constants";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 
@@ -43,8 +44,9 @@ export function Header({ toggleSidebar }: HeaderProps) {
           </Button>
 
           <div className="flex items-center">
+            <LucideZap className="h-6 w-6 text-primary mr-2" />
             <span className="font-medium text-gray-800">
-              ConstructBudget
+              {APP_NAME}
             </span>
           </div>
 

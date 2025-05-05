@@ -43,10 +43,8 @@ export function Sidebar() {
       onMouseEnter={() => setExpanded(true)}
       onMouseLeave={() => setExpanded(false)}
     >
-      {/* Logo */}
+      {/* Empty top space to align with header */}
       <div className="flex items-center justify-center h-16 bg-sidebar border-b border-sidebar-accent/10">
-        <LucideZap className="h-8 w-8 text-primary" />
-        {expanded && <span className="ml-2 text-lg font-semibold transition-opacity duration-150 text-white">{APP_NAME}</span>}
       </div>
 
       {/* Navigation */}
