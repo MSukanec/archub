@@ -22,9 +22,6 @@ export function MainLayout({
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const isMobile = useIsMobile();
-  const [selectedProjectId, setSelectedProjectId] = useState<number>();
-  const [isBudgetDialogOpen, setIsBudgetDialogOpen] = useState(false);
-  
   // Handle mobile sidebar if we're controlling it from outside
   const [internalMobileSidebarOpen, setInternalMobileSidebarOpen] = useState(false);
   const sidebarOpen = mobileSidebarOpen !== undefined ? mobileSidebarOpen : internalMobileSidebarOpen;
@@ -34,46 +31,19 @@ export function MainLayout({
     setSidebarOpen(!sidebarOpen);
   };
 
-  const handleCreateBudget = () => {
-    if (!selectedProjectId) {
-      toast({
-        title: "Selecciona un proyecto",
-        description: "Debes seleccionar un proyecto para crear un presupuesto",
-        variant: "destructive",
-      });
-      return;
-    }
-    setIsBudgetDialogOpen(true);
-  };
-
-  const handleProjectChange = (projectId: number) => {
-    setSelectedProjectId(projectId);
-    
-    // If we're on a project-specific route, redirect to the new project
-    if (location.startsWith('/projects/') && location.includes('/budgets')) {
-      const newLocation = `/projects/${projectId}/budgets`;
-      setLocation(newLocation);
-    }
-    
-    toast({
-      title: "Proyecto cambiado",
-      description: "Has cambiado al proyecto seleccionado",
-    });
-  };
-
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
       <div className="flex w-full">
         {/* Desktop Sidebar */}
         <div className="fixed left-0 top-0 h-full z-20">
-          <Sidebar onCreateBudget={handleCreateBudget} />
+          <Sidebar />
         </div>
 
         {/* Mobile Sidebar */}
         {isMobile && (
           <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
             <SheetContent side="left" className="w-[300px] p-0">
-              <Sidebar onCreateBudget={handleCreateBudget} />
+              <Sidebar />
             </SheetContent>
           </Sheet>
         )}

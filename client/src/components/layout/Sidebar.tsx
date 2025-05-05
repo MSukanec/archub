@@ -5,11 +5,7 @@ import { APP_NAME } from "@/lib/constants";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useState } from "react";
 
-interface SidebarProps {
-  onCreateBudget: () => void;
-}
-
-export function Sidebar({ onCreateBudget }: SidebarProps) {
+export function Sidebar() {
   const [location] = useLocation();
   const isMobile = useIsMobile();
   const [expanded, setExpanded] = useState(false);
@@ -21,9 +17,9 @@ export function Sidebar({ onCreateBudget }: SidebarProps) {
       icon: <LucideHome className="h-5 w-5" />,
     },
     {
-      name: "Materiales",
-      path: "/materials",
-      icon: <LucidePackage className="h-5 w-5" />,
+      name: "Presupuestos",
+      path: "/budgets",
+      icon: <LucideFileText className="h-5 w-5" />,
     },
     {
       name: "Tareas",
@@ -31,9 +27,9 @@ export function Sidebar({ onCreateBudget }: SidebarProps) {
       icon: <LucideCheckSquare className="h-5 w-5" />,
     },
     {
-      name: "Presupuestos",
-      path: "/budgets",
-      icon: <LucideFileText className="h-5 w-5" />,
+      name: "Materiales Unitarios",
+      path: "/materials",
+      icon: <LucidePackage className="h-5 w-5" />,
     },
   ];
 
@@ -114,16 +110,7 @@ export function Sidebar({ onCreateBudget }: SidebarProps) {
         </TooltipProvider>
       </nav>
 
-      {/* Create New Button */}
-      <div className="p-3 absolute bottom-4 left-0 right-0 flex justify-center">
-        <button 
-          className={`create-button flex items-center justify-center ${expanded ? 'w-[90%] px-4 py-2' : 'w-10 h-10 rounded-full'}`}
-          onClick={onCreateBudget}
-        >
-          <LucidePlus className={`${expanded ? 'mr-2 h-5 w-5' : 'h-5 w-5'}`} />
-          {expanded && <span>Crear</span>}
-        </button>
-      </div>
+      {/* No Create Button */}
     </aside>
   );
 }
