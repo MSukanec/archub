@@ -62,7 +62,7 @@ export function MainLayout({
   };
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-gray-50">
       {/* Desktop Sidebar */}
       <Sidebar onCreateBudget={handleCreateBudget} />
 
@@ -76,7 +76,7 @@ export function MainLayout({
       )}
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col ml-16 transition-all duration-200">
         <Header 
           toggleSidebar={toggleSidebar} 
           currentProjectId={selectedProjectId}
@@ -84,7 +84,7 @@ export function MainLayout({
         />
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto p-4 bg-gray-50">
+        <main className="flex-1 overflow-y-auto p-6">
           {children}
         </main>
       </div>
