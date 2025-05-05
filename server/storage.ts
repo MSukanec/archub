@@ -49,6 +49,7 @@ export interface IStorage {
   
   // Budget Task operations
   getBudgetTasks(budgetId: number): Promise<BudgetTask[]>;
+  getBudgetTask(id: number): Promise<BudgetTask | undefined>;
   addBudgetTask(budgetTask: InsertBudgetTask): Promise<BudgetTask>;
   updateBudgetTask(id: number, quantity: number): Promise<BudgetTask | undefined>;
   removeBudgetTask(id: number): Promise<boolean>;
@@ -297,6 +298,10 @@ export class MemStorage implements IStorage {
     return Array.from(this.budgetTaskMap.values()).filter(
       (bt) => bt.budgetId === budgetId
     );
+  }
+
+  async getBudgetTask(id: number): Promise<BudgetTask | undefined> {
+    return this.budgetTaskMap.get(id);
   }
 
   async addBudgetTask(insertBudgetTask: InsertBudgetTask): Promise<BudgetTask> {

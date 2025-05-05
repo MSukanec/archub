@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { LucideTrash } from "lucide-react";
+import { LucideTrash, LucidePencil } from "lucide-react";
 
 interface Task {
   id: number;
@@ -21,9 +21,11 @@ interface BudgetTask {
 interface BudgetTaskTableProps {
   budgetTasks: BudgetTask[];
   onRemoveTask: (index: number) => void;
+  onEditTask?: (index: number, task: BudgetTask) => void;
+  isEditing?: boolean;
 }
 
-export function BudgetTaskTable({ budgetTasks, onRemoveTask }: BudgetTaskTableProps) {
+export function BudgetTaskTable({ budgetTasks, onRemoveTask, onEditTask, isEditing = false }: BudgetTaskTableProps) {
   const [totals, setTotals] = useState({
     subtotal: 0,
   });

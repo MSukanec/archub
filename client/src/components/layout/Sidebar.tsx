@@ -21,11 +21,6 @@ export function Sidebar({ onCreateBudget }: SidebarProps) {
       icon: <LucideHome className="h-5 w-5" />,
     },
     {
-      name: "Proyectos",
-      path: "/projects",
-      icon: <LucideLayoutGrid className="h-5 w-5" />,
-    },
-    {
       name: "Materiales",
       path: "/materials",
       icon: <LucidePackage className="h-5 w-5" />,
