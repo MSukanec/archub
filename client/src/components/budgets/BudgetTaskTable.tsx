@@ -82,15 +82,28 @@ export function BudgetTaskTable({ budgetTasks, onRemoveTask, onEditTask, isEditi
                     <TableCell>{formatCurrency(budgetTask.task?.unitPrice || 0)}</TableCell>
                     <TableCell>{formatCurrency(subtotal)}</TableCell>
                     <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-red-500 hover:text-red-700"
-                        onClick={() => onRemoveTask(index)}
-                      >
-                        <LucideTrash className="h-4 w-4" />
-                        <span className="sr-only">Eliminar</span>
-                      </Button>
+                      <div className="flex space-x-1">
+                        {isEditing && onEditTask && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-blue-500 hover:text-blue-700"
+                            onClick={() => onEditTask(index, budgetTask)}
+                          >
+                            <LucidePencil className="h-4 w-4" />
+                            <span className="sr-only">Editar</span>
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-500 hover:text-red-700"
+                          onClick={() => onRemoveTask(index)}
+                        >
+                          <LucideTrash className="h-4 w-4" />
+                          <span className="sr-only">Eliminar</span>
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 );

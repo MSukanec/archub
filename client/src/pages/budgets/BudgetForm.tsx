@@ -28,6 +28,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { z } from "zod";
 import { BudgetTaskTable } from "@/components/budgets/BudgetTaskTable";
 import { AddTaskForm } from "@/components/budgets/AddTaskForm";
+import { EditBudgetTaskDialog } from "@/components/budgets/EditBudgetTaskDialog";
 
 // Form schema
 const budgetSchema = z.object({
@@ -80,6 +81,8 @@ export default function BudgetForm({ budgetId, projectId: initialProjectId }: Bu
   const queryClient = useQueryClient();
   const isEditing = !!budgetId;
   const [budgetTasks, setBudgetTasks] = useState<BudgetTask[]>([]);
+  const [editingTask, setEditingTask] = useState<BudgetTask | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(budgetSchema),
@@ -202,6 +205,29 @@ export default function BudgetForm({ budgetId, projectId: initialProjectId }: Bu
     },
   });
 
+  // Update budget task mutation
+  const updateBudgetTaskMutation = useMutation({
+    mutationFn: (data: { id: number, quantity: number }) => {
+      return apiRequest('PATCH', `/api/budget-tasks/${data.id}`, {
+        quantity: data.quantity,
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Tarea actualizada",
+        description: "La tarea ha sido actualizada correctamente",
+      });
+      queryClient.invalidateQueries({ queryKey: [`/api/budgets/${budgetId}/tasks`] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `No se pudo actualizar la tarea: ${error}`,
+        variant: "destructive",
+      });
+    },
+  });
+
   // Delete budget task mutation
   const deleteBudgetTaskMutation = useMutation({
     mutationFn: (id: number) => {
@@ -318,6 +344,35 @@ export default function BudgetForm({ budgetId, projectId: initialProjectId }: Bu
         title: "Tarea eliminada",
         description: "La tarea ha sido eliminada del presupuesto",
       });
+    }
+  };
+
+  const handleEditTask = (index: number, budgetTask: BudgetTask) => {
+    setEditingTask(budgetTask);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdateTask = (id: number, quantity: number) => {
+    if (isEditing) {
+      // If editing an existing budget, update via API
+      updateBudgetTaskMutation.mutate({
+        id,
+        quantity,
+      });
+    } else {
+      // If creating a new budget, update local state
+      const updatedTasks = [...budgetTasks];
+      const taskIndex = updatedTasks.findIndex(bt => bt.taskId === editingTask?.taskId);
+      
+      if (taskIndex >= 0) {
+        updatedTasks[taskIndex].quantity = quantity;
+        setBudgetTasks(updatedTasks);
+        
+        toast({
+          title: "Tarea actualizada",
+          description: "La cantidad de la tarea ha sido actualizada",
+        });
+      }
     }
   };
 
@@ -455,12 +510,22 @@ export default function BudgetForm({ budgetId, projectId: initialProjectId }: Bu
                 <BudgetTaskTable
                   budgetTasks={budgetTasks}
                   onRemoveTask={handleRemoveTask}
+                  onEditTask={handleEditTask}
+                  isEditing={isEditing}
                 />
               )}
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Edit Task Dialog */}
+      <EditBudgetTaskDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        budgetTask={editingTask}
+        onSave={handleUpdateTask}
+      />
     </MainLayout>
   );
 }
