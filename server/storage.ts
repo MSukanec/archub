@@ -41,7 +41,7 @@ export interface IStorage {
   removeTaskMaterial(id: number): Promise<boolean>;
   
   // Budget operations
-  getBudgets(projectId: number): Promise<Budget[]>;
+  getBudgets(userId: number): Promise<Budget[]>;
   getBudget(id: number): Promise<Budget | undefined>;
   createBudget(budget: InsertBudget): Promise<Budget>;
   updateBudget(id: number, budget: Partial<InsertBudget>): Promise<Budget | undefined>;
@@ -254,9 +254,9 @@ export class MemStorage implements IStorage {
   }
 
   // Budget operations
-  async getBudgets(projectId: number): Promise<Budget[]> {
+  async getBudgets(userId: number): Promise<Budget[]> {
     return Array.from(this.budgetMap.values()).filter(
-      (budget) => budget.projectId === projectId
+      (budget) => budget.userId === userId
     );
   }
 

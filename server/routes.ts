@@ -441,9 +441,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Budget not found" });
       }
       
-      const project = await storage.getProject(budget.projectId);
-      
-      if (!project || project.userId !== req.user.id) {
+      if (budget.userId !== req.user.id) {
         return res.status(403).json({ message: "Not authorized to access this budget" });
       }
       
@@ -490,9 +488,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Budget not found" });
       }
       
-      const project = await storage.getProject(budget.projectId);
-      
-      if (!project || project.userId !== req.user.id) {
+      if (budget.userId !== req.user.id) {
         return res.status(403).json({ message: "Not authorized to update this budget" });
       }
       
@@ -516,9 +512,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Budget not found" });
       }
       
-      const project = await storage.getProject(budget.projectId);
-      
-      if (!project || project.userId !== req.user.id) {
+      if (budget.userId !== req.user.id) {
         return res.status(403).json({ message: "Not authorized to delete this budget" });
       }
       
@@ -539,9 +533,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Budget not found" });
       }
       
-      const project = await storage.getProject(budget.projectId);
-      
-      if (!project || project.userId !== req.user.id) {
+      if (budget.userId !== req.user.id) {
         return res.status(403).json({ message: "Not authorized to access this budget's tasks" });
       }
       
