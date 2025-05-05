@@ -105,7 +105,7 @@ export default function ProjectForm({ projectId }: ProjectFormProps) {
     if (project) {
       form.reset({
         name: project.name,
-        description: project.description || "",
+        description: project.description ?? "",
         status: project.status,
         userId: project.userId,
       });
@@ -169,9 +169,13 @@ export default function ProjectForm({ projectId }: ProjectFormProps) {
                         <FormLabel>Descripción</FormLabel>
                         <FormControl>
                           <Textarea
-                            {...field}
                             placeholder="Descripción del proyecto"
                             className="min-h-[100px]"
+                            onChange={field.onChange}
+                            value={typeof field.value === 'string' ? field.value : ''}
+                            onBlur={field.onBlur}
+                            name={field.name}
+                            ref={field.ref}
                           />
                         </FormControl>
                         <FormMessage />

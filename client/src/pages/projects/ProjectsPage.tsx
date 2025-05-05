@@ -50,8 +50,9 @@ export default function ProjectsPage() {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
+  const formatDate = (dateStr: string | Date | null) => {
+    if (!dateStr) return "-";
+    const date = typeof dateStr === 'string' ? new Date(dateStr) : dateStr;
     return new Intl.DateTimeFormat("es", {
       year: "numeric",
       month: "long",

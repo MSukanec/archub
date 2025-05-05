@@ -11,6 +11,8 @@ import TasksPage from "@/pages/tasks/TasksPage";
 import TaskForm from "@/pages/tasks/TaskForm";
 import BudgetsPage from "@/pages/budgets/BudgetsPage";
 import BudgetForm from "@/pages/budgets/BudgetForm";
+import ProjectsPage from "@/pages/projects/ProjectsPage";
+import ProjectForm from "@/pages/projects/ProjectForm";
 import LoginPage from "@/pages/auth/LoginPage";
 import RegisterPage from "@/pages/auth/RegisterPage";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -49,6 +51,11 @@ function Router() {
       </Route>
       <Route path="/projects/:projectId/budgets/new">
         {(params) => <ProtectedRoute path="/projects/:projectId/budgets/new" component={() => <BudgetForm projectId={parseInt(params.projectId)} />} />}
+      </Route>
+      <ProtectedRoute path="/projects" component={ProjectsPage} />
+      <ProtectedRoute path="/projects/new" component={ProjectForm} />
+      <Route path="/projects/:id/edit">
+        {(params) => <ProtectedRoute path="/projects/:id/edit" component={() => <ProjectForm projectId={params.id} />} />}
       </Route>
 
       <Route component={NotFound} />
