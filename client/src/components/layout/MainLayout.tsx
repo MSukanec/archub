@@ -1,0 +1,120 @@
+import { useState, ReactNode } from "react";
+import { Sidebar } from "./Sidebar";
+import { Header } from "./Header";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useQuery } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+
+interface MainLayoutProps {
+  children: ReactNode;
+  mobileSidebarOpen?: boolean;
+  onMobileSidebarOpenChange?: (open: boolean) => void;
+}
+
+export function MainLayout({ 
+  children,
+  mobileSidebarOpen,
+  onMobileSidebarOpenChange
+}: MainLayoutProps) {
+  const [location, setLocation] = useLocation();
+  const { toast } = useToast();
+  const isMobile = useIsMobile();
+  const [selectedProjectId, setSelectedProjectId] = useState<number>();
+  const [isBudgetDialogOpen, setIsBudgetDialogOpen] = useState(false);
+  
+  // Handle mobile sidebar if we're controlling it from outside
+  const [internalMobileSidebarOpen, setInternalMobileSidebarOpen] = useState(false);
+  const sidebarOpen = mobileSidebarOpen !== undefined ? mobileSidebarOpen : internalMobileSidebarOpen;
+  const setSidebarOpen = onMobileSidebarOpenChange || setInternalMobileSidebarOpen;
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  const handleCreateBudget = () => {
+    if (!selectedProjectId) {
+      toast({
+        title: "Selecciona un proyecto",
+        description: "Debes seleccionar un proyecto para crear un presupuesto",
+        variant: "destructive",
+      });
+      return;
+    }
+    setIsBudgetDialogOpen(true);
+  };
+
+  const handleProjectChange = (projectId: number) => {
+    setSelectedProjectId(projectId);
+    
+    // If we're on a project-specific route, redirect to the new project
+    if (location.startsWith('/projects/') && location.includes('/budgets')) {
+      const newLocation = `/projects/${projectId}/budgets`;
+      setLocation(newLocation);
+    }
+    
+    toast({
+      title: "Proyecto cambiado",
+      description: "Has cambiado al proyecto seleccionado",
+    });
+  };
+
+  return (
+    <div className="flex h-screen overflow-hidden">
+      {/* Desktop Sidebar */}
+      <Sidebar onCreateBudget={handleCreateBudget} />
+
+      {/* Mobile Sidebar */}
+      {isMobile && (
+        <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+          <SheetContent side="left" className="w-[300px] p-0">
+            <Sidebar onCreateBudget={handleCreateBudget} />
+          </SheetContent>
+        </Sheet>
+      )}
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header 
+          toggleSidebar={toggleSidebar} 
+          currentProjectId={selectedProjectId}
+          onProjectChange={handleProjectChange}
+        />
+
+        {/* Main Content Area */}
+        <main className="flex-1 overflow-y-auto p-4 bg-gray-50">
+          {children}
+        </main>
+      </div>
+
+      {/* Budget Creation Dialog */}
+      <Dialog open={isBudgetDialogOpen} onOpenChange={setIsBudgetDialogOpen}>
+        <DialogContent className="max-w-3xl">
+          <div className="p-4">
+            <h2 className="text-xl font-semibold mb-4">Crear nuevo presupuesto</h2>
+            {/* Budget form would go here */}
+            <div className="flex justify-end gap-2 mt-4">
+              <button 
+                className="px-4 py-2 border rounded-md"
+                onClick={() => setIsBudgetDialogOpen(false)}
+              >
+                Cancelar
+              </button>
+              <button 
+                className="px-4 py-2 bg-primary text-white rounded-md"
+                onClick={() => {
+                  setIsBudgetDialogOpen(false);
+                  setLocation(`/projects/${selectedProjectId}/budgets/new`);
+                }}
+              >
+                Continuar
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

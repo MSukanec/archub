@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 20 14.3% 4.1%;
+  --muted: 60 4.8% 95.9%;
+  --muted-foreground: 25 5.3% 44.7%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 20 14.3% 4.1%;
+  --card: 0 0% 100%;
+  --card-foreground: 20 14.3% 4.1%;
+  --border: 20 5.9% 90%;
+  --input: 20 5.9% 90%;
+  --primary: 152 61% 52%;  /* Supabase green color */
+  --primary-foreground: 211 100% 99%;
+  --secondary: 60 4.8% 95.9%;
+  --secondary-foreground: 24 9.8% 10%;
+  --accent: 60 4.8% 95.9%;
+  --accent-foreground: 24 9.8% 10%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 60 9.1% 97.8%;
+  --ring: 20 14.3% 4.1%;
+  --radius: 0.5rem;
+
+  /* Sidebar specific colors */
+  --sidebar-background: 240 5% 12%;  /* Dark background for sidebar */
+  --sidebar-foreground: 0 0% 100%;  /* White text for sidebar */
+  --sidebar-primary: 152 61% 52%;  /* Primary color for sidebar (same as primary) */
+  --sidebar-primary-foreground: 0 0% 100%;  /* White text for primary elements in sidebar */
+  --sidebar-accent: 240 5% 16%;  /* Slightly lighter than background for hover states */
+  --sidebar-accent-foreground: 0 0% 100%;  /* White text for accent elements */
+  --sidebar-border: 240 5% 26%;  /* Border color for sidebar elements */
+  --sidebar-ring: 152 61% 52%;  /* Ring color for focus states in sidebar */
+
+  /* Chart colors */
+  --chart-1: 152 61% 52%;  /* Primary color */
+  --chart-2: 207 90% 54%;  /* Blue */
+  --chart-3: 266 80% 61%;  /* Purple */
+  --chart-4: 351 95% 71%;  /* Pink */
+  --chart-5: 32 90% 60%;   /* Orange */
+}
+
+.dark {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --primary: 152 61% 52%;  /* Keep the same primary color */
+  --primary-foreground: 240 10% 3.9%;
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 240 4.9% 83.9%;
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+/* Custom classes for sidebar styling */
+.sidebar {
+  @apply bg-sidebar text-sidebar-foreground;
+}
+
+.sidebar-item {
+  @apply px-3 py-2 rounded-md flex items-center transition-colors;
+}
+
+.sidebar-item:hover {
+  @apply bg-sidebar-accent text-sidebar-accent-foreground;
+}
+
+.sidebar-item.active {
+  @apply bg-opacity-20 bg-primary border-l-2 border-primary;
+}
+
+.create-button {
+  @apply w-full flex items-center justify-center px-4 py-2 bg-primary text-white rounded-md shadow-sm hover:bg-opacity-90 transition-colors;
+}
