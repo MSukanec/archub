@@ -333,8 +333,8 @@ export default function BudgetForm({ budgetId }: BudgetFormProps) {
     }
   };
 
-  const handleEditTask = (index: number, budgetTask: BudgetTask) => {
-    setEditingTask(budgetTask);
+  const handleEditTask = (index: number, task: BudgetTask) => {
+    setEditingTask(task);
     setIsEditDialogOpen(true);
   };
 
@@ -463,8 +463,8 @@ export default function BudgetForm({ budgetId }: BudgetFormProps) {
                 <BudgetTaskTable
                   budgetTasks={budgetTasks}
                   onRemoveTask={handleRemoveTask}
-                  onEditTask={handleEditTask}
-                  isEditing={isEditing}
+                  onEditTask={(index, task) => handleEditTask(index, task)}
+                  isEditing={true}
                 />
               )}
             </div>

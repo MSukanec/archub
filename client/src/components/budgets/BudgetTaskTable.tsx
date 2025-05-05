@@ -8,6 +8,7 @@ interface Task {
   name: string;
   unit: string;
   unitPrice: number;
+  category: string;
 }
 
 interface BudgetTask {
