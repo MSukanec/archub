@@ -1,11 +1,10 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -36,8 +35,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const [, setLocation] = useLocation();
-  const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+  const { user, loginMutation } = useAuth();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -47,29 +45,14 @@ export default function LoginPage() {
     },
   });
 
-  // Login mutation
-  const loginMutation = useMutation({
-    mutationFn: (data: LoginFormValues) => {
-      return apiRequest('POST', '/api/auth/login', data);
-    },
-    onSuccess: () => {
-      toast({
-        title: "Inicio de sesión exitoso",
-        description: "Has iniciado sesión correctamente",
-      });
-      setLocation("/");
-    },
-    onError: (error) => {
-      toast({
-        title: "Error de inicio de sesión",
-        description: "Usuario o contraseña incorrectos",
-        variant: "destructive",
-      });
-    },
-  });
+  // Redirect to dashboard if already logged in
+  useEffect(() => {
+    if (user) {
+      setLocation('/');
+    }
+  }, [user, setLocation]);
 
   const onSubmit = (data: LoginFormValues) => {
-    setIsLoading(true);
     loginMutation.mutate(data);
   };
 
@@ -132,9 +115,9 @@ export default function LoginPage() {
                 <Button
                   type="submit"
                   className="w-full bg-primary hover:bg-primary/90"
-                  disabled={isLoading || loginMutation.isPending}
+                  disabled={loginMutation.isPending}
                 >
-                  {(isLoading || loginMutation.isPending) ? "Iniciando sesión..." : "Iniciar sesión"}
+                  {loginMutation.isPending ? "Iniciando sesión..." : "Iniciar sesión"}
                 </Button>
               </form>
             </Form>
@@ -142,8 +125,8 @@ export default function LoginPage() {
           <CardFooter className="flex justify-center">
             <p className="text-sm text-gray-600">
               ¿No tienes una cuenta?{" "}
-              <Link href="/register">
-                <a className="text-primary hover:underline">Registrarse</a>
+              <Link href="/auth/register">
+                <span className="text-primary hover:underline cursor-pointer">Registrarse</span>
               </Link>
             </p>
           </CardFooter>

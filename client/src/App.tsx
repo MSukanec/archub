@@ -1,6 +1,8 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, Redirect } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AuthProvider } from "@/hooks/use-auth";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard/Dashboard";
 import MaterialsPage from "@/pages/materials/MaterialsPage";
@@ -11,125 +13,42 @@ import BudgetsPage from "@/pages/budgets/BudgetsPage";
 import BudgetForm from "@/pages/budgets/BudgetForm";
 import LoginPage from "@/pages/auth/LoginPage";
 import RegisterPage from "@/pages/auth/RegisterPage";
-import { useQuery } from "@tanstack/react-query";
-import { Redirect } from "wouter";
-
-function RequireAuth({ children }: { children: JSX.Element }) {
-  const { data: user, isLoading } = useQuery({
-    queryKey: ['/api/auth/me'],
-  });
-
-  if (isLoading) {
-    return <div className="flex items-center justify-center h-screen">Cargando...</div>;
-  }
-
-  if (!user) {
-    return <Redirect to="/login" />;
-  }
-
-  return children;
-}
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
 
 function Router() {
   return (
     <Switch>
-      <Route path="/login" component={LoginPage} />
-      <Route path="/register" component={RegisterPage} />
+      <Route path="/auth/login" component={LoginPage} />
+      <Route path="/auth/register" component={RegisterPage} />
+      <Route path="/login">
+        {() => <Redirect to="/auth/login" />}
+      </Route>
+      <Route path="/register">
+        {() => <Redirect to="/auth/register" />}
+      </Route>
       
-      <Route path="/">
-        {() => (
-          <RequireAuth>
-            <Dashboard />
-          </RequireAuth>
-        )}
-      </Route>
-
-      <Route path="/materials">
-        {() => (
-          <RequireAuth>
-            <MaterialsPage />
-          </RequireAuth>
-        )}
-      </Route>
-
-      <Route path="/materials/new">
-        {() => (
-          <RequireAuth>
-            <MaterialForm />
-          </RequireAuth>
-        )}
-      </Route>
-
+      <ProtectedRoute path="/" component={Dashboard} />
+      <ProtectedRoute path="/materials" component={MaterialsPage} />
+      <ProtectedRoute path="/materials/new" component={MaterialForm} />
       <Route path="/materials/:id/edit">
-        {(params) => (
-          <RequireAuth>
-            <MaterialForm materialId={params.id} />
-          </RequireAuth>
-        )}
+        {(params) => <ProtectedRoute path="/materials/:id/edit" component={() => <MaterialForm materialId={params.id} />} />}
       </Route>
-
-      <Route path="/tasks">
-        {() => (
-          <RequireAuth>
-            <TasksPage />
-          </RequireAuth>
-        )}
-      </Route>
-
-      <Route path="/tasks/new">
-        {() => (
-          <RequireAuth>
-            <TaskForm />
-          </RequireAuth>
-        )}
-      </Route>
-
+      <ProtectedRoute path="/tasks" component={TasksPage} />
+      <ProtectedRoute path="/tasks/new" component={TaskForm} />
       <Route path="/tasks/:id/edit">
-        {(params) => (
-          <RequireAuth>
-            <TaskForm taskId={params.id} />
-          </RequireAuth>
-        )}
+        {(params) => <ProtectedRoute path="/tasks/:id/edit" component={() => <TaskForm taskId={params.id} />} />}
       </Route>
-
-      <Route path="/budgets">
-        {() => (
-          <RequireAuth>
-            <BudgetsPage />
-          </RequireAuth>
-        )}
-      </Route>
-
-      <Route path="/budgets/new">
-        {() => (
-          <RequireAuth>
-            <BudgetForm />
-          </RequireAuth>
-        )}
-      </Route>
-
+      <ProtectedRoute path="/budgets" component={BudgetsPage} />
+      <ProtectedRoute path="/budgets/new" component={BudgetForm} />
       <Route path="/budgets/:id/edit">
-        {(params) => (
-          <RequireAuth>
-            <BudgetForm budgetId={params.id} />
-          </RequireAuth>
-        )}
+        {(params) => <ProtectedRoute path="/budgets/:id/edit" component={() => <BudgetForm budgetId={params.id} />} />}
       </Route>
-
       <Route path="/projects/:projectId/budgets">
-        {(params) => (
-          <RequireAuth>
-            <BudgetsPage projectId={parseInt(params.projectId)} />
-          </RequireAuth>
-        )}
+        {(params) => <ProtectedRoute path="/projects/:projectId/budgets" component={() => <BudgetsPage projectId={parseInt(params.projectId)} />} />}
       </Route>
-
       <Route path="/projects/:projectId/budgets/new">
-        {(params) => (
-          <RequireAuth>
-            <BudgetForm projectId={parseInt(params.projectId)} />
-          </RequireAuth>
-        )}
+        {(params) => <ProtectedRoute path="/projects/:projectId/budgets/new" component={() => <BudgetForm projectId={parseInt(params.projectId)} />} />}
       </Route>
 
       <Route component={NotFound} />
@@ -139,10 +58,14 @@ function Router() {
 
 function App() {
   return (
-    <TooltipProvider>
-      <Toaster />
-      <Router />
-    </TooltipProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+        </TooltipProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
 
