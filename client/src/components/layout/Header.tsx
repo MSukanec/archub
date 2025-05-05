@@ -3,20 +3,8 @@ import { useLocation } from "wouter";
 import { ProfileMenu } from "@/components/common/ProfileMenu";
 import { Button } from "@/components/ui/button";
 import { LucideBell, LucideMenu, LucidePlus, LucideSearch } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
-
-interface Project {
-  id: number;
-  name: string;
-}
 
 interface User {
   id: number;
@@ -28,11 +16,9 @@ interface User {
 
 interface HeaderProps {
   toggleSidebar?: () => void;
-  currentProjectId?: number;
-  onProjectChange?: (projectId: number) => void;
 }
 
-export function Header({ toggleSidebar, currentProjectId, onProjectChange }: HeaderProps) {
+export function Header({ toggleSidebar }: HeaderProps) {
   const [location, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -41,24 +27,10 @@ export function Header({ toggleSidebar, currentProjectId, onProjectChange }: Hea
     queryKey: ['/api/auth/me'],
   });
 
-  // Query for projects 
-  const { data: projects = [] } = useQuery<Project[]>({
-    queryKey: ['/api/projects'],
-  });
-
-  const currentProject = projects.find(project => project.id === currentProjectId);
-
-  const handleProjectChange = (value: string) => {
-    const projectId = parseInt(value);
-    if (onProjectChange) {
-      onProjectChange(projectId);
-    }
-  };
-
   return (
     <header className="z-30 bg-white border-b sticky top-0 w-full h-16">
       <div className="flex items-center justify-between px-5 h-full">
-        {/* Left section with project name */}
+        {/* Left section with app logo */}
         <div className="flex items-center space-x-4">
           <Button
             variant="ghost"
@@ -70,28 +42,10 @@ export function Header({ toggleSidebar, currentProjectId, onProjectChange }: Hea
             <span className="sr-only">Toggle sidebar</span>
           </Button>
 
-          <div className="flex items-center min-w-[240px]">
-            {projects.length > 0 ? (
-              <Select
-                value={currentProjectId?.toString()}
-                onValueChange={handleProjectChange}
-              >
-                <SelectTrigger className="bg-transparent border-none shadow-none h-auto p-0">
-                  <SelectValue placeholder="Seleccionar Proyecto" className="font-medium text-gray-800" />
-                </SelectTrigger>
-                <SelectContent>
-                  {projects.map((project) => (
-                    <SelectItem key={project.id} value={project.id.toString()}>
-                      {project.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            ) : (
-              <span className="font-medium text-gray-800">
-                {currentProject?.name || "Sin proyectos"}
-              </span>
-            )}
+          <div className="flex items-center">
+            <span className="font-medium text-gray-800">
+              ConstructBudget
+            </span>
           </div>
 
           <div className="rounded-md border border-gray-200 px-3 py-1 flex items-center max-w-md w-64 h-9 hidden md:flex">
@@ -116,16 +70,15 @@ export function Header({ toggleSidebar, currentProjectId, onProjectChange }: Hea
                 setLocation('/materials/new');
               } else if (location.includes('/tasks')) {
                 setLocation('/tasks/new');
-              } else if (location.includes('/budgets') || location.includes('/projects')) {
-                // Use the create budget dialog through the sidebar
-                if (toggleSidebar) toggleSidebar();
+              } else if (location.includes('/budgets')) {
+                setLocation('/budgets/new');
               }
             }}
           >
             <LucidePlus className="h-4 w-4 mr-2" />
             {location.includes('/materials') ? 'Nuevo Material' : 
              location.includes('/tasks') ? 'Nueva Tarea' : 
-             location.includes('/budgets') || location.includes('/projects') ? 'Nuevo Presupuesto' : 'Nuevo'}
+             location.includes('/budgets') ? 'Nuevo Presupuesto' : 'Nuevo'}
           </Button>
           
           <Button

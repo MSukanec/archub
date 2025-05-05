@@ -3,10 +3,6 @@ import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useQuery } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
-import { useLocation } from "wouter";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -19,9 +15,8 @@ export function MainLayout({
   mobileSidebarOpen,
   onMobileSidebarOpenChange
 }: MainLayoutProps) {
-  const [location, setLocation] = useLocation();
-  const { toast } = useToast();
   const isMobile = useIsMobile();
+  
   // Handle mobile sidebar if we're controlling it from outside
   const [internalMobileSidebarOpen, setInternalMobileSidebarOpen] = useState(false);
   const sidebarOpen = mobileSidebarOpen !== undefined ? mobileSidebarOpen : internalMobileSidebarOpen;
@@ -50,11 +45,7 @@ export function MainLayout({
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col ml-16 transition-all duration-200 w-full">
-          <Header 
-            toggleSidebar={toggleSidebar} 
-            currentProjectId={selectedProjectId}
-            onProjectChange={handleProjectChange}
-          />
+          <Header toggleSidebar={toggleSidebar} />
 
           {/* Main Content Area */}
           <main className="flex-1 overflow-y-auto p-6">
@@ -62,33 +53,6 @@ export function MainLayout({
           </main>
         </div>
       </div>
-
-      {/* Budget Creation Dialog */}
-      <Dialog open={isBudgetDialogOpen} onOpenChange={setIsBudgetDialogOpen}>
-        <DialogContent className="max-w-3xl">
-          <div className="p-4">
-            <h2 className="text-xl font-semibold mb-4">Crear nuevo presupuesto</h2>
-            {/* Budget form would go here */}
-            <div className="flex justify-end gap-2 mt-4">
-              <button 
-                className="px-4 py-2 border rounded-md"
-                onClick={() => setIsBudgetDialogOpen(false)}
-              >
-                Cancelar
-              </button>
-              <button 
-                className="px-4 py-2 bg-primary text-white rounded-md"
-                onClick={() => {
-                  setIsBudgetDialogOpen(false);
-                  setLocation(`/projects/${selectedProjectId}/budgets/new`);
-                }}
-              >
-                Continuar
-              </button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

@@ -34,7 +34,6 @@ import { EditBudgetTaskDialog } from "@/components/budgets/EditBudgetTaskDialog"
 const budgetSchema = z.object({
   name: z.string().min(1, "El nombre es requerido"),
   description: z.string().optional(),
-  projectId: z.string().min(1, "El proyecto es requerido"),
 });
 
 type FormValues = z.infer<typeof budgetSchema>;
@@ -43,15 +42,9 @@ interface Budget {
   id: number;
   name: string;
   description: string;
-  projectId: number;
+  userId: number;
   createdAt: string;
   updatedAt: string;
-}
-
-interface Project {
-  id: number;
-  name: string;
-  status: string;
 }
 
 interface Task {
@@ -72,10 +65,9 @@ interface BudgetTask {
 
 interface BudgetFormProps {
   budgetId?: string;
-  projectId?: number;
 }
 
-export default function BudgetForm({ budgetId, projectId: initialProjectId }: BudgetFormProps) {
+export default function BudgetForm({ budgetId }: BudgetFormProps) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
