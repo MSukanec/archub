@@ -123,8 +123,9 @@ export default function TaskForm({ taskId }: TaskFormProps) {
 
   // Create task mutation
   const createTaskMutation = useMutation({
-    mutationFn: (data: TaskFormValues) => {
-      return apiRequest('POST', '/api/tasks', data);
+    mutationFn: async (data: TaskFormValues) => {
+      const response = await apiRequest('POST', '/api/tasks', data);
+      return await response.json();
     },
     onSuccess: (data) => {
       // Add materials to the new task
@@ -165,8 +166,9 @@ export default function TaskForm({ taskId }: TaskFormProps) {
 
   // Update task mutation
   const updateTaskMutation = useMutation({
-    mutationFn: (data: TaskFormValues) => {
-      return apiRequest('PATCH', `/api/tasks/${taskId}`, data);
+    mutationFn: async (data: TaskFormValues) => {
+      const response = await apiRequest('PATCH', `/api/tasks/${taskId}`, data);
+      return await response.json();
     },
     onSuccess: () => {
       toast({
@@ -239,7 +241,7 @@ export default function TaskForm({ taskId }: TaskFormProps) {
         name: task.name,
         category: task.category,
         unit: task.unit,
-        unitPrice: task.unitPrice.toString(),
+        unitPrice: task.unitPrice,
       });
     }
   }, [task, taskForm]);

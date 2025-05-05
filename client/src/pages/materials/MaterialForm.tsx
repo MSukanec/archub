@@ -125,7 +125,7 @@ export default function MaterialForm({ materialId }: MaterialFormProps) {
         name: material.name,
         category: material.category,
         unit: material.unit,
-        unitPrice: material.unitPrice.toString(),
+        unitPrice: material.unitPrice,
       });
     }
   }, [material, form]);

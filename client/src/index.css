@@ -80,6 +80,8 @@
   @apply bg-sidebar text-sidebar-foreground;
 }
 
+
+
 .sidebar-item {
   @apply px-3 py-2 rounded-md flex items-center transition-colors;
 }
