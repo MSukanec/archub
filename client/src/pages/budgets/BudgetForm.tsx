@@ -13,13 +13,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
@@ -29,6 +22,7 @@ import { z } from "zod";
 import { BudgetTaskTable } from "@/components/budgets/BudgetTaskTable";
 import { AddTaskForm } from "@/components/budgets/AddTaskForm";
 import { EditBudgetTaskDialog } from "@/components/budgets/EditBudgetTaskDialog";
+import { useAuth } from "@/hooks/use-auth";
 
 // Form schema
 const budgetSchema = z.object({
@@ -71,6 +65,7 @@ export default function BudgetForm({ budgetId }: BudgetFormProps) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const isEditing = !!budgetId;
   const [budgetTasks, setBudgetTasks] = useState<BudgetTask[]>([]);
   const [editingTask, setEditingTask] = useState<BudgetTask | null>(null);
@@ -81,7 +76,6 @@ export default function BudgetForm({ budgetId }: BudgetFormProps) {
     defaultValues: {
       name: "",
       description: "",
-      projectId: initialProjectId ? initialProjectId.toString() : "",
     },
   });
 
@@ -89,11 +83,6 @@ export default function BudgetForm({ budgetId }: BudgetFormProps) {
   const { data: budget, isLoading: isBudgetLoading } = useQuery<Budget>({
     queryKey: [`/api/budgets/${budgetId}`],
     enabled: isEditing,
-  });
-
-  // Fetch projects
-  const { data: projects = [] } = useQuery<Project[]>({
-    queryKey: ['/api/projects'],
   });
 
   // Fetch tasks
@@ -110,14 +99,20 @@ export default function BudgetForm({ budgetId }: BudgetFormProps) {
   // Create budget mutation
   const createBudgetMutation = useMutation({
     mutationFn: async (data: FormValues) => {
+      if (!user) {
+        throw new Error("Debes estar autenticado para crear un presupuesto");
+      }
+
       // Create budget
-      const response = await apiRequest('POST', `/api/projects/${data.projectId}/budgets`, {
+      const response = await apiRequest('POST', '/api/budgets', {
         name: data.name,
         description: data.description,
+        userId: user.id
       });
       
       // Add budget tasks
-      const newBudgetId = response.id;
+      const budget = await response.json();
+      const newBudgetId = budget.id;
       
       const taskPromises = budgetTasks.map(bt => {
         return apiRequest('POST', `/api/budgets/${newBudgetId}/tasks`, {
@@ -128,15 +123,15 @@ export default function BudgetForm({ budgetId }: BudgetFormProps) {
       
       await Promise.all(taskPromises);
       
-      return response;
+      return budget;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast({
         title: "Presupuesto creado",
         description: "El presupuesto ha sido creado correctamente",
       });
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${data.projectId}/budgets`] });
-      setLocation(`/projects/${data.projectId}/budgets`);
+      queryClient.invalidateQueries({ queryKey: ['/api/budgets'] });
+      setLocation('/budgets');
     },
     onError: (error) => {
       toast({
@@ -155,14 +150,14 @@ export default function BudgetForm({ budgetId }: BudgetFormProps) {
         description: data.description,
       });
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast({
         title: "Presupuesto actualizado",
         description: "El presupuesto ha sido actualizado correctamente",
       });
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${data.projectId}/budgets`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/budgets'] });
       queryClient.invalidateQueries({ queryKey: [`/api/budgets/${budgetId}`] });
-      setLocation(`/projects/${data.projectId}/budgets`);
+      setLocation('/budgets');
     },
     onError: (error) => {
       toast({
@@ -247,7 +242,6 @@ export default function BudgetForm({ budgetId }: BudgetFormProps) {
       form.reset({
         name: budget.name,
         description: budget.description || "",
-        projectId: budget.projectId.toString(),
       });
     }
   }, [budget, form]);
@@ -379,10 +373,7 @@ export default function BudgetForm({ budgetId }: BudgetFormProps) {
           <h1 className="text-2xl font-bold">{title}</h1>
           <Button
             variant="outline"
-            onClick={() => {
-              const projectId = form.getValues().projectId;
-              setLocation(projectId ? `/projects/${projectId}/budgets` : "/budgets");
-            }}
+            onClick={() => setLocation('/budgets')}
           >
             Volver
           </Button>
@@ -430,43 +421,13 @@ export default function BudgetForm({ budgetId }: BudgetFormProps) {
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="projectId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Proyecto</FormLabel>
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
-                          disabled={!!initialProjectId || isEditing}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Seleccionar proyecto" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {projects.map((project) => (
-                              <SelectItem key={project.id} value={project.id.toString()}>
-                                {project.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {/* No project field required anymore */}
 
                   <div className="flex justify-end space-x-4">
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => {
-                        const projectId = form.getValues().projectId;
-                        setLocation(projectId ? `/projects/${projectId}/budgets` : "/budgets");
-                      }}
+                      onClick={() => setLocation('/budgets')}
                     >
                       Cancelar
                     </Button>
