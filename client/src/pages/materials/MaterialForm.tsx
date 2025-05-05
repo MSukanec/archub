@@ -75,8 +75,9 @@ export default function MaterialForm({ materialId }: MaterialFormProps) {
 
   // Create mutation
   const createMutation = useMutation({
-    mutationFn: (data: FormValues) => {
-      return apiRequest('POST', '/api/materials', data);
+    mutationFn: async (data: FormValues) => {
+      const response = await apiRequest('POST', '/api/materials', data);
+      return await response.json();
     },
     onSuccess: () => {
       toast({
@@ -97,8 +98,9 @@ export default function MaterialForm({ materialId }: MaterialFormProps) {
 
   // Update mutation
   const updateMutation = useMutation({
-    mutationFn: (data: FormValues) => {
-      return apiRequest('PATCH', `/api/materials/${materialId}`, data);
+    mutationFn: async (data: FormValues) => {
+      const response = await apiRequest('PATCH', `/api/materials/${materialId}`, data);
+      return await response.json();
     },
     onSuccess: () => {
       toast({

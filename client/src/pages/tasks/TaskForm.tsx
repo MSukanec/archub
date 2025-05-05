@@ -131,11 +131,12 @@ export default function TaskForm({ taskId }: TaskFormProps) {
       // Add materials to the new task
       const newTaskId = data.id;
       
-      const materialPromises = taskMaterials.map(tm => {
-        return apiRequest('POST', `/api/tasks/${newTaskId}/materials`, {
+      const materialPromises = taskMaterials.map(async (tm) => {
+        const response = await apiRequest('POST', `/api/tasks/${newTaskId}/materials`, {
           materialId: tm.materialId,
           quantity: tm.quantity,
         });
+        return response.json();
       });
       
       Promise.all(materialPromises)
@@ -190,11 +191,12 @@ export default function TaskForm({ taskId }: TaskFormProps) {
 
   // Add task material mutation
   const addTaskMaterialMutation = useMutation({
-    mutationFn: (data: {taskId: string, materialId: number, quantity: number}) => {
-      return apiRequest('POST', `/api/tasks/${data.taskId}/materials`, {
+    mutationFn: async (data: {taskId: string, materialId: number, quantity: number}) => {
+      const response = await apiRequest('POST', `/api/tasks/${data.taskId}/materials`, {
         materialId: data.materialId,
         quantity: data.quantity,
       });
+      return await response.json();
     },
     onSuccess: () => {
       toast({
@@ -215,8 +217,9 @@ export default function TaskForm({ taskId }: TaskFormProps) {
 
   // Delete task material mutation
   const deleteTaskMaterialMutation = useMutation({
-    mutationFn: (id: number) => {
-      return apiRequest('DELETE', `/api/task-materials/${id}`);
+    mutationFn: async (id: number) => {
+      const response = await apiRequest('DELETE', `/api/task-materials/${id}`);
+      return response;
     },
     onSuccess: () => {
       toast({
