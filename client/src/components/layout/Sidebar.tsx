@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LucideHome, LucidePackage, LucideCheckSquare, LucideFileText, LucideSettings, LucidePlus, LucideZap } from "lucide-react";
+import { LucideHome, LucidePackage, LucideCheckSquare, LucideFileText, LucideSettings, LucidePlus, LucideZap, LucideLayoutGrid } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { APP_NAME } from "@/lib/constants";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -19,6 +19,11 @@ export function Sidebar({ onCreateBudget }: SidebarProps) {
       name: "Dashboard",
       path: "/",
       icon: <LucideHome className="h-5 w-5" />,
+    },
+    {
+      name: "Proyectos",
+      path: "/projects",
+      icon: <LucideLayoutGrid className="h-5 w-5" />,
     },
     {
       name: "Materiales",
