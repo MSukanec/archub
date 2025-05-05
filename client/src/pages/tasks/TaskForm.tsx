@@ -42,7 +42,7 @@ type TaskFormValues = z.infer<typeof taskSchema>;
 // Form schema for adding materials to task
 const taskMaterialSchema = z.object({
   materialId: z.string().min(1, "El material es requerido"),
-  quantity: z.string().min(1, "La cantidad es requerida").transform(Number),
+  quantity: z.coerce.number().min(0.01, "La cantidad debe ser mayor a 0"),
 });
 
 type TaskMaterialFormValues = z.infer<typeof taskMaterialSchema>;
@@ -100,7 +100,7 @@ export default function TaskForm({ taskId }: TaskFormProps) {
     resolver: zodResolver(taskMaterialSchema),
     defaultValues: {
       materialId: "",
-      quantity: "",
+      quantity: 0,
     },
   });
 
@@ -202,7 +202,7 @@ export default function TaskForm({ taskId }: TaskFormProps) {
         description: "El material ha sido añadido a la tarea correctamente",
       });
       queryClient.invalidateQueries({ queryKey: [`/api/tasks/${taskId}/materials`] });
-      materialForm.reset({ materialId: "", quantity: "" });
+      materialForm.reset({ materialId: "", quantity: 0 });
     },
     onError: (error) => {
       toast({
@@ -293,7 +293,7 @@ export default function TaskForm({ taskId }: TaskFormProps) {
         }
       ]);
       
-      materialForm.reset({ materialId: "", quantity: "" });
+      materialForm.reset({ materialId: "", quantity: 0 });
       
       toast({
         title: "Material añadido",

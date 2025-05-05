@@ -56,7 +56,7 @@ export function Header({ toggleSidebar, currentProjectId, onProjectChange }: Hea
   };
 
   return (
-    <header className="z-20 bg-white border-b sticky top-0 w-full h-16">
+    <header className="z-30 bg-white border-b sticky top-0 w-full h-16">
       <div className="flex items-center justify-between px-5 h-full">
         {/* Left section with project name */}
         <div className="flex items-center space-x-4">

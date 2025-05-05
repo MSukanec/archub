@@ -63,30 +63,34 @@ export function MainLayout({
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
-      {/* Desktop Sidebar */}
-      <Sidebar onCreateBudget={handleCreateBudget} />
+      <div className="flex w-full">
+        {/* Desktop Sidebar */}
+        <div className="fixed left-0 top-0 h-full z-20">
+          <Sidebar onCreateBudget={handleCreateBudget} />
+        </div>
 
-      {/* Mobile Sidebar */}
-      {isMobile && (
-        <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-          <SheetContent side="left" className="w-[300px] p-0">
-            <Sidebar onCreateBudget={handleCreateBudget} />
-          </SheetContent>
-        </Sheet>
-      )}
+        {/* Mobile Sidebar */}
+        {isMobile && (
+          <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+            <SheetContent side="left" className="w-[300px] p-0">
+              <Sidebar onCreateBudget={handleCreateBudget} />
+            </SheetContent>
+          </Sheet>
+        )}
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col ml-16 transition-all duration-200">
-        <Header 
-          toggleSidebar={toggleSidebar} 
-          currentProjectId={selectedProjectId}
-          onProjectChange={handleProjectChange}
-        />
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col ml-16 transition-all duration-200 w-full">
+          <Header 
+            toggleSidebar={toggleSidebar} 
+            currentProjectId={selectedProjectId}
+            onProjectChange={handleProjectChange}
+          />
 
-        {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto p-6">
-          {children}
-        </main>
+          {/* Main Content Area */}
+          <main className="flex-1 overflow-y-auto p-6">
+            {children}
+          </main>
+        </div>
       </div>
 
       {/* Budget Creation Dialog */}
