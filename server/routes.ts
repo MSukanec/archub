@@ -385,6 +385,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Budget routes
+  app.get(`${apiPrefix}/budgets`, authenticate, async (req, res) => {
+    try {
+      // Get all budgets for the current user
+      const budgets = await storage.getBudgets(req.user.id);
+      return res.json(budgets);
+    } catch (error) {
+      return res.status(500).json({ message: "Server error", error });
+    }
+  });
+
+  app.post(`${apiPrefix}/budgets`, authenticate, async (req, res) => {
+    try {
+      const budgetData = insertBudgetSchema.parse({
+        ...req.body,
+        userId: req.user.id
+      });
+      
+      const budget = await storage.createBudget(budgetData);
+      return res.json(budget);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", error: error.errors });
+      }
+      return res.status(500).json({ message: "Server error", error });
+    }
+  });
+
   app.get(`${apiPrefix}/projects/:projectId/budgets`, authenticate, async (req, res) => {
     try {
       const projectId = parseInt(req.params.projectId);
