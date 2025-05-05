@@ -43,14 +43,14 @@ export function Sidebar({ onCreateBudget }: SidebarProps) {
 
   return (
     <aside 
-      className={`sidebar fixed top-0 left-0 z-10 h-screen transition-all duration-200 ${expanded ? "w-60" : "w-16"}`}
+      className={`sidebar fixed top-0 left-0 z-10 h-screen bg-sidebar transition-all duration-200 ${expanded ? "w-60" : "w-16"}`}
       onMouseEnter={() => setExpanded(true)}
       onMouseLeave={() => setExpanded(false)}
     >
       {/* Logo */}
-      <div className="flex items-center justify-center h-16">
+      <div className="flex items-center justify-center h-16 bg-sidebar-header border-b border-sidebar-accent/10">
         <LucideZap className="h-8 w-8 text-primary" />
-        {expanded && <span className="ml-2 text-lg font-semibold transition-opacity duration-150">{APP_NAME}</span>}
+        {expanded && <span className="ml-2 text-lg font-semibold transition-opacity duration-150 text-white">{APP_NAME}</span>}
       </div>
 
       {/* Navigation */}

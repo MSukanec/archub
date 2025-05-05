@@ -32,7 +32,7 @@ const materialSchema = z.object({
   name: z.string().min(1, "El nombre es requerido"),
   category: z.string().min(1, "La categoría es requerida"),
   unit: z.string().min(1, "La unidad es requerida"),
-  unitPrice: z.string().min(1, "El precio unitario es requerido").transform(Number),
+  unitPrice: z.coerce.number().min(0, "El precio unitario debe ser un número positivo"),
 });
 
 type FormValues = z.infer<typeof materialSchema>;
@@ -63,7 +63,7 @@ export default function MaterialForm({ materialId }: MaterialFormProps) {
       name: "",
       category: "",
       unit: "",
-      unitPrice: "",
+      unitPrice: 0,
     },
   });
 
