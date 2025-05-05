@@ -92,6 +92,8 @@ export const insertMaterialSchema = createInsertSchema(materials).pick({
   category: true,
   unit: true,
   unitPrice: true,
+}).extend({
+  unitPrice: z.coerce.number().min(0, "El precio debe ser mayor a 0"),
 });
 
 export const insertTaskSchema = createInsertSchema(tasks).pick({
@@ -99,24 +101,36 @@ export const insertTaskSchema = createInsertSchema(tasks).pick({
   category: true,
   unit: true,
   unitPrice: true,
+}).extend({
+  unitPrice: z.coerce.number().min(0, "El precio debe ser mayor a 0"),
 });
 
 export const insertTaskMaterialSchema = createInsertSchema(taskMaterials).pick({
   taskId: true,
   materialId: true,
   quantity: true,
+}).extend({
+  taskId: z.coerce.number(),
+  materialId: z.coerce.number(),
+  quantity: z.coerce.number().min(0, "La cantidad debe ser mayor a 0"),
 });
 
 export const insertBudgetSchema = createInsertSchema(budgets).pick({
   name: true,
   description: true,
   projectId: true,
+}).extend({
+  projectId: z.coerce.number(),
 });
 
 export const insertBudgetTaskSchema = createInsertSchema(budgetTasks).pick({
   budgetId: true,
   taskId: true,
   quantity: true,
+}).extend({
+  budgetId: z.coerce.number(),
+  taskId: z.coerce.number(),
+  quantity: z.coerce.number().min(0, "La cantidad debe ser mayor a 0"),
 });
 
 // Type definitions
