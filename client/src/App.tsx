@@ -51,6 +51,9 @@ function Router() {
       <Route path="/budgets/:id/edit">
         {(params) => <ProtectedRoute path="/budgets/:id/edit" component={() => <BudgetForm budgetId={params.id} />} />}
       </Route>
+      <Route path="/budgets/:id">
+        {(params) => <ProtectedRoute path="/budgets/:id" component={() => <BudgetForm budgetId={params.id} readOnly={true} />} />}
+      </Route>
       <Route path="/projects/:projectId/budgets">
         {(params) => <ProtectedRoute path="/projects/:projectId/budgets" component={() => <BudgetsPage projectId={parseInt(params.projectId)} />} />}
       </Route>
