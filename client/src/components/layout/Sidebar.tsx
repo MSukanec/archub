@@ -1,26 +1,81 @@
 import { Link, useLocation } from "wouter";
-import { LucideHome, LucidePackage, LucideCheckSquare, LucideFileText, LucideSettings, LucidePlus, LucideZap, LucideLayoutGrid } from "lucide-react";
+import { 
+  LucideHome, 
+  LucidePackage, 
+  LucideCheckSquare, 
+  LucideFileText, 
+  LucideSettings, 
+  LucideBuilding, 
+  LucideUsers, 
+  LucideDatabase, 
+  LucideFolderClosed, 
+  LucideChevronLeft, 
+  LucideListTodo 
+} from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { APP_NAME } from "@/lib/constants";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useState } from "react";
 
-export function Sidebar() {
+// Enum para los diferentes tipos de sidebar
+export enum SidebarType {
+  Organization = "organization",
+  Project = "project",
+  Configuration = "configuration"
+}
+
+interface SidebarProps {
+  type?: SidebarType;
+  onTypeChange?: (type: SidebarType) => void;
+  selectedOrganization?: string | null;
+  selectedProject?: string | null;
+}
+
+export function Sidebar({ 
+  type = SidebarType.Organization, 
+  onTypeChange,
+  selectedOrganization = null,
+  selectedProject = null
+}: SidebarProps) {
   const [location] = useLocation();
   const isMobile = useIsMobile();
   const [expanded, setExpanded] = useState(false);
 
-  const sidebarItems = [
+  // Items del sidebar para la organización
+  const organizationItems = [
     {
       name: "Dashboard",
       path: "/",
       icon: <LucideHome className="h-5 w-5" />,
     },
     {
+      name: "Proyectos",
+      path: "/projects",
+      icon: <LucideFolderClosed className="h-5 w-5" />,
+    },
+    {
+      name: "Equipo",
+      path: "/team",
+      icon: <LucideUsers className="h-5 w-5" />,
+    },
+  ];
+  
+  // Items del sidebar para el proyecto
+  const projectItems = [
+    {
       name: "Presupuestos",
-      path: "/budgets",
+      path: `/projects/${selectedProject}/budgets`,
       icon: <LucideFileText className="h-5 w-5" />,
     },
+    {
+      name: "Listado de Materiales",
+      path: `/projects/${selectedProject}/materials-list`,
+      icon: <LucideListTodo className="h-5 w-5" />,
+    },
+  ];
+  
+  // Items del sidebar para la configuración
+  const configItems = [
     {
       name: "Tareas",
       path: "/tasks",
@@ -32,6 +87,14 @@ export function Sidebar() {
       icon: <LucidePackage className="h-5 w-5" />,
     },
   ];
+  
+  // Seleccionar los items correctos según el tipo de sidebar
+  let sidebarItems = organizationItems;
+  if (type === SidebarType.Project) {
+    sidebarItems = projectItems;
+  } else if (type === SidebarType.Configuration) {
+    sidebarItems = configItems;
+  }
 
   if (isMobile) {
     return null;
@@ -80,13 +143,13 @@ export function Sidebar() {
 
           <div className="pt-4"></div>
 
+          {/* Botón de Configuración o Volver según el tipo */}
           <Tooltip>
             <TooltipTrigger asChild>
-              <Link href="/settings">
+              {type !== SidebarType.Configuration ? (
                 <div 
-                  className={`flex items-center rounded-md transition-colors py-2.5 ${location === '/settings' 
-                    ? 'bg-sidebar-accent text-white' 
-                    : 'text-slate-300 hover:bg-sidebar-accent/50 hover:text-white'}`}
+                  className="flex items-center rounded-md transition-colors py-2.5 text-slate-300 hover:bg-sidebar-accent/50 hover:text-white cursor-pointer"
+                  onClick={() => onTypeChange && onTypeChange(SidebarType.Configuration)}
                 >
                   <div className={`flex items-center justify-center min-w-[3.5rem] ${expanded ? 'justify-start pl-3' : ''}`}>
                     <LucideSettings className="h-5 w-5" />
@@ -97,11 +160,34 @@ export function Sidebar() {
                     </span>
                   )}
                 </div>
-              </Link>
+              ) : (
+                <div 
+                  className="flex items-center rounded-md transition-colors py-2.5 text-slate-300 hover:bg-sidebar-accent/50 hover:text-white cursor-pointer"
+                  onClick={() => {
+                    // Volver al sidebar anterior
+                    if (onTypeChange) {
+                      if (selectedProject) {
+                        onTypeChange(SidebarType.Project);
+                      } else {
+                        onTypeChange(SidebarType.Organization);
+                      }
+                    }
+                  }}
+                >
+                  <div className={`flex items-center justify-center min-w-[3.5rem] ${expanded ? 'justify-start pl-3' : ''}`}>
+                    <LucideChevronLeft className="h-5 w-5" />
+                  </div>
+                  {expanded && (
+                    <span className="text-sm font-medium transition-opacity duration-150">
+                      Volver
+                    </span>
+                  )}
+                </div>
+              )}
             </TooltipTrigger>
             {!expanded && (
               <TooltipContent side="right" className="mr-2">
-                <p>Configuración</p>
+                <p>{type !== SidebarType.Configuration ? 'Configuración' : 'Volver'}</p>
               </TooltipContent>
             )}
           </Tooltip>

@@ -13,7 +13,7 @@
   --card-foreground: 20 14.3% 4.1%;
   --border: 20 5.9% 90%;
   --input: 20 5.9% 90%;
-  --primary: 152 61% 52%;  /* Supabase green color */
+  --primary: 83 100% 40%;  /* #92c900 - Color verde solicitado */
   --primary-foreground: 211 100% 99%;
   --secondary: 60 4.8% 95.9%;
   --secondary-foreground: 24 9.8% 10%;
@@ -27,15 +27,15 @@
   /* Sidebar specific colors */
   --sidebar-background: 240 5% 12%;  /* Dark background for sidebar */
   --sidebar-foreground: 0 0% 100%;  /* White text for sidebar */
-  --sidebar-primary: 152 61% 52%;  /* Primary color for sidebar (same as primary) */
+  --sidebar-primary: 83 100% 40%;  /* #92c900 - Primary color for sidebar (same as primary) */
   --sidebar-primary-foreground: 0 0% 100%;  /* White text for primary elements in sidebar */
   --sidebar-accent: 240 5% 16%;  /* Slightly lighter than background for hover states */
   --sidebar-accent-foreground: 0 0% 100%;  /* White text for accent elements */
   --sidebar-border: 240 5% 26%;  /* Border color for sidebar elements */
-  --sidebar-ring: 152 61% 52%;  /* Ring color for focus states in sidebar */
+  --sidebar-ring: 83 100% 40%;  /* #92c900 - Ring color for focus states in sidebar */
 
   /* Chart colors */
-  --chart-1: 152 61% 52%;  /* Primary color */
+  --chart-1: 83 100% 40%;  /* #92c900 - Primary color */
   --chart-2: 207 90% 54%;  /* Blue */
   --chart-3: 266 80% 61%;  /* Purple */
   --chart-4: 351 95% 71%;  /* Pink */
@@ -53,7 +53,7 @@
   --card-foreground: 0 0% 98%;
   --border: 240 3.7% 15.9%;
   --input: 240 3.7% 15.9%;
-  --primary: 152 61% 52%;  /* Keep the same primary color */
+  --primary: 83 100% 40%;  /* #92c900 - Keep the same primary color */
   --primary-foreground: 240 10% 3.9%;
   --secondary: 240 3.7% 15.9%;
   --secondary-foreground: 0 0% 98%;
