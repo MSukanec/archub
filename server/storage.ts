@@ -89,8 +89,8 @@ export class MemStorage implements IStorage {
     this.budgetId = 1;
     this.budgetTaskId = 1;
     
-    // Add sample user
-    const sampleUser: User = {
+    // Add sample users
+    const adminUser: User = {
       id: this.userId++,
       username: "admin",
       password: "admin123",
@@ -98,7 +98,18 @@ export class MemStorage implements IStorage {
       email: "admin@example.com",
       avatarUrl: null
     };
-    this.userMap.set(sampleUser.id, sampleUser);
+    
+    const demoUser: User = {
+      id: this.userId++,
+      username: "demo",
+      password: "demo123",
+      fullName: "Demo User",
+      email: "demo@example.com",
+      avatarUrl: null
+    };
+    
+    this.userMap.set(adminUser.id, adminUser);
+    this.userMap.set(demoUser.id, demoUser);
   }
 
   // User operations
@@ -615,4 +626,6 @@ class DatabaseStorage implements IStorage {
   }
 }
 
-export const storage = new DatabaseStorage();
+// Temporalmente usamos MemStorage mientras resolvemos la conexión a la base de datos
+// export const storage = new DatabaseStorage();
+export const storage = new MemStorage();
