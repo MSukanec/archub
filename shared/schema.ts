@@ -59,6 +59,7 @@ export const budgets = pgTable("budgets", {
   name: text("name").notNull(),
   description: text("description"),
   userId: integer("user_id").notNull(),
+  projectId: integer("project_id").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -119,8 +120,10 @@ export const insertBudgetSchema = createInsertSchema(budgets).pick({
   name: true,
   description: true,
   userId: true,
+  projectId: true,
 }).extend({
   userId: z.coerce.number(),
+  projectId: z.coerce.number(),
 });
 
 export const insertBudgetTaskSchema = createInsertSchema(budgetTasks).pick({
