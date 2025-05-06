@@ -627,5 +627,5 @@ class DatabaseStorage implements IStorage {
 }
 
 // Temporalmente usamos MemStorage mientras resolvemos la conexión a la base de datos
-// export const storage = new DatabaseStorage();
-export const storage = new MemStorage();
+// Cambiamos a almacenamiento en base de datos
+export const storage = new DatabaseStorage();

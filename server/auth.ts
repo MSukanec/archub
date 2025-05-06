@@ -6,6 +6,8 @@ import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
+import connectPgSimple from "connect-pg-simple";
+import { pool } from "./db";
 
 declare global {
   namespace Express {
@@ -33,7 +35,13 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
-  const sessionStore = new session.MemoryStore();
+  // Configurar almacenamiento de sesiones en PostgreSQL
+  const PostgreSqlStore = connectPgSimple(session);
+  const sessionStore = new PostgreSqlStore({
+    pool,
+    tableName: 'sessions', // Nombre de la tabla para sesiones
+    createTableIfMissing: true // Crear tabla si no existe
+  });
   
   const sessionSettings: session.SessionOptions = {
     secret: SESSION_SECRET,
