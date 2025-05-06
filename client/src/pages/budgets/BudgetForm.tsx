@@ -24,6 +24,7 @@ import { AddTaskForm } from "@/components/budgets/AddTaskForm";
 import { EditBudgetTaskDialog } from "@/components/budgets/EditBudgetTaskDialog";
 import { BudgetMaterialsList } from "@/components/budgets/BudgetMaterialsList";
 import { useAuth } from "@/hooks/use-auth";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 // Form schema
 const budgetSchema = z.object({
@@ -482,9 +483,20 @@ export default function BudgetForm({ budgetId }: BudgetFormProps) {
                 <CardTitle>Lista de Materiales</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="p-4 text-center text-muted-foreground">
-                  Guarda el presupuesto para ver la lista de materiales
-                </div>
+                {budgetTasks.length > 0 ? (
+                  <div className="space-y-4">
+                    <div className="p-4 border rounded">
+                      <h3 className="text-lg font-medium mb-2">Materiales necesarios</h3>
+                      <div className="text-sm text-muted-foreground">
+                        Los materiales se calcularán automáticamente al guardar el presupuesto
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-4 text-center text-muted-foreground">
+                    Agregue tareas al presupuesto para ver los materiales necesarios
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}

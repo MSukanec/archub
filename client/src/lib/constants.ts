@@ -1,4 +1,4 @@
-export const APP_NAME = "ConstructBudget";
+export const APP_NAME = "Archub";
 
 export const PROJECT_STATUS_OPTIONS = [
   { value: "planning", label: "Planificación" },
