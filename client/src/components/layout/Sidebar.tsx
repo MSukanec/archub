@@ -67,6 +67,11 @@ export function Sidebar({
   // Items para el project_sidebar
   const projectSidebarItems = [
     {
+      name: "Resumen",
+      path: `/projects/${selectedProject}`,
+      icon: <LucideLayoutGrid className="h-5 w-5" />,
+    },
+    {
       name: "Crear Presupuesto",
       path: `/projects/${selectedProject}/budgets/new`,
       icon: <LucidePlus className="h-5 w-5" />,

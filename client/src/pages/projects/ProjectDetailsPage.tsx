@@ -225,7 +225,11 @@ export default function ProjectDetailsPage({ projectId }: ProjectDetailsPageProp
                                     Creado el {formatDate(budget.createdAt)}
                                   </p>
                                 </div>
-                                <Button variant="outline" size="sm">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => setLocation(`/budgets/${budget.id}`)}
+                                >
                                   Ver Detalles
                                 </Button>
                               </div>
