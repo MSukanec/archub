@@ -62,14 +62,16 @@ export function MainLayout({
       
       <div className="flex flex-1 overflow-hidden">
         {/* Desktop Sidebar - Debajo del header */}
-        <div className="fixed left-0 top-16 bottom-0 z-20">
-          <Sidebar 
-            type={sidebarType}
-            onTypeChange={handleSidebarTypeChange}
-            selectedOrganization={selectedOrganization}
-            selectedProject={selectedProject}
-          />
-        </div>
+        {!isMobile && (
+          <div className="h-full">
+            <Sidebar 
+              type={sidebarType}
+              onTypeChange={handleSidebarTypeChange}
+              selectedOrganization={selectedOrganization}
+              selectedProject={selectedProject}
+            />
+          </div>
+        )}
 
         {/* Mobile Sidebar */}
         {isMobile && (
@@ -86,7 +88,7 @@ export function MainLayout({
         )}
 
         {/* Main Content */}
-        <div className="flex-1 ml-16 sm:ml-[220px] transition-all duration-200">
+        <div className="flex-1 transition-all duration-200">
           <main className="flex-1 overflow-y-auto p-6">
             {children}
           </main>

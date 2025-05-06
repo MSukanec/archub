@@ -4,6 +4,7 @@ import { useLocation, Link as WouterLink } from "wouter";
 import { Edit, ArrowLeft, Plus, FileText, ListTodo } from "lucide-react";
 
 import { MainLayout } from "@/components/layout/MainLayout";
+import { SidebarTypes } from "@/components/layout/Sidebar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -61,7 +62,10 @@ export default function ProjectDetailsPage({ projectId }: ProjectDetailsPageProp
   };
 
   return (
-    <MainLayout>
+    <MainLayout
+      sidebarType={SidebarTypes.ProjectSidebar}
+      selectedProject={projectId}
+    >
       <div className="px-4 md:px-6 py-4">
         {/* Back button and actions */}
         <div className="flex items-center justify-between mb-6">

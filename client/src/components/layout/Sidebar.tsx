@@ -106,7 +106,7 @@ export function Sidebar({
 
   return (
     <aside 
-      className={`sidebar h-full transition-all duration-200 ${expanded ? "w-60" : "w-16"}`}
+      className={`sidebar h-full transition-all duration-200 border-r ${expanded ? "w-60" : "w-16"}`}
       onMouseEnter={() => setExpanded(true)}
       onMouseLeave={() => setExpanded(false)}
     >
