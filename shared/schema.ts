@@ -59,7 +59,7 @@ export const budgets = pgTable("budgets", {
   name: text("name").notNull(),
   description: text("description"),
   userId: integer("user_id").notNull(),
-  projectId: integer("project_id").notNull(),
+  projectId: integer("project_id"),  // Permitir nulos
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

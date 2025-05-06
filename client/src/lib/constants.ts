@@ -1,4 +1,4 @@
-export const APP_NAME = "Archub";
+export const APP_NAME = "Otro invento de Matias Sukanec";
 
 export const PROJECT_STATUS_OPTIONS = [
   { value: "planning", label: "Planificación" },
