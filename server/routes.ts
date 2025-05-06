@@ -1,6 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { setupAuth } from "./auth";
 import { 
   insertUserSchema, 
   insertProjectSchema, 
@@ -15,96 +16,20 @@ import { z } from "zod";
 export async function registerRoutes(app: Express): Promise<Server> {
   // API routes prefix
   const apiPrefix = '/api';
+  
+  // Setup authentication with Passport.js
+  setupAuth(app);
 
-  // Authentication middleware
-  const authenticate = async (req: Request, res: Response, next: Function) => {
-    const userId = req.session?.userId;
-    if (!userId) {
+  // Authentication middleware utilizando Passport.js
+  const authenticate = (req: Request, res: Response, next: Function) => {
+    if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Unauthorized" });
     }
-    const user = await storage.getUser(userId);
-    if (!user) {
-      return res.status(401).json({ message: "User not found" });
-    }
-    req.user = user;
     next();
   };
 
-  // Auth routes
-  app.post(`${apiPrefix}/auth/login`, async (req, res) => {
-    try {
-      const { username, password } = req.body;
-      const user = await storage.getUserByUsername(username);
-      
-      if (!user || user.password !== password) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-      
-      if (req.session) {
-        req.session.userId = user.id;
-      }
-      
-      return res.json({ 
-        id: user.id, 
-        username: user.username, 
-        fullName: user.fullName,
-        email: user.email,
-        avatarUrl: user.avatarUrl
-      });
-    } catch (error) {
-      return res.status(500).json({ message: "Server error", error });
-    }
-  });
-
-  app.post(`${apiPrefix}/auth/register`, async (req, res) => {
-    try {
-      const userData = insertUserSchema.parse(req.body);
-      const existingUser = await storage.getUserByUsername(userData.username);
-      
-      if (existingUser) {
-        return res.status(400).json({ message: "Username already exists" });
-      }
-      
-      const user = await storage.createUser(userData);
-      
-      if (req.session) {
-        req.session.userId = user.id;
-      }
-      
-      return res.status(201).json({ 
-        id: user.id, 
-        username: user.username, 
-        fullName: user.fullName,
-        email: user.email,
-        avatarUrl: user.avatarUrl
-      });
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid data", error: error.errors });
-      }
-      return res.status(500).json({ message: "Server error", error });
-    }
-  });
-
-  app.get(`${apiPrefix}/auth/me`, authenticate, async (req, res) => {
-    return res.json({ 
-      id: req.user.id, 
-      username: req.user.username, 
-      fullName: req.user.fullName,
-      email: req.user.email,
-      avatarUrl: req.user.avatarUrl
-    });
-  });
-
-  app.post(`${apiPrefix}/auth/logout`, (req, res) => {
-    req.session?.destroy((err) => {
-      if (err) {
-        return res.status(500).json({ message: "Logout failed", error: err });
-      }
-      res.clearCookie("connect.sid");
-      return res.json({ message: "Logged out successfully" });
-    });
-  });
+  // Nota: Las rutas de autenticación están configuradas en auth.ts
+  // /api/auth/login, /api/auth/register, /api/auth/logout, /api/auth/me
 
   // Project routes
   app.get(`${apiPrefix}/projects`, authenticate, async (req, res) => {
