@@ -194,7 +194,7 @@ export default function TaskForm({ taskId }: TaskFormProps) {
     mutationFn: async (data: {taskId: string, materialId: number, quantity: number}) => {
       const response = await apiRequest('POST', `/api/tasks/${data.taskId}/materials`, {
         materialId: data.materialId,
-        quantity: data.quantity,
+        quantity: data.quantity.toString(), // Convert number to string to match API expectations
       });
       return await response.json();
     },
@@ -325,7 +325,8 @@ export default function TaskForm({ taskId }: TaskFormProps) {
 
   return (
     <MainLayout>
-      <div className="max-w-3xl mx-auto">
+      <div className="container mx-auto px-4">
+        {/* Header - 100% width */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">{title}</h1>
           <Button
@@ -336,245 +337,254 @@ export default function TaskForm({ taskId }: TaskFormProps) {
           </Button>
         </div>
 
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Detalles de la Tarea</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isTaskLoading && isEditing ? (
-              <div className="text-center py-4">Cargando datos...</div>
-            ) : (
-              <Form {...taskForm}>
-                <form onSubmit={taskForm.handleSubmit(onTaskSubmit)} className="space-y-6">
-                  <FormField
-                    control={taskForm.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nombre</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Nombre de la tarea" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+        {/* Main content - Two columns layout when editing task */}
+        <div className={`grid ${isEditing ? 'grid-cols-1 lg:grid-cols-2 gap-6' : ''}`}>
+          {/* Column 1: Task Details */}
+          <div>
+            <Card className="mb-6 lg:mb-0">
+              <CardHeader>
+                <CardTitle>Detalles de la Tarea</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isTaskLoading && isEditing ? (
+                  <div className="text-center py-4">Cargando datos...</div>
+                ) : (
+                  <Form {...taskForm}>
+                    <form onSubmit={taskForm.handleSubmit(onTaskSubmit)} className="space-y-6">
+                      <FormField
+                        control={taskForm.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Nombre</FormLabel>
+                            <FormControl>
+                              <Input {...field} placeholder="Nombre de la tarea" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                  <FormField
-                    control={taskForm.control}
-                    name="category"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Categoría</FormLabel>
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
+                      <FormField
+                        control={taskForm.control}
+                        name="category"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Categoría</FormLabel>
+                            <Select
+                              value={field.value}
+                              onValueChange={field.onChange}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Seleccionar categoría" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {TASK_CATEGORIES.map((category) => (
+                                  <SelectItem key={category.value} value={category.value}>
+                                    {category.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={taskForm.control}
+                        name="unit"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Unidad</FormLabel>
+                            <Select
+                              value={field.value}
+                              onValueChange={field.onChange}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Seleccionar unidad" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {UNITS.map((unit) => (
+                                  <SelectItem key={unit.value} value={unit.value}>
+                                    {unit.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={taskForm.control}
+                        name="unitPrice"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Precio Unitario</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                type="number"
+                                step="0.01"
+                                placeholder="0.00"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="flex justify-end space-x-4">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setLocation("/tasks")}
                         >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Seleccionar categoría" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {TASK_CATEGORIES.map((category) => (
-                              <SelectItem key={category.value} value={category.value}>
-                                {category.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={taskForm.control}
-                    name="unit"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Unidad</FormLabel>
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
+                          Cancelar
+                        </Button>
+                        <Button
+                          type="submit"
+                          disabled={isSubmitting}
+                          className="bg-primary hover:bg-primary/90"
                         >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Seleccionar unidad" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {UNITS.map((unit) => (
-                              <SelectItem key={unit.value} value={unit.value}>
-                                {unit.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                          {isSubmitting ? "Guardando..." : submitLabel}
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
+                )}
+              </CardContent>
+            </Card>
+          </div>
 
-                  <FormField
-                    control={taskForm.control}
-                    name="unitPrice"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Precio Unitario</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            type="number"
-                            step="0.01"
-                            placeholder="0.00"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+          {/* Column 2: Materials - Only show in editing mode or take full width in creation mode */}
+          <div className={`${isEditing ? '' : 'lg:col-span-2'}`}>
+            <Card>
+              <CardHeader>
+                <CardTitle>Materiales</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Form {...materialForm}>
+                  <form onSubmit={materialForm.handleSubmit(onAddMaterial)} className="space-y-4 mb-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <FormField
+                        control={materialForm.control}
+                        name="materialId"
+                        render={({ field }) => (
+                          <FormItem className="md:col-span-2">
+                            <FormLabel>Material</FormLabel>
+                            <Select
+                              value={field.value}
+                              onValueChange={field.onChange}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Seleccionar material" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {materials.map((material) => (
+                                  <SelectItem key={material.id} value={material.id.toString()}>
+                                    {material.name} ({material.unit})
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                  <div className="flex justify-end space-x-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setLocation("/tasks")}
-                    >
-                      Cancelar
-                    </Button>
-                    <Button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="bg-primary hover:bg-primary/90"
-                    >
-                      {isSubmitting ? "Guardando..." : submitLabel}
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            )}
-          </CardContent>
-        </Card>
+                      <FormField
+                        control={materialForm.control}
+                        name="quantity"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Cantidad</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                type="number"
+                                step="0.01"
+                                placeholder="0.00"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Materiales</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Form {...materialForm}>
-              <form onSubmit={materialForm.handleSubmit(onAddMaterial)} className="space-y-4 mb-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <FormField
-                    control={materialForm.control}
-                    name="materialId"
-                    render={({ field }) => (
-                      <FormItem className="md:col-span-2">
-                        <FormLabel>Material</FormLabel>
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
+                      <div className="md:col-span-3 flex justify-end">
+                        <Button
+                          type="submit"
+                          className="bg-primary hover:bg-primary/90"
+                          disabled={addTaskMaterialMutation.isPending}
                         >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Seleccionar material" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {materials.map((material) => (
-                              <SelectItem key={material.id} value={material.id.toString()}>
-                                {material.name} ({material.unit})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                          <LucidePlus className="mr-2 h-4 w-4" />
+                          {addTaskMaterialMutation.isPending ? "Agregando..." : "Agregar Material"}
+                        </Button>
+                      </div>
+                    </div>
+                  </form>
 
-                  <FormField
-                    control={materialForm.control}
-                    name="quantity"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Cantidad</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            type="number"
-                            step="0.01"
-                            placeholder="0.00"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <div className="md:col-span-3 flex justify-end">
-                    <Button
-                      type="submit"
-                      className="bg-primary hover:bg-primary/90"
-                      disabled={addTaskMaterialMutation.isPending}
-                    >
-                      <LucidePlus className="mr-2 h-4 w-4" />
-                      {addTaskMaterialMutation.isPending ? "Agregando..." : "Agregar Material"}
-                    </Button>
-                  </div>
-                </div>
-              </form>
-
-              {(isTaskMaterialsLoading && isEditing) ? (
-                <div className="text-center py-4">Cargando materiales...</div>
-              ) : (
-                <div className="border rounded-md overflow-hidden">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Material</TableHead>
-                        <TableHead>Categoría</TableHead>
-                        <TableHead>Unidad</TableHead>
-                        <TableHead>Cantidad</TableHead>
-                        <TableHead className="text-right">Acciones</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {taskMaterials.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={5} className="text-center py-6 text-gray-500">
-                            No hay materiales añadidos
-                          </TableCell>
-                        </TableRow>
-                      ) : (
-                        taskMaterials.map((tm) => (
-                          <TableRow key={tm.id}>
-                            <TableCell className="font-medium">{tm.material?.name || '—'}</TableCell>
-                            <TableCell>{tm.material?.category || '—'}</TableCell>
-                            <TableCell>{tm.material?.unit || '—'}</TableCell>
-                            <TableCell>{tm.quantity}</TableCell>
-                            <TableCell className="text-right">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-red-500 hover:text-red-700"
-                                onClick={() => handleRemoveMaterial(tm.id)}
-                                disabled={deleteTaskMaterialMutation.isPending}
-                              >
-                                <LucideTrash className="h-4 w-4" />
-                                <span className="sr-only">Eliminar</span>
-                              </Button>
-                            </TableCell>
+                  {(isTaskMaterialsLoading && isEditing) ? (
+                    <div className="text-center py-4">Cargando materiales...</div>
+                  ) : (
+                    <div className="border rounded-md overflow-hidden">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Material</TableHead>
+                            <TableHead>Categoría</TableHead>
+                            <TableHead>Unidad</TableHead>
+                            <TableHead>Cantidad</TableHead>
+                            <TableHead className="text-right">Acciones</TableHead>
                           </TableRow>
-                        ))
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            </Form>
-          </CardContent>
-        </Card>
+                        </TableHeader>
+                        <TableBody>
+                          {taskMaterials.length === 0 ? (
+                            <TableRow>
+                              <TableCell colSpan={5} className="text-center py-6 text-gray-500">
+                                No hay materiales añadidos
+                              </TableCell>
+                            </TableRow>
+                          ) : (
+                            taskMaterials.map((tm) => (
+                              <TableRow key={tm.id}>
+                                <TableCell className="font-medium">{tm.material?.name || '—'}</TableCell>
+                                <TableCell>{tm.material?.category || '—'}</TableCell>
+                                <TableCell>{tm.material?.unit || '—'}</TableCell>
+                                <TableCell>{tm.quantity}</TableCell>
+                                <TableCell className="text-right">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-red-500 hover:text-red-700"
+                                    onClick={() => handleRemoveMaterial(tm.id)}
+                                    disabled={deleteTaskMaterialMutation.isPending}
+                                  >
+                                    <LucideTrash className="h-4 w-4" />
+                                    <span className="sr-only">Eliminar</span>
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )}
+                </Form>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </MainLayout>
   );
