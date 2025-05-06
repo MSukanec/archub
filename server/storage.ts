@@ -380,6 +380,28 @@ const convertFromDb = <T>(item: T): T => {
     result.quantity = Number(result.quantity);
   }
   
+  // Asegurar que los campos opcionales son null y no undefined
+  if ('fullName' in result && result.fullName === undefined) {
+    result.fullName = null;
+  }
+  
+  if ('email' in result && result.email === undefined) {
+    result.email = null;
+  }
+  
+  if ('avatarUrl' in result && result.avatarUrl === undefined) {
+    result.avatarUrl = null;
+  }
+  
+  if ('description' in result && result.description === undefined) {
+    result.description = null;
+  }
+  
+  // Asegurar que status tiene un valor por defecto
+  if ('status' in result && result.status === undefined) {
+    result.status = 'planning';
+  }
+  
   return result as T;
 };
 
@@ -401,7 +423,15 @@ class DatabaseStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const dbData = prepareForDb(insertUser);
+    // Asegurar que los campos opcionales son null y no undefined
+    const userData = {
+      ...insertUser,
+      fullName: insertUser.fullName || null,
+      email: insertUser.email || null,
+      avatarUrl: insertUser.avatarUrl || null
+    };
+    
+    const dbData = prepareForDb(userData);
     const [user] = await db.insert(users).values(dbData).returning();
     return convertFromDb(user);
   }
@@ -421,11 +451,14 @@ class DatabaseStorage implements IStorage {
   }
 
   async createProject(project: InsertProject): Promise<Project> {
-    const dbData = prepareForDb(project);
-    // Asegurar que el status nunca sea undefined
-    if (!dbData.status) {
-      dbData.status = 'planning';
-    }
+    // Asegurar que los campos opcionales son null o tienen valores predeterminados
+    const projectData = {
+      ...project,
+      status: project.status || 'planning',
+      description: project.description || null
+    };
+    
+    const dbData = prepareForDb(projectData);
     const [newProject] = await db.insert(projects).values(dbData).returning();
     return convertFromDb(newProject);
   }
@@ -547,7 +580,13 @@ class DatabaseStorage implements IStorage {
   }
 
   async createBudget(budget: InsertBudget): Promise<Budget> {
-    const dbData = prepareForDb(budget);
+    // Asegurar que los campos opcionales son null
+    const budgetData = {
+      ...budget,
+      description: budget.description || null
+    };
+    
+    const dbData = prepareForDb(budgetData);
     const [newBudget] = await db.insert(budgets).values(dbData).returning();
     return convertFromDb(newBudget);
   }
@@ -605,7 +644,13 @@ class DatabaseStorage implements IStorage {
   }
 
   async addBudgetTask(budgetTask: InsertBudgetTask): Promise<BudgetTask> {
-    const dbData = prepareForDb(budgetTask);
+    // Asegurar que quantity sea un string
+    const budgetTaskData = {
+      ...budgetTask,
+      quantity: String(budgetTask.quantity)
+    };
+    
+    const dbData = prepareForDb(budgetTaskData);
     const [newBudgetTask] = await db
       .insert(budgetTasks)
       .values(dbData)
