@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueries } from "@tanstack/react-query";
 import { getQueryFn } from "@/lib/queryClient";
 import { Material, TaskMaterial } from "@shared/schema";
 import { Loader2 } from "lucide-react";
@@ -24,30 +24,30 @@ export function BudgetMaterialsList({ budgetId }: BudgetMaterialsListProps) {
   const [materialsByCategory, setMaterialsByCategory] = useState<Record<string, MaterialWithQuantity[]>>({});
 
   // Obtener las tareas del presupuesto
-  const { data: budgetTasks, isLoading: isLoadingTasks } = useQuery<BudgetTask[]>({
+  const { data: budgetTasks = [], isLoading: isLoadingTasks } = useQuery<BudgetTask[]>({
     queryKey: [`/api/budgets/${budgetId}/tasks`],
     queryFn: getQueryFn({ on401: "throw" }),
     enabled: !!budgetId,
   });
 
   // Obtener todas las tareas y materiales para tener los datos completos
-  const { data: allTasks, isLoading: isLoadingAllTasks } = useQuery<any[]>({
+  const { data: allTasks = [], isLoading: isLoadingAllTasks } = useQuery<any[]>({
     queryKey: ["/api/tasks"],
     queryFn: getQueryFn({ on401: "throw" }),
   });
 
-  const { data: allMaterials, isLoading: isLoadingAllMaterials } = useQuery<Material[]>({
+  const { data: allMaterials = [], isLoading: isLoadingAllMaterials } = useQuery<Material[]>({
     queryKey: ["/api/materials"],
     queryFn: getQueryFn({ on401: "throw" }),
   });
 
-  // Cargar los materiales para cada tarea en el presupuesto
-  const taskMaterialsQueries = (budgetTasks || []).map((budgetTask) => {
-    return useQuery<TaskMaterial[]>({
+  // Cargar los materiales para cada tarea en el presupuesto usando useQueries
+  const taskMaterialsQueries = useQueries({
+    queries: budgetTasks.map((budgetTask) => ({
       queryKey: [`/api/tasks/${budgetTask.taskId}/materials`],
       queryFn: getQueryFn({ on401: "throw" }),
-      enabled: !!budgetTasks?.length,
-    });
+      enabled: budgetTasks.length > 0,
+    })),
   });
 
   const isLoading = 
@@ -58,7 +58,7 @@ export function BudgetMaterialsList({ budgetId }: BudgetMaterialsListProps) {
 
   // Procesar datos cuando estén disponibles
   useEffect(() => {
-    if (!budgetTasks || !allTasks || !allMaterials || taskMaterialsQueries.some(q => !q.data)) {
+    if (!budgetTasks.length || !allTasks.length || !allMaterials.length || taskMaterialsQueries.some(q => !q.data)) {
       return;
     }
 
@@ -78,7 +78,7 @@ export function BudgetMaterialsList({ budgetId }: BudgetMaterialsListProps) {
     const materialQuantities = new Map<number, number>();
     
     taskMaterialsQueries.forEach((query, index) => {
-      if (query.data && budgetTasks[index]) {
+      if (query.data && index < budgetTasks.length) {
         const budgetTask = budgetTasks[index];
         const taskMaterials = query.data;
         
