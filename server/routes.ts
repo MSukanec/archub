@@ -322,27 +322,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post(`${apiPrefix}/budgets`, authenticate, async (req, res) => {
     try {
-      // Asegurarse de que el projectId está presente
-      if (!req.body.projectId) {
-        return res.status(400).json({ message: "Project ID is required" });
-      }
-      
-      const projectId = parseInt(req.body.projectId);
-      // Verificar que el proyecto existe y pertenece al usuario
-      const project = await storage.getProject(projectId);
-      if (!project) {
-        return res.status(404).json({ message: "Project not found" });
-      }
-      
-      if (project.userId !== req.user.id) {
-        return res.status(403).json({ message: "Not authorized to create a budget for this project" });
-      }
-      
-      const budgetData = insertBudgetSchema.parse({
+      let budgetData = {
         ...req.body,
-        userId: req.user.id,
-        projectId
-      });
+        userId: req.user.id
+      };
+      
+      // Si hay projectId, verificamos que el proyecto existe y pertenece al usuario
+      if (req.body.projectId) {
+        const projectId = parseInt(req.body.projectId);
+        const project = await storage.getProject(projectId);
+        
+        if (!project) {
+          return res.status(404).json({ message: "Project not found" });
+        }
+        
+        if (project.userId !== req.user.id) {
+          return res.status(403).json({ message: "Not authorized to create a budget for this project" });
+        }
+        
+        // Aseguramos que el projectId es un número
+        budgetData.projectId = projectId;
+      }
+      
+      // Validar con el schema
+      budgetData = insertBudgetSchema.parse(budgetData);
       
       const budget = await storage.createBudget(budgetData);
       return res.status(201).json(budget);

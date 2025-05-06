@@ -123,7 +123,7 @@ export const insertBudgetSchema = createInsertSchema(budgets).pick({
   projectId: true,
 }).extend({
   userId: z.coerce.number(),
-  projectId: z.coerce.number(),
+  projectId: z.coerce.number().optional(),
 });
 
 export const insertBudgetTaskSchema = createInsertSchema(budgetTasks).pick({

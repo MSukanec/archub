@@ -35,16 +35,16 @@ export function Header({
   const [location, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   
-  // Temp mock data - Should be replaced with actual API data
+  // Fetch real project data instead of using mock data
+  const { data: projects = [] } = useQuery<any[]>({
+    queryKey: ['/api/projects'],
+    enabled: !!selectedOrganization,
+  });
+  
+  // Temp mock data for organizations - Should be replaced with actual API data
   const organizations = [
     { id: "1", name: "Mi Organización" },
     { id: "2", name: "Otra Organización" }
-  ];
-  
-  const projects = [
-    { id: "1", name: "Casa de Matias", organizationId: "1" },
-    { id: "2", name: "Edificio Central", organizationId: "1" },
-    { id: "3", name: "Oficinas Norte", organizationId: "2" }
   ];
   
   // Use the first organization by default if none is selected
@@ -117,7 +117,7 @@ export function Header({
                       }}
                     >
                       {selectedProject ? 
-                        projects.find(proj => proj.id === selectedProject)?.name : 
+                        projects.find(proj => String(proj.id) === String(selectedProject))?.name || `Proyecto #${selectedProject}` : 
                         "Seleccionar Proyecto"}
                     </Button>
                   </NavigationMenuItem>
