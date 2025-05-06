@@ -100,6 +100,11 @@ export function Sidebar({
       path: "/tasks",
       icon: <LucideCheckSquare className="h-5 w-5" />,
     },
+    {
+      name: "Categorías",
+      path: "/categories",
+      icon: <LucideDatabase className="h-5 w-5" />,
+    },
   ];
   
   // Seleccionar los items correctos según el tipo de sidebar

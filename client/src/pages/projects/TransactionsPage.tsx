@@ -276,15 +276,14 @@ export default function TransactionsPage({ projectId }: TransactionsPageProps) {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="transaction-type">Tipo de Movimiento</Label>
-                  <Select defaultValue="ingreso">
-                    <SelectTrigger id="transaction-type">
-                      <SelectValue placeholder="Seleccionar tipo" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="ingreso">Ingreso</SelectItem>
-                      <SelectItem value="egreso">Egreso</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select 
+                    id="transaction-type" 
+                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    defaultValue="ingreso"
+                  >
+                    <option value="ingreso">Ingreso</option>
+                    <option value="egreso">Egreso</option>
+                  </select>
                 </div>
                 
                 <div className="space-y-2">
@@ -295,22 +294,21 @@ export default function TransactionsPage({ projectId }: TransactionsPageProps) {
               
               <div className="space-y-2">
                 <Label htmlFor="transaction-category">Categoría</Label>
-                <Select defaultValue="otros">
-                  <SelectTrigger id="transaction-category">
-                    <SelectValue placeholder="Seleccionar categoría" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="anticipo">Anticipo</SelectItem>
-                    <SelectItem value="pago_parcial">Pago Parcial</SelectItem>
-                    <SelectItem value="pago_final">Pago Final</SelectItem>
-                    <SelectItem value="materiales">Materiales</SelectItem>
-                    <SelectItem value="mano_de_obra">Mano de Obra</SelectItem>
-                    <SelectItem value="herramientas">Herramientas</SelectItem>
-                    <SelectItem value="transporte">Transporte</SelectItem>
-                    <SelectItem value="impuestos">Impuestos</SelectItem>
-                    <SelectItem value="otros">Otros</SelectItem>
-                  </SelectContent>
-                </Select>
+                <select 
+                  id="transaction-category" 
+                  className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  defaultValue="otros"
+                >
+                  <option value="anticipo">Anticipo</option>
+                  <option value="pago_parcial">Pago Parcial</option>
+                  <option value="pago_final">Pago Final</option>
+                  <option value="materiales">Materiales</option>
+                  <option value="mano_de_obra">Mano de Obra</option>
+                  <option value="herramientas">Herramientas</option>
+                  <option value="transporte">Transporte</option>
+                  <option value="impuestos">Impuestos</option>
+                  <option value="otros">Otros</option>
+                </select>
               </div>
               
               <div className="space-y-2">

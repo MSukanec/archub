@@ -145,26 +145,6 @@ export function Header({
         {/* Right section with actions and user profile */}
         <div className="flex items-center space-x-4">
           <Button
-            variant="outline"
-            size="sm"
-            className="text-gray-700 hidden md:flex"
-            onClick={() => {
-              if (location.includes('/materials')) {
-                setLocation('/materials/new');
-              } else if (location.includes('/tasks')) {
-                setLocation('/tasks/new');
-              } else if (location.includes('/budgets')) {
-                setLocation('/budgets/new');
-              }
-            }}
-          >
-            <LucidePlus className="h-4 w-4 mr-2" />
-            {location.includes('/materials') ? 'Nuevo Material' : 
-             location.includes('/tasks') ? 'Nueva Tarea' : 
-             location.includes('/budgets') ? 'Nuevo Presupuesto' : 'Nuevo'}
-          </Button>
-          
-          <Button
             variant="ghost"
             size="icon"
             className="text-gray-500 hover:text-gray-700"

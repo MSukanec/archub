@@ -19,6 +19,7 @@ import TransactionsPage from "@/pages/projects/TransactionsPage";
 import ProfilePage from "@/pages/profile/ProfilePage";
 import OrganizationPage from "@/pages/organization/OrganizationPage";
 import TeamPage from "@/pages/team/TeamPage";
+import CategoriesPage from "@/pages/categories/CategoriesPage";
 import LoginPage from "@/pages/auth/LoginPage";
 import RegisterPage from "@/pages/auth/RegisterPage";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -78,6 +79,7 @@ function Router() {
       <ProtectedRoute path="/profile" component={ProfilePage} />
       <ProtectedRoute path="/organization" component={OrganizationPage} />
       <ProtectedRoute path="/team" component={TeamPage} />
+      <ProtectedRoute path="/categories" component={() => <CategoriesPage />} />
 
       <Route component={NotFound} />
     </Switch>
