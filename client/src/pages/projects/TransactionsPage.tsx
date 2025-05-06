@@ -232,7 +232,7 @@ export default function TransactionsPage({ projectId }: TransactionsPageProps) {
                           <TableRow key={transaction.id}>
                             <TableCell>{formatDate(transaction.date)}</TableCell>
                             <TableCell>
-                              <Badge variant={transaction.type === "ingreso" ? "success" : "destructive"}>
+                              <Badge className={transaction.type === "ingreso" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
                                 {transaction.type === "ingreso" ? "Ingreso" : "Egreso"}
                               </Badge>
                             </TableCell>

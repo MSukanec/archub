@@ -65,6 +65,9 @@ function Router() {
       <Route path="/projects/:id/edit">
         {(params) => <ProtectedRoute path="/projects/:id/edit" component={() => <ProjectForm projectId={params.id} />} />}
       </Route>
+      <Route path="/projects/:id/transactions">
+        {(params) => <ProtectedRoute path="/projects/:id/transactions" component={() => <TransactionsPage projectId={params.id} />} />}
+      </Route>
       <ProtectedRoute path="/profile" component={ProfilePage} />
       <ProtectedRoute path="/organization" component={OrganizationPage} />
       <ProtectedRoute path="/team" component={TeamPage} />
