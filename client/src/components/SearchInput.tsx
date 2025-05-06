@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 interface SearchInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   onSearch: (term: string) => void;
@@ -13,34 +12,34 @@ export function SearchInput({
   onSearch,
   placeholder = "Buscar...",
   debounceMs = 300,
-  className,
+  className = "",
   ...props
 }: SearchInputProps) {
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Manejar el cambio del input con debounce
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-    
-    // Limpiar cualquier timeout anterior
-    const timeoutId = setTimeout(() => {
-      onSearch(value);
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      onSearch(searchTerm);
     }, debounceMs);
 
-    // Limpiar el timeout si el componente se desmonta o el usuario sigue escribiendo
-    return () => clearTimeout(timeoutId);
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchTerm, onSearch, debounceMs]);
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
   };
 
   return (
-    <div className={cn("relative", className)}>
-      <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+    <div className={`relative ${className}`}>
+      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
       <Input
         type="text"
+        placeholder={placeholder}
         value={searchTerm}
         onChange={handleChange}
-        className="pl-8"
-        placeholder={placeholder}
+        className="pl-9"
         {...props}
       />
     </div>

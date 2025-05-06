@@ -232,7 +232,7 @@ export default function ProjectMaterialsPage({ projectId }: ProjectMaterialsPage
     : filteredMaterials.filter(m => m.category === selectedTab);
 
   // Obtener la lista de categorías únicas
-  const categories = [...new Set(materialsList.map(m => m.category))];
+  const categories = Array.from(new Set(materialsList.map(m => m.category)));
 
   const isLoading = isLoadingBudgets || isLoadingBudgetTasks || isLoadingTaskMaterials || isLoadingMaterials;
 

@@ -59,6 +59,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ message: "Server error", error });
     }
   });
+  
+
 
   app.post(`${apiPrefix}/projects`, authenticate, async (req, res) => {
     try {
@@ -271,6 +273,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const taskId = parseInt(req.params.taskId);
       const taskMaterials = await storage.getTaskMaterials(taskId);
       return res.json(taskMaterials);
+    } catch (error) {
+      return res.status(500).json({ message: "Server error", error });
+    }
+  });
+  
+  // Get all task materials for all tasks in a project's budgets
+  app.get(`${apiPrefix}/projects/:projectId/task-materials`, authenticate, async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.projectId);
+      const project = await storage.getProject(projectId);
+      
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      
+      if (project.userId !== req.user?.id) {
+        return res.status(403).json({ message: "Not authorized to access this project's materials" });
+      }
+      
+      // Get all budgets for this project
+      const budgets = await storage.getBudgets(projectId, true);
+      
+      // Get all budget tasks for each budget
+      const budgetTasksMap: Record<number, any[]> = {};
+      for (const budget of budgets) {
+        const budgetTasks = await storage.getBudgetTasks(budget.id);
+        budgetTasksMap[budget.id] = budgetTasks;
+      }
+      
+      return res.json(budgetTasksMap);
     } catch (error) {
       return res.status(500).json({ message: "Server error", error });
     }
