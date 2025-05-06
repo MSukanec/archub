@@ -328,4 +328,245 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+import { db } from "./db";
+import { and, eq } from "drizzle-orm";
+
+// Función para convertir 'numeric' a number en JavaScript
+const convertNumberFields = <T extends Record<string, any>>(item: T): T => {
+  if (!item) return item;
+  
+  // Convertir campos numéricos
+  if ('unitPrice' in item && item.unitPrice !== undefined) {
+    item.unitPrice = Number(item.unitPrice);
+  }
+  
+  if ('quantity' in item && item.quantity !== undefined) {
+    item.quantity = Number(item.quantity);
+  }
+  
+  return item;
+};
+
+class DatabaseStorage implements IStorage {
+  // Usuarios
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db.insert(users).values(insertUser).returning();
+    return user;
+  }
+
+  // Proyectos (mantenidos para compatibilidad)
+  async getProjects(userId: number): Promise<Project[]> {
+    return [];
+  }
+
+  async getProject(id: number): Promise<Project | undefined> {
+    return undefined;
+  }
+
+  async createProject(project: InsertProject): Promise<Project> {
+    throw new Error("Proyectos no están disponibles en esta versión");
+  }
+
+  async updateProject(id: number, project: Partial<InsertProject>): Promise<Project | undefined> {
+    throw new Error("Proyectos no están disponibles en esta versión");
+  }
+
+  async deleteProject(id: number): Promise<boolean> {
+    throw new Error("Proyectos no están disponibles en esta versión");
+  }
+
+  // Materiales
+  async getMaterials(): Promise<Material[]> {
+    const materials = await db.select().from(materials);
+    return materials;
+  }
+
+  async getMaterial(id: number): Promise<Material | undefined> {
+    const [material] = await db.select().from(materials).where(eq(materials.id, id));
+    return material;
+  }
+
+  async createMaterial(material: InsertMaterial): Promise<Material> {
+    const [newMaterial] = await db.insert(materials).values(material).returning();
+    return newMaterial;
+  }
+
+  async updateMaterial(id: number, materialData: Partial<InsertMaterial>): Promise<Material | undefined> {
+    const [updatedMaterial] = await db
+      .update(materials)
+      .set(materialData)
+      .where(eq(materials.id, id))
+      .returning();
+    return updatedMaterial;
+  }
+
+  async deleteMaterial(id: number): Promise<boolean> {
+    await db.delete(materials).where(eq(materials.id, id));
+    return true;
+  }
+
+  // Tareas
+  async getTasks(): Promise<Task[]> {
+    const tasksList = await db.select().from(tasks);
+    return tasksList;
+  }
+
+  async getTask(id: number): Promise<Task | undefined> {
+    const [task] = await db.select().from(tasks).where(eq(tasks.id, id));
+    return task;
+  }
+
+  async createTask(task: InsertTask): Promise<Task> {
+    const [newTask] = await db.insert(tasks).values(task).returning();
+    return newTask;
+  }
+
+  async updateTask(id: number, taskData: Partial<InsertTask>): Promise<Task | undefined> {
+    const [updatedTask] = await db
+      .update(tasks)
+      .set(taskData)
+      .where(eq(tasks.id, id))
+      .returning();
+    return updatedTask;
+  }
+
+  async deleteTask(id: number): Promise<boolean> {
+    await db.delete(tasks).where(eq(tasks.id, id));
+    return true;
+  }
+
+  // Materiales de tarea
+  async getTaskMaterials(taskId: number): Promise<TaskMaterial[]> {
+    const taskMaterialsList = await db
+      .select()
+      .from(taskMaterials)
+      .where(eq(taskMaterials.taskId, taskId));
+    return taskMaterialsList;
+  }
+
+  async addTaskMaterial(taskMaterial: InsertTaskMaterial): Promise<TaskMaterial> {
+    const [newTaskMaterial] = await db
+      .insert(taskMaterials)
+      .values(taskMaterial)
+      .returning();
+    return newTaskMaterial;
+  }
+
+  async removeTaskMaterial(id: number): Promise<boolean> {
+    await db.delete(taskMaterials).where(eq(taskMaterials.id, id));
+    return true;
+  }
+
+  // Presupuestos
+  async getBudgets(userId: number): Promise<Budget[]> {
+    const budgetsList = await db
+      .select()
+      .from(budgets)
+      .where(eq(budgets.userId, userId));
+    return budgetsList;
+  }
+
+  async getBudget(id: number): Promise<Budget | undefined> {
+    const [budget] = await db.select().from(budgets).where(eq(budgets.id, id));
+    return budget;
+  }
+
+  async createBudget(budget: InsertBudget): Promise<Budget> {
+    const [newBudget] = await db.insert(budgets).values(budget).returning();
+    return newBudget;
+  }
+
+  async updateBudget(id: number, budgetData: Partial<InsertBudget>): Promise<Budget | undefined> {
+    const [updatedBudget] = await db
+      .update(budgets)
+      .set(budgetData)
+      .where(eq(budgets.id, id))
+      .returning();
+    return updatedBudget;
+  }
+
+  async deleteBudget(id: number): Promise<boolean> {
+    await db.delete(budgets).where(eq(budgets.id, id));
+    return true;
+  }
+
+  // Tareas de presupuesto
+  async getBudgetTasks(budgetId: number): Promise<BudgetTask[]> {
+    const budgetTasksList = await db
+      .select()
+      .from(budgetTasks)
+      .where(eq(budgetTasks.budgetId, budgetId));
+
+    // Obtener datos de tarea para cada budgetTask
+    const result = [];
+    for (const budgetTask of budgetTasksList) {
+      const task = await this.getTask(budgetTask.taskId);
+      result.push({
+        ...budgetTask,
+        task
+      });
+    }
+    return result;
+  }
+
+  async getBudgetTask(id: number): Promise<BudgetTask | undefined> {
+    const [budgetTask] = await db
+      .select()
+      .from(budgetTasks)
+      .where(eq(budgetTasks.id, id));
+    
+    if (!budgetTask) return undefined;
+
+    const task = await this.getTask(budgetTask.taskId);
+    return {
+      ...budgetTask,
+      task
+    };
+  }
+
+  async addBudgetTask(budgetTask: InsertBudgetTask): Promise<BudgetTask> {
+    const [newBudgetTask] = await db
+      .insert(budgetTasks)
+      .values(budgetTask)
+      .returning();
+    
+    const task = await this.getTask(newBudgetTask.taskId);
+    return {
+      ...newBudgetTask,
+      task
+    };
+  }
+
+  async updateBudgetTask(id: number, quantity: number): Promise<BudgetTask | undefined> {
+    const [updatedBudgetTask] = await db
+      .update(budgetTasks)
+      .set({ quantity: String(quantity) })
+      .where(eq(budgetTasks.id, id))
+      .returning();
+    
+    if (!updatedBudgetTask) return undefined;
+    
+    const task = await this.getTask(updatedBudgetTask.taskId);
+    return {
+      ...updatedBudgetTask,
+      task
+    };
+  }
+
+  async removeBudgetTask(id: number): Promise<boolean> {
+    await db.delete(budgetTasks).where(eq(budgetTasks.id, id));
+    return true;
+  }
+}
+
+export const storage = new DatabaseStorage();
