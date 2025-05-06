@@ -80,12 +80,17 @@ export default function TransactionsPage({ projectId }: TransactionsPageProps) {
   const [, setLocation] = useLocation();
   const [isAddTransactionOpen, setIsAddTransactionOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
+  const [transactions, setTransactions] = useState([...demoTransactions]);
   
   // Fetch project details
   const { data: project } = useQuery({
     queryKey: [`/api/projects/${projectId}`],
     enabled: !!projectId,
   });
+
+  const addTransaction = (transaction: typeof demoTransactions[0]) => {
+    setTransactions(prev => [...prev, transaction]);
+  };
 
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat("es", {
@@ -104,11 +109,11 @@ export default function TransactionsPage({ projectId }: TransactionsPageProps) {
   };
 
   // Calcular totales
-  const totalIncome = demoTransactions
+  const totalIncome = transactions
     .filter(t => t.type === "ingreso")
     .reduce((sum, t) => sum + t.amount, 0);
     
-  const totalExpenses = demoTransactions
+  const totalExpenses = transactions
     .filter(t => t.type === "egreso")
     .reduce((sum, t) => sum + t.amount, 0);
     
@@ -116,8 +121,8 @@ export default function TransactionsPage({ projectId }: TransactionsPageProps) {
 
   // Filtrar transacciones según la pestaña activa
   const filteredTransactions = activeTab === "all" 
-    ? demoTransactions 
-    : demoTransactions.filter(t => t.type === activeTab);
+    ? transactions 
+    : transactions.filter(t => t.type === activeTab);
 
   return (
     <MainLayout
@@ -329,7 +334,33 @@ export default function TransactionsPage({ projectId }: TransactionsPageProps) {
               <Button 
                 className="bg-primary hover:bg-primary/90"
                 onClick={() => {
-                  // Aquí se manejaría la creación real de la transacción
+                  // Obtener valores de los campos del formulario
+                  const typeInput = document.getElementById('transaction-type') as HTMLSelectElement;
+                  const dateInput = document.getElementById('transaction-date') as HTMLInputElement;
+                  const categoryInput = document.getElementById('transaction-category') as HTMLSelectElement;
+                  const descriptionInput = document.getElementById('transaction-description') as HTMLInputElement;
+                  const amountInput = document.getElementById('transaction-amount') as HTMLInputElement;
+                  
+                  // Validar datos
+                  if (!typeInput?.value || !dateInput?.value || !amountInput?.value) {
+                    return; // No procesar si faltan campos obligatorios
+                  }
+                  
+                  // Aquí se enviaría la información a la API
+                  // Por ahora, agregar a los datos de demostración
+                  const newTransaction = {
+                    id: transactions.length + 1,
+                    date: new Date(dateInput.value),
+                    type: typeInput.value as 'ingreso' | 'egreso',
+                    category: categoryInput.value,
+                    description: descriptionInput.value,
+                    amount: parseFloat(amountInput.value)
+                  };
+                  
+                  // Agregar localmente - en una implementación real se usaría un mutation
+                  addTransaction(newTransaction);
+                  
+                  // Cerrar diálogo
                   setIsAddTransactionOpen(false);
                 }}
               >

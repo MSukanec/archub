@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { ProfileMenu } from "@/components/common/ProfileMenu";
 import { Button } from "@/components/ui/button";
 import { LucideBell, LucideMenu, LucidePlus, LucideSearch, LucideZap, LucideChevronRight } from "lucide-react";
-import { APP_NAME } from "@/lib/constants";
+import { APP_NAME, APP_SUBTITLE } from "@/lib/constants";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink } from "@/components/ui/navigation-menu";
@@ -74,10 +74,15 @@ export function Header({
             <span className="sr-only">Toggle sidebar</span>
           </Button>
 
-          <div className="flex items-center mr-6">
-            <LucideZap className="h-6 w-6 text-primary mr-2" />
-            <span className="font-medium text-gray-800">
-              {APP_NAME}
+          <div className="flex flex-col items-start mr-6">
+            <div className="flex items-center">
+              <LucideZap className="h-6 w-6 text-primary mr-2" />
+              <span className="font-medium text-gray-800">
+                {APP_NAME}
+              </span>
+            </div>
+            <span className="text-xs text-gray-500 ml-8 -mt-1">
+              {APP_SUBTITLE}
             </span>
           </div>
           
