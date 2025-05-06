@@ -20,7 +20,7 @@ export function MainLayout({
   // Estado para la navegación
   const [selectedOrganization, setSelectedOrganization] = useState<string | null>(null);
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
-  const [sidebarType, setSidebarType] = useState<SidebarType>(SidebarType.Organization);
+  const [sidebarType, setSidebarType] = useState<SidebarType>(SidebarType.MainSidebar);
   
   // Handle mobile sidebar if we're controlling it from outside
   const [internalMobileSidebarOpen, setInternalMobileSidebarOpen] = useState(false);
@@ -35,13 +35,13 @@ export function MainLayout({
   const handleOrganizationChange = (organizationId: string | null) => {
     setSelectedOrganization(organizationId);
     setSelectedProject(null);
-    setSidebarType(SidebarType.Organization);
+    setSidebarType(SidebarType.MainSidebar);
   };
   
   // Gestionar cambios en el proyecto seleccionado
   const handleProjectChange = (projectId: string | null) => {
     setSelectedProject(projectId);
-    setSidebarType(SidebarType.Project);
+    setSidebarType(SidebarType.ProjectSidebar);
   };
   
   // Gestionar cambios en el tipo de sidebar

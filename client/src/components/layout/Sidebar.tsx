@@ -10,7 +10,9 @@ import {
   LucideDatabase, 
   LucideFolderClosed, 
   LucideChevronLeft, 
-  LucideListTodo 
+  LucideListTodo,
+  LucidePlus,
+  LucideLayoutGrid
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { APP_NAME } from "@/lib/constants";
@@ -19,9 +21,9 @@ import { useState } from "react";
 
 // Enum para los diferentes tipos de sidebar
 export enum SidebarType {
-  Organization = "organization",
-  Project = "project",
-  Configuration = "configuration"
+  MainSidebar = "main_sidebar",
+  ProjectSidebar = "project_sidebar",
+  SettingsSidebar = "settings_sidebar"
 }
 
 interface SidebarProps {
@@ -32,7 +34,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ 
-  type = SidebarType.Organization, 
+  type = SidebarType.MainSidebar, 
   onTypeChange,
   selectedOrganization = null,
   selectedProject = null
@@ -41,12 +43,12 @@ export function Sidebar({
   const isMobile = useIsMobile();
   const [expanded, setExpanded] = useState(false);
 
-  // Items del sidebar para la organización
-  const organizationItems = [
+  // Items para el main_sidebar
+  const mainSidebarItems = [
     {
-      name: "Dashboard",
-      path: "/",
-      icon: <LucideHome className="h-5 w-5" />,
+      name: "Organización",
+      path: "/organization",
+      icon: <LucideBuilding className="h-5 w-5" />,
     },
     {
       name: "Proyectos",
@@ -60,40 +62,40 @@ export function Sidebar({
     },
   ];
   
-  // Items del sidebar para el proyecto
-  const projectItems = [
+  // Items para el project_sidebar
+  const projectSidebarItems = [
     {
-      name: "Presupuestos",
-      path: `/projects/${selectedProject}/budgets`,
-      icon: <LucideFileText className="h-5 w-5" />,
+      name: "Crear Presupuesto",
+      path: `/projects/${selectedProject}/budgets/new`,
+      icon: <LucidePlus className="h-5 w-5" />,
     },
     {
-      name: "Listado de Materiales",
+      name: "Lista de Materiales",
       path: `/projects/${selectedProject}/materials-list`,
       icon: <LucideListTodo className="h-5 w-5" />,
     },
   ];
   
-  // Items del sidebar para la configuración
-  const configItems = [
-    {
-      name: "Tareas",
-      path: "/tasks",
-      icon: <LucideCheckSquare className="h-5 w-5" />,
-    },
+  // Items para el settings_sidebar
+  const settingsSidebarItems = [
     {
       name: "Materiales Unitarios",
       path: "/materials",
       icon: <LucidePackage className="h-5 w-5" />,
     },
+    {
+      name: "Tareas",
+      path: "/tasks",
+      icon: <LucideCheckSquare className="h-5 w-5" />,
+    },
   ];
   
   // Seleccionar los items correctos según el tipo de sidebar
-  let sidebarItems = organizationItems;
-  if (type === SidebarType.Project) {
-    sidebarItems = projectItems;
-  } else if (type === SidebarType.Configuration) {
-    sidebarItems = configItems;
+  let sidebarItems = mainSidebarItems;
+  if (type === SidebarType.ProjectSidebar) {
+    sidebarItems = projectSidebarItems;
+  } else if (type === SidebarType.SettingsSidebar) {
+    sidebarItems = settingsSidebarItems;
   }
 
   if (isMobile) {
@@ -102,31 +104,29 @@ export function Sidebar({
 
   return (
     <aside 
-      className={`sidebar fixed top-0 left-0 z-10 h-screen bg-sidebar transition-all duration-200 ${expanded ? "w-60" : "w-16"}`}
+      className={`sidebar fixed top-0 left-0 z-10 h-screen transition-all duration-200 ${expanded ? "w-60" : "w-16"}`}
       onMouseEnter={() => setExpanded(true)}
       onMouseLeave={() => setExpanded(false)}
     >
       {/* Empty top space to align with header */}
-      <div className="flex items-center justify-center h-16 bg-sidebar border-b border-sidebar-accent/10">
+      <div className="flex items-center justify-center h-16 border-b border-sidebar-border">
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-2 py-4 space-y-1.5">
+      <nav className="flex-1 px-2 py-4 space-y-1">
         <TooltipProvider>
           {sidebarItems.map((item) => (
             <Tooltip key={item.path}>
               <TooltipTrigger asChild>
                 <Link href={item.path}>
                   <div 
-                    className={`flex items-center rounded-md transition-colors py-2.5 ${location === item.path 
-                      ? 'bg-sidebar-accent text-white' 
-                      : 'text-slate-300 hover:bg-sidebar-accent/50 hover:text-white'}`}
+                    className={`sidebar-item ${location === item.path ? 'active' : ''}`}
                   >
-                    <div className={`flex items-center justify-center min-w-[3.5rem] ${expanded ? 'justify-start pl-3' : ''}`}>
+                    <div className={`flex items-center justify-center min-w-[2rem] ${expanded ? 'mr-3' : ''}`}>
                       {item.icon}
                     </div>
                     {expanded && (
-                      <span className="text-sm font-medium transition-opacity duration-150">
+                      <span className="text-sm font-medium">
                         {item.name}
                       </span>
                     )}
@@ -141,60 +141,68 @@ export function Sidebar({
             </Tooltip>
           ))}
 
-          <div className="pt-4"></div>
-
-          {/* Botón de Configuración o Volver según el tipo */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              {type !== SidebarType.Configuration ? (
+          {/* Solo mostramos el botón de configuración en el MainSidebar */}
+          {type === SidebarType.MainSidebar && (
+            <Tooltip>
+              <TooltipTrigger asChild>
                 <div 
-                  className="flex items-center rounded-md transition-colors py-2.5 text-slate-300 hover:bg-sidebar-accent/50 hover:text-white cursor-pointer"
-                  onClick={() => onTypeChange && onTypeChange(SidebarType.Configuration)}
+                  className="sidebar-item cursor-pointer"
+                  onClick={() => onTypeChange && onTypeChange(SidebarType.SettingsSidebar)}
                 >
-                  <div className={`flex items-center justify-center min-w-[3.5rem] ${expanded ? 'justify-start pl-3' : ''}`}>
+                  <div className={`flex items-center justify-center min-w-[2rem] ${expanded ? 'mr-3' : ''}`}>
                     <LucideSettings className="h-5 w-5" />
                   </div>
                   {expanded && (
-                    <span className="text-sm font-medium transition-opacity duration-150">
+                    <span className="text-sm font-medium">
                       Configuración
                     </span>
                   )}
                 </div>
-              ) : (
+              </TooltipTrigger>
+              {!expanded && (
+                <TooltipContent side="right" className="mr-2">
+                  <p>Configuración</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          )}
+
+          {/* Solo mostramos el botón de volver en ProjectSidebar y SettingsSidebar */}
+          {(type === SidebarType.ProjectSidebar || type === SidebarType.SettingsSidebar) && (
+            <Tooltip>
+              <TooltipTrigger asChild>
                 <div 
-                  className="flex items-center rounded-md transition-colors py-2.5 text-slate-300 hover:bg-sidebar-accent/50 hover:text-white cursor-pointer"
+                  className="sidebar-item cursor-pointer"
                   onClick={() => {
                     // Volver al sidebar anterior
                     if (onTypeChange) {
-                      if (selectedProject) {
-                        onTypeChange(SidebarType.Project);
+                      if (type === SidebarType.ProjectSidebar) {
+                        onTypeChange(SidebarType.MainSidebar);
                       } else {
-                        onTypeChange(SidebarType.Organization);
+                        onTypeChange(SidebarType.MainSidebar);
                       }
                     }
                   }}
                 >
-                  <div className={`flex items-center justify-center min-w-[3.5rem] ${expanded ? 'justify-start pl-3' : ''}`}>
+                  <div className={`flex items-center justify-center min-w-[2rem] ${expanded ? 'mr-3' : ''}`}>
                     <LucideChevronLeft className="h-5 w-5" />
                   </div>
                   {expanded && (
-                    <span className="text-sm font-medium transition-opacity duration-150">
+                    <span className="text-sm font-medium">
                       Volver
                     </span>
                   )}
                 </div>
+              </TooltipTrigger>
+              {!expanded && (
+                <TooltipContent side="right" className="mr-2">
+                  <p>Volver</p>
+                </TooltipContent>
               )}
-            </TooltipTrigger>
-            {!expanded && (
-              <TooltipContent side="right" className="mr-2">
-                <p>{type !== SidebarType.Configuration ? 'Configuración' : 'Volver'}</p>
-              </TooltipContent>
-            )}
-          </Tooltip>
+            </Tooltip>
+          )}
         </TooltipProvider>
       </nav>
-
-      {/* No Create Button */}
     </aside>
   );
 }

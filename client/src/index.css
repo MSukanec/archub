@@ -24,14 +24,14 @@
   --ring: 20 14.3% 4.1%;
   --radius: 0.5rem;
 
-  /* Sidebar specific colors */
-  --sidebar-background: 240 5% 12%;  /* Dark background for sidebar */
-  --sidebar-foreground: 0 0% 100%;  /* White text for sidebar */
+  /* Sidebar specific colors - White with gray icons */
+  --sidebar-background: 0 0% 100%;  /* White background for sidebar */
+  --sidebar-foreground: 220 9% 46%;  /* Gray text for sidebar */
   --sidebar-primary: 83 100% 40%;  /* #92c900 - Primary color for sidebar (same as primary) */
   --sidebar-primary-foreground: 0 0% 100%;  /* White text for primary elements in sidebar */
-  --sidebar-accent: 240 5% 16%;  /* Slightly lighter than background for hover states */
-  --sidebar-accent-foreground: 0 0% 100%;  /* White text for accent elements */
-  --sidebar-border: 240 5% 26%;  /* Border color for sidebar elements */
+  --sidebar-accent: 220 13% 95%;  /* Light gray for hover states */
+  --sidebar-accent-foreground: 220 9% 46%;  /* Gray text for accent elements */
+  --sidebar-border: 220 13% 91%;  /* Border color for sidebar elements */
   --sidebar-ring: 83 100% 40%;  /* #92c900 - Ring color for focus states in sidebar */
 
   /* Chart colors */
@@ -77,13 +77,11 @@
 
 /* Custom classes for sidebar styling */
 .sidebar {
-  @apply bg-sidebar text-sidebar-foreground;
+  @apply bg-sidebar text-sidebar-foreground border-r border-sidebar-border;
 }
 
-
-
 .sidebar-item {
-  @apply px-3 py-2 rounded-md flex items-center transition-colors;
+  @apply px-3 py-2 rounded-md flex items-center transition-colors my-1;
 }
 
 .sidebar-item:hover {
@@ -91,9 +89,9 @@
 }
 
 .sidebar-item.active {
-  @apply bg-opacity-20 bg-primary border-l-2 border-primary;
+  @apply text-primary border-l-2 border-primary;
 }
 
 .create-button {
-  @apply w-full flex items-center justify-center px-4 py-2 bg-primary text-white rounded-md shadow-sm hover:bg-opacity-90 transition-colors;
+  @apply flex items-center justify-center px-3 py-2 bg-primary text-white rounded-md shadow-sm hover:bg-opacity-90 transition-colors my-2 mx-2;
 }
