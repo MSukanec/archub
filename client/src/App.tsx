@@ -13,6 +13,7 @@ import BudgetsPage from "@/pages/budgets/BudgetsPage";
 import BudgetForm from "@/pages/budgets/BudgetForm";
 import ProjectsPage from "@/pages/projects/ProjectsPage";
 import ProjectForm from "@/pages/projects/ProjectForm";
+import ProjectDetailsPage from "@/pages/projects/ProjectDetailsPage";
 import ProfilePage from "@/pages/profile/ProfilePage";
 import LoginPage from "@/pages/auth/LoginPage";
 import RegisterPage from "@/pages/auth/RegisterPage";
@@ -55,6 +56,9 @@ function Router() {
       </Route>
       <ProtectedRoute path="/projects" component={ProjectsPage} />
       <ProtectedRoute path="/projects/new" component={ProjectForm} />
+      <Route path="/projects/:id">
+        {(params) => <ProtectedRoute path="/projects/:id" component={() => <ProjectDetailsPage projectId={params.id} />} />}
+      </Route>
       <Route path="/projects/:id/edit">
         {(params) => <ProtectedRoute path="/projects/:id/edit" component={() => <ProjectForm projectId={params.id} />} />}
       </Route>
