@@ -337,8 +337,8 @@ export default function TaskForm({ taskId }: TaskFormProps) {
           </Button>
         </div>
 
-        {/* Main content - Two columns layout when editing task */}
-        <div className={`grid ${isEditing ? 'grid-cols-1 lg:grid-cols-2 gap-6' : ''}`}>
+        {/* Main content - Two columns layout always */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Column 1: Task Details */}
           <div>
             <Card className="mb-6 lg:mb-0">
@@ -463,11 +463,11 @@ export default function TaskForm({ taskId }: TaskFormProps) {
             </Card>
           </div>
 
-          {/* Column 2: Materials - Only show in editing mode or take full width in creation mode */}
-          <div className={`${isEditing ? '' : 'lg:col-span-2'}`}>
+          {/* Column 2: Materials Intervinientes */}
+          <div>
             <Card>
               <CardHeader>
-                <CardTitle>Materiales</CardTitle>
+                <CardTitle>Materiales Intervinientes</CardTitle>
               </CardHeader>
               <CardContent>
                 <Form {...materialForm}>
