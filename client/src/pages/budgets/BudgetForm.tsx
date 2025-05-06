@@ -62,9 +62,10 @@ interface BudgetTask {
 interface BudgetFormProps {
   budgetId?: string;
   projectId?: number;
+  readOnly?: boolean;
 }
 
-export default function BudgetForm({ budgetId, projectId }: BudgetFormProps) {
+export default function BudgetForm({ budgetId, projectId, readOnly = false }: BudgetFormProps) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -376,7 +377,7 @@ export default function BudgetForm({ budgetId, projectId }: BudgetFormProps) {
     }
   };
 
-  const title = isEditing ? "Editar Presupuesto" : "Nuevo Presupuesto";
+  const title = readOnly ? "Detalles del Presupuesto" : (isEditing ? "Editar Presupuesto" : "Nuevo Presupuesto");
   const submitLabel = isEditing ? "Actualizar" : "Crear";
   const isSubmitting = createBudgetMutation.isPending || updateBudgetMutation.isPending;
 
@@ -410,7 +411,7 @@ export default function BudgetForm({ budgetId, projectId }: BudgetFormProps) {
                       <FormItem>
                         <FormLabel>Nombre</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="Nombre del presupuesto" />
+                          <Input {...field} placeholder="Nombre del presupuesto" readOnly={readOnly} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -428,6 +429,7 @@ export default function BudgetForm({ budgetId, projectId }: BudgetFormProps) {
                             {...field}
                             placeholder="Descripción del presupuesto (opcional)"
                             rows={3}
+                            readOnly={readOnly}
                           />
                         </FormControl>
                         <FormMessage />
@@ -435,22 +437,24 @@ export default function BudgetForm({ budgetId, projectId }: BudgetFormProps) {
                     )}
                   />
 
-                  <div className="flex justify-end space-x-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => projectId ? setLocation(`/projects/${projectId}`) : setLocation('/budgets')}
-                    >
-                      Cancelar
-                    </Button>
-                    <Button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="bg-primary hover:bg-primary/90"
-                    >
-                      {isSubmitting ? "Guardando..." : submitLabel}
-                    </Button>
-                  </div>
+                  {!readOnly && (
+                    <div className="flex justify-end space-x-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => projectId ? setLocation(`/projects/${projectId}`) : setLocation('/budgets')}
+                      >
+                        Cancelar
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="bg-primary hover:bg-primary/90"
+                      >
+                        {isSubmitting ? "Guardando..." : submitLabel}
+                      </Button>
+                    </div>
+                  )}
                 </form>
               </Form>
             )}
@@ -466,20 +470,22 @@ export default function BudgetForm({ budgetId, projectId }: BudgetFormProps) {
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-                <AddTaskForm 
-                  tasks={tasks} 
-                  onAddTask={handleAddTask}
-                  isSubmitting={addBudgetTaskMutation.isPending}
-                />
+                {!readOnly && (
+                  <AddTaskForm 
+                    tasks={tasks} 
+                    onAddTask={handleAddTask}
+                    isSubmitting={addBudgetTaskMutation.isPending}
+                  />
+                )}
 
                 {isBudgetTasksLoading && isEditing ? (
                   <div className="text-center py-4">Cargando tareas...</div>
                 ) : (
                   <BudgetTaskTable
                     budgetTasks={budgetTasks}
-                    onRemoveTask={handleRemoveTask}
-                    onEditTask={(index, task) => handleEditTask(index, task)}
-                    isEditing={true}
+                    onRemoveTask={!readOnly ? handleRemoveTask : undefined}
+                    onEditTask={!readOnly ? (index, task) => handleEditTask(index, task) : undefined}
+                    isEditing={!readOnly}
                   />
                 )}
               </div>
