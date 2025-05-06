@@ -14,6 +14,7 @@ import BudgetForm from "@/pages/budgets/BudgetForm";
 import ProjectsPage from "@/pages/projects/ProjectsPage";
 import ProjectForm from "@/pages/projects/ProjectForm";
 import ProjectDetailsPage from "@/pages/projects/ProjectDetailsPage";
+import ProjectMaterialsPage from "@/pages/projects/ProjectMaterialsPage";
 import TransactionsPage from "@/pages/projects/TransactionsPage";
 import ProfilePage from "@/pages/profile/ProfilePage";
 import OrganizationPage from "@/pages/organization/OrganizationPage";
@@ -70,6 +71,9 @@ function Router() {
       </Route>
       <Route path="/projects/:id/transactions">
         {(params) => <ProtectedRoute path="/projects/:id/transactions" component={() => <TransactionsPage projectId={params.id} />} />}
+      </Route>
+      <Route path="/projects/:id/materials">
+        {(params) => <ProtectedRoute path="/projects/:id/materials" component={() => <ProjectMaterialsPage projectId={params.id} />} />}
       </Route>
       <ProtectedRoute path="/profile" component={ProfilePage} />
       <ProtectedRoute path="/organization" component={OrganizationPage} />

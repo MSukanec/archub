@@ -78,7 +78,7 @@ export function Sidebar({
     },
     {
       name: "Lista de Materiales",
-      path: `/projects/${selectedProject}/materials-list`,
+      path: `/projects/${selectedProject}/materials`,
       icon: <LucideListTodo className="h-5 w-5" />,
     },
     {
