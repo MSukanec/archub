@@ -22,6 +22,7 @@ import { z } from "zod";
 import { BudgetTaskTable } from "@/components/budgets/BudgetTaskTable";
 import { AddTaskForm } from "@/components/budgets/AddTaskForm";
 import { EditBudgetTaskDialog } from "@/components/budgets/EditBudgetTaskDialog";
+import { BudgetMaterialsList } from "@/components/budgets/BudgetMaterialsList";
 import { useAuth } from "@/hooks/use-auth";
 
 // Form schema
@@ -368,7 +369,7 @@ export default function BudgetForm({ budgetId }: BudgetFormProps) {
 
   return (
     <MainLayout>
-      <div className="max-w-4xl mx-auto">
+      <div className="container mx-auto px-4">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">{title}</h1>
           <Button
@@ -421,8 +422,6 @@ export default function BudgetForm({ budgetId }: BudgetFormProps) {
                     )}
                   />
 
-                  {/* No project field required anymore */}
-
                   <div className="flex justify-end space-x-4">
                     <Button
                       type="button"
@@ -445,31 +444,51 @@ export default function BudgetForm({ budgetId }: BudgetFormProps) {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Tareas del Presupuesto</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              <AddTaskForm 
-                tasks={tasks} 
-                onAddTask={handleAddTask}
-                isSubmitting={addBudgetTaskMutation.isPending}
-              />
-
-              {isBudgetTasksLoading && isEditing ? (
-                <div className="text-center py-4">Cargando tareas...</div>
-              ) : (
-                <BudgetTaskTable
-                  budgetTasks={budgetTasks}
-                  onRemoveTask={handleRemoveTask}
-                  onEditTask={(index, task) => handleEditTask(index, task)}
-                  isEditing={true}
+        {/* Contenedor dividido en dos columnas */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Columna izquierda: Tareas */}
+          <Card className="h-full">
+            <CardHeader className="pb-2">
+              <CardTitle>Tareas del Presupuesto</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <AddTaskForm 
+                  tasks={tasks} 
+                  onAddTask={handleAddTask}
+                  isSubmitting={addBudgetTaskMutation.isPending}
                 />
-              )}
-            </div>
-          </CardContent>
-        </Card>
+
+                {isBudgetTasksLoading && isEditing ? (
+                  <div className="text-center py-4">Cargando tareas...</div>
+                ) : (
+                  <BudgetTaskTable
+                    budgetTasks={budgetTasks}
+                    onRemoveTask={handleRemoveTask}
+                    onEditTask={(index, task) => handleEditTask(index, task)}
+                    isEditing={true}
+                  />
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Columna derecha: Materiales */}
+          {isEditing && budgetId ? (
+            <BudgetMaterialsList budgetId={parseInt(budgetId)} />
+          ) : (
+            <Card className="h-full">
+              <CardHeader className="pb-2">
+                <CardTitle>Lista de Materiales</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="p-4 text-center text-muted-foreground">
+                  Guarda el presupuesto para ver la lista de materiales
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
 
       {/* Edit Task Dialog */}
