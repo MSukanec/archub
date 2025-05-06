@@ -152,5 +152,5 @@ export type InsertTaskMaterial = z.infer<typeof insertTaskMaterialSchema>;
 export type Budget = typeof budgets.$inferSelect;
 export type InsertBudget = z.infer<typeof insertBudgetSchema>;
 
-export type BudgetTask = typeof budgetTasks.$inferSelect;
+export type BudgetTask = typeof budgetTasks.$inferSelect & { task?: Task };
 export type InsertBudgetTask = z.infer<typeof insertBudgetTaskSchema>;

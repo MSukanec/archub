@@ -331,37 +331,68 @@ export class MemStorage implements IStorage {
 import { db } from "./db";
 import { and, eq } from "drizzle-orm";
 
-// Función para convertir 'numeric' a number en JavaScript
-const convertNumberFields = <T extends Record<string, any>>(item: T): T => {
-  if (!item) return item;
+// Función auxiliar para convertir numbers para PostgreSQL y null para valores opcionales
+const prepareForDb = <T>(item: T): any => {
+  if (!item || typeof item !== 'object') return item;
   
-  // Convertir campos numéricos
-  if ('unitPrice' in item && item.unitPrice !== undefined) {
-    item.unitPrice = Number(item.unitPrice);
+  const result = {...item as any};
+  
+  // Asegurar que valores opcionales sean null y no undefined
+  Object.keys(result).forEach(key => {
+    if (result[key] === undefined) {
+      result[key] = null;
+    }
+    
+    // Convertir numeric a string para PostgreSQL
+    if (key === 'unitPrice' || key === 'quantity') {
+      if (typeof result[key] === 'number') {
+        result[key] = String(result[key]);
+      }
+    }
+  });
+  
+  return result;
+};
+
+// Función auxiliar para convertir strings de numeric a numbers en JavaScript
+const convertFromDb = <T>(item: T): T => {
+  if (!item || typeof item !== 'object') return item;
+  
+  const result = {...item as any};
+  
+  // Convertir numeric (string) a number para JavaScript
+  if ('unitPrice' in result && result.unitPrice !== null) {
+    result.unitPrice = Number(result.unitPrice);
   }
   
-  if ('quantity' in item && item.quantity !== undefined) {
-    item.quantity = Number(item.quantity);
+  if ('quantity' in result && result.quantity !== null) {
+    result.quantity = Number(result.quantity);
   }
   
-  return item;
+  return result as T;
+};
+
+// Auxiliar para procesar arrays de resultados
+const convertArrayFromDb = <T>(items: T[]): T[] => {
+  return items.map(item => convertFromDb(item));
 };
 
 class DatabaseStorage implements IStorage {
   // Usuarios
   async getUser(id: number): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
+    return convertFromDb(user);
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user;
+    return convertFromDb(user);
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db.insert(users).values(insertUser).returning();
-    return user;
+    const dbData = prepareForDb(insertUser);
+    const [user] = await db.insert(users).values(dbData).returning();
+    return convertFromDb(user);
   }
 
   // Proyectos (mantenidos para compatibilidad)
@@ -387,27 +418,29 @@ class DatabaseStorage implements IStorage {
 
   // Materiales
   async getMaterials(): Promise<Material[]> {
-    const materials = await db.select().from(materials);
-    return materials;
+    const materialsData = await db.select().from(materials);
+    return convertArrayFromDb(materialsData);
   }
 
   async getMaterial(id: number): Promise<Material | undefined> {
     const [material] = await db.select().from(materials).where(eq(materials.id, id));
-    return material;
+    return convertFromDb(material);
   }
 
   async createMaterial(material: InsertMaterial): Promise<Material> {
-    const [newMaterial] = await db.insert(materials).values(material).returning();
-    return newMaterial;
+    const dbData = prepareForDb(material);
+    const [newMaterial] = await db.insert(materials).values(dbData).returning();
+    return convertFromDb(newMaterial);
   }
 
   async updateMaterial(id: number, materialData: Partial<InsertMaterial>): Promise<Material | undefined> {
+    const dbData = prepareForDb(materialData);
     const [updatedMaterial] = await db
       .update(materials)
-      .set(materialData)
+      .set(dbData)
       .where(eq(materials.id, id))
       .returning();
-    return updatedMaterial;
+    return convertFromDb(updatedMaterial);
   }
 
   async deleteMaterial(id: number): Promise<boolean> {
@@ -418,26 +451,28 @@ class DatabaseStorage implements IStorage {
   // Tareas
   async getTasks(): Promise<Task[]> {
     const tasksList = await db.select().from(tasks);
-    return tasksList;
+    return convertArrayFromDb(tasksList);
   }
 
   async getTask(id: number): Promise<Task | undefined> {
     const [task] = await db.select().from(tasks).where(eq(tasks.id, id));
-    return task;
+    return convertFromDb(task);
   }
 
   async createTask(task: InsertTask): Promise<Task> {
-    const [newTask] = await db.insert(tasks).values(task).returning();
-    return newTask;
+    const dbData = prepareForDb(task);
+    const [newTask] = await db.insert(tasks).values(dbData).returning();
+    return convertFromDb(newTask);
   }
 
   async updateTask(id: number, taskData: Partial<InsertTask>): Promise<Task | undefined> {
+    const dbData = prepareForDb(taskData);
     const [updatedTask] = await db
       .update(tasks)
-      .set(taskData)
+      .set(dbData)
       .where(eq(tasks.id, id))
       .returning();
-    return updatedTask;
+    return convertFromDb(updatedTask);
   }
 
   async deleteTask(id: number): Promise<boolean> {
@@ -451,15 +486,16 @@ class DatabaseStorage implements IStorage {
       .select()
       .from(taskMaterials)
       .where(eq(taskMaterials.taskId, taskId));
-    return taskMaterialsList;
+    return convertArrayFromDb(taskMaterialsList);
   }
 
   async addTaskMaterial(taskMaterial: InsertTaskMaterial): Promise<TaskMaterial> {
+    const dbData = prepareForDb(taskMaterial);
     const [newTaskMaterial] = await db
       .insert(taskMaterials)
-      .values(taskMaterial)
+      .values(dbData)
       .returning();
-    return newTaskMaterial;
+    return convertFromDb(newTaskMaterial);
   }
 
   async removeTaskMaterial(id: number): Promise<boolean> {
@@ -473,26 +509,28 @@ class DatabaseStorage implements IStorage {
       .select()
       .from(budgets)
       .where(eq(budgets.userId, userId));
-    return budgetsList;
+    return convertArrayFromDb(budgetsList);
   }
 
   async getBudget(id: number): Promise<Budget | undefined> {
     const [budget] = await db.select().from(budgets).where(eq(budgets.id, id));
-    return budget;
+    return convertFromDb(budget);
   }
 
   async createBudget(budget: InsertBudget): Promise<Budget> {
-    const [newBudget] = await db.insert(budgets).values(budget).returning();
-    return newBudget;
+    const dbData = prepareForDb(budget);
+    const [newBudget] = await db.insert(budgets).values(dbData).returning();
+    return convertFromDb(newBudget);
   }
 
   async updateBudget(id: number, budgetData: Partial<InsertBudget>): Promise<Budget | undefined> {
+    const dbData = prepareForDb(budgetData);
     const [updatedBudget] = await db
       .update(budgets)
-      .set(budgetData)
+      .set(dbData)
       .where(eq(budgets.id, id))
       .returning();
-    return updatedBudget;
+    return convertFromDb(updatedBudget);
   }
 
   async deleteBudget(id: number): Promise<boolean> {
@@ -510,9 +548,10 @@ class DatabaseStorage implements IStorage {
     // Obtener datos de tarea para cada budgetTask
     const result = [];
     for (const budgetTask of budgetTasksList) {
-      const task = await this.getTask(budgetTask.taskId);
+      const convertedBudgetTask = convertFromDb(budgetTask);
+      const task = await this.getTask(convertedBudgetTask.taskId);
       result.push({
-        ...budgetTask,
+        ...convertedBudgetTask,
         task
       });
     }
@@ -527,24 +566,29 @@ class DatabaseStorage implements IStorage {
     
     if (!budgetTask) return undefined;
 
-    const task = await this.getTask(budgetTask.taskId);
+    const convertedBudgetTask = convertFromDb(budgetTask);
+    const task = await this.getTask(convertedBudgetTask.taskId);
+    
     return {
-      ...budgetTask,
+      ...convertedBudgetTask,
       task
-    };
+    } as BudgetTask;
   }
 
   async addBudgetTask(budgetTask: InsertBudgetTask): Promise<BudgetTask> {
+    const dbData = prepareForDb(budgetTask);
     const [newBudgetTask] = await db
       .insert(budgetTasks)
-      .values(budgetTask)
+      .values(dbData)
       .returning();
     
-    const task = await this.getTask(newBudgetTask.taskId);
+    const convertedBudgetTask = convertFromDb(newBudgetTask);
+    const task = await this.getTask(convertedBudgetTask.taskId);
+    
     return {
-      ...newBudgetTask,
+      ...convertedBudgetTask,
       task
-    };
+    } as BudgetTask;
   }
 
   async updateBudgetTask(id: number, quantity: number): Promise<BudgetTask | undefined> {
@@ -556,11 +600,13 @@ class DatabaseStorage implements IStorage {
     
     if (!updatedBudgetTask) return undefined;
     
-    const task = await this.getTask(updatedBudgetTask.taskId);
+    const convertedBudgetTask = convertFromDb(updatedBudgetTask);
+    const task = await this.getTask(convertedBudgetTask.taskId);
+    
     return {
-      ...updatedBudgetTask,
+      ...convertedBudgetTask,
       task
-    };
+    } as BudgetTask;
   }
 
   async removeBudgetTask(id: number): Promise<boolean> {
