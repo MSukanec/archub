@@ -265,10 +265,18 @@ export class MemStorage implements IStorage {
   }
 
   // Budget operations
-  async getBudgets(userId: number): Promise<Budget[]> {
-    return Array.from(this.budgetMap.values()).filter(
-      (budget) => budget.userId === userId
-    );
+  async getBudgets(userIdOrProjectId: number, isProjectId: boolean = false): Promise<Budget[]> {
+    if (isProjectId) {
+      // Si es un projectId, filtramos por el projectId
+      return Array.from(this.budgetMap.values()).filter(
+        (budget) => budget.projectId === userIdOrProjectId
+      );
+    } else {
+      // Si es un userId, filtramos por el userId
+      return Array.from(this.budgetMap.values()).filter(
+        (budget) => budget.userId === userIdOrProjectId
+      );
+    }
   }
 
   async getBudget(id: number): Promise<Budget | undefined> {
@@ -566,11 +574,23 @@ class DatabaseStorage implements IStorage {
   }
 
   // Presupuestos
-  async getBudgets(userId: number): Promise<Budget[]> {
-    const budgetsList = await db
-      .select()
-      .from(budgets)
-      .where(eq(budgets.userId, userId));
+  async getBudgets(userIdOrProjectId: number, isProjectId: boolean = false): Promise<Budget[]> {
+    let budgetsList;
+    
+    if (isProjectId) {
+      // Filtramos por projectId
+      budgetsList = await db
+        .select()
+        .from(budgets)
+        .where(eq(budgets.projectId, userIdOrProjectId));
+    } else {
+      // Filtramos por userId
+      budgetsList = await db
+        .select()
+        .from(budgets)
+        .where(eq(budgets.userId, userIdOrProjectId));
+    }
+    
     return convertArrayFromDb(budgetsList);
   }
 

@@ -322,13 +322,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post(`${apiPrefix}/budgets`, authenticate, async (req, res) => {
     try {
+      // Asegurarse de que el projectId está presente
+      if (!req.body.projectId) {
+        return res.status(400).json({ message: "Project ID is required" });
+      }
+      
+      const projectId = parseInt(req.body.projectId);
+      // Verificar que el proyecto existe y pertenece al usuario
+      const project = await storage.getProject(projectId);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      
+      if (project.userId !== req.user.id) {
+        return res.status(403).json({ message: "Not authorized to create a budget for this project" });
+      }
+      
       const budgetData = insertBudgetSchema.parse({
         ...req.body,
-        userId: req.user.id
+        userId: req.user.id,
+        projectId
       });
       
       const budget = await storage.createBudget(budgetData);
-      return res.json(budget);
+      return res.status(201).json(budget);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid data", error: error.errors });
@@ -350,7 +367,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Not authorized to access this project's budgets" });
       }
       
-      const budgets = await storage.getBudgets(projectId);
+      // Pasar isProjectId como true para filtrar por projectId
+      const budgets = await storage.getBudgets(projectId, true);
       return res.json(budgets);
     } catch (error) {
       return res.status(500).json({ message: "Server error", error });
@@ -391,7 +409,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const budgetData = insertBudgetSchema.parse({
         ...req.body,
-        projectId
+        projectId,
+        userId: req.user.id
       });
       
       const budget = await storage.createBudget(budgetData);
