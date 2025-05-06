@@ -106,12 +106,15 @@ export default function BudgetForm({ budgetId, projectId }: BudgetFormProps) {
         throw new Error("Debes estar autenticado para crear un presupuesto");
       }
 
-      // Create budget
-      const response = await apiRequest('POST', '/api/budgets', {
+      // Create budget - si hay projectId, usar la ruta específica del proyecto
+      const endpoint = projectId 
+        ? `/api/projects/${projectId}/budgets`
+        : '/api/budgets';
+        
+      const response = await apiRequest('POST', endpoint, {
         name: data.name,
         description: data.description,
-        userId: user.id,
-        ...(projectId ? { projectId } : {})
+        userId: user.id
       });
       
       // Add budget tasks

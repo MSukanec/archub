@@ -8,19 +8,33 @@ interface MainLayoutProps {
   children: ReactNode;
   mobileSidebarOpen?: boolean;
   onMobileSidebarOpenChange?: (open: boolean) => void;
+  sidebarType?: SidebarType;
+  selectedProject?: string | number | null;
+  selectedOrganization?: string | null;
 }
 
 export function MainLayout({ 
   children,
   mobileSidebarOpen,
-  onMobileSidebarOpenChange
+  onMobileSidebarOpenChange,
+  sidebarType: initialSidebarType,
+  selectedProject: initialSelectedProject,
+  selectedOrganization: initialSelectedOrganization
 }: MainLayoutProps) {
   const isMobile = useIsMobile();
   
   // Estado para la navegación
-  const [selectedOrganization, setSelectedOrganization] = useState<string | null>(null);
-  const [selectedProject, setSelectedProject] = useState<string | null>(null);
-  const [sidebarType, setSidebarType] = useState<SidebarType>(SidebarTypes.MainSidebar);
+  const [selectedOrganization, setSelectedOrganization] = useState<string | null>(
+    initialSelectedOrganization !== undefined ? String(initialSelectedOrganization) : null
+  );
+  
+  const [selectedProject, setSelectedProject] = useState<string | null>(
+    initialSelectedProject !== undefined ? String(initialSelectedProject) : null
+  );
+  
+  const [sidebarType, setSidebarType] = useState<SidebarType>(
+    initialSidebarType || SidebarTypes.MainSidebar
+  );
   
   // Handle mobile sidebar if we're controlling it from outside
   const [internalMobileSidebarOpen, setInternalMobileSidebarOpen] = useState(false);
