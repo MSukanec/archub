@@ -70,6 +70,14 @@ export function MainLayout({
       setSidebarType(initialSidebarType);
     }
   }, [initialSidebarType]);
+  
+  // Debug para ver cuándo cambian las props
+  useEffect(() => {
+    console.log("MainLayout props updated:", {
+      type: initialSidebarType,
+      projectId: initialSelectedProject
+    });
+  }, [initialSidebarType, initialSelectedProject]);
 
   useEffect(() => {
     if (initialSelectedProject !== undefined) {
