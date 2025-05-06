@@ -1,4 +1,4 @@
-import { useState, ReactNode } from "react";
+import { useState, ReactNode, useEffect } from "react";
 import { Sidebar, SidebarTypes, SidebarType } from "./Sidebar";
 import { Header } from "./Header";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -62,6 +62,35 @@ export function MainLayout({
   const handleSidebarTypeChange = (type: SidebarType) => {
     setSidebarType(type);
   };
+
+  // Actualizar el estado interno cuando cambian las props
+  useEffect(() => {
+    if (initialSidebarType) {
+      console.log("Updating sidebar type:", initialSidebarType);
+      setSidebarType(initialSidebarType);
+    }
+  }, [initialSidebarType]);
+
+  useEffect(() => {
+    if (initialSelectedProject !== undefined) {
+      const projectId = initialSelectedProject !== null ? String(initialSelectedProject) : null;
+      console.log("Updating selected project:", projectId);
+      setSelectedProject(projectId);
+      
+      // Si se selecciona un proyecto, cambiar automáticamente a ProjectSidebar
+      if (projectId) {
+        setSidebarType(SidebarTypes.ProjectSidebar);
+      }
+    }
+  }, [initialSelectedProject]);
+
+  useEffect(() => {
+    if (initialSelectedOrganization !== undefined) {
+      const orgId = initialSelectedOrganization !== null ? String(initialSelectedOrganization) : null;
+      console.log("Updating selected organization:", orgId);
+      setSelectedOrganization(orgId);
+    }
+  }, [initialSelectedOrganization]);
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-gray-50">

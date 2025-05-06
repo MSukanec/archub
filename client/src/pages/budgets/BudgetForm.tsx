@@ -493,7 +493,7 @@ export default function BudgetForm({ budgetId, projectId, readOnly = false }: Bu
           </Card>
 
           {/* Columna derecha: Materiales */}
-          {isEditing && budgetId ? (
+          {(isEditing || readOnly) && budgetId ? (
             <BudgetMaterialsList budgetId={parseInt(budgetId)} />
           ) : (
             <Card className="h-full">

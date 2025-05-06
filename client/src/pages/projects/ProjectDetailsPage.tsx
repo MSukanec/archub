@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation, Link as WouterLink } from "wouter";
 import { Edit, ArrowLeft, Plus, FileText, ListTodo } from "lucide-react";
@@ -60,6 +60,11 @@ export default function ProjectDetailsPage({ projectId }: ProjectDetailsPageProp
       day: "numeric",
     }).format(date);
   };
+
+  // Forzamos el tipo de sidebar a ProjectSidebar
+  useEffect(() => {
+    console.log("Setting ProjectSidebar for project:", projectId);
+  }, [projectId]);
 
   return (
     <MainLayout
