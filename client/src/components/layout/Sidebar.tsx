@@ -104,13 +104,10 @@ export function Sidebar({
 
   return (
     <aside 
-      className={`sidebar fixed top-0 left-0 z-10 h-screen transition-all duration-200 ${expanded ? "w-60" : "w-16"}`}
+      className={`sidebar fixed left-0 z-10 h-[calc(100vh-4rem)] transition-all duration-200 ${expanded ? "w-60" : "w-16"}`}
       onMouseEnter={() => setExpanded(true)}
       onMouseLeave={() => setExpanded(false)}
     >
-      {/* Empty top space to align with header */}
-      <div className="flex items-center justify-center h-16 border-b border-sidebar-border">
-      </div>
 
       {/* Navigation */}
       <nav className="flex-1 px-2 py-4 space-y-1">

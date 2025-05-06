@@ -107,7 +107,11 @@ export default function ProjectsPage() {
                   </TableHeader>
                   <TableBody>
                     {filteredProjects.map((project) => (
-                      <TableRow key={project.id}>
+                      <TableRow 
+                        key={project.id}
+                        className="cursor-pointer hover:bg-gray-50"
+                        onClick={() => setLocation(`/projects/${project.id}`)}
+                      >
                         <TableCell className="font-medium">{project.name}</TableCell>
                         <TableCell className="max-w-xs truncate">{project.description || "—"}</TableCell>
                         <TableCell>
@@ -118,13 +122,36 @@ export default function ProjectsPage() {
                         <TableCell>{formatDate(project.createdAt)}</TableCell>
                         <TableCell>{formatDate(project.updatedAt)}</TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setLocation(`/projects/${project.id}`)}
-                          >
-                            Ver Detalles
-                          </Button>
+                          <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setLocation(`/projects/${project.id}`);
+                              }}
+                            >
+                              Ver Detalles
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (confirm("¿Estás seguro de que deseas eliminar este proyecto?")) {
+                                  // Lógica para eliminar el proyecto
+                                  fetch(`/api/projects/${project.id}`, {
+                                    method: 'DELETE',
+                                  }).then(() => {
+                                    // Refrescar la lista de proyectos
+                                    window.location.reload();
+                                  });
+                                }
+                              }}
+                            >
+                              Eliminar
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
