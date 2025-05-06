@@ -61,9 +61,10 @@ interface BudgetTask {
 
 interface BudgetFormProps {
   budgetId?: string;
+  projectId?: number;
 }
 
-export default function BudgetForm({ budgetId }: BudgetFormProps) {
+export default function BudgetForm({ budgetId, projectId }: BudgetFormProps) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -109,7 +110,8 @@ export default function BudgetForm({ budgetId }: BudgetFormProps) {
       const response = await apiRequest('POST', '/api/budgets', {
         name: data.name,
         description: data.description,
-        userId: user.id
+        userId: user.id,
+        ...(projectId ? { projectId } : {})
       });
       
       // Add budget tasks
@@ -133,7 +135,14 @@ export default function BudgetForm({ budgetId }: BudgetFormProps) {
         description: "El presupuesto ha sido creado correctamente",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/budgets'] });
-      setLocation('/budgets');
+      
+      // Si hay projectId, redirigir a la página del proyecto, si no a la lista de presupuestos
+      if (projectId) {
+        queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/budgets`] });
+        setLocation(`/projects/${projectId}`);
+      } else {
+        setLocation('/budgets');
+      }
     },
     onError: (error) => {
       toast({
@@ -375,7 +384,7 @@ export default function BudgetForm({ budgetId }: BudgetFormProps) {
           <h1 className="text-2xl font-bold">{title}</h1>
           <Button
             variant="outline"
-            onClick={() => setLocation('/budgets')}
+            onClick={() => projectId ? setLocation(`/projects/${projectId}`) : setLocation('/budgets')}
           >
             Volver
           </Button>
@@ -427,7 +436,7 @@ export default function BudgetForm({ budgetId }: BudgetFormProps) {
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => setLocation('/budgets')}
+                      onClick={() => projectId ? setLocation(`/projects/${projectId}`) : setLocation('/budgets')}
                     >
                       Cancelar
                     </Button>
