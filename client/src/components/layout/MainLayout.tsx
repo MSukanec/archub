@@ -1,5 +1,5 @@
 import { useState, ReactNode } from "react";
-import { Sidebar, SidebarType } from "./Sidebar";
+import { Sidebar, SidebarTypes, SidebarType } from "./Sidebar";
 import { Header } from "./Header";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -20,7 +20,7 @@ export function MainLayout({
   // Estado para la navegación
   const [selectedOrganization, setSelectedOrganization] = useState<string | null>(null);
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
-  const [sidebarType, setSidebarType] = useState<SidebarType>(SidebarType.MainSidebar);
+  const [sidebarType, setSidebarType] = useState<SidebarType>(SidebarTypes.MainSidebar);
   
   // Handle mobile sidebar if we're controlling it from outside
   const [internalMobileSidebarOpen, setInternalMobileSidebarOpen] = useState(false);
@@ -35,13 +35,13 @@ export function MainLayout({
   const handleOrganizationChange = (organizationId: string | null) => {
     setSelectedOrganization(organizationId);
     setSelectedProject(null);
-    setSidebarType(SidebarType.MainSidebar);
+    setSidebarType(SidebarTypes.MainSidebar);
   };
   
   // Gestionar cambios en el proyecto seleccionado
   const handleProjectChange = (projectId: string | null) => {
     setSelectedProject(projectId);
-    setSidebarType(SidebarType.ProjectSidebar);
+    setSidebarType(SidebarTypes.ProjectSidebar);
   };
   
   // Gestionar cambios en el tipo de sidebar

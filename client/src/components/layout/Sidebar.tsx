@@ -20,11 +20,13 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useState } from "react";
 
 // Enum para los diferentes tipos de sidebar
-export enum SidebarType {
-  MainSidebar = "main_sidebar",
-  ProjectSidebar = "project_sidebar",
-  SettingsSidebar = "settings_sidebar"
-}
+export const SidebarTypes = {
+  MainSidebar: "main_sidebar",
+  ProjectSidebar: "project_sidebar",
+  SettingsSidebar: "settings_sidebar"
+} as const;
+
+export type SidebarType = typeof SidebarTypes[keyof typeof SidebarTypes];
 
 interface SidebarProps {
   type?: SidebarType;
@@ -34,7 +36,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ 
-  type = SidebarType.MainSidebar, 
+  type = SidebarTypes.MainSidebar, 
   onTypeChange,
   selectedOrganization = null,
   selectedProject = null
@@ -92,9 +94,9 @@ export function Sidebar({
   
   // Seleccionar los items correctos según el tipo de sidebar
   let sidebarItems = mainSidebarItems;
-  if (type === SidebarType.ProjectSidebar) {
+  if (type === SidebarTypes.ProjectSidebar) {
     sidebarItems = projectSidebarItems;
-  } else if (type === SidebarType.SettingsSidebar) {
+  } else if (type === SidebarTypes.SettingsSidebar) {
     sidebarItems = settingsSidebarItems;
   }
 
@@ -139,12 +141,12 @@ export function Sidebar({
           ))}
 
           {/* Solo mostramos el botón de configuración en el MainSidebar */}
-          {type === SidebarType.MainSidebar && (
+          {type === SidebarTypes.MainSidebar && (
             <Tooltip>
               <TooltipTrigger asChild>
                 <div 
                   className="sidebar-item cursor-pointer"
-                  onClick={() => onTypeChange && onTypeChange(SidebarType.SettingsSidebar)}
+                  onClick={() => onTypeChange && onTypeChange(SidebarTypes.SettingsSidebar)}
                 >
                   <div className={`flex items-center justify-center min-w-[2rem] ${expanded ? 'mr-3' : ''}`}>
                     <LucideSettings className="h-5 w-5" />
@@ -165,7 +167,7 @@ export function Sidebar({
           )}
 
           {/* Solo mostramos el botón de volver en ProjectSidebar y SettingsSidebar */}
-          {(type === SidebarType.ProjectSidebar || type === SidebarType.SettingsSidebar) && (
+          {(type === SidebarTypes.ProjectSidebar || type === SidebarTypes.SettingsSidebar) && (
             <Tooltip>
               <TooltipTrigger asChild>
                 <div 
@@ -173,10 +175,10 @@ export function Sidebar({
                   onClick={() => {
                     // Volver al sidebar anterior
                     if (onTypeChange) {
-                      if (type === SidebarType.ProjectSidebar) {
-                        onTypeChange(SidebarType.MainSidebar);
+                      if (type === SidebarTypes.ProjectSidebar) {
+                        onTypeChange(SidebarTypes.MainSidebar);
                       } else {
-                        onTypeChange(SidebarType.MainSidebar);
+                        onTypeChange(SidebarTypes.MainSidebar);
                       }
                     }
                   }}
