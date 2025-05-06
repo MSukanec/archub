@@ -118,7 +118,7 @@ export default function BudgetForm({ budgetId }: BudgetFormProps) {
       const taskPromises = budgetTasks.map(bt => {
         return apiRequest('POST', `/api/budgets/${newBudgetId}/tasks`, {
           taskId: bt.taskId,
-          quantity: bt.quantity,
+          quantity: bt.quantity.toString(), // Convertir a string para cumplir con las expectativas del API
         });
       });
       
@@ -174,7 +174,7 @@ export default function BudgetForm({ budgetId }: BudgetFormProps) {
     mutationFn: (data: { budgetId: string, taskId: number, quantity: number }) => {
       return apiRequest('POST', `/api/budgets/${data.budgetId}/tasks`, {
         taskId: data.taskId,
-        quantity: data.quantity,
+        quantity: data.quantity.toString(), // Convertir a string para el API
       });
     },
     onSuccess: () => {
@@ -197,7 +197,7 @@ export default function BudgetForm({ budgetId }: BudgetFormProps) {
   const updateBudgetTaskMutation = useMutation({
     mutationFn: (data: { id: number, quantity: number }) => {
       return apiRequest('PATCH', `/api/budget-tasks/${data.id}`, {
-        quantity: data.quantity,
+        quantity: data.quantity.toString(), // Convertir a string para el API
       });
     },
     onSuccess: () => {
