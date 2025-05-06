@@ -406,25 +406,43 @@ class DatabaseStorage implements IStorage {
     return convertFromDb(user);
   }
 
-  // Proyectos (mantenidos para compatibilidad)
+  // Proyectos
   async getProjects(userId: number): Promise<Project[]> {
-    return [];
+    const projectsList = await db
+      .select()
+      .from(projects)
+      .where(eq(projects.userId, userId));
+    return convertArrayFromDb(projectsList);
   }
 
   async getProject(id: number): Promise<Project | undefined> {
-    return undefined;
+    const [project] = await db.select().from(projects).where(eq(projects.id, id));
+    return convertFromDb(project);
   }
 
   async createProject(project: InsertProject): Promise<Project> {
-    throw new Error("Proyectos no están disponibles en esta versión");
+    const dbData = prepareForDb(project);
+    // Asegurar que el status nunca sea undefined
+    if (!dbData.status) {
+      dbData.status = 'planning';
+    }
+    const [newProject] = await db.insert(projects).values(dbData).returning();
+    return convertFromDb(newProject);
   }
 
-  async updateProject(id: number, project: Partial<InsertProject>): Promise<Project | undefined> {
-    throw new Error("Proyectos no están disponibles en esta versión");
+  async updateProject(id: number, projectData: Partial<InsertProject>): Promise<Project | undefined> {
+    const dbData = prepareForDb(projectData);
+    const [updatedProject] = await db
+      .update(projects)
+      .set(dbData)
+      .where(eq(projects.id, id))
+      .returning();
+    return convertFromDb(updatedProject);
   }
 
   async deleteProject(id: number): Promise<boolean> {
-    throw new Error("Proyectos no están disponibles en esta versión");
+    await db.delete(projects).where(eq(projects.id, id));
+    return true;
   }
 
   // Materiales

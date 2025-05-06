@@ -50,10 +50,19 @@ export function MainLayout({
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
-      <div className="flex w-full">
-        {/* Desktop Sidebar */}
-        <div className="fixed left-0 top-0 h-full z-20">
+    <div className="flex flex-col h-screen overflow-hidden bg-gray-50">
+      {/* Header en la parte superior */}
+      <Header 
+        toggleSidebar={toggleSidebar} 
+        onOrganizationChange={handleOrganizationChange}
+        onProjectChange={handleProjectChange}
+        selectedOrganization={selectedOrganization}
+        selectedProject={selectedProject}
+      />
+      
+      <div className="flex flex-1 overflow-hidden">
+        {/* Desktop Sidebar - Debajo del header */}
+        <div className="fixed left-0 top-16 bottom-0 z-20">
           <Sidebar 
             type={sidebarType}
             onTypeChange={handleSidebarTypeChange}
@@ -65,7 +74,7 @@ export function MainLayout({
         {/* Mobile Sidebar */}
         {isMobile && (
           <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-            <SheetContent side="left" className="w-[300px] p-0">
+            <SheetContent side="left" className="w-[300px] p-0 pt-16">
               <Sidebar 
                 type={sidebarType}
                 onTypeChange={handleSidebarTypeChange}
@@ -77,16 +86,7 @@ export function MainLayout({
         )}
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col ml-16 transition-all duration-200 w-full">
-          <Header 
-            toggleSidebar={toggleSidebar} 
-            onOrganizationChange={handleOrganizationChange}
-            onProjectChange={handleProjectChange}
-            selectedOrganization={selectedOrganization}
-            selectedProject={selectedProject}
-          />
-
-          {/* Main Content Area */}
+        <div className="flex-1 ml-16 transition-all duration-200">
           <main className="flex-1 overflow-y-auto p-6">
             {children}
           </main>
