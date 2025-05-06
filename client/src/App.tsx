@@ -14,6 +14,7 @@ import BudgetForm from "@/pages/budgets/BudgetForm";
 import ProjectsPage from "@/pages/projects/ProjectsPage";
 import ProjectForm from "@/pages/projects/ProjectForm";
 import ProjectDetailsPage from "@/pages/projects/ProjectDetailsPage";
+import TransactionsPage from "@/pages/projects/TransactionsPage";
 import ProfilePage from "@/pages/profile/ProfilePage";
 import OrganizationPage from "@/pages/organization/OrganizationPage";
 import TeamPage from "@/pages/team/TeamPage";

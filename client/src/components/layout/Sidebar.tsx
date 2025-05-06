@@ -81,6 +81,11 @@ export function Sidebar({
       path: `/projects/${selectedProject}/materials-list`,
       icon: <LucideListTodo className="h-5 w-5" />,
     },
+    {
+      name: "Movimientos",
+      path: `/projects/${selectedProject}/transactions`,
+      icon: <LucideFileText className="h-5 w-5" />,
+    },
   ];
   
   // Items para el settings_sidebar

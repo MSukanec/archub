@@ -226,7 +226,7 @@ export default function ProjectDetailsPage({ projectId }: ProjectDetailsPageProp
                                   </p>
                                 </div>
                                 <Button 
-                                  variant="outline" 
+                                  className="bg-primary hover:bg-primary/90 text-white"
                                   size="sm"
                                   onClick={() => setLocation(`/budgets/${budget.id}`)}
                                 >
