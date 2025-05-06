@@ -13,6 +13,7 @@ import BudgetsPage from "@/pages/budgets/BudgetsPage";
 import BudgetForm from "@/pages/budgets/BudgetForm";
 import ProjectsPage from "@/pages/projects/ProjectsPage";
 import ProjectForm from "@/pages/projects/ProjectForm";
+import ProfilePage from "@/pages/profile/ProfilePage";
 import LoginPage from "@/pages/auth/LoginPage";
 import RegisterPage from "@/pages/auth/RegisterPage";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -57,6 +58,7 @@ function Router() {
       <Route path="/projects/:id/edit">
         {(params) => <ProtectedRoute path="/projects/:id/edit" component={() => <ProjectForm projectId={params.id} />} />}
       </Route>
+      <ProtectedRoute path="/profile" component={ProfilePage} />
 
       <Route component={NotFound} />
     </Switch>

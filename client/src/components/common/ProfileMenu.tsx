@@ -58,7 +58,7 @@ export function ProfileMenu({ user }: ProfileMenuProps) {
     if (user.fullName) {
       return user.fullName
         .split(' ')
-        .map(name => name[0])
+        .map((name: string) => name[0])
         .join('')
         .toUpperCase()
         .substring(0, 2);

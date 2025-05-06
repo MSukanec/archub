@@ -86,7 +86,7 @@ export function MainLayout({
         )}
 
         {/* Main Content */}
-        <div className="flex-1 ml-16 transition-all duration-200">
+        <div className="flex-1 ml-16 sm:ml-[220px] transition-all duration-200">
           <main className="flex-1 overflow-y-auto p-6">
             {children}
           </main>

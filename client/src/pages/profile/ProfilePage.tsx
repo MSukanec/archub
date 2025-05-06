@@ -89,14 +89,14 @@ export default function ProfilePage() {
 }
 
 // Función auxiliar para obtener las iniciales del usuario
-function getUserInitials(user: any): string {
+function getUserInitials(user: {username: string, fullName?: string | null} | null): string {
   if (!user) return '?';
   
   if (user.fullName) {
     return user.fullName
       .split(' ')
       .slice(0, 2)
-      .map(name => name[0])
+      .map((name: string) => name[0])
       .join('')
       .toUpperCase();
   }
