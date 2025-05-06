@@ -27,11 +27,16 @@ interface Budget {
   name: string;
   description: string;
   userId: number;
+  projectId: number;
   createdAt: string;
   updatedAt: string;
 }
 
-export default function BudgetsPage() {
+interface BudgetsPageProps {
+  projectId?: number;
+}
+
+export default function BudgetsPage({ projectId }: BudgetsPageProps) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -40,9 +45,14 @@ export default function BudgetsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [budgetToDelete, setBudgetToDelete] = useState<Budget | null>(null);
 
-  // Fetch all budgets for the current user
+  // Definir el endpoint según si estamos viendo presupuestos de un proyecto específico o todos
+  const endpoint = projectId 
+    ? `/api/projects/${projectId}/budgets`
+    : "/api/budgets";
+
+  // Fetch budgets either for a specific project or all for the current user
   const { data: budgets = [], isLoading } = useQuery<Budget[]>({
-    queryKey: ["/api/budgets"],
+    queryKey: [endpoint],
     enabled: !!user,
   });
 
@@ -56,7 +66,14 @@ export default function BudgetsPage() {
         title: "Presupuesto eliminado",
         description: "El presupuesto ha sido eliminado correctamente",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/budgets"] });
+      
+      // Invalidar caché dependiendo de si estamos en un proyecto o no
+      if (projectId) {
+        queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/budgets`] });
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["/api/budgets"] });
+      }
+      
       setBudgetToDelete(null);
     },
     onError: (error) => {
@@ -83,9 +100,18 @@ export default function BudgetsPage() {
   return (
     <MainLayout>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Presupuestos</h1>
+        <h1 className="text-2xl font-bold">
+          {projectId ? 'Presupuestos del Proyecto' : 'Presupuestos'}
+        </h1>
         <Button 
-          onClick={() => setLocation('/budgets/new')}
+          onClick={() => {
+            // Si hay un projectId, redirigir a la ruta de crear presupuesto para ese proyecto
+            if (projectId) {
+              setLocation(`/projects/${projectId}/budgets/new`);
+            } else {
+              setLocation('/budgets/new');
+            }
+          }}
           className="bg-primary hover:bg-primary/90"
         >
           <LucidePlus className="mr-2 h-4 w-4" />
