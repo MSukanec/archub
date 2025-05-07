@@ -75,22 +75,22 @@ export function Sidebar({
     {
       name: "Resumen",
       path: `/projects/${selectedProject}`,
-      icon: <LucideLayoutGrid className="h-5 w-5" />,
+      icon: <LucideLayoutGrid className="h-5 w-5 md:h-[20px] md:w-[20px]" />,
     },
     {
       name: "Crear Presupuesto",
       path: `/projects/${selectedProject}/budgets/new`,
-      icon: <LucidePlus className="h-5 w-5" />,
+      icon: <LucidePlus className="h-5 w-5 md:h-[20px] md:w-[20px]" />,
     },
     {
       name: "Lista de Materiales",
       path: `/projects/${selectedProject}/materials`,
-      icon: <LucideListTodo className="h-5 w-5" />,
+      icon: <LucideListTodo className="h-5 w-5 md:h-[20px] md:w-[20px]" />,
     },
     {
       name: "Movimientos",
       path: `/projects/${selectedProject}/transactions`,
-      icon: <LucideFileText className="h-5 w-5" />,
+      icon: <LucideFileText className="h-5 w-5 md:h-[20px] md:w-[20px]" />,
     },
   ];
   
@@ -99,17 +99,17 @@ export function Sidebar({
     {
       name: "Materiales Unitarios",
       path: "/materials",
-      icon: <LucidePackage className="h-5 w-5" />,
+      icon: <LucidePackage className="h-5 w-5 md:h-[20px] md:w-[20px]" />,
     },
     {
       name: "Tareas",
       path: "/tasks",
-      icon: <LucideCheckSquare className="h-5 w-5" />,
+      icon: <LucideCheckSquare className="h-5 w-5 md:h-[20px] md:w-[20px]" />,
     },
     {
       name: "Categorías",
       path: "/categories",
-      icon: <LucideDatabase className="h-5 w-5" />,
+      icon: <LucideDatabase className="h-5 w-5 md:h-[20px] md:w-[20px]" />,
     },
   ];
   
@@ -127,7 +127,7 @@ export function Sidebar({
 
   return (
     <aside 
-      className={`sidebar h-full transition-all duration-200 border-r ${expanded ? "w-60" : "w-16"}`}
+      className={`sidebar h-full transition-all duration-200 border-r ${expanded ? "w-60" : "w-[45px]"}`}
       onMouseEnter={() => setExpanded(true)}
       onMouseLeave={() => setExpanded(false)}
     >
@@ -170,7 +170,7 @@ export function Sidebar({
                   onClick={() => onTypeChange && onTypeChange(SidebarTypes.SettingsSidebar)}
                 >
                   <div className={`flex items-center justify-center min-w-[2rem] ${expanded ? 'mr-3' : ''}`}>
-                    <LucideSettings className="h-5 w-5" />
+                    <LucideSettings className="h-5 w-5 md:h-[20px] md:w-[20px]" />
                   </div>
                   {expanded && (
                     <span className="text-sm font-medium">
@@ -205,7 +205,7 @@ export function Sidebar({
                   }}
                 >
                   <div className={`flex items-center justify-center min-w-[2rem] ${expanded ? 'mr-3' : ''}`}>
-                    <LucideChevronLeft className="h-5 w-5" />
+                    <LucideChevronLeft className="h-5 w-5 md:h-[20px] md:w-[20px]" />
                   </div>
                   {expanded && (
                     <span className="text-sm font-medium">

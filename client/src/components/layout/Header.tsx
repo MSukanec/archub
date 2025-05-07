@@ -79,9 +79,9 @@ export function Header({
 
   return (
     <header className="z-30 bg-white border-b sticky top-0 w-full h-[45px]">
-      <div className="flex items-center justify-between px-5 h-full">
+      <div className="flex items-center justify-between px-0 h-full">
         {/* Left section with app logo */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center">
           <Button
             variant="ghost"
             size="icon"
@@ -92,15 +92,19 @@ export function Header({
             <span className="sr-only">Toggle sidebar</span>
           </Button>
 
-          <div className="flex items-center">
+          {/* Logo centered in the sidebar-header intersection */}
+          <div className="flex items-center justify-center h-[45px] w-[45px] border-r">
             <LucideZap className="h-5 w-5 text-primary" />
-            <span className="font-medium text-gray-800 ml-2">
+          </div>
+          
+          <div className="hidden md:flex items-center ml-4">
+            <span className="font-medium text-gray-800">
               {APP_NAME}
             </span>
           </div>
           
           {/* Organization and Project Navigation */}
-          <NavigationMenu className="hidden md:flex">
+          <NavigationMenu className="hidden md:flex ml-2">
             <NavigationMenuList>
               <NavigationMenuItem>
                 <Button 
@@ -144,7 +148,7 @@ export function Header({
             </NavigationMenuList>
           </NavigationMenu>
 
-          <div className="rounded-md border border-gray-200 px-3 py-1 flex items-center max-w-md w-64 h-7 hidden md:flex ml-auto cursor-pointer" onClick={() => setSearchOpen(true)}>
+          <div className="rounded-md border border-gray-200 px-3 py-1 flex items-center max-w-md w-64 h-7 hidden md:flex mx-4 cursor-pointer" onClick={() => setSearchOpen(true)}>
             <LucideSearch className="h-4 w-4 text-gray-400 mr-2" />
             <span className="text-sm text-gray-400">Buscar proyectos...</span>
           </div>
@@ -173,7 +177,7 @@ export function Header({
         </div>
 
         {/* Right section with actions and user profile */}
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-3 mr-4">
           <Button
             variant="ghost"
             size="icon"
