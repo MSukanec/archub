@@ -51,22 +51,22 @@ export function Sidebar({
     {
       name: "Dashboard",
       path: "/",
-      icon: <LucidePieChart className="h-5 w-5" />,
+      icon: <LucidePieChart className="h-5 w-5 md:h-[20px] md:w-[20px]" />,
     },
     {
       name: "Organización",
       path: "/organization",
-      icon: <LucideBuilding className="h-5 w-5" />,
+      icon: <LucideBuilding className="h-5 w-5 md:h-[20px] md:w-[20px]" />,
     },
     {
       name: "Proyectos",
       path: "/projects",
-      icon: <LucideFolderClosed className="h-5 w-5" />,
+      icon: <LucideFolderClosed className="h-5 w-5 md:h-[20px] md:w-[20px]" />,
     },
     {
       name: "Equipo",
       path: "/team",
-      icon: <LucideUsers className="h-5 w-5" />,
+      icon: <LucideUsers className="h-5 w-5 md:h-[20px] md:w-[20px]" />,
     },
   ];
   

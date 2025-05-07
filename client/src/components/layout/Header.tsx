@@ -78,29 +78,24 @@ export function Header({
   };
 
   return (
-    <header className="z-30 bg-white border-b sticky top-0 w-full h-16">
+    <header className="z-30 bg-white border-b sticky top-0 w-full h-[45px]">
       <div className="flex items-center justify-between px-5 h-full">
         {/* Left section with app logo */}
         <div className="flex items-center space-x-4">
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden text-gray-500 hover:text-gray-700"
+            className="md:hidden text-gray-500 hover:text-gray-700 h-[45px] p-0"
             onClick={toggleSidebar}
           >
-            <LucideMenu className="h-6 w-6" />
+            <LucideMenu className="h-5 w-5" />
             <span className="sr-only">Toggle sidebar</span>
           </Button>
 
-          <div className="flex flex-col items-start mr-6">
-            <div className="flex items-center">
-              <LucideZap className="h-6 w-6 text-primary mr-2" />
-              <span className="font-medium text-gray-800">
-                {APP_NAME}
-              </span>
-            </div>
-            <span className="text-xs text-gray-500 ml-8 -mt-1">
-              {APP_SUBTITLE}
+          <div className="flex items-center">
+            <LucideZap className="h-5 w-5 text-primary" />
+            <span className="font-medium text-gray-800 ml-2">
+              {APP_NAME}
             </span>
           </div>
           
@@ -110,7 +105,7 @@ export function Header({
               <NavigationMenuItem>
                 <Button 
                   variant="ghost" 
-                  className="px-2 h-9 flex items-center gap-1 font-medium text-gray-700 hover:bg-gray-100"
+                  className="px-2 h-8 flex items-center gap-1 font-medium text-gray-700 hover:bg-gray-100"
                   onClick={() => {
                     if (onOrganizationChange && selectedOrganization) {
                       setLocation('/organization');
@@ -132,7 +127,7 @@ export function Header({
                   <NavigationMenuItem>
                     <Button 
                       variant="ghost" 
-                      className="px-2 h-9 flex items-center gap-1 font-medium text-gray-700 hover:bg-gray-100"
+                      className="px-2 h-8 flex items-center gap-1 font-medium text-gray-700 hover:bg-gray-100"
                       onClick={() => {
                         if (onProjectChange && selectedProject) {
                           setLocation(`/projects/${selectedProject}`);
@@ -149,7 +144,7 @@ export function Header({
             </NavigationMenuList>
           </NavigationMenu>
 
-          <div className="rounded-md border border-gray-200 px-3 py-1 flex items-center max-w-md w-64 h-9 hidden md:flex ml-auto cursor-pointer" onClick={() => setSearchOpen(true)}>
+          <div className="rounded-md border border-gray-200 px-3 py-1 flex items-center max-w-md w-64 h-7 hidden md:flex ml-auto cursor-pointer" onClick={() => setSearchOpen(true)}>
             <LucideSearch className="h-4 w-4 text-gray-400 mr-2" />
             <span className="text-sm text-gray-400">Buscar proyectos...</span>
           </div>
@@ -178,11 +173,11 @@ export function Header({
         </div>
 
         {/* Right section with actions and user profile */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-3">
           <Button
             variant="ghost"
             size="icon"
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-500 hover:text-gray-700 h-[35px] w-[35px] p-0"
             onClick={() => setLocation('/notifications')}
           >
             <LucideBell className="h-5 w-5" />

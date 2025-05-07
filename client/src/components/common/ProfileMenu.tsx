@@ -70,8 +70,8 @@ export function ProfileMenu({ user }: ProfileMenuProps) {
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-8 w-8 rounded-full p-0">
-          <Avatar className="h-8 w-8">
+        <Button variant="ghost" className="h-7 w-7 rounded-full p-0">
+          <Avatar className="h-7 w-7">
             <AvatarImage src={user.avatarUrl || ''} alt={user.fullName || user.username} />
             <AvatarFallback>{getInitials()}</AvatarFallback>
           </Avatar>
