@@ -10,7 +10,8 @@ import {
   insertTaskMaterialSchema,
   insertBudgetSchema,
   insertBudgetTaskSchema,
-  insertCategorySchema
+  insertCategorySchema,
+  insertUnitSchema
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -733,6 +734,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!deleted) {
         return res.status(404).json({ message: "Category not found" });
+      }
+      
+      return res.status(204).send();
+    } catch (error) {
+      return res.status(500).json({ message: "Server error", error });
+    }
+  });
+
+  // Unit routes
+  app.get(`${apiPrefix}/units`, async (req, res) => {
+    try {
+      const units = await storage.getUnits();
+      res.json(units);
+    } catch (error) {
+      return res.status(500).json({ message: "Server error", error });
+    }
+  });
+
+  app.get(`${apiPrefix}/units/:id`, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const unit = await storage.getUnit(id);
+      
+      if (!unit) {
+        return res.status(404).json({ message: "Unit not found" });
+      }
+      
+      res.json(unit);
+    } catch (error) {
+      return res.status(500).json({ message: "Server error", error });
+    }
+  });
+
+  app.post(`${apiPrefix}/units`, async (req, res) => {
+    try {
+      const parsedBody = insertUnitSchema.safeParse(req.body);
+      
+      if (!parsedBody.success) {
+        return res.status(400).json({ 
+          message: "Invalid unit data", 
+          errors: parsedBody.error.format() 
+        });
+      }
+      
+      const unit = await storage.createUnit(parsedBody.data);
+      res.status(201).json(unit);
+    } catch (error) {
+      return res.status(500).json({ message: "Server error", error });
+    }
+  });
+
+  app.put(`${apiPrefix}/units/:id`, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const parsedBody = insertUnitSchema.partial().safeParse(req.body);
+      
+      if (!parsedBody.success) {
+        return res.status(400).json({ 
+          message: "Invalid unit data", 
+          errors: parsedBody.error.format() 
+        });
+      }
+      
+      const updatedUnit = await storage.updateUnit(id, parsedBody.data);
+      
+      if (!updatedUnit) {
+        return res.status(404).json({ message: "Unit not found" });
+      }
+      
+      res.json(updatedUnit);
+    } catch (error) {
+      return res.status(500).json({ message: "Server error", error });
+    }
+  });
+
+  app.delete(`${apiPrefix}/units/:id`, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteUnit(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Unit not found" });
       }
       
       return res.status(204).send();
