@@ -72,6 +72,7 @@ export class MemStorage implements IStorage {
   private taskMaterialMap: Map<number, TaskMaterial>;
   private budgetMap: Map<number, Budget>;
   private budgetTaskMap: Map<number, BudgetTask>;
+  private categoryMap: Map<number, Category>;
   
   private userId: number;
   private projectId: number;
@@ -80,6 +81,7 @@ export class MemStorage implements IStorage {
   private taskMaterialId: number;
   private budgetId: number;
   private budgetTaskId: number;
+  private categoryId: number;
 
   constructor() {
     this.userMap = new Map();
@@ -89,6 +91,7 @@ export class MemStorage implements IStorage {
     this.taskMaterialMap = new Map();
     this.budgetMap = new Map();
     this.budgetTaskMap = new Map();
+    this.categoryMap = new Map();
     
     this.userId = 1;
     this.projectId = 1;
@@ -97,6 +100,7 @@ export class MemStorage implements IStorage {
     this.taskMaterialId = 1;
     this.budgetId = 1;
     this.budgetTaskId = 1;
+    this.categoryId = 1;
     
     // Add sample users
     const adminUser: User = {
@@ -353,6 +357,122 @@ export class MemStorage implements IStorage {
 
   async removeBudgetTask(id: number): Promise<boolean> {
     return this.budgetTaskMap.delete(id);
+  }
+  
+  // Category operations
+  async getCategories(type?: string): Promise<Category[]> {
+    let categories = Array.from(this.categoryMap.values());
+    
+    if (type) {
+      categories = categories.filter(cat => cat.type === type);
+    }
+    
+    // Ordenamos por position
+    categories.sort((a, b) => a.position - b.position);
+    
+    // Construir estructura jerárquica
+    const rootCategories: Category[] = [];
+    const childrenMap: Record<number, Category[]> = {};
+    
+    // Primero, agrupamos todas las categorías hijas por su parentId
+    categories.forEach(cat => {
+      if (cat.parentId) {
+        if (!childrenMap[cat.parentId]) {
+          childrenMap[cat.parentId] = [];
+        }
+        childrenMap[cat.parentId].push(cat);
+      }
+    });
+    
+    // Luego, para cada categoría principal (sin parentId), asignamos sus hijos
+    categories.forEach(cat => {
+      if (!cat.parentId) {
+        const categoryWithChildren = { ...cat };
+        if (childrenMap[cat.id]) {
+          categoryWithChildren.children = childrenMap[cat.id];
+        }
+        rootCategories.push(categoryWithChildren);
+      }
+    });
+    
+    return rootCategories;
+  }
+
+  async getCategory(id: number): Promise<Category | undefined> {
+    const category = this.categoryMap.get(id);
+    if (!category) return undefined;
+    
+    // Buscar hijos de esta categoría
+    const children = Array.from(this.categoryMap.values())
+      .filter(cat => cat.parentId === id)
+      .sort((a, b) => a.position - b.position);
+      
+    if (children.length > 0) {
+      return { ...category, children };
+    }
+    
+    return category;
+  }
+
+  async createCategory(insertCategory: InsertCategory): Promise<Category> {
+    const id = this.categoryId++;
+    const category: Category = { 
+      ...insertCategory, 
+      id, 
+      createdAt: new Date(), 
+      updatedAt: new Date() 
+    };
+    this.categoryMap.set(id, category);
+    return category;
+  }
+
+  async updateCategory(id: number, categoryData: Partial<InsertCategory>): Promise<Category | undefined> {
+    const category = this.categoryMap.get(id);
+    if (!category) return undefined;
+    
+    const updatedCategory: Category = { 
+      ...category, 
+      ...categoryData, 
+      updatedAt: new Date() 
+    };
+    this.categoryMap.set(id, updatedCategory);
+    return updatedCategory;
+  }
+
+  async updateCategoryPosition(id: number, newPosition: number): Promise<boolean> {
+    const category = this.categoryMap.get(id);
+    if (!category) return false;
+    
+    category.position = newPosition;
+    category.updatedAt = new Date();
+    this.categoryMap.set(id, category);
+    return true;
+  }
+
+  async deleteCategory(id: number): Promise<boolean> {
+    // Primero verificamos si hay categorías hijas
+    const children = Array.from(this.categoryMap.values())
+      .filter(cat => cat.parentId === id);
+      
+    // Si hay hijos, primero los asignamos a otra categoría padre
+    if (children.length > 0) {
+      // Obtener el parent de la categoría que vamos a eliminar
+      const category = this.categoryMap.get(id);
+      if (!category) return false;
+      
+      // Asignar los hijos al parent de la categoría que estamos eliminando
+      const parentId = category.parentId;
+      
+      // Actualizar los hijos
+      children.forEach(child => {
+        child.parentId = parentId;
+        child.updatedAt = new Date();
+        this.categoryMap.set(child.id, child);
+      });
+    }
+    
+    // Ahora eliminamos la categoría
+    return this.categoryMap.delete(id);
   }
 }
 

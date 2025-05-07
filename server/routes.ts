@@ -9,7 +9,8 @@ import {
   insertTaskSchema,
   insertTaskMaterialSchema,
   insertBudgetSchema,
-  insertBudgetTaskSchema
+  insertBudgetTaskSchema,
+  insertCategorySchema
 } from "@shared/schema";
 import { z } from "zod";
 

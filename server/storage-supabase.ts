@@ -662,4 +662,155 @@ export class SupabaseStorage implements IStorage {
       
     return !error;
   }
+
+  // Categorías
+  async getCategories(type?: string): Promise<Category[]> {
+    let query = supabase
+      .from(tableNames.categories)
+      .select('*');
+      
+    if (type) {
+      query = query.eq('type', type);
+    }
+    
+    const { data, error } = await query.order('position', { ascending: true });
+    
+    if (error) throw new Error(`Error al obtener categorías: ${error.message}`);
+    
+    const categories = convertArrayFromDb(data as Category[]);
+    
+    // Construir estructura jerárquica
+    const rootCategories: Category[] = [];
+    const childrenMap: Record<number, Category[]> = {};
+    
+    // Primero, agrupamos todas las categorías hijas por su parentId
+    categories.forEach(cat => {
+      if (cat.parentId) {
+        if (!childrenMap[cat.parentId]) {
+          childrenMap[cat.parentId] = [];
+        }
+        childrenMap[cat.parentId].push(cat);
+      }
+    });
+    
+    // Luego, para cada categoría principal (sin parentId), asignamos sus hijos
+    categories.forEach(cat => {
+      if (!cat.parentId) {
+        const categoryWithChildren = { ...cat };
+        if (childrenMap[cat.id]) {
+          categoryWithChildren.children = childrenMap[cat.id];
+        }
+        rootCategories.push(categoryWithChildren);
+      }
+    });
+    
+    return rootCategories;
+  }
+
+  async getCategory(id: number): Promise<Category | undefined> {
+    const { data, error } = await supabase
+      .from(tableNames.categories)
+      .select('*')
+      .eq('id', id)
+      .single();
+      
+    if (error || !data) return undefined;
+    
+    const category = convertFromDb(data as Category);
+    
+    // Buscar hijos de esta categoría
+    const { data: children, error: childrenError } = await supabase
+      .from(tableNames.categories)
+      .select('*')
+      .eq('parent_id', id)
+      .order('position', { ascending: true });
+      
+    if (!childrenError && children && children.length > 0) {
+      category.children = convertArrayFromDb(children as Category[]);
+    }
+    
+    return category;
+  }
+
+  async createCategory(category: InsertCategory): Promise<Category> {
+    // Convertir camelCase a snake_case para parentId
+    const categoryData = { ...prepareForDb(category) };
+    if ('parentId' in category) {
+      categoryData.parent_id = category.parentId;
+      delete categoryData.parentId;
+    }
+    
+    const { data, error } = await supabase
+      .from(tableNames.categories)
+      .insert(categoryData)
+      .select()
+      .single();
+      
+    if (error) throw new Error(`Error al crear categoría: ${error.message}`);
+    return convertFromDb(data as Category);
+  }
+
+  async updateCategory(id: number, categoryData: Partial<InsertCategory>): Promise<Category | undefined> {
+    // Convertir camelCase a snake_case para parentId
+    const dbData = { ...prepareForDb(categoryData) };
+    if ('parentId' in categoryData) {
+      dbData.parent_id = categoryData.parentId;
+      delete dbData.parentId;
+    }
+    
+    const { data, error } = await supabase
+      .from(tableNames.categories)
+      .update(dbData)
+      .eq('id', id)
+      .select()
+      .single();
+      
+    if (error || !data) return undefined;
+    return convertFromDb(data as Category);
+  }
+
+  async updateCategoryPosition(id: number, newPosition: number): Promise<boolean> {
+    const { error } = await supabase
+      .from(tableNames.categories)
+      .update({ position: newPosition })
+      .eq('id', id);
+      
+    return !error;
+  }
+
+  async deleteCategory(id: number): Promise<boolean> {
+    // Primero verificamos si hay categorías hijas
+    const { data: children } = await supabase
+      .from(tableNames.categories)
+      .select('id')
+      .eq('parent_id', id);
+      
+    // Si hay hijos, primero los eliminamos o los asignamos a otra categoría padre
+    if (children && children.length > 0) {
+      // Obtener el parent de la categoría que vamos a eliminar
+      const { data: category } = await supabase
+        .from(tableNames.categories)
+        .select('parent_id')
+        .eq('id', id)
+        .single();
+        
+      // Asignar los hijos al parent de la categoría que estamos eliminando
+      const parentId = category?.parent_id || null;
+      
+      const { error: updateError } = await supabase
+        .from(tableNames.categories)
+        .update({ parent_id: parentId })
+        .eq('parent_id', id);
+        
+      if (updateError) return false;
+    }
+    
+    // Ahora eliminamos la categoría
+    const { error } = await supabase
+      .from(tableNames.categories)
+      .delete()
+      .eq('id', id);
+      
+    return !error;
+  }
 }
