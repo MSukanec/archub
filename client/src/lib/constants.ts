@@ -1,60 +1,75 @@
-export const APP_NAME = "Archub";
-export const APP_SUBTITLE = "Otro invento de Matias Sukanec";
+// Definiciones de constantes para la aplicación
 
-export const PROJECT_STATUS_OPTIONS = [
+// Nombre de la aplicación
+export const APP_NAME = "ArchHub";
+export const APP_SUBTITLE = "Gestión de Presupuestos";
+
+// Categorías de materiales (se utilizan como fallback si el API no está disponible)
+export const MATERIAL_CATEGORIES = [
+  { value: "Materiales Básicos", label: "Materiales Básicos" },
+  { value: "Instalaciones Eléctricas", label: "Instalaciones Eléctricas" },
+  { value: "Instalaciones Sanitarias", label: "Instalaciones Sanitarias" },
+  { value: "Acabados", label: "Acabados" },
+  { value: "Otros", label: "Otros" }
+];
+
+// Categorías de tareas
+export const TASK_CATEGORIES = [
+  { value: "Estructuras", label: "Estructuras" },
+  { value: "Instalaciones", label: "Instalaciones" },
+  { value: "Acabados", label: "Acabados" },
+  { value: "Limpieza", label: "Limpieza" },
+  { value: "Otros", label: "Otros" }
+];
+
+// Estados de proyecto
+export const PROJECT_STATUS = [
   { value: "planning", label: "Planificación" },
   { value: "in_progress", label: "En Progreso" },
-  { value: "review", label: "Revisión" },
   { value: "completed", label: "Completado" },
-  { value: "cancelled", label: "Cancelado" },
+  { value: "cancelled", label: "Cancelado" }
 ];
 
-export const MATERIAL_CATEGORIES = [
-  { value: "base_materials", label: "Materiales Base" },
-  { value: "structure", label: "Estructura" },
-  { value: "masonry", label: "Mampostería" },
-  { value: "finishing", label: "Acabados" },
-  { value: "plumbing", label: "Plomería" },
-  { value: "electrical", label: "Eléctrica" },
-  { value: "roofing", label: "Techos" },
-  { value: "painting", label: "Pintura" },
-  { value: "flooring", label: "Pisos" },
-  { value: "doors_windows", label: "Puertas y Ventanas" },
-  { value: "other", label: "Otro" },
+// Alias para PROJECT_STATUS (para compatibilidad)
+export const PROJECT_STATUS_OPTIONS = PROJECT_STATUS;
+
+// Unidades de medida comunes
+export const COMMON_UNITS = [
+  { value: "m", label: "Metros (m)" },
+  { value: "m2", label: "Metros Cuadrados (m²)" },
+  { value: "m3", label: "Metros Cúbicos (m³)" },
+  { value: "kg", label: "Kilogramos (kg)" },
+  { value: "lt", label: "Litros (lt)" },
+  { value: "pza", label: "Piezas" },
+  { value: "bolsa", label: "Bolsa" },
+  { value: "saco", label: "Saco" },
+  { value: "global", label: "Global" },
+  { value: "punto", label: "Punto" }
 ];
 
-export const TASK_CATEGORIES = [
-  { value: "site_preparation", label: "Preparación del Sitio" },
-  { value: "foundation", label: "Cimentación" },
-  { value: "structure", label: "Estructura" },
-  { value: "masonry", label: "Mampostería" },
-  { value: "roofing", label: "Techos" },
-  { value: "plumbing", label: "Plomería" },
-  { value: "electrical", label: "Eléctrica" },
-  { value: "hvac", label: "HVAC" },
-  { value: "finishing", label: "Acabados" },
-  { value: "exterior", label: "Exteriores" },
-  { value: "other", label: "Otro" },
-];
+// Colores principales
+export const THEME_COLORS = {
+  primary: "#92c900",
+  secondary: "#3a3a3a",
+  background: "#f5f5f5",
+  cardBackground: "#ffffff",
+  headerBackground: "#ffffff",
+  sidebarBackground: "#ffffff",
+  textPrimary: "#1a1a1a",
+  textSecondary: "#707070", // Cambiado a #707070 según solicitud
+  danger: "#dc3545",
+  success: "#28a745",
+  warning: "#ffc107",
+  info: "#17a2b8"
+};
 
-export const UNITS = [
-  { value: "m", label: "m (metro)" },
-  { value: "m2", label: "m² (metro cuadrado)" },
-  { value: "m3", label: "m³ (metro cúbico)" },
-  { value: "kg", label: "kg (kilogramo)" },
-  { value: "unit", label: "Unidad" },
-  { value: "set", label: "Juego" },
-  { value: "bag", label: "Bolsa" },
-  { value: "roll", label: "Rollo" },
-  { value: "hour", label: "Hora" },
-  { value: "day", label: "Día" },
-  { value: "liter", label: "Litro" },
-  { value: "ton", label: "Tonelada" },
-];
-
+// Pestañas del dashboard
 export const DASHBOARD_TABS = [
-  { id: "dashboard", label: "Dashboard" },
+  { id: "overview", label: "General" },
+  { id: "projects", label: "Proyectos" },
   { id: "materials", label: "Materiales" },
-  { id: "tasks", label: "Tareas" },
-  { id: "budgets", label: "Presupuestos" },
+  { id: "budgets", label: "Presupuestos" }
 ];
+
+// Exportar COMMON_UNITS también como UNITS para mantener compatibilidad
+export const UNITS = COMMON_UNITS;

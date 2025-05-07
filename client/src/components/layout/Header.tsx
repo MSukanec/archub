@@ -4,7 +4,7 @@ import { ProfileMenu } from "@/components/common/ProfileMenu";
 import { Button } from "@/components/ui/button";
 import { LucideBell, LucideMenu, LucidePlus, LucideSearch, LucideZap, LucideChevronRight, LucideMoon, LucideSun } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
-import { APP_NAME, APP_SUBTITLE } from "@/lib/constants";
+import { APP_NAME } from "@/lib/constants";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink } from "@/components/ui/navigation-menu";
@@ -89,7 +89,7 @@ export function Header({
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden text-gray-500 hover:text-gray-700 h-[45px] p-0"
+            className="md:hidden text-[#707070] hover:text-gray-700 h-[45px] p-0"
             onClick={toggleSidebar}
           >
             <LucideMenu className="h-5 w-5" />

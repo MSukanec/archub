@@ -14,10 +14,11 @@ import {
   LucideListTodo,
   LucidePlus,
   LucideLayoutGrid,
-  LucidePieChart
+  LucidePieChart,
+  LucideRuler
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { APP_NAME } from "@/lib/constants";
+import { APP_NAME, THEME_COLORS } from "@/lib/constants";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 // Enum para los diferentes tipos de sidebar
@@ -111,6 +112,11 @@ export function Sidebar({
       path: "/categories",
       icon: <LucideDatabase className="h-5 w-5 md:h-[20px] md:w-[20px]" />,
     },
+    {
+      name: "Unidades",
+      path: "/units",
+      icon: <LucideRuler className="h-5 w-5 md:h-[20px] md:w-[20px]" />,
+    },
   ];
   
   // Seleccionar los items correctos según el tipo de sidebar
@@ -143,13 +149,13 @@ export function Sidebar({
                     className={`sidebar-item ${location === item.path ? 'active' : ''}`}
                   >
                     <div className="flex items-center">
-                      <div className="flex items-center justify-center w-[45px]">
-                        <div className={location === item.path ? "text-primary" : ""}>
+                      <div className={`flex items-center ${expanded ? 'justify-start' : 'justify-center'} w-[45px]`}>
+                        <div className={location === item.path ? "text-primary" : "text-[#707070]"}>
                           {item.icon}
                         </div>
                       </div>
                       {expanded && (
-                        <span className="text-sm font-medium ml-2">
+                        <span className="text-sm font-medium ml-2 text-[#707070]">
                           {item.name}
                         </span>
                       )}
@@ -174,11 +180,11 @@ export function Sidebar({
                   onClick={() => onTypeChange && onTypeChange(SidebarTypes.SettingsSidebar)}
                 >
                   <div className="flex items-center">
-                    <div className="flex items-center justify-center w-[45px]">
-                      <LucideSettings className="h-5 w-5 md:h-[20px] md:w-[20px]" />
+                    <div className={`flex items-center ${expanded ? 'justify-start' : 'justify-center'} w-[45px]`}>
+                      <LucideSettings className="h-5 w-5 md:h-[20px] md:w-[20px] text-[#707070]" />
                     </div>
                     {expanded && (
-                      <span className="text-sm font-medium ml-2">
+                      <span className="text-sm font-medium ml-2 text-[#707070]">
                         Configuración
                       </span>
                     )}
@@ -211,11 +217,11 @@ export function Sidebar({
                   }}
                 >
                   <div className="flex items-center">
-                    <div className="flex items-center justify-center w-[45px]">
-                      <LucideChevronLeft className="h-5 w-5 md:h-[20px] md:w-[20px]" />
+                    <div className={`flex items-center ${expanded ? 'justify-start' : 'justify-center'} w-[45px]`}>
+                      <LucideChevronLeft className="h-5 w-5 md:h-[20px] md:w-[20px] text-[#707070]" />
                     </div>
                     {expanded && (
-                      <span className="text-sm font-medium ml-2">
+                      <span className="text-sm font-medium ml-2 text-[#707070]">
                         Volver
                       </span>
                     )}
