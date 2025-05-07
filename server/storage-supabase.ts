@@ -54,7 +54,7 @@ const convertArrayFromDb = <T>(items: T[]): T[] => {
 const tableNames = {
   users: 'users',
   projects: 'projects',
-  materials: 'materials',
+  materials: 'materiales', // Usamos la tabla existente materiales hasta que se renombre
   tasks: 'tasks',
   taskMaterials: 'task_materials',
   budgets: 'budgets',
@@ -164,7 +164,20 @@ export class SupabaseStorage implements IStorage {
       .select('*');
       
     if (error) throw new Error(`Error al obtener materiales: ${error.message}`);
-    return convertArrayFromDb(data as Material[]);
+    
+    // Convertir la estructura actual de la tabla "materiales" al formato esperado por la aplicación
+    return data.map(item => {
+      const material: any = {
+        id: item.id,
+        name: item.nombre || item.name || '',
+        category: item.category || 'Materiales básicos',
+        unit: item.unit || 'unidad',
+        unitPrice: item.unit_price || item.unitPrice || 0,
+        createdAt: item.created_at || item.createdAt || null,
+        updatedAt: item.updated_at || item.updatedAt || null
+      };
+      return material as Material;
+    });
   }
 
   async getMaterial(id: number): Promise<Material | undefined> {
@@ -175,11 +188,54 @@ export class SupabaseStorage implements IStorage {
       .single();
       
     if (error || !data) return undefined;
-    return convertFromDb(data as Material);
+    
+    // Convertir la estructura actual de la tabla "materiales" al formato esperado por la aplicación
+    const material: any = {
+      id: data.id,
+      name: data.nombre || data.name || '',
+      category: data.category || 'Materiales básicos',
+      unit: data.unit || 'unidad',
+      unitPrice: data.unit_price || data.unitPrice || 0,
+      createdAt: data.created_at || data.createdAt || null,
+      updatedAt: data.updated_at || data.updatedAt || null
+    };
+    
+    return material as Material;
   }
 
   async createMaterial(material: InsertMaterial): Promise<Material> {
-    const materialData = prepareForDb(material);
+    // Adaptar los campos del material según la estructura actual de la tabla
+    let materialData;
+    
+    // Verificar si la tabla tiene la estructura nueva o vieja
+    try {
+      const { data: columnInfo, error } = await supabase
+        .from('information_schema.columns')
+        .select('column_name')
+        .eq('table_name', tableNames.materials)
+        .eq('table_schema', 'public');
+      
+      const columns = columnInfo ? columnInfo.map(col => col.column_name) : [];
+      
+      if (columns.includes('nombre') && !columns.includes('name')) {
+        // Estructura vieja (tabla "materiales")
+        materialData = {
+          nombre: material.name,
+        };
+      } else {
+        // Estructura nueva o en transición
+        materialData = prepareForDb(material);
+      }
+    } catch (e) {
+      // Si no podemos verificar la estructura, intentamos con la adaptación más segura
+      materialData = {
+        nombre: material.name,
+        name: material.name,
+        category: material.category,
+        unit: material.unit,
+        unit_price: material.unitPrice
+      };
+    }
     
     const { data, error } = await supabase
       .from(tableNames.materials)
@@ -188,11 +244,54 @@ export class SupabaseStorage implements IStorage {
       .single();
       
     if (error) throw new Error(`Error al crear material: ${error.message}`);
-    return convertFromDb(data as Material);
+    
+    // Convertir la estructura actual de la tabla "materiales" al formato esperado por la aplicación
+    const newMaterial: any = {
+      id: data.id,
+      name: data.nombre || data.name || '',
+      category: data.category || 'Materiales básicos',
+      unit: data.unit || 'unidad',
+      unitPrice: data.unit_price || data.unitPrice || 0,
+      createdAt: data.created_at || data.createdAt || null,
+      updatedAt: data.updated_at || data.updatedAt || null
+    };
+    
+    return newMaterial as Material;
   }
 
   async updateMaterial(id: number, materialData: Partial<InsertMaterial>): Promise<Material | undefined> {
-    const dbData = prepareForDb(materialData);
+    // Adaptar los campos del material según la estructura actual de la tabla
+    let dbData;
+    
+    // Verificar si la tabla tiene la estructura nueva o vieja
+    try {
+      const { data: columnInfo, error } = await supabase
+        .from('information_schema.columns')
+        .select('column_name')
+        .eq('table_name', tableNames.materials)
+        .eq('table_schema', 'public');
+      
+      const columns = columnInfo ? columnInfo.map(col => col.column_name) : [];
+      
+      if (columns.includes('nombre') && !columns.includes('name')) {
+        // Estructura vieja (tabla "materiales")
+        dbData = {
+          nombre: materialData.name,
+        };
+      } else {
+        // Estructura nueva o en transición
+        dbData = prepareForDb(materialData);
+      }
+    } catch (e) {
+      // Si no podemos verificar la estructura, intentamos con la adaptación más segura
+      dbData = {
+        nombre: materialData.name,
+        name: materialData.name,
+        category: materialData.category,
+        unit: materialData.unit,
+        unit_price: materialData.unitPrice
+      };
+    }
     
     const { data, error } = await supabase
       .from(tableNames.materials)
@@ -202,7 +301,19 @@ export class SupabaseStorage implements IStorage {
       .single();
       
     if (error || !data) return undefined;
-    return convertFromDb(data as Material);
+    
+    // Convertir la estructura actual de la tabla "materiales" al formato esperado por la aplicación
+    const updatedMaterial: any = {
+      id: data.id,
+      name: data.nombre || data.name || '',
+      category: data.category || 'Materiales básicos',
+      unit: data.unit || 'unidad',
+      unitPrice: data.unit_price || data.unitPrice || 0,
+      createdAt: data.created_at || data.createdAt || null,
+      updatedAt: data.updated_at || data.updatedAt || null
+    };
+    
+    return updatedMaterial as Material;
   }
 
   async deleteMaterial(id: number): Promise<boolean> {

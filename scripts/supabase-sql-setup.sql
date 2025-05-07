@@ -23,16 +23,96 @@ CREATE TABLE IF NOT EXISTS public.projects (
   user_id INTEGER NOT NULL REFERENCES public.users(id) ON DELETE CASCADE
 );
 
--- Tabla de materiales
-CREATE TABLE IF NOT EXISTS public.materials (
-  id SERIAL PRIMARY KEY,
-  name TEXT NOT NULL,
-  category TEXT NOT NULL,
-  unit TEXT NOT NULL,
-  unit_price NUMERIC NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
+-- Verificar si existe la tabla materiales (en español)
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT FROM information_schema.tables 
+    WHERE table_schema = 'public' 
+    AND table_name = 'materiales'
+  ) THEN
+    -- Si ya existe la tabla materiales, la renombramos a materials
+    ALTER TABLE IF EXISTS public.materiales RENAME TO materials;
+    
+    -- Verificamos si la tabla materials tiene las columnas necesarias
+    IF NOT EXISTS (
+      SELECT FROM information_schema.columns 
+      WHERE table_schema = 'public' 
+      AND table_name = 'materials' 
+      AND column_name = 'category'
+    ) THEN
+      -- Si la tabla materials no tiene la columna category, la agregamos
+      ALTER TABLE public.materials ADD COLUMN IF NOT EXISTS category TEXT NOT NULL DEFAULT 'Materiales básicos';
+    END IF;
+    
+    IF NOT EXISTS (
+      SELECT FROM information_schema.columns 
+      WHERE table_schema = 'public' 
+      AND table_name = 'materials' 
+      AND column_name = 'unit'
+    ) THEN
+      -- Si la tabla materials no tiene la columna unit, la agregamos
+      ALTER TABLE public.materials ADD COLUMN IF NOT EXISTS unit TEXT NOT NULL DEFAULT 'unidad';
+    END IF;
+    
+    IF NOT EXISTS (
+      SELECT FROM information_schema.columns 
+      WHERE table_schema = 'public' 
+      AND table_name = 'materials' 
+      AND column_name = 'unit_price'
+    ) THEN
+      -- Si la tabla materials no tiene la columna unit_price, la agregamos
+      ALTER TABLE public.materials ADD COLUMN IF NOT EXISTS unit_price NUMERIC NOT NULL DEFAULT 0;
+    END IF;
+    
+    IF NOT EXISTS (
+      SELECT FROM information_schema.columns 
+      WHERE table_schema = 'public' 
+      AND table_name = 'materials' 
+      AND column_name = 'created_at'
+    ) THEN
+      -- Si la tabla materials no tiene la columna created_at, la agregamos
+      ALTER TABLE public.materials ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP;
+    END IF;
+    
+    IF NOT EXISTS (
+      SELECT FROM information_schema.columns 
+      WHERE table_schema = 'public' 
+      AND table_name = 'materials' 
+      AND column_name = 'updated_at'
+    ) THEN
+      -- Si la tabla materials no tiene la columna updated_at, la agregamos
+      ALTER TABLE public.materials ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP;
+    END IF;
+    
+    -- Si existe la columna nombre pero no la columna name, renombramos nombre a name
+    IF EXISTS (
+      SELECT FROM information_schema.columns 
+      WHERE table_schema = 'public' 
+      AND table_name = 'materials' 
+      AND column_name = 'nombre'
+    ) AND NOT EXISTS (
+      SELECT FROM information_schema.columns 
+      WHERE table_schema = 'public' 
+      AND table_name = 'materials' 
+      AND column_name = 'name'
+    ) THEN
+      ALTER TABLE public.materials RENAME COLUMN nombre TO name;
+    END IF;
+    
+  ELSE
+    -- Si no existe la tabla materiales, creamos la tabla materials desde cero
+    CREATE TABLE IF NOT EXISTS public.materials (
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL,
+      category TEXT NOT NULL,
+      unit TEXT NOT NULL,
+      unit_price NUMERIC NOT NULL,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    );
+  END IF;
+END $$;
 
 -- Tabla de tareas
 CREATE TABLE IF NOT EXISTS public.tasks (

@@ -1,82 +1,117 @@
-import { supabase } from '../server/supabase';
+import { supabase } from "../server/supabase";
 
 async function testSupabase() {
-  console.log('Iniciando prueba de conexión a Supabase...');
+  console.log("Iniciando prueba de conexión a Supabase...");
 
   try {
-    // 1. Probar conexión básica
-    console.log('1. Probando conexión básica a Supabase...');
-    const { data: testData, error: testError } = await supabase.from('materiales').select('*').limit(5);
-    
-    if (testError) {
-      console.error('Error al conectar con Supabase:', testError);
+    // Verificar si podemos listar las tablas
+    console.log("Verificando tablas disponibles...");
+    const { data: tables, error: tablesError } = await supabase.from('information_schema.tables')
+      .select('table_name')
+      .eq('table_schema', 'public');
+      
+    if (tablesError) {
+      console.error("Error al obtener tablas:", tablesError);
     } else {
-      console.log('Conexión exitosa. Datos de la tabla materiales:');
-      console.log(testData);
+      console.log("Tablas disponibles:");
+      tables.forEach(t => console.log(`- ${t.table_name}`));
     }
-
-    // 2. Intentar crear una tabla de prueba usando la API REST
-    console.log('\n2. Intentando crear una tabla de prueba en Supabase...');
-    // Nota: No podemos crear tablas directamente con la API REST de Supabase
-    // pero podemos intentar comprobar si la tabla existe y luego crear registros
     
-    console.log('Verificando si podemos usar la tabla de prueba...');
-    const { data: checkTable, error: checkError } = await supabase
-      .from('test_table')
-      .select('*')
-      .limit(1)
-      .maybeSingle();
-    
-    if (checkError && checkError.code === '42P01') {
-      console.log('La tabla test_table no existe en Supabase');
-      console.log('Para crear tablas en Supabase, debes usar la interfaz de SQL Editor en el dashboard de Supabase');
-      console.log('Por ahora, vamos a trabajar con las tablas existentes');
-    } else if (checkError) {
-      console.error('Error al verificar la tabla:', checkError);
-    } else {
-      console.log('La tabla test_table existe y podemos usarla');
-    }
-
-    // 3. Insertar datos en la tabla materiales con los campos correctos
-    console.log('\n3. Intentando insertar datos en la tabla materiales...');
-    // Basado en la respuesta anterior, parece que la tabla solo tiene id y nombre
-    const { data: insertData, error: insertError } = await supabase
-      .from('materiales')
-      .insert({ 
-        nombre: 'Material de prueba ' + new Date().toISOString().substring(0, 19)
-        // Solo incluimos el campo nombre que sabemos existe
-      })
-      .select();
-
-    if (insertError) {
-      console.error('Error al insertar datos:', insertError);
-      console.log('Esto podría deberse a que el esquema de la tabla no coincide con los campos que intentamos insertar');
-      console.log('Por favor verifica el esquema de la tabla en el dashboard de Supabase');
-    } else {
-      console.log('Datos insertados correctamente en la tabla materiales:');
-      console.log(insertData);
-    }
-
-    // 4. Leer los últimos datos de la tabla materiales
-    console.log('\n4. Leyendo datos de la tabla materiales...');
-    const { data: readData, error: readError } = await supabase
+    // Probar la tabla materiales
+    console.log("\nProbando consulta a la tabla 'materiales'...");
+    const { data: materiales, error: materialesError } = await supabase
       .from('materiales')
       .select('*')
-      .order('id', { ascending: false })
       .limit(5);
-
-    if (readError) {
-      console.error('Error al leer datos:', readError);
+      
+    if (materialesError) {
+      console.error("Error al consultar materiales:", materialesError);
     } else {
-      console.log('Datos leídos correctamente de materiales:');
-      console.log(readData);
+      console.log(`Encontrados ${materiales.length} materiales:`);
+      console.log(materiales);
+      
+      // Probar la inserción de un nuevo material
+      console.log("\nProbando inserción de un nuevo material...");
+      const nuevoMaterial = {
+        nombre: "Material de prueba " + new Date().toISOString()
+      };
+      
+      const { data: materialInsertado, error: insertError } = await supabase
+        .from('materiales')
+        .insert(nuevoMaterial)
+        .select()
+        .single();
+        
+      if (insertError) {
+        console.error("Error al insertar material:", insertError);
+      } else {
+        console.log("Material insertado correctamente:", materialInsertado);
+        
+        // Probar la eliminación del material recién creado
+        console.log("\nProbando eliminación del material...");
+        const { error: deleteError } = await supabase
+          .from('materiales')
+          .delete()
+          .eq('id', materialInsertado.id);
+          
+        if (deleteError) {
+          console.error("Error al eliminar material:", deleteError);
+        } else {
+          console.log("Material eliminado correctamente.");
+        }
+      }
     }
-
-    console.log('\nPruebas con Supabase completadas.');
+    
+    // Crear un usuario de prueba o verificar si ya existe
+    console.log("\nVerificando si existe la tabla 'users'...");
+    const { data: usersTable } = await supabase.from('information_schema.tables')
+      .select('table_name')
+      .eq('table_schema', 'public')
+      .eq('table_name', 'users');
+      
+    if (usersTable && usersTable.length > 0) {
+      console.log("La tabla 'users' existe. Intentando crear un usuario de prueba...");
+      
+      // Primero verificamos si ya existe el usuario
+      const { data: existingUser, error: userQueryError } = await supabase
+        .from('users')
+        .select('id, username')
+        .eq('username', 'testuser')
+        .maybeSingle();
+        
+      if (userQueryError) {
+        console.error("Error al verificar si existe el usuario:", userQueryError);
+      } else if (existingUser) {
+        console.log("El usuario de prueba ya existe:", existingUser);
+      } else {
+        // Crear un usuario de prueba
+        const testUser = {
+          username: "testuser",
+          password: "password123",
+          full_name: "Usuario de Prueba"
+        };
+        
+        const { data: newUser, error: createUserError } = await supabase
+          .from('users')
+          .insert(testUser)
+          .select()
+          .single();
+          
+        if (createUserError) {
+          console.error("Error al crear usuario de prueba:", createUserError);
+        } else {
+          console.log("Usuario de prueba creado correctamente:", newUser);
+        }
+      }
+    } else {
+      console.log("La tabla 'users' no existe aún. Necesitamos crear las estructuras de base de datos.");
+    }
+    
+    console.log("\nPrueba completada.");
   } catch (error) {
-    console.error('Error general durante las pruebas:', error);
+    console.error("Error general durante la prueba:", error);
   }
 }
 
-// Ejecutar las pruebas
-testSupabase();
+// Ejecutar la prueba
+testSupabase().catch(console.error);
