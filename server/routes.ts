@@ -64,18 +64,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post(`${apiPrefix}/projects`, authenticate, async (req, res) => {
     try {
+      console.log("Creando proyecto con datos:", req.body);
+      
       const projectData = insertProjectSchema.parse({
         ...req.body,
         userId: req.user.id
       });
       
+      console.log("Datos parseados correctamente:", projectData);
+      
       const project = await storage.createProject(projectData);
+      console.log("Proyecto creado:", project);
+      
       return res.status(201).json(project);
     } catch (error) {
+      console.error("Error al crear proyecto:", error);
+      
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid data", error: error.errors });
       }
-      return res.status(500).json({ message: "Server error", error });
+      
+      return res.status(500).json({ 
+        message: "Server error", 
+        error: {
+          name: error.name,
+          message: error.message,
+          stack: error.stack
+        } 
+      });
     }
   });
 
@@ -150,14 +166,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post(`${apiPrefix}/materials`, authenticate, async (req, res) => {
     try {
+      console.log("Creando material con datos:", req.body);
+      
       const materialData = insertMaterialSchema.parse(req.body);
+      console.log("Datos parseados correctamente:", materialData);
+      
       const material = await storage.createMaterial(materialData);
+      console.log("Material creado:", material);
+      
       return res.status(201).json(material);
     } catch (error) {
+      console.error("Error al crear material:", error);
+      
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid data", error: error.errors });
       }
-      return res.status(500).json({ message: "Server error", error });
+      
+      return res.status(500).json({ 
+        message: "Server error", 
+        error: {
+          name: error.name,
+          message: error.message,
+          stack: error.stack
+        } 
+      });
     }
   });
 
