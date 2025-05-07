@@ -11,7 +11,7 @@ import {
 import { IStorage } from "./storage";
 import { supabase } from "./supabase";
 
-// Función auxiliar para convertir numbers para Supabase y null para valores opcionales
+// Función auxiliar para convertir nombres de campos y asegurar valores adecuados para Supabase
 const prepareForDb = <T>(item: T): any => {
   if (!item || typeof item !== 'object') return item;
   
@@ -24,14 +24,95 @@ const prepareForDb = <T>(item: T): any => {
     }
   });
   
+  // Convertir camelCase a snake_case para los campos específicos
+  if ('userId' in result) {
+    result.user_id = result.userId;
+    delete result.userId;
+  }
+  
+  if ('projectId' in result) {
+    result.project_id = result.projectId;
+    delete result.projectId;
+  }
+  
+  if ('taskId' in result) {
+    result.task_id = result.taskId;
+    delete result.taskId;
+  }
+  
+  if ('materialId' in result) {
+    result.material_id = result.materialId;
+    delete result.materialId;
+  }
+  
+  if ('budgetId' in result) {
+    result.budget_id = result.budgetId;
+    delete result.budgetId;
+  }
+  
+  if ('unitPrice' in result) {
+    result.unit_price = result.unitPrice;
+    delete result.unitPrice;
+  }
+  
+  // Asegurar que valores numéricos son realmente números
+  if ('unit_price' in result && result.unit_price !== null) {
+    result.unit_price = Number(result.unit_price);
+  }
+  
+  if ('quantity' in result && result.quantity !== null) {
+    result.quantity = Number(result.quantity);
+  }
+  
   return result;
 };
 
-// Función auxiliar para convertir datos de Supabase al formato esperado
+// Función auxiliar para convertir datos de Supabase al formato esperado por la aplicación
 const convertFromDb = <T>(item: T): T => {
   if (!item || typeof item !== 'object') return item;
   
   const result = {...item as any};
+  
+  // Convertir snake_case a camelCase
+  if ('user_id' in result) {
+    result.userId = result.user_id;
+    delete result.user_id;
+  }
+  
+  if ('project_id' in result) {
+    result.projectId = result.project_id;
+    delete result.project_id;
+  }
+  
+  if ('task_id' in result) {
+    result.taskId = result.task_id;
+    delete result.task_id;
+  }
+  
+  if ('material_id' in result) {
+    result.materialId = result.material_id;
+    delete result.material_id;
+  }
+  
+  if ('budget_id' in result) {
+    result.budgetId = result.budget_id;
+    delete result.budget_id;
+  }
+  
+  if ('unit_price' in result) {
+    result.unitPrice = result.unit_price;
+    delete result.unit_price;
+  }
+  
+  if ('created_at' in result) {
+    result.createdAt = result.created_at;
+    delete result.created_at;
+  }
+  
+  if ('updated_at' in result) {
+    result.updatedAt = result.updated_at;
+    delete result.updated_at;
+  }
   
   // Convertir numeric (string) a number para JavaScript si es necesario
   if ('unitPrice' in result && result.unitPrice !== null && typeof result.unitPrice === 'string') {
