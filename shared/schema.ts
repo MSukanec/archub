@@ -1,6 +1,7 @@
 import { pgTable, text, serial, numeric, timestamp, integer, foreignKey } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { relations } from "drizzle-orm";
 
 // Users table
 export const users = pgTable("users", {
@@ -70,6 +71,17 @@ export const budgetTasks = pgTable("budget_tasks", {
   budgetId: integer("budget_id").notNull(),
   taskId: integer("task_id").notNull(),
   quantity: numeric("quantity").notNull(),
+});
+
+// Categories table (con orden jerárquico)
+export const categories = pgTable("categories", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  position: integer("position").notNull().default(0),
+  parentId: integer("parent_id"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  type: text("type").notNull().default("material"), // "material" o "task"
 });
 
 // Insert schemas using drizzle-zod

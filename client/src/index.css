@@ -81,7 +81,7 @@
 }
 
 .sidebar-item {
-  @apply px-3 py-2 rounded-md flex items-center transition-colors my-1;
+  @apply px-3 py-2 rounded-md flex items-center justify-center transition-colors my-1;
 }
 
 .sidebar-item:hover {

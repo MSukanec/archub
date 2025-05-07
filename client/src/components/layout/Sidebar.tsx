@@ -143,7 +143,7 @@ export function Sidebar({
                     className={`sidebar-item ${location === item.path ? 'active' : ''}`}
                   >
                     <div className="flex items-center">
-                      <div className={`flex items-center justify-center w-[45px] ${expanded ? '' : 'mx-auto'}`}>
+                      <div className="flex items-center justify-center w-[45px]">
                         <div className={location === item.path ? "text-primary" : ""}>
                           {item.icon}
                         </div>
@@ -174,7 +174,7 @@ export function Sidebar({
                   onClick={() => onTypeChange && onTypeChange(SidebarTypes.SettingsSidebar)}
                 >
                   <div className="flex items-center">
-                    <div className={`flex items-center justify-center w-[45px] ${expanded ? '' : 'mx-auto'}`}>
+                    <div className="flex items-center justify-center w-[45px]">
                       <LucideSettings className="h-5 w-5 md:h-[20px] md:w-[20px]" />
                     </div>
                     {expanded && (
@@ -211,7 +211,7 @@ export function Sidebar({
                   }}
                 >
                   <div className="flex items-center">
-                    <div className={`flex items-center justify-center w-[45px] ${expanded ? '' : 'mx-auto'}`}>
+                    <div className="flex items-center justify-center w-[45px]">
                       <LucideChevronLeft className="h-5 w-5 md:h-[20px] md:w-[20px]" />
                     </div>
                     {expanded && (
