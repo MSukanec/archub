@@ -29,7 +29,7 @@ export function ProtectedRoute({
         return user ? (
           <Component {...params} />
         ) : (
-          <Redirect to="/auth/login" />
+          <Redirect to="/" />
         );
       }}
     </Route>
