@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { ProfileMenu } from "@/components/common/ProfileMenu";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,15 @@ import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
+import { 
+  Command,
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList
+} from "@/components/ui/command";
 
 interface User {
   id: number;
@@ -33,7 +42,7 @@ export function Header({
   selectedProject = null 
 }: HeaderProps) {
   const [location, setLocation] = useLocation();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
   
   // Fetch real project data instead of using mock data
   const { data: projects = [] } = useQuery<any[]>({
@@ -58,6 +67,15 @@ export function Header({
   const { data: user } = useQuery<User>({
     queryKey: ['/api/auth/me'],
   });
+  
+  // Función para manejar la selección de un proyecto en la búsqueda
+  const handleSelectProject = (projectId: string) => {
+    if (onProjectChange) {
+      onProjectChange(projectId);
+      setLocation(`/projects/${projectId}`);
+    }
+    setSearchOpen(false);
+  };
 
   return (
     <header className="z-30 bg-white border-b sticky top-0 w-full h-16">
@@ -131,15 +149,32 @@ export function Header({
             </NavigationMenuList>
           </NavigationMenu>
 
-          <div className="rounded-md border border-gray-200 px-3 py-1 flex items-center max-w-md w-64 h-9 hidden md:flex ml-auto">
+          <div className="rounded-md border border-gray-200 px-3 py-1 flex items-center max-w-md w-64 h-9 hidden md:flex ml-auto cursor-pointer" onClick={() => setSearchOpen(true)}>
             <LucideSearch className="h-4 w-4 text-gray-400 mr-2" />
-            <Input 
-              className="border-0 focus-visible:ring-0 focus-visible:ring-transparent p-0 text-sm h-6 placeholder:text-gray-400"
-              placeholder="Buscar..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+            <span className="text-sm text-gray-400">Buscar proyectos...</span>
           </div>
+          
+          <CommandDialog open={searchOpen} onOpenChange={setSearchOpen}>
+            <CommandInput placeholder="Buscar proyectos..." />
+            <CommandList>
+              <CommandEmpty>No se encontraron proyectos.</CommandEmpty>
+              <CommandGroup heading="Proyectos">
+                {projects.map((project) => (
+                  <CommandItem
+                    key={project.id}
+                    onSelect={() => handleSelectProject(String(project.id))}
+                    className="flex items-center"
+                  >
+                    <div className="w-2 h-2 rounded-full bg-primary mr-2"></div>
+                    <span>{project.name}</span>
+                    <span className="ml-2 text-xs text-gray-500">
+                      {project.status ? `(${project.status})` : ""}
+                    </span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </CommandDialog>
         </div>
 
         {/* Right section with actions and user profile */}

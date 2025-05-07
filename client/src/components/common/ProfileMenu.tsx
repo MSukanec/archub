@@ -35,7 +35,8 @@ export function ProfileMenu({ user }: ProfileMenuProps) {
   const handleLogout = async () => {
     try {
       await apiRequest('POST', '/api/auth/logout', {});
-      setLocation('/login');
+      // Redirigir a la página principal (landing page)
+      setLocation('/');
       toast({
         title: "Sesión cerrada",
         description: "Has cerrado sesión correctamente",
