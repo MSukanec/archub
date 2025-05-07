@@ -117,8 +117,9 @@ export default function UnitsPage() {
   // Mutación para eliminar una unidad
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      const response = await apiRequest("DELETE", `/api/units/${id}`);
-      return response.json();
+      // No intentamos analizar la respuesta como JSON ya que será 204 No Content
+      await apiRequest("DELETE", `/api/units/${id}`);
+      return true;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/units'] });
@@ -196,7 +197,7 @@ export default function UnitsPage() {
 
   return (
     <MainLayout>
-      <div className="container mx-auto py-6">
+      <div className="container mx-auto py-6 h-full flex flex-col">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Unidades de Medida</h1>
           <Button 
@@ -208,11 +209,11 @@ export default function UnitsPage() {
           </Button>
         </div>
 
-        <Card>
+        <Card className="flex-1 overflow-auto">
           <CardHeader>
             <CardTitle>Lista de Unidades</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="overflow-auto">
             {isLoading ? (
               <div className="flex justify-center items-center py-8">
                 <LucideLoader2 className="h-8 w-8 animate-spin text-primary" />

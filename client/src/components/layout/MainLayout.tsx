@@ -139,8 +139,8 @@ export function MainLayout({
         )}
 
         {/* Main Content */}
-        <div className="flex-1 transition-all duration-200">
-          <main className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-auto transition-all duration-200">
+          <main className="flex-1 h-full overflow-auto p-6">
             {children}
           </main>
         </div>
