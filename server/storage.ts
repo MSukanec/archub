@@ -62,6 +62,13 @@ export interface IStorage {
   updateCategory(id: number, category: Partial<InsertCategory>): Promise<Category | undefined>;
   updateCategoryPosition(id: number, newPosition: number): Promise<boolean>;
   deleteCategory(id: number): Promise<boolean>;
+  
+  // Unit operations
+  getUnits(): Promise<Unit[]>;
+  getUnit(id: number): Promise<Unit | undefined>;
+  createUnit(unit: InsertUnit): Promise<Unit>;
+  updateUnit(id: number, unit: Partial<InsertUnit>): Promise<Unit | undefined>;
+  deleteUnit(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -73,6 +80,7 @@ export class MemStorage implements IStorage {
   private budgetMap: Map<number, Budget>;
   private budgetTaskMap: Map<number, BudgetTask>;
   private categoryMap: Map<number, Category>;
+  private unitMap: Map<number, Unit>;
   
   private userId: number;
   private projectId: number;
@@ -82,6 +90,7 @@ export class MemStorage implements IStorage {
   private budgetId: number;
   private budgetTaskId: number;
   private categoryId: number;
+  private unitId: number;
 
   constructor() {
     this.userMap = new Map();
@@ -92,6 +101,7 @@ export class MemStorage implements IStorage {
     this.budgetMap = new Map();
     this.budgetTaskMap = new Map();
     this.categoryMap = new Map();
+    this.unitMap = new Map();
     
     this.userId = 1;
     this.projectId = 1;
@@ -101,6 +111,7 @@ export class MemStorage implements IStorage {
     this.budgetId = 1;
     this.budgetTaskId = 1;
     this.categoryId = 1;
+    this.unitId = 1;
     
     // Add sample users
     const adminUser: User = {
@@ -473,6 +484,38 @@ export class MemStorage implements IStorage {
     
     // Ahora eliminamos la categoría
     return this.categoryMap.delete(id);
+  }
+
+  // Unit operations
+  async getUnits(): Promise<Unit[]> {
+    return Array.from(this.unitMap.values());
+  }
+
+  async getUnit(id: number): Promise<Unit | undefined> {
+    return this.unitMap.get(id);
+  }
+
+  async createUnit(insertUnit: InsertUnit): Promise<Unit> {
+    const id = this.unitId++;
+    const unit: Unit = { ...insertUnit, id };
+    this.unitMap.set(id, unit);
+    return unit;
+  }
+
+  async updateUnit(id: number, unitData: Partial<InsertUnit>): Promise<Unit | undefined> {
+    const unit = this.unitMap.get(id);
+    if (!unit) return undefined;
+    
+    const updatedUnit: Unit = { 
+      ...unit, 
+      ...unitData 
+    };
+    this.unitMap.set(id, updatedUnit);
+    return updatedUnit;
+  }
+
+  async deleteUnit(id: number): Promise<boolean> {
+    return this.unitMap.delete(id);
   }
 }
 

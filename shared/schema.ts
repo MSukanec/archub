@@ -84,6 +84,13 @@ export const categories = pgTable("categories", {
   type: text("type").notNull().default("material"), // "material" o "task"
 });
 
+// Units table
+export const units = pgTable("units", {
+  id: serial("id").primaryKey(),
+  value: text("value").notNull().unique(),
+  label: text("label").notNull(),
+});
+
 // Relaciones para categorías (jerarquía)
 export const categoriesRelations = relations(categories, ({ one, many }) => ({
   parent: one(categories, {
@@ -171,6 +178,11 @@ export const insertCategorySchema = createInsertSchema(categories).pick({
   type: z.enum(["material", "task"]).default("material"),
 });
 
+export const insertUnitSchema = createInsertSchema(units).pick({
+  value: true,
+  label: true,
+});
+
 // Type definitions
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -195,3 +207,6 @@ export type InsertBudgetTask = z.infer<typeof insertBudgetTaskSchema>;
 
 export type Category = typeof categories.$inferSelect & { children?: Category[] };
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
+
+export type Unit = typeof units.$inferSelect;
+export type InsertUnit = z.infer<typeof insertUnitSchema>;
