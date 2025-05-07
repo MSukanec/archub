@@ -140,18 +140,20 @@ export function Sidebar({
               <TooltipTrigger asChild>
                 <Link href={item.path}>
                   <div 
-                    className={`sidebar-item flex items-center ${location === item.path ? 'active' : ''}`}
+                    className={`sidebar-item ${location === item.path ? 'active' : ''}`}
                   >
-                    <div className={`flex items-center justify-center min-w-[2rem] ${expanded ? 'mr-3' : ''}`}>
-                      <div className={location === item.path ? "text-primary" : ""}>
-                        {item.icon}
+                    <div className="flex items-center">
+                      <div className={`flex items-center justify-center w-[45px] ${expanded ? '' : 'mx-auto'}`}>
+                        <div className={location === item.path ? "text-primary" : ""}>
+                          {item.icon}
+                        </div>
                       </div>
+                      {expanded && (
+                        <span className="text-sm font-medium ml-2">
+                          {item.name}
+                        </span>
+                      )}
                     </div>
-                    {expanded && (
-                      <span className="text-sm font-medium">
-                        {item.name}
-                      </span>
-                    )}
                   </div>
                 </Link>
               </TooltipTrigger>
@@ -171,14 +173,16 @@ export function Sidebar({
                   className="sidebar-item cursor-pointer"
                   onClick={() => onTypeChange && onTypeChange(SidebarTypes.SettingsSidebar)}
                 >
-                  <div className={`flex items-center justify-center min-w-[2rem] ${expanded ? 'mr-3' : ''}`}>
-                    <LucideSettings className="h-5 w-5 md:h-[20px] md:w-[20px]" />
+                  <div className="flex items-center">
+                    <div className={`flex items-center justify-center w-[45px] ${expanded ? '' : 'mx-auto'}`}>
+                      <LucideSettings className="h-5 w-5 md:h-[20px] md:w-[20px]" />
+                    </div>
+                    {expanded && (
+                      <span className="text-sm font-medium ml-2">
+                        Configuración
+                      </span>
+                    )}
                   </div>
-                  {expanded && (
-                    <span className="text-sm font-medium">
-                      Configuración
-                    </span>
-                  )}
                 </div>
               </TooltipTrigger>
               {!expanded && (
@@ -206,14 +210,16 @@ export function Sidebar({
                     }
                   }}
                 >
-                  <div className={`flex items-center justify-center min-w-[2rem] ${expanded ? 'mr-3' : ''}`}>
-                    <LucideChevronLeft className="h-5 w-5 md:h-[20px] md:w-[20px]" />
+                  <div className="flex items-center">
+                    <div className={`flex items-center justify-center w-[45px] ${expanded ? '' : 'mx-auto'}`}>
+                      <LucideChevronLeft className="h-5 w-5 md:h-[20px] md:w-[20px]" />
+                    </div>
+                    {expanded && (
+                      <span className="text-sm font-medium ml-2">
+                        Volver
+                      </span>
+                    )}
                   </div>
-                  {expanded && (
-                    <span className="text-sm font-medium">
-                      Volver
-                    </span>
-                  )}
                 </div>
               </TooltipTrigger>
               {!expanded && (

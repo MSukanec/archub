@@ -102,7 +102,7 @@ export function Header({
           </div>
           
           <div className="hidden md:flex items-center ml-4">
-            <span className="font-medium text-gray-800">
+            <span className="font-medium text-foreground">
               {APP_NAME}
             </span>
           </div>
@@ -113,7 +113,7 @@ export function Header({
               <NavigationMenuItem>
                 <Button 
                   variant="ghost" 
-                  className="px-2 h-8 flex items-center gap-1 font-medium text-gray-700 hover:bg-gray-100"
+                  className="px-2 h-8 flex items-center gap-1 font-medium text-foreground hover:bg-muted"
                   onClick={() => {
                     if (onOrganizationChange && selectedOrganization) {
                       setLocation('/organization');
@@ -135,7 +135,7 @@ export function Header({
                   <NavigationMenuItem>
                     <Button 
                       variant="ghost" 
-                      className="px-2 h-8 flex items-center gap-1 font-medium text-gray-700 hover:bg-gray-100"
+                      className="px-2 h-8 flex items-center gap-1 font-medium text-foreground hover:bg-muted"
                       onClick={() => {
                         if (onProjectChange && selectedProject) {
                           setLocation(`/projects/${selectedProject}`);
@@ -152,9 +152,9 @@ export function Header({
             </NavigationMenuList>
           </NavigationMenu>
 
-          <div className="rounded-md border border-gray-200 px-3 py-1 flex items-center max-w-md w-64 h-7 hidden md:flex mx-4 cursor-pointer" onClick={() => setSearchOpen(true)}>
-            <LucideSearch className="h-4 w-4 text-gray-400 mr-2" />
-            <span className="text-sm text-gray-400">Buscar proyectos...</span>
+          <div className="rounded-md border border-border px-3 py-1 flex items-center max-w-md w-64 h-7 hidden md:flex mx-4 cursor-pointer" onClick={() => setSearchOpen(true)}>
+            <LucideSearch className="h-4 w-4 text-muted-foreground mr-2" />
+            <span className="text-sm text-muted-foreground">Buscar proyectos...</span>
           </div>
           
           <CommandDialog open={searchOpen} onOpenChange={setSearchOpen}>
@@ -185,7 +185,7 @@ export function Header({
           <Button
             variant="ghost"
             size="icon"
-            className="text-gray-500 hover:text-gray-700 h-[35px] w-[35px] p-0"
+            className="text-foreground h-[35px] w-[35px] p-0"
             onClick={() => setLocation('/notifications')}
           >
             <LucideBell className="h-5 w-5" />
@@ -196,7 +196,7 @@ export function Header({
           <Button
             variant="ghost"
             size="icon"
-            className="text-gray-500 hover:text-gray-700 h-[35px] w-[35px] p-0"
+            className="text-foreground h-[35px] w-[35px] p-0"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           >
             {theme === "dark" ? (
