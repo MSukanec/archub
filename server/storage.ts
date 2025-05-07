@@ -843,4 +843,5 @@ class DatabaseStorage implements IStorage {
 import { SupabaseStorage } from './storage-supabase';
 
 // Usar SupabaseStorage para todas las operaciones de almacenamiento
+
 export const storage = new SupabaseStorage();

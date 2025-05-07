@@ -643,6 +643,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Category routes
+  app.get(`${apiPrefix}/categories`, async (req, res) => {
+    try {
+      const type = req.query.type as string | undefined;
+      const categories = await storage.getCategories(type);
+      return res.json(categories);
+    } catch (error) {
+      return res.status(500).json({ message: "Server error", error });
+    }
+  });
+
+  app.get(`${apiPrefix}/categories/:id`, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const category = await storage.getCategory(id);
+      
+      if (!category) {
+        return res.status(404).json({ message: "Category not found" });
+      }
+      
+      return res.json(category);
+    } catch (error) {
+      return res.status(500).json({ message: "Server error", error });
+    }
+  });
+
+  app.post(`${apiPrefix}/categories`, authenticate, async (req, res) => {
+    try {
+      const categoryData = insertCategorySchema.parse(req.body);
+      const category = await storage.createCategory(categoryData);
+      return res.status(201).json(category);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", error: error.errors });
+      }
+      return res.status(500).json({ message: "Server error", error });
+    }
+  });
+
+  app.patch(`${apiPrefix}/categories/:id`, authenticate, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const categoryData = insertCategorySchema.partial().parse(req.body);
+      const updatedCategory = await storage.updateCategory(id, categoryData);
+      
+      if (!updatedCategory) {
+        return res.status(404).json({ message: "Category not found" });
+      }
+      
+      return res.json(updatedCategory);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", error: error.errors });
+      }
+      return res.status(500).json({ message: "Server error", error });
+    }
+  });
+
+  app.patch(`${apiPrefix}/categories/:id/position`, authenticate, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { position } = req.body;
+      
+      if (typeof position !== 'number') {
+        return res.status(400).json({ message: "Position must be a number" });
+      }
+      
+      const success = await storage.updateCategoryPosition(id, position);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Category not found" });
+      }
+      
+      return res.status(204).send();
+    } catch (error) {
+      return res.status(500).json({ message: "Server error", error });
+    }
+  });
+
+  app.delete(`${apiPrefix}/categories/:id`, authenticate, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteCategory(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Category not found" });
+      }
+      
+      return res.status(204).send();
+    } catch (error) {
+      return res.status(500).json({ message: "Server error", error });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
