@@ -19,9 +19,10 @@ async function createTables() {
     console.log('Iniciando creación de tablas en Supabase...');
 
     // Crear tabla usuarios
-    const createUsersTable = await supabase.from('users').select('id').limit(1);
-    if (createUsersTable.error && createUsersTable.error.code === '42P01') {
-      await supabase.query(`
+    const { error: userTableError } = await supabase.from('users').select('id').limit(1);
+    if (userTableError && userTableError.code === '42P01') {
+      const { error } = await supabase.rpc('exec', { 
+        query: `
         CREATE TABLE users (
           id SERIAL PRIMARY KEY,
           username TEXT NOT NULL UNIQUE,
@@ -37,9 +38,10 @@ async function createTables() {
     }
 
     // Crear tabla projects
-    const createProjectsTable = await supabase.from('projects').select('id').limit(1);
-    if (createProjectsTable.error && createProjectsTable.error.code === '42P01') {
-      await supabase.query(`
+    const { error: projectTableError } = await supabase.from('projects').select('id').limit(1);
+    if (projectTableError && projectTableError.code === '42P01') {
+      const { error } = await supabase.rpc('exec', { 
+        query: `
         CREATE TABLE projects (
           id SERIAL PRIMARY KEY,
           name TEXT NOT NULL,
@@ -56,9 +58,10 @@ async function createTables() {
     }
 
     // Crear tabla materials
-    const createMaterialsTable = await supabase.from('materials').select('id').limit(1);
-    if (createMaterialsTable.error && createMaterialsTable.error.code === '42P01') {
-      await supabase.query(`
+    const { error: materialsTableError } = await supabase.from('materials').select('id').limit(1);
+    if (materialsTableError && materialsTableError.code === '42P01') {
+      const { error } = await supabase.rpc('exec', { 
+        query: `
         CREATE TABLE materials (
           id SERIAL PRIMARY KEY,
           name TEXT NOT NULL,
@@ -75,9 +78,10 @@ async function createTables() {
     }
 
     // Crear tabla tasks
-    const createTasksTable = await supabase.from('tasks').select('id').limit(1);
-    if (createTasksTable.error && createTasksTable.error.code === '42P01') {
-      await supabase.query(`
+    const { error: tasksTableError } = await supabase.from('tasks').select('id').limit(1);
+    if (tasksTableError && tasksTableError.code === '42P01') {
+      const { error } = await supabase.rpc('exec', { 
+        query: `
         CREATE TABLE tasks (
           id SERIAL PRIMARY KEY,
           name TEXT NOT NULL,
