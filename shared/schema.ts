@@ -87,8 +87,8 @@ export const categories = pgTable("categories", {
 // Units table
 export const units = pgTable("units", {
   id: serial("id").primaryKey(),
-  value: text("value").notNull().unique(),
-  label: text("label").notNull(),
+  name: text("name").notNull().unique(),
+  description: text("description"),
 });
 
 // Relaciones para categorías (jerarquía)
@@ -179,8 +179,8 @@ export const insertCategorySchema = createInsertSchema(categories).pick({
 });
 
 export const insertUnitSchema = createInsertSchema(units).pick({
-  value: true,
-  label: true,
+  name: true,
+  description: true,
 });
 
 // Type definitions

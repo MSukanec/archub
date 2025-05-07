@@ -34,6 +34,7 @@ import {
 interface Unit {
   id: number;
   name: string;
+  description?: string | null;
 }
 
 export default function UnitsPage() {
@@ -41,8 +42,8 @@ export default function UnitsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState<Unit | null>(null);
   const [formData, setFormData] = useState({
-    value: "",
-    label: ""
+    name: "",
+    description: ""
   });
 
   // Query para obtener la lista de unidades
@@ -67,12 +68,8 @@ export default function UnitsPage() {
 
   // Mutación para crear una nueva unidad
   const createMutation = useMutation({
-    mutationFn: async (formData: {value: string, label: string}) => {
-      // Convertimos el formato del formulario al formato de la API
-      const unitData = {
-        name: formData.label || formData.value
-      };
-      const response = await apiRequest("POST", "/api/units", unitData);
+    mutationFn: async (formData: {name: string, description: string}) => {
+      const response = await apiRequest("POST", "/api/units", formData);
       return response.json();
     },
     onSuccess: () => {
@@ -95,12 +92,8 @@ export default function UnitsPage() {
 
   // Mutación para actualizar una unidad existente
   const updateMutation = useMutation({
-    mutationFn: async ({id, formData}: {id: number, formData: {value: string, label: string}}) => {
-      // Convertimos el formato del formulario al formato de la API
-      const unitData = {
-        name: formData.label || formData.value
-      };
-      const response = await apiRequest("PATCH", `/api/units/${id}`, unitData);
+    mutationFn: async ({id, formData}: {id: number, formData: {name: string, description: string}}) => {
+      const response = await apiRequest("PUT", `/api/units/${id}`, formData);
       return response.json();
     },
     onSuccess: () => {
@@ -146,7 +139,7 @@ export default function UnitsPage() {
 
   // Función para resetear el formulario
   const resetForm = () => {
-    setFormData({ value: "", label: "" });
+    setFormData({ name: "", description: "" });
     setSelectedUnit(null);
   };
 
@@ -159,14 +152,9 @@ export default function UnitsPage() {
   // Función para abrir el diálogo en modo edición
   const handleEditClick = (unit: Unit) => {
     setSelectedUnit(unit);
-    // Extraemos el código básico del nombre completo si es posible
-    // El nombre puede venir en formato "m2 (metro cuadrado)"
-    const nameMatch = unit.name.match(/^([^ ]+)/);
-    const extractedValue = nameMatch ? nameMatch[1] : unit.name;
-    
     setFormData({
-      value: extractedValue,
-      label: unit.name
+      name: unit.name,
+      description: unit.description || ""
     });
     setIsDialogOpen(true);
   };
