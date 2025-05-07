@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { 
   LucideHome, 
@@ -18,7 +19,6 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { APP_NAME } from "@/lib/constants";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useState } from "react";
 
 // Enum para los diferentes tipos de sidebar
 export const SidebarTypes = {
@@ -140,10 +140,12 @@ export function Sidebar({
               <TooltipTrigger asChild>
                 <Link href={item.path}>
                   <div 
-                    className={`sidebar-item ${location === item.path ? 'active' : ''}`}
+                    className={`sidebar-item flex items-center ${location === item.path ? 'active' : ''}`}
                   >
                     <div className={`flex items-center justify-center min-w-[2rem] ${expanded ? 'mr-3' : ''}`}>
-                      {item.icon}
+                      <div className={location === item.path ? "text-primary" : ""}>
+                        {item.icon}
+                      </div>
                     </div>
                     {expanded && (
                       <span className="text-sm font-medium">

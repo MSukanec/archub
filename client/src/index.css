@@ -89,7 +89,7 @@
 }
 
 .sidebar-item.active {
-  @apply text-primary border-l-2 border-primary;
+  @apply bg-transparent;
 }
 
 .create-button {
