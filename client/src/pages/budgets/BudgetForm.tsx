@@ -465,12 +465,21 @@ export default function BudgetForm({ budgetId, projectId, readOnly = false }: Bu
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Columna izquierda: Tareas */}
           <Card className="h-full">
-            <CardHeader className="pb-2">
+            <CardHeader className="pb-2 flex flex-row items-center justify-between">
               <CardTitle>Tareas del Presupuesto</CardTitle>
+              {(readOnly && isEditing) && (
+                <Button 
+                  size="sm"
+                  className="bg-primary hover:bg-primary/90"
+                  onClick={() => setLocation(`/budgets/${budgetId}/edit`)}
+                >
+                  Editar Tareas
+                </Button>
+              )}
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-                {!readOnly && (
+                {(!readOnly || (readOnly && isEditing)) && (
                   <AddTaskForm 
                     tasks={tasks} 
                     onAddTask={handleAddTask}
@@ -483,9 +492,9 @@ export default function BudgetForm({ budgetId, projectId, readOnly = false }: Bu
                 ) : (
                   <BudgetTaskTable
                     budgetTasks={budgetTasks}
-                    onRemoveTask={!readOnly ? handleRemoveTask : undefined}
-                    onEditTask={!readOnly ? (index, task) => handleEditTask(index, task) : undefined}
-                    isEditing={!readOnly}
+                    onRemoveTask={(!readOnly || (readOnly && isEditing)) ? handleRemoveTask : undefined}
+                    onEditTask={(!readOnly || (readOnly && isEditing)) ? (index, task) => handleEditTask(index, task) : undefined}
+                    isEditing={!readOnly || (readOnly && isEditing)}
                   />
                 )}
               </div>

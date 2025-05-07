@@ -242,7 +242,6 @@ export default function UnitsPage() {
                   <TableRow>
                     <TableHead>ID</TableHead>
                     <TableHead>Código</TableHead>
-                    <TableHead>Descripción</TableHead>
                     <TableHead className="text-right">Acciones</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -250,8 +249,7 @@ export default function UnitsPage() {
                   {units.map((unit) => (
                     <TableRow key={unit.id}>
                       <TableCell>{unit.id}</TableCell>
-                      <TableCell className="font-medium">{unit.value}</TableCell>
-                      <TableCell>{unit.label}</TableCell>
+                      <TableCell className="font-medium">{unit.name}</TableCell>
                       <TableCell className="text-right">
                         <Button
                           variant="ghost"
