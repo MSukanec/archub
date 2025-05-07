@@ -50,16 +50,45 @@ const convertArrayFromDb = <T>(items: T[]): T[] => {
   return items.map(item => convertFromDb(item));
 };
 
-// Mapeo de nombres de tablas
+// Mapeo de nombres de tablas (inicializado con valores por defecto)
 const tableNames = {
   users: 'users',
   projects: 'projects',
-  materials: 'materiales', // Usamos la tabla existente materiales hasta que se renombre
+  materials: 'materials', // Se detectará automáticamente si usamos 'materiales' o 'materials'
   tasks: 'tasks',
   taskMaterials: 'task_materials',
   budgets: 'budgets',
   budgetTasks: 'budget_tasks'
 };
+
+// Función asíncrona para inicializar y verificar tablas
+(async function detectTables() {
+  try {
+    // Verificar qué tabla de materiales existe ('materials' o 'materiales')
+    const { data: materialsTable, error: materialsError } = await supabase
+      .from('materials')
+      .select('id')
+      .limit(1);
+      
+    if (materialsError && materialsError.code === '42P01') {
+      console.log('Tabla "materials" no encontrada, verificando "materiales"...');
+      
+      const { data: materialesTable, error: materialesError } = await supabase
+        .from('materiales')
+        .select('id')
+        .limit(1);
+        
+      if (!materialesError) {
+        console.log('Usando tabla "materiales" (español) para compatibilidad');
+        tableNames.materials = 'materiales';
+      }
+    } else {
+      console.log('Usando tabla "materials" (inglés)');
+    }
+  } catch (e) {
+    console.error('Error detectando tablas:', e);
+  }
+})();
 
 export class SupabaseStorage implements IStorage {
   // Usuarios

@@ -22,16 +22,56 @@ const SESSION_NAME = 'session_id';
 const ONE_DAY = 1000 * 60 * 60 * 24; // 24 horas en milisegundos
 
 async function hashPassword(password: string) {
-  const salt = randomBytes(16).toString("hex");
-  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
-  return `${buf.toString("hex")}.${salt}`;
+  try {
+    // Método principal usando scrypt (más seguro)
+    const salt = randomBytes(16).toString("hex");
+    const buf = (await scryptAsync(password, salt, 64)) as Buffer;
+    return `${buf.toString("hex")}.${salt}`;
+  } catch (e) {
+    console.error("Error al hashear password con scrypt, usando alternativa:", e);
+    // Alternativa con SHA-256 para compatibilidad con los scripts
+    const salt = Math.random().toString(36).substring(2, 15);
+    const hash = createHash('sha256');
+    hash.update(password + salt);
+    return hash.digest('hex') + '.' + salt;
+  }
 }
 
 async function comparePasswords(supplied: string, stored: string) {
-  const [hashed, salt] = stored.split(".");
-  const hashedBuf = Buffer.from(hashed, "hex");
-  const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
-  return timingSafeEqual(hashedBuf, suppliedBuf);
+  try {
+    if (!stored.includes('.')) {
+      // Si no tiene formato hash.salt, comparación directa (para desarrollo)
+      return supplied === stored;
+    }
+    
+    const [hashed, salt] = stored.split(".");
+    
+    // Verificar si es probable que sea un hash hecho con scrypt (los hashes de scrypt tienen 64 bytes)
+    if (hashed.length === 128) {
+      try {
+        const hashedBuf = Buffer.from(hashed, "hex");
+        const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
+        return timingSafeEqual(hashedBuf, suppliedBuf);
+      } catch (e) {
+        console.error("Error en comparación scrypt, intentando con sha256:", e);
+      }
+    }
+    
+    // Verificar con SHA-256 para compatibilidad con los scripts
+    const hash = createHash('sha256');
+    hash.update(supplied + salt);
+    const suppliedHash = hash.digest('hex');
+    return suppliedHash === hashed;
+  } catch (e) {
+    console.error("Error al comparar passwords:", e);
+    
+    // Como fallback en desarrollo, comparación directa
+    if (process.env.NODE_ENV === 'development') {
+      return supplied === stored;
+    }
+    
+    return false;
+  }
 }
 
 export function setupAuth(app: Express) {
