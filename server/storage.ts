@@ -6,7 +6,8 @@ import {
   taskMaterials, type TaskMaterial, type InsertTaskMaterial,
   budgets, type Budget, type InsertBudget,
   budgetTasks, type BudgetTask, type InsertBudgetTask,
-  categories, type Category, type InsertCategory
+  categories, type Category, type InsertCategory,
+  units, type Unit, type InsertUnit
 } from "@shared/schema";
 
 export interface IStorage {

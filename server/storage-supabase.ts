@@ -6,7 +6,8 @@ import {
   taskMaterials, type TaskMaterial, type InsertTaskMaterial,
   budgets, type Budget, type InsertBudget,
   budgetTasks, type BudgetTask, type InsertBudgetTask,
-  categories, type Category, type InsertCategory
+  categories, type Category, type InsertCategory,
+  units, type Unit, type InsertUnit
 } from "@shared/schema";
 
 import { IStorage } from "./storage";
@@ -141,7 +142,8 @@ const tableNames = {
   taskMaterials: 'task_materials',
   budgets: 'budgets',
   budgetTasks: 'budget_tasks',
-  categories: 'categories'
+  categories: 'categories',
+  units: 'units'
 };
 
 // Función asíncrona para inicializar y verificar tablas
@@ -808,6 +810,63 @@ export class SupabaseStorage implements IStorage {
     // Ahora eliminamos la categoría
     const { error } = await supabase
       .from(tableNames.categories)
+      .delete()
+      .eq('id', id);
+      
+    return !error;
+  }
+
+  // Unit operations
+  async getUnits(): Promise<Unit[]> {
+    const { data, error } = await supabase
+      .from(tableNames.units)
+      .select('*');
+      
+    if (error) throw new Error(`Error al obtener unidades: ${error.message}`);
+    return convertArrayFromDb(data as Unit[]);
+  }
+
+  async getUnit(id: number): Promise<Unit | undefined> {
+    const { data, error } = await supabase
+      .from(tableNames.units)
+      .select('*')
+      .eq('id', id)
+      .single();
+      
+    if (error || !data) return undefined;
+    return convertFromDb(data as Unit);
+  }
+
+  async createUnit(unit: InsertUnit): Promise<Unit> {
+    const unitData = prepareForDb(unit);
+    
+    const { data, error } = await supabase
+      .from(tableNames.units)
+      .insert(unitData)
+      .select()
+      .single();
+      
+    if (error) throw new Error(`Error al crear unidad: ${error.message}`);
+    return convertFromDb(data as Unit);
+  }
+
+  async updateUnit(id: number, unitData: Partial<InsertUnit>): Promise<Unit | undefined> {
+    const dbData = prepareForDb(unitData);
+    
+    const { data, error } = await supabase
+      .from(tableNames.units)
+      .update(dbData)
+      .eq('id', id)
+      .select()
+      .single();
+      
+    if (error || !data) return undefined;
+    return convertFromDb(data as Unit);
+  }
+
+  async deleteUnit(id: number): Promise<boolean> {
+    const { error } = await supabase
+      .from(tableNames.units)
       .delete()
       .eq('id', id);
       
