@@ -11,7 +11,8 @@ import {
   insertBudgetSchema,
   insertBudgetTaskSchema,
   insertCategorySchema,
-  insertUnitSchema
+  insertUnitSchema,
+  insertTransactionSchema
 } from "@shared/schema";
 import { z } from "zod";
 

@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { ArrowLeft, ArrowDownUp, DollarSign, Plus, ArrowUpRight, ArrowDownLeft } from "lucide-react";
+import { queryClient, apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 import { MainLayout } from "@/components/layout/MainLayout";
 import { SidebarTypes } from "@/components/layout/Sidebar";
@@ -36,41 +38,18 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Simulación de datos de transacciones
-const demoTransactions = [
-  { 
-    id: 1, 
-    date: new Date(2025, 4, 1), 
-    type: "ingreso", 
-    category: "anticipo", 
-    description: "Anticipo del cliente", 
-    amount: 50000 
-  },
-  { 
-    id: 2, 
-    date: new Date(2025, 4, 3), 
-    type: "egreso", 
-    category: "materiales", 
-    description: "Compra de materiales", 
-    amount: 15000 
-  },
-  { 
-    id: 3, 
-    date: new Date(2025, 4, 5), 
-    type: "egreso", 
-    category: "mano_de_obra", 
-    description: "Pago a trabajadores", 
-    amount: 12000 
-  },
-  { 
-    id: 4, 
-    date: new Date(2025, 4, 10), 
-    type: "ingreso", 
-    category: "pago_parcial", 
-    description: "Pago parcial del cliente", 
-    amount: 30000 
-  }
-];
+// Interfaz para los datos de transacciones que vienen de la API
+interface Transaction {
+  id: number;
+  projectId: number;
+  date: string; // Viene como string ISO desde la API
+  type: string; // "ingreso" o "egreso"
+  category: string;
+  description: string;
+  amount: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
 
 interface TransactionsPageProps {
   projectId: string;
@@ -80,7 +59,15 @@ export default function TransactionsPage({ projectId }: TransactionsPageProps) {
   const [, setLocation] = useLocation();
   const [isAddTransactionOpen, setIsAddTransactionOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
-  const [transactions, setTransactions] = useState([...demoTransactions]);
+  const [formData, setFormData] = useState({
+    type: "ingreso",
+    date: new Date().toISOString().slice(0, 10),
+    category: "anticipo",
+    description: "",
+    amount: ""
+  });
+
+  const { toast } = useToast();
   
   // Fetch project details
   const { data: project } = useQuery({
@@ -88,8 +75,101 @@ export default function TransactionsPage({ projectId }: TransactionsPageProps) {
     enabled: !!projectId,
   });
 
-  const addTransaction = (transaction: typeof demoTransactions[0]) => {
-    setTransactions(prev => [...prev, transaction]);
+  // Fetch transactions
+  const { 
+    data: transactions = [], 
+    isLoading: isLoadingTransactions,
+    refetch: refetchTransactions
+  } = useQuery<Transaction[]>({
+    queryKey: [`/api/projects/${projectId}/transactions`],
+    enabled: !!projectId,
+  });
+
+  // Mutation para agregar una nueva transacción
+  const addTransactionMutation = useMutation({
+    mutationFn: async (transactionData: Omit<Transaction, 'id' | 'projectId' | 'createdAt' | 'updatedAt'>) => {
+      const res = await apiRequest(
+        "POST",
+        `/api/projects/${projectId}/transactions`,
+        transactionData
+      );
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Error al crear la transacción");
+      }
+      return await res.json();
+    },
+    onSuccess: () => {
+      // Cerrar el diálogo y actualizar la lista de transacciones
+      setIsAddTransactionOpen(false);
+      // Resetear el formulario
+      setFormData({
+        type: "ingreso",
+        date: new Date().toISOString().slice(0, 10),
+        category: "anticipo",
+        description: "",
+        amount: ""
+      });
+      // Refrescar la lista de transacciones
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/transactions`] });
+      toast({
+        title: "Transacción creada",
+        description: "La transacción ha sido registrada correctamente",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Handler para el envío del formulario
+  const handleSubmitTransaction = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validaciones básicas
+    if (!formData.description) {
+      toast({
+        title: "Error",
+        description: "La descripción es obligatoria",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!formData.amount || isNaN(parseFloat(formData.amount)) || parseFloat(formData.amount) <= 0) {
+      toast({
+        title: "Error",
+        description: "El monto debe ser un número mayor a cero",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Preparar los datos para enviar
+    const transactionData = {
+      date: new Date(formData.date).toISOString(),
+      type: formData.type,
+      category: formData.category,
+      description: formData.description,
+      amount: parseFloat(formData.amount)
+    };
+    
+    // Enviar la mutación
+    addTransactionMutation.mutate(transactionData);
+  };
+
+  // Handler para cambios en los campos del formulario
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { id, value } = e.target;
+    const fieldName = id.replace('transaction-', '');
+    setFormData(prev => ({
+      ...prev,
+      [fieldName]: value
+    }));
   };
 
   const formatDate = (date: Date) => {
