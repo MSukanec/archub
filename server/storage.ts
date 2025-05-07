@@ -5,7 +5,8 @@ import {
   tasks, type Task, type InsertTask,
   taskMaterials, type TaskMaterial, type InsertTaskMaterial,
   budgets, type Budget, type InsertBudget,
-  budgetTasks, type BudgetTask, type InsertBudgetTask
+  budgetTasks, type BudgetTask, type InsertBudgetTask,
+  categories, type Category, type InsertCategory
 } from "@shared/schema";
 
 export interface IStorage {
@@ -53,6 +54,14 @@ export interface IStorage {
   addBudgetTask(budgetTask: InsertBudgetTask): Promise<BudgetTask>;
   updateBudgetTask(id: number, quantity: number): Promise<BudgetTask | undefined>;
   removeBudgetTask(id: number): Promise<boolean>;
+  
+  // Category operations
+  getCategories(type?: string): Promise<Category[]>;
+  getCategory(id: number): Promise<Category | undefined>;
+  createCategory(category: InsertCategory): Promise<Category>;
+  updateCategory(id: number, category: Partial<InsertCategory>): Promise<Category | undefined>;
+  updateCategoryPosition(id: number, newPosition: number): Promise<boolean>;
+  deleteCategory(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {

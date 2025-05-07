@@ -84,6 +84,18 @@ export const categories = pgTable("categories", {
   type: text("type").notNull().default("material"), // "material" o "task"
 });
 
+// Relaciones para categorías (jerarquía)
+export const categoriesRelations = relations(categories, ({ one, many }) => ({
+  parent: one(categories, {
+    fields: [categories.parentId],
+    references: [categories.id],
+    relationName: "category_parent",
+  }),
+  children: many(categories, {
+    relationName: "category_parent",
+  }),
+}));
+
 // Insert schemas using drizzle-zod
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
@@ -148,6 +160,17 @@ export const insertBudgetTaskSchema = createInsertSchema(budgetTasks).pick({
   quantity: z.coerce.number().min(0, "La cantidad debe ser mayor a 0"),
 });
 
+export const insertCategorySchema = createInsertSchema(categories).pick({
+  name: true,
+  position: true,
+  parentId: true,
+  type: true,
+}).extend({
+  position: z.coerce.number().default(0),
+  parentId: z.coerce.number().nullable().optional(),
+  type: z.enum(["material", "task"]).default("material"),
+});
+
 // Type definitions
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -169,3 +192,6 @@ export type InsertBudget = z.infer<typeof insertBudgetSchema>;
 
 export type BudgetTask = typeof budgetTasks.$inferSelect & { task?: Task };
 export type InsertBudgetTask = z.infer<typeof insertBudgetTaskSchema>;
+
+export type Category = typeof categories.$inferSelect & { children?: Category[] };
+export type InsertCategory = z.infer<typeof insertCategorySchema>;

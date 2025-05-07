@@ -5,7 +5,8 @@ import {
   tasks, type Task, type InsertTask,
   taskMaterials, type TaskMaterial, type InsertTaskMaterial,
   budgets, type Budget, type InsertBudget,
-  budgetTasks, type BudgetTask, type InsertBudgetTask
+  budgetTasks, type BudgetTask, type InsertBudgetTask,
+  categories, type Category, type InsertCategory
 } from "@shared/schema";
 
 import { IStorage } from "./storage";
@@ -139,7 +140,8 @@ const tableNames = {
   tasks: 'tasks',
   taskMaterials: 'task_materials',
   budgets: 'budgets',
-  budgetTasks: 'budget_tasks'
+  budgetTasks: 'budget_tasks',
+  categories: 'categories'
 };
 
 // Función asíncrona para inicializar y verificar tablas
