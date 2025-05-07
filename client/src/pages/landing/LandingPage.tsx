@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { 
   Building2, 
@@ -31,10 +31,11 @@ export default function LandingPage() {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
   // Si el usuario ya inició sesión, redirigir al dashboard
-  if (user) {
-    navigate("/");
-    return null;
-  }
+  useEffect(() => {
+    if (user) {
+      navigate("/dashboard");
+    }
+  }, [user, navigate]);
 
   const features = [
     {
