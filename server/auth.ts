@@ -39,35 +39,48 @@ async function hashPassword(password: string) {
 
 async function comparePasswords(supplied: string, stored: string) {
   try {
+    console.log(`Comparando contraseñas. Formato almacenado: ${stored.substring(0, 10)}...`);
+    
+    // Si password no tiene formato de hash, comparación directa
     if (!stored.includes('.')) {
-      // Si no tiene formato hash.salt, comparación directa (para desarrollo)
+      console.log('El password almacenado no tiene formato hash.salt, usando comparación directa');
       return supplied === stored;
     }
     
     const [hashed, salt] = stored.split(".");
+    console.log(`Hash: ${hashed.substring(0, 10)}..., Salt: ${salt.substring(0, 5)}..., Longitud hash: ${hashed.length}`);
     
-    // Verificar si es probable que sea un hash hecho con scrypt (los hashes de scrypt tienen 64 bytes)
+    // Verificar si es probable que sea un hash hecho con scrypt (los hashes de scrypt tienen 64 bytes = 128 caracteres en hex)
     if (hashed.length === 128) {
+      console.log('Detectado posible hash scrypt (128 caracteres), intentando verificación scrypt');
       try {
         const hashedBuf = Buffer.from(hashed, "hex");
         const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
-        return timingSafeEqual(hashedBuf, suppliedBuf);
+        const result = timingSafeEqual(hashedBuf, suppliedBuf);
+        console.log(`Resultado verificación scrypt: ${result ? 'Exitoso' : 'Fallido'}`);
+        return result;
       } catch (e) {
         console.error("Error en comparación scrypt, intentando con sha256:", e);
       }
     }
     
     // Verificar con SHA-256 para compatibilidad con los scripts
+    console.log('Intentando verificación con SHA-256');
     const hash = createHash('sha256');
     hash.update(supplied + salt);
     const suppliedHash = hash.digest('hex');
-    return suppliedHash === hashed;
+    const result = suppliedHash === hashed;
+    console.log(`SHA-256 calculado: ${suppliedHash.substring(0, 10)}..., Resultado: ${result ? 'Exitoso' : 'Fallido'}`);
+    return result;
   } catch (e) {
     console.error("Error al comparar passwords:", e);
     
     // Como fallback en desarrollo, comparación directa
     if (process.env.NODE_ENV === 'development') {
-      return supplied === stored;
+      console.log('Error en verificación, intentando comparación directa como fallback');
+      const result = supplied === stored;
+      console.log(`Resultado comparación directa: ${result ? 'Exitoso' : 'Fallido'}`);
+      return result;
     }
     
     return false;
@@ -104,22 +117,45 @@ export function setupAuth(app: Express) {
   passport.use(
     new LocalStrategy(async (username, password, done) => {
       try {
+        console.log(`Intentando autenticar usuario: ${username}`);
         const user = await storage.getUserByUsername(username);
         if (!user) {
+          console.log(`Usuario no encontrado: ${username}`);
           return done(null, false, { message: "Usuario no encontrado" });
         }
         
-        // Si estamos en desarrollo, permitimos la comparación directa para facilitar el testing
-        const isValidPassword = process.env.NODE_ENV === 'development' 
-          ? (user.password === password) 
-          : await comparePasswords(password, user.password);
+        console.log(`Usuario encontrado, verificando contraseña. Hash almacenado: ${user.password.substring(0, 10)}...`);
+        
+        // Para desarrollo, intentamos varios métodos para facilitar login
+        let isValidPassword = false;
+        
+        if (process.env.NODE_ENV === 'development') {
+          // En desarrollo permitimos la comparación directa
+          if (user.password === password) {
+            console.log('Autenticación directa exitosa (modo desarrollo)');
+            isValidPassword = true;
+          }
+          // También probamos con comparación de hash
+          else {
+            isValidPassword = await comparePasswords(password, user.password);
+            if (isValidPassword) {
+              console.log('Autenticación con hash exitosa (modo desarrollo)');
+            }
+          }
+        } else {
+          // En producción, solo utilizamos hash
+          isValidPassword = await comparePasswords(password, user.password);
+        }
           
         if (!isValidPassword) {
+          console.log('Contraseña incorrecta');
           return done(null, false, { message: "Contraseña incorrecta" });
         }
         
+        console.log('Autenticación exitosa');
         return done(null, user);
       } catch (error) {
+        console.error('Error en autenticación:', error);
         return done(error);
       }
     })
