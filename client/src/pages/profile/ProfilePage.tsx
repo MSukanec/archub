@@ -1,11 +1,15 @@
 import { useAuth } from "@/hooks/use-auth";
+import { useLocation } from "wouter";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Settings } from "lucide-react";
 
 export default function ProfilePage() {
   const { user, isLoading } = useAuth();
+  const [, setLocation] = useLocation();
   
   if (isLoading) {
     return (
@@ -40,9 +44,18 @@ export default function ProfilePage() {
     <MainLayout>
       <div className="max-w-4xl mx-auto">
         <Card>
-          <CardHeader>
-            <CardTitle>Perfil de Usuario</CardTitle>
-            <CardDescription>Ver y editar información de tu perfil</CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle>Perfil de Usuario</CardTitle>
+              <CardDescription>Ver y editar información de tu perfil</CardDescription>
+            </div>
+            <Button 
+              onClick={() => setLocation('/profile/config')}
+              className="bg-primary hover:bg-primary/90"
+            >
+              <Settings className="mr-2 h-4 w-4" />
+              Configuración
+            </Button>
           </CardHeader>
           <CardContent>
             <div className="flex items-center space-x-4 mb-6">

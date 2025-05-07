@@ -1,407 +1,402 @@
 import { useState } from "react";
-import { useLocation } from "wouter";
 import { MainLayout } from "@/components/layout/MainLayout";
-import { StatsCard } from "@/components/dashboard/StatsCard";
-import { ProjectCard } from "@/components/dashboard/ProjectCard";
-import { SearchInput } from "@/components/common/SearchInput";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from "recharts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LucideFileText, LucidePackage, LucideCheckSquare } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DASHBOARD_TABS } from "@/lib/constants";
-import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
+import { ArrowUp, ArrowDown, TrendingUp, Layers, Package, FileText, Clock, Calendar, DollarSign } from "lucide-react";
+
+// Datos de demostración
+const mostUsedMaterials = [
+  { name: "Ladrillos", value: 1200, unit: "unidades", color: "#FF6B6B" },
+  { name: "Cemento", value: 850, unit: "kg", color: "#4ECDC4" },
+  { name: "Arena", value: 750, unit: "kg", color: "#FFD166" },
+  { name: "Hierro", value: 500, unit: "kg", color: "#6A0572" },
+  { name: "Cal", value: 300, unit: "kg", color: "#5E60CE" },
+];
+
+const projectsProgress = [
+  { name: "Casa de Ejemplo", progress: 65, budget: 1200000, spent: 780000 },
+  { name: "Edificio Gurruchaga", progress: 25, budget: 3500000, spent: 875000 },
+  { name: "Casa Dos", progress: 10, budget: 950000, spent: 95000 },
+];
+
+const monthlySpendings = [
+  { month: "Ene", amount: 150000 },
+  { month: "Feb", amount: 180000 },
+  { month: "Mar", amount: 250000 },
+  { month: "Abr", amount: 300000 },
+  { month: "May", amount: 280000 },
+  { month: "Jun", amount: 350000 },
+  { month: "Jul", amount: 450000 },
+];
+
+const tasksByCategory = [
+  { name: "Mampostería", completed: 24, pending: 8 },
+  { name: "Estructura", completed: 18, pending: 4 },
+  { name: "Acabados", completed: 12, pending: 16 },
+  { name: "Plomería", completed: 8, pending: 6 },
+  { name: "Eléctrica", completed: 10, pending: 4 },
+];
+
+const upcomingTasks = [
+  { id: 1, name: "Columna de Hormigón Armado", project: "Casa de Ejemplo", dueDate: "2025-05-08", status: "pending" },
+  { id: 2, name: "Instalación de Cañerías", project: "Edificio Gurruchaga", dueDate: "2025-05-10", status: "pending" },
+  { id: 3, name: "Pintura Interior", project: "Casa Dos", dueDate: "2025-05-12", status: "pending" },
+  { id: 4, name: "Colocación de Pisos", project: "Casa de Ejemplo", dueDate: "2025-05-15", status: "pending" },
+];
 
 export default function Dashboard() {
-  const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [searchTerm, setSearchTerm] = useState("");
+  const [timeRange, setTimeRange] = useState("month");
 
-  // Fetch projects data
-  const { data: projects = [] } = useQuery({
-    queryKey: ['/api/projects'],
-  });
-
-  // Fetch materials data
-  const { data: materials = [] } = useQuery({
-    queryKey: ['/api/materials'],
-  });
-
-  // Fetch tasks data
-  const { data: tasks = [] } = useQuery({
-    queryKey: ['/api/tasks'],
-  });
-
-  // Sample stock images for projects
-  const projectImages = [
-    "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=600&h=300",
-    "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&w=600&h=300",
-    "https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=600&h=300",
-    "https://images.unsplash.com/photo-1516156008625-3a9d6067fab5?auto=format&fit=crop&w=600&h=300"
-  ];
-
-  // Filter materials based on search term
-  const filteredMaterials = materials.filter((material) => 
-    material.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    material.category.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Filter tasks based on search term
-  const filteredTasks = tasks.filter((task) => 
-    task.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    task.category.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Formatear números a moneda Argentina
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("es-AR", {
+      style: "currency",
+      currency: "ARS",
+    }).format(amount);
+  };
 
   return (
     <MainLayout>
-      {/* Main Content Tabs */}
-      <Tabs 
-        defaultValue="dashboard" 
-        value={activeTab} 
-        onValueChange={setActiveTab}
-        className="mb-6"
-      >
-        <div className="border-b border-gray-200">
-          <TabsList className="-mb-px flex space-x-8">
-            {DASHBOARD_TABS.map((tab) => (
-              <TabsTrigger 
-                key={tab.id} 
-                value={tab.id}
-                className="border-primary text-primary data-[state=active]:border-primary data-[state=active]:text-primary whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm data-[state=inactive]:border-transparent data-[state=inactive]:text-gray-500 data-[state=inactive]:hover:text-gray-700 data-[state=inactive]:hover:border-gray-300"
-              >
-                {tab.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+      <div className="p-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-bold">Dashboard</h1>
+            <p className="text-gray-500">Una visión general de tus proyectos y materiales</p>
+          </div>
+          <div className="mt-4 md:mt-0">
+            <Select defaultValue={timeRange} onValueChange={setTimeRange}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Seleccionar período" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="week">Esta semana</SelectItem>
+                  <SelectItem value="month">Este mes</SelectItem>
+                  <SelectItem value="quarter">Este trimestre</SelectItem>
+                  <SelectItem value="year">Este año</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
-        <TabsContent value="dashboard">
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
-            <StatsCard 
-              title="Presupuestos Activos"
-              value={projects.length}
-              change={{ value: "12%", isPositive: true }}
-              icon={<LucideFileText className="h-6 w-6" />}
-              iconBackground="bg-green-100"
-              iconColor="text-green-600"
-            />
-            
-            <StatsCard 
-              title="Total de Materiales"
-              value={materials.length}
-              change={{ value: "4%", isPositive: true }}
-              icon={<LucidePackage className="h-6 w-6" />}
-              iconBackground="bg-blue-100"
-              iconColor="text-blue-600"
-            />
-            
-            <StatsCard 
-              title="Total de Tareas"
-              value={tasks.length}
-              change={{ value: "8%", isPositive: true }}
-              icon={<LucideCheckSquare className="h-6 w-6" />}
-              iconBackground="bg-indigo-100"
-              iconColor="text-indigo-600"
-            />
-          </div>
+        <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid grid-cols-4 w-full max-w-md mb-4">
+            {DASHBOARD_TABS.map((tab) => (
+              <TabsTrigger key={tab.id} value={tab.id}>{tab.label}</TabsTrigger>
+            ))}
+          </TabsList>
 
-          {/* Projects Grid */}
-          <div className="mb-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-medium text-gray-900">Proyectos Recientes</h2>
-              <Button 
-                variant="link" 
-                className="text-sm font-medium text-primary hover:text-primary-dark"
-                onClick={() => setLocation('/projects')}
-              >
-                Ver todos
-              </Button>
+          {/* Dashboard general */}
+          <TabsContent value="dashboard" className="space-y-6">
+            {/* Resumen numérico */}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Proyectos Activos</p>
+                      <h3 className="text-2xl font-bold mt-1">3</h3>
+                      <p className="text-xs text-green-600 flex items-center mt-1">
+                        <ArrowUp className="h-3 w-3 mr-1" />
+                        <span>+1 nuevo este mes</span>
+                      </p>
+                    </div>
+                    <div className="p-2 bg-blue-100 rounded-full">
+                      <Layers className="h-6 w-6 text-blue-600" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Total de Materiales</p>
+                      <h3 className="text-2xl font-bold mt-1">86</h3>
+                      <p className="text-xs text-green-600 flex items-center mt-1">
+                        <ArrowUp className="h-3 w-3 mr-1" />
+                        <span>+12 agregados recientemente</span>
+                      </p>
+                    </div>
+                    <div className="p-2 bg-orange-100 rounded-full">
+                      <Package className="h-6 w-6 text-orange-600" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Tareas Pendientes</p>
+                      <h3 className="text-2xl font-bold mt-1">38</h3>
+                      <p className="text-xs text-red-600 flex items-center mt-1">
+                        <ArrowDown className="h-3 w-3 mr-1" />
+                        <span>5 atrasadas</span>
+                      </p>
+                    </div>
+                    <div className="p-2 bg-red-100 rounded-full">
+                      <Clock className="h-6 w-6 text-red-600" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Presupuesto Utilizado</p>
+                      <h3 className="text-2xl font-bold mt-1">{formatCurrency(1750000)}</h3>
+                      <p className="text-xs text-green-600 flex items-center mt-1">
+                        <TrendingUp className="h-3 w-3 mr-1" />
+                        <span>31% del total</span>
+                      </p>
+                    </div>
+                    <div className="p-2 bg-green-100 rounded-full">
+                      <DollarSign className="h-6 w-6 text-green-600" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {projects.slice(0, 3).map((project, index) => (
-                <ProjectCard
-                  key={project.id}
-                  id={project.id}
-                  name={project.name}
-                  totalBudget={8920000 / (index + 1)} // Mock budget data
-                  status={project.status}
-                  imageUrl={projectImages[index % projectImages.length]}
-                  updatedAt={new Date(project.updatedAt)}
-                  onClick={() => setLocation(`/projects/${project.id}`)}
-                />
-              ))}
-            </div>
-          </div>
 
-          {/* Recent Materials Table */}
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-medium text-gray-900">Materiales Recientes</h2>
-              <Button 
-                variant="link" 
-                className="text-sm font-medium text-primary hover:text-primary-dark"
-                onClick={() => setActiveTab("materials")}
-              >
-                Ver todos
-              </Button>
-            </div>
-            
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nombre</TableHead>
-                    <TableHead>Categoría</TableHead>
-                    <TableHead>Unidad</TableHead>
-                    <TableHead>Precio Unitario</TableHead>
-                    <TableHead>Última Actualización</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {materials.slice(0, 4).map((material) => (
-                    <TableRow key={material.id}>
-                      <TableCell className="font-medium">{material.name}</TableCell>
-                      <TableCell>{material.category}</TableCell>
-                      <TableCell>{material.unit}</TableCell>
-                      <TableCell>${Number(material.unitPrice).toFixed(2)}</TableCell>
-                      <TableCell>
-                        {new Date(material.updatedAt).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="link"
-                          className="text-primary hover:text-primary-dark"
-                          onClick={() => setLocation(`/materials/${material.id}/edit`)}
+            {/* Gráficos principales */}
+            <div className="grid gap-6 md:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Gastos Mensuales</CardTitle>
+                  <CardDescription>Evolución de los gastos durante el año</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart
+                        data={monthlySpendings}
+                        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="month" />
+                        <YAxis
+                          tickFormatter={(value) => 
+                            new Intl.NumberFormat("es-AR", {
+                              notation: "compact",
+                              compactDisplay: "short",
+                              currency: "ARS"
+                            }).format(value)
+                          }
+                        />
+                        <Tooltip 
+                          formatter={(value) => [formatCurrency(value as number), "Gasto"]}
+                        />
+                        <Legend />
+                        <Line 
+                          type="monotone" 
+                          dataKey="amount" 
+                          name="Gasto"
+                          stroke="#92c900" 
+                          strokeWidth={2}
+                          activeDot={{ r: 8 }} 
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Materiales Más Utilizados</CardTitle>
+                  <CardDescription>Los 5 materiales más utilizados en todos los proyectos</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={mostUsedMaterials}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                          nameKey="name"
+                          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                         >
-                          Editar
-                        </Button>
-                      </TableCell>
-                    </TableRow>
+                          {mostUsedMaterials.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                          formatter={(value, name, props) => {
+                            const material = props.payload;
+                            return [`${value} ${material.unit}`, material.name];
+                          }}
+                        />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Progreso de proyectos */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Progreso de Proyectos</CardTitle>
+                <CardDescription>Estado actual de los proyectos en curso</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {projectsProgress.map((project) => (
+                    <div key={project.name} className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h4 className="font-medium">{project.name}</h4>
+                          <div className="text-sm text-gray-500 flex items-center space-x-2">
+                            <span>{formatCurrency(project.spent)}</span>
+                            <span>/</span>
+                            <span>{formatCurrency(project.budget)}</span>
+                            <span className="text-xs ml-2">
+                              ({Math.round((project.spent / project.budget) * 100)}% del presupuesto)
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-sm font-medium">
+                          {project.progress}%
+                        </div>
+                      </div>
+                      <Progress value={project.progress} className="h-2" />
+                    </div>
                   ))}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
+                </div>
+              </CardContent>
+            </Card>
 
-          {/* Recent Tasks Table */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-medium text-gray-900">Tareas de Obra Recientes</h2>
-              <Button 
-                variant="link" 
-                className="text-sm font-medium text-primary hover:text-primary-dark"
-                onClick={() => setActiveTab("tasks")}
-              >
-                Ver todas
-              </Button>
+            {/* Tareas por categoría y próximas tareas */}
+            <div className="grid gap-6 md:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Tareas por Categoría</CardTitle>
+                  <CardDescription>Distribución de tareas por tipo</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={tasksByCategory}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Tooltip />
+                        <Legend />
+                        <Bar dataKey="completed" name="Completadas" stackId="a" fill="#92c900" />
+                        <Bar dataKey="pending" name="Pendientes" stackId="a" fill="#ff6b6b" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Próximas Tareas</CardTitle>
+                  <CardDescription>Tareas programadas para los próximos días</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {upcomingTasks.map((task) => {
+                      // Calcular días restantes
+                      const dueDate = new Date(task.dueDate);
+                      const today = new Date();
+                      const diffTime = dueDate.getTime() - today.getTime();
+                      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                      
+                      return (
+                        <div key={task.id} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div>
+                            <h4 className="font-medium">{task.name}</h4>
+                            <p className="text-sm text-gray-500">{task.project}</p>
+                          </div>
+                          <div className="text-sm flex items-center">
+                            <Calendar className="h-4 w-4 mr-1 text-gray-400" />
+                            <span className={diffDays <= 3 ? "text-red-500 font-medium" : "text-gray-500"}>
+                              {diffDays > 0 ? `${diffDays} día${diffDays !== 1 ? 's' : ''}` : 'Hoy'}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-            
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Tarea</TableHead>
-                    <TableHead>Categoría</TableHead>
-                    <TableHead>Unidad</TableHead>
-                    <TableHead>Precio</TableHead>
-                    <TableHead>Materiales</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {tasks.slice(0, 4).map((task) => (
-                    <TableRow key={task.id}>
-                      <TableCell className="font-medium">{task.name}</TableCell>
-                      <TableCell>{task.category}</TableCell>
-                      <TableCell>{task.unit}</TableCell>
-                      <TableCell>${Number(task.unitPrice).toFixed(2)}</TableCell>
-                      <TableCell>
-                        {/* We'd fetch task materials count here in a real app */}
-                        {Math.floor(Math.random() * 5) + 1} materiales
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="link"
-                          className="text-primary hover:text-primary-dark"
-                          onClick={() => setLocation(`/tasks/${task.id}/edit`)}
-                        >
-                          Editar
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
-        </TabsContent>
+          </TabsContent>
 
-        <TabsContent value="materials">
-          <div className="mb-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-medium text-gray-900">Materiales Unitarios</h2>
-              <Button 
-                variant="default" 
-                className="bg-primary hover:bg-primary/90"
-                onClick={() => setLocation('/materials/new')}
-              >
-                Agregar Material
-              </Button>
-            </div>
-            
-            <div className="mb-4">
-              <SearchInput 
-                placeholder="Buscar materiales..." 
-                onSearch={setSearchTerm}
-              />
-            </div>
-            
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Nombre</TableHead>
-                      <TableHead>Categoría</TableHead>
-                      <TableHead>Unidad</TableHead>
-                      <TableHead>Precio Unitario</TableHead>
-                      <TableHead>Última Actualización</TableHead>
-                      <TableHead className="text-right">Acciones</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredMaterials.map((material) => (
-                      <TableRow key={material.id}>
-                        <TableCell className="font-medium">{material.name}</TableCell>
-                        <TableCell>{material.category}</TableCell>
-                        <TableCell>{material.unit}</TableCell>
-                        <TableCell>${Number(material.unitPrice).toFixed(2)}</TableCell>
-                        <TableCell>
-                          {new Date(material.updatedAt).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            variant="link"
-                            className="text-primary hover:text-primary-dark"
-                            onClick={() => setLocation(`/materials/${material.id}/edit`)}
-                          >
-                            Editar
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                    {filteredMaterials.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center py-6 text-gray-500">
-                          No se encontraron materiales
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            </div>
-          </div>
-        </TabsContent>
+          {/* Materiales */}
+          <TabsContent value="materials" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Análisis de Materiales</CardTitle>
+                <CardDescription>Información detallada sobre el uso de materiales en todos los proyectos</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-12">
+                  <h3 className="text-2xl font-medium text-gray-500">
+                    Selecciona "Dashboard" para ver un resumen de los materiales más utilizados
+                  </h3>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        <TabsContent value="tasks">
-          <div className="mb-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-medium text-gray-900">Tareas de Obra</h2>
-              <Button 
-                variant="default" 
-                className="bg-primary hover:bg-primary/90"
-                onClick={() => setLocation('/tasks/new')}
-              >
-                Agregar Tarea
-              </Button>
-            </div>
-            
-            <div className="mb-4">
-              <SearchInput 
-                placeholder="Buscar tareas..." 
-                onSearch={setSearchTerm}
-              />
-            </div>
-            
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Tarea</TableHead>
-                      <TableHead>Categoría</TableHead>
-                      <TableHead>Unidad</TableHead>
-                      <TableHead>Precio</TableHead>
-                      <TableHead>Materiales</TableHead>
-                      <TableHead className="text-right">Acciones</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredTasks.map((task) => (
-                      <TableRow key={task.id}>
-                        <TableCell className="font-medium">{task.name}</TableCell>
-                        <TableCell>{task.category}</TableCell>
-                        <TableCell>{task.unit}</TableCell>
-                        <TableCell>${Number(task.unitPrice).toFixed(2)}</TableCell>
-                        <TableCell>
-                          {/* We'd fetch task materials count here in a real app */}
-                          {Math.floor(Math.random() * 5) + 1} materiales
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            variant="link"
-                            className="text-primary hover:text-primary-dark"
-                            onClick={() => setLocation(`/tasks/${task.id}/edit`)}
-                          >
-                            Editar
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                    {filteredTasks.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center py-6 text-gray-500">
-                          No se encontraron tareas
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            </div>
-          </div>
-        </TabsContent>
+          {/* Tareas */}
+          <TabsContent value="tasks" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Análisis de Tareas</CardTitle>
+                <CardDescription>Información detallada sobre el progreso de tareas en todos los proyectos</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-12">
+                  <h3 className="text-2xl font-medium text-gray-500">
+                    Selecciona "Dashboard" para ver un resumen de las tareas pendientes y completadas
+                  </h3>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        <TabsContent value="budgets">
-          <div className="mb-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-medium text-gray-900">Presupuestos</h2>
-              <Button 
-                variant="default" 
-                className="bg-primary hover:bg-primary/90"
-                onClick={() => setLocation('/budgets/new')}
-              >
-                Crear Presupuesto
-              </Button>
-            </div>
-            
-            {/* Budgets would be listed here */}
-            <div className="bg-white rounded-lg shadow-sm p-6 text-center text-gray-500">
-              Selecciona un proyecto para ver sus presupuestos
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
+          {/* Presupuestos */}
+          <TabsContent value="budgets" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Análisis de Presupuestos</CardTitle>
+                <CardDescription>Información detallada sobre el estado financiero de todos los proyectos</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-12">
+                  <h3 className="text-2xl font-medium text-gray-500">
+                    Selecciona "Dashboard" para ver un resumen de los presupuestos y gastos
+                  </h3>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
     </MainLayout>
   );
 }

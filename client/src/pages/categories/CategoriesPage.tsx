@@ -14,7 +14,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function CategoriesPage() {
   const { toast } = useToast();
-  const [categories, setCategories] = useState<string[]>(MATERIAL_CATEGORIES);
+  // Extraer solo las etiquetas de las categorías
+  const [categories, setCategories] = useState<string[]>(
+    MATERIAL_CATEGORIES.map(cat => cat.label)
+  );
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editValue, setEditValue] = useState("");
   const [newCategory, setNewCategory] = useState("");
