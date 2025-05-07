@@ -711,4 +711,7 @@ class DatabaseStorage implements IStorage {
 
 // Temporalmente usamos MemStorage mientras resolvemos la conexión a la base de datos
 // Cambiamos a almacenamiento en base de datos
-export const storage = new DatabaseStorage();
+import { SupabaseStorage } from './storage-supabase';
+
+// Usar SupabaseStorage para todas las operaciones de almacenamiento
+export const storage = new SupabaseStorage();
