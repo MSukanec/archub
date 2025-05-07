@@ -128,7 +128,7 @@ export default function LandingPage() {
     <div className="min-h-screen flex flex-col">
       {/* Barra de navegación */}
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between">
+        <div className="container flex h-16 items-center justify-between mx-auto max-w-6xl">
           <div className="flex items-center gap-2">
             <Shield className="h-6 w-6 text-primary" />
             <span className="text-xl font-bold">{APP_NAME}</span>
@@ -151,7 +151,7 @@ export default function LandingPage() {
 
       {/* Hero section */}
       <section className="py-20 md:py-32 bg-gradient-to-b from-background to-muted">
-        <div className="container px-4 md:px-6">
+        <div className="container px-4 md:px-6 mx-auto max-w-6xl">
           <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 xl:grid-cols-2">
             <div className="flex flex-col justify-center space-y-4">
               <div className="space-y-2">
@@ -193,7 +193,7 @@ export default function LandingPage() {
 
       {/* Features section */}
       <section id="features" className="py-16 md:py-24">
-        <div className="container px-4 md:px-6">
+        <div className="container px-4 md:px-6 mx-auto max-w-6xl">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
               Todo lo que Necesitas para tus Proyectos
@@ -216,7 +216,7 @@ export default function LandingPage() {
 
       {/* Pricing section */}
       <section id="pricing" className="py-16 md:py-24 bg-muted">
-        <div className="container px-4 md:px-6">
+        <div className="container px-4 md:px-6 mx-auto max-w-6xl">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
               Planes de Suscripción
@@ -278,7 +278,7 @@ export default function LandingPage() {
 
       {/* FAQ section */}
       <section id="faq" className="py-16 md:py-24">
-        <div className="container px-4 md:px-6">
+        <div className="container px-4 md:px-6 mx-auto max-w-6xl">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
               Preguntas Frecuentes
@@ -334,7 +334,7 @@ export default function LandingPage() {
 
       {/* CTA section */}
       <section className="py-16 md:py-24 bg-primary text-white">
-        <div className="container px-4 md:px-6 text-center">
+        <div className="container px-4 md:px-6 mx-auto max-w-6xl text-center">
           <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl mb-4">
             Comienza a Optimizar tus Proyectos Hoy
           </h2>
@@ -364,7 +364,7 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="border-t py-12 md:py-16">
-        <div className="container px-4 md:px-6">
+        <div className="container px-4 md:px-6 mx-auto max-w-6xl">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
