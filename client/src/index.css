@@ -77,7 +77,7 @@
 
 /* Custom classes for sidebar styling */
 .sidebar {
-  @apply bg-sidebar text-sidebar-foreground border-r border-sidebar-border;
+  @apply bg-background text-sidebar-foreground border-r border-sidebar-border;
 }
 
 .sidebar-item {

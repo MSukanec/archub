@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { ProfileMenu } from "@/components/common/ProfileMenu";
 import { Button } from "@/components/ui/button";
-import { LucideBell, LucideMenu, LucidePlus, LucideSearch, LucideZap, LucideChevronRight } from "lucide-react";
+import { LucideBell, LucideMenu, LucidePlus, LucideSearch, LucideZap, LucideChevronRight, LucideMoon, LucideSun } from "lucide-react";
+import { useTheme } from "@/components/theme-provider";
 import { APP_NAME, APP_SUBTITLE } from "@/lib/constants";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
@@ -76,9 +77,12 @@ export function Header({
     }
     setSearchOpen(false);
   };
+  
+  // Tema
+  const { theme, setTheme } = useTheme();
 
   return (
-    <header className="z-30 bg-white border-b sticky top-0 w-full h-[45px]">
+    <header className="z-30 bg-background border-b sticky top-0 w-full h-[45px]">
       <div className="flex items-center justify-between px-0 h-full">
         {/* Left section with app logo */}
         <div className="flex items-center">
@@ -186,6 +190,21 @@ export function Header({
           >
             <LucideBell className="h-5 w-5" />
             <span className="sr-only">Notifications</span>
+          </Button>
+          
+          {/* Theme toggle button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-gray-500 hover:text-gray-700 h-[35px] w-[35px] p-0"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          >
+            {theme === "dark" ? (
+              <LucideSun className="h-5 w-5" />
+            ) : (
+              <LucideMoon className="h-5 w-5" />
+            )}
+            <span className="sr-only">Toggle theme</span>
           </Button>
 
           <ProfileMenu user={user || null} />
