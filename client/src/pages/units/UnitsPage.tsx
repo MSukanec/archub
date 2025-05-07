@@ -163,10 +163,10 @@ export default function UnitsPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.value || !formData.label) {
+    if (!formData.name) {
       toast({
         title: "Campos incompletos",
-        description: "Todos los campos son obligatorios",
+        description: "El nombre de la unidad es obligatorio",
         variant: "destructive",
       });
       return;
@@ -177,15 +177,15 @@ export default function UnitsPage() {
       updateMutation.mutate({
         id: selectedUnit.id,
         formData: {
-          value: formData.value,
-          label: formData.label
+          name: formData.name,
+          description: formData.description
         }
       });
     } else {
       // Crear nueva unidad
       createMutation.mutate({
-        value: formData.value,
-        label: formData.label
+        name: formData.name,
+        description: formData.description
       });
     }
   };
@@ -229,7 +229,8 @@ export default function UnitsPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>ID</TableHead>
-                    <TableHead>Código</TableHead>
+                    <TableHead>Nombre</TableHead>
+                    <TableHead>Descripción</TableHead>
                     <TableHead className="text-right">Acciones</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -238,6 +239,7 @@ export default function UnitsPage() {
                     <TableRow key={unit.id}>
                       <TableCell>{unit.id}</TableCell>
                       <TableCell className="font-medium">{unit.name}</TableCell>
+                      <TableCell>{unit.description}</TableCell>
                       <TableCell className="text-right">
                         <Button
                           variant="ghost"
@@ -277,20 +279,20 @@ export default function UnitsPage() {
             <form onSubmit={handleSubmit}>
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="value">Código</Label>
+                  <Label htmlFor="name">Nombre</Label>
                   <Input
-                    id="value"
-                    value={formData.value}
-                    onChange={(e) => setFormData({ ...formData, value: e.target.value })}
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="Ejemplo: m2"
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="label">Descripción</Label>
+                  <Label htmlFor="description">Descripción</Label>
                   <Input
-                    id="label"
-                    value={formData.label}
-                    onChange={(e) => setFormData({ ...formData, label: e.target.value })}
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     placeholder="Ejemplo: Metro cuadrado (m²)"
                   />
                 </div>

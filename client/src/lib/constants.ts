@@ -35,16 +35,16 @@ export const PROJECT_STATUS_OPTIONS = PROJECT_STATUS;
 
 // Unidades de medida comunes
 export const COMMON_UNITS = [
-  { value: "m", label: "Metros (m)" },
-  { value: "m2", label: "Metros Cuadrados (m²)" },
-  { value: "m3", label: "Metros Cúbicos (m³)" },
-  { value: "kg", label: "Kilogramos (kg)" },
-  { value: "lt", label: "Litros (lt)" },
-  { value: "pza", label: "Piezas" },
-  { value: "bolsa", label: "Bolsa" },
-  { value: "saco", label: "Saco" },
-  { value: "global", label: "Global" },
-  { value: "punto", label: "Punto" }
+  { name: "m", description: "Metros (m)" },
+  { name: "m2", description: "Metros Cuadrados (m²)" },
+  { name: "m3", description: "Metros Cúbicos (m³)" },
+  { name: "kg", description: "Kilogramos (kg)" },
+  { name: "lt", description: "Litros (lt)" },
+  { name: "pza", description: "Piezas" },
+  { name: "bolsa", description: "Bolsa" },
+  { name: "saco", description: "Saco" },
+  { name: "global", description: "Global" },
+  { name: "punto", description: "Punto" }
 ];
 
 // Colores principales
