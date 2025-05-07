@@ -7,7 +7,8 @@ import {
   budgets, type Budget, type InsertBudget,
   budgetTasks, type BudgetTask, type InsertBudgetTask,
   categories, type Category, type InsertCategory,
-  units, type Unit, type InsertUnit
+  units, type Unit, type InsertUnit,
+  transactions, type Transaction, type InsertTransaction
 } from "@shared/schema";
 
 import { IStorage } from "./storage";
@@ -143,7 +144,8 @@ const tableNames = {
   budgets: 'budgets',
   budgetTasks: 'budget_tasks',
   categories: 'categories',
-  units: 'units'
+  units: 'units',
+  transactions: 'transactions'
 };
 
 // Función asíncrona para inicializar y verificar tablas
@@ -876,7 +878,7 @@ export class SupabaseStorage implements IStorage {
   // Métodos para transacciones
   async getTransactions(projectId: number): Promise<Transaction[]> {
     const { data, error } = await supabase
-      .from('transactions')
+      .from(tableNames.transactions)
       .select('*')
       .eq('project_id', projectId)
       .order('date', { ascending: false });
@@ -887,7 +889,7 @@ export class SupabaseStorage implements IStorage {
 
   async getTransaction(id: number): Promise<Transaction | undefined> {
     const { data, error } = await supabase
-      .from('transactions')
+      .from(tableNames.transactions)
       .select('*')
       .eq('id', id)
       .single();
@@ -900,7 +902,7 @@ export class SupabaseStorage implements IStorage {
     const transactionData = prepareForDb(transaction);
     
     const { data, error } = await supabase
-      .from('transactions')
+      .from(tableNames.transactions)
       .insert(transactionData)
       .select()
       .single();
@@ -913,7 +915,7 @@ export class SupabaseStorage implements IStorage {
     const dbData = prepareForDb(transactionData);
     
     const { data, error } = await supabase
-      .from('transactions')
+      .from(tableNames.transactions)
       .update(dbData)
       .eq('id', id)
       .select()
@@ -925,7 +927,7 @@ export class SupabaseStorage implements IStorage {
 
   async deleteTransaction(id: number): Promise<boolean> {
     const { error } = await supabase
-      .from('transactions')
+      .from(tableNames.transactions)
       .delete()
       .eq('id', id);
       

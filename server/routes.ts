@@ -824,6 +824,134 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Rutas para Transacciones (Movimientos)
+  app.get(`${apiPrefix}/projects/:projectId/transactions`, authenticate, async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.projectId);
+      const project = await storage.getProject(projectId);
+      
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      
+      if (project.userId !== req.user.id) {
+        return res.status(403).json({ message: "Not authorized to access this project's transactions" });
+      }
+      
+      const transactions = await storage.getTransactions(projectId);
+      return res.json(transactions);
+    } catch (error) {
+      return res.status(500).json({ message: "Server error", error });
+    }
+  });
+
+  app.post(`${apiPrefix}/projects/:projectId/transactions`, authenticate, async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.projectId);
+      const project = await storage.getProject(projectId);
+      
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      
+      if (project.userId !== req.user.id) {
+        return res.status(403).json({ message: "Not authorized to create transactions for this project" });
+      }
+      
+      const transactionData = {
+        ...req.body,
+        projectId: projectId
+      };
+      
+      // Validar con el schema
+      const validatedData = insertTransactionSchema.parse(transactionData);
+      
+      const transaction = await storage.createTransaction(validatedData);
+      return res.status(201).json(transaction);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", error: error.errors });
+      }
+      return res.status(500).json({ message: "Server error", error });
+    }
+  });
+
+  app.get(`${apiPrefix}/transactions/:id`, authenticate, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const transaction = await storage.getTransaction(id);
+      
+      if (!transaction) {
+        return res.status(404).json({ message: "Transaction not found" });
+      }
+      
+      const project = await storage.getProject(transaction.projectId);
+      
+      if (project?.userId !== req.user.id) {
+        return res.status(403).json({ message: "Not authorized to access this transaction" });
+      }
+      
+      return res.json(transaction);
+    } catch (error) {
+      return res.status(500).json({ message: "Server error", error });
+    }
+  });
+
+  app.put(`${apiPrefix}/transactions/:id`, authenticate, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const transaction = await storage.getTransaction(id);
+      
+      if (!transaction) {
+        return res.status(404).json({ message: "Transaction not found" });
+      }
+      
+      const project = await storage.getProject(transaction.projectId);
+      
+      if (project?.userId !== req.user.id) {
+        return res.status(403).json({ message: "Not authorized to update this transaction" });
+      }
+      
+      // Validar con el schema parcial
+      const validatedData = insertTransactionSchema.partial().parse(req.body);
+      
+      const updatedTransaction = await storage.updateTransaction(id, validatedData);
+      return res.json(updatedTransaction);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", error: error.errors });
+      }
+      return res.status(500).json({ message: "Server error", error });
+    }
+  });
+
+  app.delete(`${apiPrefix}/transactions/:id`, authenticate, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const transaction = await storage.getTransaction(id);
+      
+      if (!transaction) {
+        return res.status(404).json({ message: "Transaction not found" });
+      }
+      
+      const project = await storage.getProject(transaction.projectId);
+      
+      if (project?.userId !== req.user.id) {
+        return res.status(403).json({ message: "Not authorized to delete this transaction" });
+      }
+      
+      const deleted = await storage.deleteTransaction(id);
+      
+      if (!deleted) {
+        return res.status(500).json({ message: "Failed to delete transaction" });
+      }
+      
+      return res.status(204).send();
+    } catch (error) {
+      return res.status(500).json({ message: "Server error", error });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
