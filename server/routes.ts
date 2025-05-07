@@ -647,16 +647,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get(`${apiPrefix}/categories`, async (req, res) => {
     try {
       const type = req.query.type as string | undefined;
+      console.log('Fetching categories with type:', type);
       const categories = await storage.getCategories(type);
       return res.json(categories);
     } catch (error) {
-      return res.status(500).json({ message: "Server error", error });
+      console.error('Error getting categories:', error);
+      return res.status(500).json({ message: "Server error", error: error instanceof Error ? error.message : String(error) });
     }
   });
 
   app.get(`${apiPrefix}/categories/:id`, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
+      console.log('Fetching category with id:', id);
       const category = await storage.getCategory(id);
       
       if (!category) {
@@ -665,7 +668,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       return res.json(category);
     } catch (error) {
-      return res.status(500).json({ message: "Server error", error });
+      console.error('Error getting category by id:', error);
+      return res.status(500).json({ message: "Server error", error: error instanceof Error ? error.message : String(error) });
     }
   });
 

@@ -104,4 +104,17 @@ CREATE INDEX IF NOT EXISTS idx_task_materials_material_id ON public.task_materia
 CREATE INDEX IF NOT EXISTS idx_budget_tasks_budget_id ON public.budget_tasks(budget_id);
 CREATE INDEX IF NOT EXISTS idx_budget_tasks_task_id ON public.budget_tasks(task_id);
 
+-- Tabla de categorías (jerarquía)
+CREATE TABLE IF NOT EXISTS public.categories (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  position INTEGER NOT NULL DEFAULT 0,
+  parent_id INTEGER REFERENCES public.categories(id) ON DELETE SET NULL,
+  type TEXT NOT NULL DEFAULT 'material',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_categories_parent_id ON public.categories(parent_id);
+
 SELECT 'Tablas creadas correctamente' as resultado;
