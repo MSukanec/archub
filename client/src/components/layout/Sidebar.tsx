@@ -12,7 +12,8 @@ import {
   LucideChevronLeft, 
   LucideListTodo,
   LucidePlus,
-  LucideLayoutGrid
+  LucideLayoutGrid,
+  LucidePieChart
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { APP_NAME } from "@/lib/constants";
@@ -47,6 +48,11 @@ export function Sidebar({
 
   // Items para el main_sidebar
   const mainSidebarItems = [
+    {
+      name: "Dashboard",
+      path: "/",
+      icon: <LucidePieChart className="h-5 w-5" />,
+    },
     {
       name: "Organización",
       path: "/organization",
