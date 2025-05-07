@@ -410,8 +410,8 @@ export default function TaskForm({ taskId }: TaskFormProps) {
                               </FormControl>
                               <SelectContent>
                                 {UNITS.map((unit) => (
-                                  <SelectItem key={unit.value} value={unit.value}>
-                                    {unit.label}
+                                  <SelectItem key={unit.name} value={unit.name}>
+                                    {unit.description}
                                   </SelectItem>
                                 ))}
                               </SelectContent>

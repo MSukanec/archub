@@ -210,3 +210,31 @@ export type InsertCategory = z.infer<typeof insertCategorySchema>;
 
 export type Unit = typeof units.$inferSelect;
 export type InsertUnit = z.infer<typeof insertUnitSchema>;
+
+// Transactions table
+export const transactions = pgTable("transactions", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  date: timestamp("date").notNull().defaultNow(),
+  type: text("type").notNull(), // "ingreso" o "egreso"
+  category: text("category").notNull(),
+  description: text("description").notNull(),
+  amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertTransactionSchema = createInsertSchema(transactions).pick({
+  projectId: true,
+  date: true,
+  type: true,
+  category: true,
+  description: true,
+  amount: true,
+}).extend({
+  projectId: z.coerce.number(),
+  amount: z.coerce.number().min(0, "El monto debe ser mayor a 0"),
+});
+
+export type Transaction = typeof transactions.$inferSelect;
+export type InsertTransaction = z.infer<typeof insertTransactionSchema>;

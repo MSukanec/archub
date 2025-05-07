@@ -872,4 +872,63 @@ export class SupabaseStorage implements IStorage {
       
     return !error;
   }
+
+  // Métodos para transacciones
+  async getTransactions(projectId: number): Promise<Transaction[]> {
+    const { data, error } = await supabase
+      .from('transactions')
+      .select('*')
+      .eq('project_id', projectId)
+      .order('date', { ascending: false });
+      
+    if (error) throw new Error(`Error al obtener transacciones: ${error.message}`);
+    return convertArrayFromDb(data as Transaction[]);
+  }
+
+  async getTransaction(id: number): Promise<Transaction | undefined> {
+    const { data, error } = await supabase
+      .from('transactions')
+      .select('*')
+      .eq('id', id)
+      .single();
+      
+    if (error || !data) return undefined;
+    return convertFromDb(data as Transaction);
+  }
+
+  async createTransaction(transaction: InsertTransaction): Promise<Transaction> {
+    const transactionData = prepareForDb(transaction);
+    
+    const { data, error } = await supabase
+      .from('transactions')
+      .insert(transactionData)
+      .select()
+      .single();
+      
+    if (error) throw new Error(`Error al crear transacción: ${error.message}`);
+    return convertFromDb(data as Transaction);
+  }
+
+  async updateTransaction(id: number, transactionData: Partial<InsertTransaction>): Promise<Transaction | undefined> {
+    const dbData = prepareForDb(transactionData);
+    
+    const { data, error } = await supabase
+      .from('transactions')
+      .update(dbData)
+      .eq('id', id)
+      .select()
+      .single();
+      
+    if (error || !data) return undefined;
+    return convertFromDb(data as Transaction);
+  }
+
+  async deleteTransaction(id: number): Promise<boolean> {
+    const { error } = await supabase
+      .from('transactions')
+      .delete()
+      .eq('id', id);
+      
+    return !error;
+  }
 }
