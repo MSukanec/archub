@@ -33,8 +33,7 @@ import {
 
 interface Unit {
   id: number;
-  value: string;
-  label: string;
+  name: string;
 }
 
 export default function UnitsPage() {
@@ -68,8 +67,12 @@ export default function UnitsPage() {
 
   // Mutación para crear una nueva unidad
   const createMutation = useMutation({
-    mutationFn: async (newUnit: Omit<Unit, "id">) => {
-      const response = await apiRequest("POST", "/api/units", newUnit);
+    mutationFn: async (formData: {value: string, label: string}) => {
+      // Convertimos el formato del formulario al formato de la API
+      const unitData = {
+        name: formData.label || formData.value
+      };
+      const response = await apiRequest("POST", "/api/units", unitData);
       return response.json();
     },
     onSuccess: () => {
@@ -92,8 +95,12 @@ export default function UnitsPage() {
 
   // Mutación para actualizar una unidad existente
   const updateMutation = useMutation({
-    mutationFn: async (unit: Unit) => {
-      const response = await apiRequest("PATCH", `/api/units/${unit.id}`, unit);
+    mutationFn: async ({id, formData}: {id: number, formData: {value: string, label: string}}) => {
+      // Convertimos el formato del formulario al formato de la API
+      const unitData = {
+        name: formData.label || formData.value
+      };
+      const response = await apiRequest("PATCH", `/api/units/${id}`, unitData);
       return response.json();
     },
     onSuccess: () => {
@@ -152,9 +159,14 @@ export default function UnitsPage() {
   // Función para abrir el diálogo en modo edición
   const handleEditClick = (unit: Unit) => {
     setSelectedUnit(unit);
+    // Extraemos el código básico del nombre completo si es posible
+    // El nombre puede venir en formato "m2 (metro cuadrado)"
+    const nameMatch = unit.name.match(/^([^ ]+)/);
+    const extractedValue = nameMatch ? nameMatch[1] : unit.name;
+    
     setFormData({
-      value: unit.value,
-      label: unit.label
+      value: extractedValue,
+      label: unit.name
     });
     setIsDialogOpen(true);
   };
@@ -176,8 +188,10 @@ export default function UnitsPage() {
       // Actualizar unidad existente
       updateMutation.mutate({
         id: selectedUnit.id,
-        value: formData.value,
-        label: formData.label
+        formData: {
+          value: formData.value,
+          label: formData.label
+        }
       });
     } else {
       // Crear nueva unidad
