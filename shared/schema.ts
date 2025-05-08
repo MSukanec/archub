@@ -28,6 +28,22 @@ export const organizations = pgTable("organizations", {
   taxId: text("tax_id"),
 });
 
+// Configuración PDF de organizaciones
+export const organizationPdfConfigs = pgTable("organization_pdf_configs", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organization_id").notNull().references(() => organizations.id, { onDelete: "cascade" }),
+  logoPosition: text("logo_position").default("left"),
+  showAddress: integer("show_address").default(1),  // 1 = true, 0 = false
+  showPhone: integer("show_phone").default(1),
+  showEmail: integer("show_email").default(1),
+  showWebsite: integer("show_website").default(1),
+  showTaxId: integer("show_tax_id").default(1),
+  primaryColor: text("primary_color").default("#92c900"),
+  secondaryColor: text("secondary_color").default("#f0f0f0"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Organization-User relationship
 export const organizationUsers = pgTable("organization_users", {
   id: serial("id").primaryKey(),
@@ -47,6 +63,11 @@ export const projects = pgTable("projects", {
   updatedAt: timestamp("updated_at").defaultNow(),
   userId: integer("user_id").notNull(),
   organizationId: integer("organization_id").references(() => organizations.id),
+  // Campos de cliente para el PDF
+  clientName: text("client_name"),
+  clientAddress: text("client_address"),
+  clientPhone: text("client_phone"),
+  clientEmail: text("client_email"),
 });
 
 // Materials table
@@ -269,7 +290,18 @@ export const insertTransactionSchema = createInsertSchema(transactions).pick({
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 
-export type Organization = typeof organizations.$inferSelect;
+export type Organization = typeof organizations.$inferSelect & {
+  pdfConfig?: {
+    logoPosition: "left" | "center" | "right";
+    showAddress: boolean;
+    showPhone: boolean;
+    showEmail: boolean;
+    showWebsite: boolean;
+    showTaxId: boolean;
+    primaryColor: string;
+    secondaryColor: string;
+  }
+};
 export type InsertOrganization = z.infer<typeof insertOrganizationSchema>;
 
 export type OrganizationUser = typeof organizationUsers.$inferSelect;
