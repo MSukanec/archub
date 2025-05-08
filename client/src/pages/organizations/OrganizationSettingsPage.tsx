@@ -1,9 +1,8 @@
-import { useState } from "react";
-import { MainLayout } from "@/components/layout/MainLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { OrganizationSettings } from "@/components/organization/OrganizationSettings";
 import { useQuery } from "@tanstack/react-query";
+import { Helmet } from "react-helmet";
+import { OrganizationSettings } from "@/components/organization/OrganizationSettings";
 import { Loader2 } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface Organization {
   id: number;
@@ -28,39 +27,51 @@ interface Organization {
 }
 
 export default function OrganizationSettingsPage() {
-  const [activeTab, setActiveTab] = useState<string>("general");
-
   // Obtener la organización activa
-  const { data: organization, isLoading } = useQuery<Organization>({
+  const { data: organization, isLoading, error } = useQuery<Organization>({
     queryKey: ["/api/organizations/active"],
   });
 
-  return (
-    <MainLayout>
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Configuración de la Organización</h1>
-        </div>
-
-        {isLoading ? (
-          <div className="flex justify-center items-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        ) : organization ? (
-          <Card>
-            <CardHeader>
-              <CardTitle>Personalización</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <OrganizationSettings organization={organization} />
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="text-center p-8">
-            <p>No se encontró ninguna organización. Por favor, crea una organización primero.</p>
-          </div>
-        )}
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-120px)]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
-    </MainLayout>
+    );
+  }
+
+  if (error || !organization) {
+    return (
+      <div className="container py-6">
+        <Alert variant="destructive">
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>
+            No se pudo cargar la información de la organización. 
+            Por favor, asegúrate de que existe una organización y que tienes permisos para acceder a ella.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <Helmet>
+        <title>Configuración de la Organización | ArchHub</title>
+      </Helmet>
+      
+      <div className="container py-6">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold tracking-tight">Configuración de la Organización</h1>
+          <p className="text-muted-foreground mt-2">
+            Actualiza la información y configuración de tu organización
+          </p>
+        </div>
+        
+        <div className="bg-card rounded-lg border shadow p-6">
+          <OrganizationSettings organization={organization} />
+        </div>
+      </div>
+    </>
   );
 }
