@@ -996,8 +996,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get(`${apiPrefix}/organizations`, authenticate, async (req, res) => {
     try {
       // Obtener todas las organizaciones del usuario
-      const organizations = await storage.getUserOrganizations(req.user.id);
+      const organizations = await dataStorage.getUserOrganizations(req.user.id);
       return res.json(organizations);
+    } catch (error) {
+      return res.status(500).json({ message: "Server error", error });
+    }
+  });
+  
+  // Ruta para obtener la organización activa
+  app.get(`${apiPrefix}/organizations/active`, authenticate, async (req, res) => {
+    try {
+      // Obtener todas las organizaciones del usuario
+      const organizations = await dataStorage.getUserOrganizations(req.user.id);
+      
+      if (!organizations || organizations.length === 0) {
+        // Si no hay organizaciones, crear una por defecto
+        const defaultOrg = await dataStorage.createOrganization({
+          name: "Construcciones XYZ",
+          description: "Organización por defecto",
+        });
+        
+        // Agregar al usuario como propietario
+        await dataStorage.addUserToOrganization({
+          organizationId: defaultOrg.id,
+          userId: req.user.id,
+          role: "owner"
+        });
+        
+        return res.json(defaultOrg);
+      }
+      
+      // Por ahora, simplemente devolver la primera organización
+      // En el futuro, se podría permitir al usuario seleccionar su organización activa
+      return res.json(organizations[0]);
     } catch (error) {
       return res.status(500).json({ message: "Server error", error });
     }
@@ -1053,14 +1084,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch(`${apiPrefix}/organizations/:id`, authenticate, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const organization = await storage.getOrganization(id);
+      const organization = await dataStorage.getOrganization(id);
       
       if (!organization) {
         return res.status(404).json({ message: "Organization not found" });
       }
       
       // Verificar si el usuario tiene permisos para editar (debe ser owner o admin)
-      const orgUsers = await storage.getOrganizationUsers(id);
+      const orgUsers = await dataStorage.getOrganizationUsers(id);
       const userRole = orgUsers.find(ou => ou.userId === req.user.id)?.role;
       
       if (!userRole || (userRole !== 'owner' && userRole !== 'admin')) {
@@ -1071,12 +1102,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertOrganizationSchema.partial().parse(req.body);
       
       // Actualizar la organización
-      const updatedOrganization = await storage.updateOrganization(id, validatedData);
+      const updatedOrganization = await dataStorage.updateOrganization(id, validatedData);
       return res.json(updatedOrganization);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid data", error: error.errors });
       }
+      return res.status(500).json({ message: "Server error", error });
+    }
+  });
+  
+  // Ruta para subir el logo de la organización
+  app.post(`${apiPrefix}/organizations/:id/logo`, authenticate, upload.single('logo'), async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const organization = await dataStorage.getOrganization(id);
+      
+      if (!organization) {
+        return res.status(404).json({ message: "Organization not found" });
+      }
+      
+      // Verificar si el usuario tiene permisos para editar
+      const orgUsers = await dataStorage.getOrganizationUsers(id);
+      const userRole = orgUsers.find(ou => ou.userId === req.user.id)?.role;
+      
+      if (!userRole || (userRole !== 'owner' && userRole !== 'admin')) {
+        return res.status(403).json({ message: "Not authorized to update this organization" });
+      }
+      
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+      
+      // Ruta relativa para acceder al archivo
+      const relativePath = `/uploads/${req.file.filename}`;
+      
+      // Si ya existe un logo anterior, eliminarlo
+      if (organization.logoUrl) {
+        const oldLogoPath = path.join(process.cwd(), 'client/public', organization.logoUrl);
+        if (fs.existsSync(oldLogoPath)) {
+          fs.unlinkSync(oldLogoPath);
+        }
+      }
+      
+      // Actualizar la URL del logo en la base de datos
+      const updatedOrganization = await dataStorage.updateOrganization(id, {
+        logoUrl: relativePath
+      });
+      
+      return res.json(updatedOrganization);
+    } catch (error) {
+      return res.status(500).json({ message: "Server error", error });
+    }
+  });
+  
+  // Ruta para eliminar el logo de la organización
+  app.delete(`${apiPrefix}/organizations/:id/logo`, authenticate, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const organization = await dataStorage.getOrganization(id);
+      
+      if (!organization) {
+        return res.status(404).json({ message: "Organization not found" });
+      }
+      
+      // Verificar si el usuario tiene permisos para editar
+      const orgUsers = await dataStorage.getOrganizationUsers(id);
+      const userRole = orgUsers.find(ou => ou.userId === req.user.id)?.role;
+      
+      if (!userRole || (userRole !== 'owner' && userRole !== 'admin')) {
+        return res.status(403).json({ message: "Not authorized to update this organization" });
+      }
+      
+      // Si existe un logo, eliminarlo
+      if (organization.logoUrl) {
+        const logoPath = path.join(process.cwd(), 'client/public', organization.logoUrl);
+        if (fs.existsSync(logoPath)) {
+          fs.unlinkSync(logoPath);
+        }
+        
+        // Actualizar la URL del logo en la base de datos
+        await dataStorage.updateOrganization(id, {
+          logoUrl: null
+        });
+      }
+      
+      return res.json({ message: "Logo removed successfully" });
+    } catch (error) {
       return res.status(500).json({ message: "Server error", error });
     }
   });
