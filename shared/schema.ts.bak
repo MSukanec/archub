@@ -1,4 +1,4 @@
-import { integer, numeric, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, numeric, timestamp, integer, foreignKey } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
@@ -21,20 +21,12 @@ export const organizations = pgTable("organizations", {
   logoUrl: text("logo_url"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+  // Add organization settings
   address: text("address"),
   phone: text("phone"),
   email: text("email"),
   website: text("website"),
   taxId: text("tax_id"),
-});
-
-// Organization-User relationship
-export const organizationUsers = pgTable("organization_users", {
-  id: serial("id").primaryKey(),
-  organizationId: integer("organization_id").notNull().references(() => organizations.id, { onDelete: "cascade" }),
-  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  role: text("role").notNull().default("member"), // "owner", "admin", "member"
-  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 // Projects table
@@ -116,20 +108,7 @@ export const units = pgTable("units", {
   description: text("description"),
 });
 
-// Transactions table
-export const transactions = pgTable("transactions", {
-  id: serial("id").primaryKey(),
-  projectId: integer("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
-  date: timestamp("date").notNull().defaultNow(),
-  type: text("type").notNull(), // "ingreso" o "egreso"
-  category: text("category").notNull(),
-  description: text("description").notNull(),
-  amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
-// Relaciones
+// Relaciones para categorías (jerarquía)
 export const categoriesRelations = relations(categories, ({ one, many }) => ({
   parent: one(categories, {
     fields: [categories.parentId],
@@ -138,13 +117,6 @@ export const categoriesRelations = relations(categories, ({ one, many }) => ({
   }),
   children: many(categories, {
     relationName: "category_parent",
-  }),
-}));
-
-export const projectsRelations = relations(projects, ({ one }) => ({
-  organization: one(organizations, {
-    fields: [projects.organizationId],
-    references: [organizations.id],
   }),
 }));
 
@@ -157,35 +129,11 @@ export const insertUserSchema = createInsertSchema(users).pick({
   avatarUrl: true,
 });
 
-export const insertOrganizationSchema = createInsertSchema(organizations).pick({
-  name: true,
-  description: true,
-  logoUrl: true,
-  address: true,
-  phone: true,
-  email: true,
-  website: true,
-  taxId: true,
-});
-
-export const insertOrganizationUserSchema = createInsertSchema(organizationUsers).pick({
-  organizationId: true,
-  userId: true,
-  role: true,
-}).extend({
-  organizationId: z.coerce.number(),
-  userId: z.coerce.number(),
-  role: z.enum(["owner", "admin", "member"]).default("member"),
-});
-
 export const insertProjectSchema = createInsertSchema(projects).pick({
   name: true,
   description: true,
   status: true,
   userId: true,
-  organizationId: true,
-}).extend({
-  organizationId: z.coerce.number().optional(),
 });
 
 export const insertMaterialSchema = createInsertSchema(materials).pick({
@@ -252,27 +200,9 @@ export const insertUnitSchema = createInsertSchema(units).pick({
   description: true,
 });
 
-export const insertTransactionSchema = createInsertSchema(transactions).pick({
-  projectId: true,
-  date: true,
-  type: true,
-  category: true,
-  description: true,
-  amount: true,
-}).extend({
-  projectId: z.coerce.number(),
-  amount: z.coerce.number().min(0, "El monto debe ser mayor a 0"),
-});
-
 // Type definitions
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
-
-export type Organization = typeof organizations.$inferSelect;
-export type InsertOrganization = z.infer<typeof insertOrganizationSchema>;
-
-export type OrganizationUser = typeof organizationUsers.$inferSelect;
-export type InsertOrganizationUser = z.infer<typeof insertOrganizationUserSchema>;
 
 export type Project = typeof projects.$inferSelect;
 export type InsertProject = z.infer<typeof insertProjectSchema>;
@@ -298,5 +228,67 @@ export type InsertCategory = z.infer<typeof insertCategorySchema>;
 export type Unit = typeof units.$inferSelect;
 export type InsertUnit = z.infer<typeof insertUnitSchema>;
 
+// Transactions table
+export const transactions = pgTable("transactions", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  date: timestamp("date").notNull().defaultNow(),
+  type: text("type").notNull(), // "ingreso" o "egreso"
+  category: text("category").notNull(),
+  description: text("description").notNull(),
+  amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertTransactionSchema = createInsertSchema(transactions).pick({
+  projectId: true,
+  date: true,
+  type: true,
+  category: true,
+  description: true,
+  amount: true,
+}).extend({
+  projectId: z.coerce.number(),
+  amount: z.coerce.number().min(0, "El monto debe ser mayor a 0"),
+});
+
 export type Transaction = typeof transactions.$inferSelect;
 export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
+
+// Add relations to projects for organizations
+export const projectsRelations = relations(projects, ({ one }) => ({
+  organization: one(organizations, {
+    fields: [projects.organizationId],
+    references: [organizations.id],
+  }),
+}));
+
+// Schemas
+export const insertOrganizationSchema = createInsertSchema(organizations).pick({
+  name: true,
+  description: true,
+  logoUrl: true,
+  address: true,
+  phone: true,
+  email: true,
+  website: true,
+  taxId: true,
+});
+
+export const insertOrganizationUserSchema = createInsertSchema(organizationUsers).pick({
+  organizationId: true,
+  userId: true,
+  role: true,
+}).extend({
+  organizationId: z.coerce.number(),
+  userId: z.coerce.number(),
+  role: z.enum(["owner", "admin", "member"]).default("member"),
+});
+
+// Types
+export type Organization = typeof organizations.$inferSelect;
+export type InsertOrganization = z.infer<typeof insertOrganizationSchema>;
+
+export type OrganizationUser = typeof organizationUsers.$inferSelect;
+export type InsertOrganizationUser = z.infer<typeof insertOrganizationUserSchema>;
