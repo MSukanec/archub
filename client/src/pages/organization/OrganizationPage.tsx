@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Users, Plus, Building, Settings } from "lucide-react";
+import { Link } from "wouter";
 
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,8 +54,10 @@ export default function OrganizationPage() {
               </div>
 
               <div className="flex justify-end">
-                <Button variant="outline" size="sm">
-                  <Settings className="mr-2 h-4 w-4" /> Configurar
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="/organization/settings">
+                    <Settings className="mr-2 h-4 w-4" /> Configurar
+                  </Link>
                 </Button>
               </div>
             </CardContent>

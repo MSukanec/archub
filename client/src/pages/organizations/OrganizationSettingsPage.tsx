@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet";
 import { OrganizationSettings } from "@/components/organization/OrganizationSettings";
 import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { MainLayout } from "@/components/layout/MainLayout";
 
 interface Organization {
   id: number;
@@ -34,28 +35,32 @@ export default function OrganizationSettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[calc(100vh-120px)]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      <MainLayout>
+        <div className="flex items-center justify-center min-h-[calc(100vh-120px)]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </MainLayout>
     );
   }
 
   if (error || !organization) {
     return (
-      <div className="container py-6">
-        <Alert variant="destructive">
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>
-            No se pudo cargar la información de la organización. 
-            Por favor, asegúrate de que existe una organización y que tienes permisos para acceder a ella.
-          </AlertDescription>
-        </Alert>
-      </div>
+      <MainLayout>
+        <div className="container py-6">
+          <Alert variant="destructive">
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>
+              No se pudo cargar la información de la organización. 
+              Por favor, asegúrate de que existe una organización y que tienes permisos para acceder a ella.
+            </AlertDescription>
+          </Alert>
+        </div>
+      </MainLayout>
     );
   }
 
   return (
-    <>
+    <MainLayout>
       <Helmet>
         <title>Configuración de la Organización | ArchHub</title>
       </Helmet>
@@ -72,6 +77,6 @@ export default function OrganizationSettingsPage() {
           <OrganizationSettings organization={organization} />
         </div>
       </div>
-    </>
+    </MainLayout>
   );
 }
