@@ -42,6 +42,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { PdfConfigPreview } from "./PdfConfigPreview";
 
 // Esquema de validación para los datos de la organización
 const organizationSchema = z.object({
@@ -206,6 +207,15 @@ export function OrganizationSettings({ organization }: Props) {
     } finally {
       setUploadingLogo(false);
     }
+  };
+
+  // Obtener el valor actual del formulario para la vista previa en tiempo real
+  const currentFormValues = form.watch();
+  const previewOrganization = {
+    ...organization,
+    ...currentFormValues,
+    // Asegurarse que el logoUrl siga siendo el mismo
+    logoUrl: organization.logoUrl
   };
 
   return (
@@ -373,209 +383,227 @@ export function OrganizationSettings({ organization }: Props) {
       </TabsContent>
 
       <TabsContent value="pdf">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Configuración de PDF</CardTitle>
+                    <CardDescription>
+                      Personaliza cómo se verán tus documentos PDF
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="pdfConfig.logoPosition"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Posición del Logo</FormLabel>
+                          <Select 
+                            onValueChange={field.onChange} 
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecciona la posición" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="left">Izquierda</SelectItem>
+                              <SelectItem value="center">Centro</SelectItem>
+                              <SelectItem value="right">Derecha</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <Separator className="my-4" />
+                    
+                    <div className="space-y-4">
+                      <h3 className="text-sm font-medium">Información a mostrar</h3>
+                      
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="pdfConfig.showAddress"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                              <div className="space-y-0.5">
+                                <FormLabel>Mostrar dirección</FormLabel>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="pdfConfig.showPhone"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                              <div className="space-y-0.5">
+                                <FormLabel>Mostrar teléfono</FormLabel>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="pdfConfig.showEmail"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                              <div className="space-y-0.5">
+                                <FormLabel>Mostrar email</FormLabel>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="pdfConfig.showWebsite"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                              <div className="space-y-0.5">
+                                <FormLabel>Mostrar sitio web</FormLabel>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="pdfConfig.showTaxId"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                              <div className="space-y-0.5">
+                                <FormLabel>Mostrar RFC / ID fiscal</FormLabel>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+
+                    <Separator className="my-4" />
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="pdfConfig.primaryColor"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Color Primario</FormLabel>
+                            <div className="flex gap-2">
+                              <FormControl>
+                                <Input {...field} type="text" />
+                              </FormControl>
+                              <Input 
+                                type="color" 
+                                value={field.value}
+                                onChange={(e) => field.onChange(e.target.value)}
+                                className="w-12 p-1 h-10"
+                              />
+                            </div>
+                            <FormDescription>
+                              Color principal para títulos y encabezados
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="pdfConfig.secondaryColor"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Color Secundario</FormLabel>
+                            <div className="flex gap-2">
+                              <FormControl>
+                                <Input {...field} type="text" />
+                              </FormControl>
+                              <Input 
+                                type="color" 
+                                value={field.value}
+                                onChange={(e) => field.onChange(e.target.value)}
+                                className="w-12 p-1 h-10"
+                              />
+                            </div>
+                            <FormDescription>
+                              Color para fondos y elementos secundarios
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </CardContent>
+                  <CardFooter>
+                    <Button 
+                      type="submit" 
+                      disabled={updateMutation.isPending}
+                      className="ml-auto"
+                    >
+                      {updateMutation.isPending && (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      )}
+                      Guardar configuración
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </form>
+            </Form>
+          </div>
+          
+          <div>
             <Card>
               <CardHeader>
-                <CardTitle>Configuración de PDF</CardTitle>
+                <CardTitle>Vista Previa</CardTitle>
                 <CardDescription>
-                  Personaliza cómo se verán tus documentos PDF
+                  Así se verán tus documentos PDF
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="pdfConfig.logoPosition"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Posición del Logo</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecciona la posición" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="left">Izquierda</SelectItem>
-                          <SelectItem value="center">Centro</SelectItem>
-                          <SelectItem value="right">Derecha</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <Separator className="my-4" />
-                
-                <div className="space-y-4">
-                  <h3 className="text-sm font-medium">Información a mostrar</h3>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="pdfConfig.showAddress"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                          <div className="space-y-0.5">
-                            <FormLabel>Mostrar dirección</FormLabel>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="pdfConfig.showPhone"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                          <div className="space-y-0.5">
-                            <FormLabel>Mostrar teléfono</FormLabel>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="pdfConfig.showEmail"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                          <div className="space-y-0.5">
-                            <FormLabel>Mostrar email</FormLabel>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="pdfConfig.showWebsite"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                          <div className="space-y-0.5">
-                            <FormLabel>Mostrar sitio web</FormLabel>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="pdfConfig.showTaxId"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                          <div className="space-y-0.5">
-                            <FormLabel>Mostrar RFC / ID fiscal</FormLabel>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-
-                <Separator className="my-4" />
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="pdfConfig.primaryColor"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Color Primario</FormLabel>
-                        <div className="flex gap-2">
-                          <FormControl>
-                            <Input {...field} type="text" />
-                          </FormControl>
-                          <Input 
-                            type="color" 
-                            value={field.value}
-                            onChange={(e) => field.onChange(e.target.value)}
-                            className="w-12 p-1 h-10"
-                          />
-                        </div>
-                        <FormDescription>
-                          Color principal para títulos y encabezados
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="pdfConfig.secondaryColor"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Color Secundario</FormLabel>
-                        <div className="flex gap-2">
-                          <FormControl>
-                            <Input {...field} type="text" />
-                          </FormControl>
-                          <Input 
-                            type="color" 
-                            value={field.value}
-                            onChange={(e) => field.onChange(e.target.value)}
-                            className="w-12 p-1 h-10"
-                          />
-                        </div>
-                        <FormDescription>
-                          Color para fondos y elementos secundarios
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+              <CardContent>
+                <PdfConfigPreview organization={previewOrganization} />
               </CardContent>
-              <CardFooter>
-                <Button 
-                  type="submit" 
-                  disabled={updateMutation.isPending}
-                  className="ml-auto"
-                >
-                  {updateMutation.isPending && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  Guardar configuración
-                </Button>
-              </CardFooter>
             </Card>
-          </form>
-        </Form>
+          </div>
+        </div>
       </TabsContent>
 
       <TabsContent value="logo">
@@ -674,12 +702,6 @@ export function OrganizationSettings({ organization }: Props) {
                   </Button>
                 )}
               </div>
-            </div>
-            
-            <div className="text-sm text-muted-foreground">
-              <p>Formatos aceptados: JPEG, PNG, GIF, SVG</p>
-              <p>Tamaño máximo: 2MB</p>
-              <p>Recomendación: Usa un logo con fondo transparente (PNG/SVG) para mejores resultados.</p>
             </div>
           </CardContent>
         </Card>
