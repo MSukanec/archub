@@ -51,7 +51,12 @@ const organizationSchema = z.object({
   address: z.string().nullable().optional(),
   phone: z.string().nullable().optional(),
   email: z.string().email("Email inválido").nullable().optional(),
-  website: z.string().url("URL inválida").nullable().optional(),
+  website: z.string().nullable().optional().refine(
+    (val) => !val || val === "" || val.startsWith("http://") || val.startsWith("https://"),
+    {
+      message: "La URL debe comenzar con http:// o https://",
+    }
+  ),
   taxId: z.string().nullable().optional(),
   pdfConfig: z.object({
     logoPosition: z.enum(["left", "center", "right"]),

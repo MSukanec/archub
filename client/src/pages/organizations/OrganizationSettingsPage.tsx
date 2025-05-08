@@ -65,8 +65,8 @@ export default function OrganizationSettingsPage() {
         <title>Configuración de la Organización | ArchHub</title>
       </Helmet>
       
-      <div className="container py-6">
-        <div className="mb-6">
+      <div className="container max-w-4xl mx-auto py-6">
+        <div className="mb-6 text-center">
           <h1 className="text-3xl font-bold tracking-tight">Configuración de la Organización</h1>
           <p className="text-muted-foreground mt-2">
             Actualiza la información y configuración de tu organización
