@@ -1,40 +1,71 @@
-import { useState, useEffect } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-
+import { z } from "zod";
+import { AlertTriangle, Loader2, Upload } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  RadioGroup,
-  RadioGroupItem,
-} from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { BudgetPdfPreview } from "@/components/budgets/BudgetPdfPreview";
-import { 
-  LucideArrowLeft,
-  LucideArrowRight, 
-  LucideAlignLeft, 
-  LucideAlignCenter, 
-  LucideAlignRight,
-  LucideUpload 
-} from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
-// Definimos la interfaz para la organización
+// Esquema de validación para los datos de la organización
+const organizationSchema = z.object({
+  name: z.string().min(1, "El nombre es obligatorio"),
+  description: z.string().nullable().optional(),
+  address: z.string().nullable().optional(),
+  phone: z.string().nullable().optional(),
+  email: z.string().email("Email inválido").nullable().optional(),
+  website: z.string().url("URL inválida").nullable().optional(),
+  taxId: z.string().nullable().optional(),
+  pdfConfig: z.object({
+    logoPosition: z.enum(["left", "center", "right"]),
+    showAddress: z.boolean(),
+    showPhone: z.boolean(),
+    showEmail: z.boolean(),
+    showWebsite: z.boolean(),
+    showTaxId: z.boolean(),
+    primaryColor: z.string(),
+    secondaryColor: z.string(),
+  }),
+});
+
+type OrganizationFormValues = z.infer<typeof organizationSchema>;
+
 interface Organization {
   id: number;
   name: string;
@@ -57,587 +88,601 @@ interface Organization {
   };
 }
 
-// Esquema para validar los datos del formulario
-const organizationSchema = z.object({
-  name: z.string().min(1, "El nombre es requerido"),
-  description: z.string().nullable().optional(),
-  address: z.string().nullable().optional(),
-  phone: z.string().nullable().optional(),
-  email: z.string().email("Ingrese una dirección de email válida").nullable().optional(),
-  website: z.string().url("Ingrese una URL válida").nullable().optional(),
-  taxId: z.string().nullable().optional(),
-});
-
-// Interfaz para las propiedades del componente
-interface OrganizationSettingsProps {
+interface Props {
   organization: Organization;
 }
 
-// Define un modelo de presupuesto para la vista previa del PDF
-const sampleBudget = {
-  id: 1,
-  name: "Presupuesto de Ejemplo",
-  description: "Este es un ejemplo para mostrar cómo se verá el PDF generado."
-};
-
-// Datos de ejemplo para la vista previa
-const sampleProject = {
-  id: 1,
-  name: "Proyecto de Ejemplo",
-  description: "Descripción del proyecto de ejemplo"
-};
-
-// Tareas de ejemplo para la vista previa
-const sampleBudgetTasks = [
-  {
-    id: 1,
-    quantity: 10,
-    task: {
-      id: 1,
-      name: "Instalación eléctrica",
-      unit: "m²",
-      unitPrice: 25,
-      category: "Electricidad"
-    }
-  },
-  {
-    id: 2,
-    quantity: 5,
-    task: {
-      id: 2,
-      name: "Pintura",
-      unit: "m²",
-      unitPrice: 15,
-      category: "Acabados"
-    }
-  },
-  {
-    id: 3,
-    quantity: 8,
-    task: {
-      id: 3,
-      name: "Piso laminado",
-      unit: "m²",
-      unitPrice: 35,
-      category: "Pisos"
-    }
-  }
-];
-
-export function OrganizationSettings({ organization }: OrganizationSettingsProps) {
+export function OrganizationSettings({ organization }: Props) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [uploadingLogo, setUploadingLogo] = useState(false);
-  const [logoPreview, setLogoPreview] = useState<string | null>(organization.logoUrl);
-  const [activeTab, setActiveTab] = useState<string>("general");
-  
-  // Estado para la configuración del PDF
-  const [pdfSettings, setPdfSettings] = useState<Partial<Organization>>({
-    pdfConfig: organization.pdfConfig || {
-      logoPosition: "left",
-      showAddress: true,
-      showPhone: true,
-      showEmail: true,
-      showWebsite: true,
-      showTaxId: true,
-      primaryColor: "#92c900",
-      secondaryColor: "#f0f0f0"
-    }
-  });
-  
-  // Estado para la vista previa del PDF
-  const [pdfPreview, setPdfPreview] = useState<string | null>(null);
-  
-  // Configurar el formulario
-  const form = useForm<z.infer<typeof organizationSchema>>({
+  const [logoError, setLogoError] = useState<string | null>(null);
+
+  // Default PDF config if not provided
+  const defaultPdfConfig = {
+    logoPosition: "left" as const,
+    showAddress: true,
+    showPhone: true,
+    showEmail: true,
+    showWebsite: true,
+    showTaxId: true,
+    primaryColor: "#92c900",
+    secondaryColor: "#f0f0f0",
+  };
+
+  // Prepare default values for the form
+  const defaultValues: OrganizationFormValues = {
+    name: organization.name,
+    description: organization.description,
+    address: organization.address,
+    phone: organization.phone,
+    email: organization.email,
+    website: organization.website,
+    taxId: organization.taxId,
+    pdfConfig: organization.pdfConfig || defaultPdfConfig,
+  };
+
+  // Initialize react-hook-form
+  const form = useForm<OrganizationFormValues>({
     resolver: zodResolver(organizationSchema),
-    defaultValues: {
-      name: organization.name,
-      description: organization.description,
-      address: organization.address,
-      phone: organization.phone,
-      email: organization.email,
-      website: organization.website,
-      taxId: organization.taxId,
-    }
+    defaultValues,
   });
-  
-  // Función para cargar el logo
-  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files || files.length === 0) return;
-    
-    const file = files[0];
-    
-    // Validar tipo de archivo (solo imágenes)
-    if (!file.type.startsWith('image/')) {
+
+  // Mutation para actualizar la organización
+  const updateMutation = useMutation({
+    mutationFn: async (values: OrganizationFormValues) => {
+      const res = await apiRequest(
+        "PATCH",
+        `/api/organizations/${organization.id}`,
+        values
+      );
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/organizations/active"] });
       toast({
-        title: "Error al cargar el logo",
-        description: "El archivo debe ser una imagen",
+        title: "Organización actualizada",
+        description: "Los cambios se han guardado correctamente.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error al actualizar",
+        description: error.message,
         variant: "destructive",
       });
+    },
+  });
+
+  // Función para manejar el envío del formulario
+  const onSubmit = (values: OrganizationFormValues) => {
+    updateMutation.mutate(values);
+  };
+
+  // Función para manejar la subida del logo
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validación básica
+    if (!file.type.startsWith("image/")) {
+      setLogoError("Por favor, sube solo archivos de imagen");
       return;
     }
-    
-    // Crear una vista previa
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setLogoPreview(e.target?.result as string);
-    };
-    reader.readAsDataURL(file);
-    
-    // Subir el archivo al servidor
-    const formData = new FormData();
-    formData.append('logo', file);
-    
+
+    if (file.size > 2 * 1024 * 1024) {
+      setLogoError("La imagen debe ser menor a 2MB");
+      return;
+    }
+
+    setLogoError(null);
     setUploadingLogo(true);
-    
+
     try {
-      await apiRequest('POST', `/api/organizations/${organization.id}/logo`, formData, true);
-      
+      const formData = new FormData();
+      formData.append("logo", file);
+
+      const res = await fetch(`/api/organizations/${organization.id}/logo`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        throw new Error("Error al subir el logo");
+      }
+
+      const data = await res.json();
+
+      // Actualizar caché
+      queryClient.invalidateQueries({ queryKey: ["/api/organizations/active"] });
+
       toast({
         title: "Logo actualizado",
-        description: "El logo se ha actualizado correctamente",
+        description: "Se ha subido el logo correctamente",
       });
-      
-      // Invalidar la consulta para actualizar los datos
-      queryClient.invalidateQueries({ queryKey: ['/api/organizations/active'] });
     } catch (error) {
-      toast({
-        title: "Error",
-        description: `No se pudo subir el logo: ${error}`,
-        variant: "destructive",
-      });
+      setLogoError("Error al subir el logo. Inténtalo de nuevo.");
+      console.error("Error uploading logo:", error);
     } finally {
       setUploadingLogo(false);
     }
   };
-  
-  // Mutación para actualizar la organización
-  const updateOrganizationMutation = useMutation({
-    mutationFn: (data: z.infer<typeof organizationSchema>) => {
-      return apiRequest('PATCH', `/api/organizations/${organization.id}`, data);
-    },
-    onSuccess: () => {
-      toast({
-        title: "Organización actualizada",
-        description: "La información de la organización ha sido actualizada correctamente",
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/organizations/active'] });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: `No se pudo actualizar la organización: ${error}`,
-        variant: "destructive",
-      });
-    },
-  });
-  
-  // Mutación para actualizar la configuración del PDF
-  const updatePdfConfigMutation = useMutation({
-    mutationFn: (data: { pdfConfig: any }) => {
-      return apiRequest('PATCH', `/api/organizations/${organization.id}`, data);
-    },
-    onSuccess: () => {
-      toast({
-        title: "Configuración actualizada",
-        description: "La configuración de exportación ha sido actualizada correctamente",
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/organizations/active'] });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: `No se pudo actualizar la configuración: ${error}`,
-        variant: "destructive",
-      });
-    },
-  });
-  
-  // Manejar el cambio de posición del logo
-  const handleLogoPositionChange = (position: "left" | "center" | "right") => {
-    setPdfSettings(prev => ({
-      ...prev,
-      pdfConfig: {
-        ...prev.pdfConfig!,
-        logoPosition: position
-      }
-    }));
-  };
-  
-  // Manejar el cambio de opciones de visualización
-  const handleToggleOption = (option: string, value: boolean) => {
-    setPdfSettings(prev => ({
-      ...prev,
-      pdfConfig: {
-        ...prev.pdfConfig!,
-        [option]: value
-      }
-    }));
-  };
-  
-  // Manejar el cambio de color
-  const handleColorChange = (colorType: string, value: string) => {
-    setPdfSettings(prev => ({
-      ...prev,
-      pdfConfig: {
-        ...prev.pdfConfig!,
-        [colorType]: value
-      }
-    }));
-  };
-  
-  // Guardar la configuración del PDF
-  const savePdfConfig = () => {
-    updatePdfConfigMutation.mutate({ pdfConfig: pdfSettings.pdfConfig });
-  };
-  
-  // Manejar envío del formulario
-  const onSubmit = (data: z.infer<typeof organizationSchema>) => {
-    updateOrganizationMutation.mutate(data);
-  };
-  
-  // Actualizar la vista previa del PDF cuando cambie la configuración
-  useEffect(() => {
-    // La vista previa se actualizará cuando se cambia la configuración
-  }, [pdfSettings]);
-  
-  // Combinar la organización con la configuración actualizada para la vista previa
-  const previewOrganization = {
-    ...organization,
-    ...pdfSettings
-  };
 
   return (
-    <Tabs defaultValue="general" value={activeTab} onValueChange={setActiveTab}>
-      <TabsList>
-        <TabsTrigger value="general">General</TabsTrigger>
-        <TabsTrigger value="pdf">Exportación PDF</TabsTrigger>
+    <Tabs defaultValue="general">
+      <TabsList className="w-full">
+        <TabsTrigger value="general" className="flex-1">Información General</TabsTrigger>
+        <TabsTrigger value="pdf" className="flex-1">Configuración PDF</TabsTrigger>
+        <TabsTrigger value="logo" className="flex-1">Logo</TabsTrigger>
       </TabsList>
-      
-      {/* Tab de Información General */}
+
       <TabsContent value="general">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Sección de Logo */}
-            <div className="mb-6">
-              <h3 className="text-lg font-medium mb-2">Logo de la Organización</h3>
-              <div className="flex items-start gap-4">
-                <div className="border rounded-md w-32 h-32 flex items-center justify-center overflow-hidden">
-                  {logoPreview ? (
-                    <img 
-                      src={logoPreview} 
-                      alt="Logo de la organización" 
-                      className="max-w-full max-h-full object-contain"
-                    />
-                  ) : (
-                    <div className="text-center text-muted-foreground text-sm p-2">
-                      Sin logo
-                    </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Información de la Organización</CardTitle>
+                <CardDescription>
+                  Estos datos se utilizarán en los documentos y reportes generados
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nombre de la organización</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Construcciones XYZ" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
-                </div>
-                <div>
-                  <Label htmlFor="logo-upload" className="mb-2">Subir nuevo logo</Label>
-                  <Input
-                    id="logo-upload"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleLogoUpload}
-                    disabled={uploadingLogo}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Descripción</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          {...field}
+                          value={field.value || ''}
+                          placeholder="Descripción breve de la organización"
+                          rows={3}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="taxId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>RFC / ID Fiscal</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            value={field.value || ''}
+                            placeholder="ABC123456XYZ"
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Para incluir en facturas y presupuestos
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Sube una imagen PNG o JPG que represente a tu organización.
-                  </p>
+
+                  <FormField
+                    control={form.control}
+                    name="address"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Dirección</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            value={field.value || ''}
+                            placeholder="Calle, Ciudad, Código Postal"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Teléfono</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            value={field.value || ''}
+                            placeholder="+1 (555) 123-4567"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            value={field.value || ''}
+                            placeholder="contacto@empresa.com"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="website"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Sitio Web</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            value={field.value || ''}
+                            placeholder="https://www.empresa.com"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
-              </div>
-            </div>
-            
-            {/* Campos del formulario */}
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nombre</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="Nombre de la organización" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descripción</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      value={field.value || ""}
-                      placeholder="Breve descripción de la organización"
-                      rows={3}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="address"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Dirección</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        value={field.value || ""}
-                        placeholder="Dirección física"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Teléfono</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        value={field.value || ""}
-                        placeholder="Número de contacto"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        value={field.value || ""}
-                        placeholder="Email de contacto"
-                        type="email"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="website"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Sitio Web</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        value={field.value || ""}
-                        placeholder="URL del sitio web"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            
-            <FormField
-              control={form.control}
-              name="taxId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Identificación Fiscal</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      value={field.value || ""}
-                      placeholder="RIF, NIT, RFC u otro identificador fiscal"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <div className="flex justify-end">
-              <Button
-                type="submit"
-                disabled={updateOrganizationMutation.isPending}
-                className="bg-primary hover:bg-primary/90"
-              >
-                {updateOrganizationMutation.isPending ? "Guardando..." : "Guardar Cambios"}
-              </Button>
-            </div>
+              </CardContent>
+              <CardFooter>
+                <Button 
+                  type="submit" 
+                  disabled={updateMutation.isPending}
+                  className="ml-auto"
+                >
+                  {updateMutation.isPending && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  Guardar cambios
+                </Button>
+              </CardFooter>
+            </Card>
           </form>
         </Form>
       </TabsContent>
-      
-      {/* Tab de Configuración PDF */}
+
       <TabsContent value="pdf">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-medium mb-3">Posición del Logo</h3>
-              <RadioGroup 
-                defaultValue={pdfSettings.pdfConfig?.logoPosition || "left"}
-                className="flex gap-4"
-                onValueChange={(value) => handleLogoPositionChange(value as "left" | "center" | "right")}
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="left" id="logo-left" />
-                  <Label htmlFor="logo-left" className="flex items-center gap-1">
-                    <LucideAlignLeft className="h-4 w-4" /> Izquierda
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="center" id="logo-center" />
-                  <Label htmlFor="logo-center" className="flex items-center gap-1">
-                    <LucideAlignCenter className="h-4 w-4" /> Centro
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="right" id="logo-right" />
-                  <Label htmlFor="logo-right" className="flex items-center gap-1">
-                    <LucideAlignRight className="h-4 w-4" /> Derecha
-                  </Label>
-                </div>
-              </RadioGroup>
-            </div>
-            
-            <div>
-              <h3 className="text-lg font-medium mb-3">Información a mostrar</h3>
-              <div className="grid grid-cols-1 gap-3">
-                <div className="flex items-center space-x-2">
-                  <Switch 
-                    id="show-address" 
-                    checked={pdfSettings.pdfConfig?.showAddress || false}
-                    onCheckedChange={(checked) => handleToggleOption('showAddress', checked)}
-                  />
-                  <Label htmlFor="show-address">Mostrar dirección</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Switch 
-                    id="show-phone" 
-                    checked={pdfSettings.pdfConfig?.showPhone || false}
-                    onCheckedChange={(checked) => handleToggleOption('showPhone', checked)}
-                  />
-                  <Label htmlFor="show-phone">Mostrar teléfono</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Switch 
-                    id="show-email" 
-                    checked={pdfSettings.pdfConfig?.showEmail || false}
-                    onCheckedChange={(checked) => handleToggleOption('showEmail', checked)}
-                  />
-                  <Label htmlFor="show-email">Mostrar email</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Switch 
-                    id="show-website" 
-                    checked={pdfSettings.pdfConfig?.showWebsite || false}
-                    onCheckedChange={(checked) => handleToggleOption('showWebsite', checked)}
-                  />
-                  <Label htmlFor="show-website">Mostrar sitio web</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Switch 
-                    id="show-tax-id" 
-                    checked={pdfSettings.pdfConfig?.showTaxId || false}
-                    onCheckedChange={(checked) => handleToggleOption('showTaxId', checked)}
-                  />
-                  <Label htmlFor="show-tax-id">Mostrar identificación fiscal</Label>
-                </div>
-              </div>
-            </div>
-            
-            <div>
-              <h3 className="text-lg font-medium mb-3">Colores</h3>
-              <div className="grid grid-cols-1 gap-4">
-                <div>
-                  <Label htmlFor="primary-color" className="mb-2">Color principal</Label>
-                  <div className="flex items-center gap-2">
-                    <div 
-                      className="w-10 h-10 rounded border" 
-                      style={{ backgroundColor: pdfSettings.pdfConfig?.primaryColor || "#92c900" }}
-                    />
-                    <Input
-                      id="primary-color"
-                      type="text"
-                      value={pdfSettings.pdfConfig?.primaryColor || "#92c900"}
-                      onChange={(e) => handleColorChange('primaryColor', e.target.value)}
-                      placeholder="#92c900"
-                    />
-                  </div>
-                </div>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Configuración de PDF</CardTitle>
+                <CardDescription>
+                  Personaliza cómo se verán tus documentos PDF
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="pdfConfig.logoPosition"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Posición del Logo</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecciona la posición" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="left">Izquierda</SelectItem>
+                          <SelectItem value="center">Centro</SelectItem>
+                          <SelectItem value="right">Derecha</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Separator className="my-4" />
                 
-                <div>
-                  <Label htmlFor="secondary-color" className="mb-2">Color secundario</Label>
-                  <div className="flex items-center gap-2">
-                    <div 
-                      className="w-10 h-10 rounded border" 
-                      style={{ backgroundColor: pdfSettings.pdfConfig?.secondaryColor || "#f0f0f0" }}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-medium">Información a mostrar</h3>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="pdfConfig.showAddress"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                          <div className="space-y-0.5">
+                            <FormLabel>Mostrar dirección</FormLabel>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
                     />
-                    <Input
-                      id="secondary-color"
-                      type="text"
-                      value={pdfSettings.pdfConfig?.secondaryColor || "#f0f0f0"}
-                      onChange={(e) => handleColorChange('secondaryColor', e.target.value)}
-                      placeholder="#f0f0f0"
+                    
+                    <FormField
+                      control={form.control}
+                      name="pdfConfig.showPhone"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                          <div className="space-y-0.5">
+                            <FormLabel>Mostrar teléfono</FormLabel>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="pdfConfig.showEmail"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                          <div className="space-y-0.5">
+                            <FormLabel>Mostrar email</FormLabel>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="pdfConfig.showWebsite"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                          <div className="space-y-0.5">
+                            <FormLabel>Mostrar sitio web</FormLabel>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="pdfConfig.showTaxId"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                          <div className="space-y-0.5">
+                            <FormLabel>Mostrar RFC / ID fiscal</FormLabel>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
                     />
                   </div>
                 </div>
+
+                <Separator className="my-4" />
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="pdfConfig.primaryColor"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Color Primario</FormLabel>
+                        <div className="flex gap-2">
+                          <FormControl>
+                            <Input {...field} type="text" />
+                          </FormControl>
+                          <Input 
+                            type="color" 
+                            value={field.value}
+                            onChange={(e) => field.onChange(e.target.value)}
+                            className="w-12 p-1 h-10"
+                          />
+                        </div>
+                        <FormDescription>
+                          Color principal para títulos y encabezados
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="pdfConfig.secondaryColor"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Color Secundario</FormLabel>
+                        <div className="flex gap-2">
+                          <FormControl>
+                            <Input {...field} type="text" />
+                          </FormControl>
+                          <Input 
+                            type="color" 
+                            value={field.value}
+                            onChange={(e) => field.onChange(e.target.value)}
+                            className="w-12 p-1 h-10"
+                          />
+                        </div>
+                        <FormDescription>
+                          Color para fondos y elementos secundarios
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button 
+                  type="submit" 
+                  disabled={updateMutation.isPending}
+                  className="ml-auto"
+                >
+                  {updateMutation.isPending && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  Guardar configuración
+                </Button>
+              </CardFooter>
+            </Card>
+          </form>
+        </Form>
+      </TabsContent>
+
+      <TabsContent value="logo">
+        <Card>
+          <CardHeader>
+            <CardTitle>Logo de la Organización</CardTitle>
+            <CardDescription>
+              Sube el logo de tu organización para usarlo en documentos y la interfaz
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {logoError && (
+              <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>{logoError}</AlertDescription>
+              </Alert>
+            )}
+            
+            <div className="flex flex-col items-center justify-center bg-secondary p-6 rounded-lg border border-dashed border-border">
+              {organization.logoUrl ? (
+                <div className="mb-4">
+                  <img 
+                    src={organization.logoUrl} 
+                    alt="Logo de la organización" 
+                    className="max-h-24 max-w-full object-contain"
+                  />
+                </div>
+              ) : (
+                <div className="mb-4 text-center text-muted-foreground">
+                  <Upload className="mx-auto h-12 w-12 mb-2" />
+                  <p>No hay logo cargado</p>
+                </div>
+              )}
+              
+              <div className="flex gap-2">
+                <label htmlFor="logo-upload" className="cursor-pointer">
+                  <Button 
+                    variant="outline" 
+                    className="cursor-pointer" 
+                    type="button"
+                    disabled={uploadingLogo}
+                  >
+                    {uploadingLogo ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Subiendo...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="mr-2 h-4 w-4" />
+                        {organization.logoUrl ? "Cambiar logo" : "Subir logo"}
+                      </>
+                    )}
+                  </Button>
+                  <input
+                    id="logo-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleLogoUpload}
+                    disabled={uploadingLogo}
+                  />
+                </label>
+                
+                {organization.logoUrl && (
+                  <Button 
+                    variant="destructive" 
+                    type="button"
+                    disabled={uploadingLogo}
+                    onClick={async () => {
+                      try {
+                        const res = await fetch(`/api/organizations/${organization.id}/logo`, {
+                          method: "DELETE",
+                        });
+                        
+                        if (!res.ok) {
+                          throw new Error("Error al eliminar el logo");
+                        }
+                        
+                        queryClient.invalidateQueries({ queryKey: ["/api/organizations/active"] });
+                        
+                        toast({
+                          title: "Logo eliminado",
+                          description: "Se ha eliminado el logo correctamente",
+                        });
+                      } catch (error) {
+                        toast({
+                          title: "Error",
+                          description: "No se pudo eliminar el logo",
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                  >
+                    Eliminar logo
+                  </Button>
+                )}
               </div>
             </div>
             
-            <div className="flex justify-end">
-              <Button
-                onClick={savePdfConfig}
-                disabled={updatePdfConfigMutation.isPending}
-                className="bg-primary hover:bg-primary/90"
-              >
-                {updatePdfConfigMutation.isPending ? "Guardando..." : "Guardar Configuración"}
-              </Button>
+            <div className="text-sm text-muted-foreground">
+              <p>Formatos aceptados: JPEG, PNG, GIF, SVG</p>
+              <p>Tamaño máximo: 2MB</p>
+              <p>Recomendación: Usa un logo con fondo transparente (PNG/SVG) para mejores resultados.</p>
             </div>
-          </div>
-          
-          {/* Vista previa del PDF */}
-          <div className="border rounded-md p-4">
-            <h3 className="text-lg font-medium mb-3">Vista Previa</h3>
-            <div className="bg-background border rounded-md overflow-hidden">
-              <BudgetPdfPreview
-                organization={previewOrganization as any}
-                project={sampleProject}
-                budget={sampleBudget}
-                budgetTasks={sampleBudgetTasks}
-                previewOnly={true}
-                onPreviewGenerated={setPdfPreview}
-              />
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </TabsContent>
     </Tabs>
   );

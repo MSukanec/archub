@@ -1,7 +1,10 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { storage as dataStorage } from "./storage";
 import { setupAuth } from "./auth";
+import path from "path";
+import fs from "fs";
+import multer from "multer";
 import { 
   insertUserSchema, 
   insertProjectSchema, 
@@ -32,6 +35,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     next();
   };
+  
+  // Configurar Multer para subida de archivos
+  const uploadsDir = path.join(process.cwd(), 'client/public/uploads');
+  
+  // Crear directorio si no existe
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+  
+  const multerStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, uploadsDir);
+    },
+    filename: (req, file, cb) => {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+      const ext = path.extname(file.originalname);
+      cb(null, file.fieldname + '-' + uniqueSuffix + ext);
+    },
+  });
+  
+  const upload = multer({ 
+    storage: multerStorage,
+    limits: {
+      fileSize: 2 * 1024 * 1024, // 2MB
+    },
+    fileFilter: (req, file, cb) => {
+      // Aceptar solo imágenes
+      if (file.mimetype.startsWith('image/')) {
+        cb(null, true);
+      } else {
+        cb(new Error('Solo se permiten archivos de imagen'));
+      }
+    }
+  });
 
   // Nota: Las rutas de autenticación están configuradas en auth.ts
   // /api/auth/login, /api/auth/register, /api/auth/logout, /api/auth/me
@@ -39,7 +76,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Project routes
   app.get(`${apiPrefix}/projects`, authenticate, async (req, res) => {
     try {
-      const projects = await storage.getProjects(req.user.id);
+      const projects = await dataStorage.getProjects(req.user.id);
       return res.json(projects);
     } catch (error) {
       return res.status(500).json({ message: "Server error", error });
