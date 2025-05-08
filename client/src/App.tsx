@@ -20,6 +20,7 @@ import TransactionsPage from "@/pages/projects/TransactionsPage";
 import ProfilePage from "@/pages/profile/ProfilePage";
 import ProfileConfigPage from "@/pages/profile/ProfileConfigPage";
 import OrganizationPage from "@/pages/organization/OrganizationPage";
+import OrganizationSettingsPage from "@/pages/organizations/OrganizationSettingsPage";
 import TeamPage from "@/pages/team/TeamPage";
 import CategoriesPage from "@/pages/categories/CategoriesPage";
 import LoginPage from "@/pages/auth/LoginPage";
@@ -86,6 +87,7 @@ function Router() {
       <ProtectedRoute path="/profile" component={ProfilePage} />
       <ProtectedRoute path="/profile/config" component={ProfileConfigPage} />
       <ProtectedRoute path="/organization" component={OrganizationPage} />
+      <ProtectedRoute path="/organization/settings" component={OrganizationSettingsPage} />
       <ProtectedRoute path="/team" component={TeamPage} />
       <ProtectedRoute path="/categories" component={() => <CategoriesPage />} />
       <ProtectedRoute path="/units" component={UnitsPage} />

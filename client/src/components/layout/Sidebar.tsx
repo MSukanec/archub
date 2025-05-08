@@ -60,6 +60,11 @@ export function Sidebar({
       icon: <LucideBuilding className="h-5 w-5 md:h-[20px] md:w-[20px]" />,
     },
     {
+      name: "Configuración",
+      path: "/organization/settings",
+      icon: <LucideSettings className="h-5 w-5 md:h-[20px] md:w-[20px]" />,
+    },
+    {
       name: "Proyectos",
       path: "/projects",
       icon: <LucideFolderClosed className="h-5 w-5 md:h-[20px] md:w-[20px]" />,
