@@ -172,7 +172,8 @@ export default function TransactionsPage({ projectId }: TransactionsPageProps) {
     }));
   };
 
-  const formatDate = (date: Date) => {
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
     return new Intl.DateTimeFormat("es", {
       year: "numeric",
       month: "long",
@@ -306,7 +307,13 @@ export default function TransactionsPage({ projectId }: TransactionsPageProps) {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredTransactions.length === 0 ? (
+                      {isLoadingTransactions ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                            Cargando movimientos...
+                          </TableCell>
+                        </TableRow>
+                      ) : filteredTransactions.length === 0 ? (
                         <TableRow>
                           <TableCell colSpan={5} className="text-center py-8 text-gray-500">
                             No hay movimientos para mostrar
@@ -352,99 +359,96 @@ export default function TransactionsPage({ projectId }: TransactionsPageProps) {
               </DialogDescription>
             </DialogHeader>
             
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+            <form onSubmit={handleSubmitTransaction}>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="transaction-type">Tipo de Movimiento</Label>
+                    <select 
+                      id="transaction-type" 
+                      className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      value={formData.type}
+                      onChange={handleInputChange}
+                    >
+                      <option value="ingreso">Ingreso</option>
+                      <option value="egreso">Egreso</option>
+                    </select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="transaction-date">Fecha</Label>
+                    <Input 
+                      id="transaction-date" 
+                      type="date" 
+                      value={formData.date}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </div>
+                
                 <div className="space-y-2">
-                  <Label htmlFor="transaction-type">Tipo de Movimiento</Label>
+                  <Label htmlFor="transaction-category">Categoría</Label>
                   <select 
-                    id="transaction-type" 
+                    id="transaction-category" 
                     className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    defaultValue="ingreso"
+                    value={formData.category}
+                    onChange={handleInputChange}
                   >
-                    <option value="ingreso">Ingreso</option>
-                    <option value="egreso">Egreso</option>
+                    <option value="anticipo">Anticipo</option>
+                    <option value="pago_parcial">Pago Parcial</option>
+                    <option value="pago_final">Pago Final</option>
+                    <option value="materiales">Materiales</option>
+                    <option value="mano_de_obra">Mano de Obra</option>
+                    <option value="herramientas">Herramientas</option>
+                    <option value="transporte">Transporte</option>
+                    <option value="impuestos">Impuestos</option>
+                    <option value="otros">Otros</option>
                   </select>
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="transaction-date">Fecha</Label>
-                  <Input id="transaction-date" type="date" defaultValue={new Date().toISOString().slice(0,10)} />
+                  <Label htmlFor="transaction-description">Descripción</Label>
+                  <Input 
+                    id="transaction-description" 
+                    placeholder="Describe este movimiento..." 
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="transaction-amount">Monto</Label>
+                  <div className="relative">
+                    <DollarSign className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                    <Input 
+                      id="transaction-amount" 
+                      className="pl-10" 
+                      placeholder="0.00" 
+                      type="number" 
+                      step="0.01"
+                      min="0.01"
+                      value={formData.amount}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
                 </div>
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="transaction-category">Categoría</Label>
-                <select 
-                  id="transaction-category" 
-                  className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  defaultValue="otros"
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setIsAddTransactionOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button 
+                  type="submit"
+                  className="bg-primary hover:bg-primary/90"
+                  disabled={addTransactionMutation.isPending}
                 >
-                  <option value="anticipo">Anticipo</option>
-                  <option value="pago_parcial">Pago Parcial</option>
-                  <option value="pago_final">Pago Final</option>
-                  <option value="materiales">Materiales</option>
-                  <option value="mano_de_obra">Mano de Obra</option>
-                  <option value="herramientas">Herramientas</option>
-                  <option value="transporte">Transporte</option>
-                  <option value="impuestos">Impuestos</option>
-                  <option value="otros">Otros</option>
-                </select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="transaction-description">Descripción</Label>
-                <Input id="transaction-description" placeholder="Describe este movimiento..." />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="transaction-amount">Monto</Label>
-                <div className="relative">
-                  <DollarSign className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                  <Input id="transaction-amount" className="pl-10" placeholder="0.00" type="number" step="0.01" />
-                </div>
-              </div>
-            </div>
-            
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsAddTransactionOpen(false)}>
-                Cancelar
-              </Button>
-              <Button 
-                className="bg-primary hover:bg-primary/90"
-                onClick={() => {
-                  // Obtener valores de los campos del formulario
-                  const typeInput = document.getElementById('transaction-type') as HTMLSelectElement;
-                  const dateInput = document.getElementById('transaction-date') as HTMLInputElement;
-                  const categoryInput = document.getElementById('transaction-category') as HTMLSelectElement;
-                  const descriptionInput = document.getElementById('transaction-description') as HTMLInputElement;
-                  const amountInput = document.getElementById('transaction-amount') as HTMLInputElement;
-                  
-                  // Validar datos
-                  if (!typeInput?.value || !dateInput?.value || !amountInput?.value) {
-                    return; // No procesar si faltan campos obligatorios
-                  }
-                  
-                  // Aquí se enviaría la información a la API
-                  // Por ahora, agregar a los datos de demostración
-                  const newTransaction = {
-                    id: transactions.length + 1,
-                    date: new Date(dateInput.value),
-                    type: typeInput.value as 'ingreso' | 'egreso',
-                    category: categoryInput.value,
-                    description: descriptionInput.value,
-                    amount: parseFloat(amountInput.value)
-                  };
-                  
-                  // Agregar localmente - en una implementación real se usaría un mutation
-                  addTransaction(newTransaction);
-                  
-                  // Cerrar diálogo
-                  setIsAddTransactionOpen(false);
-                }}
-              >
-                Guardar
-              </Button>
-            </DialogFooter>
+                  {addTransactionMutation.isPending ? "Guardando..." : "Guardar"}
+                </Button>
+              </DialogFooter>
+            </form>
           </DialogContent>
         </Dialog>
       </div>
