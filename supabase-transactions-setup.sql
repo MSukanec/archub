@@ -1,47 +1,75 @@
--- Crear la tabla transactions si no existe
-CREATE TABLE IF NOT EXISTS public.transactions (
+-- Este script configura la tabla de transacciones para Supabase
+
+-- Crear la tabla si no existe
+CREATE TABLE IF NOT EXISTS transactions (
   id SERIAL PRIMARY KEY,
-  project_id INTEGER NOT NULL REFERENCES public.projects(id) ON DELETE CASCADE,
-  date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  type VARCHAR(50) NOT NULL, -- "ingreso" o "egreso"
-  category VARCHAR(50) NOT NULL,
-  description TEXT NOT NULL,
-  amount DECIMAL(10, 2) NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  date DATE NOT NULL,
+  type VARCHAR(50) NOT NULL,
+  category VARCHAR(100) NOT NULL,
+  description TEXT NOT NULL,
+  amount DECIMAL(12, 2) NOT NULL
 );
 
--- Crear índices para mejor rendimiento
-CREATE INDEX IF NOT EXISTS idx_transactions_project_id ON public.transactions(project_id);
-CREATE INDEX IF NOT EXISTS idx_transactions_type ON public.transactions(type);
-CREATE INDEX IF NOT EXISTS idx_transactions_date ON public.transactions(date);
+-- Crear índices para mejorar el rendimiento
+CREATE INDEX IF NOT EXISTS idx_transactions_project_id ON transactions(project_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions(date);
+CREATE INDEX IF NOT EXISTS idx_transactions_type ON transactions(type);
+CREATE INDEX IF NOT EXISTS idx_transactions_category ON transactions(category);
 
--- Crear función para actualizar el timestamp de actualización
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-   NEW.updated_at = CURRENT_TIMESTAMP;
-   RETURN NEW;
-END;
-$$ language 'plpgsql';
-
--- Crear trigger para actualizar el timestamp
-DROP TRIGGER IF EXISTS update_transactions_updated_at ON public.transactions;
-CREATE TRIGGER update_transactions_updated_at
-BEFORE UPDATE ON public.transactions
+-- Actualizar el trigger de updated_at
+DROP TRIGGER IF EXISTS set_updated_at_timestamp_transactions ON transactions;
+CREATE TRIGGER set_updated_at_timestamp_transactions
+BEFORE UPDATE ON transactions
 FOR EACH ROW
-EXECUTE FUNCTION update_updated_at_column();
+EXECUTE FUNCTION set_updated_at_column();
 
--- Añadir permisos RLS
-ALTER TABLE public.transactions ENABLE ROW LEVEL SECURITY;
+-- Establecer políticas de seguridad (RLS)
+ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
 
--- Crear política que permite a todos los usuarios autenticados leer transacciones
-CREATE POLICY "Allow authenticated users to read transactions" 
-ON public.transactions FOR SELECT 
-USING (auth.role() = 'authenticated');
+-- Políticas para transacciones
+DROP POLICY IF EXISTS "Usuarios pueden ver transacciones de proyectos a los que tienen acceso" ON transactions;
+CREATE POLICY "Usuarios pueden ver transacciones de proyectos a los que tienen acceso" 
+ON transactions FOR SELECT 
+USING (
+  project_id IN (
+    SELECT p.id FROM projects p
+    LEFT JOIN organization_users ou ON p.organization_id = ou.organization_id
+    WHERE p.user_id = auth.uid() OR ou.user_id = auth.uid()
+  )
+);
 
--- Crear política que permite a los usuarios autenticados crear, actualizar y eliminar sus propias transacciones
-CREATE POLICY "Allow authenticated users to manage their transactions" 
-ON public.transactions FOR ALL 
-USING (auth.role() = 'authenticated')
-WITH CHECK (auth.role() = 'authenticated');
+DROP POLICY IF EXISTS "Usuarios pueden insertar transacciones en proyectos a los que tienen acceso" ON transactions;
+CREATE POLICY "Usuarios pueden insertar transacciones en proyectos a los que tienen acceso" 
+ON transactions FOR INSERT 
+WITH CHECK (
+  project_id IN (
+    SELECT p.id FROM projects p
+    LEFT JOIN organization_users ou ON p.organization_id = ou.organization_id
+    WHERE p.user_id = auth.uid() OR ou.user_id = auth.uid()
+  )
+);
+
+DROP POLICY IF EXISTS "Usuarios pueden actualizar transacciones en proyectos a los que tienen acceso" ON transactions;
+CREATE POLICY "Usuarios pueden actualizar transacciones en proyectos a los que tienen acceso" 
+ON transactions FOR UPDATE
+USING (
+  project_id IN (
+    SELECT p.id FROM projects p
+    LEFT JOIN organization_users ou ON p.organization_id = ou.organization_id
+    WHERE p.user_id = auth.uid() OR ou.user_id = auth.uid()
+  )
+);
+
+DROP POLICY IF EXISTS "Usuarios pueden eliminar transacciones en proyectos a los que tienen acceso" ON transactions;
+CREATE POLICY "Usuarios pueden eliminar transacciones en proyectos a los que tienen acceso" 
+ON transactions FOR DELETE
+USING (
+  project_id IN (
+    SELECT p.id FROM projects p
+    LEFT JOIN organization_users ou ON p.organization_id = ou.organization_id
+    WHERE p.user_id = auth.uid() OR ou.user_id = auth.uid()
+  )
+);

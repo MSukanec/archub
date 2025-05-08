@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ProjectTransactionsSummary } from "@/components/projects/ProjectTransactionsSummary";
 
 import { Project, Budget } from "@shared/schema";
 import { PROJECT_STATUS_OPTIONS } from "@/lib/constants";
@@ -170,6 +171,12 @@ export default function ProjectDetailsPage({ projectId }: ProjectDetailsPageProp
                             </CardContent>
                           </Card>
                         </div>
+                      </div>
+                      
+                      {/* Agregar el resumen de transacciones */}
+                      <div>
+                        <h3 className="text-lg font-semibold mb-4">Movimientos del Proyecto</h3>
+                        <ProjectTransactionsSummary projectId={projectId} />
                       </div>
                       
                       <div>

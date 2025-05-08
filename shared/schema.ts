@@ -262,6 +262,7 @@ export const insertTransactionSchema = createInsertSchema(transactions).pick({
 }).extend({
   projectId: z.coerce.number(),
   amount: z.coerce.number().min(0, "El monto debe ser mayor a 0"),
+  date: z.coerce.date(), // Asegurarnos de que la fecha se convierta correctamente
 });
 
 // Type definitions
