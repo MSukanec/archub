@@ -10,10 +10,17 @@ async function updateOrganizationPdfConfig() {
       SET 
         pdf_config = '{"primaryColor":"#92c900","secondaryColor":"#707070","logoPosition":"left","showFooter":true,"showHeader":true}'
       WHERE id = 1
+      RETURNING *
     `;
     
     const result = await pool.query(query);
-    console.log('Organización actualizada:', result);
+    
+    if (result.rows.length > 0) {
+      console.log('Organización actualizada con pdfConfig:', result.rows[0]);
+    } else {
+      console.log('No se encontró la organización con ID 1');
+    }
+    
     console.log('Proceso completado');
   } catch (error) {
     console.error('Error en la actualización:', error);

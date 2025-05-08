@@ -26,6 +26,7 @@ export const organizations = pgTable("organizations", {
   email: text("email"),
   website: text("website"),
   taxId: text("tax_id"),
+  pdfConfig: text("pdf_config"),
 });
 
 // Configuración PDF de organizaciones
@@ -187,6 +188,7 @@ export const insertOrganizationSchema = createInsertSchema(organizations).pick({
   email: true,
   website: true,
   taxId: true,
+  pdfConfig: true,
 });
 
 export const insertOrganizationUserSchema = createInsertSchema(organizationUsers).pick({
