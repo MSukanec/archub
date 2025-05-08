@@ -3,6 +3,7 @@ import { Sidebar, SidebarTypes, SidebarType } from "./Sidebar";
 import { Header } from "./Header";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useMobile } from "@/hooks/use-mobile";
+import { MobileNavbar } from "@/components/mobile/MobileNavbar";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -21,7 +22,7 @@ export function MainLayout({
   selectedProject: initialSelectedProject,
   selectedOrganization: initialSelectedOrganization
 }: MainLayoutProps) {
-  const isMobile = useIsMobile();
+  const isMobile = useMobile();
   
   // Estado para la navegación
   const [selectedOrganization, setSelectedOrganization] = useState<string | null>(
@@ -145,6 +146,15 @@ export function MainLayout({
           </main>
         </div>
       </div>
+      
+      {/* Barra de navegación móvil */}
+      {isMobile && (
+        <MobileNavbar 
+          type={sidebarType}
+          selectedProject={selectedProject}
+          selectedOrganization={selectedOrganization}
+        />
+      )}
     </div>
   );
 }
