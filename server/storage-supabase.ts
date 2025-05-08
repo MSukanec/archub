@@ -174,6 +174,18 @@ const tableNames = {
     } else {
       console.log('Usando tabla "materials" (inglés)');
     }
+    
+    // Verificar si existe la tabla transactions
+    const { data: transactionsTable, error: transactionsError } = await supabase
+      .from('transactions')
+      .select('id')
+      .limit(1);
+      
+    if (transactionsError && transactionsError.code === '42P01') {
+      console.log('ADVERTENCIA: La tabla "transactions" no existe. Las funciones de transacciones no funcionarán correctamente hasta que se cree la tabla.');
+    } else {
+      console.log('Tabla "transactions" encontrada correctamente.');
+    }
   } catch (e) {
     console.error('Error detectando tablas:', e);
   }
