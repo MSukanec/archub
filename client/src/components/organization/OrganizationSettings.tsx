@@ -51,12 +51,14 @@ const organizationSchema = z.object({
   address: z.string().nullable().optional(),
   phone: z.string().nullable().optional(),
   email: z.string().email("Email inválido").nullable().optional(),
-  website: z.string().nullable().optional().refine(
-    (val) => !val || val === "" || val.startsWith("http://") || val.startsWith("https://"),
-    {
-      message: "La URL debe comenzar con http:// o https://",
-    }
-  ),
+  website: z.union([
+    z.literal(""),
+    z.literal(null),
+    z.string().url("La URL debe ser válida").refine(
+      (val) => val.startsWith("http://") || val.startsWith("https://"),
+      { message: "La URL debe comenzar con http:// o https://" }
+    )
+  ]).optional().transform(val => val === "" ? null : val),
   taxId: z.string().nullable().optional(),
   pdfConfig: z.object({
     logoPosition: z.enum(["left", "center", "right"]),

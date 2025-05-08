@@ -480,19 +480,35 @@ export function BudgetPdfPreview({
   // Generar una vista previa para el componente que lo requiera
   useEffect(() => {
     if (onPreviewGenerated && !previewOnly) {
+      // Usar una variable para controlar si ya se ejecutó
+      let isGenerating = false;
+      
       const generatePreview = async () => {
+        if (isGenerating) return;
+        isGenerating = true;
+        
         try {
           const blob = await pdf(BudgetPdf).toBlob();
           const dataUrl = URL.createObjectURL(blob);
           onPreviewGenerated(dataUrl);
+          
+          // Limpiar la URL después de usarla
+          setTimeout(() => {
+            URL.revokeObjectURL(dataUrl);
+          }, 100);
         } catch (error) {
           console.error('Error generando vista previa del PDF:', error);
         }
       };
       
       generatePreview();
+      
+      // Limpiar efecto
+      return () => {
+        isGenerating = true;
+      };
     }
-  }, [organization, budget, budgetTasks, pdfConfig, onPreviewGenerated, previewOnly]);
+  }, []);
   
   // Efecto para manejar el montaje del componente
   useEffect(() => {
