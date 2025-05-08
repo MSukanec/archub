@@ -1,0 +1,96 @@
+/* Estilos específicos para dispositivos móviles */
+@media (max-width: 640px) {
+  /* Ajuste de padding para tarjetas y componentes shadcn */
+  .card,
+  [class*="card"] {
+    padding: 1rem !important;
+  }
+  
+  /* Ajustes específicos de espacio */
+  .card-header,
+  [class*="cardHeader"] {
+    padding: 1rem 1rem 0.5rem 1rem !important;
+  }
+  
+  .card-content,
+  [class*="cardContent"] {
+    padding: 0.5rem 1rem !important;
+  }
+  
+  .card-footer,
+  [class*="cardFooter"] {
+    padding: 0.5rem 1rem 1rem 1rem !important;
+  }
+  
+  /* Botones más grandes y accesibles en móvil */
+  .button,
+  button {
+    min-height: 2.5rem !important;
+    touch-action: manipulation;
+  }
+  
+  /* Ajustes de fuentes */
+  h1,
+  [class*="h1"] {
+    font-size: 1.5rem !important;
+  }
+  
+  h2,
+  [class*="h2"] {
+    font-size: 1.25rem !important;
+  }
+  
+  /* Ajustes de tablas para móviles */
+  table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Formularios */
+  form .grid,
+  [class*="grid"] {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Inputs y campos de formularios más grandes en móvil */
+  input,
+  select,
+  textarea {
+    font-size: 16px !important; /* Previene zoom en iOS */
+    min-height: 2.75rem !important;
+  }
+  
+  /* Ajustar tamaño de modales */
+  [class*="dialog"],
+  [class*="sheet"] {
+    width: 95vw !important;
+    max-width: 95vw !important;
+  }
+  
+  /* Mejorar legibilidad */
+  p, 
+  span, 
+  div {
+    max-width: 100%;
+    word-wrap: break-word;
+  }
+  
+  /* Reducir los márgenes exteriores */
+  .container {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+}
+
+/* Añadir padding inferior para evitar que la navegación móvil tape el contenido */
+.pb-safe {
+  padding-bottom: calc(3.5rem + env(safe-area-inset-bottom, 0)) !important;
+}
+
+/* Ajustes para evitar scrollbar horizontal */
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
