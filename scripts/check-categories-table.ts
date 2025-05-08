@@ -1,127 +1,65 @@
-import { db } from "../server/db";
-import { sql } from "drizzle-orm";
+import { supabase } from "../server/supabase";
 
 async function checkCategoriesTable() {
   try {
-    console.log("Verificando existencia de la tabla categories...");
+    console.log("Verificando si la tabla categories existe...");
     
-    // Consulta para verificar si la tabla existe
-    const result = await db.execute(sql`
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables 
-        WHERE table_schema = 'public' 
-        AND table_name = 'categories'
-      );
-    `);
-    
-    const tableExists = result[0]?.exists || false;
-    
-    if (tableExists) {
-      console.log("✓ La tabla categories ya existe.");
-      return true;
+    // Verificar si la tabla existe
+    const { data: existingTable, error: tableCheckError } = await supabase
+      .from('categories')
+      .select('id')
+      .limit(1);
+      
+    if (tableCheckError && tableCheckError.code === '42P01') {
+      console.log("La tabla categories NO existe en Supabase.");
+      console.log("Debes ejecutar el script SQL 'supabase-categories-setup.sql' en la consola SQL de Supabase.");
+      console.log("Pasos:");
+      console.log("1. Ve al dashboard de Supabase");
+      console.log("2. Selecciona tu proyecto");
+      console.log("3. Ve a 'SQL Editor'");
+      console.log("4. Copia y pega el contenido de 'supabase-categories-setup.sql'");
+      console.log("5. Ejecuta el script");
+      return false;
+    } else if (tableCheckError) {
+      console.error("Error al verificar la tabla categories:", tableCheckError);
+      return false;
     } else {
-      console.log("✗ La tabla categories no existe. Creando tabla...");
+      console.log("La tabla categories EXISTE en Supabase.");
       
-      // Crear la tabla categories
-      await db.execute(sql`
-        CREATE TABLE IF NOT EXISTS categories (
-          id SERIAL PRIMARY KEY,
-          name VARCHAR(255) NOT NULL,
-          type VARCHAR(50) NOT NULL,
-          position INTEGER NOT NULL DEFAULT 0,
-          parent_id INTEGER DEFAULT NULL REFERENCES categories(id) ON DELETE SET NULL,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-          updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-        );
-      `);
-      
-      // Verificar si se creó correctamente
-      const checkResult = await db.execute(sql`
-        SELECT EXISTS (
-          SELECT FROM information_schema.tables 
-          WHERE table_schema = 'public' 
-          AND table_name = 'categories'
-        );
-      `);
-      
-      const createdSuccessfully = checkResult[0]?.exists || false;
-      
-      if (createdSuccessfully) {
-        console.log("✓ Tabla categories creada correctamente.");
+      // Verificar si hay categorías en la tabla
+      const { data: categories, error: categoriesError } = await supabase
+        .from('categories')
+        .select('*');
         
-        // Crear función y trigger para actualizar el timestamp
-        await db.execute(sql`
-          CREATE OR REPLACE FUNCTION update_updated_at_column()
-          RETURNS TRIGGER AS $$
-          BEGIN
-             NEW.updated_at = CURRENT_TIMESTAMP;
-             RETURN NEW;
-          END;
-          $$ language 'plpgsql';
-        `);
-        
-        await db.execute(sql`
-          CREATE TRIGGER update_categories_updated_at
-          BEFORE UPDATE ON categories
-          FOR EACH ROW
-          EXECUTE FUNCTION update_updated_at_column();
-        `);
-        
-        // Crear índices
-        await db.execute(sql`
-          CREATE INDEX IF NOT EXISTS idx_categories_type ON categories(type);
-        `);
-        
-        await db.execute(sql`
-          CREATE INDEX IF NOT EXISTS idx_categories_parent_id ON categories(parent_id);
-        `);
-        
-        // Insertar categorías predeterminadas para materiales
-        await db.execute(sql`
-          INSERT INTO categories (name, type, position) VALUES 
-          ('Materiales de construcción', 'material', 1),
-          ('Materiales eléctricos', 'material', 2),
-          ('Materiales de plomería', 'material', 3),
-          ('Acabados', 'material', 4),
-          ('Herramientas', 'material', 5);
-        `);
-        
-        // Insertar categorías predeterminadas para tareas
-        await db.execute(sql`
-          INSERT INTO categories (name, type, position) VALUES 
-          ('Obra gruesa', 'task', 1),
-          ('Instalaciones eléctricas', 'task', 2),
-          ('Instalaciones sanitarias', 'task', 3),
-          ('Acabados', 'task', 4),
-          ('Limpieza', 'task', 5);
-        `);
-        
-        console.log("✓ Categorías predeterminadas creadas.");
-        return true;
-      } else {
-        console.log("✗ No se pudo crear la tabla categories.");
+      if (categoriesError) {
+        console.error("Error al obtener categorías:", categoriesError);
         return false;
       }
+      
+      if (!categories || categories.length === 0) {
+        console.log("La tabla existe pero está vacía. Debes ejecutar el script SQL para insertar datos.");
+      } else {
+        console.log(`Hay ${categories.length} categorías en la tabla:`);
+        categories.forEach(category => {
+          console.log(`- ${category.name} (tipo: ${category.type}, posición: ${category.position})`);
+        });
+      }
+      
+      return true;
     }
   } catch (error) {
-    console.error("Error al verificar/crear la tabla categories:");
-    if (error instanceof Error) {
-      console.error("Mensaje:", error.message);
-      console.error("Stack:", error.stack);
-    } else {
-      console.error(error);
-    }
+    console.error("Error al comprobar la tabla de categorías:", error);
     return false;
   }
 }
 
-// Ejecutar la función al importar el archivo
+// Ejecutar el script
 checkCategoriesTable()
   .then(success => {
     if (success) {
-      console.log("Proceso completado con éxito.");
+      console.log("Verificación completada con éxito.");
     } else {
-      console.log("El proceso falló.");
+      console.log("La verificación falló.");
       process.exit(1);
     }
   })
@@ -129,5 +67,3 @@ checkCategoriesTable()
     console.error("Error:", error);
     process.exit(1);
   });
-
-export { checkCategoriesTable };

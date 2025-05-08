@@ -1,136 +1,155 @@
-import { createClient } from '@supabase/supabase-js'
-import dotenv from 'dotenv'
-import { scrypt, randomBytes } from 'crypto'
-import { promisify } from 'util'
-
-// Carga variables de entorno
-dotenv.config({ path: '.env.local' })
-
-const supabaseUrl = process.env.SUPABASE_URL || ''
-const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY || ''
-
-if (!supabaseUrl || !supabaseKey) {
-  console.error('Error: SUPABASE_URL o SUPABASE_KEY no están definidas')
-  process.exit(1)
-}
-
-const supabase = createClient(supabaseUrl, supabaseKey)
+import { supabase } from "../server/supabase";
 
 async function createSampleCategories() {
-  console.log('Creando categorías de ejemplo...')
-  
-  // Verificar si ya existen categorías
-  const { data: existingCategories, error: checkError } = await supabase
-    .from('categories')
-    .select('id')
-    .limit(1)
-  
-  if (checkError) {
-    console.error('Error al verificar categorías existentes:', checkError.message)
-    console.log('Asegúrate de que la tabla "categories" existe en la base de datos')
-    console.log('Ejecuta el script supabase-sql-setup.sql en el editor SQL de Supabase primero')
-    process.exit(1)
-  }
-  
-  if (existingCategories && existingCategories.length > 0) {
-    console.log('Ya existen categorías en la base de datos. No se crearán categorías de ejemplo.')
-    return
-  }
-  
-  // Categorías principales de materiales
-  const materialCategories = [
-    { name: 'Materiales Básicos', position: 0, type: 'material' },
-    { name: 'Instalaciones Eléctricas', position: 1, type: 'material' },
-    { name: 'Instalaciones Sanitarias', position: 2, type: 'material' },
-    { name: 'Acabados', position: 3, type: 'material' }
-  ]
-  
-  // Categorías principales de tareas
-  const taskCategories = [
-    { name: 'Preliminares', position: 0, type: 'task' },
-    { name: 'Estructura', position: 1, type: 'task' },
-    { name: 'Instalaciones', position: 2, type: 'task' },
-    { name: 'Acabados', position: 3, type: 'task' }
-  ]
-  
-  // Insertar categorías principales de materiales
-  const { data: insertedMaterialCategories, error: materialError } = await supabase
-    .from('categories')
-    .insert(materialCategories)
-    .select()
-  
-  if (materialError) {
-    console.error('Error al crear categorías de materiales:', materialError.message)
-  } else {
-    console.log(`Creadas ${insertedMaterialCategories.length} categorías principales de materiales`)
+  try {
+    console.log("Verificando si la tabla categories existe...");
     
-    // Subcategorías de materiales
-    const materialSubcategories = [
-      { name: 'Cemento', position: 0, parent_id: insertedMaterialCategories[0].id, type: 'material' },
-      { name: 'Arena', position: 1, parent_id: insertedMaterialCategories[0].id, type: 'material' },
-      { name: 'Grava', position: 2, parent_id: insertedMaterialCategories[0].id, type: 'material' },
-      { name: 'Cables', position: 0, parent_id: insertedMaterialCategories[1].id, type: 'material' },
-      { name: 'Interruptores', position: 1, parent_id: insertedMaterialCategories[1].id, type: 'material' },
-      { name: 'Tuberías', position: 0, parent_id: insertedMaterialCategories[2].id, type: 'material' },
-      { name: 'Pinturas', position: 0, parent_id: insertedMaterialCategories[3].id, type: 'material' },
-      { name: 'Cerámicas', position: 1, parent_id: insertedMaterialCategories[3].id, type: 'material' }
-    ]
-    
-    const { data: insertedMaterialSubcategories, error: subError } = await supabase
+    // Primero, verificamos si la tabla existe
+    const { data: existingTable, error: tableCheckError } = await supabase
       .from('categories')
-      .insert(materialSubcategories)
-      .select()
-    
-    if (subError) {
-      console.error('Error al crear subcategorías de materiales:', subError.message)
+      .select('id')
+      .limit(1);
+      
+    if (tableCheckError && tableCheckError.code === '42P01') {
+      // La tabla no existe, necesitamos crearla con SQL directamente
+      console.log("La tabla categories no existe. Creándola...");
+      
+      // Ejecutar SQL para crear la tabla
+      const { error: createTableError } = await supabase.rpc('execute_sql', {
+        sql_query: `
+          CREATE TABLE IF NOT EXISTS public.categories (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(255) NOT NULL,
+            "type" VARCHAR(50) NOT NULL DEFAULT 'material',
+            position INTEGER NOT NULL DEFAULT 0,
+            parent_id INTEGER REFERENCES public.categories(id) ON DELETE SET NULL,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+          );
+          
+          CREATE INDEX IF NOT EXISTS idx_categories_type ON public.categories("type");
+          CREATE INDEX IF NOT EXISTS idx_categories_parent_id ON public.categories(parent_id);
+          
+          -- Crear función para actualizar el timestamp de actualización
+          CREATE OR REPLACE FUNCTION update_updated_at_column()
+          RETURNS TRIGGER AS $$
+          BEGIN
+             NEW.updated_at = CURRENT_TIMESTAMP;
+             RETURN NEW;
+          END;
+          $$ language 'plpgsql';
+          
+          -- Crear trigger para actualizar el timestamp
+          DROP TRIGGER IF EXISTS update_categories_updated_at ON public.categories;
+          CREATE TRIGGER update_categories_updated_at
+          BEFORE UPDATE ON public.categories
+          FOR EACH ROW
+          EXECUTE FUNCTION update_updated_at_column();
+        `
+      });
+      
+      if (createTableError) {
+        console.error("Error al crear la tabla categories:", createTableError);
+        
+        // Si falla el método RPC, es probable que Supabase no permita ejecutar SQL arbitrario
+        // o que la función 'execute_sql' no esté disponible. Intentemos crear la tabla a través de la API REST
+        console.log("Intentando crear categorías con la API REST de Supabase...");
+        
+        // Intentar insertar categorías (Supabase creará la tabla con la estructura adecuada)
+        // Intentamos usar la API normal de Supabase para insertar datos
+        const { error: insertError } = await supabase
+          .from('categories')
+          .insert([
+            { name: 'Materiales de construcción', type: 'material', position: 1 },
+            { name: 'Materiales eléctricos', type: 'material', position: 2 },
+            { name: 'Materiales de plomería', type: 'material', position: 3 }
+          ]);
+          
+        if (insertError) {
+          console.error("No se pudo crear la tabla categories a través de la API:", insertError);
+          return false;
+        } else {
+          console.log("Categorías creadas correctamente a través de la API.");
+          return true;
+        }
+      } else {
+        console.log("Tabla categories creada correctamente con SQL.");
+      }
+    } else if (tableCheckError) {
+      console.error("Error al verificar la tabla categories:", tableCheckError);
+      return false;
     } else {
-      console.log(`Creadas ${insertedMaterialSubcategories.length} subcategorías de materiales`)
+      console.log("La tabla categories ya existe.");
     }
-  }
-  
-  // Insertar categorías principales de tareas
-  const { data: insertedTaskCategories, error: taskError } = await supabase
-    .from('categories')
-    .insert(taskCategories)
-    .select()
-  
-  if (taskError) {
-    console.error('Error al crear categorías de tareas:', taskError.message)
-  } else {
-    console.log(`Creadas ${insertedTaskCategories.length} categorías principales de tareas`)
     
-    // Subcategorías de tareas
-    const taskSubcategories = [
-      { name: 'Limpieza', position: 0, parent_id: insertedTaskCategories[0].id, type: 'task' },
-      { name: 'Replanteo', position: 1, parent_id: insertedTaskCategories[0].id, type: 'task' },
-      { name: 'Cimentación', position: 0, parent_id: insertedTaskCategories[1].id, type: 'task' },
-      { name: 'Columnas', position: 1, parent_id: insertedTaskCategories[1].id, type: 'task' },
-      { name: 'Muros', position: 2, parent_id: insertedTaskCategories[1].id, type: 'task' },
-      { name: 'Instalación Eléctrica', position: 0, parent_id: insertedTaskCategories[2].id, type: 'task' },
-      { name: 'Instalación Sanitaria', position: 1, parent_id: insertedTaskCategories[2].id, type: 'task' },
-      { name: 'Pintura', position: 0, parent_id: insertedTaskCategories[3].id, type: 'task' },
-      { name: 'Pisos', position: 1, parent_id: insertedTaskCategories[3].id, type: 'task' }
-    ]
-    
-    const { data: insertedTaskSubcategories, error: taskSubError } = await supabase
+    // Verificar si hay categorías en la tabla
+    const { data: categories, error: categoriesError } = await supabase
       .from('categories')
-      .insert(taskSubcategories)
-      .select()
-    
-    if (taskSubError) {
-      console.error('Error al crear subcategorías de tareas:', taskSubError.message)
-    } else {
-      console.log(`Creadas ${insertedTaskSubcategories.length} subcategorías de tareas`)
+      .select('*');
+      
+    if (categoriesError) {
+      console.error("Error al obtener categorías:", categoriesError);
+      return false;
     }
+    
+    if (!categories || categories.length === 0) {
+      console.log("No hay categorías. Insertando categorías predeterminadas...");
+      
+      // Insertar categorías predeterminadas de materiales
+      const { error: materialCategoriesError } = await supabase
+        .from('categories')
+        .insert([
+          { name: 'Materiales de construcción', type: 'material', position: 1 },
+          { name: 'Materiales eléctricos', type: 'material', position: 2 },
+          { name: 'Materiales de plomería', type: 'material', position: 3 },
+          { name: 'Acabados', type: 'material', position: 4 },
+          { name: 'Herramientas', type: 'material', position: 5 }
+        ]);
+        
+      if (materialCategoriesError) {
+        console.error("Error al insertar categorías de materiales:", materialCategoriesError);
+        return false;
+      }
+      
+      // Insertar categorías predeterminadas de tareas
+      const { error: taskCategoriesError } = await supabase
+        .from('categories')
+        .insert([
+          { name: 'Obra gruesa', type: 'task', position: 1 },
+          { name: 'Instalaciones eléctricas', type: 'task', position: 2 },
+          { name: 'Instalaciones sanitarias', type: 'task', position: 3 },
+          { name: 'Acabados', type: 'task', position: 4 },
+          { name: 'Limpieza', type: 'task', position: 5 }
+        ]);
+        
+      if (taskCategoriesError) {
+        console.error("Error al insertar categorías de tareas:", taskCategoriesError);
+        return false;
+      }
+      
+      console.log("Categorías predeterminadas insertadas correctamente.");
+    } else {
+      console.log(`Ya existen ${categories.length} categorías en la tabla.`);
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Error en el proceso de creación de categorías:", error);
+    return false;
   }
 }
 
-// Ejecutar la función
+// Ejecutar el script
 createSampleCategories()
-  .catch(err => {
-    console.error('Error inesperado:', err)
-    process.exit(1)
+  .then(success => {
+    if (success) {
+      console.log("Proceso completado con éxito.");
+    } else {
+      console.log("El proceso falló.");
+      process.exit(1);
+    }
   })
-  .finally(() => {
-    console.log('Proceso completado')
-  })
+  .catch(error => {
+    console.error("Error:", error);
+    process.exit(1);
+  });
