@@ -1,7 +1,17 @@
-import { useRef, useEffect, useState } from 'react';
-import { toPng } from 'html-to-image';
-import { Card, CardContent } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
+import { useEffect, useState } from "react";
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+  PDFViewer,
+  pdf,
+  Image,
+  Font,
+} from "@react-pdf/renderer";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
 
 interface Organization {
   name: string;
@@ -57,228 +67,452 @@ interface BudgetPdfPreviewProps {
   onPreviewGenerated?: (dataUrl: string) => void;
 }
 
+// Registrar fuentes (opcional)
+Font.register({
+  family: "Roboto",
+  fonts: [
+    { src: "https://fonts.gstatic.com/s/roboto/v29/KFOmCnqEu92Fr1Mu4mxP.ttf", fontWeight: 400 },
+    { src: "https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmWUlfBBc9.ttf", fontWeight: 700 },
+  ],
+});
+
 export function BudgetPdfPreview({ 
   organization, 
   project, 
   budget, 
   budgetTasks,
-  previewOnly = true,
+  previewOnly = false,
   onPreviewGenerated
 }: BudgetPdfPreviewProps) {
-  const previewRef = useRef<HTMLDivElement>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [dataUrl, setDataUrl] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
   
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("es-AR", {
-      style: "currency",
-      currency: "ARS",
-      minimumFractionDigits: 2,
-    }).format(amount);
+  // Configuración del PDF
+  const pdfConfig = organization.pdfConfig || {
+    logoPosition: "left",
+    showAddress: true,
+    showPhone: true,
+    showEmail: true,
+    showWebsite: true,
+    showTaxId: true,
+    primaryColor: "#92c900",
+    secondaryColor: "#f0f0f0"
   };
   
-  const calculateTotal = () => {
-    return budgetTasks.reduce((sum, bt) => {
-      return sum + (bt.quantity * bt.task.unitPrice);
-    }, 0);
-  };
+  // Calcular el total del presupuesto
+  const total = budgetTasks.reduce((acc, budgetTask) => {
+    return acc + (budgetTask.quantity * budgetTask.task.unitPrice);
+  }, 0);
   
-  // Generar la imagen de previsualización
+  // Agrupar tareas por categoría
+  const tasksByCategory = budgetTasks.reduce((acc, budgetTask) => {
+    const category = budgetTask.task.category || "Sin categoría";
+    
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    
+    acc[category].push(budgetTask);
+    return acc;
+  }, {} as Record<string, BudgetTask[]>);
+  
+  // Crear estilos para el PDF
+  const styles = StyleSheet.create({
+    page: {
+      flexDirection: 'column',
+      padding: 20,
+      fontFamily: "Roboto",
+      fontSize: 10,
+    },
+    header: {
+      flexDirection: 'row',
+      marginBottom: 20,
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    headerCenter: {
+      flexDirection: 'column',
+      marginBottom: 20,
+      alignItems: 'center',
+    },
+    headerLeft: {
+      flexDirection: 'row',
+      marginBottom: 20,
+      alignItems: 'center',
+    },
+    headerRight: {
+      flexDirection: 'row-reverse',
+      marginBottom: 20,
+      alignItems: 'center',
+    },
+    logo: {
+      width: 80,
+      height: 80,
+      marginRight: 10,
+      objectFit: 'contain',
+    },
+    logoCenter: {
+      width: 100,
+      height: 100,
+      marginBottom: 10,
+      objectFit: 'contain',
+    },
+    orgInfo: {
+      flex: 1,
+      flexDirection: 'column',
+    },
+    orgName: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      marginBottom: 4,
+    },
+    orgDetails: {
+      fontSize: 10,
+      marginBottom: 2,
+    },
+    projectInfo: {
+      marginTop: 10,
+      marginBottom: 20,
+      padding: 10,
+      backgroundColor: pdfConfig.secondaryColor,
+      borderRadius: 4,
+    },
+    projectTitle: {
+      fontSize: 12,
+      fontWeight: 'bold',
+    },
+    budgetTitle: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      marginBottom: 4,
+      color: pdfConfig.primaryColor,
+    },
+    section: {
+      marginBottom: 10,
+    },
+    categoryHeader: {
+      fontSize: 14,
+      fontWeight: 'bold',
+      backgroundColor: pdfConfig.primaryColor,
+      padding: 6,
+      color: 'white',
+      marginBottom: 6,
+      borderRadius: 4,
+    },
+    table: {
+      display: 'flex',
+      width: 'auto',
+      borderStyle: 'solid',
+      borderWidth: 1,
+      borderColor: '#bfbfbf',
+      borderRightWidth: 0,
+      borderBottomWidth: 0,
+    },
+    tableRow: {
+      margin: 'auto',
+      flexDirection: 'row',
+    },
+    tableRowHeader: {
+      margin: 'auto',
+      flexDirection: 'row',
+      backgroundColor: pdfConfig.secondaryColor,
+      borderBottomColor: '#bfbfbf',
+      borderBottomWidth: 1,
+    },
+    tableColHeader: {
+      width: '30%',
+      borderStyle: 'solid',
+      borderColor: '#bfbfbf',
+      borderWidth: 1,
+      borderLeftWidth: 0,
+      borderTopWidth: 0,
+      padding: 5,
+      fontWeight: 'bold',
+    },
+    tableNumColHeader: {
+      width: '15%',
+      borderStyle: 'solid',
+      borderColor: '#bfbfbf',
+      borderWidth: 1,
+      borderLeftWidth: 0,
+      borderTopWidth: 0,
+      padding: 5,
+      fontWeight: 'bold',
+      textAlign: 'right',
+    },
+    tableCol: {
+      width: '30%',
+      borderStyle: 'solid',
+      borderColor: '#bfbfbf',
+      borderWidth: 1,
+      borderLeftWidth: 0,
+      borderTopWidth: 0,
+      padding: 5,
+    },
+    tableNumCol: {
+      width: '15%',
+      borderStyle: 'solid',
+      borderColor: '#bfbfbf',
+      borderWidth: 1,
+      borderLeftWidth: 0,
+      borderTopWidth: 0,
+      padding: 5,
+      textAlign: 'right',
+    },
+    tableTotalRow: {
+      margin: 'auto',
+      flexDirection: 'row',
+      backgroundColor: pdfConfig.secondaryColor,
+      fontWeight: 'bold',
+    },
+    footer: {
+      marginTop: 20,
+      padding: 10,
+      fontSize: 8,
+      textAlign: 'center',
+      color: '#666',
+    },
+    dateText: {
+      fontSize: 10,
+      marginBottom: 10,
+      textAlign: 'right',
+    },
+  });
+  
+  // Componente PDF
+  const BudgetPdf = (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        {/* Encabezado de la organización */}
+        {pdfConfig.logoPosition === 'center' ? (
+          <View style={styles.headerCenter}>
+            {organization.logoUrl && (
+              <Image src={organization.logoUrl} style={styles.logoCenter} />
+            )}
+            <Text style={styles.orgName}>{organization.name}</Text>
+            {organization.description && (
+              <Text style={styles.orgDetails}>{organization.description}</Text>
+            )}
+            {pdfConfig.showAddress && organization.address && (
+              <Text style={styles.orgDetails}>{organization.address}</Text>
+            )}
+            <View style={{ flexDirection: 'row', justifyContent: 'center', flexWrap: 'wrap' }}>
+              {pdfConfig.showPhone && organization.phone && (
+                <Text style={[styles.orgDetails, { marginRight: 10 }]}>
+                  Tel: {organization.phone}
+                </Text>
+              )}
+              {pdfConfig.showEmail && organization.email && (
+                <Text style={[styles.orgDetails, { marginRight: 10 }]}>
+                  Email: {organization.email}
+                </Text>
+              )}
+              {pdfConfig.showWebsite && organization.website && (
+                <Text style={styles.orgDetails}>Web: {organization.website}</Text>
+              )}
+            </View>
+            {pdfConfig.showTaxId && organization.taxId && (
+              <Text style={styles.orgDetails}>RIF/NIT: {organization.taxId}</Text>
+            )}
+          </View>
+        ) : (
+          <View style={pdfConfig.logoPosition === 'left' ? styles.headerLeft : styles.headerRight}>
+            {organization.logoUrl && (
+              <Image src={organization.logoUrl} style={styles.logo} />
+            )}
+            <View style={styles.orgInfo}>
+              <Text style={styles.orgName}>{organization.name}</Text>
+              {organization.description && (
+                <Text style={styles.orgDetails}>{organization.description}</Text>
+              )}
+              {pdfConfig.showAddress && organization.address && (
+                <Text style={styles.orgDetails}>{organization.address}</Text>
+              )}
+              {pdfConfig.showPhone && organization.phone && (
+                <Text style={styles.orgDetails}>Tel: {organization.phone}</Text>
+              )}
+              {pdfConfig.showEmail && organization.email && (
+                <Text style={styles.orgDetails}>Email: {organization.email}</Text>
+              )}
+              {pdfConfig.showWebsite && organization.website && (
+                <Text style={styles.orgDetails}>Web: {organization.website}</Text>
+              )}
+              {pdfConfig.showTaxId && organization.taxId && (
+                <Text style={styles.orgDetails}>RIF/NIT: {organization.taxId}</Text>
+              )}
+            </View>
+          </View>
+        )}
+        
+        {/* Fecha */}
+        <View>
+          <Text style={styles.dateText}>
+            Fecha: {format(new Date(), "d 'de' MMMM 'de' yyyy", { locale: es })}
+          </Text>
+        </View>
+        
+        {/* Información del proyecto */}
+        <View style={styles.projectInfo}>
+          <Text style={styles.projectTitle}>Proyecto: {project.name}</Text>
+          {project.description && (
+            <Text style={styles.orgDetails}>{project.description}</Text>
+          )}
+        </View>
+        
+        {/* Título del presupuesto */}
+        <View style={styles.section}>
+          <Text style={styles.budgetTitle}>{budget.name}</Text>
+          {budget.description && (
+            <Text style={styles.orgDetails}>{budget.description}</Text>
+          )}
+        </View>
+        
+        {/* Tareas agrupadas por categoría */}
+        {Object.entries(tasksByCategory).map(([category, tasks]) => (
+          <View style={styles.section} key={category}>
+            <Text style={styles.categoryHeader}>{category}</Text>
+            <View style={styles.table}>
+              {/* Encabezados de tabla */}
+              <View style={styles.tableRowHeader}>
+                <View style={styles.tableColHeader}>
+                  <Text>Descripción</Text>
+                </View>
+                <View style={styles.tableNumColHeader}>
+                  <Text>Unidad</Text>
+                </View>
+                <View style={styles.tableNumColHeader}>
+                  <Text>Cantidad</Text>
+                </View>
+                <View style={styles.tableNumColHeader}>
+                  <Text>Precio Unit.</Text>
+                </View>
+                <View style={styles.tableNumColHeader}>
+                  <Text>Total</Text>
+                </View>
+              </View>
+              
+              {/* Filas de tareas */}
+              {tasks.map((budgetTask) => {
+                const { task, quantity } = budgetTask;
+                const taskTotal = quantity * task.unitPrice;
+                
+                return (
+                  <View style={styles.tableRow} key={budgetTask.id}>
+                    <View style={styles.tableCol}>
+                      <Text>{task.name}</Text>
+                    </View>
+                    <View style={styles.tableNumCol}>
+                      <Text>{task.unit}</Text>
+                    </View>
+                    <View style={styles.tableNumCol}>
+                      <Text>{quantity}</Text>
+                    </View>
+                    <View style={styles.tableNumCol}>
+                      <Text>{task.unitPrice.toFixed(2)}</Text>
+                    </View>
+                    <View style={styles.tableNumCol}>
+                      <Text>{taskTotal.toFixed(2)}</Text>
+                    </View>
+                  </View>
+                );
+              })}
+              
+              {/* Total de la categoría */}
+              <View style={styles.tableTotalRow}>
+                <View 
+                  style={{
+                    ...styles.tableCol,
+                    width: '60%',
+                    borderRightWidth: 0,
+                  }}
+                >
+                  <Text>Subtotal {category}</Text>
+                </View>
+                <View 
+                  style={{
+                    ...styles.tableNumCol,
+                    width: '40%',
+                  }}
+                >
+                  <Text>
+                    {tasks.reduce((acc, bt) => acc + (bt.quantity * bt.task.unitPrice), 0).toFixed(2)}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
+        ))}
+        
+        {/* Total general */}
+        <View style={{ marginTop: 20 }}>
+          <View style={styles.table}>
+            <View style={styles.tableTotalRow}>
+              <View 
+                style={{
+                  ...styles.tableCol,
+                  width: '60%',
+                  borderRightWidth: 0,
+                }}
+              >
+                <Text>TOTAL GENERAL</Text>
+              </View>
+              <View 
+                style={{
+                  ...styles.tableNumCol,
+                  width: '40%',
+                }}
+              >
+                <Text>{total.toFixed(2)}</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+        
+        {/* Pie de página */}
+        <View style={styles.footer} fixed>
+          <Text>
+            Documento generado automáticamente por ArchHub
+          </Text>
+        </View>
+      </Page>
+    </Document>
+  );
+  
+  // Generar una vista previa para el componente que lo requiera
   useEffect(() => {
-    if (previewRef.current && !isGenerating && !dataUrl) {
+    if (onPreviewGenerated && !previewOnly) {
       const generatePreview = async () => {
         try {
-          setIsGenerating(true);
-          const dataUrl = await toPng(previewRef.current!, { 
-            quality: 0.95,
-            backgroundColor: 'white'
-          });
-          setDataUrl(dataUrl);
-          
-          if (onPreviewGenerated) {
-            onPreviewGenerated(dataUrl);
-          }
+          const blob = await pdf(BudgetPdf).toBlob();
+          const dataUrl = URL.createObjectURL(blob);
+          onPreviewGenerated(dataUrl);
         } catch (error) {
-          console.error('Error al generar la previsualización:', error);
-        } finally {
-          setIsGenerating(false);
+          console.error('Error generando vista previa del PDF:', error);
         }
       };
       
-      // Pequeño retraso para asegurar que el componente esté renderizado completamente
-      const timeoutId = setTimeout(generatePreview, 300);
-      return () => clearTimeout(timeoutId);
+      generatePreview();
     }
-  }, [previewRef, isGenerating, dataUrl, onPreviewGenerated]);
+  }, [organization, budget, budgetTasks, pdfConfig, onPreviewGenerated, previewOnly]);
   
-  const logoPosition = organization.pdfConfig?.logoPosition || "left";
-  const primaryColor = organization.pdfConfig?.primaryColor || "#92c900";
-  const secondaryColor = organization.pdfConfig?.secondaryColor || "#333333";
+  // Efecto para manejar el montaje del componente
+  useEffect(() => {
+    setIsMounted(true);
+    return () => setIsMounted(false);
+  }, []);
   
-  // Solo para previsualización, usamos una imagen estática
-  if (previewOnly && dataUrl) {
-    return (
-      <Card className="overflow-hidden">
-        <CardContent className="p-0">
-          <img 
-            src={dataUrl} 
-            alt="Previsualización del presupuesto" 
-            className="w-full h-auto"
-          />
-        </CardContent>
-      </Card>
-    );
+  if (!isMounted || typeof window === "undefined") {
+    return <div className="p-4 text-center">Cargando vista previa...</div>;
   }
   
-  // Mostramos un skeleton mientras se genera
-  if (previewOnly && isGenerating) {
-    return (
-      <Card>
-        <CardContent className="p-4">
-          <Skeleton className="h-8 w-2/3 mb-4" />
-          <Skeleton className="h-4 w-full mb-2" />
-          <Skeleton className="h-4 w-full mb-2" />
-          <Skeleton className="h-4 w-full mb-4" />
-          
-          <div className="space-y-2 mt-6">
-            <Skeleton className="h-6 w-full" />
-            <Skeleton className="h-6 w-full" />
-            <Skeleton className="h-6 w-full" />
-            <Skeleton className="h-6 w-full" />
-            <Skeleton className="h-6 w-full" />
-          </div>
-          
-          <Skeleton className="h-8 w-1/3 mt-4 ml-auto" />
-        </CardContent>
-      </Card>
-    );
-  }
-  
-  // La versión real para renderizar
-  return (
-    <div 
-      ref={previewRef} 
-      className="bg-white p-8 shadow-lg max-w-full"
-      style={{ 
-        maxWidth: previewOnly ? '100%' : '210mm', 
-        minHeight: previewOnly ? 'auto' : '297mm',
-        display: previewOnly && (isGenerating || dataUrl) ? 'none' : 'block'
-      }}
-    >
-      {/* Encabezado */}
-      <div className="flex justify-between items-start mb-8">
-        <div className={`flex justify-${logoPosition} w-full`}>
-          {organization.logoUrl && (
-            <div className="mb-4" style={{ maxWidth: '150px', maxHeight: '80px' }}>
-              <img 
-                src={organization.logoUrl} 
-                alt={`Logo de ${organization.name}`} 
-                className="max-w-full max-h-full object-contain"
-              />
-            </div>
-          )}
-        </div>
-        
-        <div className="text-right">
-          <h1 className="text-2xl font-bold" style={{ color: primaryColor }}>
-            {organization.name}
-          </h1>
-          {organization.pdfConfig?.showTaxId && organization.taxId && (
-            <p className="text-sm text-gray-600">CUIT/RUT: {organization.taxId}</p>
-          )}
-          {organization.pdfConfig?.showAddress && organization.address && (
-            <p className="text-sm text-gray-600">{organization.address}</p>
-          )}
-          {organization.pdfConfig?.showPhone && organization.phone && (
-            <p className="text-sm text-gray-600">{organization.phone}</p>
-          )}
-          {organization.pdfConfig?.showEmail && organization.email && (
-            <p className="text-sm text-gray-600">{organization.email}</p>
-          )}
-          {organization.pdfConfig?.showWebsite && organization.website && (
-            <p className="text-sm text-gray-600">{organization.website}</p>
-          )}
-        </div>
-      </div>
-      
-      {/* Información del presupuesto */}
-      <div className="mb-8">
-        <h2 className="text-xl font-bold mb-2" style={{ color: primaryColor }}>
-          {budget.name}
-        </h2>
-        <p className="text-sm mb-1">
-          <span className="font-semibold">Proyecto:</span> {project.name}
-        </p>
-        {budget.description && (
-          <p className="text-sm text-gray-600 mt-2">{budget.description}</p>
-        )}
-        <p className="text-sm text-gray-600 mt-2">
-          <span className="font-semibold">Fecha:</span> {new Date().toLocaleDateString('es-AR')}
-        </p>
-      </div>
-      
-      {/* Tabla de tareas */}
-      <div className="mb-8">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr style={{ backgroundColor: primaryColor }}>
-              <th className="py-2 px-4 text-white text-left">Descripción</th>
-              <th className="py-2 px-4 text-white text-center">Unidad</th>
-              <th className="py-2 px-4 text-white text-center">Cantidad</th>
-              <th className="py-2 px-4 text-white text-right">Precio Unitario</th>
-              <th className="py-2 px-4 text-white text-right">Subtotal</th>
-            </tr>
-          </thead>
-          <tbody>
-            {budgetTasks.map((budgetTask, index) => (
-              <tr 
-                key={budgetTask.id} 
-                className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}
-              >
-                <td className="py-2 px-4 border-b border-gray-200">
-                  <p className="font-medium">{budgetTask.task.name}</p>
-                  <p className="text-xs text-gray-500 mt-1">{budgetTask.task.category}</p>
-                </td>
-                <td className="py-2 px-4 border-b border-gray-200 text-center">
-                  {budgetTask.task.unit}
-                </td>
-                <td className="py-2 px-4 border-b border-gray-200 text-center">
-                  {budgetTask.quantity}
-                </td>
-                <td className="py-2 px-4 border-b border-gray-200 text-right">
-                  {formatCurrency(budgetTask.task.unitPrice)}
-                </td>
-                <td className="py-2 px-4 border-b border-gray-200 text-right font-medium">
-                  {formatCurrency(budgetTask.quantity * budgetTask.task.unitPrice)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-          <tfoot>
-            <tr>
-              <td colSpan={4} className="py-3 px-4 text-right font-bold">
-                TOTAL
-              </td>
-              <td className="py-3 px-4 text-right font-bold" style={{ color: primaryColor }}>
-                {formatCurrency(calculateTotal())}
-              </td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-      
-      {/* Notas */}
-      <div className="mt-8 text-sm text-gray-600">
-        <p className="mb-1"><strong>Notas:</strong></p>
-        <p>* Los precios pueden variar según disponibilidad y fluctuaciones de mercado.</p>
-        <p>* Este presupuesto tiene una validez de 15 días desde su emisión.</p>
-        <p>* Los tiempos de ejecución se acordarán según la complejidad del proyecto.</p>
-      </div>
-      
-      {/* Pie de página */}
-      <div className="mt-16 pt-4 border-t text-center text-sm text-gray-500">
-        <p>Generado desde Archub - Sistema de Gestión de Proyectos de Construcción</p>
-      </div>
+  return previewOnly ? (
+    <div className="border rounded-lg overflow-hidden">
+      <PDFViewer width="100%" height={500} className="w-full">
+        {BudgetPdf}
+      </PDFViewer>
     </div>
+  ) : (
+    <PDFViewer width="100%" height={600} className="w-full">
+      {BudgetPdf}
+    </PDFViewer>
   );
 }

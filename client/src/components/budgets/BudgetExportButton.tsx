@@ -1,11 +1,5 @@
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import * as XLSX from 'xlsx';
-import { Download, FileDown, Loader2, FileText } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,8 +7,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -22,11 +15,17 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import { LucideFileDown, LucideFileText, LucideFileSpreadsheet } from "lucide-react";
+import { BudgetPdfPreview } from "./BudgetPdfPreview";
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
 
-import { BudgetPdfPreview } from './BudgetPdfPreview';
-
+// Interfaces
 interface Task {
   id: number;
   name: string;
@@ -85,357 +84,223 @@ interface BudgetExportButtonProps {
 
 export function BudgetExportButton({ budgetId, projectId }: BudgetExportButtonProps) {
   const { toast } = useToast();
-  const [isPdfDialogOpen, setIsPdfDialogOpen] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
-  const [previewDataUrl, setPreviewDataUrl] = useState<string | null>(null);
+  const [showPdfPreview, setShowPdfPreview] = useState(false);
+  const [exportInProgress, setExportInProgress] = useState(false);
   
-  // Obtener datos del presupuesto
+  // Obtener datos necesarios para exportar
   const { data: budget } = useQuery<Budget>({
     queryKey: [`/api/budgets/${budgetId}`],
-    enabled: !!budgetId,
   });
   
-  // Obtener las tareas del presupuesto
-  const { data: budgetTasks = [] } = useQuery<BudgetTask[]>({
-    queryKey: [`/api/budgets/${budgetId}/tasks`],
-    enabled: !!budgetId,
-  });
-  
-  // Obtener datos del proyecto
   const { data: project } = useQuery<Project>({
     queryKey: [`/api/projects/${projectId}`],
     enabled: !!projectId,
   });
   
-  // Obtener la organización actual
-  const { data: organization } = useQuery<Organization>({
-    queryKey: ['/api/organizations/current'],
+  const { data: budgetTasks = [] } = useQuery<BudgetTask[]>({
+    queryKey: [`/api/budgets/${budgetId}/tasks`],
   });
   
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("es-AR", {
-      style: "currency",
-      currency: "ARS",
-      minimumFractionDigits: 2,
-    }).format(amount);
+  // Obtener la organización activa
+  const { data: organization } = useQuery<Organization>({
+    queryKey: ["/api/organizations/active"],
+  });
+  
+  // Maneja la exportación a PDF
+  const handleExportPdf = () => {
+    setShowPdfPreview(true);
   };
   
-  const handleExportPDF = async () => {
-    if (!budget || !project || !organization || budgetTasks.length === 0) {
-      toast({
-        title: "No hay datos para exportar",
-        description: "Verifique que el presupuesto contiene tareas",
-        variant: "destructive",
-      });
-      return;
-    }
+  // Descargar PDF
+  const handleSavePdf = (dataUrl: string) => {
+    if (!budget) return;
     
     try {
-      setIsExporting(true);
-      
-      // Creamos el documento PDF
-      const doc = new jsPDF();
-      
-      // Título del documento
-      doc.setFontSize(18);
-      doc.setTextColor(0, 0, 0);
-      doc.text(`Presupuesto: ${budget.name}`, 14, 20);
-      
-      // Información de la organización
-      doc.setFontSize(12);
-      doc.text(`Organización: ${organization.name}`, 14, 30);
-      if (organization.taxId) {
-        doc.text(`CUIT/RUT: ${organization.taxId}`, 14, 36);
-      }
-      
-      // Información del proyecto
-      doc.text(`Proyecto: ${project.name}`, 14, 48);
-      doc.text(`Fecha: ${new Date().toLocaleDateString('es-AR')}`, 14, 54);
-      
-      // Tabla de tareas
-      const tableData = budgetTasks.map(item => [
-        item.task.name,
-        item.task.category,
-        item.task.unit,
-        item.quantity.toString(),
-        formatCurrency(item.task.unitPrice),
-        formatCurrency(item.quantity * item.task.unitPrice)
-      ]);
-      
-      // Calcular el total
-      const total = budgetTasks.reduce((sum, item) => {
-        return sum + (item.quantity * item.task.unitPrice);
-      }, 0);
-      
-      // Añadir fila de total
-      tableData.push(['', '', '', '', 'TOTAL', formatCurrency(total)]);
-      
-      // Generar la tabla
-      autoTable(doc, {
-        head: [['Descripción', 'Categoría', 'Unidad', 'Cantidad', 'Precio Unit.', 'Subtotal']],
-        body: tableData,
-        startY: 65,
-        theme: 'grid',
-        headStyles: {
-          fillColor: [146, 201, 0], // El color principal (#92c900)
-          textColor: [255, 255, 255],
-          fontStyle: 'bold'
-        },
-        footStyles: {
-          fontStyle: 'bold'
-        }
-      });
-      
-      // Notas al pie
-      const finalY = (doc as any).lastAutoTable.finalY + 15;
-      doc.setFontSize(10);
-      doc.text('Notas:', 14, finalY);
-      doc.text('* Los precios pueden variar según disponibilidad y fluctuaciones de mercado.', 20, finalY + 6);
-      doc.text('* Este presupuesto tiene una validez de 15 días desde su emisión.', 20, finalY + 12);
-      doc.text('* Los tiempos de ejecución se acordarán según la complejidad del proyecto.', 20, finalY + 18);
-      
-      // Pie de página
-      doc.setFontSize(8);
-      doc.setTextColor(150, 150, 150);
-      doc.text('Generado desde Archub - Sistema de Gestión de Proyectos de Construcción', doc.internal.pageSize.getWidth() / 2, 285, { align: 'center' });
-      
-      // Guardar el PDF
-      const fileName = `presupuesto_${budget.name.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase()}_${new Date().toISOString().split('T')[0]}.pdf`;
-      doc.save(fileName);
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = `presupuesto_${budget.name.replace(/\s+/g, '_').toLowerCase()}_${format(new Date(), 'yyyy-MM-dd')}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
       
       toast({
-        title: "Exportación completada",
-        description: `El presupuesto ha sido exportado como "${fileName}"`,
+        title: "PDF Exportado",
+        description: "El presupuesto ha sido exportado como PDF correctamente.",
       });
-      
     } catch (error) {
-      console.error('Error al exportar el PDF:', error);
       toast({
-        title: "Error al exportar",
-        description: "No se pudo generar el archivo PDF. Intente nuevamente.",
+        title: "Error",
+        description: `No se pudo exportar el PDF: ${error}`,
         variant: "destructive",
       });
-    } finally {
-      setIsExporting(false);
-      setIsPdfDialogOpen(false);
     }
   };
   
+  // Exportar a Excel
   const handleExportExcel = async () => {
-    if (!budget || !project || budgetTasks.length === 0) {
-      toast({
-        title: "No hay datos para exportar",
-        description: "Verifique que el presupuesto contiene tareas",
-        variant: "destructive",
-      });
-      return;
-    }
+    if (!budget || !budgetTasks.length) return;
+    
+    setExportInProgress(true);
     
     try {
-      setIsExporting(true);
-      
-      // Preparar datos para Excel
-      const worksheetData = [
-        ['Presupuesto', budget.name],
-        ['Proyecto', project.name],
-        ['Organización', organization?.name || ''],
-        ['Fecha', new Date().toLocaleDateString('es-AR')],
-        [''],
-        ['Descripción', 'Categoría', 'Unidad', 'Cantidad', 'Precio Unitario', 'Subtotal']
+      // Datos para la cabecera
+      const headerData = [
+        [`Presupuesto: ${budget.name}`],
+        [`Fecha: ${format(new Date(), "d 'de' MMMM 'de' yyyy", { locale: es })}`],
+        [`Proyecto: ${project?.name || 'Sin proyecto'}`],
+        [],
       ];
       
-      // Añadir filas de tareas
-      budgetTasks.forEach(item => {
-        worksheetData.push([
-          item.task.name,
-          item.task.category,
-          item.task.unit,
-          item.quantity,
-          item.task.unitPrice,
-          item.quantity * item.task.unitPrice
-        ]);
+      // Crear una hoja de cálculo con las tareas
+      const tasksSheet = [
+        ['Categoría', 'Tarea', 'Unidad', 'Cantidad', 'Precio Unitario', 'Total'],
+        ...budgetTasks.map(bt => [
+          bt.task.category,
+          bt.task.name,
+          bt.task.unit,
+          bt.quantity,
+          bt.task.unitPrice,
+          bt.quantity * bt.task.unitPrice
+        ]),
+        [],
+        [
+          '', 
+          '', 
+          '', 
+          '', 
+          'TOTAL',
+          budgetTasks.reduce((acc, bt) => acc + (bt.quantity * bt.task.unitPrice), 0)
+        ],
+      ];
+      
+      // Crear hoja por categorías
+      const categoriesData: Record<string, any[][]> = {};
+      const categories = [...new Set(budgetTasks.map(bt => bt.task.category))];
+      
+      categories.forEach(category => {
+        const categoryTasks = budgetTasks.filter(bt => bt.task.category === category);
+        
+        categoriesData[category] = [
+          ['Tarea', 'Unidad', 'Cantidad', 'Precio Unitario', 'Total'],
+          ...categoryTasks.map(bt => [
+            bt.task.name,
+            bt.task.unit,
+            bt.quantity,
+            bt.task.unitPrice,
+            bt.quantity * bt.task.unitPrice
+          ]),
+          [],
+          [
+            '', 
+            '', 
+            '', 
+            'TOTAL',
+            categoryTasks.reduce((acc, bt) => acc + (bt.quantity * bt.task.unitPrice), 0)
+          ],
+        ];
       });
       
-      // Calcular el total
-      const total = budgetTasks.reduce((sum, item) => {
-        return sum + (item.quantity * item.task.unitPrice);
-      }, 0);
-      
-      // Añadir fila de total
-      worksheetData.push(['', '', '', '', 'TOTAL', total]);
-      
-      // Crear el libro de trabajo y la hoja
-      const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
-      
-      // Ajustar anchos de columna
-      const columnWidths = [
-        { wch: 25 }, // Descripción
-        { wch: 15 }, // Categoría
-        { wch: 10 }, // Unidad
-        { wch: 10 }, // Cantidad
-        { wch: 15 }, // Precio Unitario
-        { wch: 15 }, // Subtotal
-      ];
-      worksheet['!cols'] = columnWidths;
-      
-      // Crear el libro y agregar la hoja
+      // Crear el libro de trabajo
       const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Presupuesto');
       
-      // Generar y descargar el archivo
-      const fileName = `presupuesto_${budget.name.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase()}_${new Date().toISOString().split('T')[0]}.xlsx`;
-      XLSX.writeFile(workbook, fileName);
+      // Añadir la hoja principal
+      const mainSheet = [...headerData, ...tasksSheet];
+      XLSX.utils.book_append_sheet(
+        workbook, 
+        XLSX.utils.aoa_to_sheet(mainSheet), 
+        'Presupuesto'
+      );
       
-      toast({
-        title: "Exportación completada",
-        description: `El presupuesto ha sido exportado como "${fileName}"`,
+      // Añadir hojas por categoría
+      categories.forEach(category => {
+        XLSX.utils.book_append_sheet(
+          workbook, 
+          XLSX.utils.aoa_to_sheet(categoriesData[category]), 
+          category.slice(0, 31) // Excel limita los nombres de hoja a 31 caracteres
+        );
       });
       
-    } catch (error) {
-      console.error('Error al exportar a Excel:', error);
+      // Convertir a binario y descargar
+      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      saveAs(blob, `presupuesto_${budget.name.replace(/\s+/g, '_').toLowerCase()}_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+      
       toast({
-        title: "Error al exportar",
-        description: "No se pudo generar el archivo Excel. Intente nuevamente.",
+        title: "Excel Exportado",
+        description: "El presupuesto ha sido exportado como Excel correctamente.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: `No se pudo exportar el Excel: ${error}`,
         variant: "destructive",
       });
     } finally {
-      setIsExporting(false);
+      setExportInProgress(false);
     }
   };
   
-  const handlePreviewGenerated = (dataUrl: string) => {
-    setPreviewDataUrl(dataUrl);
-  };
-  
-  const handleAdvancedPdfExport = async () => {
-    if (!previewDataUrl) {
-      toast({
-        title: "Error al exportar",
-        description: "No se pudo generar la previsualización del PDF. Intente nuevamente.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    try {
-      setIsExporting(true);
-      
-      // Crear un nuevo documento PDF con el tamaño de una hoja A4
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
-      
-      // Añadir la imagen de la previsualización al PDF
-      pdf.addImage(previewDataUrl, 'PNG', 0, 0, 210, 297);
-      
-      // Guardar el PDF
-      const fileName = `presupuesto_${budget?.name.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase()}_${new Date().toISOString().split('T')[0]}.pdf`;
-      pdf.save(fileName);
-      
-      toast({
-        title: "Exportación completada",
-        description: `El presupuesto ha sido exportado como "${fileName}"`,
-      });
-      
-    } catch (error) {
-      console.error('Error al exportar el PDF avanzado:', error);
-      toast({
-        title: "Error al exportar",
-        description: "No se pudo generar el archivo PDF. Intente nuevamente.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsExporting(false);
-      setIsPdfDialogOpen(false);
-    }
-  };
-  
-  if (!budget || !project || !organization) {
-    return (
-      <Button variant="outline" size="sm" disabled>
-        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        Cargando...
-      </Button>
-    );
-  }
+  // Verificar que tenemos todos los datos necesarios
+  const canExport = !!budget && !!budgetTasks.length && !!organization;
   
   return (
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm">
-            <Download className="mr-2 h-4 w-4" />
+          <Button 
+            variant="default" 
+            className="bg-primary hover:bg-primary/90"
+            disabled={!canExport || exportInProgress}
+          >
+            <LucideFileDown className="mr-2 h-4 w-4" />
             Exportar
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Opciones de exportación</DropdownMenuLabel>
+        <DropdownMenuContent>
+          <DropdownMenuLabel>Formato de exportación</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setIsPdfDialogOpen(true)}>
-            <FileText className="mr-2 h-4 w-4" />
-            Diseño PDF personalizado
+          <DropdownMenuItem onClick={handleExportPdf} disabled={exportInProgress}>
+            <LucideFileText className="mr-2 h-4 w-4" />
+            Exportar como PDF
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleExportPDF}>
-            <FileText className="mr-2 h-4 w-4" />
-            PDF simple
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleExportExcel}>
-            <FileDown className="mr-2 h-4 w-4" />
-            Excel
+          <DropdownMenuItem onClick={handleExportExcel} disabled={exportInProgress}>
+            <LucideFileSpreadsheet className="mr-2 h-4 w-4" />
+            Exportar como Excel
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       
-      {/* Diálogo para exportar PDF con diseño personalizado */}
-      <Dialog open={isPdfDialogOpen} onOpenChange={setIsPdfDialogOpen}>
-        <DialogContent className="sm:max-w-3xl">
+      {/* Diálogo para vista previa del PDF */}
+      <Dialog open={showPdfPreview} onOpenChange={setShowPdfPreview}>
+        <DialogContent className="max-w-4xl">
           <DialogHeader>
-            <DialogTitle>Previsualización del Presupuesto</DialogTitle>
+            <DialogTitle>Vista previa del PDF</DialogTitle>
             <DialogDescription>
-              Esta es una previsualización de cómo se verá el documento exportado en formato PDF.
+              Previsualiza el documento PDF antes de descargarlo.
             </DialogDescription>
           </DialogHeader>
           
-          <div className="max-h-[60vh] overflow-y-auto mt-4">
-            {budget && project && organization && (
-              <BudgetPdfPreview
-                organization={organization}
-                project={project}
-                budget={budget}
+          {canExport && showPdfPreview && (
+            <div className="mt-4">
+              <BudgetPdfPreview 
+                organization={organization!}
+                project={project || { id: 0, name: "Sin proyecto", description: null }}
+                budget={budget!}
                 budgetTasks={budgetTasks}
-                onPreviewGenerated={handlePreviewGenerated}
+                onPreviewGenerated={handleSavePdf}
               />
-            )}
-          </div>
+            </div>
+          )}
           
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsPdfDialogOpen(false)}
-              disabled={isExporting}
+          <div className="flex justify-end mt-4">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowPdfPreview(false)}
+              className="mr-2"
             >
-              Cancelar
+              Cerrar
             </Button>
-            <Button
-              onClick={handleAdvancedPdfExport}
-              className="bg-primary hover:bg-primary/90"
-              disabled={isExporting || !previewDataUrl}
-            >
-              {isExporting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Exportando...
-                </>
-              ) : (
-                <>
-                  <FileDown className="mr-2 h-4 w-4" />
-                  Exportar PDF
-                </>
-              )}
-            </Button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
     </>

@@ -1,24 +1,40 @@
-import { useState, useRef, useEffect } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Save, X, Check } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  RadioGroup,
+  RadioGroupItem,
+} from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { BudgetPdfPreview } from "@/components/budgets/BudgetPdfPreview";
 import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  LucideArrowLeft,
+  LucideArrowRight, 
+  LucideAlignLeft, 
+  LucideAlignCenter, 
+  LucideAlignRight,
+  LucideUpload 
+} from "lucide-react";
 
+// Definimos la interfaz para la organización
 interface Organization {
   id: number;
   name: string;
@@ -41,24 +57,83 @@ interface Organization {
   };
 }
 
-export function OrganizationSettings() {
+// Esquema para validar los datos del formulario
+const organizationSchema = z.object({
+  name: z.string().min(1, "El nombre es requerido"),
+  description: z.string().nullable().optional(),
+  address: z.string().nullable().optional(),
+  phone: z.string().nullable().optional(),
+  email: z.string().email("Ingrese una dirección de email válida").nullable().optional(),
+  website: z.string().url("Ingrese una URL válida").nullable().optional(),
+  taxId: z.string().nullable().optional(),
+});
+
+// Interfaz para las propiedades del componente
+interface OrganizationSettingsProps {
+  organization: Organization;
+}
+
+// Define un modelo de presupuesto para la vista previa del PDF
+const sampleBudget = {
+  id: 1,
+  name: "Presupuesto de Ejemplo",
+  description: "Este es un ejemplo para mostrar cómo se verá el PDF generado."
+};
+
+// Datos de ejemplo para la vista previa
+const sampleProject = {
+  id: 1,
+  name: "Proyecto de Ejemplo",
+  description: "Descripción del proyecto de ejemplo"
+};
+
+// Tareas de ejemplo para la vista previa
+const sampleBudgetTasks = [
+  {
+    id: 1,
+    quantity: 10,
+    task: {
+      id: 1,
+      name: "Instalación eléctrica",
+      unit: "m²",
+      unitPrice: 25,
+      category: "Electricidad"
+    }
+  },
+  {
+    id: 2,
+    quantity: 5,
+    task: {
+      id: 2,
+      name: "Pintura",
+      unit: "m²",
+      unitPrice: 15,
+      category: "Acabados"
+    }
+  },
+  {
+    id: 3,
+    quantity: 8,
+    task: {
+      id: 3,
+      name: "Piso laminado",
+      unit: "m²",
+      unitPrice: 35,
+      category: "Pisos"
+    }
+  }
+];
+
+export function OrganizationSettings({ organization }: OrganizationSettingsProps) {
   const { toast } = useToast();
-  const [editing, setEditing] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [logoPreview, setLogoPreview] = useState<string | null>(organization.logoUrl);
+  const [activeTab, setActiveTab] = useState<string>("general");
   
-  const { data: organization, isLoading } = useQuery<Organization>({
-    queryKey: ["/api/organizations/current"],
-  });
-  
-  const [formData, setFormData] = useState<Partial<Organization>>({
-    name: "",
-    description: "",
-    address: "",
-    phone: "",
-    email: "",
-    website: "",
-    taxId: "",
-    pdfConfig: {
+  // Estado para la configuración del PDF
+  const [pdfSettings, setPdfSettings] = useState<Partial<Organization>>({
+    pdfConfig: organization.pdfConfig || {
       logoPosition: "left",
       showAddress: true,
       showPhone: true,
@@ -66,467 +141,504 @@ export function OrganizationSettings() {
       showWebsite: true,
       showTaxId: true,
       primaryColor: "#92c900",
-      secondaryColor: "#333333",
+      secondaryColor: "#f0f0f0"
     }
   });
   
-  // Inicializar el formulario con los datos de la organización
-  useEffect(() => {
-    if (organization) {
-      setFormData({
-        ...organization,
-        pdfConfig: organization.pdfConfig || {
-          logoPosition: "left",
-          showAddress: true,
-          showPhone: true,
-          showEmail: true,
-          showWebsite: true,
-          showTaxId: true,
-          primaryColor: "#92c900",
-          secondaryColor: "#333333",
-        }
-      });
-    }
-  }, [organization]);
+  // Estado para la vista previa del PDF
+  const [pdfPreview, setPdfPreview] = useState<string | null>(null);
   
-  // Efecto para actualizar el formulario cuando se carguen los datos
-  useEffect(() => {
-    if (organization && !editing) {
-      setFormData({
-        ...organization,
-        pdfConfig: organization.pdfConfig || {
-          logoPosition: "left",
-          showAddress: true,
-          showPhone: true,
-          showEmail: true,
-          showWebsite: true,
-          showTaxId: true,
-          primaryColor: "#92c900",
-          secondaryColor: "#333333",
-        }
-      });
+  // Configurar el formulario
+  const form = useForm<z.infer<typeof organizationSchema>>({
+    resolver: zodResolver(organizationSchema),
+    defaultValues: {
+      name: organization.name,
+      description: organization.description,
+      address: organization.address,
+      phone: organization.phone,
+      email: organization.email,
+      website: organization.website,
+      taxId: organization.taxId,
     }
-  }, [organization, editing]);
+  });
   
-  const updateMutation = useMutation({
-    mutationFn: async (data: Partial<Organization>) => {
-      const res = await apiRequest("PUT", `/api/organizations/${organization?.id}`, data);
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Error al actualizar la organización");
-      }
-      return await res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/organizations/current"] });
+  // Función para cargar el logo
+  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+    
+    const file = files[0];
+    
+    // Validar tipo de archivo (solo imágenes)
+    if (!file.type.startsWith('image/')) {
       toast({
-        title: "Configuración actualizada",
-        description: "Los datos de la organización se han actualizado correctamente",
-      });
-      setEditing(false);
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message,
+        title: "Error al cargar el logo",
+        description: "El archivo debe ser una imagen",
         variant: "destructive",
       });
+      return;
     }
-  });
-  
-  const uploadLogoMutation = useMutation({
-    mutationFn: async (file: File) => {
-      const formData = new FormData();
-      formData.append('logo', file);
+    
+    // Crear una vista previa
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setLogoPreview(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+    
+    // Subir el archivo al servidor
+    const formData = new FormData();
+    formData.append('logo', file);
+    
+    setUploadingLogo(true);
+    
+    try {
+      await apiRequest('POST', `/api/organizations/${organization.id}/logo`, formData, true);
       
-      const res = await apiRequest("POST", `/api/organizations/${organization?.id}/logo`, formData, false);
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Error al cargar el logo");
-      }
-      return await res.json();
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/organizations/current"] });
-      setFormData(prev => ({ ...prev, logoUrl: data.logoUrl }));
       toast({
         title: "Logo actualizado",
-        description: "El logo de la organización se ha actualizado correctamente",
+        description: "El logo se ha actualizado correctamente",
       });
-    },
-    onError: (error: Error) => {
+      
+      // Invalidar la consulta para actualizar los datos
+      queryClient.invalidateQueries({ queryKey: ['/api/organizations/active'] });
+    } catch (error) {
       toast({
         title: "Error",
-        description: error.message,
+        description: `No se pudo subir el logo: ${error}`,
         variant: "destructive",
       });
+    } finally {
+      setUploadingLogo(false);
     }
-  });
-  
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
   };
   
-  const handlePdfConfigChange = (key: string, value: any) => {
-    setFormData(prev => ({
+  // Mutación para actualizar la organización
+  const updateOrganizationMutation = useMutation({
+    mutationFn: (data: z.infer<typeof organizationSchema>) => {
+      return apiRequest('PATCH', `/api/organizations/${organization.id}`, data);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Organización actualizada",
+        description: "La información de la organización ha sido actualizada correctamente",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/organizations/active'] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `No se pudo actualizar la organización: ${error}`,
+        variant: "destructive",
+      });
+    },
+  });
+  
+  // Mutación para actualizar la configuración del PDF
+  const updatePdfConfigMutation = useMutation({
+    mutationFn: (data: { pdfConfig: any }) => {
+      return apiRequest('PATCH', `/api/organizations/${organization.id}`, data);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Configuración actualizada",
+        description: "La configuración de exportación ha sido actualizada correctamente",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/organizations/active'] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `No se pudo actualizar la configuración: ${error}`,
+        variant: "destructive",
+      });
+    },
+  });
+  
+  // Manejar el cambio de posición del logo
+  const handleLogoPositionChange = (position: "left" | "center" | "right") => {
+    setPdfSettings(prev => ({
       ...prev,
       pdfConfig: {
-        ...prev.pdfConfig,
-        [key]: value
+        ...prev.pdfConfig!,
+        logoPosition: position
       }
     }));
   };
   
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      uploadLogoMutation.mutate(file);
-    }
+  // Manejar el cambio de opciones de visualización
+  const handleToggleOption = (option: string, value: boolean) => {
+    setPdfSettings(prev => ({
+      ...prev,
+      pdfConfig: {
+        ...prev.pdfConfig!,
+        [option]: value
+      }
+    }));
   };
   
-  const triggerFileInput = () => {
-    fileInputRef.current?.click();
+  // Manejar el cambio de color
+  const handleColorChange = (colorType: string, value: string) => {
+    setPdfSettings(prev => ({
+      ...prev,
+      pdfConfig: {
+        ...prev.pdfConfig!,
+        [colorType]: value
+      }
+    }));
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateMutation.mutate(formData);
+  // Guardar la configuración del PDF
+  const savePdfConfig = () => {
+    updatePdfConfigMutation.mutate({ pdfConfig: pdfSettings.pdfConfig });
   };
   
-  if (isLoading) {
-    return (
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle>Configuración de la Organización</CardTitle>
-          <CardDescription>Cargando datos de la organización...</CardDescription>
-        </CardHeader>
-      </Card>
-    );
-  }
+  // Manejar envío del formulario
+  const onSubmit = (data: z.infer<typeof organizationSchema>) => {
+    updateOrganizationMutation.mutate(data);
+  };
   
+  // Actualizar la vista previa del PDF cuando cambie la configuración
+  useEffect(() => {
+    // La vista previa se actualizará cuando se cambia la configuración
+  }, [pdfSettings]);
+  
+  // Combinar la organización con la configuración actualizada para la vista previa
+  const previewOrganization = {
+    ...organization,
+    ...pdfSettings
+  };
+
   return (
-    <form onSubmit={handleSubmit}>
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle>Configuración de la Organización</CardTitle>
-          <CardDescription>Gestione la información y apariencia de su organización</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Sección de información general */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Información General</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nombre de la organización</Label>
-                <Input
-                  id="name"
-                  name="name"
-                  value={formData.name || ""}
-                  onChange={handleChange}
-                  disabled={!editing || updateMutation.isPending}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="taxId">Identificación fiscal (CUIT/RUT)</Label>
-                <Input
-                  id="taxId"
-                  name="taxId"
-                  value={formData.taxId || ""}
-                  onChange={handleChange}
-                  disabled={!editing || updateMutation.isPending}
-                />
-              </div>
-              
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="description">Descripción</Label>
-                <Textarea
-                  id="description"
-                  name="description"
-                  value={formData.description || ""}
-                  onChange={handleChange}
-                  disabled={!editing || updateMutation.isPending}
-                  rows={3}
-                />
-              </div>
-            </div>
-          </div>
-          
-          <Separator />
-          
-          {/* Sección de contacto */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Información de Contacto</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="address">Dirección</Label>
-                <Input
-                  id="address"
-                  name="address"
-                  value={formData.address || ""}
-                  onChange={handleChange}
-                  disabled={!editing || updateMutation.isPending}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="phone">Teléfono</Label>
-                <Input
-                  id="phone"
-                  name="phone"
-                  value={formData.phone || ""}
-                  onChange={handleChange}
-                  disabled={!editing || updateMutation.isPending}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="email">Correo electrónico</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={formData.email || ""}
-                  onChange={handleChange}
-                  disabled={!editing || updateMutation.isPending}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="website">Sitio web</Label>
-                <Input
-                  id="website"
-                  name="website"
-                  value={formData.website || ""}
-                  onChange={handleChange}
-                  disabled={!editing || updateMutation.isPending}
-                />
-              </div>
-            </div>
-          </div>
-          
-          <Separator />
-          
-          {/* Sección de logo */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Logo de la Organización</h3>
-            <div className="flex items-center gap-4">
-              <div className="w-32 h-32 border rounded-md flex items-center justify-center overflow-hidden bg-gray-50">
-                {formData.logoUrl ? (
-                  <img
-                    src={formData.logoUrl}
-                    alt="Logo de la organización"
-                    className="max-w-full max-h-full object-contain"
-                  />
-                ) : (
-                  <span className="text-gray-400 text-sm text-center px-2">
-                    Sin logo
-                  </span>
-                )}
-              </div>
-              
-              <div>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  className="hidden"
-                  accept="image/*"
-                  onChange={handleLogoUpload}
-                  disabled={!editing || uploadLogoMutation.isPending}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={triggerFileInput}
-                  disabled={!editing || uploadLogoMutation.isPending}
-                >
-                  {uploadLogoMutation.isPending ? (
-                    <>Subiendo...</>
+    <Tabs defaultValue="general" value={activeTab} onValueChange={setActiveTab}>
+      <TabsList>
+        <TabsTrigger value="general">General</TabsTrigger>
+        <TabsTrigger value="pdf">Exportación PDF</TabsTrigger>
+      </TabsList>
+      
+      {/* Tab de Información General */}
+      <TabsContent value="general">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {/* Sección de Logo */}
+            <div className="mb-6">
+              <h3 className="text-lg font-medium mb-2">Logo de la Organización</h3>
+              <div className="flex items-start gap-4">
+                <div className="border rounded-md w-32 h-32 flex items-center justify-center overflow-hidden">
+                  {logoPreview ? (
+                    <img 
+                      src={logoPreview} 
+                      alt="Logo de la organización" 
+                      className="max-w-full max-h-full object-contain"
+                    />
                   ) : (
-                    <>
-                      <Upload className="mr-2 h-4 w-4" />
-                      Subir logo
-                    </>
+                    <div className="text-center text-muted-foreground text-sm p-2">
+                      Sin logo
+                    </div>
                   )}
-                </Button>
-                <p className="text-sm text-gray-500 mt-2">
-                  Recomendado: PNG o SVG con fondo transparente, máximo 1MB.
-                </p>
+                </div>
+                <div>
+                  <Label htmlFor="logo-upload" className="mb-2">Subir nuevo logo</Label>
+                  <Input
+                    id="logo-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoUpload}
+                    disabled={uploadingLogo}
+                  />
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Sube una imagen PNG o JPG que represente a tu organización.
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-          
-          <Separator />
-          
-          {/* Configuración de PDF */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Configuración de Documentos PDF</h3>
             
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="logoPosition">Posición del logo</Label>
-                  <Select
-                    value={formData.pdfConfig?.logoPosition || "left"}
-                    onValueChange={(value) => handlePdfConfigChange("logoPosition", value)}
-                    disabled={!editing || updateMutation.isPending}
-                  >
-                    <SelectTrigger id="logoPosition">
-                      <SelectValue placeholder="Seleccione una posición" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="left">Izquierda</SelectItem>
-                      <SelectItem value="center">Centro</SelectItem>
-                      <SelectItem value="right">Derecha</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="primaryColor">Color principal</Label>
-                  <div className="flex items-center gap-2">
+            {/* Campos del formulario */}
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nombre</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Nombre de la organización" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descripción</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      value={field.value || ""}
+                      placeholder="Breve descripción de la organización"
+                      rows={3}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Dirección</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        value={field.value || ""}
+                        placeholder="Dirección física"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Teléfono</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        value={field.value || ""}
+                        placeholder="Número de contacto"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        value={field.value || ""}
+                        placeholder="Email de contacto"
+                        type="email"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="website"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Sitio Web</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        value={field.value || ""}
+                        placeholder="URL del sitio web"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <FormField
+              control={form.control}
+              name="taxId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Identificación Fiscal</FormLabel>
+                  <FormControl>
                     <Input
-                      id="primaryColor"
-                      type="color"
-                      value={formData.pdfConfig?.primaryColor || "#92c900"}
-                      onChange={(e) => handlePdfConfigChange("primaryColor", e.target.value)}
-                      disabled={!editing || updateMutation.isPending}
-                      className="w-12 h-8 p-1"
+                      {...field}
+                      value={field.value || ""}
+                      placeholder="RIF, NIT, RFC u otro identificador fiscal"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <div className="flex justify-end">
+              <Button
+                type="submit"
+                disabled={updateOrganizationMutation.isPending}
+                className="bg-primary hover:bg-primary/90"
+              >
+                {updateOrganizationMutation.isPending ? "Guardando..." : "Guardar Cambios"}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </TabsContent>
+      
+      {/* Tab de Configuración PDF */}
+      <TabsContent value="pdf">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-medium mb-3">Posición del Logo</h3>
+              <RadioGroup 
+                defaultValue={pdfSettings.pdfConfig?.logoPosition || "left"}
+                className="flex gap-4"
+                onValueChange={(value) => handleLogoPositionChange(value as "left" | "center" | "right")}
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="left" id="logo-left" />
+                  <Label htmlFor="logo-left" className="flex items-center gap-1">
+                    <LucideAlignLeft className="h-4 w-4" /> Izquierda
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="center" id="logo-center" />
+                  <Label htmlFor="logo-center" className="flex items-center gap-1">
+                    <LucideAlignCenter className="h-4 w-4" /> Centro
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="right" id="logo-right" />
+                  <Label htmlFor="logo-right" className="flex items-center gap-1">
+                    <LucideAlignRight className="h-4 w-4" /> Derecha
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+            
+            <div>
+              <h3 className="text-lg font-medium mb-3">Información a mostrar</h3>
+              <div className="grid grid-cols-1 gap-3">
+                <div className="flex items-center space-x-2">
+                  <Switch 
+                    id="show-address" 
+                    checked={pdfSettings.pdfConfig?.showAddress || false}
+                    onCheckedChange={(checked) => handleToggleOption('showAddress', checked)}
+                  />
+                  <Label htmlFor="show-address">Mostrar dirección</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch 
+                    id="show-phone" 
+                    checked={pdfSettings.pdfConfig?.showPhone || false}
+                    onCheckedChange={(checked) => handleToggleOption('showPhone', checked)}
+                  />
+                  <Label htmlFor="show-phone">Mostrar teléfono</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch 
+                    id="show-email" 
+                    checked={pdfSettings.pdfConfig?.showEmail || false}
+                    onCheckedChange={(checked) => handleToggleOption('showEmail', checked)}
+                  />
+                  <Label htmlFor="show-email">Mostrar email</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch 
+                    id="show-website" 
+                    checked={pdfSettings.pdfConfig?.showWebsite || false}
+                    onCheckedChange={(checked) => handleToggleOption('showWebsite', checked)}
+                  />
+                  <Label htmlFor="show-website">Mostrar sitio web</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch 
+                    id="show-tax-id" 
+                    checked={pdfSettings.pdfConfig?.showTaxId || false}
+                    onCheckedChange={(checked) => handleToggleOption('showTaxId', checked)}
+                  />
+                  <Label htmlFor="show-tax-id">Mostrar identificación fiscal</Label>
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <h3 className="text-lg font-medium mb-3">Colores</h3>
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <Label htmlFor="primary-color" className="mb-2">Color principal</Label>
+                  <div className="flex items-center gap-2">
+                    <div 
+                      className="w-10 h-10 rounded border" 
+                      style={{ backgroundColor: pdfSettings.pdfConfig?.primaryColor || "#92c900" }}
                     />
                     <Input
+                      id="primary-color"
                       type="text"
-                      value={formData.pdfConfig?.primaryColor || "#92c900"}
-                      onChange={(e) => handlePdfConfigChange("primaryColor", e.target.value)}
-                      disabled={!editing || updateMutation.isPending}
-                      className="flex-1"
+                      value={pdfSettings.pdfConfig?.primaryColor || "#92c900"}
+                      onChange={(e) => handleColorChange('primaryColor', e.target.value)}
+                      placeholder="#92c900"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <Label htmlFor="secondary-color" className="mb-2">Color secundario</Label>
+                  <div className="flex items-center gap-2">
+                    <div 
+                      className="w-10 h-10 rounded border" 
+                      style={{ backgroundColor: pdfSettings.pdfConfig?.secondaryColor || "#f0f0f0" }}
+                    />
+                    <Input
+                      id="secondary-color"
+                      type="text"
+                      value={pdfSettings.pdfConfig?.secondaryColor || "#f0f0f0"}
+                      onChange={(e) => handleColorChange('secondaryColor', e.target.value)}
+                      placeholder="#f0f0f0"
                     />
                   </div>
                 </div>
               </div>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                <div className="flex items-center justify-between space-x-2">
-                  <Label htmlFor="showAddress" className="flex-1">
-                    Mostrar dirección
-                  </Label>
-                  <Switch
-                    id="showAddress"
-                    checked={formData.pdfConfig?.showAddress ?? true}
-                    onCheckedChange={(checked) => handlePdfConfigChange("showAddress", checked)}
-                    disabled={!editing || updateMutation.isPending}
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between space-x-2">
-                  <Label htmlFor="showPhone" className="flex-1">
-                    Mostrar teléfono
-                  </Label>
-                  <Switch
-                    id="showPhone"
-                    checked={formData.pdfConfig?.showPhone ?? true}
-                    onCheckedChange={(checked) => handlePdfConfigChange("showPhone", checked)}
-                    disabled={!editing || updateMutation.isPending}
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between space-x-2">
-                  <Label htmlFor="showEmail" className="flex-1">
-                    Mostrar email
-                  </Label>
-                  <Switch
-                    id="showEmail"
-                    checked={formData.pdfConfig?.showEmail ?? true}
-                    onCheckedChange={(checked) => handlePdfConfigChange("showEmail", checked)}
-                    disabled={!editing || updateMutation.isPending}
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between space-x-2">
-                  <Label htmlFor="showWebsite" className="flex-1">
-                    Mostrar sitio web
-                  </Label>
-                  <Switch
-                    id="showWebsite"
-                    checked={formData.pdfConfig?.showWebsite ?? true}
-                    onCheckedChange={(checked) => handlePdfConfigChange("showWebsite", checked)}
-                    disabled={!editing || updateMutation.isPending}
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between space-x-2">
-                  <Label htmlFor="showTaxId" className="flex-1">
-                    Mostrar identificación fiscal
-                  </Label>
-                  <Switch
-                    id="showTaxId"
-                    checked={formData.pdfConfig?.showTaxId ?? true}
-                    onCheckedChange={(checked) => handlePdfConfigChange("showTaxId", checked)}
-                    disabled={!editing || updateMutation.isPending}
-                  />
-                </div>
-              </div>
+            </div>
+            
+            <div className="flex justify-end">
+              <Button
+                onClick={savePdfConfig}
+                disabled={updatePdfConfigMutation.isPending}
+                className="bg-primary hover:bg-primary/90"
+              >
+                {updatePdfConfigMutation.isPending ? "Guardando..." : "Guardar Configuración"}
+              </Button>
             </div>
           </div>
-        </CardContent>
-        
-        <CardFooter className="flex justify-between">
-          {editing ? (
-            <>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setEditing(false);
-                  // Revertir cambios
-                  if (organization) {
-                    setFormData({
-                      ...organization,
-                      pdfConfig: organization.pdfConfig || {
-                        logoPosition: "left",
-                        showAddress: true,
-                        showPhone: true,
-                        showEmail: true,
-                        showWebsite: true,
-                        showTaxId: true,
-                        primaryColor: "#92c900",
-                        secondaryColor: "#333333",
-                      }
-                    });
-                  }
-                }}
-                disabled={updateMutation.isPending}
-              >
-                <X className="mr-2 h-4 w-4" />
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                className="bg-primary hover:bg-primary/90"
-                disabled={updateMutation.isPending}
-              >
-                {updateMutation.isPending ? (
-                  <>Guardando...</>
-                ) : (
-                  <>
-                    <Save className="mr-2 h-4 w-4" />
-                    Guardar Cambios
-                  </>
-                )}
-              </Button>
-            </>
-          ) : (
-            <Button
-              type="button"
-              onClick={() => setEditing(true)}
-              className="bg-primary hover:bg-primary/90"
-            >
-              <Check className="mr-2 h-4 w-4" />
-              Editar Configuración
-            </Button>
-          )}
-        </CardFooter>
-      </Card>
-    </form>
+          
+          {/* Vista previa del PDF */}
+          <div className="border rounded-md p-4">
+            <h3 className="text-lg font-medium mb-3">Vista Previa</h3>
+            <div className="bg-background border rounded-md overflow-hidden">
+              <BudgetPdfPreview
+                organization={previewOrganization as any}
+                project={sampleProject}
+                budget={sampleBudget}
+                budgetTasks={sampleBudgetTasks}
+                previewOnly={true}
+                onPreviewGenerated={setPdfPreview}
+              />
+            </div>
+          </div>
+        </div>
+      </TabsContent>
+    </Tabs>
   );
 }

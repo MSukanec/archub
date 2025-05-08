@@ -18,6 +18,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { BudgetExportButton } from "@/components/budgets/BudgetExportButton";
 import { z } from "zod";
 import { BudgetTaskTable } from "@/components/budgets/BudgetTaskTable";
 import { AddTaskForm } from "@/components/budgets/AddTaskForm";
@@ -386,12 +387,20 @@ export default function BudgetForm({ budgetId, projectId, readOnly = false }: Bu
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">{title}</h1>
-          <Button
-            variant="outline"
-            onClick={() => projectId ? setLocation(`/projects/${projectId}`) : setLocation('/budgets')}
-          >
-            Volver
-          </Button>
+          <div className="flex gap-2">
+            {budgetId && readOnly && (
+              <BudgetExportButton 
+                budgetId={parseInt(budgetId)} 
+                projectId={projectId || 0}
+              />
+            )}
+            <Button
+              variant="outline"
+              onClick={() => projectId ? setLocation(`/projects/${projectId}`) : setLocation('/budgets')}
+            >
+              Volver
+            </Button>
+          </div>
         </div>
 
         <Card className="mb-6">
