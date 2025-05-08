@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
-import { storage as dataStorage } from "./storage";
+import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import path from "path";
 import fs from "fs";
@@ -76,7 +76,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Project routes
   app.get(`${apiPrefix}/projects`, authenticate, async (req, res) => {
     try {
-      const projects = await dataStorage.getProjects(req.user.id);
+      const projects = await storage.getProjects(req.user.id);
       return res.json(projects);
     } catch (error) {
       return res.status(500).json({ message: "Server error", error });
@@ -996,7 +996,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get(`${apiPrefix}/organizations`, authenticate, async (req, res) => {
     try {
       // Obtener todas las organizaciones del usuario
-      const organizations = await dataStorage.getUserOrganizations(req.user.id);
+      const organizations = await storage.getUserOrganizations(req.user.id);
       return res.json(organizations);
     } catch (error) {
       return res.status(500).json({ message: "Server error", error });
@@ -1007,17 +1007,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get(`${apiPrefix}/organizations/active`, authenticate, async (req, res) => {
     try {
       // Obtener todas las organizaciones del usuario
-      const organizations = await dataStorage.getUserOrganizations(req.user.id);
+      const organizations = await storage.getUserOrganizations(req.user.id);
       
       if (!organizations || organizations.length === 0) {
         // Si no hay organizaciones, crear una por defecto
-        const defaultOrg = await dataStorage.createOrganization({
+        const defaultOrg = await storage.createOrganization({
           name: "Construcciones XYZ",
           description: "Organización por defecto",
         });
         
         // Agregar al usuario como propietario
-        await dataStorage.addUserToOrganization({
+        await storage.addUserToOrganization({
           organizationId: defaultOrg.id,
           userId: req.user.id,
           role: "owner"
@@ -1084,14 +1084,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch(`${apiPrefix}/organizations/:id`, authenticate, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const organization = await dataStorage.getOrganization(id);
+      const organization = await storage.getOrganization(id);
       
       if (!organization) {
         return res.status(404).json({ message: "Organization not found" });
       }
       
       // Verificar si el usuario tiene permisos para editar (debe ser owner o admin)
-      const orgUsers = await dataStorage.getOrganizationUsers(id);
+      const orgUsers = await storage.getOrganizationUsers(id);
       const userRole = orgUsers.find(ou => ou.userId === req.user.id)?.role;
       
       if (!userRole || (userRole !== 'owner' && userRole !== 'admin')) {
@@ -1102,7 +1102,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertOrganizationSchema.partial().parse(req.body);
       
       // Actualizar la organización
-      const updatedOrganization = await dataStorage.updateOrganization(id, validatedData);
+      const updatedOrganization = await storage.updateOrganization(id, validatedData);
       return res.json(updatedOrganization);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -1116,14 +1116,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post(`${apiPrefix}/organizations/:id/logo`, authenticate, upload.single('logo'), async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const organization = await dataStorage.getOrganization(id);
+      const organization = await storage.getOrganization(id);
       
       if (!organization) {
         return res.status(404).json({ message: "Organization not found" });
       }
       
       // Verificar si el usuario tiene permisos para editar
-      const orgUsers = await dataStorage.getOrganizationUsers(id);
+      const orgUsers = await storage.getOrganizationUsers(id);
       const userRole = orgUsers.find(ou => ou.userId === req.user.id)?.role;
       
       if (!userRole || (userRole !== 'owner' && userRole !== 'admin')) {
@@ -1146,7 +1146,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Actualizar la URL del logo en la base de datos
-      const updatedOrganization = await dataStorage.updateOrganization(id, {
+      const updatedOrganization = await storage.updateOrganization(id, {
         logoUrl: relativePath
       });
       
@@ -1160,14 +1160,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete(`${apiPrefix}/organizations/:id/logo`, authenticate, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const organization = await dataStorage.getOrganization(id);
+      const organization = await storage.getOrganization(id);
       
       if (!organization) {
         return res.status(404).json({ message: "Organization not found" });
       }
       
       // Verificar si el usuario tiene permisos para editar
-      const orgUsers = await dataStorage.getOrganizationUsers(id);
+      const orgUsers = await storage.getOrganizationUsers(id);
       const userRole = orgUsers.find(ou => ou.userId === req.user.id)?.role;
       
       if (!userRole || (userRole !== 'owner' && userRole !== 'admin')) {
@@ -1182,7 +1182,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         // Actualizar la URL del logo en la base de datos
-        await dataStorage.updateOrganization(id, {
+        await storage.updateOrganization(id, {
           logoUrl: null
         });
       }
