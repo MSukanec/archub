@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { APP_NAME, THEME_COLORS } from "@/lib/constants";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useMobile } from "@/hooks/use-mobile";
 
 // Enum para los diferentes tipos de sidebar
 export const SidebarTypes = {
@@ -44,7 +44,7 @@ export function Sidebar({
   selectedProject = null
 }: SidebarProps) {
   const [location] = useLocation();
-  const isMobile = useIsMobile();
+  const isMobile = useMobile();
   const [expanded, setExpanded] = useState(false);
 
   // Items para el main_sidebar

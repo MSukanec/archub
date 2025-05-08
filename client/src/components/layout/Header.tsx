@@ -107,7 +107,18 @@ export function Header({
             </span>
           </div>
           
-          {/* Organization and Project Navigation */}
+          {/* Mobile title - shown in center for small screens */}
+          <div className="md:hidden absolute left-0 right-0 mx-auto w-max">
+            <span className="font-medium text-sm truncate max-w-[150px] inline-block">
+              {selectedProject 
+                ? projects.find(proj => String(proj.id) === String(selectedProject))?.name || `Proyecto ${selectedProject}`
+                : selectedOrganization 
+                  ? organizations.find(org => org.id === selectedOrganization)?.name || `Organización ${selectedOrganization}`
+                  : "Organizaciones"}
+            </span>
+          </div>
+          
+          {/* Organization and Project Navigation - desktop only */}
           <NavigationMenu className="hidden md:flex ml-2">
             <NavigationMenuList>
               <NavigationMenuItem>
@@ -135,7 +146,7 @@ export function Header({
                   <NavigationMenuItem>
                     <Button 
                       variant="ghost" 
-                      className="px-2 h-8 flex items-center gap-1 font-medium text-foreground hover:bg-muted"
+                      className="px-2 h-8 flex items-center gap-1 font-medium text-foreground hover:bg-muted truncate max-w-[180px]"
                       onClick={() => {
                         if (onProjectChange && selectedProject) {
                           setLocation(`/projects/${selectedProject}`);
@@ -152,13 +163,25 @@ export function Header({
             </NavigationMenuList>
           </NavigationMenu>
 
+          {/* Search input - desktop only */}
           <div className="rounded-md border border-border px-3 py-1 flex items-center max-w-md w-64 h-7 hidden md:flex mx-4 cursor-pointer" onClick={() => setSearchOpen(true)}>
             <LucideSearch className="h-4 w-4 text-muted-foreground mr-2" />
             <span className="text-sm text-muted-foreground">Buscar proyectos...</span>
           </div>
           
+          {/* Search Command Dialog */}
           <CommandDialog open={searchOpen} onOpenChange={setSearchOpen}>
-            <CommandInput placeholder="Buscar proyectos..." />
+            <div className="flex flex-col space-y-2 p-2">
+              <h2 id="command-dialog-title" className="text-lg font-medium sr-only">Búsqueda de proyectos</h2>
+              <p id="command-dialog-description" className="text-sm text-muted-foreground sr-only">
+                Busca y selecciona proyectos
+              </p>
+            </div>
+            <CommandInput 
+              placeholder="Buscar proyectos..." 
+              aria-labelledby="command-dialog-title"
+              aria-describedby="command-dialog-description"
+            />
             <CommandList>
               <CommandEmpty>No se encontraron proyectos.</CommandEmpty>
               <CommandGroup heading="Proyectos">
@@ -181,11 +204,23 @@ export function Header({
         </div>
 
         {/* Right section with actions and user profile */}
-        <div className="flex items-center space-x-3 mr-4">
+        <div className="flex items-center space-x-1 md:space-x-3 mr-2 md:mr-4">
+          {/* Search icon - mobile only */}
           <Button
             variant="ghost"
             size="icon"
-            className="text-foreground h-[35px] w-[35px] p-0"
+            className="md:hidden text-foreground h-[35px] w-[35px] p-0"
+            onClick={() => setSearchOpen(true)}
+          >
+            <LucideSearch className="h-5 w-5" />
+            <span className="sr-only">Search</span>
+          </Button>
+          
+          {/* Notifications - hidden on smallest screens */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="hidden sm:flex text-foreground h-[35px] w-[35px] p-0"
             onClick={() => setLocation('/notifications')}
           >
             <LucideBell className="h-5 w-5" />

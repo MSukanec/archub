@@ -2,7 +2,7 @@ import { useState, ReactNode, useEffect } from "react";
 import { Sidebar, SidebarTypes, SidebarType } from "./Sidebar";
 import { Header } from "./Header";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useMobile } from "@/hooks/use-mobile";
 
 interface MainLayoutProps {
   children: ReactNode;
