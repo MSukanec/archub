@@ -114,6 +114,11 @@ export default function TaskForm({ taskId }: TaskFormProps) {
   const { data: materials = [] } = useQuery<Material[]>({
     queryKey: ['/api/materials'],
   });
+  
+  // Fetch units from database
+  const { data: units = [] } = useQuery<Array<{ id: number, name: string, description: string | null }>>({
+    queryKey: ['/api/units'],
+  });
 
   // Fetch task materials if editing
   const { data: fetchedTaskMaterials = [], isLoading: isTaskMaterialsLoading } = useQuery<TaskMaterial[]>({
@@ -409,7 +414,11 @@ export default function TaskForm({ taskId }: TaskFormProps) {
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                {UNITS.map((unit) => (
+                                {units.length > 0 ? units.map((unit) => (
+                                  <SelectItem key={unit.id} value={unit.name}>
+                                    {unit.name}
+                                  </SelectItem>
+                                )) : UNITS.map((unit) => (
                                   <SelectItem key={unit.name} value={unit.name}>
                                     {unit.description}
                                   </SelectItem>

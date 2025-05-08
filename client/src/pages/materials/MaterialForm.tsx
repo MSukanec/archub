@@ -72,6 +72,11 @@ export default function MaterialForm({ materialId }: MaterialFormProps) {
     queryKey: [`/api/materials/${materialId}`],
     enabled: isEditing,
   });
+  
+  // Fetch units from database
+  const { data: units = [] } = useQuery<Array<{ id: number, name: string, description: string | null }>>({
+    queryKey: ['/api/units'],
+  });
 
   // Create mutation
   const createMutation = useMutation({
@@ -225,7 +230,11 @@ export default function MaterialForm({ materialId }: MaterialFormProps) {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {UNITS.map((unit) => (
+                            {units.length > 0 ? units.map((unit) => (
+                              <SelectItem key={unit.id} value={unit.name}>
+                                {unit.name}
+                              </SelectItem>
+                            )) : UNITS.map((unit) => (
                               <SelectItem key={unit.name} value={unit.name}>
                                 {unit.description}
                               </SelectItem>
