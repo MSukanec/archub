@@ -132,8 +132,24 @@ export function Sidebar({
     sidebarItems = settingsSidebarItems;
   }
 
+  // En lugar de no renderizar nada en móvil, mostramos una versión móvil
   if (isMobile) {
-    return null;
+    return (
+      <nav className="fixed bottom-0 left-0 right-0 bg-background border-t z-50 flex justify-around py-3">
+        {sidebarItems.slice(0, 5).map((item) => (
+          <Link key={item.path} href={item.path}>
+            <div className="flex flex-col items-center">
+              <div className={location === item.path ? "text-primary" : "text-muted-foreground"}>
+                {item.icon}
+              </div>
+              <span className="text-xs mt-1 text-muted-foreground">
+                {item.name}
+              </span>
+            </div>
+          </Link>
+        ))}
+      </nav>
+    );
   }
 
   return (

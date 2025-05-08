@@ -140,7 +140,7 @@ export function MainLayout({
 
         {/* Main Content */}
         <div className="flex-1 overflow-auto transition-all duration-200">
-          <main className="flex-1 h-full overflow-auto p-6">
+          <main className={`flex-1 h-full overflow-auto ${isMobile ? 'p-3 pb-20' : 'p-6'}`}>
             {children}
           </main>
         </div>
