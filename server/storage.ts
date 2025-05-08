@@ -554,6 +554,129 @@ export class MemStorage implements IStorage {
   async deleteUnit(id: number): Promise<boolean> {
     return this.unitMap.delete(id);
   }
+
+  // Transaction operations
+  async getTransactions(projectId: number): Promise<Transaction[]> {
+    return Array.from(this.transactionMap.values()).filter(
+      (transaction) => transaction.projectId === projectId
+    );
+  }
+
+  async getTransaction(id: number): Promise<Transaction | undefined> {
+    return this.transactionMap.get(id);
+  }
+
+  async createTransaction(insertTransaction: InsertTransaction): Promise<Transaction> {
+    const id = this.transactionId++;
+    const transaction: Transaction = { 
+      ...insertTransaction, 
+      id, 
+      createdAt: new Date(), 
+      updatedAt: new Date() 
+    };
+    this.transactionMap.set(id, transaction);
+    return transaction;
+  }
+
+  async updateTransaction(id: number, transactionData: Partial<InsertTransaction>): Promise<Transaction | undefined> {
+    const transaction = this.transactionMap.get(id);
+    if (!transaction) return undefined;
+    
+    const updatedTransaction: Transaction = { 
+      ...transaction, 
+      ...transactionData, 
+      updatedAt: new Date() 
+    };
+    this.transactionMap.set(id, updatedTransaction);
+    return updatedTransaction;
+  }
+
+  async deleteTransaction(id: number): Promise<boolean> {
+    return this.transactionMap.delete(id);
+  }
+  
+  // Organization operations
+  async getOrganizations(): Promise<Organization[]> {
+    return Array.from(this.organizationMap.values());
+  }
+
+  async getOrganization(id: number): Promise<Organization | undefined> {
+    return this.organizationMap.get(id);
+  }
+
+  async createOrganization(insertOrganization: InsertOrganization): Promise<Organization> {
+    const id = this.organizationId++;
+    const organization: Organization = { 
+      ...insertOrganization, 
+      id, 
+      createdAt: new Date(), 
+      updatedAt: new Date() 
+    };
+    this.organizationMap.set(id, organization);
+    return organization;
+  }
+
+  async updateOrganization(id: number, organizationData: Partial<InsertOrganization>): Promise<Organization | undefined> {
+    const organization = this.organizationMap.get(id);
+    if (!organization) return undefined;
+    
+    const updatedOrganization: Organization = { 
+      ...organization, 
+      ...organizationData, 
+      updatedAt: new Date() 
+    };
+    this.organizationMap.set(id, updatedOrganization);
+    return updatedOrganization;
+  }
+
+  async deleteOrganization(id: number): Promise<boolean> {
+    return this.organizationMap.delete(id);
+  }
+  
+  // Organization User operations
+  async getOrganizationUsers(organizationId: number): Promise<OrganizationUser[]> {
+    return Array.from(this.organizationUserMap.values()).filter(
+      (ou) => ou.organizationId === organizationId
+    );
+  }
+
+  async getUserOrganizations(userId: number): Promise<Organization[]> {
+    // Obtener todas las membresías del usuario
+    const userMemberships = Array.from(this.organizationUserMap.values()).filter(
+      (ou) => ou.userId === userId
+    );
+    
+    // Obtener los IDs de las organizaciones
+    const organizationIds = userMemberships.map(membership => membership.organizationId);
+    
+    // Filtrar las organizaciones por esos IDs
+    return Array.from(this.organizationMap.values()).filter(
+      (org) => organizationIds.includes(org.id)
+    );
+  }
+
+  async addUserToOrganization(orgUser: InsertOrganizationUser): Promise<OrganizationUser> {
+    const id = this.organizationUserId++;
+    const organizationUser: OrganizationUser = { ...orgUser, id };
+    this.organizationUserMap.set(id, organizationUser);
+    return organizationUser;
+  }
+
+  async updateUserOrganizationRole(id: number, role: string): Promise<OrganizationUser | undefined> {
+    const orgUser = this.organizationUserMap.get(id);
+    if (!orgUser) return undefined;
+    
+    const updatedOrgUser: OrganizationUser = { 
+      ...orgUser, 
+      role 
+    };
+    this.organizationUserMap.set(id, updatedOrgUser);
+    return updatedOrgUser;
+  }
+
+  async removeUserFromOrganization(id: number): Promise<boolean> {
+    return this.organizationUserMap.delete(id);
+  }
 }
 
 import { db } from "./db";

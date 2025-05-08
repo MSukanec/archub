@@ -12,7 +12,9 @@ import {
   insertBudgetTaskSchema,
   insertCategorySchema,
   insertUnitSchema,
-  insertTransactionSchema
+  insertTransactionSchema,
+  insertOrganizationSchema,
+  insertOrganizationUserSchema
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -945,6 +947,280 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!deleted) {
         return res.status(500).json({ message: "Failed to delete transaction" });
+      }
+      
+      return res.status(204).send();
+    } catch (error) {
+      return res.status(500).json({ message: "Server error", error });
+    }
+  });
+
+  // Organization routes
+  app.get(`${apiPrefix}/organizations`, authenticate, async (req, res) => {
+    try {
+      // Obtener todas las organizaciones del usuario
+      const organizations = await storage.getUserOrganizations(req.user.id);
+      return res.json(organizations);
+    } catch (error) {
+      return res.status(500).json({ message: "Server error", error });
+    }
+  });
+
+  app.get(`${apiPrefix}/organizations/:id`, authenticate, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const organization = await storage.getOrganization(id);
+      
+      if (!organization) {
+        return res.status(404).json({ message: "Organization not found" });
+      }
+      
+      // Verificar si el usuario pertenece a esta organización
+      const userOrganizations = await storage.getUserOrganizations(req.user.id);
+      const isUserInOrg = userOrganizations.some(org => org.id === id);
+      
+      if (!isUserInOrg) {
+        return res.status(403).json({ message: "Not authorized to access this organization" });
+      }
+      
+      return res.json(organization);
+    } catch (error) {
+      return res.status(500).json({ message: "Server error", error });
+    }
+  });
+
+  app.post(`${apiPrefix}/organizations`, authenticate, async (req, res) => {
+    try {
+      // Validar los datos de la organización
+      const organizationData = insertOrganizationSchema.parse(req.body);
+      
+      // Crear la organización
+      const organization = await storage.createOrganization(organizationData);
+      
+      // Añadir al usuario como propietario de la organización
+      await storage.addUserToOrganization({
+        userId: req.user.id,
+        organizationId: organization.id,
+        role: 'owner'
+      });
+      
+      return res.status(201).json(organization);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", error: error.errors });
+      }
+      return res.status(500).json({ message: "Server error", error });
+    }
+  });
+
+  app.patch(`${apiPrefix}/organizations/:id`, authenticate, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const organization = await storage.getOrganization(id);
+      
+      if (!organization) {
+        return res.status(404).json({ message: "Organization not found" });
+      }
+      
+      // Verificar si el usuario tiene permisos para editar (debe ser owner o admin)
+      const orgUsers = await storage.getOrganizationUsers(id);
+      const userRole = orgUsers.find(ou => ou.userId === req.user.id)?.role;
+      
+      if (!userRole || (userRole !== 'owner' && userRole !== 'admin')) {
+        return res.status(403).json({ message: "Not authorized to update this organization" });
+      }
+      
+      // Validar con el schema parcial
+      const validatedData = insertOrganizationSchema.partial().parse(req.body);
+      
+      // Actualizar la organización
+      const updatedOrganization = await storage.updateOrganization(id, validatedData);
+      return res.json(updatedOrganization);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", error: error.errors });
+      }
+      return res.status(500).json({ message: "Server error", error });
+    }
+  });
+
+  app.delete(`${apiPrefix}/organizations/:id`, authenticate, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const organization = await storage.getOrganization(id);
+      
+      if (!organization) {
+        return res.status(404).json({ message: "Organization not found" });
+      }
+      
+      // Verificar si el usuario es propietario
+      const orgUsers = await storage.getOrganizationUsers(id);
+      const userRole = orgUsers.find(ou => ou.userId === req.user.id)?.role;
+      
+      if (userRole !== 'owner') {
+        return res.status(403).json({ message: "Only the owner can delete the organization" });
+      }
+      
+      const deleted = await storage.deleteOrganization(id);
+      
+      if (!deleted) {
+        return res.status(500).json({ message: "Failed to delete organization" });
+      }
+      
+      return res.status(204).send();
+    } catch (error) {
+      return res.status(500).json({ message: "Server error", error });
+    }
+  });
+
+  // Organization User routes
+  app.get(`${apiPrefix}/organizations/:id/users`, authenticate, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const organization = await storage.getOrganization(id);
+      
+      if (!organization) {
+        return res.status(404).json({ message: "Organization not found" });
+      }
+      
+      // Verificar si el usuario pertenece a esta organización
+      const userOrganizations = await storage.getUserOrganizations(req.user.id);
+      const isUserInOrg = userOrganizations.some(org => org.id === id);
+      
+      if (!isUserInOrg) {
+        return res.status(403).json({ message: "Not authorized to access this organization's users" });
+      }
+      
+      const orgUsers = await storage.getOrganizationUsers(id);
+      return res.json(orgUsers);
+    } catch (error) {
+      return res.status(500).json({ message: "Server error", error });
+    }
+  });
+
+  app.post(`${apiPrefix}/organizations/:id/users`, authenticate, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const organization = await storage.getOrganization(id);
+      
+      if (!organization) {
+        return res.status(404).json({ message: "Organization not found" });
+      }
+      
+      // Verificar si el usuario tiene permisos para añadir miembros (debe ser owner o admin)
+      const orgUsers = await storage.getOrganizationUsers(id);
+      const userRole = orgUsers.find(ou => ou.userId === req.user.id)?.role;
+      
+      if (!userRole || (userRole !== 'owner' && userRole !== 'admin')) {
+        return res.status(403).json({ message: "Not authorized to add users to this organization" });
+      }
+      
+      // Validar los datos
+      const orgUserData = insertOrganizationUserSchema.parse({
+        ...req.body,
+        organizationId: id
+      });
+      
+      // Comprobar si el usuario ya es miembro
+      const existingMember = orgUsers.find(ou => ou.userId === orgUserData.userId);
+      if (existingMember) {
+        return res.status(400).json({ message: "User is already a member of this organization" });
+      }
+      
+      // Añadir al usuario a la organización
+      const orgUser = await storage.addUserToOrganization(orgUserData);
+      return res.status(201).json(orgUser);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", error: error.errors });
+      }
+      return res.status(500).json({ message: "Server error", error });
+    }
+  });
+
+  app.patch(`${apiPrefix}/organizations/:orgId/users/:userId`, authenticate, async (req, res) => {
+    try {
+      const orgId = parseInt(req.params.orgId);
+      const targetUserId = parseInt(req.params.userId);
+      
+      // Verificar si la organización existe
+      const organization = await storage.getOrganization(orgId);
+      if (!organization) {
+        return res.status(404).json({ message: "Organization not found" });
+      }
+      
+      // Verificar si el usuario tiene permisos para cambiar roles (debe ser owner)
+      const orgUsers = await storage.getOrganizationUsers(orgId);
+      const userRole = orgUsers.find(ou => ou.userId === req.user.id)?.role;
+      
+      if (userRole !== 'owner') {
+        return res.status(403).json({ message: "Only the owner can change user roles" });
+      }
+      
+      // Buscar la membresía del usuario objetivo
+      const targetMembership = orgUsers.find(ou => ou.userId === targetUserId);
+      if (!targetMembership) {
+        return res.status(404).json({ message: "User is not a member of this organization" });
+      }
+      
+      // No permitir cambiar el rol del propietario
+      if (targetMembership.role === 'owner') {
+        return res.status(400).json({ message: "Cannot change the role of the organization owner" });
+      }
+      
+      // Validar el nuevo rol
+      const { role } = req.body;
+      if (!role || !['admin', 'member'].includes(role)) {
+        return res.status(400).json({ message: "Invalid role. Valid roles are: admin, member" });
+      }
+      
+      // Actualizar el rol
+      const updatedMembership = await storage.updateUserOrganizationRole(targetMembership.id, role);
+      return res.json(updatedMembership);
+    } catch (error) {
+      return res.status(500).json({ message: "Server error", error });
+    }
+  });
+
+  app.delete(`${apiPrefix}/organizations/:orgId/users/:userId`, authenticate, async (req, res) => {
+    try {
+      const orgId = parseInt(req.params.orgId);
+      const targetUserId = parseInt(req.params.userId);
+      
+      // Verificar si la organización existe
+      const organization = await storage.getOrganization(orgId);
+      if (!organization) {
+        return res.status(404).json({ message: "Organization not found" });
+      }
+      
+      // Verificar si el usuario tiene permisos para eliminar miembros
+      const orgUsers = await storage.getOrganizationUsers(orgId);
+      const currentUserRole = orgUsers.find(ou => ou.userId === req.user.id)?.role;
+      
+      // El usuario puede eliminar a otros si es owner o admin, o puede eliminarse a sí mismo
+      const isRemovingSelf = targetUserId === req.user.id;
+      const hasPermission = isRemovingSelf || currentUserRole === 'owner' || currentUserRole === 'admin';
+      
+      if (!hasPermission) {
+        return res.status(403).json({ message: "Not authorized to remove users from this organization" });
+      }
+      
+      // Buscar la membresía del usuario objetivo
+      const targetMembership = orgUsers.find(ou => ou.userId === targetUserId);
+      if (!targetMembership) {
+        return res.status(404).json({ message: "User is not a member of this organization" });
+      }
+      
+      // No permitir eliminar al propietario
+      if (targetMembership.role === 'owner' && !isRemovingSelf) {
+        return res.status(400).json({ message: "Cannot remove the organization owner" });
+      }
+      
+      // Eliminar la membresía
+      const deleted = await storage.removeUserFromOrganization(targetMembership.id);
+      
+      if (!deleted) {
+        return res.status(500).json({ message: "Failed to remove user from organization" });
       }
       
       return res.status(204).send();
