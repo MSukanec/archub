@@ -4,6 +4,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { ArrowLeft, ArrowDownUp, DollarSign, Plus, ArrowUpRight, ArrowDownLeft } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { ExportTransactionsButton } from "@/components/projects/ExportTransactionsButton";
 
 import { MainLayout } from "@/components/layout/MainLayout";
 import { SidebarTypes } from "@/components/layout/Sidebar";
@@ -283,8 +284,9 @@ export default function TransactionsPage({ projectId }: TransactionsPageProps) {
 
         {/* Transactions list */}
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Registros de Movimientos</CardTitle>
+            <ExportTransactionsButton projectId={projectId} />
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="w-full">
