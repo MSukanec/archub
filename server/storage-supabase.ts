@@ -145,7 +145,9 @@ const tableNames = {
   budgetTasks: 'budget_tasks',
   categories: 'categories',
   units: 'units',
-  transactions: 'transactions'
+  transactions: 'transactions',
+  organizations: 'organizations',
+  organizationUsers: 'organization_users'
 };
 
 // Función asíncrona para inicializar y verificar tablas
@@ -928,6 +930,135 @@ export class SupabaseStorage implements IStorage {
   async deleteTransaction(id: number): Promise<boolean> {
     const { error } = await supabase
       .from(tableNames.transactions)
+      .delete()
+      .eq('id', id);
+      
+    return !error;
+  }
+
+  // Organizaciones
+  async getOrganizations(): Promise<Organization[]> {
+    const { data, error } = await supabase
+      .from(tableNames.organizations)
+      .select('*');
+      
+    if (error) throw new Error(`Error al obtener organizaciones: ${error.message}`);
+    return convertArrayFromDb(data as Organization[]);
+  }
+
+  async getOrganization(id: number): Promise<Organization | undefined> {
+    const { data, error } = await supabase
+      .from(tableNames.organizations)
+      .select('*')
+      .eq('id', id)
+      .single();
+      
+    if (error || !data) return undefined;
+    return convertFromDb(data as Organization);
+  }
+
+  async createOrganization(organization: InsertOrganization): Promise<Organization> {
+    const orgData = prepareForDb(organization);
+    
+    const { data, error } = await supabase
+      .from(tableNames.organizations)
+      .insert(orgData)
+      .select()
+      .single();
+      
+    if (error) throw new Error(`Error al crear organización: ${error.message}`);
+    return convertFromDb(data as Organization);
+  }
+
+  async updateOrganization(id: number, organizationData: Partial<InsertOrganization>): Promise<Organization | undefined> {
+    const dbData = prepareForDb(organizationData);
+    
+    const { data, error } = await supabase
+      .from(tableNames.organizations)
+      .update(dbData)
+      .eq('id', id)
+      .select()
+      .single();
+      
+    if (error || !data) return undefined;
+    return convertFromDb(data as Organization);
+  }
+
+  async deleteOrganization(id: number): Promise<boolean> {
+    const { error } = await supabase
+      .from(tableNames.organizations)
+      .delete()
+      .eq('id', id);
+      
+    return !error;
+  }
+
+  // Membresías de organizaciones
+  async getOrganizationUsers(organizationId: number): Promise<OrganizationUser[]> {
+    const { data, error } = await supabase
+      .from(tableNames.organizationUsers)
+      .select('*')
+      .eq('organization_id', organizationId);
+      
+    if (error) throw new Error(`Error al obtener miembros de la organización: ${error.message}`);
+    return convertArrayFromDb(data as OrganizationUser[]);
+  }
+
+  async getUserOrganizations(userId: number): Promise<Organization[]> {
+    // Primero obtenemos los IDs de las organizaciones a las que pertenece el usuario
+    const { data: userOrgs, error: orgsError } = await supabase
+      .from(tableNames.organizationUsers)
+      .select('organization_id')
+      .eq('user_id', userId);
+      
+    if (orgsError) throw new Error(`Error al obtener organizaciones del usuario: ${orgsError.message}`);
+    
+    if (!userOrgs || userOrgs.length === 0) {
+      return [];
+    }
+    
+    // Extraemos los IDs de las organizaciones
+    const orgIds = userOrgs.map(item => item.organization_id);
+    
+    // Obtenemos las organizaciones completas
+    const { data: organizations, error: orgsDataError } = await supabase
+      .from(tableNames.organizations)
+      .select('*')
+      .in('id', orgIds);
+      
+    if (orgsDataError) throw new Error(`Error al obtener datos de organizaciones: ${orgsDataError.message}`);
+    
+    return convertArrayFromDb(organizations as Organization[]);
+  }
+
+  async addUserToOrganization(orgUser: InsertOrganizationUser): Promise<OrganizationUser> {
+    const userData = prepareForDb(orgUser);
+    
+    const { data, error } = await supabase
+      .from(tableNames.organizationUsers)
+      .insert(userData)
+      .select()
+      .single();
+      
+    if (error) throw new Error(`Error al añadir usuario a la organización: ${error.message}`);
+    return convertFromDb(data as OrganizationUser);
+  }
+
+  async updateUserOrganizationRole(id: number, role: string): Promise<OrganizationUser | undefined> {
+    const { data, error } = await supabase
+      .from(tableNames.organizationUsers)
+      .update({ role })
+      .eq('id', id)
+      .select()
+      .single();
+      
+    if (error || !data) return undefined;
+    return convertFromDb(data as OrganizationUser);
+  }
+
+  async removeUserFromOrganization(id: number): Promise<boolean> {
+    const { error } = await supabase
+      .from(tableNames.organizationUsers)
       .delete()
       .eq('id', id);
       

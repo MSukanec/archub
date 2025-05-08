@@ -7,7 +7,10 @@ import {
   budgets, type Budget, type InsertBudget,
   budgetTasks, type BudgetTask, type InsertBudgetTask,
   categories, type Category, type InsertCategory,
-  units, type Unit, type InsertUnit
+  units, type Unit, type InsertUnit,
+  organizations, type Organization, type InsertOrganization,
+  organizationUsers, type OrganizationUser, type InsertOrganizationUser,
+  transactions, type Transaction, type InsertTransaction
 } from "@shared/schema";
 
 export interface IStorage {
@@ -70,6 +73,27 @@ export interface IStorage {
   createUnit(unit: InsertUnit): Promise<Unit>;
   updateUnit(id: number, unit: Partial<InsertUnit>): Promise<Unit | undefined>;
   deleteUnit(id: number): Promise<boolean>;
+  
+  // Transaction operations
+  getTransactions(projectId: number): Promise<Transaction[]>;
+  getTransaction(id: number): Promise<Transaction | undefined>;
+  createTransaction(transaction: InsertTransaction): Promise<Transaction>;
+  updateTransaction(id: number, transaction: Partial<InsertTransaction>): Promise<Transaction | undefined>;
+  deleteTransaction(id: number): Promise<boolean>;
+  
+  // Organization operations
+  getOrganizations(): Promise<Organization[]>;
+  getOrganization(id: number): Promise<Organization | undefined>;
+  createOrganization(organization: InsertOrganization): Promise<Organization>;
+  updateOrganization(id: number, organization: Partial<InsertOrganization>): Promise<Organization | undefined>;
+  deleteOrganization(id: number): Promise<boolean>;
+  
+  // Organization User operations
+  getOrganizationUsers(organizationId: number): Promise<OrganizationUser[]>;
+  getUserOrganizations(userId: number): Promise<Organization[]>;
+  addUserToOrganization(orgUser: InsertOrganizationUser): Promise<OrganizationUser>;
+  updateUserOrganizationRole(id: number, role: string): Promise<OrganizationUser | undefined>;
+  removeUserFromOrganization(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -82,6 +106,9 @@ export class MemStorage implements IStorage {
   private budgetTaskMap: Map<number, BudgetTask>;
   private categoryMap: Map<number, Category>;
   private unitMap: Map<number, Unit>;
+  private transactionMap: Map<number, Transaction>;
+  private organizationMap: Map<number, Organization>;
+  private organizationUserMap: Map<number, OrganizationUser>;
   
   private userId: number;
   private projectId: number;
@@ -92,6 +119,9 @@ export class MemStorage implements IStorage {
   private budgetTaskId: number;
   private categoryId: number;
   private unitId: number;
+  private transactionId: number;
+  private organizationId: number;
+  private organizationUserId: number;
 
   constructor() {
     this.userMap = new Map();
@@ -103,6 +133,9 @@ export class MemStorage implements IStorage {
     this.budgetTaskMap = new Map();
     this.categoryMap = new Map();
     this.unitMap = new Map();
+    this.transactionMap = new Map();
+    this.organizationMap = new Map();
+    this.organizationUserMap = new Map();
     
     this.userId = 1;
     this.projectId = 1;
@@ -113,6 +146,9 @@ export class MemStorage implements IStorage {
     this.budgetTaskId = 1;
     this.categoryId = 1;
     this.unitId = 1;
+    this.transactionId = 1;
+    this.organizationId = 1;
+    this.organizationUserId = 1;
     
     // Add sample users
     const adminUser: User = {
