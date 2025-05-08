@@ -151,7 +151,7 @@ export default function TransactionsPage({ projectId }: TransactionsPageProps) {
     
     // Preparar los datos para enviar
     const transactionData = {
-      date: new Date(formData.date).toISOString(),
+      date: formData.date, // Enviamos la fecha como string en formato YYYY-MM-DD
       type: formData.type,
       category: formData.category,
       description: formData.description,
