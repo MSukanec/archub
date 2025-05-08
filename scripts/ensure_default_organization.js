@@ -1,12 +1,12 @@
 import { pool, db } from '../server/db.ts';
-import { organizations, organizationUsers } from '../shared/schema.ts';
+import { organizations, organizationUsers, users } from '../shared/schema.ts';
 import { eq, and } from 'drizzle-orm';
 
 async function ensureDefaultOrganization() {
   console.log('Verificando organización por defecto...');
   
   // Verificar si existe el usuario admin (ID = 1)
-  const [adminUser] = await db.select().from(db.schema.users).where(eq(db.schema.users.id, 1));
+  const [adminUser] = await db.select().from(users).where(eq(users.id, 1));
   
   if (!adminUser) {
     console.log('No se encontró el usuario admin');
@@ -22,18 +22,25 @@ async function ensureDefaultOrganization() {
   if (existingOrgs.length > 0) {
     defaultOrg = existingOrgs[0];
     console.log('Organización encontrada:', defaultOrg);
+    
+    // Actualizar el pdfConfig si no existe
+    if (!defaultOrg.pdfConfig) {
+      const [updatedOrg] = await db.update(organizations)
+        .set({ 
+          pdfConfig: '{"primaryColor":"#92c900","secondaryColor":"#707070","logoPosition":"left","showFooter":true,"showHeader":true}'
+        })
+        .where(eq(organizations.id, defaultOrg.id))
+        .returning();
+      
+      defaultOrg = updatedOrg;
+      console.log('Organización actualizada con pdfConfig:', defaultOrg);
+    }
   } else {
     // Crear la organización por defecto
     const [newOrg] = await db.insert(organizations).values({
       name: 'Construcciones XYZ',
       description: 'Organización por defecto',
-      pdfConfig: JSON.stringify({
-        primaryColor: '#92c900',
-        secondaryColor: '#707070',
-        logoPosition: 'left',
-        showFooter: true,
-        showHeader: true
-      })
+      pdfConfig: '{"primaryColor":"#92c900","secondaryColor":"#707070","logoPosition":"left","showFooter":true,"showHeader":true}'
     }).returning();
     
     defaultOrg = newOrg;
