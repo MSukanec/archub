@@ -262,6 +262,16 @@ Changelog:
   • Updated navigation store with Spanish menu items (Panel Principal, Organizaciones, etc.)
   • Enhanced sidebar with profile avatar, translated theme button, and Spanish configuration text
   • Integrated profile functionality with existing authentication and theme systems
+
+- June 18, 2025. Unified visual design system for form components with CSS variables
+  • Standardized Input, Select, and Dropdown Menu components using consistent CSS variable system
+  • Updated SelectTrigger to match Input styling with unified border, background, and focus states
+  • Modified SelectContent and SelectItem to use --popover-bg, --popover-fg, and --accent-bg variables
+  • Enhanced DropdownMenuContent and DropdownMenuItem with consistent hover and focus styling
+  • Added missing CSS variables: --popover-bg, --popover-fg, --accent-bg with dark mode support
+  • All form components now use --radius-md, --input-border, --input-bg, and transition-colors
+  • Eliminated hardcoded Tailwind classes (bg-background, text-muted-foreground) for scalability
+  • Created cohesive visual experience across inputs, selects, and dropdown menus with unified design tokens
 ```
 
 ## User Preferences

@@ -56,6 +56,11 @@
   --input-focus-ring: hsl(210, 40%, 50%);
   --input-focus-border: hsl(210, 40%, 50%);
 
+  /* Popover/Dropdown */
+  --popover-bg: hsl(0, 0%, 100%);
+  --popover-fg: hsl(240, 10%, 4%);
+  --accent-bg: hsl(240, 5%, 96%);
+
   /* Accent / State */
   --accent: hsl(210, 40%, 50%);
   --accent-text: hsl(0, 0%, 100%);
@@ -143,6 +148,11 @@
   --input-placeholder: hsl(240, 5%, 50%);
   --input-focus-ring: hsl(210, 40%, 55%);
   --input-focus-border: hsl(210, 40%, 55%);
+
+  /* Popover/Dropdown */
+  --popover-bg: hsl(240, 10%, 8%);
+  --popover-fg: hsl(0, 0%, 98%);
+  --accent-bg: hsl(240, 8%, 12%);
 
   /* Accent / State */
   --accent: hsl(210, 40%, 55%);
