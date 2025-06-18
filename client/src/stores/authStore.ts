@@ -81,24 +81,29 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   initialize: async () => {
+    console.log('Initializing auth...')
+    
+    // Set as initialized immediately to prevent infinite loading
+    set({ initialized: true, loading: false })
+    
     try {
       if (!supabase) {
         console.error('Supabase not configured properly')
-        set({ initialized: true, loading: false })
         return
       }
 
       const { data: { session } } = await supabase.auth.getSession()
+      console.log('Got session:', session ? 'user logged in' : 'no user')
       
       set({ 
         user: session?.user ?? null,
         session,
-        initialized: true,
         loading: false
       })
 
       // Listen for auth changes
       supabase.auth.onAuthStateChange((event, session) => {
+        console.log('Auth state changed:', event)
         set({ 
           user: session?.user ?? null,
           session,
@@ -107,7 +112,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       })
     } catch (error) {
       console.error('Error initializing auth:', error)
-      set({ initialized: true, loading: false })
+      set({ loading: false })
     }
   },
 }))
