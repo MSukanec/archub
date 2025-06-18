@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { cn } from "@/lib/utils";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useThemeStore } from "@/stores/themeStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -16,7 +15,6 @@ import {
   Settings,
   Moon,
   Sun,
-  X,
 } from "lucide-react";
 import {
   SIDEBAR_WIDTH,
@@ -35,26 +33,21 @@ const iconMap = {
   "bar-chart-3": BarChart3,
 };
 
-// Componente para el botón de cambio de tema
+// Botón de cambio de tema
 function ThemeToggleButton({ isExpanded }: { isExpanded: boolean }) {
   const { isDark, toggleTheme } = useThemeStore();
   const { data } = useCurrentUser();
 
   const handleToggleTheme = async () => {
-    console.log('Theme button clicked! Current state:', { isDark });
     const userId = data?.user?.id;
     const preferencesId = data?.preferences?.id;
-    console.log('User data:', { userId, preferencesId });
-    
+
     try {
       await toggleTheme(userId, preferencesId);
-      console.log('Theme toggle completed');
     } catch (error) {
-      console.error('Error toggling theme:', error);
+      console.error("Error toggling theme:", error);
     }
   };
-
-  console.log('ThemeToggleButton render:', { isDark, isExpanded });
 
   return (
     <SidebarButton
@@ -96,8 +89,11 @@ export function Sidebar() {
           </SidebarButton>
         </Link>
 
-        {/* Navigation Items */}
-        <nav className="flex flex-col flex-1">
+        {/* Navigation */}
+        <nav 
+          className="flex flex-col flex-1 gap-1"
+          style={{ padding: `8px` }}
+        >
           {navigationItems.map((item) => {
             const Icon = iconMap[item.icon as keyof typeof iconMap];
             const isActive = location === item.href;
@@ -116,14 +112,12 @@ export function Sidebar() {
           })}
         </nav>
 
-        {/* Footer: Theme & Settings */}
+        {/* Footer: Tema + Settings */}
         <div 
-          className="border-t border-slate-200 dark:border-slate-700"
+          className="border-t border-slate-200 dark:border-slate-700 flex flex-col gap-1"
           style={{ padding: `8px` }}
         >
-          <div style={{ marginBottom: `8px` }}>
-            <ThemeToggleButton isExpanded={isExpanded} />
-          </div>
+          <ThemeToggleButton isExpanded={isExpanded} />
           <Link href="/settings">
             <SidebarButton
               icon={Settings}

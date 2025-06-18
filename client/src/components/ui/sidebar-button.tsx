@@ -23,7 +23,7 @@ export function SidebarButton({
     <button
       onClick={onClick}
       className={cn(
-        "flex items-center w-full h-auto transition-colors px-3",
+        "flex items-center w-full h-auto transition-colors px-2",
         "hover:bg-slate-100 dark:hover:bg-slate-700",
         isActive
           ? "bg-primary/10 text-primary"
@@ -45,7 +45,7 @@ export function SidebarButton({
 
       {/* Texto que se desliza como en Supabase */}
       <span
-        className="overflow-hidden whitespace-nowrap transition-all duration-300 ease-in-out ml-2"
+        className="text-xs font-medium overflow-hidden whitespace-nowrap transition-all duration-300 ease-in-out ml-2"
         style={{
           maxWidth: isExpanded ? 160 : 0,
           opacity: isExpanded ? 1 : 0,

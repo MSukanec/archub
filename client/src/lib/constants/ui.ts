@@ -1,5 +1,5 @@
-export const SIDEBAR_WIDTH = 40;
-export const BUTTON_SIZE = 40;
+export const SIDEBAR_WIDTH = 48;
+export const BUTTON_SIZE = 36;
 export const ICON_SIZE = 18;
 export const HEADER_HEIGHT = 40;
 
