@@ -112,7 +112,7 @@ export default function Organizations() {
       filters={filters}
       onClearFilters={() => setSearchValue("")}
     >
-      <div className="p-6 space-y-6">
+      <div className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">

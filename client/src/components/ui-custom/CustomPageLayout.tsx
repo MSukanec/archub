@@ -1,5 +1,6 @@
 import { LucideIcon } from "lucide-react";
 import { CustomPageHeader } from "./CustomPageHeader";
+import { CustomPageBody } from "./CustomPageBody";
 
 interface CustomPageLayoutProps {
   icon?: LucideIcon;
@@ -31,7 +32,7 @@ export function CustomPageLayout({
   return (
     <div className="flex justify-center bg-slate-50 dark:bg-slate-900">
       <div 
-        className={`px-4 border-2 border-red-500 min-h-screen ${
+        className={`p-4 border-2 border-red-500 min-h-screen ${
           wide ? "max-w-none w-full" : "max-w-[1440px] w-full"
         }`}
       >
@@ -47,9 +48,9 @@ export function CustomPageLayout({
           onClearFilters={onClearFilters}
         />
         
-        <div className="border-2 border-blue-500">
+        <CustomPageBody padding="none">
           {children}
-        </div>
+        </CustomPageBody>
       </div>
     </div>
   );

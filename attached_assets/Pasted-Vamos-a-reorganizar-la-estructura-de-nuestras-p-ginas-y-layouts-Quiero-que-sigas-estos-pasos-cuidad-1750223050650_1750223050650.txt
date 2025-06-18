@@ -1,0 +1,72 @@
+Vamos a reorganizar la estructura de nuestras páginas y layouts. Quiero que sigas estos pasos cuidadosamente:
+
+---
+
+✅ 1. Creá un nuevo componente llamado `CustomPageBody.tsx` en `client/src/components/ui-custom/`.
+
+Este componente debe:
+
+- Renderizar un `div` que reciba `children`
+- Tener por defecto un margen superior (`mt-4`) para separar el contenido del header
+- Recibir un prop opcional `padding?: "none" | "sm" | "md" | "lg"` con clases:
+  - `"none"` → sin padding
+  - `"sm"` → `p-2`
+  - `"md"` → `p-4`
+  - `"lg"` → `p-6`
+- El valor por defecto de `padding` debe ser `"none"`
+
+Agregale un borde `border-2 border-blue-500` para debug visual.
+
+---
+
+✅ 2. Modificá `CustomPageHeader.tsx`:
+
+- Cambiá el diseño para que sea de **una sola fila de 38px**
+- A la izquierda debe ir el icono y título
+- A la derecha debe ir todo lo demás, en este orden:
+  1. Filtros (dropdown)
+  2. Limpiar filtros
+  3. Sort (ordenamiento) – por ahora puede ser otro botón ficticio
+  4. Botones secundarios (si hay)
+  5. Botón primario (si hay)
+
+Todo debe estar alineado verticalmente en el centro.
+
+- Cambiá el borde a `border-2 border-orange-500` para debug
+
+---
+
+✅ 3. Modificá `CustomPageLayout.tsx`:
+
+- Aumentá el padding general a `p-4` en todo el wrapper interior (el que tiene `max-w-[1440px]`)
+- Usá el nuevo componente `CustomPageBody` para envolver `{children}`
+
+Por ejemplo:
+
+```tsx
+<CustomPageBody padding="none">
+  {children}
+</CustomPageBody>
+✅ 4. Aplicalo en las siguientes páginas:
+
+pages/Dashboard.tsx
+
+pages/Organizations.tsx
+
+En ambas páginas:
+
+Asegurate de que el CustomPageLayout use CustomPageBody
+
+El contenido interno de la página no debe tener padding adicional
+
+El padding se controla ahora exclusivamente desde CustomPageBody
+
+📁 Ubicación de los archivos:
+
+CustomPageHeader.tsx → ya está en ui-custom/
+
+CustomPageLayout.tsx → ya está en ui-custom/
+
+CustomPageBody.tsx → crear en ui-custom/
+
+🎯 Objetivo final: tener un sistema estructurado en bloques (Layout, Header, Body) con paddings controlados y visuales ordenados, sin elementos hardcodeados.

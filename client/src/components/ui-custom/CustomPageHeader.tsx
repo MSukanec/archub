@@ -1,4 +1,4 @@
-import { LucideIcon, Search, Filter, X } from "lucide-react";
+import { LucideIcon, Search, Filter, X, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -34,53 +34,23 @@ export function CustomPageHeader({
   const hasFilters = filters.length > 0;
 
   return (
-    <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 border-2 border-green-500">
-      {/* Primera fila: Título + Acciones */}
-      <div 
-        className="flex items-center justify-between px-6"
-        style={{ height: "38px" }}
-      >
-        <div className="flex items-center gap-2">
-          {Icon && (
-            <Icon 
-              className="text-slate-600 dark:text-slate-400"
-              style={{ width: "18px", height: "18px" }}
-            />
-          )}
-          <h1 className="text-base font-semibold text-slate-900 dark:text-slate-100">
-            {title}
-          </h1>
-        </div>
-        
-        {actions && (
-          <div className="flex items-center gap-2">
-            {actions}
-          </div>
+    <div className="h-[38px] border-2 border-orange-500 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-6">
+      {/* Left side - Icon and Title */}
+      <div className="flex items-center gap-2">
+        {Icon && (
+          <Icon 
+            className="text-slate-600 dark:text-slate-400"
+            style={{ width: "18px", height: "18px" }}
+          />
         )}
+        <h1 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+          {title}
+        </h1>
       </div>
-
-      {/* Segunda fila: Búsqueda + Filtros */}
-      <div 
-        className="flex items-center gap-3 px-6"
-        style={{ height: "38px" }}
-      >
-        {/* Input de búsqueda */}
-        {showSearch && (
-          <div className="flex-1 relative">
-            <Search 
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"
-              style={{ width: "16px", height: "16px" }}
-            />
-            <Input
-              placeholder="Buscar..."
-              value={searchValue}
-              onChange={(e) => onSearchChange?.(e.target.value)}
-              className="pl-10 h-8 text-sm"
-            />
-          </div>
-        )}
-
-        {/* Botón Filtros */}
+      
+      {/* Right side - All controls in order */}
+      <div className="flex items-center gap-2">
+        {/* 1. Filters dropdown */}
         {showFilters && hasFilters && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -103,7 +73,7 @@ export function CustomPageHeader({
           </DropdownMenu>
         )}
 
-        {/* Botón Limpiar filtros */}
+        {/* 2. Clear filters */}
         {onClearFilters && (
           <Button 
             variant="ghost" 
@@ -114,6 +84,20 @@ export function CustomPageHeader({
             <X style={{ width: "16px", height: "16px" }} />
             <span className="text-sm">Limpiar</span>
           </Button>
+        )}
+
+        {/* 3. Sort button */}
+        <Button variant="outline" size="sm" className="h-8 gap-1">
+          <ArrowUpDown style={{ width: "16px", height: "16px" }} />
+          <span className="text-sm">Sort</span>
+        </Button>
+
+        {/* 4. Secondary buttons (if any) */}
+        {/* 5. Primary button (actions) */}
+        {actions && (
+          <>
+            {actions}
+          </>
         )}
       </div>
     </div>
