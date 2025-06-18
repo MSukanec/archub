@@ -42,11 +42,12 @@ interface UserData {
     [key: string]: any
   } | null
   organization_preferences: {
-    id: string
     organization_id: string
     default_currency: string
     default_wallet: string
     pdf_template: string
+    created_at: string
+    updated_at: string
     [key: string]: any
   } | null
   role: {

@@ -306,6 +306,15 @@ Changelog:
   • Updated schema.ts to match actual Supabase database structure (removed first_name/last_name from user_data)
   • Profile functionality now works correctly with authentic Supabase data and proper validation
   • All plan information now correctly flows from user.preferences.last_organization → organization → plan
+
+- June 18, 2025. Complete SQL function synchronization and cleanup
+  • Updated archub_get_user SQL function in Supabase to include user_data and organization_preferences
+  • Removed local SQL function management code from server/routes.ts
+  • Cleaned up organization_preferences interface to use organization_id instead of id for validation
+  • Eliminated theme toggle button from sidebar (now only in preferences)
+  • Fixed ProfilePage data mapping to correctly load and persist all user information
+  • Profile data now loads from user_data table (birthdate, country) and saves correctly to Supabase
+  • All data persistence and loading works properly with updated SQL function structure
 ```
 
 ## User Preferences
