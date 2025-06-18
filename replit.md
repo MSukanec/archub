@@ -331,6 +331,14 @@ Changelog:
   • Updated all TypeScript interfaces to match exact Supabase database schema
   • Enhanced archub_get_user function to return comprehensive user data with all new fields
   • All database references now use correct column names and table structures
+
+- June 18, 2025. Fixed profile data persistence issues and auth metadata errors
+  • Corrected profile update endpoint to save names directly to users table instead of auth metadata
+  • Eliminated "User not allowed" errors by removing auth.admin.updateUserById calls
+  • Profile updates now successfully save to users, user_data, and user_preferences tables
+  • Created simplified archub_get_user function to avoid column existence errors
+  • Temporarily simplified function to use only verified tables until all schema issues resolved
+  • Profile data now persists correctly in database but requires function fix for frontend display
 ```
 
 ## User Preferences

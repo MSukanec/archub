@@ -86,13 +86,21 @@ export function useCurrentUser() {
       
       if (error) {
         console.error('Supabase RPC Error:', error)
+        console.error('Error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        })
         throw error
       }
       
       if (!data) {
+        console.error('No user data returned from RPC function')
         throw new Error('No user data returned')
       }
 
+      console.log('User data received:', data)
       return data as UserData
     },
     enabled: !!authUser && !!supabase,
