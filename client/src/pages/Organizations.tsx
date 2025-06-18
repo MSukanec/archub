@@ -8,14 +8,25 @@ import { useState } from 'react'
 
 export default function Organizations() {
   const { data, isLoading, error } = useCurrentUser()
+  const [searchValue, setSearchValue] = useState("")
+
+  const filters = [
+    { label: "Active Organizations", onClick: () => console.log("Active Organizations") },
+    { label: "Inactive Organizations", onClick: () => console.log("Inactive Organizations") },
+    { label: "System Organizations", onClick: () => console.log("System Organizations") },
+    { label: "User Organizations", onClick: () => console.log("User Organizations") },
+  ]
 
   if (isLoading) {
     return (
       <div className="flex flex-col">
-        <PageHeader
+        <CustomPageHeader
           icon={Building}
           title="Organization"
-          description="Manage your organization settings and members"
+          searchValue={searchValue}
+          onSearchChange={setSearchValue}
+          filters={filters}
+          onClearFilters={() => setSearchValue("")}
         />
         <div className="flex-1 p-6 bg-slate-50 dark:bg-slate-900">
           <div className="max-w-4xl mx-auto">
@@ -37,10 +48,13 @@ export default function Organizations() {
   if (error) {
     return (
       <div className="flex flex-col">
-        <PageHeader
+        <CustomPageHeader
           icon={Building}
           title="Organization"
-          description="Manage your organization settings and members"
+          searchValue={searchValue}
+          onSearchChange={setSearchValue}
+          filters={filters}
+          onClearFilters={() => setSearchValue("")}
         />
         <div className="flex-1 p-6 bg-slate-50 dark:bg-slate-900">
           <div className="max-w-4xl mx-auto">
@@ -63,10 +77,13 @@ export default function Organizations() {
   if (!data?.organization) {
     return (
       <div className="flex flex-col">
-        <PageHeader
+        <CustomPageHeader
           icon={Building}
           title="Organization"
-          description="Manage your organization settings and members"
+          searchValue={searchValue}
+          onSearchChange={setSearchValue}
+          filters={filters}
+          onClearFilters={() => setSearchValue("")}
         />
         <div className="flex-1 p-6 bg-slate-50 dark:bg-slate-900">
           <div className="max-w-4xl mx-auto">
@@ -91,10 +108,13 @@ export default function Organizations() {
 
   return (
     <div className="flex flex-col">
-      <PageHeader
+      <CustomPageHeader
         icon={Building}
         title="Organization"
-        description="Manage your organization settings and members"
+        searchValue={searchValue}
+        onSearchChange={setSearchValue}
+        filters={filters}
+        onClearFilters={() => setSearchValue("")}
       />
       
       <div className="flex-1 p-6 bg-slate-50 dark:bg-slate-900">
