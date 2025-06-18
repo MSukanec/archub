@@ -119,7 +119,16 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- June 18, 2025. Initial setup
+- June 18, 2025. Initial setup - Complete SPA base structure implemented
+  • React + Vite + TypeScript frontend with shadcn/ui components
+  • Supabase authentication (email + Google OAuth)
+  • Zustand stores for auth, navigation, and theme management
+  • Responsive sidebar navigation (Supabase-style)
+  • Header with project selector and user menu
+  • PageHeader component for consistent page layouts
+  • Protected routes with authentication modal
+  • Dashboard page with construction management UI
+  • Dark/light theme support with persistence
 ```
 
 ## User Preferences
