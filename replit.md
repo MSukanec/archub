@@ -315,6 +315,14 @@ Changelog:
   • Fixed ProfilePage data mapping to correctly load and persist all user information
   • Profile data now loads from user_data table (birthdate, country) and saves correctly to Supabase
   • All data persistence and loading works properly with updated SQL function structure
+
+- June 18, 2025. Fixed SQL function table references and column structure errors
+  • Corrected archub_get_user function to eliminate non-existent updated_at columns from user_data and user_preferences
+  • Fixed table name from organization_memberships to organization_members in SQL JOIN statements
+  • Updated TypeScript interfaces to match actual Supabase database structure
+  • Eliminated 400 errors caused by accessing non-existent tables and columns
+  • Function now correctly accesses organization_members table for user role information
+  • All SQL function calls now work properly with authentic database schema
 ```
 
 ## User Preferences
