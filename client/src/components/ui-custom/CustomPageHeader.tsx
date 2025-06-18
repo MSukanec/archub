@@ -1,12 +1,12 @@
-import { LucideIcon, Search, Filter, X, ArrowUpDown } from "lucide-react";
+import { LucideIcon, Filter, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
+  DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { CustomSearchButton } from "./CustomSearchButton";
 
 interface CustomPageHeaderProps {
   icon?: LucideIcon;
@@ -48,15 +48,22 @@ export function CustomPageHeader({
         </h1>
       </div>
       
-      {/* Right side - All controls in order */}
+      {/* Right side - Clean circular icon buttons */}
       <div className="flex items-center gap-2">
-        {/* 1. Filters dropdown */}
+        {/* Search button */}
+        {showSearch && (
+          <CustomSearchButton
+            value={searchValue}
+            onChange={(value) => onSearchChange?.(value)}
+          />
+        )}
+
+        {/* Filters button */}
         {showFilters && hasFilters && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-8 gap-1">
-                <Filter style={{ width: "16px", height: "16px" }} />
-                <span className="text-sm">Filtros</span>
+              <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full">
+                <Filter className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
@@ -73,31 +80,23 @@ export function CustomPageHeader({
           </DropdownMenu>
         )}
 
-        {/* 2. Clear filters */}
+        {/* Clear button */}
         {onClearFilters && (
           <Button 
             variant="ghost" 
-            size="sm" 
+            size="icon"
             onClick={onClearFilters}
-            className="h-8 gap-1 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+            className="h-10 w-10 rounded-full"
           >
-            <X style={{ width: "16px", height: "16px" }} />
-            <span className="text-sm">Limpiar</span>
+            <X className="h-4 w-4" />
           </Button>
         )}
 
-        {/* 3. Sort button */}
-        <Button variant="outline" size="sm" className="h-8 gap-1">
-          <ArrowUpDown style={{ width: "16px", height: "16px" }} />
-          <span className="text-sm">Sort</span>
-        </Button>
-
-        {/* 4. Secondary buttons (if any) */}
-        {/* 5. Primary button (actions) */}
+        {/* Actions */}
         {actions && (
-          <>
+          <div className="flex items-center gap-2 ml-2">
             {actions}
-          </>
+          </div>
         )}
       </div>
     </div>

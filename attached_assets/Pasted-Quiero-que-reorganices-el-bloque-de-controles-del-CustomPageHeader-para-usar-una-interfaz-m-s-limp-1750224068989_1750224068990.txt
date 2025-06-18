@@ -1,0 +1,53 @@
+Quiero que reorganices el bloque de controles del `CustomPageHeader` para usar una interfaz más limpia, como en Linear o Supabase. Vamos a trabajar con tres botones funcionales (Buscar, Filtros, Limpiar) y todos deben tener el mismo tamaño y estilo visual.
+
+---
+
+✅ 1. Todos los botones deben usar el componente `Button` que ya existe, con:
+
+```tsx
+variant="ghost"
+size="icon"
+Esto asegura que todos tengan forma circular (40x40px aprox).
+
+✅ 2. El botón de búsqueda (🔍) debe funcionar así:
+
+Cuando el usuario hace hover sobre el ícono de la lupa, debe aparecer un Input para escribir la búsqueda.
+
+El input debe aparecer a la izquierda del botón.
+
+El input debe tener la misma altura que el botón (40px) y alinearse perfectamente.
+
+El input puede aparecer con animación simple o transition si querés.
+
+Creá un componente nuevo llamado CustomSearchButton.tsx dentro de client/src/components/ui-custom/.
+
+Este componente debe aceptar:
+
+tsx
+Copiar
+Editar
+{
+  value: string
+  onChange: (value: string) => void
+}
+✅ 3. El botón de filtros (⏷) debe abrir un dropdown como ya se usa en el header, pero ahora como ícono circular. Usá el ícono Filter y mantené el mismo menú actual (filters).
+
+✅ 4. El botón de "Limpiar" (✖️) debe ser igual: circular, solo ícono, misma altura, misma clase.
+
+✅ 5. En el CustomPageHeader.tsx:
+
+Reemplazá los tres controles actuales por estos tres botones alineados horizontalmente
+
+Todos deben estar contenidos en un contenedor con flex items-center gap-2
+
+Todos deben tener la misma altura y alineación
+
+El input de búsqueda no debe romper el layout al expandirse: debe posicionarse con absolute left-full si hace falta
+
+📁 Ubicación:
+
+El nuevo componente CustomSearchButton.tsx va en client/src/components/ui-custom/
+
+No toques el componente Button.tsx, solo usalo bien
+
+🎯 Resultado: barra superior limpia con íconos circulares perfectamente alineados, input expandible desde la lupa hacia la izquierda, todo visualmente coherente.
