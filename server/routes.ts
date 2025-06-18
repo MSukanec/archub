@@ -136,22 +136,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Update auth.users metadata for all user fields
+      // Update users table for user profile fields
       if (full_name !== undefined || avatar_url !== undefined || first_name !== undefined || last_name !== undefined) {
-        const metadata: any = {};
-        if (full_name !== undefined) metadata.full_name = full_name;
-        if (avatar_url !== undefined) metadata.avatar_url = avatar_url;
-        if (first_name !== undefined) metadata.first_name = first_name;
-        if (last_name !== undefined) metadata.last_name = last_name;
+        const userUpdateData: any = {};
+        if (full_name !== undefined) userUpdateData.full_name = full_name;
+        if (avatar_url !== undefined) userUpdateData.avatar_url = avatar_url;
+        if (first_name !== undefined) userUpdateData.first_name = first_name;
+        if (last_name !== undefined) userUpdateData.last_name = last_name;
 
-        const { error } = await supabase.auth.admin.updateUserById(user_id, {
-          user_metadata: metadata
-        });
+        const { error } = await supabase
+          .from('users')
+          .update(userUpdateData)
+          .eq('auth_id', user_id);
 
         if (error) {
-          console.error("Error updating auth metadata:", error);
+          console.error("Error updating users table:", error);
         } else {
-          console.log("Updated auth metadata successfully");
+          console.log("Updated users table successfully");
         }
       }
 
