@@ -1,43 +1,145 @@
-import { Building, Calendar, Shield, Activity, Crown } from 'lucide-react'
+import { Building, Calendar, Plus, CheckCircle, ShieldCheck, BadgeCheck } from 'lucide-react'
 import { CustomPageLayout } from '@/components/ui-custom/CustomPageLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
+import { cn } from '@/lib/utils'
+import { apiRequest, queryClient } from '@/lib/queryClient'
+import { useMutation } from '@tanstack/react-query'
+
+type FilterType = 'all' | 'active' | 'archived' | 'system'
 
 export default function Organizations() {
-  const { data, isLoading, error } = useCurrentUser()
+  const { data, isLoading, error, refetch } = useCurrentUser()
   const [searchValue, setSearchValue] = useState("")
+  const [activeFilter, setActiveFilter] = useState<FilterType>('all')
+
+  // Mutation for selecting an organization
+  const selectOrganizationMutation = useMutation({
+    mutationFn: async (organizationId: string) => {
+      return await apiRequest(`/api/user/select-organization`, {
+        method: 'POST',
+        body: { organization_id: organizationId }
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/user'] })
+      refetch()
+    }
+  })
+
+  // Mock organizations data - in real implementation, this would come from data.organizations
+  const organizations = useMemo(() => {
+    if (!data?.organization) return []
+    
+    // For now, we'll create a mock array with the current organization
+    // In a real implementation, this would be data.organizations
+    return [
+      {
+        id: data.organization.id,
+        name: data.organization.name,
+        created_at: data.organization.created_at,
+        is_active: data.organization.is_active,
+        is_system: data.organization.is_system,
+        plan_id: data.organization.plan_id
+      }
+    ]
+  }, [data])
+
+  const selectedOrganization = data?.organization
+
+  // Filter organizations based on search and filter type
+  const filteredOrganizations = useMemo(() => {
+    let filtered = organizations
+
+    // Apply search filter
+    if (searchValue.trim()) {
+      filtered = filtered.filter(org => 
+        org.name.toLowerCase().includes(searchValue.toLowerCase())
+      )
+    }
+
+    // Apply type filter
+    switch (activeFilter) {
+      case 'active':
+        filtered = filtered.filter(org => org.is_active)
+        break
+      case 'archived':
+        filtered = filtered.filter(org => !org.is_active)
+        break
+      case 'system':
+        filtered = filtered.filter(org => org.is_system)
+        break
+      default:
+        break
+    }
+
+    return filtered
+  }, [organizations, searchValue, activeFilter])
 
   const filters = [
-    { label: "Active Organizations", onClick: () => console.log("Active Organizations") },
-    { label: "Inactive Organizations", onClick: () => console.log("Inactive Organizations") },
-    { label: "System Organizations", onClick: () => console.log("System Organizations") },
-    { label: "User Organizations", onClick: () => console.log("User Organizations") },
+    { label: "Active Organizations", onClick: () => setActiveFilter('active') },
+    { label: "Archived Organizations", onClick: () => setActiveFilter('archived') },
+    { label: "System Organizations", onClick: () => setActiveFilter('system') },
   ]
+
+  const handleCreateOrganization = () => {
+    // TODO: Implement organization creation
+    console.log("Create new organization")
+  }
+
+  const handleSelectOrganization = (organizationId: string) => {
+    if (organizationId !== selectedOrganization?.id) {
+      selectOrganizationMutation.mutate(organizationId)
+    }
+  }
+
+  const handleClearFilters = () => {
+    setSearchValue("")
+    setActiveFilter('all')
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    })
+  }
+
+  const actions = (
+    <Button size="sm" onClick={handleCreateOrganization}>
+      <Plus className="w-4 h-4 mr-2" />
+      New Organization
+    </Button>
+  )
 
   if (isLoading) {
     return (
       <CustomPageLayout
         icon={Building}
-        title="Organization"
+        title="Organizations"
+        actions={actions}
         searchValue={searchValue}
         onSearchChange={setSearchValue}
         filters={filters}
-        onClearFilters={() => setSearchValue("")}
+        onClearFilters={handleClearFilters}
       >
-        <div className="p-6">
-          <div className="max-w-4xl mx-auto">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="animate-pulse space-y-4">
-                  <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-1/4"></div>
-                  <div className="h-8 bg-slate-200 dark:bg-slate-700 rounded w-1/2"></div>
-                  <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-3/4"></div>
-                </div>
-              </CardContent>
-            </Card>
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="animate-pulse">
+                <CardHeader>
+                  <div className="h-6 bg-[var(--card-hover-bg)] rounded w-3/4"></div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="h-4 bg-[var(--card-hover-bg)] rounded w-1/2"></div>
+                  <div className="h-4 bg-[var(--card-hover-bg)] rounded w-2/3"></div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </CustomPageLayout>
@@ -48,177 +150,154 @@ export default function Organizations() {
     return (
       <CustomPageLayout
         icon={Building}
-        title="Organization"
+        title="Organizations"
+        actions={actions}
         searchValue={searchValue}
         onSearchChange={setSearchValue}
         filters={filters}
-        onClearFilters={() => setSearchValue("")}
+        onClearFilters={handleClearFilters}
       >
-        <div className="p-6">
-          <div className="max-w-4xl mx-auto">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-center py-8">
-                  <p className="text-red-600 dark:text-red-400 mb-2">Error loading organization data</p>
-                  <p className="text-sm text-muted-foreground">
-                    {error.message || 'Unable to connect to database'}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+        <div className="space-y-6">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center py-8">
+                <p className="text-[var(--destructive)] mb-2">Error loading organizations</p>
+                <p className="text-sm text-[var(--text-muted)]">
+                  {error.message || 'Unable to connect to database'}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </CustomPageLayout>
     )
   }
 
-  if (!data?.organization) {
+  if (!organizations.length) {
     return (
       <CustomPageLayout
         icon={Building}
-        title="Organization"
+        title="Organizations"
+        actions={actions}
         searchValue={searchValue}
         onSearchChange={setSearchValue}
         filters={filters}
-        onClearFilters={() => setSearchValue("")}
+        onClearFilters={handleClearFilters}
       >
-        <div className="p-6">
-          <div className="max-w-4xl mx-auto">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-center py-8">
-                  <Building className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-lg font-medium text-muted-foreground mb-2">No organization found</p>
-                  <p className="text-sm text-muted-foreground">
-                    You are not a member of any organization yet.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+        <div className="space-y-6">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center py-8">
+                <Building className="h-12 w-12 text-[var(--text-muted)] mx-auto mb-4" />
+                <p className="text-lg font-medium text-[var(--text-muted)] mb-2">No organizations found</p>
+                <p className="text-sm text-[var(--text-muted)]">
+                  {searchValue || activeFilter !== 'all' 
+                    ? "Try adjusting your search or filters" 
+                    : "You are not a member of any organization yet."
+                  }
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </CustomPageLayout>
     )
   }
-
-  const { organization, role, plan } = data
 
   return (
     <CustomPageLayout
       icon={Building}
-      title="Organization"
+      title="Organizations"
+      actions={actions}
       searchValue={searchValue}
       onSearchChange={setSearchValue}
       filters={filters}
-      onClearFilters={() => setSearchValue("")}
+      onClearFilters={handleClearFilters}
     >
       <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Building className="h-5 w-5" />
-                <span>Organization Details</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label>Organization Name</Label>
-                  <p className="text-lg font-medium">{organization.name}</p>
-                </div>
-                
-                {role && (
-                  <div className="space-y-2">
-                    <Label>Your Role</Label>
-                    <Badge variant="default">
-                      {role.name}
-                    </Badge>
-                  </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {filteredOrganizations.map((org) => {
+            const isSelected = org.id === selectedOrganization?.id
+            const isSelecting = selectOrganizationMutation.isPending && selectOrganizationMutation.variables === org.id
+
+            return (
+              <Card
+                key={org.id}
+                className={cn(
+                  "transition-all duration-200 cursor-pointer hover:shadow-md",
+                  isSelected
+                    ? "border-[var(--accent)] ring-1 ring-[var(--accent)]"
+                    : "border-[var(--card-border)]",
+                  isSelecting && "opacity-50"
                 )}
-                
-                <div className="space-y-2">
-                  <Label className="flex items-center space-x-2">
+                onClick={() => handleSelectOrganization(org.id)}
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Building className="h-5 w-5" />
+                      {org.name}
+                    </CardTitle>
+                    {isSelected && (
+                      <Badge variant="default" className="bg-[var(--accent)] text-[var(--accent-text)]">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Selected
+                      </Badge>
+                    )}
+                  </div>
+                </CardHeader>
+
+                <CardContent className="space-y-4">
+                  <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
                     <Calendar className="h-4 w-4" />
-                    <span>Created</span>
-                  </Label>
-                  <p className="text-sm text-muted-foreground">
-                    {new Date(organization.created_at).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}
-                  </p>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label className="flex items-center space-x-2">
-                    <Activity className="h-4 w-4" />
-                    <span>Status</span>
-                  </Label>
-                  <Badge variant={organization.is_active ? 'default' : 'destructive'}>
-                    {organization.is_active ? 'Active' : 'Inactive'}
-                  </Badge>
-                </div>
-              </div>
-              
-              <div className="flex items-center space-x-4 pt-4 border-t">
-                <div className="flex items-center space-x-2">
-                  <Shield className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">
-                    {organization.is_system ? 'System Organization' : 'User Organization'}
-                  </span>
-                </div>
+                    Created {formatDate(org.created_at)}
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {org.is_system && (
+                      <Badge variant="secondary" className="text-xs">
+                        <ShieldCheck className="h-3 w-3 mr-1" />
+                        System
+                      </Badge>
+                    )}
+                    
+                    {org.is_active ? (
+                      <Badge variant="secondary" className="text-xs bg-[var(--success)]/10 text-[var(--success)]">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Active
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary" className="text-xs">
+                        Archived
+                      </Badge>
+                    )}
+
+                    {data?.plan && (
+                      <Badge variant="secondary" className="text-xs">
+                        <BadgeCheck className="h-3 w-3 mr-1" />
+                        {data.plan.name}
+                      </Badge>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })}
+        </div>
+
+        {filteredOrganizations.length === 0 && (searchValue || activeFilter !== 'all') && (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center py-8">
+                <Building className="h-12 w-12 text-[var(--text-muted)] mx-auto mb-4" />
+                <p className="text-lg font-medium text-[var(--text-muted)] mb-2">No organizations found</p>
+                <p className="text-sm text-[var(--text-muted)]">
+                  Try adjusting your search or filters
+                </p>
               </div>
             </CardContent>
           </Card>
-
-          {plan && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Crown className="h-5 w-5" />
-                  <span>Plan Information</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label>Current Plan</Label>
-                    <p className="text-lg font-medium">{plan.name}</p>
-                  </div>
-                  
-                  {plan.max_users && (
-                    <div className="space-y-2">
-                      <Label>Max Users</Label>
-                      <p className="text-sm text-muted-foreground">{plan.max_users}</p>
-                    </div>
-                  )}
-                  
-                  {plan.price !== undefined && (
-                    <div className="space-y-2">
-                      <Label>Price</Label>
-                      <p className="text-sm text-muted-foreground">
-                        ${plan.price}{plan.price > 0 ? '/month' : ' (Free)'}
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {plan.features && plan.features.length > 0 && (
-                  <div className="space-y-2 mt-6">
-                    <Label>Plan Features</Label>
-                    <div className="flex flex-wrap gap-2">
-                      {plan.features.map((feature, index) => (
-                        <Badge key={index} variant="secondary">
-                          {feature}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
+        )}
       </div>
     </CustomPageLayout>
   )

@@ -4,26 +4,26 @@
 
 :root {
   /* Layout */
-  --layout-bg: hsl(240, 10%, 98%);
+  --layout-bg: hsl(0, 0%, 82%);
   --layout-text: hsl(240, 10%, 4%);
   --layout-border: hsl(240, 6%, 90%);
 
   /* Sidebar */
-  --sidebar-bg: hsl(0, 0%, 100%);
-  --sidebar-text: hsl(240, 10%, 4%);
+  --sidebar-bg: hsl(0, 0%, 87%);
+  --sidebar-text: hsl(0, 0%, 40%);
   --sidebar-border: hsl(240, 6%, 90%);
-  --sidebar-hover-bg: hsl(240, 5%, 96%);
-  --sidebar-active-bg: hsl(210, 40%, 95%);
-  --sidebar-active-text: hsl(210, 40%, 35%);
+  --sidebar-hover-bg: hsl(0, 0%, 82%);
+  --sidebar-active-bg: hsl(0, 0%, 0%);
+  --sidebar-active-text: hsl(0, 0%, 100%);
 
   /* Cards */
-  --card-bg: hsl(0, 0%, 100%);
+  --card-bg: hsl(0, 0%, 87%);
   --card-text: hsl(240, 10%, 4%);
   --card-border: hsl(240, 6%, 90%);
   --card-hover-bg: hsl(240, 3%, 98%);
 
   /* Buttons - Primary */
-  --button-primary-bg: hsl(210, 40%, 50%);
+  --button-primary-bg: hsl(90, 50%, 50%);
   --button-primary-text: hsl(0, 0%, 100%);
   --button-primary-border: transparent;
   --button-primary-hover-bg: hsl(210, 40%, 45%);

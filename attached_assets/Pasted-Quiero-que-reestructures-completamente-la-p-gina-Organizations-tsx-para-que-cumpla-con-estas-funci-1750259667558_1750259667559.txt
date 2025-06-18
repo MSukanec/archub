@@ -1,0 +1,84 @@
+Quiero que reestructures completamente la página `Organizations.tsx` para que cumpla con estas funciones clave:
+
+---
+
+✅ 1. Mostrar todas las organizaciones del usuario
+
+- Usá el hook `useCurrentUser()` (o el que corresponda) y asumí que devuelve:
+  ```ts
+  data.organizations: Organization[]
+  data.selected_organization: Organization
+Mostrá una card para cada organización dentro de un grid:
+
+tsx
+Copiar
+Editar
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">...</div>
+✅ 2. Agregar botón “New Organization” en el header
+
+Dentro del prop actions del CustomPageLayout, agregá:
+
+tsx
+Copiar
+Editar
+<Button size="sm" onClick={handleCreateOrganization}>
+  <Plus className="w-4 h-4 mr-2" /> New Organization
+</Button>
+El botón va alineado a la derecha del header como parte de los actions.
+
+✅ 3. Seleccionar una organización
+
+Hacé clic en una card para ejecutar handleSelect(org.id), que:
+
+Llama a una mutation que actualiza el last_organization_id en user_preferences
+
+Hace refetch() de los datos
+
+La organización actualmente seleccionada (data.selected_organization) debe mostrarse resaltada:
+
+tsx
+Copiar
+Editar
+className={cn(
+  "border transition hover:shadow-md cursor-pointer",
+  org.id === data.selected_organization.id
+    ? "border-blue-500 ring-1 ring-blue-500"
+    : "border-border"
+)}
+✅ 4. Soporte para búsqueda y filtros
+
+Usá searchValue para filtrar las organizaciones por nombre (.filter()).
+
+Usá filters para permitir filtrar por:
+
+"Activas"
+
+"Archivadas"
+
+"De sistema"
+
+El botón “Limpiar” debe resetear los filtros.
+
+✅ 5. Visual y componentes
+
+Cada card debe mostrar:
+
+Nombre de la organización
+
+created_at (fecha legible)
+
+is_system y is_active en texto o con iconos secundarios
+
+Usá Card, CardHeader, CardTitle, CardContent de tu librería
+
+Íconos: Building, ShieldCheck, BadgeCheck, Calendar, CheckCircle de lucide-react
+
+🎯 Resultado esperado:
+
+Interfaz visual clara, moderna, funcional
+
+El usuario puede ver, buscar, seleccionar y crear organizaciones
+
+Todo el diseño debe respetar la arquitectura y sistema visual actual
+
+No se hardcodea ningún dato, se usa lo que devuelve el backend
