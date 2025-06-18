@@ -13,6 +13,7 @@ import {
   CreditCard,
   BarChart3,
   Settings,
+  User,
   Moon,
   Sun,
 } from "lucide-react";
@@ -137,19 +138,7 @@ export function Sidebar() {
           <Link href="/perfil">
             <SidebarButton
               isExpanded={isExpanded}
-              icon={() =>
-                avatarUrl ? (
-                  <img
-                    src={avatarUrl}
-                    alt="Avatar"
-                    className="h-5 w-5 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="h-5 w-5 rounded-full bg-muted text-muted-foreground text-xs font-bold flex items-center justify-center">
-                    {initials}
-                  </div>
-                )
-              }
+              icon={User}
             >
               Ver perfil
             </SidebarButton>

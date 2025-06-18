@@ -24,7 +24,6 @@ interface UserData {
     created_at: string
     is_active: boolean
     is_system: boolean
-    plan_id: string
     created_by: string
     updated_at: string
     [key: string]: any

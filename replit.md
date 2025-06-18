@@ -295,6 +295,17 @@ Changelog:
   • Added comprehensive error handling with fallback success responses for partial updates
   • Updated shared schema types to match actual Supabase table structure (countries, user_data, user_preferences)
   • Profile changes now properly save to Supabase database using existing RPC infrastructure
+
+- June 18, 2025. Complete elimination of user.plan_id references and data validation improvements
+  • Removed all plan_id references from users table throughout the entire codebase
+  • Updated Organizations.tsx to access plan data through organization.plan instead of user.plan_id
+  • Modified useCurrentUser hook to eliminate plan_id from organization interface
+  • Enhanced profile data validation to prevent empty values from being sent to database
+  • Fixed ProfilePage.tsx to only send non-empty, trimmed values for personal information
+  • Corrected server-side validation to reject empty strings for birthdate and country fields
+  • Updated schema.ts to match actual Supabase database structure (removed first_name/last_name from user_data)
+  • Profile functionality now works correctly with authentic Supabase data and proper validation
+  • All plan information now correctly flows from user.preferences.last_organization → organization → plan
 ```
 
 ## User Preferences
