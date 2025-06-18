@@ -20,7 +20,6 @@ interface UserData {
     country: string
     birthdate: string
     created_at: string
-    updated_at: string
     [key: string]: any
   } | null
   preferences: {
@@ -29,6 +28,7 @@ interface UserData {
     theme: string
     sidebar_docked: boolean
     last_organization_id: string
+    created_at: string
     [key: string]: any
   } | null
   organization: {
