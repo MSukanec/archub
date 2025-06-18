@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import { Sidebar } from './Sidebar'
-import { Header } from './Header'
 import { useAuthStore } from '@/stores/authStore'
 import { useThemeStore } from '@/stores/themeStore'
 

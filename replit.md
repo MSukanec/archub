@@ -146,6 +146,15 @@ Changelog:
   • Added plan information display with Crown icon and features
   • Clean error states and validation for missing data fields
   • All UI components from design system, no custom divs or styles
+
+- June 18, 2025. Complete UI constants refactoring and SidebarButton component
+  • Created centralized UI constants in client/src/lib/constants/ui.ts
+  • All visual measurements (SIDEBAR_WIDTH, BUTTON_SIZE, ICON_SIZE) now use constants
+  • Created reusable SidebarButton component with standardized sizing
+  • Completely refactored Sidebar.tsx to eliminate hardcoded styles
+  • Removed Header.tsx completely as it's no longer used in layout
+  • All sidebar elements now use consistent padding and transition timing
+  • Visual structure is now scalable and maintainable from single constants file
 ```
 
 ## User Preferences
