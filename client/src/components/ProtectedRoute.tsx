@@ -7,27 +7,16 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user, initialized } = useAuthStore()
-  const [showAuthModal, setShowAuthModal] = useState(false)
+  const { user } = useAuthStore()
+  const [showAuthModal, setShowAuthModal] = useState(!user)
 
   useEffect(() => {
-    if (initialized && !user) {
+    if (!user) {
       setShowAuthModal(true)
-    } else if (user) {
+    } else {
       setShowAuthModal(false)
     }
-  }, [user, initialized])
-
-  if (!initialized) {
-    return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-600 dark:text-slate-400">Loading...</p>
-        </div>
-      </div>
-    )
-  }
+  }, [user])
 
   if (!user) {
     return <AuthModal open={showAuthModal} onOpenChange={setShowAuthModal} />
