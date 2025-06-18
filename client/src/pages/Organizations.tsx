@@ -22,7 +22,7 @@ export default function Organizations() {
       return await apiRequest('POST', `/api/user/select-organization`, { organization_id: organizationId })
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/user'] })
+      queryClient.invalidateQueries({ queryKey: ['current-user'] })
       refetch()
     }
   })
