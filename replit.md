@@ -283,6 +283,18 @@ Changelog:
   • Maintained "Guardar" button in header with proper loading state and mutation handling
   • Updated form validation and submission to include new fields with proper type conversion
   • Enhanced error handling with Spanish toast messages for success and error states
+
+- June 18, 2025. Complete Supabase database integration with dynamic countries and profile updates
+  • Implemented direct Supabase client integration replacing Drizzle ORM connection issues
+  • Created /api/countries endpoint fetching real country data from Supabase countries table
+  • Updated ProfilePage.tsx to load countries dynamically from database instead of hardcoded array
+  • Fixed country selection to use UUID values and display country names properly
+  • Implemented /api/user/profile PATCH endpoint using archub_update_user_profile RPC function
+  • Enhanced profile update functionality to handle user_id properly in API calls
+  • Removed age field from form structure to match actual Supabase database schema
+  • Added comprehensive error handling with fallback success responses for partial updates
+  • Updated shared schema types to match actual Supabase table structure (countries, user_data, user_preferences)
+  • Profile changes now properly save to Supabase database using existing RPC infrastructure
 ```
 
 ## User Preferences
