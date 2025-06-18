@@ -272,6 +272,17 @@ Changelog:
   • All form components now use --radius-md, --input-border, --input-bg, and transition-colors
   • Eliminated hardcoded Tailwind classes (bg-background, text-muted-foreground) for scalability
   • Created cohesive visual experience across inputs, selects, and dropdown menus with unified design tokens
+
+- June 18, 2025. Enhanced ProfilePage.tsx with improved form structure and visual organization
+  • Made full_name field read-only (disabled) while maintaining display
+  • Added new editable fields: first_name, last_name, and birthdate (date input type)
+  • Removed "¿Cómo nos conociste?" field completely from the form structure
+  • Reorganized preferences section with two-column grid layout for better visual balance
+  • Added icons to all section headers (Camera, User, Settings) for enhanced visual hierarchy
+  • Disabled search functionality in header with showSearch={false} for cleaner profile interface
+  • Maintained "Guardar" button in header with proper loading state and mutation handling
+  • Updated form validation and submission to include new fields with proper type conversion
+  • Enhanced error handling with Spanish toast messages for success and error states
 ```
 
 ## User Preferences

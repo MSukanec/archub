@@ -1,4 +1,4 @@
-import { User, Camera, Globe, Calendar, Settings } from 'lucide-react'
+import { User, Camera, Settings } from 'lucide-react'
 import { CustomPageLayout } from '@/components/ui-custom/CustomPageLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -7,10 +7,9 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useThemeStore } from '@/stores/themeStore'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { apiRequest, queryClient } from '@/lib/queryClient'
 import { useMutation } from '@tanstack/react-query'
@@ -22,8 +21,6 @@ const countries = [
   'Paraguay', 'Perú', 'Puerto Rico', 'República Dominicana', 'Uruguay', 'Venezuela',
   'Estados Unidos', 'Canadá', 'Reino Unido', 'Francia', 'Alemania', 'Italia', 'Portugal'
 ]
-
-
 
 export default function ProfilePage() {
   const { data, isLoading, error, refetch } = useCurrentUser()
@@ -47,7 +44,7 @@ export default function ProfilePage() {
   const [avatarUrl, setAvatarUrl] = useState('')
 
   // Initialize form data when user data loads
-  useState(() => {
+  useEffect(() => {
     if (data) {
       setFormData({
         full_name: data.user?.full_name || '',
@@ -62,7 +59,7 @@ export default function ProfilePage() {
       })
       setAvatarPreview(data.user?.avatar_url || '')
     }
-  })
+  }, [data])
 
   const updateProfileMutation = useMutation({
     mutationFn: async (profileData: any) => {
@@ -158,6 +155,7 @@ export default function ProfilePage() {
       <CustomPageLayout
         icon={User}
         title="Mi Perfil"
+        showSearch={false}
       >
         <div className="space-y-6">
           <Card className="animate-pulse">
@@ -179,6 +177,7 @@ export default function ProfilePage() {
       <CustomPageLayout
         icon={User}
         title="Mi Perfil"
+        showSearch={false}
       >
         <Card>
           <CardContent className="pt-6">
@@ -198,12 +197,13 @@ export default function ProfilePage() {
     <CustomPageLayout
       icon={User}
       title="Mi Perfil"
+      showSearch={false}
       actions={
         <Button 
           onClick={handleSave} 
           disabled={updateProfileMutation.isPending}
         >
-          {updateProfileMutation.isPending ? 'Guardando...' : 'Guardar cambios'}
+          {updateProfileMutation.isPending ? 'Guardando...' : 'Guardar'}
         </Button>
       }
     >
@@ -271,7 +271,10 @@ export default function ProfilePage() {
         {/* User Information */}
         <Card>
           <CardHeader>
-            <CardTitle>Información personal</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Información personal
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -280,8 +283,8 @@ export default function ProfilePage() {
                 <Input
                   id="full_name"
                   value={formData.full_name}
-                  onChange={(e) => handleInputChange('full_name', e.target.value)}
-                  placeholder="Tu nombre completo"
+                  disabled
+                  className="opacity-60"
                 />
               </div>
 
@@ -303,19 +306,33 @@ export default function ProfilePage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="country">País</Label>
-                <Select value={formData.country} onValueChange={(value) => handleInputChange('country', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona tu país" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {countries.map(country => (
-                      <SelectItem key={country} value={country}>
-                        {country}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="first_name">Nombre</Label>
+                <Input
+                  id="first_name"
+                  value={formData.first_name}
+                  onChange={(e) => handleInputChange('first_name', e.target.value)}
+                  placeholder="Tu nombre"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="last_name">Apellido</Label>
+                <Input
+                  id="last_name"
+                  value={formData.last_name}
+                  onChange={(e) => handleInputChange('last_name', e.target.value)}
+                  placeholder="Tu apellido"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="birthdate">Fecha de nacimiento</Label>
+                <Input
+                  id="birthdate"
+                  type="date"
+                  value={formData.birthdate}
+                  onChange={(e) => handleInputChange('birthdate', e.target.value)}
+                />
               </div>
 
               <div className="space-y-2">
@@ -330,22 +347,22 @@ export default function ProfilePage() {
                   max="120"
                 />
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="discovered_by">¿Cómo nos conociste?</Label>
-              <Select value={formData.discovered_by} onValueChange={(value) => handleInputChange('discovered_by', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecciona una opción" />
-                </SelectTrigger>
-                <SelectContent>
-                  {discoveryOptions.map(option => (
-                    <SelectItem key={option} value={option}>
-                      {option}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="country">País</Label>
+                <Select value={formData.country} onValueChange={(value) => handleInputChange('country', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona tu país" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {countries.map(country => (
+                      <SelectItem key={country} value={country}>
+                        {country}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -353,37 +370,42 @@ export default function ProfilePage() {
         {/* Preferences */}
         <Card>
           <CardHeader>
-            <CardTitle>Preferencias</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              Preferencias
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <Label>Tema de la interfaz</Label>
-                <p className="text-sm text-[var(--text-muted)]">
-                  Cambia entre modo claro y oscuro
-                </p>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <Label>Tema de la interfaz</Label>
+                  <p className="text-sm text-[var(--text-muted)]">
+                    Cambia entre modo claro y oscuro
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">Claro</span>
+                  <Switch
+                    checked={isDark}
+                    onCheckedChange={handleThemeToggle}
+                  />
+                  <span className="text-sm">Oscuro</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm">Claro</span>
-                <Switch
-                  checked={isDark}
-                  onCheckedChange={handleThemeToggle}
-                />
-                <span className="text-sm">Oscuro</span>
-              </div>
-            </div>
 
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <Label>Barra lateral fija</Label>
-                <p className="text-sm text-[var(--text-muted)]">
-                  Mantener la barra lateral siempre visible
-                </p>
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <Label>Barra lateral fija</Label>
+                  <p className="text-sm text-[var(--text-muted)]">
+                    Mantener la barra lateral siempre visible
+                  </p>
+                </div>
+                <Switch
+                  checked={formData.sidebar_docked}
+                  onCheckedChange={(checked) => handleInputChange('sidebar_docked', checked)}
+                />
               </div>
-              <Switch
-                checked={formData.sidebar_docked}
-                onCheckedChange={(checked) => handleInputChange('sidebar_docked', checked)}
-              />
             </div>
           </CardContent>
         </Card>
