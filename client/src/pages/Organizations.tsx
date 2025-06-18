@@ -35,7 +35,7 @@ export default function Organizations() {
       // First get user's organization memberships
       const { data: memberships, error: membershipsError } = await supabase
         .from('organization_members')
-        .select('organization_id, role, joined_at')
+        .select('organization_id, role_id, joined_at')
         .eq('user_id', user.id)
 
       if (membershipsError) throw membershipsError
@@ -54,7 +54,7 @@ export default function Organizations() {
       // Combine organization data with membership info
       return orgs?.map(org => ({
         ...org,
-        userRole: memberships.find(m => m.organization_id === org.id)?.role || 'member',
+        userRole: memberships.find(m => m.organization_id === org.id)?.role_id || 'member',
         joinedAt: memberships.find(m => m.organization_id === org.id)?.joined_at
       })) || []
     },
@@ -71,15 +71,15 @@ export default function Organizations() {
 
       const { data: members, error } = await supabase
         .from('organization_members')
-        .select('id, role')
+        .select('id, role_id')
         .eq('organization_id', orgId)
 
       if (error) throw error
 
       return {
         totalMembers: members?.length || 0,
-        adminCount: members?.filter(m => m.role === 'admin').length || 0,
-        memberCount: members?.filter(m => m.role === 'member').length || 0
+        adminCount: members?.filter(m => m.role_id === 'admin').length || 0,
+        memberCount: members?.filter(m => m.role_id === 'member').length || 0
       }
     },
     enabled: !!user && !!supabase && !!organizations?.length,
