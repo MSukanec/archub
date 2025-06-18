@@ -15,6 +15,7 @@ import {
   Settings,
   Moon,
   Sun,
+  User,
 } from "lucide-react";
 import {
   SIDEBAR_WIDTH,
@@ -54,8 +55,75 @@ function ThemeToggleButton({ isExpanded }: { isExpanded: boolean }) {
       isExpanded={isExpanded}
       onClick={handleToggleTheme}
     >
-      Tema
+      {isDark ? "Modo claro" : "Modo oscuro"}
     </SidebarButton>
+  );
+}
+
+// Botón de perfil de usuario
+function ProfileAvatarButton({ isExpanded }: { isExpanded: boolean }) {
+  const [location] = useLocation();
+  const { data } = useCurrentUser();
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word.charAt(0))
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const avatarUrl = data?.user?.avatar_url;
+  const fullName = data?.user?.full_name || data?.user?.email || 'Usuario';
+  const initials = getInitials(fullName);
+
+  if (isExpanded) {
+    return (
+      <Link href="/perfil">
+        <div className="flex items-center gap-3 px-3 py-2 mx-2 rounded-lg hover:bg-[var(--sidebar-hover-bg)] transition-colors cursor-pointer">
+          <div className="flex-shrink-0">
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt="Avatar"
+                className="h-8 w-8 rounded-full object-cover border border-[var(--sidebar-border)]"
+              />
+            ) : (
+              <div className="h-8 w-8 rounded-full bg-[var(--accent)] flex items-center justify-center text-white text-xs font-medium">
+                {initials}
+              </div>
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-sm font-medium text-[var(--sidebar-text)] truncate">
+              {fullName}
+            </div>
+            <div className="text-xs text-[var(--sidebar-text-muted)] truncate">
+              Ver perfil
+            </div>
+          </div>
+        </div>
+      </Link>
+    );
+  }
+
+  return (
+    <Link href="/perfil">
+      <div className="flex items-center justify-center p-2 mx-2 rounded-lg hover:bg-[var(--sidebar-hover-bg)] transition-colors cursor-pointer">
+        {avatarUrl ? (
+          <img
+            src={avatarUrl}
+            alt="Avatar"
+            className="h-8 w-8 rounded-full object-cover border border-[var(--sidebar-border)]"
+          />
+        ) : (
+          <div className="h-8 w-8 rounded-full bg-[var(--accent)] flex items-center justify-center text-white text-xs font-medium">
+            {initials}
+          </div>
+        )}
+      </div>
+    </Link>
   );
 }
 
@@ -108,8 +176,9 @@ export function Sidebar() {
           })}
         </nav>
 
-        {/* Footer: Tema + Settings (sin padding, solo gap limpio) */}
+        {/* Footer: Perfil + Tema + Configuración */}
         <div className="border-t border-[var(--sidebar-border)] flex flex-col gap-1">
+          <ProfileAvatarButton isExpanded={isExpanded} />
           <ThemeToggleButton isExpanded={isExpanded} />
           <Link href="/settings">
             <SidebarButton
@@ -117,7 +186,7 @@ export function Sidebar() {
               isExpanded={isExpanded}
               isActive={location === "/settings"}
             >
-              Settings
+              Configuración
             </SidebarButton>
           </Link>
         </div>
