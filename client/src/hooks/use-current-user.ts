@@ -80,12 +80,6 @@ export function useCurrentUser() {
       
       if (error) {
         console.error('Supabase RPC Error:', error)
-        console.error('Error details:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        })
         throw error
       }
       
