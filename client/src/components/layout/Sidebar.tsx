@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { useNavigationStore } from "@/stores/navigationStore";
+import { useThemeStore } from "@/stores/themeStore";
+import { useCurrentUser } from "@/hooks/use-current-user";
 import { SidebarButton } from "@/components/ui/sidebar-button";
 import {
   Home,
@@ -12,6 +14,9 @@ import {
   CreditCard,
   BarChart3,
   Settings,
+  Moon,
+  Sun,
+  X,
 } from "lucide-react";
 import {
   SIDEBAR_WIDTH,
@@ -29,6 +34,29 @@ const iconMap = {
   "credit-card": CreditCard,
   "bar-chart-3": BarChart3,
 };
+
+// Componente para el botón de cambio de tema
+function ThemeToggleButton({ isExpanded }: { isExpanded: boolean }) {
+  const { isDark, toggleTheme } = useThemeStore();
+  const { data } = useCurrentUser();
+
+  const handleToggleTheme = async () => {
+    const userId = data?.user?.id;
+    const preferencesId = data?.preferences?.id;
+    
+    await toggleTheme(userId, preferencesId);
+  };
+
+  return (
+    <SidebarButton
+      icon={isDark ? Sun : Moon}
+      isExpanded={isExpanded}
+      onClick={handleToggleTheme}
+    >
+      Tema
+    </SidebarButton>
+  );
+}
 
 export function Sidebar() {
   const [location] = useLocation();
@@ -79,8 +107,9 @@ export function Sidebar() {
           })}
         </nav>
 
-        {/* Footer: Settings */}
-        <div className="border-t border-slate-200 dark:border-slate-700">
+        {/* Footer: Theme & Settings */}
+        <div className="border-t border-slate-200 dark:border-slate-700 space-y-2 p-2">
+          <ThemeToggleButton isExpanded={isExpanded} />
           <Link href="/settings">
             <SidebarButton
               icon={Settings}
