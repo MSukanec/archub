@@ -55,8 +55,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log("Updating profile for user:", user_id);
 
-      // Update user_data table directly
-      if (first_name !== undefined || last_name !== undefined || birthdate !== undefined || country !== undefined) {
+      // Update user_data table directly - only birthdate and country exist
+      if (birthdate !== undefined || country !== undefined) {
         // Check if user_data record exists
         const { data: existingData } = await supabase
           .from('user_data')
@@ -65,8 +65,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .single();
 
         const updateData: any = {};
-        if (first_name !== undefined) updateData.first_name = first_name;
-        if (last_name !== undefined) updateData.last_name = last_name;
         if (birthdate !== undefined) updateData.birthdate = birthdate;
         if (country !== undefined) updateData.country = country;
 
@@ -138,13 +136,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Update auth.users metadata if needed
-      if (full_name !== undefined || avatar_url !== undefined) {
+      // Update auth.users metadata for all user fields
+      if (full_name !== undefined || avatar_url !== undefined || first_name !== undefined || last_name !== undefined) {
+        const metadata: any = {};
+        if (full_name !== undefined) metadata.full_name = full_name;
+        if (avatar_url !== undefined) metadata.avatar_url = avatar_url;
+        if (first_name !== undefined) metadata.first_name = first_name;
+        if (last_name !== undefined) metadata.last_name = last_name;
+
         const { error } = await supabase.auth.admin.updateUserById(user_id, {
-          user_metadata: {
-            full_name: full_name,
-            avatar_url: avatar_url
-          }
+          user_metadata: metadata
         });
 
         if (error) {
