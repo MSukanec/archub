@@ -1,0 +1,113 @@
+Necesito que reconstruyas el sistema de diseño visual del proyecto usando un set completo de variables CSS (`:root` y `.dark`) que representen claramente cada área de la interfaz.
+
+Organizá las variables en grupos semánticos, separando estados (`hover`, `disabled`, `focus`) y tipos de componentes (layout, sidebar, cards, buttons, inputs, text, etc.).
+
+---
+
+✅ 1. En `index.css`, escribí este esquema dentro de `:root` y duplicalo con valores oscuros dentro de `.dark`.
+
+```css
+:root {
+  /* Layout */
+  --layout-bg: hsl(...);
+  --layout-text: hsl(...);
+  --layout-border: hsl(...);
+
+  /* Sidebar */
+  --sidebar-bg: hsl(...);
+  --sidebar-text: hsl(...);
+  --sidebar-border: hsl(...);
+
+  /* Cards */
+  --card-bg: hsl(...);
+  --card-text: hsl(...);
+  --card-border: hsl(...);
+  --card-hover-bg: hsl(...);
+
+  /* Buttons - Primary */
+  --button-primary-bg: hsl(...);
+  --button-primary-text: hsl(...);
+  --button-primary-border: transparent;
+  --button-primary-hover-bg: hsl(...);
+  --button-primary-hover-text: hsl(...);
+  --button-primary-hover-border: transparent;
+  --button-primary-disabled-bg: hsl(...);
+  --button-primary-disabled-text: hsl(...);
+
+  /* Buttons - Secondary */
+  --button-secondary-bg: hsl(...);
+  --button-secondary-text: hsl(...);
+  --button-secondary-border: hsl(...);
+  --button-secondary-hover-bg: hsl(...);
+  --button-secondary-hover-text: hsl(...);
+  --button-secondary-hover-border: hsl(...);
+
+  /* Inputs */
+  --input-bg: hsl(...);
+  --input-text: hsl(...);
+  --input-border: hsl(...);
+  --input-placeholder: hsl(...);
+  --input-focus-ring: hsl(...);
+
+  /* Accent / State */
+  --accent: hsl(...);
+  --accent-text: hsl(...);
+  --destructive: hsl(...);
+  --destructive-text: hsl(...);
+
+  /* Charts (si se usan) */
+  --chart-1: hsl(...);
+  --chart-2: hsl(...);
+  --chart-3: hsl(...);
+
+  /* Text */
+  --text-default: hsl(...);
+  --text-muted: hsl(...);
+  --text-subtle: hsl(...);
+  --text-inverted: hsl(...);
+
+  /* Borders and Rings */
+  --border-default: hsl(...);
+  --border-strong: hsl(...);
+  --ring-default: hsl(...);
+
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+}
+✅ 2. En todos los componentes (especialmente Button.tsx, Card.tsx, Input.tsx):
+
+Usá las variables con bg-[var(--...)], text-[var(--...)], border-[var(--...)], etc.
+
+Eliminá cualquier clase visual de Tailwind como bg-white, text-gray-900, hover:bg-blue-600, etc.
+
+Todos los colores deben venir de variables CSS
+
+El sistema debe funcionar tanto en modo claro como oscuro (.dark)
+
+✅ 3. Aplicá estos tokens en los archivos:
+
+button.tsx → primarios, secundarios, hover, disabled
+
+card.tsx → fondo, borde, hover opcional
+
+input.tsx → fondo, texto, borde, focus ring
+
+layout, sidebar, section wrappers → fondo, borde, texto, paddings
+
+Otros si aplica (modales, tooltips, badges, etc.)
+
+🎯 Objetivo final:
+
+Sistema de diseño completamente controlado por variables
+
+División clara por componente y estado
+
+Fácil de mantener y escalar
+
+Consistencia visual total entre claro y oscuro
+
+yaml
+Copiar
+Editar

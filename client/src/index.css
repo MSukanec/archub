@@ -3,84 +3,190 @@
 @tailwind utilities;
 
 :root {
-  --background: hsl(0, 0%, 100%);
-  --foreground: hsl(20, 14.3%, 4.1%);
-  --muted: hsl(60, 4.8%, 95.9%);
-  --muted-foreground: hsl(25, 5.3%, 44.7%);
-  --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(20, 14.3%, 4.1%);
-  --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(20, 14.3%, 4.1%);
-  --border: hsl(20, 5.9%, 90%);
-  --input: hsl(20, 5.9%, 90%);
-  --primary: hsl(207, 90%, 54%);
-  --primary-foreground: hsl(211, 100%, 99%);
-  --secondary: hsl(60, 4.8%, 95.9%);
-  --secondary-foreground: hsl(24, 9.8%, 10%);
-  --accent: hsl(60, 4.8%, 95.9%);
-  --accent-foreground: hsl(24, 9.8%, 10%);
-  --destructive: hsl(0, 84.2%, 60.2%);
-  --destructive-foreground: hsl(60, 9.1%, 97.8%);
-  --ring: hsl(20, 14.3%, 4.1%);
-  --radius: 0.5rem;
-  --sidebar-background: hsl(0, 0%, 100%);
-  --sidebar-foreground: hsl(20, 14.3%, 4.1%);
-  --sidebar-primary: hsl(207, 90%, 54%);
-  --sidebar-primary-foreground: hsl(211, 100%, 99%);
-  --sidebar-accent: hsl(60, 4.8%, 95.9%);
-  --sidebar-accent-foreground: hsl(24, 9.8%, 10%);
-  --sidebar-border: hsl(20, 5.9%, 90%);
-  --sidebar-ring: hsl(20, 14.3%, 4.1%);
-  --chart-1: hsl(207, 90%, 54%);
+  /* Layout */
+  --layout-bg: hsl(240, 10%, 98%);
+  --layout-text: hsl(240, 10%, 4%);
+  --layout-border: hsl(240, 6%, 90%);
+
+  /* Sidebar */
+  --sidebar-bg: hsl(0, 0%, 100%);
+  --sidebar-text: hsl(240, 10%, 4%);
+  --sidebar-border: hsl(240, 6%, 90%);
+  --sidebar-hover-bg: hsl(240, 5%, 96%);
+  --sidebar-active-bg: hsl(210, 40%, 95%);
+  --sidebar-active-text: hsl(210, 40%, 35%);
+
+  /* Cards */
+  --card-bg: hsl(0, 0%, 100%);
+  --card-text: hsl(240, 10%, 4%);
+  --card-border: hsl(240, 6%, 90%);
+  --card-hover-bg: hsl(240, 3%, 98%);
+
+  /* Buttons - Primary */
+  --button-primary-bg: hsl(210, 40%, 50%);
+  --button-primary-text: hsl(0, 0%, 100%);
+  --button-primary-border: transparent;
+  --button-primary-hover-bg: hsl(210, 40%, 45%);
+  --button-primary-hover-text: hsl(0, 0%, 100%);
+  --button-primary-hover-border: transparent;
+  --button-primary-disabled-bg: hsl(240, 5%, 85%);
+  --button-primary-disabled-text: hsl(240, 5%, 65%);
+
+  /* Buttons - Secondary */
+  --button-secondary-bg: hsl(0, 0%, 100%);
+  --button-secondary-text: hsl(240, 10%, 4%);
+  --button-secondary-border: hsl(240, 6%, 90%);
+  --button-secondary-hover-bg: hsl(240, 5%, 96%);
+  --button-secondary-hover-text: hsl(240, 10%, 4%);
+  --button-secondary-hover-border: hsl(240, 8%, 80%);
+
+  /* Buttons - Ghost */
+  --button-ghost-bg: transparent;
+  --button-ghost-text: hsl(240, 10%, 4%);
+  --button-ghost-border: transparent;
+  --button-ghost-hover-bg: hsl(240, 5%, 96%);
+  --button-ghost-hover-text: hsl(240, 10%, 4%);
+  --button-ghost-hover-border: transparent;
+
+  /* Inputs */
+  --input-bg: hsl(0, 0%, 100%);
+  --input-text: hsl(240, 10%, 4%);
+  --input-border: hsl(240, 6%, 90%);
+  --input-placeholder: hsl(240, 5%, 65%);
+  --input-focus-ring: hsl(210, 40%, 50%);
+  --input-focus-border: hsl(210, 40%, 50%);
+
+  /* Accent / State */
+  --accent: hsl(210, 40%, 50%);
+  --accent-text: hsl(0, 0%, 100%);
+  --destructive: hsl(0, 84%, 60%);
+  --destructive-text: hsl(0, 0%, 100%);
+  --success: hsl(120, 40%, 50%);
+  --success-text: hsl(0, 0%, 100%);
+  --warning: hsl(45, 90%, 50%);
+  --warning-text: hsl(240, 10%, 4%);
+
+  /* Charts */
+  --chart-1: hsl(210, 40%, 50%);
   --chart-2: hsl(173, 58%, 39%);
   --chart-3: hsl(197, 37%, 24%);
   --chart-4: hsl(43, 74%, 66%);
   --chart-5: hsl(27, 87%, 67%);
+
+  /* Text */
+  --text-default: hsl(240, 10%, 4%);
+  --text-muted: hsl(240, 5%, 45%);
+  --text-subtle: hsl(240, 5%, 65%);
+  --text-inverted: hsl(0, 0%, 100%);
+
+  /* Borders and Rings */
+  --border-default: hsl(240, 6%, 90%);
+  --border-strong: hsl(240, 8%, 80%);
+  --ring-default: hsl(210, 40%, 50%);
+
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
 }
 
 .dark {
-  --background: hsl(0, 0%, 50%);
-  --foreground: hsl(0, 0%, 98%);
-  --muted: hsl(0, 0%, 15.9%);
-  --muted-foreground: hsl(240, 5%, 64.9%);
-  --popover: hsl(0, 10%, 3.9%);
-  --popover-foreground: hsl(0, 0%, 98%);
-  --card: hsl(0, 0%, 15%);
-  --card-foreground: hsl(0, 0%, 98%);
-  --border: hsl(240, 3.7%, 15.9%);
-  --input: hsl(240, 3.7%, 15.9%);
-  --primary: hsl(207, 90%, 54%);
-  --primary-foreground: hsl(211, 100%, 99%);
-  --secondary: hsl(0, 0%, 15.9%);
-  --secondary-foreground: hsl(0, 0%, 98%);
-  --accent: hsl(240, 3.7%, 15.9%);
-  --accent-foreground: hsl(0, 0%, 98%);
-  --destructive: hsl(0, 62.8%, 30.6%);
-  --destructive-foreground: hsl(0, 0%, 98%);
-  --ring: hsl(240, 4.9%, 83.9%);
-  --radius: 0.5rem;
-  --sidebar-background: hsl(0, 0%, 15%);
-  --sidebar-foreground: hsl(0, 0%, 98%);
-  --sidebar-primary: hsl(207, 90%, 54%);
-  --sidebar-primary-foreground: hsl(211, 100%, 99%);
-  --sidebar-accent: hsl(240, 3.7%, 15.9%);
-  --sidebar-accent-foreground: hsl(0, 0%, 98%);
-  --sidebar-border: hsl(240, 3.7%, 15.9%);
-  --sidebar-ring: hsl(240, 4.9%, 83.9%);
-  --chart-1: hsl(207, 90%, 54%);
-  --chart-2: hsl(173, 58%, 39%);
-  --chart-3: hsl(197, 37%, 24%);
-  --chart-4: hsl(43, 74%, 66%);
-  --chart-5: hsl(27, 87%, 67%);
+  /* Layout */
+  --layout-bg: hsl(240, 10%, 4%);
+  --layout-text: hsl(0, 0%, 98%);
+  --layout-border: hsl(240, 8%, 15%);
+
+  /* Sidebar */
+  --sidebar-bg: hsl(240, 10%, 8%);
+  --sidebar-text: hsl(0, 0%, 98%);
+  --sidebar-border: hsl(240, 8%, 15%);
+  --sidebar-hover-bg: hsl(240, 8%, 12%);
+  --sidebar-active-bg: hsl(210, 40%, 15%);
+  --sidebar-active-text: hsl(210, 40%, 70%);
+
+  /* Cards */
+  --card-bg: hsl(240, 10%, 8%);
+  --card-text: hsl(0, 0%, 98%);
+  --card-border: hsl(240, 8%, 15%);
+  --card-hover-bg: hsl(240, 8%, 12%);
+
+  /* Buttons - Primary */
+  --button-primary-bg: hsl(210, 40%, 55%);
+  --button-primary-text: hsl(0, 0%, 100%);
+  --button-primary-border: transparent;
+  --button-primary-hover-bg: hsl(210, 40%, 60%);
+  --button-primary-hover-text: hsl(0, 0%, 100%);
+  --button-primary-hover-border: transparent;
+  --button-primary-disabled-bg: hsl(240, 5%, 25%);
+  --button-primary-disabled-text: hsl(240, 5%, 50%);
+
+  /* Buttons - Secondary */
+  --button-secondary-bg: hsl(240, 10%, 8%);
+  --button-secondary-text: hsl(0, 0%, 98%);
+  --button-secondary-border: hsl(240, 8%, 15%);
+  --button-secondary-hover-bg: hsl(240, 8%, 12%);
+  --button-secondary-hover-text: hsl(0, 0%, 98%);
+  --button-secondary-hover-border: hsl(240, 8%, 25%);
+
+  /* Buttons - Ghost */
+  --button-ghost-bg: transparent;
+  --button-ghost-text: hsl(0, 0%, 98%);
+  --button-ghost-border: transparent;
+  --button-ghost-hover-bg: hsl(240, 8%, 12%);
+  --button-ghost-hover-text: hsl(0, 0%, 98%);
+  --button-ghost-hover-border: transparent;
+
+  /* Inputs */
+  --input-bg: hsl(240, 10%, 8%);
+  --input-text: hsl(0, 0%, 98%);
+  --input-border: hsl(240, 8%, 15%);
+  --input-placeholder: hsl(240, 5%, 50%);
+  --input-focus-ring: hsl(210, 40%, 55%);
+  --input-focus-border: hsl(210, 40%, 55%);
+
+  /* Accent / State */
+  --accent: hsl(210, 40%, 55%);
+  --accent-text: hsl(0, 0%, 100%);
+  --destructive: hsl(0, 84%, 65%);
+  --destructive-text: hsl(0, 0%, 100%);
+  --success: hsl(120, 40%, 55%);
+  --success-text: hsl(0, 0%, 100%);
+  --warning: hsl(45, 90%, 55%);
+  --warning-text: hsl(240, 10%, 4%);
+
+  /* Charts */
+  --chart-1: hsl(210, 40%, 55%);
+  --chart-2: hsl(173, 58%, 45%);
+  --chart-3: hsl(197, 37%, 35%);
+  --chart-4: hsl(43, 74%, 70%);
+  --chart-5: hsl(27, 87%, 70%);
+
+  /* Text */
+  --text-default: hsl(0, 0%, 98%);
+  --text-muted: hsl(240, 5%, 65%);
+  --text-subtle: hsl(240, 5%, 45%);
+  --text-inverted: hsl(240, 10%, 4%);
+
+  /* Borders and Rings */
+  --border-default: hsl(240, 8%, 15%);
+  --border-strong: hsl(240, 8%, 25%);
+  --ring-default: hsl(210, 40%, 55%);
+
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
 }
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-[var(--border-default)];
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply font-sans antialiased;
+    background-color: var(--layout-bg);
+    color: var(--layout-text);
     font-family: 'Inter', system-ui, sans-serif;
   }
 }
@@ -89,7 +195,7 @@
   .scrollbar-thin {
     scrollbar-width: thin;
   }
-  
+
   .scrollbar-thumb-rounded {
     scrollbar-color: hsl(var(--muted-foreground)) transparent;
   }
