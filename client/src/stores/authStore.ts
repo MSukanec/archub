@@ -20,6 +20,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   initialized: false,
 
   signIn: async (email: string, password: string) => {
+    if (!supabase) throw new Error('Supabase not configured')
+    
     set({ loading: true })
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -41,6 +43,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   signInWithGoogle: async () => {
+    if (!supabase) throw new Error('Supabase not configured')
+    
     set({ loading: true })
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -58,6 +62,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   signOut: async () => {
+    if (!supabase) throw new Error('Supabase not configured')
+    
     set({ loading: true })
     try {
       const { error } = await supabase.auth.signOut()
@@ -76,12 +82,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   initialize: async () => {
     try {
+      if (!supabase) {
+        console.error('Supabase not configured properly')
+        set({ initialized: true, loading: false })
+        return
+      }
+
       const { data: { session } } = await supabase.auth.getSession()
       
       set({ 
         user: session?.user ?? null,
         session,
-        initialized: true 
+        initialized: true,
+        loading: false
       })
 
       // Listen for auth changes
@@ -94,7 +107,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       })
     } catch (error) {
       console.error('Error initializing auth:', error)
-      set({ initialized: true })
+      set({ initialized: true, loading: false })
     }
   },
 }))
