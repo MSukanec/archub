@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link, useLocation } from 'wouter'
 import { cn } from '@/lib/utils'
 import { useNavigationStore } from '@/stores/navigationStore'
@@ -36,6 +37,7 @@ const iconMap = {
 export function Sidebar() {
   const [location] = useLocation()
   const { navigationItems, sidebarOpen, setSidebarOpen } = useNavigationStore()
+  const [isExpanded, setIsExpanded] = useState(false)
 
   return (
     <>
@@ -50,7 +52,7 @@ export function Sidebar() {
             style={{ width: `${SIDEBAR_EXPANDED_WIDTH}px` }}
             onClick={(e) => e.stopPropagation()}
           >
-            <SidebarContent location={location} onNavigate={() => setSidebarOpen(false)} />
+            <SidebarContent location={location} isExpanded={true} onNavigate={() => setSidebarOpen(false)} />
           </div>
         </div>
       )}
@@ -58,19 +60,15 @@ export function Sidebar() {
       {/* Desktop Sidebar */}
       <div className="hidden lg:flex lg:flex-shrink-0">
         <div 
-          className="flex flex-col bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 transition-all group"
+          className="flex flex-col bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 transition-all"
           style={{
-            width: `${SIDEBAR_WIDTH}px`,
+            width: isExpanded ? `${SIDEBAR_EXPANDED_WIDTH}px` : `${SIDEBAR_WIDTH}px`,
             transitionDuration: `${TRANSITION_DURATION}ms`,
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.width = `${SIDEBAR_EXPANDED_WIDTH}px`
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.width = `${SIDEBAR_WIDTH}px`
-          }}
+          onMouseEnter={() => setIsExpanded(true)}
+          onMouseLeave={() => setIsExpanded(false)}
         >
-          <SidebarContent location={location} />
+          <SidebarContent location={location} isExpanded={isExpanded} />
         </div>
       </div>
     </>
@@ -79,10 +77,11 @@ export function Sidebar() {
 
 interface SidebarContentProps {
   location: string
+  isExpanded: boolean
   onNavigate?: () => void
 }
 
-function SidebarContent({ location, onNavigate }: SidebarContentProps) {
+function SidebarContent({ location, isExpanded, onNavigate }: SidebarContentProps) {
   const { navigationItems } = useNavigationStore()
 
   return (
@@ -95,26 +94,29 @@ function SidebarContent({ location, onNavigate }: SidebarContentProps) {
           padding: `${PADDING_MD}px`
         }}
       >
-        <div className="flex items-center space-x-3 min-w-0">
-          <SidebarButton 
-            icon={Building}
-            className="bg-primary text-primary-foreground hover:bg-primary/90"
-          />
-          <span 
-            className="text-xl font-bold text-slate-900 dark:text-white opacity-0 group-hover:opacity-100 whitespace-nowrap overflow-hidden"
-            style={{ transitionDuration: `${TRANSITION_DURATION}ms` }}
-          >
-            Archub
-          </span>
-        </div>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="lg:hidden ml-auto"
-          onClick={onNavigate}
+        <SidebarButton 
+          icon={Building}
+          isExpanded={isExpanded}
+          className="bg-primary text-primary-foreground hover:bg-primary/90"
         >
-          <X style={{ width: `${ICON_SIZE}px`, height: `${ICON_SIZE}px` }} />
-        </Button>
+          Archub
+        </SidebarButton>
+        
+        {/* Mobile close button */}
+        {onNavigate && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="lg:hidden ml-auto"
+            onClick={onNavigate}
+            style={{
+              width: `${BUTTON_SIZE}px`,
+              height: `${BUTTON_SIZE}px`,
+            }}
+          >
+            <X style={{ width: `${ICON_SIZE}px`, height: `${ICON_SIZE}px` }} />
+          </Button>
+        )}
       </div>
 
       {/* Navigation */}
@@ -127,20 +129,15 @@ function SidebarContent({ location, onNavigate }: SidebarContentProps) {
           const isActive = location === item.href
 
           return (
-            <div key={item.id} className="group flex items-center">
-              <Link href={item.href} onClick={onNavigate}>
-                <SidebarButton 
-                  icon={Icon}
-                  isActive={isActive}
-                />
-              </Link>
-              <span 
-                className="ml-3 text-sm font-medium opacity-0 group-hover:opacity-100 whitespace-nowrap overflow-hidden text-slate-700 dark:text-slate-300"
-                style={{ transitionDuration: `${TRANSITION_DURATION}ms` }}
+            <Link key={item.id} href={item.href} onClick={onNavigate}>
+              <SidebarButton 
+                icon={Icon}
+                isActive={isActive}
+                isExpanded={isExpanded}
               >
                 {item.name}
-              </span>
-            </div>
+              </SidebarButton>
+            </Link>
           )
         })}
       </nav>
@@ -150,17 +147,14 @@ function SidebarContent({ location, onNavigate }: SidebarContentProps) {
         className="border-t border-slate-200 dark:border-slate-700"
         style={{ padding: `${PADDING_MD}px` }}
       >
-        <div className="group flex items-center">
-          <Link href="/settings">
-            <SidebarButton icon={Settings} />
-          </Link>
-          <span 
-            className="ml-3 text-sm font-medium opacity-0 group-hover:opacity-100 whitespace-nowrap overflow-hidden text-slate-700 dark:text-slate-300"
-            style={{ transitionDuration: `${TRANSITION_DURATION}ms` }}
+        <Link href="/settings">
+          <SidebarButton 
+            icon={Settings} 
+            isExpanded={isExpanded}
           >
             Settings
-          </span>
-        </div>
+          </SidebarButton>
+        </Link>
       </div>
     </>
   )

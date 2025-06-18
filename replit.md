@@ -155,6 +155,15 @@ Changelog:
   • Removed Header.tsx completely as it's no longer used in layout
   • All sidebar elements now use consistent padding and transition timing
   • Visual structure is now scalable and maintainable from single constants file
+
+- June 18, 2025. Enhanced SidebarButton with full clickable areas and proper text handling
+  • Refactored SidebarButton to accept children and isExpanded props
+  • Entire button area (icon + text) now clickeable as single component
+  • Text properly hidden when collapsed, shown when expanded
+  • Added subtle hover effects (shadow and scale) to buttons
+  • Logo, navigation items, and settings all use same SidebarButton component
+  • Eliminated group-hover patterns in favor of internal button state management
+  • All buttons maintain exact BUTTON_SIZE dimensions with consistent behavior
 ```
 
 ## User Preferences
