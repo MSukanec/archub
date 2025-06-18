@@ -211,6 +211,16 @@ Changelog:
   • All visual elements use text-sm/text-base sizing with 16-18px icons
   • Filters dropdown automatically hides when filters array is empty
   • Component is fully reusable across all application pages
+
+- June 18, 2025. Complete page layout architecture restructuring with three-component system
+  • Created CustomPageBody.tsx with configurable padding (none, sm, md, lg) and debug border
+  • Redesigned CustomPageHeader.tsx to single 38px row with left title and right controls
+  • Controls ordered: filters, clear filters, sort button, secondary buttons, primary actions
+  • Modified CustomPageLayout.tsx to use p-4 wrapper padding and CustomPageBody integration
+  • Applied new architecture to Dashboard.tsx and Organizations.tsx with padding="none"
+  • Eliminated hardcoded padding from page content - now centrally controlled via CustomPageBody
+  • Debug borders: red (layout container), orange (header), blue (body) for visual verification
+  • System provides consistent, scalable layout structure across all application pages
 ```
 
 ## User Preferences
