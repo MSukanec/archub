@@ -16,7 +16,7 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   session: null,
-  loading: true,
+  loading: false,
   initialized: false,
 
   signIn: async (email, password) => {
@@ -67,73 +67,41 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   initialize: async () => {
+    console.log('Initializing auth...');
+    
     if (!supabase) {
       console.log('Supabase not available, marking as initialized');
       set({ user: null, session: null, loading: false, initialized: true });
       return;
     }
 
-    console.log('Initializing auth...');
-    
     try {
-      // Configurar listener primero
-      supabase.auth.onAuthStateChange((event, session) => {
-        console.log('Auth state changed:', event);
-        
-        switch (event) {
-          case 'SIGNED_IN':
-            set({
-              session,
-              user: session?.user || null,
-              loading: false,
-              initialized: true
-            });
-            break;
-          case 'SIGNED_OUT':
-            set({
-              session: null,
-              user: null,
-              loading: false,
-              initialized: true
-            });
-            break;
-          case 'TOKEN_REFRESHED':
-            if (session) {
-              set({
-                session,
-                user: session.user,
-                loading: false,
-                initialized: true
-              });
-            }
-            break;
-          case 'INITIAL_SESSION':
-            set({
-              session: session,
-              user: session?.user || null,
-              loading: false,
-              initialized: true
-            });
-            break;
-        }
-      });
-
-      // Obtener sesión actual
+      // Obtener sesión actual inmediatamente
       const { data: { session }, error } = await supabase.auth.getSession();
       
       if (error) {
         console.error('Session error:', error);
-        set({ user: null, session: null, loading: false, initialized: true });
-        return;
       }
 
-      // Establecer sesión inicial
+      // Establecer estado inicial basado en la sesión
       console.log('Got session:', session ? 'user logged in' : 'no session');
       set({
         session: session,
         user: session?.user || null,
         loading: false,
         initialized: true
+      });
+
+      // Configurar listener para cambios futuros
+      supabase.auth.onAuthStateChange((event, session) => {
+        console.log('Auth state changed:', event);
+        
+        set({
+          session: session,
+          user: session?.user || null,
+          loading: false,
+          initialized: true
+        });
       });
 
     } catch (error) {
