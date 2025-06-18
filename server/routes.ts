@@ -65,8 +65,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .single();
 
         const updateData: any = {};
-        if (birthdate !== undefined) updateData.birthdate = birthdate;
-        if (country !== undefined) updateData.country = country;
+        if (birthdate !== undefined && birthdate !== "") updateData.birthdate = birthdate;
+        if (country !== undefined && country !== "") updateData.country = country;
 
         if (existingData) {
           // Update existing record

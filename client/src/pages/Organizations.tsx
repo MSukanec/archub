@@ -40,7 +40,7 @@ export default function Organizations() {
         created_at: data.organization.created_at,
         is_active: data.organization.is_active,
         is_system: data.organization.is_system,
-        plan_id: data.organization.plan_id
+        plan: data.plan
       }
     ]
   }, [data])
@@ -269,10 +269,10 @@ export default function Organizations() {
                       </Badge>
                     )}
 
-                    {data?.plan && (
+                    {org.plan && (
                       <Badge variant="secondary" className="text-xs">
                         <BadgeCheck className="h-3 w-3 mr-1" />
-                        {data.plan.name}
+                        {org.plan.name}
                       </Badge>
                     )}
                   </div>

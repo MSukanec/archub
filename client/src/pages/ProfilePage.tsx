@@ -144,10 +144,34 @@ export default function ProfilePage() {
       return
     }
 
-    const profileData = {
-      user_id: data.user.id,
-      ...formData
+    // Clean data - only send non-empty values
+    const profileData: any = {
+      user_id: data.user.id
     }
+
+    // Only include fields that have actual values
+    if (formData.first_name && formData.first_name.trim()) {
+      profileData.first_name = formData.first_name.trim()
+    }
+    if (formData.last_name && formData.last_name.trim()) {
+      profileData.last_name = formData.last_name.trim()
+    }
+    if (formData.birthdate && formData.birthdate.trim()) {
+      profileData.birthdate = formData.birthdate.trim()
+    }
+    if (formData.country && formData.country.trim()) {
+      profileData.country = formData.country.trim()
+    }
+    if (formData.avatar_url) {
+      profileData.avatar_url = formData.avatar_url
+    }
+    if (formData.theme) {
+      profileData.theme = formData.theme
+    }
+    if (formData.sidebar_docked !== undefined) {
+      profileData.sidebar_docked = formData.sidebar_docked
+    }
+
     updateProfileMutation.mutate(profileData)
   }
 
