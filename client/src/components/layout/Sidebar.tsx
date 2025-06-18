@@ -71,7 +71,7 @@ export function Sidebar() {
       onMouseLeave={() => setIsExpanded(false)}
     >
       <aside
-        className="flex flex-col bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 transition-all"
+        className="flex flex-col bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] transition-all"
         style={{
           width: isExpanded ? SIDEBAR_EXPANDED_WIDTH : SIDEBAR_WIDTH,
           transitionDuration: `${TRANSITION_DURATION}ms`,
@@ -109,7 +109,7 @@ export function Sidebar() {
         </nav>
 
         {/* Footer: Tema + Settings (sin padding, solo gap limpio) */}
-        <div className="border-t border-slate-200 dark:border-slate-700 flex flex-col gap-1">
+        <div className="border-t border-[var(--sidebar-border)] flex flex-col gap-1">
           <ThemeToggleButton isExpanded={isExpanded} />
           <Link href="/settings">
             <SidebarButton

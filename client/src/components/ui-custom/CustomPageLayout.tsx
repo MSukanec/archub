@@ -30,7 +30,7 @@ export function CustomPageLayout({
   children,
 }: CustomPageLayoutProps) {
   return (
-    <div className="flex justify-center bg-slate-50 dark:bg-slate-900">
+    <div className="flex justify-center bg-[var(--layout-bg)]">
       <div 
         className={`p-4 border-2 border-red-500 min-h-screen ${
           wide ? "max-w-none w-full" : "max-w-[1440px] w-full"

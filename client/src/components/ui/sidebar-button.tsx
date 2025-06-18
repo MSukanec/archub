@@ -24,10 +24,10 @@ export function SidebarButton({
       onClick={onClick}
       className={cn(
         "flex items-center w-full h-auto transition-colors px-2",
-        "hover:bg-slate-100 dark:hover:bg-slate-700",
+        "hover:bg-[var(--sidebar-hover-bg)]",
         isActive
-          ? "bg-primary/10 text-primary"
-          : "text-slate-700 dark:text-slate-300",
+          ? "bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-text)]"
+          : "text-[var(--sidebar-text)]",
         className,
       )}
       style={{
