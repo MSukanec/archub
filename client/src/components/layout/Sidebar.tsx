@@ -1,20 +1,22 @@
 import { Link, useLocation } from 'wouter'
-import { Building, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { Button } from '@/components/ui/button'
 import { 
   Home, 
+  Building,
   Folder, 
   CheckSquare, 
   Users, 
   CreditCard, 
   BarChart3,
+  Settings,
   X 
 } from 'lucide-react'
 
 const iconMap = {
   home: Home,
+  building: Building,
   folder: Folder,
   'check-square': CheckSquare,
   users: Users,
@@ -45,7 +47,7 @@ export function Sidebar() {
 
       {/* Desktop Sidebar */}
       <div className="hidden lg:flex lg:flex-shrink-0">
-        <div className="flex flex-col w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700">
+        <div className="flex flex-col w-16 hover:w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 transition-all duration-200 group">
           <SidebarContent location={location} />
         </div>
       </div>
@@ -64,12 +66,12 @@ function SidebarContent({ location, onNavigate }: SidebarContentProps) {
   return (
     <>
       {/* Sidebar Header */}
-      <div className="flex items-center justify-between h-16 px-6 border-b border-slate-200 dark:border-slate-700">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+      <div className="flex items-center justify-between h-16 px-4 border-b border-slate-200 dark:border-slate-700">
+        <div className="flex items-center space-x-3 min-w-0">
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
             <Building className="h-4 w-4 text-primary-foreground" />
           </div>
-          <span className="text-xl font-bold text-slate-900 dark:text-white">Archub</span>
+          <span className="text-xl font-bold text-slate-900 dark:text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap overflow-hidden">Archub</span>
         </div>
         <Button 
           variant="ghost" 
@@ -102,12 +104,12 @@ function SidebarContent({ location, onNavigate }: SidebarContentProps) {
                 )}
               >
                 <Icon className={cn(
-                  "w-5 h-5 mr-3",
+                  "w-5 h-5 flex-shrink-0",
                   isActive 
                     ? "text-primary" 
                     : "text-slate-400 group-hover:text-slate-500"
                 )} />
-                <span>{item.name}</span>
+                <span className="ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap overflow-hidden">{item.name}</span>
               </a>
             </Link>
           )
@@ -118,8 +120,8 @@ function SidebarContent({ location, onNavigate }: SidebarContentProps) {
       <div className="p-4 border-t border-slate-200 dark:border-slate-700">
         <Link href="/settings">
           <a className="group flex items-center px-3 py-2 text-sm font-medium rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
-            <Settings className="w-5 h-5 mr-3 text-slate-400 group-hover:text-slate-500" />
-            <span>Settings</span>
+            <Settings className="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-slate-500" />
+            <span className="ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap overflow-hidden">Settings</span>
           </a>
         </Link>
       </div>

@@ -25,6 +25,7 @@ export const useNavigationStore = create<NavigationState>((set) => ({
   userMenuOpen: false,
   navigationItems: [
     { id: 'dashboard', name: 'Dashboard', icon: 'home', href: '/' },
+    { id: 'organizations', name: 'Organization', icon: 'building', href: '/organizations' },
     { id: 'projects', name: 'Projects', icon: 'folder', href: '/projects' },
     { id: 'tasks', name: 'Tasks', icon: 'check-square', href: '/tasks' },
     { id: 'team', name: 'Team', icon: 'users', href: '/team' },
