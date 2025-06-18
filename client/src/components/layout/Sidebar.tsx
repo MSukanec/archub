@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'wouter'
 import { cn } from '@/lib/utils'
 import { useNavigationStore } from '@/stores/navigationStore'
+import { SidebarButton } from '@/components/ui/sidebar-button'
 import { Button } from '@/components/ui/button'
 import { 
   Home, 
@@ -13,6 +14,14 @@ import {
   Settings,
   X 
 } from 'lucide-react'
+import { 
+  SIDEBAR_WIDTH, 
+  SIDEBAR_EXPANDED_WIDTH, 
+  BUTTON_SIZE,
+  ICON_SIZE,
+  PADDING_MD,
+  TRANSITION_DURATION 
+} from '@/lib/constants/ui'
 
 const iconMap = {
   home: Home,
@@ -37,7 +46,8 @@ export function Sidebar() {
           onClick={() => setSidebarOpen(false)}
         >
           <div 
-            className="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-800 shadow-xl"
+            className="fixed inset-y-0 left-0 z-50 bg-white dark:bg-slate-800 shadow-xl"
+            style={{ width: `${SIDEBAR_EXPANDED_WIDTH}px` }}
             onClick={(e) => e.stopPropagation()}
           >
             <SidebarContent location={location} onNavigate={() => setSidebarOpen(false)} />
@@ -47,7 +57,19 @@ export function Sidebar() {
 
       {/* Desktop Sidebar */}
       <div className="hidden lg:flex lg:flex-shrink-0">
-        <div className="flex flex-col w-16 hover:w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 transition-all duration-200 group">
+        <div 
+          className="flex flex-col bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 transition-all group"
+          style={{
+            width: `${SIDEBAR_WIDTH}px`,
+            transitionDuration: `${TRANSITION_DURATION}ms`,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.width = `${SIDEBAR_EXPANDED_WIDTH}px`
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.width = `${SIDEBAR_WIDTH}px`
+          }}
+        >
           <SidebarContent location={location} />
         </div>
       </div>
@@ -66,62 +88,79 @@ function SidebarContent({ location, onNavigate }: SidebarContentProps) {
   return (
     <>
       {/* Sidebar Header */}
-      <div className="flex items-center justify-between h-16 px-4 border-b border-slate-200 dark:border-slate-700">
+      <div 
+        className="flex items-center justify-center border-b border-slate-200 dark:border-slate-700"
+        style={{ 
+          height: `${BUTTON_SIZE + PADDING_MD * 2}px`,
+          padding: `${PADDING_MD}px`
+        }}
+      >
         <div className="flex items-center space-x-3 min-w-0">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
-            <Building className="h-4 w-4 text-primary-foreground" />
-          </div>
-          <span className="text-xl font-bold text-slate-900 dark:text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap overflow-hidden">Archub</span>
+          <SidebarButton 
+            icon={Building}
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
+          />
+          <span 
+            className="text-xl font-bold text-slate-900 dark:text-white opacity-0 group-hover:opacity-100 whitespace-nowrap overflow-hidden"
+            style={{ transitionDuration: `${TRANSITION_DURATION}ms` }}
+          >
+            Archub
+          </span>
         </div>
         <Button 
           variant="ghost" 
           size="sm" 
-          className="lg:hidden"
+          className="lg:hidden ml-auto"
           onClick={onNavigate}
         >
-          <X className="h-4 w-4" />
+          <X style={{ width: `${ICON_SIZE}px`, height: `${ICON_SIZE}px` }} />
         </Button>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-4 py-6 space-y-1">
+      <nav 
+        className="flex-1 space-y-1"
+        style={{ padding: `${PADDING_MD}px` }}
+      >
         {navigationItems.map((item) => {
           const Icon = iconMap[item.icon as keyof typeof iconMap]
           const isActive = location === item.href
 
           return (
-            <Link 
-              key={item.id} 
-              href={item.href}
-              onClick={onNavigate}
-              className={cn(
-                "group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors",
-                isActive
-                  ? "text-primary bg-primary/10"
-                  : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
-              )}
-            >
-              <Icon className={cn(
-                "w-5 h-5 flex-shrink-0",
-                isActive 
-                  ? "text-primary" 
-                  : "text-slate-400 group-hover:text-slate-500"
-              )} />
-              <span className="ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap overflow-hidden">{item.name}</span>
-            </Link>
+            <div key={item.id} className="group flex items-center">
+              <Link href={item.href} onClick={onNavigate}>
+                <SidebarButton 
+                  icon={Icon}
+                  isActive={isActive}
+                />
+              </Link>
+              <span 
+                className="ml-3 text-sm font-medium opacity-0 group-hover:opacity-100 whitespace-nowrap overflow-hidden text-slate-700 dark:text-slate-300"
+                style={{ transitionDuration: `${TRANSITION_DURATION}ms` }}
+              >
+                {item.name}
+              </span>
+            </div>
           )
         })}
       </nav>
 
       {/* Sidebar Footer */}
-      <div className="p-4 border-t border-slate-200 dark:border-slate-700">
-        <Link 
-          href="/settings"
-          className="group flex items-center px-3 py-2 text-sm font-medium rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-        >
-          <Settings className="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-slate-500" />
-          <span className="ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap overflow-hidden">Settings</span>
-        </Link>
+      <div 
+        className="border-t border-slate-200 dark:border-slate-700"
+        style={{ padding: `${PADDING_MD}px` }}
+      >
+        <div className="group flex items-center">
+          <Link href="/settings">
+            <SidebarButton icon={Settings} />
+          </Link>
+          <span 
+            className="ml-3 text-sm font-medium opacity-0 group-hover:opacity-100 whitespace-nowrap overflow-hidden text-slate-700 dark:text-slate-300"
+            style={{ transitionDuration: `${TRANSITION_DURATION}ms` }}
+          >
+            Settings
+          </span>
+        </div>
       </div>
     </>
   )
