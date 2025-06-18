@@ -12,21 +12,21 @@ import { useThemeStore } from '@/stores/themeStore'
 import { useState, useRef, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { apiRequest, queryClient } from '@/lib/queryClient'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
-
-const countries = [
-  'Argentina', 'Bolivia', 'Brasil', 'Chile', 'Colombia', 'Costa Rica', 'Cuba', 'Ecuador', 
-  'El Salvador', 'España', 'Guatemala', 'Honduras', 'México', 'Nicaragua', 'Panamá', 
-  'Paraguay', 'Perú', 'Puerto Rico', 'República Dominicana', 'Uruguay', 'Venezuela',
-  'Estados Unidos', 'Canadá', 'Reino Unido', 'Francia', 'Alemania', 'Italia', 'Portugal'
-]
+import type { Country } from '@/../../shared/schema'
 
 export default function ProfilePage() {
   const { data, isLoading, error, refetch } = useCurrentUser()
   const { isDark, toggleTheme } = useThemeStore()
   const { toast } = useToast()
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Fetch countries from database
+  const { data: countries, isLoading: countriesLoading } = useQuery({
+    queryKey: ['/api/countries'],
+    queryFn: () => apiRequest('GET', '/api/countries') as Promise<Country[]>
+  })
   
   const [formData, setFormData] = useState({
     full_name: '',
