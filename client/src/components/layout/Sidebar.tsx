@@ -41,11 +41,20 @@ function ThemeToggleButton({ isExpanded }: { isExpanded: boolean }) {
   const { data } = useCurrentUser();
 
   const handleToggleTheme = async () => {
+    console.log('Theme button clicked! Current state:', { isDark });
     const userId = data?.user?.id;
     const preferencesId = data?.preferences?.id;
+    console.log('User data:', { userId, preferencesId });
     
-    await toggleTheme(userId, preferencesId);
+    try {
+      await toggleTheme(userId, preferencesId);
+      console.log('Theme toggle completed');
+    } catch (error) {
+      console.error('Error toggling theme:', error);
+    }
   };
+
+  console.log('ThemeToggleButton render:', { isDark, isExpanded });
 
   return (
     <SidebarButton
@@ -108,8 +117,13 @@ export function Sidebar() {
         </nav>
 
         {/* Footer: Theme & Settings */}
-        <div className="border-t border-slate-200 dark:border-slate-700 space-y-2 p-2">
-          <ThemeToggleButton isExpanded={isExpanded} />
+        <div 
+          className="border-t border-slate-200 dark:border-slate-700"
+          style={{ padding: `8px` }}
+        >
+          <div style={{ marginBottom: `8px` }}>
+            <ThemeToggleButton isExpanded={isExpanded} />
+          </div>
           <Link href="/settings">
             <SidebarButton
               icon={Settings}
