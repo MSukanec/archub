@@ -162,7 +162,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-
+  // Debug endpoint to test archub_get_user function
+  app.get("/api/debug/user", async (req, res) => {
+    try {
+      const { data, error } = await supabase.rpc('archub_get_user');
+      
+      if (error) {
+        console.error("Supabase RPC error:", error);
+        return res.status(500).json({ error: error.message, details: error });
+      }
+      
+      console.log("RPC function result:", data);
+      res.json({ success: true, data });
+    } catch (error) {
+      console.error("Error calling archub_get_user:", error);
+      res.status(500).json({ error: "Failed to call archub_get_user" });
+    }
+  });
 
   const httpServer = createServer(app);
 
