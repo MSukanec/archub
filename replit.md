@@ -138,6 +138,14 @@ Changelog:
   • Proper error handling and loading states
   • Fixed DOM nesting warnings in navigation components
   • Added Organization navigation item with Building icon
+
+- June 18, 2025. Data architecture refactoring with useCurrentUser hook
+  • Created useCurrentUser hook calling archub_get_user RPC function
+  • Centralized all user, organization, role and plan data in single query
+  • Refactored Organizations.tsx to use only useCurrentUser (no direct table queries)
+  • Added plan information display with Crown icon and features
+  • Clean error states and validation for missing data fields
+  • All UI components from design system, no custom divs or styles
 ```
 
 ## User Preferences

@@ -1,91 +1,14 @@
-import { useQuery } from '@tanstack/react-query'
-import { Building, Calendar, Shield, Activity } from 'lucide-react'
+import { Building, Calendar, Shield, Activity, Crown } from 'lucide-react'
 import { PageHeader } from '@/components/ui/page-header'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
-import { supabase } from '@/lib/supabase'
-import { useAuthStore } from '@/stores/authStore'
-
-interface Organization {
-  id: string
-  name: string
-  created_at: string
-  is_active: boolean
-  is_system: boolean
-  description?: string
-}
-
-interface OrganizationMember {
-  id: string
-  user_id: string
-  organization_id: string
-  role: string
-  joined_at: string
-}
+import { useCurrentUser } from '@/hooks/use-current-user'
 
 export default function Organizations() {
-  const { user } = useAuthStore()
+  const { data, isLoading, error } = useCurrentUser()
 
-  const { data: organizations, isLoading: organizationsLoading, error: organizationsError } = useQuery({
-    queryKey: ['organizations', user?.id],
-    queryFn: async () => {
-      if (!supabase || !user) return []
-      
-      // First get user's organization memberships
-      const { data: memberships, error: membershipsError } = await supabase
-        .from('organization_members')
-        .select('organization_id, role_id, joined_at')
-        .eq('user_id', user.id)
-
-      if (membershipsError) throw membershipsError
-
-      if (!memberships || memberships.length === 0) return []
-
-      // Get organization details
-      const orgIds = memberships.map(m => m.organization_id)
-      const { data: orgs, error: orgsError } = await supabase
-        .from('organizations')
-        .select('*')
-        .in('id', orgIds)
-
-      if (orgsError) throw orgsError
-
-      // Combine organization data with membership info
-      return orgs?.map(org => ({
-        ...org,
-        userRole: memberships.find(m => m.organization_id === org.id)?.role_id || 'member',
-        joinedAt: memberships.find(m => m.organization_id === org.id)?.joined_at
-      })) || []
-    },
-    enabled: !!user && !!supabase,
-  })
-
-  const { data: membershipStats, isLoading: statsLoading } = useQuery({
-    queryKey: ['organization-stats', user?.id],
-    queryFn: async () => {
-      if (!supabase || !user || !organizations?.length) return null
-      
-      const orgId = organizations[0]?.id
-      if (!orgId) return null
-
-      const { data: members, error } = await supabase
-        .from('organization_members')
-        .select('id, role_id')
-        .eq('organization_id', orgId)
-
-      if (error) throw error
-
-      return {
-        totalMembers: members?.length || 0,
-        adminCount: members?.filter(m => m.role_id === 'admin').length || 0,
-        memberCount: members?.filter(m => m.role_id === 'member').length || 0
-      }
-    },
-    enabled: !!user && !!supabase && !!organizations?.length,
-  })
-
-  if (organizationsLoading) {
+  if (isLoading) {
     return (
       <div className="flex flex-col">
         <PageHeader
@@ -110,7 +33,7 @@ export default function Organizations() {
     )
   }
 
-  if (organizationsError) {
+  if (error) {
     return (
       <div className="flex flex-col">
         <PageHeader
@@ -125,7 +48,7 @@ export default function Organizations() {
                 <div className="text-center py-8">
                   <p className="text-red-600 dark:text-red-400 mb-2">Error loading organization data</p>
                   <p className="text-sm text-muted-foreground">
-                    {organizationsError.message || 'Unable to connect to database'}
+                    {error.message || 'Unable to connect to database'}
                   </p>
                 </div>
               </CardContent>
@@ -136,9 +59,7 @@ export default function Organizations() {
     )
   }
 
-  const currentOrg = organizations?.[0]
-
-  if (!currentOrg) {
+  if (!data?.organization) {
     return (
       <div className="flex flex-col">
         <PageHeader
@@ -165,6 +86,8 @@ export default function Organizations() {
     )
   }
 
+  const { organization, role, plan } = data
+
   return (
     <div className="flex flex-col">
       <PageHeader
@@ -175,7 +98,6 @@ export default function Organizations() {
       
       <div className="flex-1 p-6 bg-slate-50 dark:bg-slate-900">
         <div className="max-w-4xl mx-auto space-y-6">
-          {/* Organization Overview */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
@@ -187,15 +109,17 @@ export default function Organizations() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label>Organization Name</Label>
-                  <p className="text-lg font-medium">{currentOrg.name}</p>
+                  <p className="text-lg font-medium">{organization.name}</p>
                 </div>
                 
-                <div className="space-y-2">
-                  <Label>Your Role</Label>
-                  <Badge variant={currentOrg.userRole === 'admin' ? 'default' : 'secondary'}>
-                    {currentOrg.userRole}
-                  </Badge>
-                </div>
+                {role && (
+                  <div className="space-y-2">
+                    <Label>Your Role</Label>
+                    <Badge variant="default">
+                      {role.name}
+                    </Badge>
+                  </div>
+                )}
                 
                 <div className="space-y-2">
                   <Label className="flex items-center space-x-2">
@@ -203,7 +127,7 @@ export default function Organizations() {
                     <span>Created</span>
                   </Label>
                   <p className="text-sm text-muted-foreground">
-                    {new Date(currentOrg.created_at).toLocaleDateString('en-US', {
+                    {new Date(organization.created_at).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric'
@@ -216,59 +140,67 @@ export default function Organizations() {
                     <Activity className="h-4 w-4" />
                     <span>Status</span>
                   </Label>
-                  <Badge variant={currentOrg.is_active ? 'default' : 'destructive'}>
-                    {currentOrg.is_active ? 'Active' : 'Inactive'}
+                  <Badge variant={organization.is_active ? 'default' : 'destructive'}>
+                    {organization.is_active ? 'Active' : 'Inactive'}
                   </Badge>
                 </div>
               </div>
-              
-              {currentOrg.description && (
-                <div className="space-y-2">
-                  <Label>Description</Label>
-                  <p className="text-muted-foreground">{currentOrg.description}</p>
-                </div>
-              )}
               
               <div className="flex items-center space-x-4 pt-4 border-t">
                 <div className="flex items-center space-x-2">
                   <Shield className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm text-muted-foreground">
-                    {currentOrg.is_system ? 'System Organization' : 'User Organization'}
+                    {organization.is_system ? 'System Organization' : 'User Organization'}
                   </span>
                 </div>
-                
-                {currentOrg.joinedAt && (
-                  <div className="text-sm text-muted-foreground">
-                    Joined {new Date(currentOrg.joinedAt).toLocaleDateString()}
-                  </div>
-                )}
               </div>
             </CardContent>
           </Card>
 
-          {/* Membership Statistics */}
-          {membershipStats && (
+          {plan && (
             <Card>
               <CardHeader>
-                <CardTitle>Membership Overview</CardTitle>
+                <CardTitle className="flex items-center space-x-2">
+                  <Crown className="h-5 w-5" />
+                  <span>Plan Information</span>
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="text-center p-4 bg-muted rounded-lg">
-                    <div className="text-2xl font-bold text-primary">{membershipStats.totalMembers}</div>
-                    <div className="text-sm text-muted-foreground">Total Members</div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label>Current Plan</Label>
+                    <p className="text-lg font-medium">{plan.name}</p>
                   </div>
                   
-                  <div className="text-center p-4 bg-muted rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">{membershipStats.adminCount}</div>
-                    <div className="text-sm text-muted-foreground">Administrators</div>
-                  </div>
+                  {plan.max_users && (
+                    <div className="space-y-2">
+                      <Label>Max Users</Label>
+                      <p className="text-sm text-muted-foreground">{plan.max_users}</p>
+                    </div>
+                  )}
                   
-                  <div className="text-center p-4 bg-muted rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600">{membershipStats.memberCount}</div>
-                    <div className="text-sm text-muted-foreground">Members</div>
-                  </div>
+                  {plan.price !== undefined && (
+                    <div className="space-y-2">
+                      <Label>Price</Label>
+                      <p className="text-sm text-muted-foreground">
+                        ${plan.price}{plan.price > 0 ? '/month' : ' (Free)'}
+                      </p>
+                    </div>
+                  )}
                 </div>
+
+                {plan.features && plan.features.length > 0 && (
+                  <div className="space-y-2 mt-6">
+                    <Label>Plan Features</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {plan.features.map((feature, index) => (
+                        <Badge key={index} variant="secondary">
+                          {feature}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}

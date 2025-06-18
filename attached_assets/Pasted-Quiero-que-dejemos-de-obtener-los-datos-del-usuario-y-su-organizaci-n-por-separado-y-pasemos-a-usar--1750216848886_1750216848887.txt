@@ -1,0 +1,31 @@
+Quiero que dejemos de obtener los datos del usuario y su organización por separado y pasemos a usar una única función llamada `archub_get_user`, ya creada en Supabase, que devuelve toda la información relevante del usuario logueado. Esta función ya se encarga de acceder a las tablas `users`, `user_preferences`, `organization_members`, `organizations`, `plans`, `roles`, etc., y retorna un objeto con esta estructura:
+
+{
+  user: { ... },
+  preferences: { ... },
+  organization: { ... },
+  role: { ... },
+  plan: { ... }
+}
+
+Pasos a seguir:
+
+1. Crea un nuevo hook llamado `useCurrentUser` dentro de `client/src/hooks/use-current-user.ts`.
+
+Este hook debe usar React Query y llamar a la función RPC `archub_get_user` usando Supabase. Debe manejar loading y error. Ejemplo de uso:
+
+```ts
+const { data, isLoading, error } = useCurrentUser()
+Refactoriza la página Organizations.tsx para que use únicamente useCurrentUser para obtener la organización del usuario. NO debe consultar directamente organization_members, users, ni otras tablas. Todo debe venir de data.organization.
+
+Usa únicamente componentes del sistema de UI (como Card, PageHeader, Label, etc.). No escribas ningún div personalizado ni estilos custom. Queremos poder cambiar la estética desde los componentes globales.
+
+Si no se encuentra una organización (data?.organization === null), mostrá una pantalla limpia con el ícono Building y el mensaje "No organization found" utilizando el componente de UI actual que tenías.
+
+Si la organización existe, mostrá su nombre, fecha de creación, estado activo y tipo de plan (usando data.organization, data.plan, etc.). Todo con diseño limpio, y sin hardcodear textos o íconos.
+
+No muestres ningún campo que no esté presente en data. Usá validaciones para evitar errores si algún campo viene vacío.
+
+Esta lógica reemplaza todas las llamadas anteriores a Supabase dentro de esta página. El único origen de datos debe ser useCurrentUser.
+
+Asegurate de que el hook solo se ejecute si el usuario está autenticado. Podés verificarlo con el store authStore.
