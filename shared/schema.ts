@@ -25,7 +25,6 @@ export const user_data = pgTable("user_data", {
   first_name: text("first_name"),
   last_name: text("last_name"),
   birthdate: text("birthdate"),
-  age: integer("age"),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
 });
@@ -52,7 +51,6 @@ export const insertUserDataSchema = createInsertSchema(user_data).pick({
   first_name: true,
   last_name: true,
   birthdate: true,
-  age: true,
 });
 
 export const insertUserPreferencesSchema = createInsertSchema(user_preferences).pick({

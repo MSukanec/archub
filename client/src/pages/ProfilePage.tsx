@@ -345,7 +345,7 @@ export default function ProfilePage() {
                 />
               </div>
 
-              <div className="space-y-2 md:col-span-2">
+              <div className="space-y-2">
                 <Label htmlFor="country">País</Label>
                 <Select value={formData.country} onValueChange={(value) => handleInputChange('country', value)}>
                   <SelectTrigger>

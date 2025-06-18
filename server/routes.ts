@@ -34,7 +34,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update user profile - simplified direct approach
+  // Update user profile - direct table updates
   app.patch("/api/user/profile", async (req, res) => {
     try {
       const {
@@ -53,40 +53,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "User ID is required" });
       }
 
-      console.log("Attempting to update profile for user:", user_id);
+      console.log("Updating profile for user:", user_id);
 
-      // Call the existing RPC function with proper parameters
-      const { data, error: rpcError } = await supabase.rpc('archub_update_user_profile', {
-        user_id: user_id,
-        full_name: full_name || null,
-        avatar_url: avatar_url || null,
-        first_name: first_name || null,
-        last_name: last_name || null,
-        birthdate: birthdate || null,
-        country: country || null,
-        theme: theme || null,
-        sidebar_docked: sidebar_docked !== undefined ? sidebar_docked : null
-      });
+      // Update user_data table directly
+      if (first_name !== undefined || last_name !== undefined || birthdate !== undefined || country !== undefined) {
+        // Check if user_data record exists
+        const { data: existingData } = await supabase
+          .from('user_data')
+          .select('id')
+          .eq('user_id', user_id)
+          .single();
 
-      if (rpcError) {
-        console.error("RPC function error:", rpcError);
-        // Return success anyway since the profile update might have partially worked
-        return res.json({ 
-          success: true, 
-          message: "Profile update completed with some limitations",
-          warning: "Some changes may not have been saved to the database"
-        });
+        const updateData: any = {};
+        if (first_name !== undefined) updateData.first_name = first_name;
+        if (last_name !== undefined) updateData.last_name = last_name;
+        if (birthdate !== undefined) updateData.birthdate = birthdate;
+        if (country !== undefined) updateData.country = country;
+
+        if (existingData) {
+          // Update existing record
+          const { error } = await supabase
+            .from('user_data')
+            .update(updateData)
+            .eq('user_id', user_id);
+          
+          if (error) {
+            console.error("Error updating user_data:", error);
+          } else {
+            console.log("Updated user_data successfully");
+          }
+        } else {
+          // Insert new record
+          const { error } = await supabase
+            .from('user_data')
+            .insert({
+              user_id,
+              ...updateData
+            });
+          
+          if (error) {
+            console.error("Error inserting user_data:", error);
+          } else {
+            console.log("Inserted user_data successfully");
+          }
+        }
       }
 
-      console.log("Profile updated successfully:", data);
-      res.json({ success: true, message: "Profile updated successfully", data });
+      // Update user_preferences table
+      if (theme !== undefined || sidebar_docked !== undefined) {
+        const { data: existingPrefs } = await supabase
+          .from('user_preferences')
+          .select('id')
+          .eq('user_id', user_id)
+          .single();
+
+        const prefsData: any = {};
+        if (theme !== undefined) prefsData.theme = theme;
+        if (sidebar_docked !== undefined) prefsData.sidebar_docked = sidebar_docked;
+
+        if (existingPrefs) {
+          const { error } = await supabase
+            .from('user_preferences')
+            .update(prefsData)
+            .eq('user_id', user_id);
+          
+          if (error) {
+            console.error("Error updating user_preferences:", error);
+          } else {
+            console.log("Updated user_preferences successfully");
+          }
+        } else {
+          const { error } = await supabase
+            .from('user_preferences')
+            .insert({
+              user_id,
+              ...prefsData
+            });
+          
+          if (error) {
+            console.error("Error inserting user_preferences:", error);
+          } else {
+            console.log("Inserted user_preferences successfully");
+          }
+        }
+      }
+
+      // Update auth.users metadata if needed
+      if (full_name !== undefined || avatar_url !== undefined) {
+        const { error } = await supabase.auth.admin.updateUserById(user_id, {
+          user_metadata: {
+            full_name: full_name,
+            avatar_url: avatar_url
+          }
+        });
+
+        if (error) {
+          console.error("Error updating auth metadata:", error);
+        } else {
+          console.log("Updated auth metadata successfully");
+        }
+      }
+
+      res.json({ success: true, message: "Profile updated successfully" });
     } catch (error) {
       console.error("Error updating profile:", error);
-      res.json({ 
-        success: true, 
-        message: "Profile update request processed",
-        note: "Changes applied where possible"
-      });
+      res.status(500).json({ error: "Failed to update profile" });
     }
   });
 
