@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Layout } from "@/components/layout/Layout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Dashboard from "@/pages/Dashboard";
+import Organizations from "@/pages/Organizations";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/not-found";
 
@@ -13,6 +14,13 @@ function Router() {
   return (
     <Switch>
       <Route path="/login" component={Login} />
+      <Route path="/organizations">
+        <ProtectedRoute>
+          <Layout>
+            <Organizations />
+          </Layout>
+        </ProtectedRoute>
+      </Route>
       <Route path="/">
         <ProtectedRoute>
           <Layout>

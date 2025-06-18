@@ -129,6 +129,15 @@ Changelog:
   • Protected routes with authentication modal
   • Dashboard page with construction management UI
   • Dark/light theme support with persistence
+
+- June 18, 2025. Layout improvements and Organizations page
+  • Removed Header component from Layout - full screen for content
+  • Sidebar now collapses to icons-only (Supabase-style hover expansion)
+  • Created Organizations.tsx page with real Supabase data integration
+  • React Query implementation for organization and membership data
+  • Proper error handling and loading states
+  • Fixed DOM nesting warnings in navigation components
+  • Added Organization navigation item with Building icon
 ```
 
 ## User Preferences
