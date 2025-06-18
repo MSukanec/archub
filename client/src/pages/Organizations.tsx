@@ -19,10 +19,7 @@ export default function Organizations() {
   // Mutation for selecting an organization
   const selectOrganizationMutation = useMutation({
     mutationFn: async (organizationId: string) => {
-      return await apiRequest(`/api/user/select-organization`, {
-        method: 'POST',
-        body: { organization_id: organizationId }
-      })
+      return await apiRequest('POST', `/api/user/select-organization`, { organization_id: organizationId })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/user'] })
@@ -80,14 +77,14 @@ export default function Organizations() {
   }, [organizations, searchValue, activeFilter])
 
   const filters = [
-    { label: "Active Organizations", onClick: () => setActiveFilter('active') },
-    { label: "Archived Organizations", onClick: () => setActiveFilter('archived') },
-    { label: "System Organizations", onClick: () => setActiveFilter('system') },
+    { label: "Organizaciones activas", onClick: () => setActiveFilter('active') },
+    { label: "Organizaciones archivadas", onClick: () => setActiveFilter('archived') },
+    { label: "Organizaciones del sistema", onClick: () => setActiveFilter('system') },
   ]
 
   const handleCreateOrganization = () => {
     // TODO: Implement organization creation
-    console.log("Create new organization")
+    console.log("Crear nueva organización")
   }
 
   const handleSelectOrganization = (organizationId: string) => {
@@ -112,7 +109,7 @@ export default function Organizations() {
   const actions = (
     <Button size="sm" onClick={handleCreateOrganization}>
       <Plus className="w-4 h-4 mr-2" />
-      New Organization
+      Nueva organización
     </Button>
   )
 
