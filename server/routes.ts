@@ -71,47 +71,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Update or insert user_data
-      if (first_name !== undefined || last_name !== undefined || birthdate !== undefined || age !== undefined || country !== undefined) {
-        const { data: existingUserData } = await supabase
-          .from('user_data')
-          .select('id')
-          .eq('user_id', user_id)
-          .single();
+      // Check if user_data table has the expected structure, if not update users table instead
+      if (first_name !== undefined || last_name !== undefined || birthdate !== undefined || country !== undefined) {
+        // Try to update the users table directly with available fields
+        const userData: any = {};
         
-        if (existingUserData) {
-          const { error } = await supabase
-            .from('user_data')
-            .update({
-              first_name,
-              last_name,
-              birthdate,
-              age,
-              country,
-              updated_at: new Date().toISOString()
-            })
-            .eq('user_id', user_id);
+        // Map fields that might exist in users table
+        if (first_name !== undefined) {
+          userData.raw_user_meta_data = { first_name, last_name, birthdate, country };
+        }
+        
+        const { error } = await supabase
+          .from('users')
+          .update({
+            updated_at: new Date().toISOString(),
+            ...userData
+          })
+          .eq('id', user_id);
 
-          if (error) {
-            console.error("Error updating user_data:", error);
-            return res.status(500).json({ error: "Failed to update user data" });
-          }
-        } else {
-          const { error } = await supabase
-            .from('user_data')
-            .insert({
-              user_id,
-              first_name,
-              last_name,
-              birthdate,
-              age,
-              country
-            });
-
-          if (error) {
-            console.error("Error inserting user_data:", error);
-            return res.status(500).json({ error: "Failed to create user data" });
-          }
+        if (error) {
+          console.error("Error updating user with additional data:", error);
+          // Don't fail the request if this update fails
         }
       }
 

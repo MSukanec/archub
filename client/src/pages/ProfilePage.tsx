@@ -39,8 +39,7 @@ export default function ProfilePage() {
     avatar_url: '',
     theme: 'light',
     sidebar_docked: true,
-    country: '',
-    age: ''
+    country: ''
   })
   
   const [avatarPreview, setAvatarPreview] = useState('')
@@ -57,8 +56,7 @@ export default function ProfilePage() {
         avatar_url: data.user?.avatar_url || '',
         theme: data.preferences?.theme || 'light',
         sidebar_docked: data.preferences?.sidebar_docked || true,
-        country: data.user?.country || '',
-        age: data.user?.age?.toString() || ''
+        country: data.user?.country || ''
       })
       setAvatarPreview(data.user?.avatar_url || '')
     }
@@ -148,8 +146,7 @@ export default function ProfilePage() {
 
     const profileData = {
       user_id: data.user.id,
-      ...formData,
-      age: formData.age ? parseInt(formData.age) : null
+      ...formData
     }
     updateProfileMutation.mutate(profileData)
   }
