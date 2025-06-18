@@ -1,4 +1,4 @@
-import { User, Camera, Globe, Calendar, HelpCircle } from 'lucide-react'
+import { User, Camera, Globe, Calendar, Settings } from 'lucide-react'
 import { CustomPageLayout } from '@/components/ui-custom/CustomPageLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -23,15 +23,7 @@ const countries = [
   'Estados Unidos', 'Canadá', 'Reino Unido', 'Francia', 'Alemania', 'Italia', 'Portugal'
 ]
 
-const discoveryOptions = [
-  'Búsqueda en Google',
-  'Redes sociales',
-  'Recomendación de amigo/colega', 
-  'Publicidad online',
-  'Blog o artículo',
-  'Evento o conferencia',
-  'Otro'
-]
+
 
 export default function ProfilePage() {
   const { data, isLoading, error, refetch } = useCurrentUser()
@@ -41,12 +33,14 @@ export default function ProfilePage() {
   
   const [formData, setFormData] = useState({
     full_name: '',
+    first_name: '',
+    last_name: '',
+    birthdate: '',
     avatar_url: '',
     theme: 'light',
     sidebar_docked: true,
     country: '',
-    age: '',
-    discovered_by: ''
+    age: ''
   })
   
   const [avatarPreview, setAvatarPreview] = useState('')
@@ -57,12 +51,14 @@ export default function ProfilePage() {
     if (data) {
       setFormData({
         full_name: data.user?.full_name || '',
+        first_name: data.user?.first_name || '',
+        last_name: data.user?.last_name || '',
+        birthdate: data.user?.birthdate || '',
         avatar_url: data.user?.avatar_url || '',
         theme: data.preferences?.theme || 'light',
         sidebar_docked: data.preferences?.sidebar_docked || true,
         country: data.user?.country || '',
-        age: data.user?.age?.toString() || '',
-        discovered_by: data.user?.discovered_by || ''
+        age: data.user?.age?.toString() || ''
       })
       setAvatarPreview(data.user?.avatar_url || '')
     }
