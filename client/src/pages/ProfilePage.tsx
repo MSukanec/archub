@@ -25,7 +25,10 @@ export default function ProfilePage() {
   // Fetch countries from database
   const { data: countries, isLoading: countriesLoading } = useQuery({
     queryKey: ['/api/countries'],
-    queryFn: () => apiRequest('GET', '/api/countries') as Promise<Country[]>
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/countries')
+      return await response.json() as Country[]
+    }
   })
   
   const [formData, setFormData] = useState({
@@ -134,7 +137,17 @@ export default function ProfilePage() {
   }
 
   const handleSave = () => {
+    if (!data?.user?.id) {
+      toast({
+        title: "Error",
+        description: "No se pudo obtener la información del usuario.",
+        variant: "destructive"
+      })
+      return
+    }
+
     const profileData = {
+      user_id: data.user.id,
       ...formData,
       age: formData.age ? parseInt(formData.age) : null
     }
@@ -355,9 +368,9 @@ export default function ProfilePage() {
                     <SelectValue placeholder="Selecciona tu país" />
                   </SelectTrigger>
                   <SelectContent>
-                    {countries.map(country => (
-                      <SelectItem key={country} value={country}>
-                        {country}
+                    {countries?.map((country) => (
+                      <SelectItem key={country.id} value={country.id}>
+                        {country.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
