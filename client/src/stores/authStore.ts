@@ -1,118 +1,144 @@
-import { create } from 'zustand'
-import { User, Session } from '@supabase/supabase-js'
-import { supabase } from '@/lib/supabase'
+import { create } from "zustand";
+import { supabase } from "@/lib/supabase";
+import { User, Session } from "@supabase/supabase-js";
 
 interface AuthState {
-  user: User | null
-  session: Session | null
-  loading: boolean
-  initialized: boolean
-  signIn: (email: string, password: string) => Promise<void>
-  signInWithGoogle: () => Promise<void>
-  signOut: () => Promise<void>
-  initialize: () => Promise<void>
+  user: User | null;
+  session: Session | null;
+  loading: boolean;
+  initialized: boolean;
+  signIn: (email: string, password: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
+  signOut: () => Promise<void>;
+  initialize: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   session: null,
-  loading: false,
+  loading: true,
   initialized: false,
 
-  signIn: async (email: string, password: string) => {
-    if (!supabase) throw new Error('Supabase not configured')
+  signIn: async (email, password) => {
+    if (!supabase) throw new Error('Supabase not configured');
     
-    set({ loading: true })
+    set({ loading: true });
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
-      })
-      
-      if (error) throw error
-      
-      set({ 
-        user: data.user, 
-        session: data.session,
-        loading: false 
-      })
+      });
+      if (error) throw error;
+      console.log('Sign in successful:', data.user?.email);
+      set({ user: data.user, session: data.session, loading: false });
     } catch (error) {
-      set({ loading: false })
-      throw error
+      set({ loading: false });
+      throw error;
     }
   },
 
   signInWithGoogle: async () => {
-    if (!supabase) throw new Error('Supabase not configured')
+    if (!supabase) throw new Error('Supabase not configured');
     
-    set({ loading: true })
     try {
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+        provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/`,
-        },
-      })
-      
-      if (error) throw error
+          redirectTo: window.location.origin
+        }
+      });
+      if (error) throw error;
     } catch (error) {
-      set({ loading: false })
-      throw error
+      console.error('Google sign in error:', error);
+      throw error;
     }
   },
 
   signOut: async () => {
-    if (!supabase) throw new Error('Supabase not configured')
+    if (!supabase) return;
     
-    set({ loading: true })
     try {
-      const { error } = await supabase.auth.signOut()
-      if (error) throw error
-      
-      set({ 
-        user: null, 
-        session: null,
-        loading: false 
-      })
+      console.log('Signing out...');
+      await supabase.auth.signOut();
+      set({ user: null, session: null });
     } catch (error) {
-      set({ loading: false })
-      throw error
+      console.error('Sign out error:', error);
     }
   },
 
   initialize: async () => {
-    console.log('Initializing auth...')
-    
-    // Set as initialized immediately to prevent infinite loading
-    set({ initialized: true, loading: false })
+    if (!supabase) {
+      console.log('Supabase not available, marking as initialized');
+      set({ user: null, session: null, loading: false, initialized: true });
+      return;
+    }
+
+    console.log('Initializing auth...');
     
     try {
-      if (!supabase) {
-        console.error('Supabase not configured properly')
-        return
+      // Configurar listener primero
+      supabase.auth.onAuthStateChange((event, session) => {
+        console.log('Auth state changed:', event);
+        
+        switch (event) {
+          case 'SIGNED_IN':
+            set({
+              session,
+              user: session?.user || null,
+              loading: false,
+              initialized: true
+            });
+            break;
+          case 'SIGNED_OUT':
+            set({
+              session: null,
+              user: null,
+              loading: false,
+              initialized: true
+            });
+            break;
+          case 'TOKEN_REFRESHED':
+            if (session) {
+              set({
+                session,
+                user: session.user,
+                loading: false,
+                initialized: true
+              });
+            }
+            break;
+          case 'INITIAL_SESSION':
+            set({
+              session: session,
+              user: session?.user || null,
+              loading: false,
+              initialized: true
+            });
+            break;
+        }
+      });
+
+      // Obtener sesión actual
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error('Session error:', error);
+        set({ user: null, session: null, loading: false, initialized: true });
+        return;
       }
 
-      const { data: { session } } = await supabase.auth.getSession()
-      console.log('Got session:', session ? 'user logged in' : 'no user')
-      
-      set({ 
-        user: session?.user ?? null,
-        session,
-        loading: false
-      })
+      // Establecer sesión inicial
+      console.log('Got session:', session ? 'user logged in' : 'no session');
+      set({
+        session: session,
+        user: session?.user || null,
+        loading: false,
+        initialized: true
+      });
 
-      // Listen for auth changes
-      supabase.auth.onAuthStateChange((event, session) => {
-        console.log('Auth state changed:', event)
-        set({ 
-          user: session?.user ?? null,
-          session,
-          loading: false 
-        })
-      })
     } catch (error) {
-      console.error('Error initializing auth:', error)
-      set({ loading: false })
+      console.error('Initialize error:', error);
+      set({ user: null, session: null, loading: false, initialized: true });
     }
   },
-}))
+}));

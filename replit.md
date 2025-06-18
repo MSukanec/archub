@@ -174,6 +174,15 @@ Changelog:
   • All sections (header, nav, footer) use consistent 8px padding
   • Eliminated all unnecessary margins and external spacing
   • Single button structure transforms cleanly between states
+
+- June 18, 2025. Fixed session persistence and authentication state management
+  • Refactored authStore to properly handle session persistence across page refreshes
+  • Added initialized state to prevent premature auth modal display
+  • Improved ProtectedRoute to show loading spinner while authentication initializes
+  • Fixed Supabase null checks throughout authentication flow
+  • Enhanced error handling and logging for auth state changes
+  • Sessions now persist correctly when user refreshes the page
+  • Eliminated unwanted logout behavior on page reload
 ```
 
 ## User Preferences
