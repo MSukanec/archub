@@ -19,51 +19,76 @@ export function SidebarButton({
   className,
   isExpanded = false
 }: SidebarButtonProps) {
+  if (!isExpanded) {
+    // Collapsed state: only icon, centered, exact BUTTON_SIZE
+    return (
+      <button
+        onClick={onClick}
+        className={cn(
+          "flex items-center justify-center rounded-lg transition-colors",
+          "hover:shadow-sm hover:scale-[1.02]",
+          isActive
+            ? "text-primary bg-primary/10 shadow-sm"
+            : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700",
+          className
+        )}
+        style={{
+          width: `${BUTTON_SIZE}px`,
+          height: `${BUTTON_SIZE}px`,
+        }}
+      >
+        <Icon 
+          className={cn(
+            "flex-shrink-0",
+            isActive 
+              ? "text-primary" 
+              : "text-slate-400"
+          )}
+          style={{
+            width: `${ICON_SIZE}px`,
+            height: `${ICON_SIZE}px`,
+          }}
+        />
+      </button>
+    )
+  }
+
+  // Expanded state: icon + text, full width, left aligned
   return (
     <button
       onClick={onClick}
       className={cn(
-        "flex items-center rounded-lg transition-all group relative overflow-hidden",
-        "hover:shadow-sm hover:scale-[1.02]",
+        "flex items-center px-3 gap-2 rounded-lg transition-colors w-full",
+        "hover:shadow-sm hover:scale-[1.01]",
         isActive
           ? "text-primary bg-primary/10 shadow-sm"
           : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700",
-        // When collapsed, center the content
-        !isExpanded && "justify-center",
-        // When expanded, align left with padding
-        isExpanded && "justify-start px-3",
         className
       )}
       style={{
-        width: isExpanded ? '100%' : `${BUTTON_SIZE}px`,
         height: `${BUTTON_SIZE}px`,
-        transitionDuration: `${TRANSITION_DURATION}ms`,
       }}
     >
       <Icon 
         className={cn(
-          "flex-shrink-0 transition-colors",
+          "flex-shrink-0",
           isActive 
             ? "text-primary" 
-            : "text-slate-400 group-hover:text-slate-500",
-          // Add margin when expanded and has children
-          isExpanded && children && "mr-3"
+            : "text-slate-400"
         )}
         style={{
           width: `${ICON_SIZE}px`,
           height: `${ICON_SIZE}px`,
         }}
       />
-      {/* Text content only visible when expanded */}
-      {isExpanded && children && (
+      {children && (
         <span 
           className={cn(
-            "text-sm font-medium whitespace-nowrap transition-opacity",
+            "text-sm font-medium whitespace-nowrap",
             isActive 
               ? "text-primary" 
               : "text-slate-700 dark:text-slate-300"
           )}
-          style={{ transitionDuration: `${TRANSITION_DURATION}ms` }}
         >
           {children}
         </span>

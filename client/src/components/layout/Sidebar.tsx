@@ -20,6 +20,7 @@ import {
   SIDEBAR_EXPANDED_WIDTH, 
   BUTTON_SIZE,
   ICON_SIZE,
+  PADDING_SM,
   PADDING_MD,
   TRANSITION_DURATION 
 } from '@/lib/constants/ui'
@@ -85,13 +86,13 @@ function SidebarContent({ location, isExpanded, onNavigate }: SidebarContentProp
   const { navigationItems } = useNavigationStore()
 
   return (
-    <>
-      {/* Sidebar Header */}
+    <div className="flex flex-col h-full">
+      {/* Sidebar Header - Logo */}
       <div 
         className="flex items-center justify-center border-b border-slate-200 dark:border-slate-700"
         style={{ 
-          height: `${BUTTON_SIZE + PADDING_MD * 2}px`,
-          padding: `${PADDING_MD}px`
+          height: `${BUTTON_SIZE + PADDING_SM * 2}px`,
+          padding: `${PADDING_SM}px`
         }}
       >
         <SidebarButton 
@@ -106,8 +107,7 @@ function SidebarContent({ location, isExpanded, onNavigate }: SidebarContentProp
         {onNavigate && (
           <Button 
             variant="ghost" 
-            size="sm" 
-            className="lg:hidden ml-auto"
+            className="lg:hidden ml-auto flex items-center justify-center"
             onClick={onNavigate}
             style={{
               width: `${BUTTON_SIZE}px`,
@@ -119,33 +119,40 @@ function SidebarContent({ location, isExpanded, onNavigate }: SidebarContentProp
         )}
       </div>
 
-      {/* Navigation */}
-      <nav 
-        className="flex-1 space-y-1"
-        style={{ padding: `${PADDING_MD}px` }}
+      {/* Navigation Items */}
+      <div 
+        className="flex-1 flex flex-col"
+        style={{ padding: `${PADDING_SM}px` }}
       >
-        {navigationItems.map((item) => {
+        {navigationItems.map((item, index) => {
           const Icon = iconMap[item.icon as keyof typeof iconMap]
           const isActive = location === item.href
 
           return (
-            <Link key={item.id} href={item.href} onClick={onNavigate}>
-              <SidebarButton 
-                icon={Icon}
-                isActive={isActive}
-                isExpanded={isExpanded}
-              >
-                {item.name}
-              </SidebarButton>
-            </Link>
+            <div
+              key={item.id}
+              style={{ 
+                marginBottom: index < navigationItems.length - 1 ? `${PADDING_SM}px` : '0'
+              }}
+            >
+              <Link href={item.href} onClick={onNavigate}>
+                <SidebarButton 
+                  icon={Icon}
+                  isActive={isActive}
+                  isExpanded={isExpanded}
+                >
+                  {item.name}
+                </SidebarButton>
+              </Link>
+            </div>
           )
         })}
-      </nav>
+      </div>
 
-      {/* Sidebar Footer */}
+      {/* Settings Footer */}
       <div 
         className="border-t border-slate-200 dark:border-slate-700"
-        style={{ padding: `${PADDING_MD}px` }}
+        style={{ padding: `${PADDING_SM}px` }}
       >
         <Link href="/settings">
           <SidebarButton 
@@ -156,6 +163,6 @@ function SidebarContent({ location, isExpanded, onNavigate }: SidebarContentProp
           </SidebarButton>
         </Link>
       </div>
-    </>
+    </div>
   )
 }
