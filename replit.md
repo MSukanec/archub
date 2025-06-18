@@ -251,6 +251,17 @@ Changelog:
   • Visual cards show organization name, creation date, status badges, and plan information
   • Uses authentic data from useCurrentUser hook with proper loading and error states
   • Integrated with existing design system using CSS variables throughout
+
+- June 18, 2025. Complete user system and visual configuration improvements with Spanish translation
+  • Created comprehensive ProfilePage.tsx with full user profile management functionality
+  • Added profile route (/perfil) with avatar support, personal information, and preferences editing
+  • Implemented ProfileAvatarButton in sidebar footer with avatar display and initials fallback
+  • Added avatar upload functionality supporting file upload and URL input with validation
+  • Built user preferences management with theme toggle and sidebar docking controls
+  • Translated entire interface to Spanish including navigation, buttons, labels, and messages
+  • Updated navigation store with Spanish menu items (Panel Principal, Organizaciones, etc.)
+  • Enhanced sidebar with profile avatar, translated theme button, and Spanish configuration text
+  • Integrated profile functionality with existing authentication and theme systems
 ```
 
 ## User Preferences

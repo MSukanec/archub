@@ -158,9 +158,9 @@ export default function Organizations() {
           <Card>
             <CardContent className="pt-6">
               <div className="text-center py-8">
-                <p className="text-[var(--destructive)] mb-2">Error loading organizations</p>
+                <p className="text-[var(--destructive)] mb-2">Error al cargar las organizaciones</p>
                 <p className="text-sm text-[var(--text-muted)]">
-                  {error.message || 'Unable to connect to database'}
+                  {error.message || 'No se pudo conectar con la base de datos'}
                 </p>
               </div>
             </CardContent>
@@ -186,11 +186,11 @@ export default function Organizations() {
             <CardContent className="pt-6">
               <div className="text-center py-8">
                 <Building className="h-12 w-12 text-[var(--text-muted)] mx-auto mb-4" />
-                <p className="text-lg font-medium text-[var(--text-muted)] mb-2">No organizations found</p>
+                <p className="text-lg font-medium text-[var(--text-muted)] mb-2">No se encontraron organizaciones</p>
                 <p className="text-sm text-[var(--text-muted)]">
                   {searchValue || activeFilter !== 'all' 
-                    ? "Try adjusting your search or filters" 
-                    : "You are not a member of any organization yet."
+                    ? "Intenta ajustar tu búsqueda o filtros" 
+                    : "Aún no eres miembro de ninguna organización."
                   }
                 </p>
               </div>
@@ -238,7 +238,7 @@ export default function Organizations() {
                     {isSelected && (
                       <Badge variant="default" className="bg-[var(--accent)] text-[var(--accent-text)]">
                         <CheckCircle className="h-3 w-3 mr-1" />
-                        Selected
+                        Seleccionada
                       </Badge>
                     )}
                   </div>
@@ -247,25 +247,25 @@ export default function Organizations() {
                 <CardContent className="space-y-4">
                   <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
                     <Calendar className="h-4 w-4" />
-                    Created {formatDate(org.created_at)}
+                    Creada el {formatDate(org.created_at)}
                   </div>
 
                   <div className="flex flex-wrap gap-2">
                     {org.is_system && (
                       <Badge variant="secondary" className="text-xs">
                         <ShieldCheck className="h-3 w-3 mr-1" />
-                        System
+                        Sistema
                       </Badge>
                     )}
                     
                     {org.is_active ? (
                       <Badge variant="secondary" className="text-xs bg-[var(--success)]/10 text-[var(--success)]">
                         <CheckCircle className="h-3 w-3 mr-1" />
-                        Active
+                        Activa
                       </Badge>
                     ) : (
                       <Badge variant="secondary" className="text-xs">
-                        Archived
+                        Archivada
                       </Badge>
                     )}
 
@@ -287,9 +287,9 @@ export default function Organizations() {
             <CardContent className="pt-6">
               <div className="text-center py-8">
                 <Building className="h-12 w-12 text-[var(--text-muted)] mx-auto mb-4" />
-                <p className="text-lg font-medium text-[var(--text-muted)] mb-2">No organizations found</p>
+                <p className="text-lg font-medium text-[var(--text-muted)] mb-2">No se encontraron organizaciones</p>
                 <p className="text-sm text-[var(--text-muted)]">
-                  Try adjusting your search or filters
+                  Intenta ajustar tu búsqueda o filtros
                 </p>
               </div>
             </CardContent>
