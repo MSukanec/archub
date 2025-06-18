@@ -34,7 +34,7 @@ export function CustomPageHeader({
   const hasFilters = filters.length > 0;
 
   return (
-    <div className="w-full bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
+    <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 border-2 border-green-500">
       {/* Primera fila: Título + Acciones */}
       <div 
         className="flex items-center justify-between px-6"

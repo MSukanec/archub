@@ -1,5 +1,5 @@
 import { Home, Download, Plus } from 'lucide-react'
-import { CustomPageHeader } from '@/components/ui-custom/CustomPageHeader'
+import { CustomPageLayout } from '@/components/ui-custom/CustomPageLayout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useState } from 'react'
@@ -117,113 +117,109 @@ export default function Dashboard() {
   )
 
   return (
-    <div className="flex flex-col">
-      <CustomPageHeader
-        icon={Home}
-        title="Dashboard"
-        actions={actions}
-        searchValue={searchValue}
-        onSearchChange={setSearchValue}
-        filters={filters}
-        onClearFilters={() => setSearchValue("")}
-      />
-
-      <div className="flex-1 p-6 bg-slate-50 dark:bg-slate-900">
-        <div className="max-w-7xl mx-auto space-y-6">
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {statsCards.map((card, index) => (
-              <Card key={index}>
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">
-                        {card.title}
-                      </p>
-                      <p className="text-3xl font-bold">
-                        {card.value}
-                      </p>
-                    </div>
-                    <div className="text-2xl">
-                      {card.icon}
-                    </div>
+    <CustomPageLayout
+      icon={Home}
+      title="Dashboard"
+      actions={actions}
+      searchValue={searchValue}
+      onSearchChange={setSearchValue}
+      filters={filters}
+      onClearFilters={() => setSearchValue("")}
+    >
+      <div className="p-6 space-y-6">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {statsCards.map((card, index) => (
+            <Card key={index}>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {card.title}
+                    </p>
+                    <p className="text-3xl font-bold">
+                      {card.value}
+                    </p>
                   </div>
-                  <div className="mt-4 flex items-center">
-                    <span className="text-sm text-green-600 dark:text-green-400 font-medium">
-                      {card.change}
-                    </span>
-                    <span className="text-sm text-muted-foreground ml-2">
-                      from last month
-                    </span>
+                  <div className="text-2xl">
+                    {card.icon}
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                </div>
+                <div className="mt-4 flex items-center">
+                  <span className="text-sm text-green-600 dark:text-green-400 font-medium">
+                    {card.change}
+                  </span>
+                  <span className="text-sm text-muted-foreground ml-2">
+                    from last month
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
 
-          {/* Recent Projects and Activity */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Recent Projects */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Projects</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {recentProjects.map((project, index) => (
-                    <div key={index} className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                          <span className="text-white text-xs font-bold">
-                            {project.name.split(' ').map(w => w[0]).join('').slice(0, 2)}
-                          </span>
-                        </div>
-                        <div>
-                          <p className="font-medium">{project.name}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {project.type} • {project.budget}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">
-                          {project.completion} Complete
+        {/* Recent Projects and Activity */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Recent Projects */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Projects</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {recentProjects.map((project, index) => (
+                  <div key={index} className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                        <span className="text-white text-xs font-bold">
+                          {project.name.split(' ').map(w => w[0]).join('').slice(0, 2)}
                         </span>
                       </div>
+                      <div>
+                        <p className="font-medium">{project.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {project.type} • {project.budget}
+                        </p>
+                      </div>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                    <div className="text-right">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">
+                        {project.completion} Complete
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
-            {/* Recent Activity */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {recentActivity.map((activity, index) => (
-                    <div key={index} className="flex items-start space-x-3">
-                      <div className="text-lg">
-                        {activity.icon}
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">
-                          {activity.title}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {activity.subtitle}
-                        </p>
-                      </div>
+          {/* Recent Activity */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Activity</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {recentActivity.map((activity, index) => (
+                  <div key={index} className="flex items-start space-x-3">
+                    <div className="text-lg">
+                      {activity.icon}
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">
+                        {activity.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {activity.subtitle}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
-    </div>
+    </CustomPageLayout>
   )
 }

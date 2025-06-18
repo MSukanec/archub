@@ -1,5 +1,5 @@
 import { Building, Calendar, Shield, Activity, Crown } from 'lucide-react'
-import { CustomPageHeader } from '@/components/ui-custom/CustomPageHeader'
+import { CustomPageLayout } from '@/components/ui-custom/CustomPageLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
