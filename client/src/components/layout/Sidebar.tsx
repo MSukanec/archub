@@ -14,8 +14,6 @@ import {
   BarChart3,
   Settings,
   User,
-  Moon,
-  Sun,
 } from "lucide-react";
 import {
   SIDEBAR_WIDTH,
@@ -33,32 +31,7 @@ const iconMap = {
   "bar-chart-3": BarChart3,
 };
 
-// Botón de cambio de tema
-function ThemeToggleButton({ isExpanded }: { isExpanded: boolean }) {
-  const { isDark, toggleTheme } = useThemeStore();
-  const { data } = useCurrentUser();
 
-  const handleToggleTheme = async () => {
-    const userId = data?.user?.id;
-    const preferencesId = data?.preferences?.id;
-
-    try {
-      await toggleTheme(userId, preferencesId);
-    } catch (error) {
-      console.error("Error toggling theme:", error);
-    }
-  };
-
-  return (
-    <SidebarButton
-      icon={isDark ? Sun : Moon}
-      isExpanded={isExpanded}
-      onClick={handleToggleTheme}
-    >
-      {isDark ? "Modo claro" : "Modo oscuro"}
-    </SidebarButton>
-  );
-}
 
 export function Sidebar() {
   const [location] = useLocation();
@@ -123,9 +96,8 @@ export function Sidebar() {
           })}
         </nav>
 
-        {/* Bloque inferior (modo, settings, perfil) */}
+        {/* Bloque inferior (settings, perfil) */}
         <div className="flex flex-col">
-          <ThemeToggleButton isExpanded={isExpanded} />
           <Link href="/settings">
             <SidebarButton
               icon={Settings}

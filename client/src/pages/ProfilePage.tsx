@@ -48,15 +48,16 @@ export default function ProfilePage() {
   // Initialize form data when user data loads
   useEffect(() => {
     if (data) {
+      console.log('Profile data structure:', JSON.stringify(data, null, 2))
       setFormData({
         full_name: data.user?.full_name || '',
-        first_name: data.user?.first_name || '',
-        last_name: data.user?.last_name || '',
-        birthdate: data.user?.birthdate || '',
+        first_name: data.user?.user_metadata?.first_name || '',
+        last_name: data.user?.user_metadata?.last_name || '',
+        birthdate: data.user?.user_data?.birthdate || '',
         avatar_url: data.user?.avatar_url || '',
         theme: data.preferences?.theme || 'light',
         sidebar_docked: data.preferences?.sidebar_docked || true,
-        country: data.user?.country || ''
+        country: data.user?.user_data?.country || ''
       })
       setAvatarPreview(data.user?.avatar_url || '')
     }
