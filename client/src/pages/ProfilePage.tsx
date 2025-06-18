@@ -345,19 +345,6 @@ export default function ProfilePage() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="age">Edad</Label>
-                <Input
-                  id="age"
-                  type="number"
-                  value={formData.age}
-                  onChange={(e) => handleInputChange('age', e.target.value)}
-                  placeholder="Tu edad"
-                  min="13"
-                  max="120"
-                />
-              </div>
-
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="country">País</Label>
                 <Select value={formData.country} onValueChange={(value) => handleInputChange('country', value)}>
