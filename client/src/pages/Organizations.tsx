@@ -1,9 +1,10 @@
 import { Building, Calendar, Shield, Activity, Crown } from 'lucide-react'
-import { PageHeader } from '@/components/ui/page-header'
+import { CustomPageHeader } from '@/components/ui-custom/CustomPageHeader'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { useState } from 'react'
 
 export default function Organizations() {
   const { data, isLoading, error } = useCurrentUser()

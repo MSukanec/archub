@@ -1,7 +1,7 @@
-export const SIDEBAR_WIDTH = 48;
+export const SIDEBAR_WIDTH = 36;
 export const BUTTON_SIZE = 36;
 export const ICON_SIZE = 18;
-export const HEADER_HEIGHT = 40;
+export const HEADER_HEIGHT = 36;
 
 // Additional UI constants for consistency
 export const SIDEBAR_EXPANDED_WIDTH = 200;

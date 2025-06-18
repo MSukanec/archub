@@ -19,7 +19,6 @@ import {
 import {
   SIDEBAR_WIDTH,
   SIDEBAR_EXPANDED_WIDTH,
-  BUTTON_SIZE,
   TRANSITION_DURATION,
 } from "@/lib/constants/ui";
 
@@ -90,10 +89,7 @@ export function Sidebar() {
         </Link>
 
         {/* Navigation */}
-        <nav 
-          className="flex flex-col flex-1 gap-1"
-          style={{ padding: `8px` }}
-        >
+        <nav className="flex flex-col flex-1 gap-1">
           {navigationItems.map((item) => {
             const Icon = iconMap[item.icon as keyof typeof iconMap];
             const isActive = location === item.href;
@@ -112,11 +108,8 @@ export function Sidebar() {
           })}
         </nav>
 
-        {/* Footer: Tema + Settings */}
-        <div 
-          className="border-t border-slate-200 dark:border-slate-700 flex flex-col gap-1"
-          style={{ padding: `8px` }}
-        >
+        {/* Footer: Tema + Settings (sin padding, solo gap limpio) */}
+        <div className="border-t border-slate-200 dark:border-slate-700 flex flex-col gap-1">
           <ThemeToggleButton isExpanded={isExpanded} />
           <Link href="/settings">
             <SidebarButton

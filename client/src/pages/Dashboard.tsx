@@ -1,10 +1,12 @@
 import { Home, Download, Plus } from 'lucide-react'
-import { PageHeader } from '@/components/ui/page-header'
+import { CustomPageHeader } from '@/components/ui-custom/CustomPageHeader'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useState } from 'react'
 
 export default function Dashboard() {
+  const [searchValue, setSearchValue] = useState("");
+
   const statsCards = [
     {
       title: "Active Projects",
@@ -91,49 +93,40 @@ export default function Dashboard() {
     }
   ]
 
-  const filters = (
-    <div className="flex items-center space-x-4">
-      <Select defaultValue="all">
-        <SelectTrigger className="w-48">
-          <SelectValue placeholder="Filter projects" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All Projects</SelectItem>
-          <SelectItem value="active">Active</SelectItem>
-          <SelectItem value="completed">Completed</SelectItem>
-          <SelectItem value="on-hold">On Hold</SelectItem>
-        </SelectContent>
-      </Select>
-      <Select defaultValue="30-days">
-        <SelectTrigger className="w-48">
-          <SelectValue placeholder="Time period" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="30-days">Last 30 days</SelectItem>
-          <SelectItem value="90-days">Last 90 days</SelectItem>
-          <SelectItem value="year">This year</SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
+  const filters = [
+    { label: "All Projects", onClick: () => console.log("All Projects") },
+    { label: "Active", onClick: () => console.log("Active") },
+    { label: "Completed", onClick: () => console.log("Completed") },
+    { label: "On Hold", onClick: () => console.log("On Hold") },
+    { label: "Last 30 days", onClick: () => console.log("Last 30 days") },
+    { label: "Last 90 days", onClick: () => console.log("Last 90 days") },
+    { label: "This year", onClick: () => console.log("This year") },
+  ]
+
+  const actions = (
+    <>
+      <Button variant="outline">
+        <Download className="w-4 h-4 mr-2" />
+        Export
+      </Button>
+      <Button>
+        <Plus className="w-4 h-4 mr-2" />
+        New Project
+      </Button>
+    </>
   )
 
   return (
     <div className="flex flex-col">
-      <PageHeader
+      <CustomPageHeader
         icon={Home}
         title="Dashboard"
-        description="Overview of your construction projects and recent activity"
+        actions={actions}
+        searchValue={searchValue}
+        onSearchChange={setSearchValue}
         filters={filters}
-      >
-        <Button variant="outline">
-          <Download className="w-4 h-4 mr-2" />
-          Export
-        </Button>
-        <Button>
-          <Plus className="w-4 h-4 mr-2" />
-          New Project
-        </Button>
-      </PageHeader>
+        onClearFilters={() => setSearchValue("")}
+      />
 
       <div className="flex-1 p-6 bg-slate-50 dark:bg-slate-900">
         <div className="max-w-7xl mx-auto space-y-6">
