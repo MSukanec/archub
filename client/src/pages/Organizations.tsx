@@ -19,16 +19,15 @@ export default function Organizations() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col">
-        <CustomPageHeader
-          icon={Building}
-          title="Organization"
-          searchValue={searchValue}
-          onSearchChange={setSearchValue}
-          filters={filters}
-          onClearFilters={() => setSearchValue("")}
-        />
-        <div className="flex-1 p-6 bg-slate-50 dark:bg-slate-900">
+      <CustomPageLayout
+        icon={Building}
+        title="Organization"
+        searchValue={searchValue}
+        onSearchChange={setSearchValue}
+        filters={filters}
+        onClearFilters={() => setSearchValue("")}
+      >
+        <div className="p-6">
           <div className="max-w-4xl mx-auto">
             <Card>
               <CardContent className="pt-6">
@@ -41,22 +40,21 @@ export default function Organizations() {
             </Card>
           </div>
         </div>
-      </div>
+      </CustomPageLayout>
     )
   }
 
   if (error) {
     return (
-      <div className="flex flex-col">
-        <CustomPageHeader
-          icon={Building}
-          title="Organization"
-          searchValue={searchValue}
-          onSearchChange={setSearchValue}
-          filters={filters}
-          onClearFilters={() => setSearchValue("")}
-        />
-        <div className="flex-1 p-6 bg-slate-50 dark:bg-slate-900">
+      <CustomPageLayout
+        icon={Building}
+        title="Organization"
+        searchValue={searchValue}
+        onSearchChange={setSearchValue}
+        filters={filters}
+        onClearFilters={() => setSearchValue("")}
+      >
+        <div className="p-6">
           <div className="max-w-4xl mx-auto">
             <Card>
               <CardContent className="pt-6">
@@ -70,22 +68,21 @@ export default function Organizations() {
             </Card>
           </div>
         </div>
-      </div>
+      </CustomPageLayout>
     )
   }
 
   if (!data?.organization) {
     return (
-      <div className="flex flex-col">
-        <CustomPageHeader
-          icon={Building}
-          title="Organization"
-          searchValue={searchValue}
-          onSearchChange={setSearchValue}
-          filters={filters}
-          onClearFilters={() => setSearchValue("")}
-        />
-        <div className="flex-1 p-6 bg-slate-50 dark:bg-slate-900">
+      <CustomPageLayout
+        icon={Building}
+        title="Organization"
+        searchValue={searchValue}
+        onSearchChange={setSearchValue}
+        filters={filters}
+        onClearFilters={() => setSearchValue("")}
+      >
+        <div className="p-6">
           <div className="max-w-4xl mx-auto">
             <Card>
               <CardContent className="pt-6">
@@ -100,25 +97,22 @@ export default function Organizations() {
             </Card>
           </div>
         </div>
-      </div>
+      </CustomPageLayout>
     )
   }
 
   const { organization, role, plan } = data
 
   return (
-    <div className="flex flex-col">
-      <CustomPageHeader
-        icon={Building}
-        title="Organization"
-        searchValue={searchValue}
-        onSearchChange={setSearchValue}
-        filters={filters}
-        onClearFilters={() => setSearchValue("")}
-      />
-      
-      <div className="flex-1 p-6 bg-slate-50 dark:bg-slate-900">
-        <div className="max-w-4xl mx-auto space-y-6">
+    <CustomPageLayout
+      icon={Building}
+      title="Organization"
+      searchValue={searchValue}
+      onSearchChange={setSearchValue}
+      filters={filters}
+      onClearFilters={() => setSearchValue("")}
+    >
+      <div className="p-6 space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
@@ -225,8 +219,7 @@ export default function Organizations() {
               </CardContent>
             </Card>
           )}
-        </div>
       </div>
-    </div>
+    </CustomPageLayout>
   )
 }
