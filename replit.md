@@ -183,6 +183,15 @@ Changelog:
   • Enhanced error handling and logging for auth state changes
   • Sessions now persist correctly when user refreshes the page
   • Eliminated unwanted logout behavior on page reload
+
+- June 18, 2025. Added theme toggle button with database synchronization
+  • Added theme toggle button to sidebar footer above Settings button
+  • Enhanced themeStore to sync theme changes with user_preferences table
+  • Integrated with useCurrentUser hook to get user preferences ID
+  • Theme persists across sessions by loading from database on app start
+  • Button shows Moon/Sun icon based on current theme state
+  • Uses same SidebarButton component for consistent styling
+  • Layout component syncs theme from database when user data loads
 ```
 
 ## User Preferences
