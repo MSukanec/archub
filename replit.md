@@ -323,6 +323,14 @@ Changelog:
   • Eliminated 400 errors caused by accessing non-existent tables and columns
   • Function now correctly accesses organization_members table for user role information
   • All SQL function calls now work properly with authentic database schema
+
+- June 18, 2025. Complete database schema synchronization with enhanced user structure
+  • Updated users table structure with auth_id, first_name, last_name, avatar_source columns
+  • Added new user_preferences fields: last_project_id, last_budget_id, onboarding_completed
+  • Corrected organization_preferences column names to default_currency_id and default_wallet_id
+  • Updated all TypeScript interfaces to match exact Supabase database schema
+  • Enhanced archub_get_user function to return comprehensive user data with all new fields
+  • All database references now use correct column names and table structures
 ```
 
 ## User Preferences

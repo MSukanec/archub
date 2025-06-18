@@ -4,11 +4,14 @@ import { z } from "zod";
 
 export const users = pgTable("users", {
   id: uuid("id").primaryKey(),
+  auth_id: uuid("auth_id").notNull().unique(),
   email: text("email").notNull().unique(),
+  first_name: text("first_name"),
+  last_name: text("last_name"),
   full_name: text("full_name"),
   avatar_url: text("avatar_url"),
+  avatar_source: text("avatar_source"),
   created_at: timestamp("created_at").defaultNow(),
-  updated_at: timestamp("updated_at").defaultNow(),
 });
 
 export const countries = pgTable("countries", {
@@ -33,6 +36,9 @@ export const user_preferences = pgTable("user_preferences", {
   theme: text("theme").default("light"),
   sidebar_docked: boolean("sidebar_docked").default(true),
   last_organization_id: uuid("last_organization_id"),
+  last_project_id: uuid("last_project_id"),
+  last_budget_id: uuid("last_budget_id"),
+  onboarding_completed: boolean("onboarding_completed").default(false),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
 });

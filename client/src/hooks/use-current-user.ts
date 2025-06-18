@@ -5,13 +5,14 @@ import { useAuthStore } from '@/stores/authStore'
 interface UserData {
   user: {
     id: string
+    auth_id: string
     email: string
     first_name: string
     last_name: string
     full_name: string
     avatar_url: string
+    avatar_source: string
     created_at: string
-    updated_at: string
     [key: string]: any
   }
   user_data: {
@@ -20,6 +21,7 @@ interface UserData {
     country: string
     birthdate: string
     created_at: string
+    updated_at: string
     [key: string]: any
   } | null
   preferences: {
@@ -28,23 +30,27 @@ interface UserData {
     theme: string
     sidebar_docked: boolean
     last_organization_id: string
+    last_project_id: string
+    last_budget_id: string
+    onboarding_completed: boolean
     created_at: string
+    updated_at: string
     [key: string]: any
   } | null
   organization: {
     id: string
     name: string
-    created_at: string
     is_active: boolean
     is_system: boolean
     created_by: string
+    created_at: string
     updated_at: string
     [key: string]: any
   } | null
   organization_preferences: {
     organization_id: string
-    default_currency: string
-    default_wallet: string
+    default_currency_id: string
+    default_wallet_id: string
     pdf_template: string
     created_at: string
     updated_at: string
