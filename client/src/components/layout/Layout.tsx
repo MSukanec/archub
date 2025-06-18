@@ -21,18 +21,21 @@ export function Layout({ children }: LayoutProps) {
     document.documentElement.classList.toggle('dark', isDark)
   }, [isDark])
 
-  // Sincronizar tema desde la base de datos cuando se carga el usuario
+  // Sincronizar tema desde la base de datos cuando se carga el usuario (solo una vez)
   useEffect(() => {
     if (data?.preferences?.theme) {
       const dbTheme = data.preferences.theme
       const shouldBeDark = dbTheme === 'dark'
       
+      console.log('Loading theme from DB:', { dbTheme, shouldBeDark, currentIsDark: isDark })
+      
       // Solo actualizar si es diferente al estado actual
       if (shouldBeDark !== isDark) {
+        console.log('Updating theme to match DB')
         setTheme(shouldBeDark)
       }
     }
-  }, [data?.preferences?.theme, isDark, setTheme])
+  }, [data?.preferences?.theme]) // Eliminé isDark y setTheme de las dependencias
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-900">

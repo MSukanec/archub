@@ -16,9 +16,17 @@ export const useThemeStore = create<ThemeState>()(
         const currentState = get()
         const newIsDark = !currentState.isDark
         
-        // Actualizar UI inmediatamente
-        document.documentElement.classList.toggle('dark', newIsDark)
+        console.log('Toggling theme:', { from: currentState.isDark, to: newIsDark })
+        
+        // Actualizar estado y DOM de forma forzada
         set({ isDark: newIsDark })
+        
+        // Forzar actualización del DOM
+        if (newIsDark) {
+          document.documentElement.classList.add('dark')
+        } else {
+          document.documentElement.classList.remove('dark')
+        }
         
         // Sincronizar con base de datos si hay usuario
         if (supabase && userId && preferencesId) {
