@@ -6,16 +6,29 @@ interface UserData {
   user: {
     id: string
     email: string
+    first_name: string
+    last_name: string
+    full_name: string
+    avatar_url: string
     created_at: string
     updated_at: string
     [key: string]: any
   }
+  user_data: {
+    id: string
+    user_id: string
+    country: string
+    birthdate: string
+    created_at: string
+    updated_at: string
+    [key: string]: any
+  } | null
   preferences: {
     id: string
     user_id: string
     theme: string
-    language: string
-    timezone: string
+    sidebar_docked: boolean
+    last_organization_id: string
     [key: string]: any
   } | null
   organization: {
@@ -26,6 +39,14 @@ interface UserData {
     is_system: boolean
     created_by: string
     updated_at: string
+    [key: string]: any
+  } | null
+  organization_preferences: {
+    id: string
+    organization_id: string
+    default_currency: string
+    default_wallet: string
+    pdf_template: string
     [key: string]: any
   } | null
   role: {
