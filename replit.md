@@ -440,6 +440,15 @@ Changelog:
   • Updated TypeScript schema to only include name and created_at fields
   • Simplified form validation and submission to match reduced field set
   • Organization modal maintains visual consistency with projects modal but with streamlined field structure
+
+- June 19, 2025. Enhanced creator field functionality across organizations and projects with editable dropdowns
+  • Added "Creador" column to Organizations page cards positioned after fecha column
+  • Created useOrganizationMembers hook to fetch organization members from Supabase
+  • Updated NewProjectModal: changed "Miembro creador" label to "Creador" and made field editable
+  • Implemented dropdown selection of organization members for both project and organization creator fields
+  • Added created_by field to project schema and form validation with proper TypeScript support
+  • Creator dropdowns show member avatars, names, and fallback to email with proper user data handling
+  • Both modals now allow selection of any active organization member as creator instead of hardcoded current user
 ```
 
 ## User Preferences

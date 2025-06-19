@@ -38,6 +38,7 @@ interface Organization {
   is_active: boolean
   is_system: boolean
   created_at: string
+  created_by?: string
   plan?: {
     id: string
     name: string
@@ -53,6 +54,7 @@ interface NewOrganizationModalProps {
 
 export function NewOrganizationModal({ open, onClose, editingOrganization }: NewOrganizationModalProps) {
   const { data: userData } = useCurrentUser()
+  const { data: organizationMembers } = useOrganizationMembers(userData?.organization?.id)
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
 
@@ -60,7 +62,8 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
     resolver: zodResolver(createOrganizationSchema),
     defaultValues: {
       name: '',
-      created_at: new Date()
+      created_at: new Date(),
+      created_by: ''
     }
   })
 
@@ -71,12 +74,14 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
       
       form.reset({
         name: editingOrganization.name,
-        created_at: new Date(editingOrganization.created_at)
+        created_at: new Date(editingOrganization.created_at),
+        created_by: editingOrganization.created_by || ''
       })
     } else {
       form.reset({
         name: '',
-        created_at: new Date()
+        created_at: new Date(),
+        created_by: ''
       })
     }
   }, [editingOrganization, form])

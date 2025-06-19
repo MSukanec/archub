@@ -367,7 +367,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
                             <Avatar className="h-6 w-6">
                               <AvatarImage src={member.users?.avatar_url || ''} />
                               <AvatarFallback className="text-xs">
-                                {member.users?.full_name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'U'}
+                                {member.users?.full_name ? member.users.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) : 'U'}
                               </AvatarFallback>
                             </Avatar>
                             <span>{member.users?.full_name || member.users?.email || 'Usuario'}</span>
