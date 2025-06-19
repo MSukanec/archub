@@ -368,6 +368,16 @@ Changelog:
     - CustomModalFooter.tsx: button layout with 25%/75% proportion for Cancel/Save actions
   • Modal system includes keyboard navigation (Escape key), body scroll lock, and smooth animations
   • All components use CSS variables for consistent theming and proper TypeScript props
+
+- June 19, 2025. NewProjectModal implementation with proper Supabase integration and UI refinements
+  • Created functional NewProjectModal.tsx in client/src/modals/ folder with complete project creation workflow
+  • Fixed modal rendering issues by simplifying CustomModalLayout CSS and using standard Tailwind colors
+  • Modal features: date picker, readonly creator field with avatar, project name, status selection (planning/active/completed)
+  • Proper Supabase integration using organization_members.id for created_by field instead of user_id
+  • Eliminates 'budget' field error by using only existing table columns (name, status, is_active, organization_id, created_at, created_by)
+  • Post-creation workflow: inserts project_data entry, updates user_preferences.last_project_id, invalidates React Query cache
+  • Visual improvements: consistent text-sm font-medium labels, avatar display, proper spacing and form validation
+  • Modal successfully opens from "Nuevo proyecto" button and integrates with existing project listing system
 ```
 
 ## User Preferences

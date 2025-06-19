@@ -1,0 +1,90 @@
+Quiero que actualices el archivo `NewProjectModal.tsx` con los siguientes cambios para que quede perfectamente funcional y visualmente impecable:
+
+---
+
+🧠 CONTEXTO GENERAL DEL MODAL
+
+Este modal permite crear un nuevo proyecto para la organización actual. Usá los componentes ya definidos:
+
+- `CustomModalLayout`
+- `CustomModalHeader`
+- `CustomModalBody`
+- `CustomModalFooter`
+
+Seguí el layout limpio tipo Lemon Squeezy y las reglas de estilo que ya definimos en `prompts/ai-modal-template.md`.
+
+---
+
+📦 CAMPOS DEL FORMULARIO (en este orden visual):
+
+1. **Fecha de creación** (`created_at`)  
+   - Campo tipo `date`  
+   - Por defecto es la fecha actual  
+   - El usuario puede modificarla
+
+2. **Miembro creador** (`created_by`)  
+   - Se muestra como un campo *readonly*  
+   - Debe mostrar el nombre del miembro actual de la organización  
+   - También debe mostrar el avatar a la izquierda del nombre  
+   - El valor viene de `userData.user.full_name` y `userData.user.avatar_url`
+
+3. **Nombre del proyecto** (`name`)  
+   - Campo obligatorio
+
+4. **Estado** (`status`)  
+   - Select con opciones: `planning`, `active`, `completed`
+
+---
+
+🔁 INSERCIÓN EN SUPABASE
+
+Al enviar el formulario, debe insertar una fila en la tabla `projects` con:
+
+- `name`
+- `status`
+- `is_active: true`
+- `organization_id` → viene de `userData.organization.id`
+- `created_at` → viene del formulario
+- `created_by` → debe ser el `organization_members.id` correspondiente al usuario actual
+
+🧠 Para obtener el `created_by` correcto:
+
+```ts
+const orgMemberId = userData.memberships.find(
+  m => m.organization_id === userData.organization.id
+)?.id
+🔁 POST-INSERT
+
+Después de crear el proyecto:
+
+Insertar también en la tabla project_data con created_by y updated_by
+
+Actualizar user_preferences.last_project_id
+
+Cerrar el modal
+
+Refrescar la lista de proyectos y el usuario actual
+
+🎨 DETALLES VISUALES IMPORTANTES
+
+Todos los labels deben ser text-sm font-medium text-muted-foreground
+
+Agregá espaciado uniforme entre campos
+
+El campo de creador (created_by) debe ser un div estilizado como si fuera un campo, no un input
+
+Mostrá el avatar circular a la izquierda y el nombre a la derecha
+
+Estilo tipo badge o contenedor suave
+
+🚫 NO HAGAS ESTO
+
+No uses datos fake
+
+No muestres user_id ni IDs crudos
+
+No inventes clases de Tailwind
+
+No uses created_by_user_id, solo created_by (es organization_members.id)
+
+🎉 Gracias. Este modal tiene que quedar funcional, elegante y 100% alineado al sistema existente

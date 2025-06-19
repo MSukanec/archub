@@ -6,22 +6,19 @@ import { z } from 'zod'
 import { supabase } from '@/lib/supabase'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useToast } from '@/hooks/use-toast'
-import { CustomModalLayout } from './CustomModalLayout'
-import { CustomModalHeader } from './CustomModalHeader'
-import { CustomModalBody } from './CustomModalBody'
-import { CustomModalFooter } from './CustomModalFooter'
+import { CustomModalLayout } from '@/components/ui-custom/CustomModalLayout'
+import { CustomModalHeader } from '@/components/ui-custom/CustomModalHeader'
+import { CustomModalBody } from '@/components/ui-custom/CustomModalBody'
+import { CustomModalFooter } from '@/components/ui-custom/CustomModalFooter'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 
 const createProjectSchema = z.object({
   name: z.string().min(1, 'El nombre del proyecto es requerido').max(100, 'El nombre no puede exceder 100 caracteres'),
-  description: z.string().optional(),
-  start_date: z.string().min(1, 'La fecha de inicio es requerida'),
-  status: z.string().min(1, 'El estado es requerido'),
-  budget: z.number().min(0, 'El presupuesto debe ser mayor o igual a 0').optional(),
-  team_size: z.number().min(1, 'El tamaño del equipo debe ser al menos 1').optional()
+  status: z.enum(['planning', 'active', 'completed'], { required_error: 'El estado es requerido' }),
+  created_at: z.string().min(1, 'La fecha de creación es requerida')
 })
 
 type CreateProjectForm = z.infer<typeof createProjectSchema>
@@ -40,11 +37,8 @@ export function NewProjectModal({ open, onClose }: NewProjectModalProps) {
     resolver: zodResolver(createProjectSchema),
     defaultValues: {
       name: '',
-      description: '',
-      start_date: new Date().toISOString().split('T')[0],
-      status: 'active',
-      budget: 0,
-      team_size: 1
+      status: 'planning',
+      created_at: new Date().toISOString().split('T')[0]
     }
   })
 
@@ -54,16 +48,23 @@ export function NewProjectModal({ open, onClose }: NewProjectModalProps) {
         throw new Error('Datos de usuario u organización no disponibles')
       }
 
+      // Get the organization member ID for the current user
+      const orgMemberId = userData.memberships?.find(
+        m => m.organization_id === userData.organization.id
+      )?.id
+
+      if (!orgMemberId) {
+        throw new Error('No se encontró la membresía del usuario en la organización')
+      }
+
       // Create project in projects table
       const projectData = {
         name: formData.name,
-        description: formData.description || null,
         status: formData.status,
-        budget: formData.budget || 0,
-        team_size: formData.team_size || 1,
+        is_active: true,
         organization_id: userData.organization.id,
-        start_date: formData.start_date,
-        progress: 0
+        created_at: formData.created_at,
+        created_by: orgMemberId
       }
 
       const { data: project, error: projectError } = await supabase
@@ -77,18 +78,17 @@ export function NewProjectModal({ open, onClose }: NewProjectModalProps) {
         throw projectError
       }
 
-      // Create basic project_data entry if the table exists
+      // Create project_data entry
       try {
         const { error: projectDataError } = await supabase
           .from('project_data')
           .insert({
             project_id: project.id,
-            created_by: userData.user.id,
-            updated_by: userData.user.id
+            created_by: orgMemberId,
+            updated_by: orgMemberId
           })
 
         if (projectDataError) {
-          // If project_data table doesn't exist or fails, continue anyway
           console.warn('Could not create project_data entry:', projectDataError)
         }
       } catch (error) {
@@ -139,6 +139,15 @@ export function NewProjectModal({ open, onClose }: NewProjectModalProps) {
     onClose()
   }
 
+  // Get user display info
+  const userDisplayName = userData?.user_data?.first_name && userData?.user_data?.last_name 
+    ? `${userData.user_data.first_name} ${userData.user_data.last_name}`
+    : userData?.user?.email || 'Usuario'
+  
+  const userInitials = userData?.user_data?.first_name && userData?.user_data?.last_name
+    ? `${userData.user_data.first_name.charAt(0)}${userData.user_data.last_name.charAt(0)}`
+    : userData?.user?.email?.charAt(0).toUpperCase() || 'U'
+
   return (
     <CustomModalLayout open={open} onClose={handleCancel}>
       <CustomModalHeader
@@ -152,10 +161,44 @@ export function NewProjectModal({ open, onClose }: NewProjectModalProps) {
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
             <FormField
               control={form.control}
+              name="created_at"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-medium text-muted-foreground">
+                    Fecha de creación
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="date"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div>
+              <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                Miembro creador
+              </label>
+              <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-md border">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={userData?.user?.avatar_url || ''} />
+                  <AvatarFallback className="text-xs">{userInitials}</AvatarFallback>
+                </Avatar>
+                <span className="text-sm font-medium">{userDisplayName}</span>
+              </div>
+            </div>
+
+            <FormField
+              control={form.control}
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nombre del proyecto</FormLabel>
+                  <FormLabel className="text-sm font-medium text-muted-foreground">
+                    Nombre del proyecto
+                  </FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Torre Residencial Norte"
@@ -169,106 +212,28 @@ export function NewProjectModal({ open, onClose }: NewProjectModalProps) {
 
             <FormField
               control={form.control}
-              name="description"
+              name="status"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Descripción</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Descripción breve del proyecto..."
-                      className="min-h-[80px]"
-                      {...field}
-                    />
-                  </FormControl>
+                  <FormLabel className="text-sm font-medium text-muted-foreground">
+                    Estado
+                  </FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona un estado" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="planning">Planificación</SelectItem>
+                      <SelectItem value="active">Activo</SelectItem>
+                      <SelectItem value="completed">Completado</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="start_date"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Fecha de inicio</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="date"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Estado</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona un estado" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="active">Activo</SelectItem>
-                        <SelectItem value="on-hold">En pausa</SelectItem>
-                        <SelectItem value="completed">Completado</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="budget"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Presupuesto (USD)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min="0"
-                        step="1000"
-                        placeholder="0"
-                        {...field}
-                        onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="team_size"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tamaño del equipo</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min="1"
-                        placeholder="1"
-                        {...field}
-                        onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
           </form>
         </Form>
       </CustomModalBody>

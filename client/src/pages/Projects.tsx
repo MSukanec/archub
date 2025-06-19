@@ -10,7 +10,7 @@ import { useMutation } from '@tanstack/react-query'
 import { queryClient } from '@/lib/queryClient'
 import { supabase } from '@/lib/supabase'
 import { cn } from '@/lib/utils'
-import { NewProjectModal } from '@/components/ui-custom/NewProjectModal'
+import { NewProjectModal } from '@/modals/NewProjectModal'
 
 type FilterType = 'all' | 'active' | 'completed' | 'on-hold'
 
