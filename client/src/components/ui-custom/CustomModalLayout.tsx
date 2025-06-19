@@ -5,7 +5,11 @@ import { cn } from "@/lib/utils";
 interface CustomModalLayoutProps {
   open: boolean;
   onClose: () => void;
-  children: React.ReactNode;
+  children: {
+    header: React.ReactNode;
+    body: React.ReactNode;
+    footer: React.ReactNode;
+  };
   className?: string;
 }
 
@@ -43,7 +47,7 @@ export function CustomModalLayout({
         onClick={onClose}
       />
 
-      {/* Modal Container */}
+      {/* Modal */}
       <div
         className={cn(
           "relative z-10 flex flex-col bg-[--layout-bg] shadow-2xl transition-all duration-300 ease-in-out",
@@ -51,8 +55,12 @@ export function CustomModalLayout({
           className,
         )}
       >
-        {/* 🔧 Wrapper que impone layout vertical */}
-        <div className="flex flex-col h-full overflow-hidden">{children}</div>
+        {/* Layout vertical con header/footer fijos */}
+        <div className="flex flex-col h-full">
+          <div className="shrink-0">{children.header}</div>
+          <div className="flex-1 min-h-0 overflow-y-auto">{children.body}</div>
+          <div className="shrink-0">{children.footer}</div>
+        </div>
       </div>
     </div>
   );

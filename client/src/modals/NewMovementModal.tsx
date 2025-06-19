@@ -31,9 +31,10 @@ import { useWallets } from '@/hooks/use-wallets'
 
 const createMovementSchema = z.object({
   description: z.string().min(1, 'La descripción es requerida'),
-  amount: z.number().min(0.01, 'El monto debe ser mayor a 0'),
+  amount: z.number().min(0.01, 'La cantidad debe ser mayor a 0'),
   type_id: z.string().min(1, 'El tipo es requerido'),
   category_id: z.string().min(1, 'La categoría es requerida'),
+  subcategory_id: z.string().optional(),
   currency_id: z.string().min(1, 'La moneda es requerida'),
   wallet_id: z.string().min(1, 'La billetera es requerida'),
   created_by: z.string().min(1, 'El creador es requerido'),
@@ -56,6 +57,7 @@ interface Movement {
   project_id: string
   type_id: string
   category_id: string
+  subcategory_id?: string
   currency_id: string
   wallet_id: string
   file_url?: string
@@ -80,7 +82,9 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
   const { data: wallets = [] } = useWallets(organizationId)
 
   const [selectedTypeId, setSelectedTypeId] = useState<string>('')
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('')
   const { data: categories = [] } = useMovementConcepts('categories', selectedTypeId)
+  const { data: subcategories = [] } = useMovementConcepts('categories', selectedCategoryId)
 
   const form = useForm<CreateMovementForm>({
     resolver: zodResolver(createMovementSchema),
@@ -89,6 +93,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
       amount: 0,
       type_id: '',
       category_id: '',
+      subcategory_id: '',
       currency_id: '',
       wallet_id: '',
       created_by: '',
@@ -98,11 +103,11 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
     }
   })
 
-  // Set default creator when user data loads
+  // Set default creator when user data loads (automatically selected)
   useEffect(() => {
     if (userData?.user?.id && members.length > 0) {
       const currentMember = members.find(member => member.user_id === userData.user.id)
-      if (currentMember) {
+      if (currentMember && !form.getValues('created_by')) {
         form.setValue('created_by', currentMember.id)
       }
     }
@@ -110,14 +115,14 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
 
   // Set default currency and wallet
   useEffect(() => {
-    if (currencies.length > 0) {
+    if (currencies.length > 0 && !form.getValues('currency_id')) {
       const defaultCurrency = currencies.find((c: any) => c.is_default) || currencies[0]
       form.setValue('currency_id', defaultCurrency.id)
     }
   }, [currencies, form])
 
   useEffect(() => {
-    if (wallets.length > 0) {
+    if (wallets.length > 0 && !form.getValues('wallet_id')) {
       const defaultWallet = wallets.find((w: any) => w.is_default) || wallets[0]
       form.setValue('wallet_id', defaultWallet.id)
     }
@@ -127,11 +132,13 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
   useEffect(() => {
     if (editingMovement) {
       setSelectedTypeId(editingMovement.type_id)
+      setSelectedCategoryId(editingMovement.category_id)
       form.reset({
         description: editingMovement.description,
         amount: editingMovement.amount,
         type_id: editingMovement.type_id,
         category_id: editingMovement.category_id,
+        subcategory_id: editingMovement.subcategory_id || '',
         currency_id: editingMovement.currency_id,
         wallet_id: editingMovement.wallet_id,
         created_by: editingMovement.created_by,
@@ -141,11 +148,13 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
       })
     } else {
       setSelectedTypeId('')
+      setSelectedCategoryId('')
       form.reset({
         description: '',
         amount: 0,
         type_id: '',
         category_id: '',
+        subcategory_id: '',
         currency_id: '',
         wallet_id: '',
         created_by: '',
@@ -188,11 +197,20 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
 
   const selectedMember = members.find(member => member.id === form.watch('created_by'))
 
-  // Handle type change to reset category
+  // Handle type change to reset category and subcategory
   const handleTypeChange = (typeId: string) => {
     setSelectedTypeId(typeId)
+    setSelectedCategoryId('')
     form.setValue('type_id', typeId)
-    form.setValue('category_id', '') // Reset category when type changes
+    form.setValue('category_id', '')
+    form.setValue('subcategory_id', '')
+  }
+
+  // Handle category change to reset subcategory
+  const handleCategoryChange = (categoryId: string) => {
+    setSelectedCategoryId(categoryId)
+    form.setValue('category_id', categoryId)
+    form.setValue('subcategory_id', '')
   }
 
   return (
@@ -207,7 +225,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
 
           <CustomModalBody padding="md">
             <div className="space-y-4">
-              {/* Date Field */}
+              {/* 1. Fecha de Creación */}
               <FormField
                 control={form.control}
                 name="created_at"
@@ -250,7 +268,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                 )}
               />
 
-              {/* Creator Field */}
+              {/* 2. Creador */}
               <FormField
                 control={form.control}
                 name="created_by"
@@ -303,52 +321,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                 )}
               />
 
-              {/* Description Field */}
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">Descripción</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Describe el movimiento financiero..."
-                        className="min-h-[80px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Amount Field */}
-              <FormField
-                control={form.control}
-                name="amount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">Monto</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          placeholder="0.00"
-                          className="pl-10"
-                          {...field}
-                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Type Field */}
+              {/* 3. Tipo */}
               <FormField
                 control={form.control}
                 name="type_id"
@@ -374,14 +347,14 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                 )}
               />
 
-              {/* Category Field */}
+              {/* 4. Categoría */}
               <FormField
                 control={form.control}
                 name="category_id"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium">Categoría</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value} disabled={!selectedTypeId}>
+                    <Select onValueChange={handleCategoryChange} value={field.value} disabled={!selectedTypeId}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccionar categoría" />
@@ -400,7 +373,33 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                 )}
               />
 
-              {/* Currency Field */}
+              {/* 5. Subcategoría */}
+              <FormField
+                control={form.control}
+                name="subcategory_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">Subcategoría</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={!selectedCategoryId}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar subcategoría" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {subcategories.map((subcategory: any) => (
+                          <SelectItem key={subcategory.id} value={subcategory.id}>
+                            {subcategory.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* 6. Moneda */}
               <FormField
                 control={form.control}
                 name="currency_id"
@@ -426,7 +425,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                 )}
               />
 
-              {/* Wallet Field */}
+              {/* 7. Billetera */}
               <FormField
                 control={form.control}
                 name="wallet_id"
@@ -452,20 +451,24 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                 )}
               />
 
-              {/* File URL Field */}
+              {/* 8. Cantidad (antes Monto) */}
               <FormField
                 control={form.control}
-                name="file_url"
+                name="amount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium">Archivo adjunto (URL)</FormLabel>
+                    <FormLabel className="text-sm font-medium">Cantidad</FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
-                          placeholder="https://ejemplo.com/archivo.pdf"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="0.00"
                           className="pl-10"
                           {...field}
+                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                         />
                       </div>
                     </FormControl>
@@ -474,7 +477,26 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                 )}
               />
 
-              {/* Is Conversion Switch */}
+              {/* 9. Descripción */}
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">Descripción</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Describe el movimiento financiero..."
+                        className="min-h-[80px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* 10. Conversión de Moneda */}
               <FormField
                 control={form.control}
                 name="is_conversion"
@@ -492,6 +514,28 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                         onCheckedChange={field.onChange}
                       />
                     </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              {/* 11. Archivo Adjunto */}
+              <FormField
+                control={form.control}
+                name="file_url"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">Archivo adjunto (URL)</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          placeholder="https://ejemplo.com/archivo.pdf"
+                          className="pl-10"
+                          {...field}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
