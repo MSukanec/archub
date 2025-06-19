@@ -388,6 +388,17 @@ Changelog:
   • Delete functionality includes Supabase mutation with proper error handling and toast notifications
   • Enhanced status badge system supporting planning/active/completed/on-hold states with appropriate variants
   • Table provides clean, scalable interface for managing multiple projects with search and filter integration
+
+- June 19, 2025. Projects.tsx refactored to horizontal cards and NewProjectModal enhanced with complete field set
+  • Changed Projects.tsx from table layout back to horizontal card layout as requested (100% width cards with row-style information)
+  • Card layout shows: Date, Creator (avatar + name), Project Name (clickable), Tipología, Modalidad, Estado, Actions
+  • Created useProjectTypes and useProjectModalities hooks for loading project metadata from Supabase
+  • Enhanced useProjects hook to include project_data with JOIN queries for typology and modality information
+  • Completely rebuilt NewProjectModal.tsx with all required fields: created_at, creator (readonly), name, project_type_id, modality_id, status
+  • Fixed organization membership error by properly querying organization_members table for created_by field
+  • Modal supports both creation and editing modes with proper form pre-population for editing projects
+  • Data persistence: projects table for core data, project_data table for typology/modality metadata
+  • Enhanced error handling and Spanish toast notifications for all CRUD operations
 ```
 
 ## User Preferences

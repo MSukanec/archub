@@ -330,7 +330,7 @@ export default function Projects() {
       onClearFilters={handleClearFilters}
     >
       <div className="space-y-3">
-        {filteredProjects.map((project: Project) => {
+        {filteredProjects.map((project) => {
           const isSelected = project.id === selectedProject
           const isSelecting = selectProjectMutation.isPending && selectProjectMutation.variables === project.id
           const creator = getCreatorInfo(project)
