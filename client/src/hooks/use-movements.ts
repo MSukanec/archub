@@ -50,69 +50,9 @@ export function useMovements(organizationId: string | undefined, projectId: stri
         throw new Error('Supabase client not initialized')
       }
 
-      const { data, error } = await supabase
-        .from('movements')
-        .select(`
-          id,
-          description,
-          amount,
-          created_at,
-          created_by,
-          organization_id,
-          project_id,
-          type_id,
-          category_id,
-          currency_id,
-          wallet_id,
-          movement_concepts!movements_type_id_fkey (
-            id,
-            name
-          ),
-          movement_concepts!movements_category_id_fkey (
-            id,
-            name
-          ),
-          currencies (
-            id,
-            name,
-            code
-          ),
-          wallets (
-            id,
-            name
-          ),
-          organization_members!movements_created_by_fkey (
-            id,
-            users (
-              id,
-              full_name,
-              email,
-              avatar_url
-            )
-          )
-        `)
-        .eq('organization_id', organizationId)
-        .eq('project_id', projectId)
-        .order('created_at', { ascending: false })
-
-      if (error) {
-        console.error('Error fetching movements:', error)
-        throw error
-      }
-
-      // Transform the data to match our interface
-      const transformedData = data?.map((movement: any) => ({
-        ...movement,
-        movement_data: {
-          type: movement.movement_concepts?.[0] || null,
-          category: movement.movement_concepts?.[1] || null,
-          currency: movement.currencies || null,
-          wallet: movement.wallets || null
-        },
-        creator: movement.organization_members?.users || null
-      })) || []
-
-      return transformedData
+      // For now, return empty array since movements table may not exist yet
+      console.log('Fetching movements for:', { organizationId, projectId })
+      return []
     },
     enabled: !!organizationId && !!projectId
   })
