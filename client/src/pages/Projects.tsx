@@ -348,10 +348,14 @@ export default function Projects() {
           const creator = getCreatorInfo(project)
 
           return (
-            <Card key={project.id} className={cn(
-              "w-full transition-all duration-200 hover:shadow-md",
-              isSelected && "ring-2 ring-primary/20 bg-primary/5"
-            )}>
+            <Card 
+              key={project.id} 
+              className={cn(
+                "w-full transition-all duration-200 hover:shadow-md cursor-pointer",
+                isSelected && "ring-2 ring-primary/20 bg-primary/5"
+              )}
+              onClick={() => handleSelectProject(project.id)}
+            >
               <CardContent className="p-4">
                 <div className="flex items-center justify-between w-full">
                   {/* Fecha */}
@@ -373,16 +377,7 @@ export default function Projects() {
                   {/* Nombre del proyecto */}
                   <div className="flex-1 min-w-0 px-4">
                     <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleSelectProject(project.id)}
-                        disabled={isSelecting}
-                        className={cn(
-                          "text-left hover:text-primary transition-colors",
-                          isSelecting && "opacity-50"
-                        )}
-                      >
-                        <span className="font-medium truncate">{project.name}</span>
-                      </button>
+                      <span className="font-medium truncate">{project.name}</span>
                       {isSelected && (
                         <Badge variant="default" className="text-xs bg-primary/10 text-primary border-primary/20">
                           Activo
@@ -411,7 +406,7 @@ export default function Projects() {
                   </div>
 
                   {/* Acciones */}
-                  <div className="w-10 flex-shrink-0">
+                  <div className="w-10 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-8 w-8">

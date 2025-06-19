@@ -46,11 +46,11 @@ export function useProjects(organizationId: string | undefined) {
           project_data (
             project_type_id,
             modality_id,
-            project_types (
+            project_types!project_type_id (
               id,
               name
             ),
-            project_modalities (
+            project_modalities!modality_id (
               id,
               name
             )
@@ -79,23 +79,31 @@ export function useProjects(organizationId: string | undefined) {
       }
       
       // Transform the data to match our interface
-      const transformedData = (data || []).map(project => ({
-        ...project,
-        project_data: project.project_data?.[0] ? {
-          project_type_id: project.project_data[0].project_type_id,
-          modality_id: project.project_data[0].modality_id,
-          project_type: project.project_data[0].project_types,
-          modality: project.project_data[0].project_modalities
-        } : undefined,
-        creator: project.organization_members?.users ? {
-          id: project.organization_members.users.id,
-          full_name: project.organization_members.users.full_name,
-          email: project.organization_members.users.email,
-          avatar_url: project.organization_members.users.avatar_url,
-          first_name: project.organization_members.users.user_data?.[0]?.first_name,
-          last_name: project.organization_members.users.user_data?.[0]?.last_name
-        } : undefined
-      }))
+      const transformedData = (data || []).map(project => {
+        console.log('Project data from Supabase:', project) // Debug log
+        return {
+          ...project,
+          project_data: project.project_data?.[0] ? {
+            project_type_id: project.project_data[0].project_type_id,
+            modality_id: project.project_data[0].modality_id,
+            project_type: project.project_data[0].project_types,
+            modality: project.project_data[0].project_modalities
+          } : {
+            project_type_id: null,
+            modality_id: null,
+            project_type: null,
+            modality: null
+          },
+          creator: project.organization_members?.users ? {
+            id: project.organization_members.users.id,
+            full_name: project.organization_members.users.full_name,
+            email: project.organization_members.users.email,
+            avatar_url: project.organization_members.users.avatar_url,
+            first_name: project.organization_members.users.user_data?.[0]?.first_name,
+            last_name: project.organization_members.users.user_data?.[0]?.last_name
+          } : undefined
+        }
+      })
 
       return transformedData
     },

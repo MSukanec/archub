@@ -399,6 +399,16 @@ Changelog:
   • Modal supports both creation and editing modes with proper form pre-population for editing projects
   • Data persistence: projects table for core data, project_data table for typology/modality metadata
   • Enhanced error handling and Spanish toast notifications for all CRUD operations
+
+- June 19, 2025. Fixed cache invalidation, project selection, and data visualization issues
+  • Corrected cache invalidation with forced refetch after editing projects to ensure immediate UI updates
+  • Fixed pre-loading of project data in edit modal using 'none' values instead of empty strings
+  • Made entire project cards clickable for selection (like organization cards) with stopPropagation on actions
+  • Replaced Crown icon with "Activo" badge for selected projects with proper styling
+  • Implemented project sorting: active project appears first, then by creation date descending
+  • Fixed SelectItem empty value error by using 'none' instead of empty strings in dropdowns
+  • Enhanced project data transformation to handle missing typology/modality data correctly
+  • Added debug logging to track Supabase query results for troubleshooting data visualization issues
 ```
 
 ## User Preferences
