@@ -86,8 +86,8 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
     defaultValues: {
       name: '',
       status: 'planning',
-      project_type_id: '',
-      modality_id: '',
+      project_type_id: 'none',
+      modality_id: 'none',
       created_at: new Date()
     }
   })
@@ -98,16 +98,16 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
       form.reset({
         name: editingProject.name,
         status: editingProject.status as any,
-        project_type_id: editingProject.project_data?.project_type_id || '',
-        modality_id: editingProject.project_data?.modality_id || '',
+        project_type_id: editingProject.project_data?.project_type_id || 'none',
+        modality_id: editingProject.project_data?.modality_id || 'none',
         created_at: new Date(editingProject.created_at)
       })
     } else {
       form.reset({
         name: '',
         status: 'planning',
-        project_type_id: '',
-        modality_id: '',
+        project_type_id: 'none',
+        modality_id: 'none',
         created_at: new Date()
       })
     }
@@ -162,21 +162,19 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
           throw projectError
         }
 
-        // Update project_data if type or modality changed
-        if (formData.project_type_id || formData.modality_id) {
-          const { error: dataError } = await supabase
-            .from('project_data')
-            .upsert({
-              project_id: editingProject.id,
-              project_type_id: formData.project_type_id || null,
-              modality_id: formData.modality_id || null
-            }, {
-              onConflict: 'project_id'
-            })
+        // Update project_data (always upsert to handle adding/removing)
+        const { error: dataError } = await supabase
+          .from('project_data')
+          .upsert({
+            project_id: editingProject.id,
+            project_type_id: formData.project_type_id === 'none' ? null : formData.project_type_id || null,
+            modality_id: formData.modality_id === 'none' ? null : formData.modality_id || null
+          }, {
+            onConflict: 'project_id'
+          })
 
-          if (dataError) {
-            throw dataError
-          }
+        if (dataError) {
+          throw dataError
         }
 
         return { id: editingProject.id, isEdit: true }
@@ -232,9 +230,15 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
         return { id: projectId, isEdit: false }
       }
     },
-    onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: ['projects'] })
-      queryClient.invalidateQueries({ queryKey: ['current-user'] })
+    onSuccess: async (result) => {
+      // Invalidate all related queries to ensure fresh data
+      await queryClient.invalidateQueries({ queryKey: ['projects'] })
+      await queryClient.invalidateQueries({ queryKey: ['current-user'] })
+      
+      // Force refetch to ensure UI updates immediately
+      if (result.isEdit) {
+        await queryClient.refetchQueries({ queryKey: ['projects'] })
+      }
       
       toast({
         title: result.isEdit ? 'Proyecto actualizado' : 'Proyecto creado',
