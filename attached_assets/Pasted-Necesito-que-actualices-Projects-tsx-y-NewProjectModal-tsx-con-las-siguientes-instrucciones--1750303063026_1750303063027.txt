@@ -1,0 +1,70 @@
+Necesito que actualices `Projects.tsx` y `NewProjectModal.tsx` con las siguientes instrucciones.  
+Todo el diseño sigue el estándar definido en `/prompts/ai-page-template.md`, por lo que tenés que respetarlo.
+
+---
+
+## ✅ Estructura visual (cards, no tabla)
+
+Actualmente se muestran proyectos con un layout de tarjetas (cards). Mantené ese sistema, **pero cada card debe ocupar el 100% del ancho** disponible y organizar la información como una **fila horizontal** (tipo tabla visual), como en la referencia visual que te muestro.
+
+Cada card debe mostrar, en este orden:
+
+| Fecha | Creador | Nombre | Tipología | Modalidad | Estado | Acciones |
+
+- El campo **Creador** debe mostrar el avatar y el nombre.
+- El campo **Acciones** incluye: botón para editar (abre modal) y para eliminar (confirma).
+
+---
+
+## ✅ Modal de Nuevo Proyecto
+
+Actualmente el modal funciona pero da errores, y le faltan campos clave.
+
+### Errores a corregir:
+- El modal lanza: `Error: No se encontró la membresía del usuario en esta organización`.  
+  Este error ocurre porque no estás pasando el `organization_member_id` correcto.  
+  Debés obtenerlo desde `archub_get_user()` y usarlo al crear el proyecto.
+
+### Campos requeridos:
+
+El modal debe incluir (en este orden):
+
+1. Fecha de creación (`created_at`)
+2. Miembro creador (`created_by` → mostrar nombre y avatar, no editable)
+3. Nombre del proyecto (`name`)
+4. Tipología (`project_type_id`, viene de tabla `project_types`)
+5. Modalidad (`modality_id`, viene de tabla `project_modalities`)
+6. Estado (`status`: planning, active, completed, etc.)
+
+Los campos `name`, `status`, `created_by`, `created_at`, `organization_id`, `is_active` van a la tabla `projects`.
+
+Los campos `project_type_id` y `modality_id` se guardan en `project_data`, usando `project_id` como clave.
+
+---
+
+## ✅ Comportamiento y detalles técnicos
+
+- Usar Supabase RPC para obtener datos de usuario (`archub_get_user`)
+- Usar React Query para cargar tipologías y modalidades (tablas: `project_types`, `project_modalities`)
+- Al editar un proyecto, el modal debe rellenarse con los datos existentes (tanto de `projects` como de `project_data`)
+- El botón “Nuevo Proyecto” abre el modal en modo creación
+- El botón de editar dentro de cada card abre el modal en modo edición
+- El botón de eliminar muestra confirmación y luego borra el proyecto
+
+---
+
+## ✅ Estética
+
+- Todos los estilos deben venir de Tailwind (`index.css`)
+- Los labels no deben estar todos rojos, solo marcar error si un campo es inválido
+- No usar estilos inline
+- El diseño debe ser elegante, limpio, como en la referencia de LemonSqueezy
+
+---
+
+## 🔥 Importante
+
+- No usar datos de ejemplo inventados
+- No usar campos que no estén en Supabase (como `budget`, `team_size`, etc.)
+- Toda inserción debe respetar las relaciones reales
+- No modificar columnas fuera de las permitidas

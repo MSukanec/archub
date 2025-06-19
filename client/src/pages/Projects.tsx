@@ -1,11 +1,10 @@
 import { useState, useMemo } from 'react'
-import { Folder, Plus, Calendar, Crown, Edit, Trash2, MoreHorizontal } from 'lucide-react'
+import { Folder, Plus, Crown, Edit, Trash2, MoreHorizontal } from 'lucide-react'
 import { CustomPageLayout } from '@/components/ui-custom/CustomPageLayout'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,18 +30,36 @@ import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import { NewProjectModal } from '@/modals/NewProjectModal'
 
-type FilterType = 'all' | 'active' | 'completed' | 'on-hold'
+type FilterType = 'all' | 'active' | 'completed' | 'on-hold' | 'planning'
 
 interface Project {
   id: string
   name: string
   status: string
-  budget: number
-  team_size: number
   created_at: string
+  created_by: string
   organization_id: string
-  description?: string
-  progress?: number
+  is_active: boolean
+  project_data?: {
+    project_type_id?: string
+    modality_id?: string
+    project_type?: {
+      id: string
+      name: string
+    }
+    modality?: {
+      id: string
+      name: string
+    }
+  }
+  creator?: {
+    id: string
+    full_name?: string
+    first_name?: string
+    last_name?: string
+    email: string
+    avatar_url?: string
+  }
 }
 
 export default function Projects() {
@@ -122,10 +139,8 @@ export default function Projects() {
   const filteredProjects = useMemo(() => {
     if (!projectsData) return []
     
-    return projectsData.filter((project: Project) => {
-      const matchesSearch = project.name.toLowerCase().includes(searchValue.toLowerCase()) ||
-                           (project.description || '').toLowerCase().includes(searchValue.toLowerCase())
-      
+    return projectsData.filter((project) => {
+      const matchesSearch = project.name.toLowerCase().includes(searchValue.toLowerCase())
       const matchesFilter = activeFilter === 'all' || project.status === activeFilter
       
       return matchesSearch && matchesFilter
@@ -156,6 +171,7 @@ export default function Projects() {
     { label: 'Activos', onClick: () => setActiveFilter('active') },
     { label: 'Completados', onClick: () => setActiveFilter('completed') },
     { label: 'En pausa', onClick: () => setActiveFilter('on-hold') },
+    { label: 'Planificación', onClick: () => setActiveFilter('planning') },
   ]
 
   const handleClearFilters = () => {
@@ -196,8 +212,22 @@ export default function Projects() {
   }
 
   const getCreatorInfo = (project: Project) => {
-    // For now, we'll show organization owner info since we don't have creator details in the project data
-    // In a real implementation, you'd join with organization_members to get creator info
+    if (project.creator) {
+      const name = project.creator.full_name || 
+        (project.creator.first_name && project.creator.last_name 
+          ? `${project.creator.first_name} ${project.creator.last_name}`
+          : project.creator.email)
+      
+      const initials = project.creator.full_name 
+        ? project.creator.full_name.split(' ').map(n => n.charAt(0)).join('').toUpperCase().slice(0, 2)
+        : (project.creator.first_name && project.creator.last_name
+            ? `${project.creator.first_name.charAt(0)}${project.creator.last_name.charAt(0)}`
+            : project.creator.email.charAt(0).toUpperCase())
+
+      return { name, initials, avatar: project.creator.avatar_url || '' }
+    }
+    
+    // Fallback to current user info
     const creatorName = data?.user?.full_name || 
       (data?.user_data?.first_name && data?.user_data?.last_name 
         ? `${data.user_data.first_name} ${data.user_data.last_name}`
@@ -299,93 +329,98 @@ export default function Projects() {
       filters={filters}
       onClearFilters={handleClearFilters}
     >
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[120px]">Fecha</TableHead>
-                <TableHead className="w-[200px]">Creador</TableHead>
-                <TableHead>Nombre del proyecto</TableHead>
-                <TableHead className="w-[120px]">Estado</TableHead>
-                <TableHead className="w-[80px]">Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredProjects.map((project: Project) => {
-                const isSelected = project.id === selectedProject
-                const isSelecting = selectProjectMutation.isPending && selectProjectMutation.variables === project.id
-                const creator = getCreatorInfo(project)
+      <div className="space-y-3">
+        {filteredProjects.map((project: Project) => {
+          const isSelected = project.id === selectedProject
+          const isSelecting = selectProjectMutation.isPending && selectProjectMutation.variables === project.id
+          const creator = getCreatorInfo(project)
 
-                return (
-                  <TableRow key={project.id} className={cn(
-                    "transition-colors",
-                    isSelected && "bg-muted/50"
-                  )}>
-                    <TableCell className="font-medium text-sm text-muted-foreground">
+          return (
+            <Card key={project.id} className={cn(
+              "w-full transition-all duration-200 hover:shadow-md",
+              isSelected && "ring-2 ring-primary/20 bg-primary/5"
+            )}>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between w-full">
+                  {/* Fecha */}
+                  <div className="flex-shrink-0 w-20">
+                    <p className="text-xs text-muted-foreground font-medium">
                       {formatDate(project.created_at)}
-                    </TableCell>
-                    
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-6 w-6">
-                          <AvatarImage src={creator.avatar} />
-                          <AvatarFallback className="text-xs">{creator.initials}</AvatarFallback>
-                        </Avatar>
-                        <span className="text-sm font-medium">{creator.name}</span>
-                      </div>
-                    </TableCell>
-                    
-                    <TableCell>
-                      <button
-                        onClick={() => handleSelectProject(project.id)}
-                        disabled={isSelecting}
-                        className={cn(
-                          "flex items-center gap-2 text-left hover:text-primary transition-colors",
-                          isSelecting && "opacity-50"
-                        )}
-                      >
-                        <span className="font-medium">{project.name}</span>
-                        {isSelected && <Crown className="h-4 w-4 text-primary" />}
-                      </button>
-                      {project.description && (
-                        <p className="text-sm text-muted-foreground mt-1">{project.description}</p>
+                    </p>
+                  </div>
+
+                  {/* Creador */}
+                  <div className="flex items-center gap-2 w-40 flex-shrink-0">
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage src={creator.avatar} />
+                      <AvatarFallback className="text-xs">{creator.initials}</AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm font-medium truncate">{creator.name}</span>
+                  </div>
+
+                  {/* Nombre del proyecto */}
+                  <div className="flex-1 min-w-0 px-4">
+                    <button
+                      onClick={() => handleSelectProject(project.id)}
+                      disabled={isSelecting}
+                      className={cn(
+                        "flex items-center gap-2 text-left hover:text-primary transition-colors",
+                        isSelecting && "opacity-50"
                       )}
-                    </TableCell>
-                    
-                    <TableCell>
-                      {getStatusBadge(project.status)}
-                    </TableCell>
-                    
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleEditProject(project)}>
-                            <Edit className="h-4 w-4 mr-2" />
-                            Editar
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={() => handleDeleteProject(project)}
-                            className="text-destructive focus:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Eliminar
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                    >
+                      <span className="font-medium truncate">{project.name}</span>
+                      {isSelected && <Crown className="h-4 w-4 text-primary flex-shrink-0" />}
+                    </button>
+                  </div>
+
+                  {/* Tipología */}
+                  <div className="w-32 flex-shrink-0">
+                    <span className="text-sm text-muted-foreground">
+                      {project.project_data?.project_type?.name || 'Sin tipología'}
+                    </span>
+                  </div>
+
+                  {/* Modalidad */}
+                  <div className="w-32 flex-shrink-0">
+                    <span className="text-sm text-muted-foreground">
+                      {project.project_data?.modality?.name || 'Sin modalidad'}
+                    </span>
+                  </div>
+
+                  {/* Estado */}
+                  <div className="w-28 flex-shrink-0">
+                    {getStatusBadge(project.status)}
+                  </div>
+
+                  {/* Acciones */}
+                  <div className="w-10 flex-shrink-0">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleEditProject(project)}>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Editar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => handleDeleteProject(project)}
+                          className="text-destructive focus:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Eliminar
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )
+        })}
+      </div>
 
       {/* New/Edit Project Modal */}
       <NewProjectModal
@@ -394,6 +429,7 @@ export default function Projects() {
           setShowNewProjectModal(false)
           setEditingProject(null)
         }}
+        editingProject={editingProject}
       />
 
       {/* Delete Confirmation Dialog */}

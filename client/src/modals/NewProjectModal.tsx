@@ -1,285 +1,467 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { z } from 'zod'
-import { supabase } from '@/lib/supabase'
-import { useCurrentUser } from '@/hooks/use-current-user'
-import { useToast } from '@/hooks/use-toast'
+import { useMutation } from '@tanstack/react-query'
+import { Calendar, CalendarDays } from 'lucide-react'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
+
 import { CustomModalLayout } from '@/components/ui-custom/CustomModalLayout'
 import { CustomModalHeader } from '@/components/ui-custom/CustomModalHeader'
 import { CustomModalBody } from '@/components/ui-custom/CustomModalBody'
 import { CustomModalFooter } from '@/components/ui-custom/CustomModalFooter'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Calendar as CalendarComponent } from '@/components/ui/calendar'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+
+import { useCurrentUser } from '@/hooks/use-current-user'
+import { useProjectTypes } from '@/hooks/use-project-types'
+import { useProjectModalities } from '@/hooks/use-project-modalities'
+import { queryClient } from '@/lib/queryClient'
+import { supabase } from '@/lib/supabase'
+import { useToast } from '@/hooks/use-toast'
+import { cn } from '@/lib/utils'
 
 const createProjectSchema = z.object({
-  name: z.string().min(1, 'El nombre del proyecto es requerido').max(100, 'El nombre no puede exceder 100 caracteres'),
-  status: z.enum(['planning', 'active', 'completed'], { required_error: 'El estado es requerido' }),
-  created_at: z.string().min(1, 'La fecha de creación es requerida')
+  name: z.string().min(1, 'El nombre del proyecto es requerido'),
+  status: z.enum(['planning', 'active', 'completed', 'on-hold']),
+  project_type_id: z.string().optional(),
+  modality_id: z.string().optional(),
+  created_at: z.date()
 })
 
 type CreateProjectForm = z.infer<typeof createProjectSchema>
 
+interface Project {
+  id: string
+  name: string
+  status: string
+  created_at: string
+  created_by: string
+  organization_id: string
+  is_active: boolean
+  project_data?: {
+    project_type_id?: string
+    modality_id?: string
+    project_type?: {
+      id: string
+      name: string
+    }
+    modality?: {
+      id: string
+      name: string
+    }
+  }
+  creator?: {
+    id: string
+    full_name?: string
+    first_name?: string
+    last_name?: string
+    email: string
+    avatar_url?: string
+  }
+}
+
 interface NewProjectModalProps {
   open: boolean
   onClose: () => void
+  editingProject?: Project | null
 }
 
-export function NewProjectModal({ open, onClose }: NewProjectModalProps) {
+export function NewProjectModal({ open, onClose, editingProject }: NewProjectModalProps) {
   const { data: userData } = useCurrentUser()
+  const { data: projectTypes, isLoading: typesLoading } = useProjectTypes()
+  const { data: projectModalities, isLoading: modalitiesLoading } = useProjectModalities()
   const { toast } = useToast()
-  const queryClient = useQueryClient()
+  const [loading, setLoading] = useState(false)
 
   const form = useForm<CreateProjectForm>({
     resolver: zodResolver(createProjectSchema),
     defaultValues: {
       name: '',
       status: 'planning',
-      created_at: new Date().toISOString().split('T')[0]
+      project_type_id: '',
+      modality_id: '',
+      created_at: new Date()
     }
   })
 
+  // Update form when editing project changes
+  useEffect(() => {
+    if (editingProject) {
+      form.reset({
+        name: editingProject.name,
+        status: editingProject.status as any,
+        project_type_id: editingProject.project_data?.project_type_id || '',
+        modality_id: editingProject.project_data?.modality_id || '',
+        created_at: new Date(editingProject.created_at)
+      })
+    } else {
+      form.reset({
+        name: '',
+        status: 'planning',
+        project_type_id: '',
+        modality_id: '',
+        created_at: new Date()
+      })
+    }
+  }, [editingProject, form])
+
+  // Create project mutation
   const createProjectMutation = useMutation({
     mutationFn: async (formData: CreateProjectForm) => {
-      if (!supabase) {
-        throw new Error('Supabase no está disponible')
+      if (!supabase || !userData?.organization?.id) {
+        throw new Error('User not authenticated or no organization selected')
       }
 
-      const organization = userData?.organization
-      const user = userData?.user
-      const memberships = userData?.memberships
+      // Find the user's membership in the current organization
+      const currentOrgMembership = userData.memberships?.find(
+        membership => membership.organization_id === userData.organization?.id
+      )
 
-      if (!organization?.id) {
-        throw new Error('No se encontró la organización actual')
-      }
-
-      if (!user?.id) {
-        throw new Error('No se encontró el usuario actual')
-      }
-
-      // Get the organization member ID for the current user
-      console.log('Searching for membership in organization:', organization.id)
-      console.log('Available memberships:', memberships)
-      
-      const orgMemberId = memberships?.find(
-        m => m.organization_id === organization.id
-      )?.id
-
-      console.log('Found organization member ID:', orgMemberId)
-
-      if (!orgMemberId) {
-        // Show specific toast error and don't proceed
-        toast({
-          title: 'Error',
-          description: 'No se encontró la membresía del usuario en esta organización',
-          variant: 'destructive'
-        })
+      if (!currentOrgMembership) {
+        console.log('Searching for membership in organization:', userData.organization.id)
+        console.log('Available memberships:', userData.memberships)
         throw new Error('No se encontró la membresía del usuario en esta organización')
       }
 
-      // Create project in projects table
-      const projectData = {
-        name: formData.name,
-        status: formData.status,
-        is_active: true,
-        organization_id: organization.id,
-        created_at: formData.created_at,
-        created_by: orgMemberId
-      }
-
-      console.log('Inserting project data:', projectData)
-      
-      const { data: project, error: projectError } = await supabase
-        .from('projects')
-        .insert(projectData)
-        .select()
+      // Get the organization_member_id from the organization members table
+      const { data: memberData, error: memberError } = await supabase
+        .from('organization_members')
+        .select('id')
+        .eq('organization_id', userData.organization.id)
+        .eq('user_id', userData.user.id)
         .single()
 
-      if (projectError) {
-        console.error('Error creating project:', projectError)
-        toast({
-          title: 'Error al crear proyecto',
-          description: projectError.message || 'Error desconocido al crear el proyecto',
-          variant: 'destructive'
-        })
-        throw projectError
+      if (memberError || !memberData) {
+        console.error('Error finding organization member ID:', memberError)
+        throw new Error('No se pudo obtener el ID de membresía de la organización')
       }
 
-      console.log('Project created successfully:', project)
+      const organizationMemberId = memberData.id
+      console.log('Found organization member ID:', organizationMemberId)
 
-      // Create project_data entry
-      try {
-        const { error: projectDataError } = await supabase
-          .from('project_data')
-          .insert({
-            project_id: project.id,
-            created_by: orgMemberId,
-            updated_by: orgMemberId
+      if (editingProject) {
+        // Update existing project
+        const { error: projectError } = await supabase
+          .from('projects')
+          .update({
+            name: formData.name,
+            status: formData.status,
+            created_at: formData.created_at.toISOString()
           })
+          .eq('id', editingProject.id)
 
-        if (projectDataError) {
-          console.warn('Could not create project_data entry:', projectDataError)
+        if (projectError) {
+          throw projectError
         }
-      } catch (error) {
-        console.warn('Project_data table might not exist:', error)
+
+        // Update project_data if type or modality changed
+        if (formData.project_type_id || formData.modality_id) {
+          const { error: dataError } = await supabase
+            .from('project_data')
+            .upsert({
+              project_id: editingProject.id,
+              project_type_id: formData.project_type_id || null,
+              modality_id: formData.modality_id || null
+            }, {
+              onConflict: 'project_id'
+            })
+
+          if (dataError) {
+            throw dataError
+          }
+        }
+
+        return { id: editingProject.id, isEdit: true }
+      } else {
+        // Create new project
+        const { data: projectData, error: projectError } = await supabase
+          .from('projects')
+          .insert({
+            name: formData.name,
+            status: formData.status,
+            created_by: organizationMemberId,
+            organization_id: userData.organization.id,
+            is_active: true,
+            created_at: formData.created_at.toISOString()
+          })
+          .select('id')
+          .single()
+
+        if (projectError) {
+          console.error('Error creating project:', projectError)
+          throw projectError
+        }
+
+        const projectId = projectData.id
+
+        // Create project_data entry if type or modality provided
+        if (formData.project_type_id || formData.modality_id) {
+          const { error: dataError } = await supabase
+            .from('project_data')
+            .insert({
+              project_id: projectId,
+              project_type_id: formData.project_type_id || null,
+              modality_id: formData.modality_id || null
+            })
+
+          if (dataError) {
+            console.error('Error creating project data:', dataError)
+            throw dataError
+          }
+        }
+
+        // Update user preferences to select this project
+        const { error: prefsError } = await supabase
+          .from('user_preferences')
+          .update({ last_project_id: projectId })
+          .eq('user_id', userData.user.id)
+
+        if (prefsError) {
+          console.error('Error updating preferences:', prefsError)
+          // Don't throw here, project creation was successful
+        }
+
+        return { id: projectId, isEdit: false }
       }
-
-      // Update user's last_project_id to select this new project
-      const { error: preferencesError } = await supabase
-        .from('user_preferences')
-        .update({ last_project_id: project.id })
-        .eq('user_id', user.id)
-
-      if (preferencesError) {
-        console.warn('Could not update user preferences:', preferencesError)
-      }
-
-      return project
     },
-    onSuccess: (newProject) => {
-      // Invalidate and refetch relevant queries
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['projects'] })
       queryClient.invalidateQueries({ queryKey: ['current-user'] })
       
       toast({
-        title: 'Proyecto creado',
-        description: `El proyecto "${newProject.name}" se creó exitosamente.`
+        title: result.isEdit ? 'Proyecto actualizado' : 'Proyecto creado',
+        description: result.isEdit 
+          ? 'El proyecto se actualizó exitosamente.' 
+          : 'El proyecto se creó exitosamente.'
       })
       
-      form.reset()
       onClose()
     },
     onError: (error) => {
       console.error('Error creating project:', error)
       toast({
         title: 'Error al crear proyecto',
-        description: 'No se pudo crear el proyecto. Intenta nuevamente.',
+        description: error.message || 'No se pudo crear el proyecto. Intenta nuevamente.',
         variant: 'destructive'
       })
     }
   })
 
   const handleSubmit = (data: CreateProjectForm) => {
-    createProjectMutation.mutate(data)
+    setLoading(true)
+    createProjectMutation.mutate(data, {
+      onSettled: () => setLoading(false)
+    })
   }
 
-  const handleCancel = () => {
-    form.reset()
-    onClose()
+  const getCreatorInfo = () => {
+    const creatorName = userData?.user?.full_name || 
+      (userData?.user_data?.first_name && userData?.user_data?.last_name 
+        ? `${userData.user_data.first_name} ${userData.user_data.last_name}`
+        : userData?.user?.email) || 'Usuario'
+    
+    const creatorInitials = userData?.user?.full_name 
+      ? userData.user.full_name.split(' ').map(n => n.charAt(0)).join('').toUpperCase().slice(0, 2)
+      : (userData?.user_data?.first_name && userData?.user_data?.last_name
+          ? `${userData.user_data.first_name.charAt(0)}${userData.user_data.last_name.charAt(0)}`
+          : userData?.user?.email?.charAt(0).toUpperCase()) || 'U'
+
+    return { name: creatorName, initials: creatorInitials, avatar: userData?.user?.avatar_url || '' }
   }
 
-  // Get user display info
-  const userDisplayName = userData?.user?.full_name || 
-    (userData?.user_data?.first_name && userData?.user_data?.last_name 
-      ? `${userData.user_data.first_name} ${userData.user_data.last_name}`
-      : userData?.user?.email) || 'Usuario'
-  
-  const userInitials = userData?.user?.full_name 
-    ? userData.user.full_name.split(' ').map(n => n.charAt(0)).join('').toUpperCase().slice(0, 2)
-    : (userData?.user_data?.first_name && userData?.user_data?.last_name
-        ? `${userData.user_data.first_name.charAt(0)}${userData.user_data.last_name.charAt(0)}`
-        : userData?.user?.email?.charAt(0).toUpperCase()) || 'U'
+  const creator = getCreatorInfo()
 
   return (
-    <CustomModalLayout open={open} onClose={handleCancel}>
+    <CustomModalLayout open={open} onClose={onClose}>
       <CustomModalHeader
-        title="Nuevo proyecto"
-        description="Crea un nuevo proyecto para tu organización"
-        onClose={handleCancel}
+        title={editingProject ? 'Editar proyecto' : 'Nuevo proyecto'}
+        description={editingProject ? 'Actualiza la información del proyecto' : 'Crea un nuevo proyecto para tu organización'}
+        onClose={onClose}
       />
-      
-      <CustomModalBody>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="created_at"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium text-muted-foreground">
-                    Fecha de creación
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="date"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
-            <div>
-              <label className="text-sm font-medium text-muted-foreground mb-2 block">
-                Miembro creador
-              </label>
-              <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-md border">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={userData?.user?.avatar_url || ''} />
-                  <AvatarFallback className="text-xs">{userInitials}</AvatarFallback>
-                </Avatar>
-                <span className="text-sm font-medium">{userDisplayName}</span>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <CustomModalBody padding="md">
+            <div className="space-y-4">
+              {/* Fecha de creación */}
+              <FormField
+                control={form.control}
+                name="created_at"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel className="text-sm font-medium">Fecha de creación</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PPP", { locale: es })
+                            ) : (
+                              <span>Selecciona una fecha</span>
+                            )}
+                            <CalendarDays className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <CalendarComponent
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) =>
+                            date > new Date() || date < new Date("1900-01-01")
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Miembro creador */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Miembro creador</Label>
+                <div className="flex items-center gap-3 p-3 rounded-md border bg-muted/50">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={creator.avatar} />
+                    <AvatarFallback className="text-xs">{creator.initials}</AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm font-medium">{creator.name}</span>
+                </div>
               </div>
-            </div>
 
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium text-muted-foreground">
-                    Nombre del proyecto
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Torre Residencial Norte"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium text-muted-foreground">
-                    Estado
-                  </FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+              {/* Nombre del proyecto */}
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">Nombre del proyecto</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecciona un estado" />
-                      </SelectTrigger>
+                      <Input placeholder="Ingresa el nombre del proyecto" {...field} />
                     </FormControl>
-                    <SelectContent>
-                      <SelectItem value="planning">Planificación</SelectItem>
-                      <SelectItem value="active">Activo</SelectItem>
-                      <SelectItem value="completed">Completado</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </form>
-        </Form>
-      </CustomModalBody>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-      <CustomModalFooter
-        onCancel={handleCancel}
-        onSubmit={form.handleSubmit(handleSubmit)}
-        submitText="Crear proyecto"
-        isSubmitting={createProjectMutation.isPending}
-        submitDisabled={!form.formState.isValid}
-      />
+              {/* Tipología */}
+              <FormField
+                control={form.control}
+                name="project_type_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">Tipología</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona una tipología" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {typesLoading ? (
+                          <SelectItem value="loading" disabled>Cargando...</SelectItem>
+                        ) : (
+                          <>
+                            <SelectItem value="">Sin tipología</SelectItem>
+                            {projectTypes?.map((type) => (
+                              <SelectItem key={type.id} value={type.id}>
+                                {type.name}
+                              </SelectItem>
+                            ))}
+                          </>
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Modalidad */}
+              <FormField
+                control={form.control}
+                name="modality_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">Modalidad</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona una modalidad" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {modalitiesLoading ? (
+                          <SelectItem value="loading" disabled>Cargando...</SelectItem>
+                        ) : (
+                          <>
+                            <SelectItem value="">Sin modalidad</SelectItem>
+                            {projectModalities?.map((modality) => (
+                              <SelectItem key={modality.id} value={modality.id}>
+                                {modality.name}
+                              </SelectItem>
+                            ))}
+                          </>
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Estado */}
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">Estado</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona un estado" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="planning">Planificación</SelectItem>
+                        <SelectItem value="active">Activo</SelectItem>
+                        <SelectItem value="on-hold">En pausa</SelectItem>
+                        <SelectItem value="completed">Completado</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </CustomModalBody>
+
+          <CustomModalFooter
+            cancelText="Cancelar"
+            submitText={loading ? 'Guardando...' : (editingProject ? 'Actualizar' : 'Crear proyecto')}
+            onCancel={onClose}
+            submitDisabled={loading || createProjectMutation.isPending}
+          />
+        </form>
+      </Form>
     </CustomModalLayout>
   )
 }
