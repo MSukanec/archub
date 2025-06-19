@@ -378,6 +378,16 @@ Changelog:
   • Post-creation workflow: inserts project_data entry, updates user_preferences.last_project_id, invalidates React Query cache
   • Visual improvements: consistent text-sm font-medium labels, avatar display, proper spacing and form validation
   • Modal successfully opens from "Nuevo proyecto" button and integrates with existing project listing system
+
+- June 19, 2025. Complete Projects.tsx refactoring with professional table interface and CRUD operations
+  • Eliminated debug borders from CustomPageLayout, CustomPageHeader, and CustomPageBody components
+  • Completely refactored Projects.tsx from card-based layout to professional table interface matching provided design reference
+  • Table columns: Date (created_at), Creator (avatar + name), Project Name (clickable with Crown icon for selected), Status (badges), Actions (dropdown menu)
+  • Implemented full CRUD operations: Create (NewProjectModal), Edit (reuses modal), Delete (AlertDialog confirmation)
+  • Project selection maintains existing mutation logic with visual feedback and Crown icon for selected project
+  • Delete functionality includes Supabase mutation with proper error handling and toast notifications
+  • Enhanced status badge system supporting planning/active/completed/on-hold states with appropriate variants
+  • Table provides clean, scalable interface for managing multiple projects with search and filter integration
 ```
 
 ## User Preferences
