@@ -409,6 +409,17 @@ Changelog:
   • Fixed SelectItem empty value error by using 'none' instead of empty strings in dropdowns
   • Enhanced project data transformation to handle missing typology/modality data correctly
   • Added debug logging to track Supabase query results for troubleshooting data visualization issues
+
+- June 19, 2025. Complete navigation and page layout restructuring with unified card design
+  • Restructured sidebar navigation: Dashboard (default page), Gestión de Organizaciones, Gestión de Proyectos
+  • Changed page titles from "Proyectos" to "Gestión de Proyectos" and "Organizaciones" to "Gestión de Organizaciones"
+  • Restored Archub logo redirecting to Dashboard (/) as main landing page
+  • Completely refactored Organizations.tsx to match Projects.tsx horizontal card layout design
+  • Added column headers above organization cards: Fecha, Organización, Plan, Estado, Tipo
+  • Organization cards now show: creation date, name with active badge, plan with Crown icon, status, system type
+  • Both Projects and Organizations pages now use identical visual structure with horizontal cards and column headers
+  • Fixed data transformation issues in projects hook to properly display tipología and modalidad from Supabase
+  • Enhanced debug logging for project data to identify and resolve display issues
 ```
 
 ## User Preferences

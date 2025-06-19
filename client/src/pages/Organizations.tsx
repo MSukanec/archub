@@ -1,4 +1,4 @@
-import { Building, Calendar, Plus, CheckCircle, ShieldCheck, BadgeCheck } from 'lucide-react'
+import { Building, Calendar, Plus, CheckCircle, ShieldCheck, BadgeCheck, Crown } from 'lucide-react'
 import { CustomPageLayout } from '@/components/ui-custom/CustomPageLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -199,97 +199,119 @@ export default function Organizations() {
   return (
     <CustomPageLayout
       icon={Building}
-      title="Organizations"
+      title="Gestión de Organizaciones"
       actions={actions}
       searchValue={searchValue}
       onSearchChange={setSearchValue}
       filters={filters}
       onClearFilters={handleClearFilters}
     >
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {filteredOrganizations.map((org) => {
-            const isSelected = org.id === selectedOrganization?.id
-            const isSelecting = selectOrganizationMutation.isPending && selectOrganizationMutation.variables === org.id
+      {/* Encabezados de columnas */}
+      <div className="w-full px-4 py-2 border-b border-border/50 mb-3">
+        <div className="flex items-center justify-between w-full text-xs font-medium text-muted-foreground uppercase tracking-wide">
+          {/* Fecha */}
+          <div className="flex-shrink-0 w-24">
+            Fecha
+          </div>
+          
+          {/* Nombre */}
+          <div className="flex-1 min-w-0 px-4">
+            Organización
+          </div>
 
-            return (
-              <Card
-                key={org.id}
-                className={cn(
-                  "transition-all duration-200 cursor-pointer hover:shadow-md",
-                  isSelected
-                    ? "border-[var(--accent)] ring-1 ring-[var(--accent)]"
-                    : "border-[var(--card-border)]",
-                  isSelecting && "opacity-50"
-                )}
-                onClick={() => handleSelectOrganization(org.id)}
-              >
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <Building className="h-5 w-5" />
-                      {org.name}
-                    </CardTitle>
-                    {isSelected && (
-                      <Badge variant="default" className="bg-[var(--accent)] text-[var(--accent-text)]">
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        Seleccionada
-                      </Badge>
-                    )}
+          {/* Plan */}
+          <div className="w-32 flex-shrink-0 px-2">
+            Plan
+          </div>
+
+          {/* Estado */}
+          <div className="w-28 flex-shrink-0">
+            Estado
+          </div>
+
+          {/* Tipo */}
+          <div className="w-20 flex-shrink-0">
+            Tipo
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        {filteredOrganizations.map((org) => {
+          const isSelected = org.id === selectedOrganization?.id
+          const isSelecting = selectOrganizationMutation.isPending && selectOrganizationMutation.variables === org.id
+
+          return (
+            <Card 
+              key={org.id} 
+              className={cn(
+                "w-full transition-all duration-200 hover:shadow-md cursor-pointer",
+                isSelected && "ring-2 ring-primary/20 bg-primary/5"
+              )}
+              onClick={() => handleSelectOrganization(org.id)}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between w-full">
+                  {/* Fecha */}
+                  <div className="flex-shrink-0 w-24">
+                    <span className="text-sm text-muted-foreground">
+                      {formatDate(org.created_at)}
+                    </span>
                   </div>
-                </CardHeader>
 
-                <CardContent className="space-y-4">
-                  <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
-                    <Calendar className="h-4 w-4" />
-                    Creada el {formatDate(org.created_at)}
+                  {/* Nombre de la organización */}
+                  <div className="flex-1 min-w-0 px-4">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium truncate">{org.name}</span>
+                      {isSelected && (
+                        <Badge variant="default" className="text-xs bg-primary/10 text-primary border-primary/20">
+                          Activa
+                        </Badge>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="flex flex-wrap gap-2">
+                  {/* Plan */}
+                  <div className="w-32 flex-shrink-0 px-2">
+                    <div className="flex items-center gap-1">
+                      {org.plan && (
+                        <>
+                          <Crown className="h-3 w-3 text-amber-500" />
+                          <span className="text-sm text-muted-foreground truncate">{org.plan.name}</span>
+                        </>
+                      )}
+                      {!org.plan && (
+                        <span className="text-sm text-muted-foreground">Sin plan</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Estado */}
+                  <div className="w-28 flex-shrink-0">
+                    <Badge variant={org.is_active ? "default" : "secondary"}>
+                      {org.is_active ? "Activa" : "Inactiva"}
+                    </Badge>
+                  </div>
+
+                  {/* Tipo */}
+                  <div className="w-20 flex-shrink-0">
                     {org.is_system && (
-                      <Badge variant="secondary" className="text-xs">
-                        <ShieldCheck className="h-3 w-3 mr-1" />
+                      <Badge variant="outline" className="text-xs">
                         Sistema
                       </Badge>
                     )}
-                    
-                    {org.is_active ? (
-                      <Badge variant="secondary" className="text-xs bg-[var(--success)]/10 text-[var(--success)]">
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        Activa
-                      </Badge>
-                    ) : (
-                      <Badge variant="secondary" className="text-xs">
-                        Archivada
-                      </Badge>
-                    )}
-
-                    {org.plan && (
-                      <Badge variant="secondary" className="text-xs">
-                        <BadgeCheck className="h-3 w-3 mr-1" />
-                        {org.plan.name}
-                      </Badge>
-                    )}
                   </div>
-                </CardContent>
-              </Card>
-            )
-          })}
-        </div>
+                </div>
 
-        {filteredOrganizations.length === 0 && (searchValue || activeFilter !== 'all') && (
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center py-8">
-                <Building className="h-12 w-12 text-[var(--text-muted)] mx-auto mb-4" />
-                <p className="text-lg font-medium text-[var(--text-muted)] mb-2">No se encontraron organizaciones</p>
-                <p className="text-sm text-[var(--text-muted)]">
-                  Intenta ajustar tu búsqueda o filtros
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                {isSelecting && (
+                  <div className="flex items-center justify-center py-2 mt-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )
+        })}
       </div>
     </CustomPageLayout>
   )
