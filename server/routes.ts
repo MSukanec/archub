@@ -192,6 +192,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Select project endpoint
+  app.post("/api/user/select-project", async (req, res) => {
+    try {
+      const { project_id } = req.body;
+      const user_id = req.headers['x-user-id'];
+
+      if (!project_id || !user_id) {
+        return res.status(400).json({ error: "Missing project_id or user_id" });
+      }
+
+      const { error } = await supabase
+        .from('user_preferences')
+        .update({ last_project_id: project_id })
+        .eq('user_id', user_id);
+
+      if (error) {
+        console.error("Error updating last_project_id:", error);
+        return res.status(500).json({ error: "Failed to update project selection" });
+      }
+
+      res.json({ success: true, message: "Project selected successfully" });
+    } catch (error) {
+      console.error("Error selecting project:", error);
+      res.status(500).json({ error: "Failed to select project" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
