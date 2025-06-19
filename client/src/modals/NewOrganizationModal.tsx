@@ -13,14 +13,13 @@ import { CustomModalBody } from '@/components/ui-custom/CustomModalBody'
 import { CustomModalFooter } from '@/components/ui-custom/CustomModalFooter'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Calendar as CalendarComponent } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
-import { apiRequest, queryClient } from '@/lib/queryClient'
+import { queryClient } from '@/lib/queryClient'
 import { useCurrentUser } from '@/hooks/use-current-user'
 
 const createOrganizationSchema = z.object({
@@ -79,7 +78,6 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
     }
   }, [editingOrganization, form])
 
-  // Create organization mutation
   const createOrganizationMutation = useMutation({
     mutationFn: async (formData: CreateOrganizationForm) => {
       if (!userData?.user?.id) {
@@ -136,48 +134,27 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
   }
 
   const getCreatorInfo = () => {
-    const user = userData?.user
-    const userData_ = userData?.user_data
-    
-    if (!user) return { name: 'Usuario', initials: 'U', avatar: '' }
-    
-    // Prefer display names from user_data, fallback to user table
-    let displayName = user.full_name || 'Usuario'
-    if (userData_?.first_name && userData_?.last_name) {
-      displayName = `${userData_.first_name} ${userData_.last_name}`
-    } else if (userData_?.first_name) {
-      displayName = userData_.first_name
+    if (userData?.user_data?.first_name && userData?.user_data?.last_name) {
+      return `${userData.user_data.first_name} ${userData.user_data.last_name}`
     }
-    
-    const initials = displayName
-      .split(' ')
-      .map(name => name.charAt(0))
-      .join('')
-      .toUpperCase()
-      .slice(0, 2)
-    
-    return {
-      name: displayName,
-      initials,
-      avatar: user.avatar_url || ''
-    }
+    return userData?.user?.full_name || userData?.user?.email || 'Usuario'
   }
 
-  const creator = getCreatorInfo()
+  const getCreatorInitials = () => {
+    const name = getCreatorInfo()
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+  }
 
   return (
     <CustomModalLayout open={open} onClose={onClose}>
-      <CustomModalHeader
-        title={editingOrganization ? "Editar organización" : "Nueva organización"}
-        description={editingOrganization 
-          ? "Modifica los datos de la organización" 
-          : "Crea una nueva organización para tu cuenta"
-        }
-        onClose={onClose}
-      />
-
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)}>
+          <CustomModalHeader
+            title={editingOrganization ? "Editar organización" : "Nueva organización"}
+            description={editingOrganization ? "Actualiza los datos de la organización" : "Crea una nueva organización para gestionar tus proyectos"}
+            onClose={onClose}
+          />
+
           <CustomModalBody padding="md">
             <div className="space-y-4">
               {/* Fecha de creación */}
@@ -198,13 +175,11 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
                             )}
                           >
                             {field.value ? (
-                              <div className="flex items-center gap-2">
-                                <Calendar className="h-4 w-4" />
-                                {format(field.value, "PPP", { locale: es })}
-                              </div>
+                              format(field.value, "PPP", { locale: es })
                             ) : (
                               <span>Selecciona una fecha</span>
                             )}
+                            <Calendar className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
@@ -225,18 +200,19 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
                 )}
               />
 
-              {/* Creador (readonly) */}
-              <div className="space-y-2">
+              {/* Creador */}
+              <div className="flex flex-col space-y-2">
                 <label className="text-sm font-medium">Creador</label>
-                <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-md">
+                <div className="flex items-center space-x-3 p-3 border rounded-md bg-muted/30">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={creator.avatar} alt={creator.name} />
-                    <AvatarFallback className="text-xs">{creator.initials}</AvatarFallback>
+                    <AvatarImage src={userData?.user?.avatar_url || ''} />
+                    <AvatarFallback className="text-xs">
+                      {getCreatorInitials()}
+                    </AvatarFallback>
                   </Avatar>
-                  <div>
-                    <p className="text-sm font-medium">{creator.name}</p>
-                    <p className="text-xs text-muted-foreground">{userData?.user?.email}</p>
-                  </div>
+                  <span className="text-sm text-muted-foreground">
+                    {getCreatorInfo()}
+                  </span>
                 </div>
               </div>
 
@@ -248,17 +224,15 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
                   <FormItem>
                     <FormLabel className="text-sm font-medium">Nombre de la organización</FormLabel>
                     <FormControl>
-                      <Input 
-                        placeholder="Ingresa el nombre de la organización" 
-                        {...field} 
+                      <Input
+                        placeholder="Ej: Mi empresa constructora"
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
-
             </div>
           </CustomModalBody>
 

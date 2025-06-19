@@ -432,6 +432,14 @@ Changelog:
   • Added actions dropdown menu to organization cards with Edit and Delete options matching projects interface
   • Organization modal integrates with existing authentication system and uses proper form validation
   • Both pages now have identical visual structure, text sizing, and functional capabilities
+
+- June 19, 2025. Simplified NewOrganizationModal by removing "tipo" and "estado" fields per user request
+  • Removed "tipo" (type/is_system) field completely from organization creation/editing modal
+  • Removed "estado" (status/is_active) field completely from organization creation/editing modal
+  • Modal now only includes: fecha de creación (date picker), creador (readonly creator info), and nombre (organization name)
+  • Updated TypeScript schema to only include name and created_at fields
+  • Simplified form validation and submission to match reduced field set
+  • Organization modal maintains visual consistency with projects modal but with streamlined field structure
 ```
 
 ## User Preferences
