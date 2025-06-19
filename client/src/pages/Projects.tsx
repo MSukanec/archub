@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { Folder, Plus, Crown, Edit, Trash2, MoreHorizontal } from 'lucide-react'
+import { Folder, Plus, Edit, Trash2, MoreHorizontal } from 'lucide-react'
 import { CustomPageLayout } from '@/components/ui-custom/CustomPageLayout'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -135,17 +135,29 @@ export default function Projects() {
 
   const selectedProject = data?.preferences?.last_project_id
 
-  // Filter projects based on search and filter type
+  // Filter and sort projects based on search, filter type, and active project
   const filteredProjects = useMemo(() => {
     if (!projectsData) return []
     
-    return projectsData.filter((project) => {
+    const filtered = projectsData.filter((project) => {
       const matchesSearch = project.name.toLowerCase().includes(searchValue.toLowerCase())
       const matchesFilter = activeFilter === 'all' || project.status === activeFilter
       
       return matchesSearch && matchesFilter
     })
-  }, [projectsData, searchValue, activeFilter])
+
+    // Sort projects: active project first, then by creation date
+    return filtered.sort((a, b) => {
+      const aIsSelected = a.id === selectedProject
+      const bIsSelected = b.id === selectedProject
+      
+      if (aIsSelected && !bIsSelected) return -1
+      if (!aIsSelected && bIsSelected) return 1
+      
+      // If neither or both are selected, sort by creation date (newest first)
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    })
+  }, [projectsData, searchValue, activeFilter, selectedProject])
 
   const handleSelectProject = (projectId: string) => {
     selectProjectMutation.mutate(projectId)
@@ -360,17 +372,23 @@ export default function Projects() {
 
                   {/* Nombre del proyecto */}
                   <div className="flex-1 min-w-0 px-4">
-                    <button
-                      onClick={() => handleSelectProject(project.id)}
-                      disabled={isSelecting}
-                      className={cn(
-                        "flex items-center gap-2 text-left hover:text-primary transition-colors",
-                        isSelecting && "opacity-50"
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleSelectProject(project.id)}
+                        disabled={isSelecting}
+                        className={cn(
+                          "text-left hover:text-primary transition-colors",
+                          isSelecting && "opacity-50"
+                        )}
+                      >
+                        <span className="font-medium truncate">{project.name}</span>
+                      </button>
+                      {isSelected && (
+                        <Badge variant="default" className="text-xs bg-primary/10 text-primary border-primary/20">
+                          Activo
+                        </Badge>
                       )}
-                    >
-                      <span className="font-medium truncate">{project.name}</span>
-                      {isSelected && <Crown className="h-4 w-4 text-primary flex-shrink-0" />}
-                    </button>
+                    </div>
                   </div>
 
                   {/* Tipología */}

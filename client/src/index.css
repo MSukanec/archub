@@ -26,7 +26,7 @@
   --button-primary-bg: hsl(0, 0%, 15%);
   --button-primary-text: hsl(0, 0%, 100%);
   --button-primary-border: transparent;
-  --button-primary-hover-bg: hsl(210, 40%, 45%);
+  --button-primary-hover-bg: hsl(90, 50%, 50%);
   --button-primary-hover-text: hsl(0, 0%, 100%);
   --button-primary-hover-border: transparent;
   --button-primary-disabled-bg: hsl(240, 5%, 85%);
@@ -53,8 +53,8 @@
   --input-text: hsl(240, 10%, 4%);
   --input-border: hsl(240, 6%, 90%);
   --input-placeholder: hsl(240, 5%, 65%);
-  --input-focus-ring: hsl(210, 40%, 50%);
-  --input-focus-border: hsl(210, 40%, 50%);
+  --input-focus-ring: hsl(90, 50%, 50%);
+  --input-focus-border: hsl(90, 50%, 50%);
 
   /* Popover/Dropdown */
   --popover-bg: hsl(0, 0%, 100%);
@@ -62,7 +62,7 @@
   --accent-bg: hsl(240, 5%, 96%);
 
   /* Accent / State */
-  --accent: hsl(210, 40%, 50%);
+  --accent: hsl(90, 50%, 50%);
   --accent-text: hsl(0, 0%, 100%);
   --destructive: hsl(0, 84%, 60%);
   --destructive-text: hsl(0, 0%, 100%);
@@ -87,7 +87,7 @@
   /* Borders and Rings */
   --border-default: hsl(240, 6%, 90%);
   --border-strong: hsl(240, 8%, 80%);
-  --ring-default: hsl(210, 40%, 50%);
+  --ring-default: hsl(90, 50%, 50%);
 
   /* Radius */
   --radius-sm: 4px;

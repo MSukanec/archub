@@ -203,13 +203,13 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
         const projectId = projectData.id
 
         // Create project_data entry if type or modality provided
-        if (formData.project_type_id || formData.modality_id) {
+        if (formData.project_type_id && formData.project_type_id !== 'none' || formData.modality_id && formData.modality_id !== 'none') {
           const { error: dataError } = await supabase
             .from('project_data')
             .insert({
               project_id: projectId,
-              project_type_id: formData.project_type_id || null,
-              modality_id: formData.modality_id || null
+              project_type_id: formData.project_type_id === 'none' ? null : formData.project_type_id || null,
+              modality_id: formData.modality_id === 'none' ? null : formData.modality_id || null
             })
 
           if (dataError) {
@@ -378,7 +378,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
                         <SelectItem value="loading" disabled>Cargando...</SelectItem>
                       ) : (
                         <>
-                          <SelectItem value="">Sin tipología</SelectItem>
+                          <SelectItem value="none">Sin tipología</SelectItem>
                           {projectTypes?.map((type) => (
                             <SelectItem key={type.id} value={type.id}>
                               {type.name}
@@ -411,7 +411,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
                         <SelectItem value="loading" disabled>Cargando...</SelectItem>
                       ) : (
                         <>
-                          <SelectItem value="">Sin modalidad</SelectItem>
+                          <SelectItem value="none">Sin modalidad</SelectItem>
                           {projectModalities?.map((modality) => (
                             <SelectItem key={modality.id} value={modality.id}>
                               {modality.name}
