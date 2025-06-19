@@ -90,7 +90,6 @@ export default function Projects() {
   }
 
   const handleNewProject = () => {
-    console.log('Abriendo modal de nuevo proyecto')
     setShowNewProjectModal(true)
   }
 
@@ -304,18 +303,8 @@ export default function Projects() {
 
       <NewProjectModal
         open={showNewProjectModal}
-        onClose={() => {
-          console.log('Cerrando modal')
-          setShowNewProjectModal(false)
-        }}
+        onClose={() => setShowNewProjectModal(false)}
       />
-      
-      {/* Debug info */}
-      {showNewProjectModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, background: 'red', color: 'white', padding: '10px', zIndex: 9999 }}>
-          Modal debería estar abierto
-        </div>
-      )}
     </CustomPageLayout>
   )
 }

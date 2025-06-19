@@ -15,7 +15,6 @@ export function CustomModalLayout({
   children,
   className
 }: CustomModalLayoutProps) {
-  console.log('CustomModalLayout render:', { open })
   // Close modal on Escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -38,17 +37,17 @@ export function CustomModalLayout({
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex">
+    <div className="fixed inset-0 z-50 flex items-start justify-end">
       {/* Overlay */}
       <div
-        className="absolute inset-0 bg-black/50"
+        className="absolute inset-0 bg-black/50 transition-opacity duration-300 ease-in-out"
         onClick={onClose}
       />
 
       {/* Modal Container */}
       <div className={cn(
-        "relative z-10 flex flex-col bg-[var(--card-bg)] shadow-2xl transition-all duration-300 ease-in-out",
-        "h-full w-full md:max-w-xl md:ml-auto",
+        "relative z-10 flex flex-col bg-white dark:bg-gray-900 shadow-2xl transition-all duration-300 ease-in-out",
+        "h-full w-full max-w-xl",
         className
       )}>
         {children}
