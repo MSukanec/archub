@@ -17,7 +17,7 @@ export function CustomPageBody({
   padding = "none" 
 }: CustomPageBodyProps) {
   return (
-    <div className={`mt-4 border-2 border-blue-500 ${paddingClasses[padding]}`}>
+    <div className={`mt-4 ${paddingClasses[padding]}`}>
       {children}
     </div>
   );
