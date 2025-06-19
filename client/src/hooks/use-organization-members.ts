@@ -15,10 +15,6 @@ interface OrganizationMember {
     email: string
     avatar_url: string
   } | null
-  user_data: {
-    first_name: string
-    last_name: string
-  } | null
 }
 
 export function useOrganizationMembers(organizationId: string | undefined) {
@@ -46,10 +42,6 @@ export function useOrganizationMembers(organizationId: string | undefined) {
             full_name,
             email,
             avatar_url
-          ),
-          user_data (
-            first_name,
-            last_name
           )
         `)
         .eq('organization_id', organizationId)
