@@ -22,6 +22,13 @@ function Router() {
           </Layout>
         </ProtectedRoute>
       </Route>
+      <Route path="/organizaciones">
+        <ProtectedRoute>
+          <Layout>
+            <Organizations />
+          </Layout>
+        </ProtectedRoute>
+      </Route>
       <Route path="/perfil">
         <ProtectedRoute>
           <Layout>

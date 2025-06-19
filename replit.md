@@ -347,6 +347,15 @@ Changelog:
   • Clear separation: users table for technical/auth data, user_data for personal information
   • Updated TypeScript interfaces to reflect new data structure
   • Backend now correctly saves names, birthdate, and country all in user_data table
+
+- June 18, 2025. Complete data architecture unification with single archub_get_user function
+  • Eliminated all multiple database calls in favor of single archub_get_user RPC function
+  • Function returns complete user context: user, user_data, preferences, organization, organizations[], memberships[], role, plan
+  • Updated Organizations.tsx to use data.organizations array instead of single organization mock
+  • Modified useCurrentUser hook to use unified ['current-user'] query key
+  • All components now use single data source, eliminating redundant API calls
+  • Enhanced TypeScript interfaces to include organizations array and memberships with role permissions
+  • Profile and organization selection now properly invalidate unified cache
 ```
 
 ## User Preferences

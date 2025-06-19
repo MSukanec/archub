@@ -99,7 +99,7 @@ export function useCurrentUser() {
         throw new Error('User not authenticated')
       }
 
-      const { data, error } = await supabase.rpc('get_current_user')
+      const { data, error } = await supabase.rpc('archub_get_user')
       
       if (error) {
         console.error('Supabase RPC Error:', error)
