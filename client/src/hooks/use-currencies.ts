@@ -1,33 +1,37 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 
-interface Currency {
+interface OrganizationCurrency {
   id: string
-  name: string
-  code: string
-  symbol?: string
+  organization_id: string
+  currency_id: string
+  is_active: boolean
+  is_default: boolean
   created_at: string
 }
 
-export function useCurrencies() {
+export function useCurrencies(organizationId: string | undefined) {
   return useQuery({
-    queryKey: ['currencies'],
+    queryKey: ['organization-currencies', organizationId],
     queryFn: async () => {
       if (!supabase) {
         throw new Error('Supabase client not initialized')
       }
 
       const { data, error } = await supabase
-        .from('currencies')
-        .select('id, name, code, symbol, created_at')
-        .order('code')
+        .from('organization_currencies')
+        .select('id, organization_id, currency_id, is_active, is_default, created_at')
+        .eq('organization_id', organizationId)
+        .eq('is_active', true)
+        .order('is_default', { ascending: false })
 
       if (error) {
-        console.error('Error fetching currencies:', error)
+        console.error('Error fetching organization currencies:', error)
         throw error
       }
 
       return data || []
-    }
+    },
+    enabled: !!organizationId
   })
 }

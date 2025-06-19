@@ -50,9 +50,50 @@ export function useMovements(organizationId: string | undefined, projectId: stri
         throw new Error('Supabase client not initialized')
       }
 
-      // For now, return empty array since movements table may not exist yet
-      console.log('Fetching movements for:', { organizationId, projectId })
-      return []
+      const { data, error } = await supabase
+        .from('movements')
+        .select(`
+          id,
+          description,
+          amount,
+          created_at,
+          created_by,
+          organization_id,
+          project_id,
+          type_id,
+          category_id,
+          currency_id,
+          wallet_id,
+          file_url,
+          related_contact_id,
+          related_task_id,
+          is_conversion,
+          organization_members!movements_created_by_fkey (
+            id,
+            users (
+              id,
+              full_name,
+              email,
+              avatar_url
+            )
+          )
+        `)
+        .eq('organization_id', organizationId)
+        .eq('project_id', projectId)
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Error fetching movements:', error)
+        throw error
+      }
+
+      // Transform the data to match our interface
+      const transformedData = data?.map((movement: any) => ({
+        ...movement,
+        creator: movement.organization_members?.users || null
+      })) || []
+
+      return transformedData
     },
     enabled: !!organizationId && !!projectId
   })

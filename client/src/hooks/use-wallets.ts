@@ -21,10 +21,11 @@ export function useWallets(organizationId: string | undefined) {
       }
 
       const { data, error } = await supabase
-        .from('wallets')
-        .select('id, name, description, currency_id, organization_id, created_at')
+        .from('organization_wallets')
+        .select('id, organization_id, wallet_id, is_active, is_default, created_at')
         .eq('organization_id', organizationId)
-        .order('name')
+        .eq('is_active', true)
+        .order('is_default', { ascending: false })
 
       if (error) {
         console.error('Error fetching wallets:', error)
