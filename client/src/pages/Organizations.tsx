@@ -1,8 +1,9 @@
-import { Building, Calendar, Plus, CheckCircle, ShieldCheck, BadgeCheck, Crown } from 'lucide-react'
+import { Building, Calendar, Plus, CheckCircle, ShieldCheck, BadgeCheck, Crown, MoreHorizontal, Edit, Trash2 } from 'lucide-react'
 import { CustomPageLayout } from '@/components/ui-custom/CustomPageLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useState, useMemo } from 'react'
 import { cn } from '@/lib/utils'
@@ -15,6 +16,8 @@ export default function Organizations() {
   const { data, isLoading, error, refetch } = useCurrentUser()
   const [searchValue, setSearchValue] = useState("")
   const [activeFilter, setActiveFilter] = useState<FilterType>('all')
+  const [editingOrganization, setEditingOrganization] = useState<any>(null)
+  const [showNewOrgModal, setShowNewOrgModal] = useState(false)
 
   // Mutation for selecting an organization
   const selectOrganizationMutation = useMutation({
@@ -229,9 +232,8 @@ export default function Organizations() {
             Estado
           </div>
 
-          {/* Tipo */}
-          <div className="w-20 flex-shrink-0">
-            Tipo
+          {/* Acciones */}
+          <div className="w-10 flex-shrink-0">
           </div>
         </div>
       </div>
@@ -246,7 +248,7 @@ export default function Organizations() {
               key={org.id} 
               className={cn(
                 "w-full transition-all duration-200 hover:shadow-md cursor-pointer",
-                isSelected && "ring-2 ring-primary/20 bg-primary/5"
+                isSelected && "border-[var(--accent)] ring-1 ring-[var(--accent)] bg-[var(--accent)]/5"
               )}
               onClick={() => handleSelectOrganization(org.id)}
             >
@@ -293,13 +295,28 @@ export default function Organizations() {
                     </Badge>
                   </div>
 
-                  {/* Tipo */}
-                  <div className="w-20 flex-shrink-0">
-                    {org.is_system && (
-                      <Badge variant="outline" className="text-xs">
-                        Sistema
-                      </Badge>
-                    )}
+                  {/* Acciones */}
+                  <div className="w-10 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleEditOrganization(org)}>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Editar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => handleDeleteOrganization(org)}
+                          className="text-destructive focus:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Eliminar
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
 

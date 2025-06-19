@@ -391,7 +391,7 @@ export default function Projects() {
               key={project.id} 
               className={cn(
                 "w-full transition-all duration-200 hover:shadow-md cursor-pointer",
-                isSelected && "ring-2 ring-primary/20 bg-primary/5"
+                isSelected && "border-[var(--accent)] ring-1 ring-[var(--accent)] bg-[var(--accent)]/5"
               )}
               onClick={() => handleSelectProject(project.id)}
             >
