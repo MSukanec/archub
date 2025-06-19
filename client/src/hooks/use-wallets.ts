@@ -22,7 +22,19 @@ export function useWallets(organizationId: string | undefined) {
 
       const { data, error } = await supabase
         .from('organization_wallets')
-        .select('id, organization_id, wallet_id, is_active, is_default, created_at')
+        .select(`
+          id, 
+          organization_id, 
+          wallet_id, 
+          is_active, 
+          is_default, 
+          created_at,
+          wallets (
+            id,
+            name,
+            description
+          )
+        `)
         .eq('organization_id', organizationId)
         .eq('is_active', true)
         .order('is_default', { ascending: false })

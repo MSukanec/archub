@@ -23,6 +23,7 @@ import { Switch } from '@/components/ui/switch'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
 import { queryClient } from '@/lib/queryClient'
+import { supabase } from '@/lib/supabase'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useMovementConcepts } from '@/hooks/use-movement-concepts'
@@ -30,7 +31,7 @@ import { useCurrencies } from '@/hooks/use-currencies'
 import { useWallets } from '@/hooks/use-wallets'
 
 const createMovementSchema = z.object({
-  description: z.string().min(1, 'La descripción es requerida'),
+  description: z.string().optional(),
   amount: z.number().min(0.01, 'La cantidad debe ser mayor a 0'),
   type_id: z.string().min(1, 'El tipo es requerido'),
   category_id: z.string().min(1, 'La categoría es requerida'),
@@ -74,6 +75,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
   const { toast } = useToast()
   const { data: userData } = useCurrentUser()
   const organizationId = userData?.preferences?.last_organization_id
+  const projectId = userData?.preferences?.last_project_id
   
   const { data: members = [] } = useOrganizationMembers(organizationId)
   const { data: types = [] } = useMovementConcepts('types')
@@ -131,9 +133,37 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
     mutationFn: async (formData: CreateMovementForm) => {
       console.log('Creating movement with data:', formData)
       
-      // For now, simulate success since movements API may not be fully implemented
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      return { success: true }
+      if (!supabase) {
+        throw new Error('Supabase client not initialized')
+      }
+
+      const movementData = {
+        description: formData.description || '',
+        amount: formData.amount,
+        type_id: formData.type_id,
+        category_id: formData.category_id,
+        subcategory_id: formData.subcategory_id || null,
+        currency_id: formData.currency_id,
+        wallet_id: formData.wallet_id,
+        created_by: formData.created_by,
+        file_url: formData.file_url || null,
+        is_conversion: formData.is_conversion,
+        created_at: formData.created_at.toISOString(),
+        organization_id: organizationId,
+        project_id: projectId
+      }
+
+      const { data, error } = await supabase
+        .from('movements')
+        .insert([movementData])
+        .select()
+
+      if (error) {
+        console.error('Error creating movement:', error)
+        throw error
+      }
+
+      return data[0]
     },
     onSuccess: () => {
       toast({
@@ -376,7 +406,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                     <SelectContent>
                       {currencies.map((currency: any) => (
                         <SelectItem key={currency.id} value={currency.id}>
-                          {currency.currency_id} {currency.is_default && "(Por defecto)"}
+                          {currency.currencies?.name || currency.currencies?.code || currency.currency_id} {currency.is_default && "(Por defecto)"}
                         </SelectItem>
                       ))}
                     </SelectContent>

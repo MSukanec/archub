@@ -20,7 +20,20 @@ export function useCurrencies(organizationId: string | undefined) {
 
       const { data, error } = await supabase
         .from('organization_currencies')
-        .select('id, organization_id, currency_id, is_active, is_default, created_at')
+        .select(`
+          id, 
+          organization_id, 
+          currency_id, 
+          is_active, 
+          is_default, 
+          created_at,
+          currencies (
+            id,
+            name,
+            code,
+            symbol
+          )
+        `)
         .eq('organization_id', organizationId)
         .eq('is_active', true)
         .order('is_default', { ascending: false })
