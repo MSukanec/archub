@@ -24,13 +24,10 @@ export const useNavigationStore = create<NavigationState>((set) => ({
   sidebarOpen: false,
   userMenuOpen: false,
   navigationItems: [
-    { id: 'dashboard', name: 'Dashboard', icon: 'home', href: '/' },
+    { id: 'dashboard', name: 'Panel Principal', icon: 'home', href: '/' },
     { id: 'organizations', name: 'Gestión de Organizaciones', icon: 'building', href: '/organizaciones' },
     { id: 'projects', name: 'Gestión de Proyectos', icon: 'folder', href: '/proyectos' },
-    { id: 'tasks', name: 'Tareas', icon: 'check-square', href: '/tasks' },
-    { id: 'team', name: 'Equipo', icon: 'users', href: '/team' },
-    { id: 'billing', name: 'Facturación', icon: 'credit-card', href: '/billing' },
-    { id: 'reports', name: 'Reportes', icon: 'bar-chart-3', href: '/reports' },
+    { id: 'movements', name: 'Gestión de Movimientos', icon: 'dollar-sign', href: '/movimientos' },
   ],
 
   setCurrentPage: (page) => set({ currentPage: page }),

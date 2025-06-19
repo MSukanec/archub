@@ -449,6 +449,16 @@ Changelog:
   • Added created_by field to project schema and form validation with proper TypeScript support
   • Creator dropdowns show member avatars, names, and fallback to email with proper user data handling
   • Both modals now allow selection of any active organization member as creator instead of hardcoded current user
+
+- June 19, 2025. Complete Movements page implementation with financial management functionality
+  • Created comprehensive Movements.tsx page using professional table interface for financial movement tracking
+  • Implemented useMovements, useMovementConcepts, useCurrencies, and useWallets hooks for Supabase data integration
+  • Built NewMovementModal.tsx with complete form including description, amount, type/category hierarchy, currency, and wallet selection
+  • Added "Gestión de Movimientos" navigation button to sidebar positioned below "Gestión de Proyectos"
+  • Movement management includes full CRUD operations: create, edit, delete with proper confirmation dialogs
+  • Table displays: date, description, amount with currency badges, type, category, currency, wallet, creator with avatar, and actions
+  • Modal supports hierarchical movement concepts (types as parents, categories as children) from Supabase database
+  • All components follow established design patterns with CustomPageLayout, CustomModalLayout, and consistent styling
 ```
 
 ## User Preferences

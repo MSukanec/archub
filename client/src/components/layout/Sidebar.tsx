@@ -12,6 +12,7 @@ import {
   Users,
   CreditCard,
   BarChart3,
+  DollarSign,
   Settings,
   User,
 } from "lucide-react";

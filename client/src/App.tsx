@@ -8,6 +8,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Dashboard from "@/pages/Dashboard";
 import Organizations from "@/pages/Organizations";
 import Projects from "@/pages/Projects";
+import Movements from "@/pages/Movements";
 import ProfilePage from "@/pages/ProfilePage";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/not-found";
@@ -41,6 +42,13 @@ function Router() {
         <ProtectedRoute>
           <Layout>
             <Projects />
+          </Layout>
+        </ProtectedRoute>
+      </Route>
+      <Route path="/movimientos">
+        <ProtectedRoute>
+          <Layout>
+            <Movements />
           </Layout>
         </ProtectedRoute>
       </Route>
