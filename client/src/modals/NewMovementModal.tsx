@@ -118,14 +118,18 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
   useEffect(() => {
     if (currencies.length > 0 && !form.getValues('currency_id')) {
       const defaultCurrency = currencies.find((c: any) => c.is_default) || currencies[0]
-      form.setValue('currency_id', defaultCurrency.id)
+      if (defaultCurrency) {
+        form.setValue('currency_id', defaultCurrency.id)
+      }
     }
   }, [currencies, form])
 
   useEffect(() => {
     if (wallets.length > 0 && !form.getValues('wallet_id')) {
       const defaultWallet = wallets.find((w: any) => w.is_default) || wallets[0]
-      form.setValue('wallet_id', defaultWallet.id)
+      if (defaultWallet) {
+        form.setValue('wallet_id', defaultWallet.id)
+      }
     }
   }, [wallets, form])
 
@@ -432,7 +436,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                     <SelectContent>
                       {wallets.map((wallet: any) => (
                         <SelectItem key={wallet.id} value={wallet.id}>
-                          {wallet.wallet_id} {wallet.is_default && "(Por defecto)"}
+                          {wallet.wallets?.name || wallet.wallet_id} {wallet.is_default && "(Por defecto)"}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -539,7 +543,12 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
   const footer = (
     <CustomModalFooter
       onCancel={onClose}
-      onSubmit={() => document.getElementById('movement-form')?.requestSubmit()}
+      onSubmit={() => {
+        const formElement = document.getElementById('movement-form') as HTMLFormElement
+        if (formElement) {
+          formElement.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }))
+        }
+      }}
       submitLabel="Crear"
       disabled={createMovementMutation.isPending}
     />
