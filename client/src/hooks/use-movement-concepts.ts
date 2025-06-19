@@ -4,9 +4,7 @@ import { supabase } from '@/lib/supabase'
 interface MovementConcept {
   id: string
   name: string
-  description?: string
   parent_id?: string
-  created_at: string
 }
 
 export function useMovementConcepts(type: 'types' | 'categories', parentId?: string) {
@@ -19,12 +17,14 @@ export function useMovementConcepts(type: 'types' | 'categories', parentId?: str
 
       let query = supabase
         .from('movement_concepts')
-        .select('id, name, description, parent_id, created_at')
+        .select('id, name, parent_id')
         .order('name')
 
       if (type === 'types') {
+        // Get parent concepts (types) - those with null parent_id
         query = query.is('parent_id', null)
       } else if (type === 'categories' && parentId) {
+        // Get child concepts (categories) - those with specific parent_id
         query = query.eq('parent_id', parentId)
       } else {
         return []
