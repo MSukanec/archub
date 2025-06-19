@@ -23,6 +23,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectTypes } from '@/hooks/use-project-types'
 import { useProjectModalities } from '@/hooks/use-project-modalities'
+import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { queryClient } from '@/lib/queryClient'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/hooks/use-toast'
@@ -33,6 +34,7 @@ const createProjectSchema = z.object({
   status: z.enum(['planning', 'active', 'completed', 'on-hold']),
   project_type_id: z.string().optional(),
   modality_id: z.string().optional(),
+  created_by: z.string().min(1, 'El creador es requerido'),
   created_at: z.date()
 })
 
@@ -78,6 +80,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
   const { data: userData } = useCurrentUser()
   const { data: projectTypes, isLoading: typesLoading } = useProjectTypes()
   const { data: projectModalities, isLoading: modalitiesLoading } = useProjectModalities()
+  const { data: organizationMembers } = useOrganizationMembers(userData?.organization?.id)
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
 
@@ -88,6 +91,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
       status: 'planning',
       project_type_id: 'none',
       modality_id: 'none',
+      created_by: '',
       created_at: new Date()
     }
   })
@@ -103,6 +107,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
         status: editingProject.status as any,
         project_type_id: editingProject.project_data?.project_type_id || 'none',
         modality_id: editingProject.project_data?.modality_id || 'none',
+        created_by: editingProject.created_by || '',
         created_at: new Date(editingProject.created_at)
       })
     } else {
@@ -111,6 +116,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
         status: 'planning',
         project_type_id: 'none',
         modality_id: 'none',
+        created_by: '',
         created_at: new Date()
       })
     }
@@ -340,17 +346,40 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
               )}
             />
 
-            {/* Miembro creador */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Miembro creador</Label>
-              <div className="flex items-center gap-3 p-3 rounded-md border bg-muted/50">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={creator.avatar} />
-                  <AvatarFallback className="text-xs">{creator.initials}</AvatarFallback>
-                </Avatar>
-                <span className="text-sm font-medium">{creator.name}</span>
-              </div>
-            </div>
+            {/* Creador */}
+            <FormField
+              control={form.control}
+              name="created_by"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-medium">Creador</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value || 'none'}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona el creador" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="none">Selecciona un miembro</SelectItem>
+                      {organizationMembers?.map((member) => (
+                        <SelectItem key={member.id} value={member.id}>
+                          <div className="flex items-center gap-2">
+                            <Avatar className="h-6 w-6">
+                              <AvatarImage src={member.users?.avatar_url || ''} />
+                              <AvatarFallback className="text-xs">
+                                {member.users?.full_name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'U'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span>{member.users?.full_name || member.users?.email || 'Usuario'}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             {/* Nombre del proyecto */}
             <FormField
