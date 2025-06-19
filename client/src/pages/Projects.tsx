@@ -10,6 +10,7 @@ import { useMutation } from '@tanstack/react-query'
 import { queryClient } from '@/lib/queryClient'
 import { supabase } from '@/lib/supabase'
 import { cn } from '@/lib/utils'
+import { NewProjectModal } from '@/components/ui-custom/NewProjectModal'
 
 type FilterType = 'all' | 'active' | 'completed' | 'on-hold'
 
@@ -30,6 +31,7 @@ export default function Projects() {
   const { data: projectsData, isLoading: projectsLoading, error: projectsError } = useProjects(data?.organization?.id)
   const [searchValue, setSearchValue] = useState("")
   const [activeFilter, setActiveFilter] = useState<FilterType>('all')
+  const [showNewProjectModal, setShowNewProjectModal] = useState(false)
 
   // Mutation for selecting a project
   const selectProjectMutation = useMutation({
@@ -88,7 +90,7 @@ export default function Projects() {
   }
 
   const handleNewProject = () => {
-    console.log('Crear nuevo proyecto')
+    setShowNewProjectModal(true)
   }
 
   const actions = (
@@ -298,6 +300,11 @@ export default function Projects() {
           })}
         </div>
       </div>
+
+      <NewProjectModal
+        open={showNewProjectModal}
+        onClose={() => setShowNewProjectModal(false)}
+      />
     </CustomPageLayout>
   )
 }

@@ -1,5 +1,5 @@
+// CustomModalLayout.tsx
 import { useEffect } from 'react'
-import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface CustomModalLayoutProps {
@@ -37,20 +37,17 @@ export function CustomModalLayout({
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-end">
+    <div className="fixed inset-0 z-50 flex">
       {/* Overlay */}
-      <div 
-        className="absolute inset-0 bg-black/50 transition-opacity duration-300 ease-in-out"
+      <div
+        className="absolute inset-0 bg-black/50"
         onClick={onClose}
       />
-      
+
       {/* Modal Container */}
       <div className={cn(
-        "relative bg-[var(--card-bg)] shadow-2xl transition-all duration-300 ease-in-out",
-        // Desktop: right-anchored with max width
-        "hidden md:flex md:h-full md:max-w-xl md:w-full md:flex-col",
-        // Mobile: full screen
-        "flex h-full w-full flex-col md:hidden",
+        "relative z-10 flex flex-col bg-[var(--card-bg)] shadow-2xl transition-all duration-300 ease-in-out",
+        "h-full w-full md:max-w-xl md:ml-auto",
         className
       )}>
         {children}
