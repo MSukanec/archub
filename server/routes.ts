@@ -165,6 +165,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Select organization endpoint
+  app.post("/api/user/select-organization", async (req, res) => {
+    try {
+      const { organization_id } = req.body;
+      const user_id = req.headers['x-user-id']; // You'll need to pass this from frontend
+
+      if (!organization_id || !user_id) {
+        return res.status(400).json({ error: "Missing organization_id or user_id" });
+      }
+
+      const { error } = await supabase
+        .from('user_preferences')
+        .update({ last_organization_id: organization_id })
+        .eq('user_id', user_id);
+
+      if (error) {
+        console.error("Error updating last_organization_id:", error);
+        return res.status(500).json({ error: "Failed to update organization selection" });
+      }
+
+      res.json({ success: true, message: "Organization selected successfully" });
+    } catch (error) {
+      console.error("Error selecting organization:", error);
+      res.status(500).json({ error: "Failed to select organization" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

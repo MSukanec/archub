@@ -19,7 +19,15 @@ export default function Organizations() {
   // Mutation for selecting an organization
   const selectOrganizationMutation = useMutation({
     mutationFn: async (organizationId: string) => {
-      return await apiRequest('POST', `/api/user/select-organization`, { organization_id: organizationId })
+      const response = await fetch('/api/user/select-organization', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': data?.user?.id || ''
+        },
+        body: JSON.stringify({ organization_id: organizationId })
+      })
+      return response.json()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['current-user'] })

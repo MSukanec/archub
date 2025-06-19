@@ -68,7 +68,7 @@ export default function ProfilePage() {
       return await apiRequest('PATCH', '/api/user/profile', profileData)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/user'] })
+      queryClient.invalidateQueries({ queryKey: ['current-user'] })
       refetch()
       toast({
         title: "Perfil actualizado",
