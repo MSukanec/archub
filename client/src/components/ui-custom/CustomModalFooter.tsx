@@ -1,43 +1,41 @@
-import { Button } from '@/components/ui/button'
+// CustomModalFooter.tsx
+import { Button } from "@/components/ui/button";
 
 interface CustomModalFooterProps {
-  onCancel: () => void
-  onSubmit: () => void
-  cancelText?: string
-  submitText?: string
-  isSubmitting?: boolean
-  submitDisabled?: boolean
+  onCancel: () => void;
+  onSubmit: () => void;
+  cancelLabel?: string;
+  submitLabel?: string;
+  disabled?: boolean;
 }
 
 export function CustomModalFooter({
   onCancel,
   onSubmit,
-  cancelText = 'Cancelar',
-  submitText = 'Guardar',
-  isSubmitting = false,
-  submitDisabled = false
+  cancelLabel = "Cancelar",
+  submitLabel = "Guardar",
+  disabled = false,
 }: CustomModalFooterProps) {
   return (
-    <div className="flex items-center justify-end gap-3 p-6 border-t border-[var(--card-border)]">
-      <div className="flex w-full gap-3">
+    <div className="p-3 border-t border-[var(--card-border)] mt-auto">
+      <div className="flex gap-2 w-full">
         <Button
-          variant="outline"
+          type="button"
+          variant="ghost"
           onClick={onCancel}
-          disabled={isSubmitting}
-          className="flex-1 max-w-[25%]"
+          className="w-1/4"
         >
-          {cancelText}
+          {cancelLabel}
         </Button>
-        
         <Button
-          variant="default"
+          type="submit"
           onClick={onSubmit}
-          disabled={submitDisabled || isSubmitting}
-          className="flex-1 max-w-[75%]"
+          className="w-3/4"
+          disabled={disabled}
         >
-          {isSubmitting ? 'Guardando...' : submitText}
+          {submitLabel}
         </Button>
       </div>
     </div>
-  )
+  );
 }

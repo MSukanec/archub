@@ -13,7 +13,7 @@ export function CustomModalHeader({
   onClose
 }: CustomModalHeaderProps) {
   return (
-    <div className="flex items-start justify-between p-6 border-b border-[var(--card-border)]">
+    <div className="flex items-start justify-between p-3 border-b border-[var(--card-border)]">
       <div className="flex-1 pr-4">
         <h2 className="text-lg font-semibold text-[var(--card-fg)]">
           {title}

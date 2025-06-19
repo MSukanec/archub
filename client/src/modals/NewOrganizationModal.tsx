@@ -21,10 +21,13 @@ import { cn } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
 import { queryClient } from '@/lib/queryClient'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { useOrganizationMembers } from '@/hooks/use-organization-members'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 const createOrganizationSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
-  created_at: z.date()
+  created_at: z.date(),
+  created_by: z.string().min(1, 'El creador es requerido')
 })
 
 type CreateOrganizationForm = z.infer<typeof createOrganizationSchema>

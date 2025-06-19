@@ -228,6 +228,11 @@ export default function Organizations() {
             Fecha
           </div>
           
+          {/* Creador */}
+          <div className="w-32 flex-shrink-0 px-2">
+            Creador
+          </div>
+          
           {/* Nombre */}
           <div className="flex-1 min-w-0 px-4">
             Organización
@@ -269,6 +274,14 @@ export default function Organizations() {
                   <div className="flex-shrink-0 w-24">
                     <span className="text-xs text-muted-foreground">
                       {formatDate(org.created_at)}
+                    </span>
+                  </div>
+
+                  {/* Creador */}
+                  <div className="w-32 flex-shrink-0 px-2">
+                    <span className="text-xs text-muted-foreground truncate">
+                      {/* TODO: Get creator info from org.created_by */}
+                      Sistema
                     </span>
                   </div>
 
