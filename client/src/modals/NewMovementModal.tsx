@@ -178,10 +178,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         created_at: formData.created_at.toISOString()
       }
 
-      return await apiRequest(endpoint, {
-        method,
-        body: JSON.stringify(movementData)
-      })
+      return await apiRequest(endpoint, method, movementData)
     },
     onSuccess: () => {
       toast({
@@ -283,14 +280,14 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                             {selectedMember && (
                               <>
                                 <Avatar className="h-6 w-6">
-                                  <AvatarImage src={selectedMember.users?.avatar_url} />
+                                  <AvatarImage src={(selectedMember as any).users?.avatar_url} />
                                   <AvatarFallback className="text-xs">
-                                    {selectedMember.users?.full_name?.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) || 
-                                     selectedMember.users?.email?.slice(0, 2).toUpperCase()}
+                                    {(selectedMember as any).users?.full_name?.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) || 
+                                     (selectedMember as any).users?.email?.slice(0, 2).toUpperCase() || 'U'}
                                   </AvatarFallback>
                                 </Avatar>
                                 <span className="truncate">
-                                  {selectedMember.users?.full_name || selectedMember.users?.email}
+                                  {(selectedMember as any).users?.full_name || (selectedMember as any).users?.email || 'Usuario'}
                                 </span>
                               </>
                             )}
@@ -299,18 +296,18 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {members.map((member) => (
+                        {members.map((member: any) => (
                           <SelectItem key={member.id} value={member.id}>
                             <div className="flex items-center gap-2">
                               <Avatar className="h-6 w-6">
                                 <AvatarImage src={member.users?.avatar_url} />
                                 <AvatarFallback className="text-xs">
                                   {member.users?.full_name?.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) || 
-                                   member.users?.email?.slice(0, 2).toUpperCase()}
+                                   member.users?.email?.slice(0, 2).toUpperCase() || 'U'}
                                 </AvatarFallback>
                               </Avatar>
                               <span className="truncate">
-                                {member.users?.full_name || member.users?.email}
+                                {member.users?.full_name || member.users?.email || 'Usuario'}
                               </span>
                             </div>
                           </SelectItem>
@@ -519,7 +516,9 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
 
           <CustomModalFooter
             onCancel={onClose}
-            isLoading={createMovementMutation.isPending}
+            onSubmit={() => {}}
+            submitLabel={editingMovement ? "Actualizar" : "Crear"}
+            disabled={createMovementMutation.isPending}
           />
         </form>
       </Form>

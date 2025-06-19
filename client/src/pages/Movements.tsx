@@ -57,9 +57,7 @@ export default function Movements() {
 
   const deleteMovementMutation = useMutation({
     mutationFn: async (movementId: string) => {
-      return await apiRequest(`/api/movements/${movementId}`, {
-        method: 'DELETE'
-      })
+      return await apiRequest(`/api/movements/${movementId}`, 'DELETE', undefined)
     },
     onSuccess: () => {
       toast({
