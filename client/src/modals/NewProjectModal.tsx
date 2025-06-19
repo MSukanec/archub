@@ -44,17 +44,40 @@ export function NewProjectModal({ open, onClose }: NewProjectModalProps) {
 
   const createProjectMutation = useMutation({
     mutationFn: async (formData: CreateProjectForm) => {
-      if (!supabase || !userData?.organization?.id || !userData?.user?.id) {
-        throw new Error('Datos de usuario u organización no disponibles')
+      if (!supabase) {
+        throw new Error('Supabase no está disponible')
+      }
+
+      const organization = userData?.organization
+      const user = userData?.user
+      const memberships = userData?.memberships
+
+      if (!organization?.id) {
+        throw new Error('No se encontró la organización actual')
+      }
+
+      if (!user?.id) {
+        throw new Error('No se encontró el usuario actual')
       }
 
       // Get the organization member ID for the current user
-      const orgMemberId = userData.memberships?.find(
-        m => m.organization_id === userData.organization.id
+      console.log('Searching for membership in organization:', organization.id)
+      console.log('Available memberships:', memberships)
+      
+      const orgMemberId = memberships?.find(
+        m => m.organization_id === organization.id
       )?.id
 
+      console.log('Found organization member ID:', orgMemberId)
+
       if (!orgMemberId) {
-        throw new Error('No se encontró la membresía del usuario en la organización')
+        // Show specific toast error and don't proceed
+        toast({
+          title: 'Error',
+          description: 'No se encontró la membresía del usuario en esta organización',
+          variant: 'destructive'
+        })
+        throw new Error('No se encontró la membresía del usuario en esta organización')
       }
 
       // Create project in projects table
@@ -62,11 +85,13 @@ export function NewProjectModal({ open, onClose }: NewProjectModalProps) {
         name: formData.name,
         status: formData.status,
         is_active: true,
-        organization_id: userData.organization.id,
+        organization_id: organization.id,
         created_at: formData.created_at,
         created_by: orgMemberId
       }
 
+      console.log('Inserting project data:', projectData)
+      
       const { data: project, error: projectError } = await supabase
         .from('projects')
         .insert(projectData)
@@ -75,8 +100,15 @@ export function NewProjectModal({ open, onClose }: NewProjectModalProps) {
 
       if (projectError) {
         console.error('Error creating project:', projectError)
+        toast({
+          title: 'Error al crear proyecto',
+          description: projectError.message || 'Error desconocido al crear el proyecto',
+          variant: 'destructive'
+        })
         throw projectError
       }
+
+      console.log('Project created successfully:', project)
 
       // Create project_data entry
       try {
@@ -99,7 +131,7 @@ export function NewProjectModal({ open, onClose }: NewProjectModalProps) {
       const { error: preferencesError } = await supabase
         .from('user_preferences')
         .update({ last_project_id: project.id })
-        .eq('user_id', userData.user.id)
+        .eq('user_id', user.id)
 
       if (preferencesError) {
         console.warn('Could not update user preferences:', preferencesError)
@@ -140,13 +172,16 @@ export function NewProjectModal({ open, onClose }: NewProjectModalProps) {
   }
 
   // Get user display info
-  const userDisplayName = userData?.user_data?.first_name && userData?.user_data?.last_name 
-    ? `${userData.user_data.first_name} ${userData.user_data.last_name}`
-    : userData?.user?.email || 'Usuario'
+  const userDisplayName = userData?.user?.full_name || 
+    (userData?.user_data?.first_name && userData?.user_data?.last_name 
+      ? `${userData.user_data.first_name} ${userData.user_data.last_name}`
+      : userData?.user?.email) || 'Usuario'
   
-  const userInitials = userData?.user_data?.first_name && userData?.user_data?.last_name
-    ? `${userData.user_data.first_name.charAt(0)}${userData.user_data.last_name.charAt(0)}`
-    : userData?.user?.email?.charAt(0).toUpperCase() || 'U'
+  const userInitials = userData?.user?.full_name 
+    ? userData.user.full_name.split(' ').map(n => n.charAt(0)).join('').toUpperCase().slice(0, 2)
+    : (userData?.user_data?.first_name && userData?.user_data?.last_name
+        ? `${userData.user_data.first_name.charAt(0)}${userData.user_data.last_name.charAt(0)}`
+        : userData?.user?.email?.charAt(0).toUpperCase()) || 'U'
 
   return (
     <CustomModalLayout open={open} onClose={handleCancel}>

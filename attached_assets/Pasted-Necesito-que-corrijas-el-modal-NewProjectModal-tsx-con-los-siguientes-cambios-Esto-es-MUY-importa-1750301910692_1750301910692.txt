@@ -1,0 +1,89 @@
+Necesito que corrijas el modal `NewProjectModal.tsx` con los siguientes cambios. Esto es MUY importante para que funcione correctamente y no genere errores.
+
+---
+
+🧠 CONTEXTO
+
+- El modal crea un nuevo proyecto y usa los componentes ya definidos (`CustomModalLayout`, `CustomModalHeader`, `CustomModalBody`, `CustomModalFooter`).
+- Los datos del usuario actual vienen desde `useCurrentUser()`, que incluye:
+  - `userData.user` (información general del usuario global)
+  - `userData.organization` (organización actual seleccionada)
+  - `userData.memberships[]` (relación con `organization_members`)
+
+---
+
+✅ 1. CAMPOS DEL FORMULARIO
+
+Los campos deben mostrarse en este orden:
+
+1. `created_at` (input tipo `date`, editable)
+2. `created_by` (solo mostrar, no editable)
+   - Mostrar el `full_name` del usuario actual (`userData.user.full_name`)
+   - Mostrar el `avatar_url` con fallback de iniciales
+   - Todo dentro de un contenedor estilizado como campo de texto pero *readonly*
+3. `name`
+4. `status` (planning, active, completed)
+
+---
+
+✅ 2. MUTACIÓN A SUPABASE
+
+Para insertar en la tabla `projects`, usá:
+
+- `name`, `status`, `created_at`, `is_active: true`
+- `organization_id`: viene de `userData.organization.id`
+- `created_by`: debe ser el `organization_members.id` correspondiente
+
+Para obtener el `organization_member.id` correcto:
+
+```ts
+const orgMemberId = userData.memberships?.find(
+  m => m.organization_id === userData.organization?.id
+)?.id
+✅ Si orgMemberId es undefined, no llames a Supabase. Mostrá un toast de error como este:
+
+ts
+Copiar
+Editar
+toast({
+  title: 'Error',
+  description: 'No se encontró la membresía del usuario en esta organización',
+  variant: 'destructive'
+})
+✅ 3. POST-INSERCIÓN
+
+Después de insertar el proyecto:
+
+Insertar en project_data con project_id, created_by, updated_by
+
+Actualizar user_preferences.last_project_id con el nuevo project.id
+
+Cerrar el modal
+
+Refrescar la lista de proyectos (projects) y el usuario (current-user)
+
+✅ 4. DETALLES VISUALES
+
+Los labels deben ser text-sm font-medium text-muted-foreground
+
+El campo Miembro creador debe estar estilizado como un bloque con:
+
+Avatar circular
+
+Nombre del usuario
+
+Padding, borde, fondo suave
+
+No debe ser un input, sino un div
+
+❌ NO HAGAS ESTO
+
+No uses user.id como created_by
+
+No insertes datos si orgMemberId no existe
+
+No pongas datos de ejemplo
+
+No muestres errores genéricos, usá toast
+
+Gracias. Este modal debe quedar 100% funcional y alineado a nuestra estructura real de base de datos.
