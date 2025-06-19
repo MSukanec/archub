@@ -97,29 +97,29 @@
 
 .dark {
   /* Layout */
-  --layout-bg: hsl(240, 10%, 4%);
-  --layout-text: hsl(0, 0%, 98%);
+  --layout-bg: hsl(0, 0%, 12%);
+  --layout-text: hsl(0, 0%, 90%);
   --layout-border: hsl(240, 8%, 15%);
 
   /* Sidebar */
-  --sidebar-bg: hsl(240, 10%, 8%);
+  --sidebar-bg: hsl(0, 0%, 14%);
   --sidebar-text: hsl(0, 0%, 98%);
   --sidebar-border: hsl(240, 8%, 15%);
-  --sidebar-hover-bg: hsl(240, 8%, 12%);
-  --sidebar-active-bg: hsl(210, 40%, 15%);
-  --sidebar-active-text: hsl(210, 40%, 70%);
+  --sidebar-hover-bg: hsl(0, 0%, 8%);
+  --sidebar-active-bg: hsl(0, 0%, 8%);
+  --sidebar-active-text: hsl(0, 0%, 90%);
 
   /* Cards */
-  --card-bg: hsl(240, 10%, 8%);
-  --card-text: hsl(0, 0%, 98%);
+  --card-bg: hsl(0, 0%, 14%);
+  --card-text: hsl(0, 0%, 90%);
   --card-border: hsl(240, 8%, 15%);
-  --card-hover-bg: hsl(240, 8%, 12%);
+  --card-hover-bg: hsl(0, 0%, 16%);
 
   /* Buttons - Primary */
-  --button-primary-bg: hsl(210, 40%, 55%);
+  --button-primary-bg: hsl(0, 0%, 30%);
   --button-primary-text: hsl(0, 0%, 100%);
   --button-primary-border: transparent;
-  --button-primary-hover-bg: hsl(210, 40%, 60%);
+  --button-primary-hover-bg: hsl(90, 50%, 50%);
   --button-primary-hover-text: hsl(0, 0%, 100%);
   --button-primary-hover-border: transparent;
   --button-primary-disabled-bg: hsl(240, 5%, 25%);
@@ -142,12 +142,12 @@
   --button-ghost-hover-border: transparent;
 
   /* Inputs */
-  --input-bg: hsl(240, 10%, 8%);
+  --input-bg: hsl(0, 0%, 12%);
   --input-text: hsl(0, 0%, 98%);
-  --input-border: hsl(240, 8%, 15%);
-  --input-placeholder: hsl(240, 5%, 50%);
-  --input-focus-ring: hsl(210, 40%, 55%);
-  --input-focus-border: hsl(210, 40%, 55%);
+  --input-border: hsl(0, 0%, 25%);
+  --input-placeholder: hsl(0, 0%, 50%);
+  --input-focus-ring: hsl(90, 50 50%);
+  --input-focus-border: hsl(90, 50%, 50%);
 
   /* Popover/Dropdown */
   --popover-bg: hsl(240, 10%, 8%);
@@ -155,7 +155,7 @@
   --accent-bg: hsl(240, 8%, 12%);
 
   /* Accent / State */
-  --accent: hsl(210, 40%, 55%);
+  --accent: hsl(90, 50%, 50%);
   --accent-text: hsl(0, 0%, 100%);
   --destructive: hsl(0, 84%, 65%);
   --destructive-text: hsl(0, 0%, 100%);
@@ -180,7 +180,7 @@
   /* Borders and Rings */
   --border-default: hsl(240, 8%, 15%);
   --border-strong: hsl(240, 8%, 25%);
-  --ring-default: hsl(210, 40%, 55%);
+  --ring-default: hsl(0, 0%, 30%);
 
   /* Radius */
   --radius-sm: 4px;

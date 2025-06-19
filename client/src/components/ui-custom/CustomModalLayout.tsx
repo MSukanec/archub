@@ -1,40 +1,40 @@
 // CustomModalLayout.tsx
-import { useEffect } from 'react'
-import { cn } from '@/lib/utils'
+import { useEffect } from "react";
+import { cn } from "@/lib/utils";
 
 interface CustomModalLayoutProps {
-  open: boolean
-  onClose: () => void
-  children: React.ReactNode
-  className?: string
+  open: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
+  className?: string;
 }
 
 export function CustomModalLayout({
   open,
   onClose,
   children,
-  className
+  className,
 }: CustomModalLayoutProps) {
   // Close modal on Escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && open) {
-        onClose()
+      if (e.key === "Escape" && open) {
+        onClose();
       }
-    }
+    };
 
     if (open) {
-      document.addEventListener('keydown', handleEscape)
-      document.body.style.overflow = 'hidden'
+      document.addEventListener("keydown", handleEscape);
+      document.body.style.overflow = "hidden";
     }
 
     return () => {
-      document.removeEventListener('keydown', handleEscape)
-      document.body.style.overflow = 'unset'
-    }
-  }, [open, onClose])
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "unset";
+    };
+  }, [open, onClose]);
 
-  if (!open) return null
+  if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-end">
@@ -45,13 +45,15 @@ export function CustomModalLayout({
       />
 
       {/* Modal Container */}
-      <div className={cn(
-        "relative z-10 flex flex-col bg-white dark:bg-gray-900 shadow-2xl transition-all duration-300 ease-in-out",
-        "h-full w-full max-w-xl",
-        className
-      )}>
+      <div
+        className={cn(
+          "relative z-10 flex flex-col bg-[--layout-bg] shadow-2xl transition-all duration-300 ease-in-out",
+          "h-full w-full max-w-xl",
+          className,
+        )}
+      >
         {children}
       </div>
     </div>
-  )
+  );
 }

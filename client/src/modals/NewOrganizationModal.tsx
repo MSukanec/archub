@@ -25,8 +25,6 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 
 const createOrganizationSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
-  is_active: z.boolean().default(true),
-  is_system: z.boolean().default(false),
   created_at: z.date()
 })
 
@@ -60,8 +58,6 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
     resolver: zodResolver(createOrganizationSchema),
     defaultValues: {
       name: '',
-      is_active: true,
-      is_system: false,
       created_at: new Date()
     }
   })
@@ -73,15 +69,11 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
       
       form.reset({
         name: editingOrganization.name,
-        is_active: editingOrganization.is_active,
-        is_system: editingOrganization.is_system,
         created_at: new Date(editingOrganization.created_at)
       })
     } else {
       form.reset({
         name: '',
-        is_active: true,
-        is_system: false,
         created_at: new Date()
       })
     }
@@ -96,8 +88,6 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
 
       const organizationData = {
         name: formData.name,
-        is_active: formData.is_active,
-        is_system: formData.is_system,
         created_at: formData.created_at.toISOString()
       }
 
@@ -268,57 +258,7 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
                 )}
               />
 
-              {/* Estado */}
-              <FormField
-                control={form.control}
-                name="is_active"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">Estado</FormLabel>
-                    <Select
-                      onValueChange={(value) => field.onChange(value === 'true')}
-                      value={field.value ? 'true' : 'false'}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona el estado" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="true">Activa</SelectItem>
-                        <SelectItem value="false">Inactiva</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
-              {/* Tipo de organización */}
-              <FormField
-                control={form.control}
-                name="is_system"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">Tipo</FormLabel>
-                    <Select
-                      onValueChange={(value) => field.onChange(value === 'true')}
-                      value={field.value ? 'true' : 'false'}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona el tipo" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="false">Normal</SelectItem>
-                        <SelectItem value="true">Sistema</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
           </CustomModalBody>
 
