@@ -142,7 +142,7 @@ export default function Organizations() {
     return (
       <CustomPageLayout
         icon={Building}
-        title="Organizations"
+        title="Gestión de Organizaciones"
         actions={actions}
         searchValue={searchValue}
         onSearchChange={setSearchValue}
@@ -169,7 +169,7 @@ export default function Organizations() {
     return (
       <CustomPageLayout
         icon={Building}
-        title="Organizations"
+        title="Gestión de Organizaciones"
         actions={actions}
         searchValue={searchValue}
         onSearchChange={setSearchValue}

@@ -5,7 +5,7 @@
 :root {
   /* Layout */
   --layout-bg: hsl(0, 0%, 99%);
-  --layout-text: hsl(0, 50%, 50%);
+  --layout-text: hsl(0, 0%, 35%);
   --layout-border: hsl(240, 6%, 90%);
 
   /* Sidebar */

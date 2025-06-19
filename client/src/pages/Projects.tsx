@@ -334,7 +334,7 @@ export default function Projects() {
   return (
     <CustomPageLayout
       icon={Folder}
-      title="Proyectos"
+      title="Gestión de Proyectos"
       actions={actions}
       searchValue={searchValue}
       onSearchChange={setSearchValue}
