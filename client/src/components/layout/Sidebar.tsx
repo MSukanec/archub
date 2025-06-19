@@ -66,13 +66,13 @@ export function Sidebar() {
         }}
       >
         {/* Logo */}
-        <Link href="/">
+        <Link href="/organizaciones">
           <SidebarButton
             icon={Building}
             isExpanded={isExpanded}
-            isActive={location === "/"}
+            isActive={location === "/organizaciones"}
           >
-            Archub
+            Organización
           </SidebarButton>
         </Link>
 

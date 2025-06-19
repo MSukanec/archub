@@ -95,6 +95,9 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
   // Update form when editing project changes
   useEffect(() => {
     if (editingProject) {
+      console.log('Editing project data:', editingProject) // Debug log
+      console.log('Project data structure:', editingProject.project_data) // Debug log
+      
       form.reset({
         name: editingProject.name,
         status: editingProject.status as any,

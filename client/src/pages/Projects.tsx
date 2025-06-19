@@ -341,6 +341,45 @@ export default function Projects() {
       filters={filters}
       onClearFilters={handleClearFilters}
     >
+      {/* Encabezados de columnas */}
+      <div className="w-full px-4 py-2 border-b border-border/50 mb-3">
+        <div className="flex items-center justify-between w-full text-xs font-medium text-muted-foreground uppercase tracking-wide">
+          {/* Fecha */}
+          <div className="flex-shrink-0 w-20">
+            Fecha
+          </div>
+          
+          {/* Creador */}
+          <div className="flex-shrink-0 w-48 px-4">
+            Creador
+          </div>
+
+          {/* Nombre del proyecto */}
+          <div className="flex-1 min-w-0 px-4">
+            Proyecto
+          </div>
+
+          {/* Tipología */}
+          <div className="w-32 flex-shrink-0 px-2">
+            Tipología
+          </div>
+
+          {/* Modalidad */}
+          <div className="w-32 flex-shrink-0 px-2">
+            Modalidad
+          </div>
+
+          {/* Estado */}
+          <div className="w-28 flex-shrink-0">
+            Estado
+          </div>
+
+          {/* Acciones */}
+          <div className="w-10 flex-shrink-0">
+          </div>
+        </div>
+      </div>
+
       <div className="space-y-3">
         {filteredProjects.map((project) => {
           const isSelected = project.id === selectedProject

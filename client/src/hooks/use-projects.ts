@@ -80,20 +80,27 @@ export function useProjects(organizationId: string | undefined) {
       
       // Transform the data to match our interface
       const transformedData = (data || []).map(project => {
-        console.log('Project data from Supabase:', project) // Debug log
-        return {
+        console.log('Raw project from Supabase:', project) // Debug log
+        
+        // Handle project_data which can be an array or object
+        let projectData = null
+        if (project.project_data) {
+          const pd = Array.isArray(project.project_data) ? project.project_data[0] : project.project_data
+          console.log('Processing project_data:', pd) // Debug log
+          if (pd) {
+            projectData = {
+              project_type_id: pd.project_type_id,
+              modality_id: pd.modality_id,
+              project_type: pd.project_types,
+              modality: pd.project_modalities
+            }
+            console.log('Transformed project_data:', projectData) // Debug log
+          }
+        }
+        
+        const transformedProject = {
           ...project,
-          project_data: project.project_data?.[0] ? {
-            project_type_id: project.project_data[0].project_type_id,
-            modality_id: project.project_data[0].modality_id,
-            project_type: project.project_data[0].project_types,
-            modality: project.project_data[0].project_modalities
-          } : {
-            project_type_id: null,
-            modality_id: null,
-            project_type: null,
-            modality: null
-          },
+          project_data: projectData,
           creator: project.organization_members?.users ? {
             id: project.organization_members.users.id,
             full_name: project.organization_members.users.full_name,
@@ -103,6 +110,9 @@ export function useProjects(organizationId: string | undefined) {
             last_name: project.organization_members.users.user_data?.[0]?.last_name
           } : undefined
         }
+        
+        console.log('Final transformed project:', transformedProject) // Debug log
+        return transformedProject
       })
 
       return transformedData
