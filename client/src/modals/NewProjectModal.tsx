@@ -491,12 +491,11 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
       </Form>
 
       <CustomModalFooter
-        cancelText="Cancelar"
-        submitText={loading ? 'Guardando...' : (editingProject ? 'Actualizar' : 'Crear proyecto')}
+        cancelLabel="Cancelar"
+        submitLabel={loading ? 'Guardando...' : (editingProject ? 'Actualizar' : 'Crear proyecto')}
         onCancel={onClose}
         onSubmit={() => form.handleSubmit(handleSubmit)()}
-        submitDisabled={loading || createProjectMutation.isPending}
-        isSubmitting={loading}
+        disabled={loading || createProjectMutation.isPending}
       />
     </CustomModalLayout>
   )

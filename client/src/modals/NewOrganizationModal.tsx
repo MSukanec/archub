@@ -94,6 +94,7 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
 
       const organizationData = {
         name: formData.name,
+        created_by: formData.created_by,
         created_at: formData.created_at.toISOString()
       }
 
@@ -209,20 +210,39 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
               />
 
               {/* Creador */}
-              <div className="flex flex-col space-y-2">
-                <label className="text-sm font-medium">Creador</label>
-                <div className="flex items-center space-x-3 p-3 border rounded-md bg-muted/30">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={userData?.user?.avatar_url || ''} />
-                    <AvatarFallback className="text-xs">
-                      {getCreatorInitials()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="text-sm text-muted-foreground">
-                    {getCreatorInfo()}
-                  </span>
-                </div>
-              </div>
+              <FormField
+                control={form.control}
+                name="created_by"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">Creador</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona un miembro" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="none">Selecciona un miembro</SelectItem>
+                        {organizationMembers?.map((member) => (
+                          <SelectItem key={member.id} value={member.id}>
+                            <div className="flex items-center gap-2">
+                              <Avatar className="h-6 w-6">
+                                <AvatarImage src={member.users?.avatar_url || ''} />
+                                <AvatarFallback className="text-xs">
+                                  {member.users?.full_name ? member.users.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) : 'U'}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span>{member.users?.full_name || member.users?.email || 'Usuario'}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               {/* Nombre de la organización */}
               <FormField
@@ -247,9 +267,9 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
           <CustomModalFooter
             onCancel={onClose}
             onSubmit={form.handleSubmit(handleSubmit)}
-            cancelText="Cancelar"
-            submitText="Guardar"
-            isSubmitting={createOrganizationMutation.isPending}
+            cancelLabel="Cancelar"
+            submitLabel="Guardar"
+            disabled={createOrganizationMutation.isPending}
           />
         </form>
       </Form>
