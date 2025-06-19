@@ -7,8 +7,6 @@ interface UserData {
     id: string
     auth_id: string
     email: string
-    first_name: string
-    last_name: string
     full_name: string
     avatar_url: string
     avatar_source: string
@@ -18,6 +16,9 @@ interface UserData {
   user_data: {
     id: string
     user_id: string
+    first_name: string
+    last_name: string
+    display_name: string
     country: string
     birthdate: string
     created_at: string

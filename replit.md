@@ -339,6 +339,14 @@ Changelog:
   • Created simplified archub_get_user function to avoid column existence errors
   • Temporarily simplified function to use only verified tables until all schema issues resolved
   • Profile data now persists correctly in database but requires function fix for frontend display
+
+- June 18, 2025. Moved personal data fields to user_data table for better data organization
+  • Moved first_name and last_name from users table to user_data table
+  • Updated archub_get_user function to return names from user_data with display_name field
+  • Modified backend to save personal information exclusively in user_data table
+  • Clear separation: users table for technical/auth data, user_data for personal information
+  • Updated TypeScript interfaces to reflect new data structure
+  • Backend now correctly saves names, birthdate, and country all in user_data table
 ```
 
 ## User Preferences

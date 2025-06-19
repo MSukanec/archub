@@ -55,8 +55,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log("Updating profile for user:", user_id);
 
-      // Update user_data table directly - only birthdate and country exist
-      if (birthdate !== undefined || country !== undefined) {
+      // Update user_data table - now includes first_name, last_name, birthdate and country
+      if (birthdate !== undefined || country !== undefined || first_name !== undefined || last_name !== undefined) {
         // Check if user_data record exists
         const { data: existingData } = await supabase
           .from('user_data')
@@ -67,6 +67,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const updateData: any = {};
         if (birthdate !== undefined && birthdate !== "") updateData.birthdate = birthdate;
         if (country !== undefined && country !== "") updateData.country = country;
+        if (first_name !== undefined && first_name !== "") updateData.first_name = first_name;
+        if (last_name !== undefined && last_name !== "") updateData.last_name = last_name;
 
         if (existingData) {
           // Update existing record
@@ -136,23 +138,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Update users table for user profile fields
-      if (full_name !== undefined || avatar_url !== undefined || first_name !== undefined || last_name !== undefined) {
+      // Update users table for user profile fields (excluding first_name/last_name which are now in user_data)
+      if (full_name !== undefined || avatar_url !== undefined) {
         const userUpdateData: any = {};
         if (full_name !== undefined) userUpdateData.full_name = full_name;
         if (avatar_url !== undefined) userUpdateData.avatar_url = avatar_url;
-        if (first_name !== undefined) userUpdateData.first_name = first_name;
-        if (last_name !== undefined) userUpdateData.last_name = last_name;
 
-        const { error } = await supabase
-          .from('users')
-          .update(userUpdateData)
-          .eq('auth_id', user_id);
+        if (Object.keys(userUpdateData).length > 0) {
+          const { error } = await supabase
+            .from('users')
+            .update(userUpdateData)
+            .eq('auth_id', user_id);
 
-        if (error) {
-          console.error("Error updating users table:", error);
-        } else {
-          console.log("Updated users table successfully");
+          if (error) {
+            console.error("Error updating users table:", error);
+          } else {
+            console.log("Updated users table successfully");
+          }
         }
       }
 
