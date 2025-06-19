@@ -26,6 +26,7 @@ const iconMap = {
   home: Home,
   building: Building,
   folder: Folder,
+  "dollar-sign": DollarSign,
   "check-square": CheckSquare,
   users: Users,
   "credit-card": CreditCard,
