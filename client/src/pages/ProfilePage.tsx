@@ -51,8 +51,8 @@ export default function ProfilePage() {
 
       setFormData({
         full_name: data.user?.full_name || '',
-        first_name: data.user?.first_name || '',
-        last_name: data.user?.last_name || '',
+        first_name: data.user_data?.first_name || '',
+        last_name: data.user_data?.last_name || '',
         birthdate: data.user_data?.birthdate || '',
         avatar_url: data.user?.avatar_url || '',
         theme: data.preferences?.theme || 'light',
