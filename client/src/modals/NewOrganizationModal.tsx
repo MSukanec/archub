@@ -148,7 +148,7 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
   return (
     <CustomModalLayout open={open} onClose={onClose}>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col h-full">
           <CustomModalHeader
             title={editingOrganization ? "Editar organización" : "Nueva organización"}
             description={editingOrganization ? "Actualiza los datos de la organización" : "Crea una nueva organización para gestionar tus proyectos"}

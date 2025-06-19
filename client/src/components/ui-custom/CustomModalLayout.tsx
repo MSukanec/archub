@@ -15,7 +15,6 @@ export function CustomModalLayout({
   children,
   className,
 }: CustomModalLayoutProps) {
-  // Close modal on Escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape" && open) {
@@ -52,7 +51,8 @@ export function CustomModalLayout({
           className,
         )}
       >
-        {children}
+        {/* 🔧 Wrapper que impone layout vertical */}
+        <div className="flex flex-col h-full overflow-hidden">{children}</div>
       </div>
     </div>
   );
