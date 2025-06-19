@@ -410,7 +410,7 @@ export default function Projects() {
                       <AvatarImage src={creator.avatar} />
                       <AvatarFallback className="text-xs">{creator.initials}</AvatarFallback>
                     </Avatar>
-                    <span className="text-sm font-medium truncate">{creator.name}</span>
+                    <span className="text-xs font-medium truncate">{creator.name}</span>
                   </div>
 
                   {/* Nombre del proyecto */}
@@ -418,7 +418,7 @@ export default function Projects() {
                     <div className="flex items-center gap-2">
                       <span className="font-medium truncate">{project.name}</span>
                       {isSelected && (
-                        <Badge variant="default" className="text-xs bg-primary/10 text-primary border-primary/20">
+                        <Badge variant="default" className="text-xs bg-[var(--accent)]/10 text-[var(--accent)] border-[var(--accent)]/20">
                           Activo
                         </Badge>
                       )}
@@ -427,14 +427,14 @@ export default function Projects() {
 
                   {/* Tipología */}
                   <div className="w-32 flex-shrink-0">
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-xs text-muted-foreground">
                       {project.project_data?.project_type?.name || 'Sin tipología'}
                     </span>
                   </div>
 
                   {/* Modalidad */}
                   <div className="w-32 flex-shrink-0">
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-xs text-muted-foreground">
                       {project.project_data?.modality?.name || 'Sin modalidad'}
                     </span>
                   </div>

@@ -9,6 +9,7 @@ import { useState, useMemo } from 'react'
 import { cn } from '@/lib/utils'
 import { apiRequest, queryClient } from '@/lib/queryClient'
 import { useMutation } from '@tanstack/react-query'
+import { NewOrganizationModal } from '@/modals/NewOrganizationModal'
 
 type FilterType = 'all' | 'active' | 'archived' | 'system'
 
@@ -81,8 +82,18 @@ export default function Organizations() {
   ]
 
   const handleCreateOrganization = () => {
-    // TODO: Implement organization creation
-    console.log("Crear nueva organización")
+    setEditingOrganization(null)
+    setShowNewOrgModal(true)
+  }
+
+  const handleEditOrganization = (org: any) => {
+    setEditingOrganization(org)
+    setShowNewOrgModal(true)
+  }
+
+  const handleDeleteOrganization = (org: any) => {
+    // TODO: Implement delete functionality
+    console.log('Delete organization:', org)
   }
 
   const handleSelectOrganization = (organizationId: string) => {
@@ -256,7 +267,7 @@ export default function Organizations() {
                 <div className="flex items-center justify-between w-full">
                   {/* Fecha */}
                   <div className="flex-shrink-0 w-24">
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-xs text-muted-foreground">
                       {formatDate(org.created_at)}
                     </span>
                   </div>
@@ -266,8 +277,8 @@ export default function Organizations() {
                     <div className="flex items-center gap-2">
                       <span className="font-medium truncate">{org.name}</span>
                       {isSelected && (
-                        <Badge variant="default" className="text-xs bg-primary/10 text-primary border-primary/20">
-                          Activa
+                        <Badge variant="default" className="text-xs bg-[var(--accent)]/10 text-[var(--accent)] border-[var(--accent)]/20">
+                          Seleccionada
                         </Badge>
                       )}
                     </div>
@@ -279,11 +290,11 @@ export default function Organizations() {
                       {org.plan && (
                         <>
                           <Crown className="h-3 w-3 text-amber-500" />
-                          <span className="text-sm text-muted-foreground truncate">{org.plan.name}</span>
+                          <span className="text-xs text-muted-foreground truncate">{org.plan.name}</span>
                         </>
                       )}
                       {!org.plan && (
-                        <span className="text-sm text-muted-foreground">Sin plan</span>
+                        <span className="text-xs text-muted-foreground">Sin plan</span>
                       )}
                     </div>
                   </div>
