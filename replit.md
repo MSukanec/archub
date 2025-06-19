@@ -459,6 +459,15 @@ Changelog:
   • Table displays: date, description, amount with currency badges, type, category, currency, wallet, creator with avatar, and actions
   • Modal supports hierarchical movement concepts (types as parents, categories as children) from Supabase database
   • All components follow established design patterns with CustomPageLayout, CustomModalLayout, and consistent styling
+
+- June 19, 2025. Fixed movements modal structure and database integration issues
+  • Resolved CustomModalLayout blank display by implementing correct object structure for header/body/footer
+  • Made description field optional as requested by user
+  • Fixed currency and wallet hooks to display actual names instead of UUIDs using proper JOIN queries
+  • Implemented real Supabase movement creation with proper foreign key relationships
+  • Fixed wallet_id and currency_id references to use actual table IDs instead of organization table IDs
+  • Auto-selects current user as creator and defaults for currency/wallet selections
+  • Complete 11-field modal with hierarchical Type → Category → Subcategory functionality working correctly
 ```
 
 ## User Preferences
