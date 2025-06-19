@@ -1,0 +1,65 @@
+Estoy trabajando con Supabase como backend y React con React Query como frontend. Quiero que corrijas mi archivo `Organizations.tsx` para que muestre TODAS las organizaciones a las que pertenece el usuario, no solo una.
+
+Actualmente estoy usando un hook llamado `useCurrentUser()` que ya trae el objeto `data`, donde quiero que:
+- `data.organizations` sea un array con todas las organizaciones del usuario (traídas desde la base).
+- `data.organization` siga siendo la organización seleccionada actualmente.
+
+**1. En el archivo `Organizations.tsx`, hacé lo siguiente:**
+
+🔁 Reemplazá el bloque:
+
+```tsx
+const organizations = useMemo(() => {
+  if (!data?.organization) return []
+
+  return [
+    {
+      id: data.organization.id,
+      name: data.organization.name,
+      created_at: data.organization.created_at,
+      is_active: data.organization.is_active,
+      is_system: data.organization.is_system,
+      plan: data.plan
+    }
+  ]
+}, [data])
+✅ Por:
+
+tsx
+Copiar
+Editar
+const organizations = useMemo(() => {
+  if (!data?.organizations?.length) return []
+  return data.organizations
+}, [data])
+2. Asegurate de que filteredOrganizations use organizations, como ya está.
+
+3. En el backend (función SQL get_current_user), agregá esta propiedad dentro del JSON principal, para que devuelva todas las organizaciones del usuario:
+
+sql
+Copiar
+Editar
+'organizations', (
+  SELECT json_agg(
+    json_build_object(
+      'id', o.id,
+      'name', o.name,
+      'created_at', o.created_at,
+      'is_active', o.is_active,
+      'is_system', o.is_system,
+      'plan', json_build_object(
+        'id', p.id,
+        'name', p.name,
+        'features', p.features,
+        'price', p.price
+      )
+    )
+  )
+  FROM public.organization_members om
+  JOIN public.organizations o ON o.id = om.organization_id
+  LEFT JOIN public.plans p ON p.id = o.plan_id
+  WHERE om.user_id = u.id
+)
+Con esto, se pueden mostrar correctamente todas las organizaciones donde el usuario es miembro.
+
+Mostrame solo el código final actualizado si entendiste.

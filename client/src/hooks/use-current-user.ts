@@ -48,6 +48,21 @@ interface UserData {
     updated_at: string
     [key: string]: any
   } | null
+  organizations: {
+    id: string
+    name: string
+    created_at: string
+    is_active: boolean
+    is_system: boolean
+    plan: {
+      id: string
+      name: string
+      features: string[]
+      price: number
+      [key: string]: any
+    } | null
+    [key: string]: any
+  }[] | null
   organization_preferences: {
     organization_id: string
     default_currency_id: string

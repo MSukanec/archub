@@ -27,22 +27,9 @@ export default function Organizations() {
     }
   })
 
-  // Mock organizations data - in real implementation, this would come from data.organizations
   const organizations = useMemo(() => {
-    if (!data?.organization) return []
-    
-    // For now, we'll create a mock array with the current organization
-    // In a real implementation, this would be data.organizations
-    return [
-      {
-        id: data.organization.id,
-        name: data.organization.name,
-        created_at: data.organization.created_at,
-        is_active: data.organization.is_active,
-        is_system: data.organization.is_system,
-        plan: data.plan
-      }
-    ]
+    if (!data?.organizations?.length) return []
+    return data.organizations
   }, [data])
 
   const selectedOrganization = data?.organization
