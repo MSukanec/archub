@@ -15,6 +15,7 @@ export function CustomModalLayout({
   children,
   className
 }: CustomModalLayoutProps) {
+  console.log('CustomModalLayout render:', { open })
   // Close modal on Escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {

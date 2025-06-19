@@ -32,6 +32,7 @@ interface NewProjectModalProps {
 }
 
 export function NewProjectModal({ open, onClose }: NewProjectModalProps) {
+  console.log('NewProjectModal render:', { open })
   const { data: userData } = useCurrentUser()
   const { toast } = useToast()
   const queryClient = useQueryClient()
