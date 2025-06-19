@@ -276,8 +276,9 @@ export function NewProjectModal({ open, onClose }: NewProjectModalProps) {
       <CustomModalFooter
         onCancel={handleCancel}
         onSubmit={form.handleSubmit(handleSubmit)}
-        submitLabel="Crear proyecto"
-        disabled={createProjectMutation.isPending || !form.formState.isValid}
+        submitText="Crear proyecto"
+        isSubmitting={createProjectMutation.isPending}
+        submitDisabled={!form.formState.isValid}
       />
     </CustomModalLayout>
   )
