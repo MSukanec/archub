@@ -341,6 +341,16 @@ export default function Organizations() {
           )
         })}
       </div>
+
+      {/* Modal for creating/editing organizations */}
+      <NewOrganizationModal
+        open={showNewOrgModal}
+        onClose={() => {
+          setShowNewOrgModal(false)
+          setEditingOrganization(null)
+        }}
+        editingOrganization={editingOrganization}
+      />
     </CustomPageLayout>
   )
 }

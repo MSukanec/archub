@@ -103,20 +103,18 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
 
       if (editingOrganization) {
         // Update existing organization
-        const response = await apiRequest(`/api/organizations/${editingOrganization.id}`, {
+        return await fetch(`/api/organizations/${editingOrganization.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(organizationData)
-        })
-        return response
+        }).then(res => res.json())
       } else {
         // Create new organization
-        const response = await apiRequest('/api/organizations', {
+        return await fetch('/api/organizations', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(organizationData)
-        })
-        return response
+        }).then(res => res.json())
       }
     },
     onSuccess: () => {
@@ -324,23 +322,13 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
             </div>
           </CustomModalBody>
 
-          <CustomModalFooter>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={onClose}
-              disabled={createOrganizationMutation.isPending}
-            >
-              Cancelar
-            </Button>
-            <Button 
-              type="submit" 
-              disabled={createOrganizationMutation.isPending}
-              className="min-w-24"
-            >
-              {createOrganizationMutation.isPending ? "Guardando..." : "Guardar"}
-            </Button>
-          </CustomModalFooter>
+          <CustomModalFooter
+            onCancel={onClose}
+            onSubmit={form.handleSubmit(handleSubmit)}
+            cancelText="Cancelar"
+            submitText="Guardar"
+            isSubmitting={createOrganizationMutation.isPending}
+          />
         </form>
       </Form>
     </CustomModalLayout>

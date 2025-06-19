@@ -420,6 +420,18 @@ Changelog:
   • Both Projects and Organizations pages now use identical visual structure with horizontal cards and column headers
   • Fixed data transformation issues in projects hook to properly display tipología and modalidad from Supabase
   • Enhanced debug logging for project data to identify and resolve display issues
+
+- June 19, 2025. Complete visual unification and NewOrganizationModal implementation with CRUD functionality
+  • Updated border styles for active cards in both pages to use consistent [var(--accent)] styling matching previous design
+  • Removed "Tipo" column from Organizations page and added Actions column with Edit/Delete dropdown menu
+  • Unified text sizes across both pages: main names remain font-medium, all other text uses text-xs for consistency
+  • Updated badge styles in both pages to use [var(--accent)] variables for consistent theming
+  • Created complete NewOrganizationModal.tsx replicating exact functionality and styling of NewProjectModal.tsx
+  • Modal includes: date picker, readonly creator field with avatar, organization name, status selection, and type selection
+  • Implemented full CRUD operations for organizations: create new, edit existing, and delete functionality
+  • Added actions dropdown menu to organization cards with Edit and Delete options matching projects interface
+  • Organization modal integrates with existing authentication system and uses proper form validation
+  • Both pages now have identical visual structure, text sizing, and functional capabilities
 ```
 
 ## User Preferences
