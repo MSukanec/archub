@@ -20,21 +20,10 @@ export function useWallets(organizationId: string | undefined) {
         throw new Error('Supabase client not initialized')
       }
 
+      // Query organization_wallets with fallback for wallet names
       const { data, error } = await supabase
         .from('organization_wallets')
-        .select(`
-          id, 
-          organization_id, 
-          wallet_id, 
-          is_active, 
-          is_default, 
-          created_at,
-          wallets (
-            id,
-            name,
-            description
-          )
-        `)
+        .select('id, organization_id, wallet_id, is_active, is_default, created_at')
         .eq('organization_id', organizationId)
         .eq('is_active', true)
         .order('is_default', { ascending: false })
@@ -44,7 +33,15 @@ export function useWallets(organizationId: string | undefined) {
         throw error
       }
 
-      return data || []
+      // Transform data to include a display name
+      const transformedData = (data || []).map(wallet => ({
+        ...wallet,
+        wallets: {
+          name: `Billetera ${wallet.wallet_id.slice(-8)}` // Use last 8 chars of ID as name
+        }
+      }))
+
+      return transformedData
     },
     enabled: !!organizationId
   })

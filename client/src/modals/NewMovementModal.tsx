@@ -156,6 +156,8 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         organization_id: organizationId,
         project_id: projectId
       }
+      
+      console.log('Submitting movement data to Supabase:', movementData)
 
       const { data, error } = await supabase
         .from('movements')
@@ -163,10 +165,11 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         .select()
 
       if (error) {
-        console.error('Error creating movement:', error)
-        throw error
+        console.error('Supabase error creating movement:', error)
+        throw new Error(`Error al crear movimiento: ${error.message}`)
       }
 
+      console.log('Movement created successfully:', data[0])
       return data[0]
     },
     onSuccess: () => {
