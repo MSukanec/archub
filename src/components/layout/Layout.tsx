@@ -9,13 +9,8 @@ interface LayoutProps {
 }
 
 export function Layout({ children }: LayoutProps) {
-  const { initialize } = useAuthStore()
   const { isDark, setTheme } = useThemeStore()
   const { data } = useCurrentUser()
-
-  useEffect(() => {
-    initialize()
-  }, [initialize])
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', isDark)

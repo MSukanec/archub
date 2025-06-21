@@ -95,7 +95,7 @@ function App() {
 
   useEffect(() => {
     initialize();
-  }, []);
+  }, [initialize]);
 
   return (
     <QueryClientProvider client={queryClient}>
