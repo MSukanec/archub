@@ -129,8 +129,10 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         currency_id: editingMovement.currency_id || '',
         wallet_id: editingMovement.wallet_id || '',
         file_url: editingMovement.file_url || '',
-        is_conversion: editingMovement.is_conversion || false,
       })
+      // Set selected IDs for dropdowns
+      setSelectedTypeId(editingMovement.type_id || 'none')
+      setSelectedCategoryId(editingMovement.category_id || 'none')
     } else {
       form.reset({
         created_at: new Date(),
@@ -143,8 +145,9 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         currency_id: '',
         wallet_id: '',
         file_url: '',
-        is_conversion: false,
       })
+      setSelectedTypeId('none')
+      setSelectedCategoryId('none')
     }
   }, [editingMovement, form])
 
@@ -524,31 +527,31 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
             )}
           />
 
-            {/* 8. Cantidad */}
-            <FormField
-              control={form.control}
-              name="amount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium">Cantidad</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        placeholder="0.00"
-                        className="pl-10"
-                        {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          {/* 8. Cantidad */}
+          <FormField
+            control={form.control}
+            name="amount"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel className="text-sm font-medium">Cantidad</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="0.00"
+                      className="pl-10"
+                      {...field}
+                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                    />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
             {/* 9. Descripción */}
             <FormField
