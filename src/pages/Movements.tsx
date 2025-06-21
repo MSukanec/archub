@@ -281,17 +281,18 @@ export default function Movements() {
         const isIngreso = typeName.toLowerCase().includes('ingreso')
         const isEgreso = typeName.toLowerCase().includes('egreso')
         
+        let badgeClasses = "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white"
+        
+        if (isIngreso) {
+          badgeClasses += " bg-green-500"
+        } else if (isEgreso) {
+          badgeClasses += " bg-red-500"
+        } else {
+          badgeClasses += " bg-gray-400"
+        }
+        
         return (
-          <span 
-            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white"
-            style={{
-              backgroundColor: isIngreso 
-                ? 'hsl(var(--chart-1))' 
-                : isEgreso 
-                ? 'hsl(var(--chart-5))' 
-                : 'hsl(var(--muted))'
-            }}
-          >
+          <span className={badgeClasses}>
             {typeName}
           </span>
         )
