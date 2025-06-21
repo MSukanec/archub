@@ -32,13 +32,13 @@ export function SidebarSubmenu({ title, items, isVisible }: SidebarSubmenuProps)
       </div>
 
       {/* Submenu items */}
-      <nav className="flex-1 p-2 space-y-1">
+      <nav className="flex-1">
         {items.map((item) => (
           <Link key={item.href} href={item.href}>
             <Button
               variant="ghost"
               className={cn(
-                "w-full justify-start h-8 px-3 text-xs font-normal transition-colors",
+                "w-full justify-start h-10 px-4 text-sm font-normal transition-colors rounded-none",
                 "hover:bg-[var(--sidebar-hover-bg)] hover:text-[var(--sidebar-hover-fg)]",
                 location === item.href && "bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-fg)]"
               )}
