@@ -94,9 +94,11 @@ export function Sidebar() {
 
   const handleSubmenuMouseLeave = () => {
     setIsSubmenuHovered(false);
-    // Close submenu only if not docked
-    if (!isSidebarDocked) {
-      setActiveGroup(null);
+    // Close submenu only if not docked and not auto-showing for current page
+    if (!isSidebarDocked && activeGroup) {
+      setTimeout(() => {
+        setActiveGroup(null);
+      }, 100); // Small delay to prevent flicker
     }
   };
 
@@ -114,8 +116,8 @@ export function Sidebar() {
   const activeGroupData = getActiveGroup();
   const submenuGroup = menuGroups.find(g => g.id === activeGroup);
 
-  // Show submenu if docked, clicked, or auto-show for current page
-  const shouldShowSubmenu = isSidebarDocked || submenuGroup || (activeGroupData && activeGroupData.items.length > 0);
+  // Show submenu if docked, clicked, or auto-show for current page (but not if user manually closed it)
+  const shouldShowSubmenu = isSidebarDocked || submenuGroup || (!activeGroup && activeGroupData && activeGroupData.items.length > 0);
 
   return (
     <>
