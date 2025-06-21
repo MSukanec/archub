@@ -23,22 +23,20 @@ import {
 // Define menu structure
 const menuGroups = [
   {
-    id: 'dashboard',
-    label: 'Dashboard',
-    icon: Home,
-    href: '/dashboard',
-    items: [] // No submenu - direct navigation
-  },
-  {
     id: 'organizacion',
     label: 'Organización',
-    icon: Users,
+    icon: Building,
     items: [
-      { label: 'Gestión de Organizaciones', href: '/admin/organizaciones' },
+      { label: 'Dashboard', href: '/dashboard' },
       { label: 'Contactos', href: '/contactos' }
     ]
   },
-
+  {
+    id: 'proyecto',
+    label: 'Proyecto',
+    icon: Folder,
+    items: []
+  },
   {
     id: 'obra',
     label: 'Obra',
@@ -71,7 +69,7 @@ const menuGroups = [
     icon: User,
     items: [
       { label: 'Mi Perfil', href: '/perfil' },
-      { label: 'Organizaciones', href: '/admin/organizaciones' }
+      { label: 'Mis Organizaciones', href: '/organizaciones' }
     ]
   }
 ];
@@ -217,14 +215,7 @@ export function Sidebar() {
       >
         {/* Logo/Header */}
         <div className="h-10 flex items-center justify-center border-b border-[var(--sidebar-border)]">
-          <Link href="/dashboard">
-            <Button
-              variant="ghost"
-              className="w-10 h-10 p-0 hover:bg-[var(--sidebar-hover-bg)]"
-            >
-              <Building2 className="h-4 w-4 text-[var(--sidebar-fg)]" />
-            </Button>
-          </Link>
+          <span className="text-lg font-bold text-[var(--sidebar-fg)]">A</span>
         </div>
 
         {/* Main Navigation */}
