@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useContacts } from "@/hooks/use-contacts";
 import { useContactTypes } from "@/hooks/use-contact-types";
-import { CreateContactModal } from "@/modals/CreateContactModal";
+import { NewContactModal } from "@/modals/NewContactModal";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";

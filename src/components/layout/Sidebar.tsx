@@ -29,7 +29,7 @@ const menuGroups = [
     label: 'Organización',
     icon: Users,
     items: [
-      { label: 'Gestión de Organizaciones', href: '/organizaciones' },
+      { label: 'Gestión de Organizaciones', href: '/admin/organizaciones' },
       { label: 'Contactos', href: '/contactos' }
     ]
   },
@@ -38,7 +38,7 @@ const menuGroups = [
     label: 'Proyectos',
     icon: Folder,
     items: [
-      { label: 'Gestión de Proyectos', href: '/proyectos' }
+      { label: 'Gestión de Proyectos', href: '/gestion-proyectos' }
     ]
   },
   {
@@ -62,8 +62,7 @@ const menuGroups = [
     label: 'Configuración',
     icon: Settings,
     items: [
-      { label: 'Admin de Organizaciones', href: '/admin/organizaciones' },
-      { label: 'Ver perfil', href: '/perfil' }
+      { label: 'Admin de Organizaciones', href: '/admin/organizaciones' }
     ]
   }
 ];
@@ -74,24 +73,9 @@ export function Sidebar() {
   const [isMainSidebarHovered, setIsMainSidebarHovered] = useState(false);
   const [isSubmenuHovered, setIsSubmenuHovered] = useState(false);
   const { data: userData } = useCurrentUser();
-  const { data: projects = [] } = useProjects(userData?.preferences?.last_organization_id);
 
   // Check if sidebar should be docked from user preferences
   const isSidebarDocked = userData?.preferences?.sidebar_docked ?? false;
-
-  // Populate projects list dynamically
-  const dynamicMenuGroups = menuGroups.map(group => {
-    if (group.id === 'proyectos-lista') {
-      return {
-        ...group,
-        items: projects.map(project => ({
-          label: project.name,
-          href: `/proyecto/${project.id}` // You'll need to create this route
-        }))
-      };
-    }
-    return group;
-  });
 
   const handleGroupClick = (groupId: string, href?: string) => {
     if (href) {
@@ -144,11 +128,11 @@ export function Sidebar() {
   };
 
   const getActiveGroup = () => {
-    return dynamicMenuGroups.find(group => isGroupActive(group));
+    return menuGroups.find(group => isGroupActive(group));
   };
 
   const activeGroupData = getActiveGroup();
-  const submenuGroup = dynamicMenuGroups.find(g => g.id === activeGroup);
+  const submenuGroup = menuGroups.find(g => g.id === activeGroup);
 
   // Show submenu based on different conditions
   const shouldShowSubmenu = (() => {

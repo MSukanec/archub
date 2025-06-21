@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/hooks/use-organization-members";
-import { CreateSiteLogModal } from "@/modals/CreateSiteLogModal";
+import { NewSiteLogModal } from "@/modals/NewSiteLogModal";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
