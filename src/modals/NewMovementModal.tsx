@@ -33,9 +33,9 @@ import { useWallets } from '@/hooks/use-wallets'
 const createMovementSchema = z.object({
   description: z.string().optional(),
   amount: z.number().min(0.01, 'La cantidad debe ser mayor a 0'),
-  type_id: z.string().min(1, 'El tipo es requerido'),
-  category_id: z.string().min(1, 'La categoría es requerida'),
-  subcategory_id: z.string().optional(),
+  type_id: z.string().min(1, 'El tipo es requerido').refine(val => val !== 'none', 'El tipo es requerido'),
+  category_id: z.string().min(1, 'La categoría es requerida').refine(val => val !== 'none', 'La categoría es requerida'),
+  subcategory_id: z.string().optional().refine(val => !val || val !== 'none', 'Selección inválida'),
   currency_id: z.string().min(1, 'La moneda es requerida'),
   wallet_id: z.string().min(1, 'La billetera es requerida'),
   created_by: z.string().min(1, 'El creador es requerido'),
@@ -240,14 +240,14 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
     setSelectedTypeId(typeId)
     setSelectedCategoryId('')
     form.setValue('type_id', typeId)
-    form.setValue('category_id', '')
-    form.setValue('subcategory_id', '')
+    form.setValue('category_id', 'none')
+    form.setValue('subcategory_id', 'none')
   }
 
   const handleCategoryChange = (categoryId: string) => {
     setSelectedCategoryId(categoryId)
     form.setValue('category_id', categoryId)
-    form.setValue('subcategory_id', '')
+    form.setValue('subcategory_id', 'none')
   }
 
   const header = (
@@ -373,7 +373,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Seleccionar tipo</SelectItem>
+                      <SelectItem value="none">Seleccionar tipo</SelectItem>
                       {types.map((type: any) => (
                         <SelectItem key={type.id} value={type.id}>
                           {type.name}
@@ -400,7 +400,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Seleccionar categoría</SelectItem>
+                      <SelectItem value="none">Seleccionar categoría</SelectItem>
                       {categories.map((category: any) => (
                         <SelectItem key={category.id} value={category.id}>
                           {category.name}
@@ -427,7 +427,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Seleccionar subcategoría</SelectItem>
+                      <SelectItem value="none">Seleccionar subcategoría</SelectItem>
                       {subcategories.map((subcategory: any) => (
                         <SelectItem key={subcategory.id} value={subcategory.id}>
                           {subcategory.name}
