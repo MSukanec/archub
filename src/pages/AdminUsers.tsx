@@ -52,8 +52,8 @@ export function AdminUsers() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("created_at");
   const [sortOrder, setSortOrder] = useState("desc");
-  const [roleFilter, setRoleFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [openModal, setOpenModal] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -252,8 +252,8 @@ export function AdminUsers() {
     setSearchTerm("");
     setSortBy("created_at");
     setSortOrder("desc");
-    setRoleFilter("");
-    setStatusFilter("");
+    setRoleFilter("all");
+    setStatusFilter("all");
   };
 
   // Filter and sort users
@@ -263,8 +263,8 @@ export function AdminUsers() {
                            user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            user.organization?.name.toLowerCase().includes(searchTerm.toLowerCase());
       
-      const matchesRole = roleFilter === "" || user.role === roleFilter;
-      const matchesStatus = statusFilter === "" || 
+      const matchesRole = roleFilter === "all" || user.role === roleFilter;
+      const matchesStatus = statusFilter === "all" || 
                            (statusFilter === "active" && user.is_active) ||
                            (statusFilter === "inactive" && !user.is_active);
       
@@ -335,7 +335,7 @@ export function AdminUsers() {
             <SelectValue placeholder="Todos los roles" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todos los roles</SelectItem>
+            <SelectItem value="all">Todos los roles</SelectItem>
             <SelectItem value="admin">Administrador</SelectItem>
             <SelectItem value="user">Usuario</SelectItem>
           </SelectContent>
@@ -349,7 +349,7 @@ export function AdminUsers() {
             <SelectValue placeholder="Todos los estados" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todos los estados</SelectItem>
+            <SelectItem value="all">Todos los estados</SelectItem>
             <SelectItem value="active">Activos</SelectItem>
             <SelectItem value="inactive">Inactivos</SelectItem>
           </SelectContent>
@@ -467,12 +467,88 @@ export function AdminUsers() {
       customFilters={customFilters}
       onClearFilters={handleClearFilters}
     >
-      <CustomTable
-        columns={columns}
-        data={filteredUsers}
-        isLoading={isLoading}
-        emptyState={emptyState}
-      />
+      {isLoading ? (
+        <div className="flex justify-center py-8">
+          <div className="text-muted-foreground">Cargando usuarios...</div>
+        </div>
+      ) : filteredUsers.length === 0 ? (
+        emptyState
+      ) : (
+        <div className="space-y-4">
+          {/* Column Headers */}
+          <div className="grid grid-cols-7 gap-4 text-xs font-medium text-muted-foreground uppercase tracking-wide px-4">
+            <div>Usuario</div>
+            <div>Email</div>
+            <div>Rol</div>
+            <div>Estado</div>
+            <div>Organización</div>
+            <div>Fecha Registro</div>
+            <div>Acciones</div>
+          </div>
+
+          {/* User Cards */}
+          {filteredUsers.map((user) => (
+            <div
+              key={user.id}
+              className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-sm transition-shadow"
+            >
+              <div className="grid grid-cols-7 gap-4 items-center">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                    <User className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <span className="font-medium text-sm">{user.full_name}</span>
+                </div>
+                
+                <div className="text-xs text-gray-600">{user.email}</div>
+                
+                <div>
+                  <Badge variant={user.role === 'admin' ? 'default' : 'secondary'} className="text-xs">
+                    {user.role === 'admin' ? 'Administrador' : 'Usuario'}
+                  </Badge>
+                </div>
+                
+                <div>
+                  <Badge variant={user.is_active ? 'default' : 'destructive'} className="text-xs">
+                    {user.is_active ? 'Activo' : 'Inactivo'}
+                  </Badge>
+                </div>
+                
+                <div className="text-xs text-gray-600">
+                  {user.organization?.name || 'Sin asignar'}
+                </div>
+                
+                <div className="text-xs text-gray-600">
+                  {new Date(user.created_at).toLocaleDateString()}
+                </div>
+                
+                <div className="flex justify-end">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => handleEdit(user)}>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Editar
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={() => handleDelete(user)}
+                        className="text-red-600"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Desactivar
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       <Dialog open={openModal} onOpenChange={setOpenModal}>
         <DialogContent className="sm:max-w-[600px]">
