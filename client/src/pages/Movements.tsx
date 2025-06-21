@@ -77,7 +77,7 @@ export default function Movements() {
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState<SortBy>('date')
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc')
-  const [filterByType, setFilterByType] = useState<string>('')
+  const [filterByType, setFilterByType] = useState<string>('todos')
   const [filterByCategory, setFilterByCategory] = useState<string>('')
   const [showConversionsOnly, setShowConversionsOnly] = useState(false)
   const [showNewMovementModal, setShowNewMovementModal] = useState(false)
@@ -143,7 +143,7 @@ export default function Movements() {
     setSearchTerm('')
     setSortBy('date')
     setSortOrder('desc')
-    setFilterByType('')
+    setFilterByType('todos')
     setFilterByCategory('')
     setShowConversionsOnly(false)
   }
@@ -155,7 +155,7 @@ export default function Movements() {
                            movement.movement_data?.category?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            movement.creator?.full_name?.toLowerCase().includes(searchTerm.toLowerCase())
       
-      const matchesType = filterByType === 'all' || !filterByType || movement.type_id === filterByType
+      const matchesType = !filterByType || filterByType === 'todos' || movement.type_id === filterByType
       const matchesCategory = !filterByCategory || movement.category_id === filterByCategory
       const matchesConversion = !showConversionsOnly || movement.is_conversion
       
@@ -219,7 +219,7 @@ export default function Movements() {
             <SelectValue placeholder="Todos los tipos" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todos los tipos</SelectItem>
+            <SelectItem value="todos">Todos los tipos</SelectItem>
             {movementTypes.map((type) => (
               <SelectItem key={type.id} value={type.id}>
                 {type.name}
@@ -392,6 +392,7 @@ export default function Movements() {
         ]}
         customFilters={customFilters}
         onClearFilters={clearFilters}
+        padding="none"
       >
         <CustomTable
           columns={tableColumns}
