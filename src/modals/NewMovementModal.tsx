@@ -238,7 +238,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
 
   const handleTypeChange = (typeId: string) => {
     setSelectedTypeId(typeId)
-    setSelectedCategoryId('')
+    setSelectedCategoryId('none')
     form.setValue('type_id', typeId)
     form.setValue('category_id', 'none')
     form.setValue('subcategory_id', 'none')
