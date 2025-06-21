@@ -88,14 +88,25 @@ export function useMovements(organizationId: string | undefined, projectId: stri
       let walletData: any[] = []
 
       if (data && data.length > 0) {
-        // Get user data
-        const userIds = [...new Set(data.map(m => m.created_by).filter(Boolean))]
-        if (userIds.length > 0) {
-          const { data: users } = await supabase
-            .from('users')
-            .select('id, full_name, email, avatar_url')
-            .in('id', userIds)
-          userData = users || []
+        // Get user data through organization_members
+        const memberIds = [...new Set(data.map(m => m.created_by).filter(Boolean))]
+        if (memberIds.length > 0) {
+          const { data: members } = await supabase
+            .from('organization_members')
+            .select(`
+              id,
+              users (
+                id,
+                full_name,
+                email,
+                avatar_url
+              )
+            `)
+            .in('id', memberIds)
+          userData = members?.map(member => ({
+            id: member.id,
+            ...member.users
+          })) || []
         }
 
         // Get movement concepts

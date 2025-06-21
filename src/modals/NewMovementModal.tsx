@@ -100,49 +100,61 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
 
   const form = useForm<CreateMovementForm>({
     resolver: zodResolver(createMovementSchema),
-    defaultValues: {
-      created_at: editingMovement ? new Date(editingMovement.created_at) : new Date(),
-      created_by: editingMovement?.created_by || userData?.user?.id || '',
-      description: editingMovement?.description || '',
-      amount: editingMovement?.amount || 0,
-      type_id: editingMovement?.type_id || 'none',
-      category_id: editingMovement?.category_id || 'none',
-      subcategory_id: editingMovement?.subcategory_id || 'none',
-      currency_id: editingMovement?.currency_id || '',
-      wallet_id: editingMovement?.wallet_id || '',
-      file_url: editingMovement?.file_url || '',
-      is_conversion: editingMovement?.is_conversion || false,
+    defaultValues: editingMovement ? {
+      created_at: new Date(editingMovement.created_at),
+      created_by: editingMovement.created_by || '',
+      description: editingMovement.description || '',
+      amount: editingMovement.amount || 0,
+      type_id: editingMovement.type_id || 'none',
+      category_id: editingMovement.category_id || 'none',
+      subcategory_id: editingMovement.subcategory_id || 'none',
+      currency_id: editingMovement.currency_id || '',
+      wallet_id: editingMovement.wallet_id || '',
+      file_url: editingMovement.file_url || '',
+      is_conversion: editingMovement.is_conversion || false,
+    } : {
+      created_at: new Date(),
+      created_by: '',
+      description: '',
+      amount: 0,
+      type_id: 'none',
+      category_id: 'none',
+      subcategory_id: 'none',
+      currency_id: '',
+      wallet_id: '',
+      file_url: '',
+      is_conversion: false,
     }
   })
 
-  // Auto-select current user as creator
+  // Auto-select current user as creator for new movements only
   useEffect(() => {
-    if (userData?.user?.id && members.length > 0) {
+    if (!editingMovement && userData?.user?.id && members.length > 0) {
       const currentMember = members.find(member => member.user_id === userData.user.id)
       if (currentMember && !form.getValues('created_by')) {
         form.setValue('created_by', currentMember.id)
       }
     }
-  }, [userData, members, form])
+  }, [userData, members, form, editingMovement])
 
-  // Set default currency and wallet
+  // Set default currency and wallet for new movements only
   useEffect(() => {
-    if (currencies.length > 0 && !form.getValues('currency_id')) {
+    if (!editingMovement && currencies.length > 0 && !form.getValues('currency_id')) {
       const defaultCurrency = currencies.find((c: any) => c.is_default) || currencies[0]
       if (defaultCurrency) {
         form.setValue('currency_id', defaultCurrency.currency_id)
       }
     }
-  }, [currencies, form])
+  }, [currencies, form, editingMovement])
 
   useEffect(() => {
-    if (wallets.length > 0 && !form.getValues('wallet_id')) {
+    if (!editingMovement && wallets.length > 0 && !form.getValues('wallet_id')) {
       const defaultWallet = wallets.find((w: any) => w.is_default) || wallets[0]
       if (defaultWallet) {
         form.setValue('wallet_id', defaultWallet.wallet_id)
       }
     }
-  }, [wallets, form])
+  }, [wallets, form, editingMovement])
 
   const createMovementMutation = useMutation({
     mutationFn: async (formData: CreateMovementForm) => {
