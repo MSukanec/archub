@@ -100,19 +100,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
 
   const form = useForm<CreateMovementForm>({
     resolver: zodResolver(createMovementSchema),
-    defaultValues: editingMovement ? {
-      created_at: new Date(editingMovement.created_at),
-      created_by: editingMovement.created_by || '',
-      description: editingMovement.description || '',
-      amount: editingMovement.amount || 0,
-      type_id: editingMovement.type_id || 'none',
-      category_id: editingMovement.category_id || 'none',
-      subcategory_id: editingMovement.subcategory_id || 'none',
-      currency_id: editingMovement.currency_id || '',
-      wallet_id: editingMovement.wallet_id || '',
-      file_url: editingMovement.file_url || '',
-      is_conversion: editingMovement.is_conversion || false,
-    } : {
+    defaultValues: {
       created_at: new Date(),
       created_by: '',
       description: '',
@@ -126,6 +114,39 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
       is_conversion: false,
     }
   })
+
+  // Reset form when editing movement changes
+  useEffect(() => {
+    if (editingMovement) {
+      form.reset({
+        created_at: new Date(editingMovement.created_at),
+        created_by: editingMovement.created_by || '',
+        description: editingMovement.description || '',
+        amount: editingMovement.amount || 0,
+        type_id: editingMovement.type_id || 'none',
+        category_id: editingMovement.category_id || 'none',
+        subcategory_id: editingMovement.subcategory_id || 'none',
+        currency_id: editingMovement.currency_id || '',
+        wallet_id: editingMovement.wallet_id || '',
+        file_url: editingMovement.file_url || '',
+        is_conversion: editingMovement.is_conversion || false,
+      })
+    } else {
+      form.reset({
+        created_at: new Date(),
+        created_by: '',
+        description: '',
+        amount: 0,
+        type_id: 'none',
+        category_id: 'none',
+        subcategory_id: 'none',
+        currency_id: '',
+        wallet_id: '',
+        file_url: '',
+        is_conversion: false,
+      })
+    }
+  }, [editingMovement, form])
 
   // Auto-select current user as creator for new movements only
   useEffect(() => {
