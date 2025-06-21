@@ -42,10 +42,7 @@ export function SidebarSubmenu({ title, items, isVisible, onMouseEnter, onMouseL
       <nav className="flex-1">
         {items.map((item, index) => (
           <div key={`${item.href || item.label}-${index}`}>
-            {/* Show divider before item if it has isDivider flag */}
-            {item.isDivider && (
-              <div className="border-t border-[var(--sidebar-border)] mx-4 my-2" />
-            )}
+
             
             {item.onClick ? (
               // Clickable item without navigation

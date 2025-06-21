@@ -109,8 +109,12 @@ export function Sidebar() {
       return;
     }
     
-    // Show submenu for groups with items
-    setActiveGroup(groupId);
+    // Toggle submenu for groups with items
+    if (activeGroup === groupId) {
+      setActiveGroup(null); // Close if already open
+    } else {
+      setActiveGroup(groupId); // Open new group
+    }
   };
 
   const handleMainSidebarMouseEnter = () => {
@@ -135,10 +139,10 @@ export function Sidebar() {
 
   const handleSubmenuMouseLeave = () => {
     setIsSubmenuHovered(false);
-    // Close submenu after delay if not docked and no hover on main sidebar
+    // Close submenu after delay if not docked and no hover on either sidebar
     if (!isSidebarDocked && !isMainSidebarHovered) {
       setTimeout(() => {
-        if (!isMainSidebarHovered && !isSubmenuHovered) {
+        if (!isSubmenuHovered && !isMainSidebarHovered) {
           setActiveGroup(null);
         }
       }, 200);
@@ -177,13 +181,6 @@ export function Sidebar() {
       onClick: () => selectProjectMutation.mutate(project.id),
       isActive: project.id === userData?.preferences?.last_project_id
     }));
-
-    // Add "Gestión de Proyectos" button at the end
-    projectItems.push({
-      label: 'Gestión de Proyectos',
-      href: '/gestion-proyectos',
-      isDivider: true // Special flag to show divider before this item
-    });
 
     return projectItems;
   };
@@ -276,8 +273,27 @@ export function Sidebar() {
           ))}
         </nav>
 
-        {/* User Section - Profile + Settings */}
+        {/* User and Projects Section */}
         <div className="border-t border-[var(--sidebar-border)]">
+          {/* Settings button */}
+          <Button
+            variant="ghost"
+            className={cn(
+              "w-10 h-10 p-0 transition-colors rounded-none",
+              "hover:bg-[var(--sidebar-hover-bg)]",
+              activeGroup === 'configuracion' && "bg-[var(--sidebar-active-bg)]"
+            )}
+            style={{
+              backgroundColor: activeGroup === 'configuracion' ? 'var(--sidebar-active-bg)' : 'transparent'
+            }}
+            onClick={() => handleGroupClick('configuracion')}
+          >
+            <Settings className={cn(
+              "h-4 w-4",
+              activeGroup === 'configuracion' ? "text-[var(--sidebar-active-fg)]" : "text-[var(--sidebar-fg)]"
+            )} />
+          </Button>
+
           {/* Profile button */}
           <Link href="/perfil">
             <Button
@@ -306,28 +322,7 @@ export function Sidebar() {
             </Button>
           </Link>
 
-          {/* Settings button */}
-          <Button
-            variant="ghost"
-            className={cn(
-              "w-10 h-10 p-0 transition-colors rounded-none",
-              "hover:bg-[var(--sidebar-hover-bg)]",
-              activeGroup === 'configuracion' && "bg-[var(--sidebar-active-bg)]"
-            )}
-            style={{
-              backgroundColor: activeGroup === 'configuracion' ? 'var(--sidebar-active-bg)' : 'transparent'
-            }}
-            onClick={() => handleGroupClick('configuracion')}
-          >
-            <Settings className={cn(
-              "h-4 w-4",
-              activeGroup === 'configuracion' ? "text-[var(--sidebar-active-fg)]" : "text-[var(--sidebar-fg)]"
-            )} />
-          </Button>
-        </div>
-
-        {/* Projects Section */}
-        <div className="border-t border-[var(--sidebar-border)]">
+          {/* Projects list button */}
           <Button
             variant="ghost"
             className={cn(
@@ -345,6 +340,26 @@ export function Sidebar() {
               activeGroup === 'proyectos-lista' ? "text-[var(--sidebar-active-fg)]" : "text-[var(--sidebar-fg)]"
             )} />
           </Button>
+
+          {/* Project management button */}
+          <Link href="/gestion-proyectos">
+            <Button
+              variant="ghost"
+              className={cn(
+                "w-10 h-10 p-0 transition-colors rounded-none",
+                "hover:bg-[var(--sidebar-hover-bg)]",
+                location === '/gestion-proyectos' && "bg-[var(--sidebar-active-bg)]"
+              )}
+              style={{
+                backgroundColor: location === '/gestion-proyectos' ? 'var(--sidebar-active-bg)' : 'transparent'
+              }}
+            >
+              <Folder className={cn(
+                "h-4 w-4",
+                location === '/gestion-proyectos' ? "text-[var(--sidebar-active-fg)]" : "text-[var(--sidebar-fg)]"
+              )} />
+            </Button>
+          </Link>
         </div>
       </aside>
 
