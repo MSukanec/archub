@@ -518,6 +518,16 @@ Changelog:
   • Preserved dynamic filtering system with sort options, type filters, and conversion toggles
   • All data now comes from authentic Supabase queries with proper error handling and no mock data
   • CustomTable component ready for reuse across Contacts, Projects, and other table-based pages
+
+- June 21, 2025. Complete project structure reorganization for simplified deployment
+  • Moved all source code from client/src/ to root /src/ directory
+  • Updated vite.config.ts to remove root: "client" and point alias to new src location
+  • Modified tsconfig.json paths and include to reference src/* instead of client/src/*
+  • Updated tailwind.config.ts content paths to remove client/ references
+  • Adjusted components.json to point to new src/ structure for shadcn/ui
+  • Moved index.html to project root for standard Vite project structure
+  • Eliminated client/ folder completely for cleaner deployment to Vercel
+  • All imports and configurations now reference simplified /src structure
 ```
 
 ## User Preferences
