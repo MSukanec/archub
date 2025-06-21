@@ -118,6 +118,10 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
   // Reset form when editing movement changes
   useEffect(() => {
     if (editingMovement) {
+      // Update selected IDs first for hierarchical loading
+      setSelectedTypeId(editingMovement.type_id || 'none')
+      setSelectedCategoryId(editingMovement.category_id || 'none')
+      
       form.reset({
         created_at: new Date(editingMovement.created_at),
         created_by: editingMovement.created_by || '',
@@ -132,6 +136,9 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         is_conversion: editingMovement.is_conversion || false,
       })
     } else {
+      setSelectedTypeId('none')
+      setSelectedCategoryId('none')
+      
       form.reset({
         created_at: new Date(),
         created_by: '',
@@ -295,49 +302,51 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-0" id="movement-form">
         <CustomModalBody padding="md">
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* 1. Fecha */}
-            <FormField
-              control={form.control}
-              name="created_at"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel className="text-sm font-medium">Fecha</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "PPP", { locale: es })
-                          ) : (
-                            <span>Seleccionar fecha</span>
-                          )}
-                          <Calendar className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <CalendarComponent
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) =>
-                          date > new Date() || date < new Date("1900-01-01")
-                        }
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="col-span-1">
+              <FormField
+                control={form.control}
+                name="created_at"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel className="text-sm font-medium">Fecha</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PPP", { locale: es })
+                            ) : (
+                              <span>Seleccionar fecha</span>
+                            )}
+                            <Calendar className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <CalendarComponent
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) =>
+                            date > new Date() || date < new Date("1900-01-01")
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             {/* 2. Creador */}
             <FormField
