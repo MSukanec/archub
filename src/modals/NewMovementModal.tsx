@@ -82,19 +82,19 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
   const { data: currencies = [] } = useCurrencies(organizationId)
   const { data: wallets = [] } = useWallets(organizationId)
 
-  const [selectedTypeId, setSelectedTypeId] = useState<string>(editingMovement?.type_id || '')
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string>(editingMovement?.category_id || '')
-  const { data: categories = [] } = useMovementConcepts('categories', selectedTypeId || undefined)
-  const { data: subcategories = [] } = useMovementConcepts('categories', selectedCategoryId || undefined)
+  const [selectedTypeId, setSelectedTypeId] = useState<string>(editingMovement?.type_id || 'none')
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>(editingMovement?.category_id || 'none')
+  const { data: categories = [] } = useMovementConcepts('categories', selectedTypeId === 'none' ? undefined : selectedTypeId)
+  const { data: subcategories = [] } = useMovementConcepts('categories', selectedCategoryId === 'none' ? undefined : selectedCategoryId)
 
   // Update selected IDs when editing movement changes
   useEffect(() => {
     if (editingMovement) {
-      setSelectedTypeId(editingMovement.type_id || '')
-      setSelectedCategoryId(editingMovement.category_id || '')
+      setSelectedTypeId(editingMovement.type_id || 'none')
+      setSelectedCategoryId(editingMovement.category_id || 'none')
     } else {
-      setSelectedTypeId('')
-      setSelectedCategoryId('')
+      setSelectedTypeId('none')
+      setSelectedCategoryId('none')
     }
   }, [editingMovement])
 
@@ -105,9 +105,9 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
       created_by: editingMovement?.created_by || userData?.user?.id || '',
       description: editingMovement?.description || '',
       amount: editingMovement?.amount || 0,
-      type_id: editingMovement?.type_id || '',
-      category_id: editingMovement?.category_id || '',
-      subcategory_id: editingMovement?.subcategory_id || '',
+      type_id: editingMovement?.type_id || 'none',
+      category_id: editingMovement?.category_id || 'none',
+      subcategory_id: editingMovement?.subcategory_id || 'none',
       currency_id: editingMovement?.currency_id || '',
       wallet_id: editingMovement?.wallet_id || '',
       file_url: editingMovement?.file_url || '',
@@ -163,9 +163,9 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
           .update({
             description: formData.description || null,
             amount: formData.amount,
-            type_id: formData.type_id || null,
-            category_id: formData.category_id || null,
-            subcategory_id: formData.subcategory_id || null,
+            type_id: formData.type_id === 'none' ? null : formData.type_id,
+            category_id: formData.category_id === 'none' ? null : formData.category_id,
+            subcategory_id: formData.subcategory_id === 'none' ? null : formData.subcategory_id,
             currency_id: formData.currency_id,
             wallet_id: formData.wallet_id,
             is_conversion: formData.is_conversion,
