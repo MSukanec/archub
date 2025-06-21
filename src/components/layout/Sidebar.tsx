@@ -64,6 +64,15 @@ const menuGroups = [
       { label: 'Gestión de Usuarios', href: '/admin/usuarios' },
       { label: 'Gestión de Tareas', href: '/admin/tareas' }
     ]
+  },
+  {
+    id: 'perfil',
+    label: 'Perfil',
+    icon: User,
+    items: [
+      { label: 'Mi Perfil', href: '/perfil' },
+      { label: 'Organizaciones', href: '/admin/organizaciones' }
+    ]
   }
 ];
 
@@ -220,7 +229,7 @@ export function Sidebar() {
 
         {/* Main Navigation */}
         <nav className="flex-1">
-          {menuGroups.slice(0, -1).map((group) => ( // All groups except configuracion
+          {menuGroups.slice(0, -2).map((group) => ( // All groups except configuracion and perfil
             <div key={group.id}>
               {group.href ? (
                 <Link href={group.href}>
@@ -290,32 +299,31 @@ export function Sidebar() {
           </Button>
 
           {/* Profile button */}
-          <Link href="/perfil">
-            <Button
-              variant="ghost"
-              className={cn(
-                "w-10 h-10 p-0 transition-colors rounded-none",
-                "hover:bg-[var(--sidebar-hover-bg)]",
-                location === '/perfil' && "bg-[var(--sidebar-active-bg)]"
-              )}
-              style={{
-                backgroundColor: location === '/perfil' ? 'var(--sidebar-active-bg)' : 'transparent'
-              }}
-            >
-              {userData?.user?.avatar_url ? (
-                <img 
-                  src={userData.user.avatar_url} 
-                  alt="Avatar"
-                  className="w-6 h-6 rounded-full"
-                />
-              ) : (
-                <User className={cn(
-                  "h-4 w-4",
-                  location === '/perfil' ? "text-[var(--sidebar-active-fg)]" : "text-[var(--sidebar-fg)]"
-                )} />
-              )}
-            </Button>
-          </Link>
+          <Button
+            variant="ghost"
+            className={cn(
+              "w-10 h-10 p-0 transition-colors rounded-none",
+              "hover:bg-[var(--sidebar-hover-bg)]",
+              activeGroup === 'perfil' && "bg-[var(--sidebar-active-bg)]"
+            )}
+            style={{
+              backgroundColor: activeGroup === 'perfil' ? 'var(--sidebar-active-bg)' : 'transparent'
+            }}
+            onClick={() => handleGroupClick('perfil')}
+          >
+            {userData?.user?.avatar_url ? (
+              <img 
+                src={userData.user.avatar_url} 
+                alt="Avatar"
+                className="w-6 h-6 rounded-full"
+              />
+            ) : (
+              <User className={cn(
+                "h-4 w-4",
+                activeGroup === 'perfil' ? "text-[var(--sidebar-active-fg)]" : "text-[var(--sidebar-fg)]"
+              )} />
+            )}
+          </Button>
 
           {/* Projects list and management button */}
           <Button

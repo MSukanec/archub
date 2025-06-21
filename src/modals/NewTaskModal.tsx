@@ -260,6 +260,7 @@ export function NewTaskModal({ open, onClose, editingTask }: NewTaskModalProps) 
         body: (
           <CustomModalBody padding="md">
             <div className="grid grid-cols-2 gap-4">
+              {/* Nombre - ancho completo */}
               <div className="col-span-2">
                 <Label htmlFor="name">Nombre de la tarea</Label>
                 <Input
@@ -272,6 +273,7 @@ export function NewTaskModal({ open, onClose, editingTask }: NewTaskModalProps) 
                 )}
               </div>
 
+              {/* Descripción - ancho completo */}
               <div className="col-span-2">
                 <Label htmlFor="description">Descripción</Label>
                 <Textarea
@@ -282,13 +284,13 @@ export function NewTaskModal({ open, onClose, editingTask }: NewTaskModalProps) 
                 />
               </div>
 
-              <div>
+              {/* Categoría - mitad del ancho */}
+              <div className="col-span-1">
                 <Label htmlFor="category_id">Categoría</Label>
                 <Select
                   value={form.watch("category_id") || "none"}
                   onValueChange={(value) => {
                     form.setValue("category_id", value === "none" ? "" : value);
-                    // Reset subcategory when category changes
                     form.setValue("subcategory_id", "");
                   }}
                 >
@@ -306,7 +308,8 @@ export function NewTaskModal({ open, onClose, editingTask }: NewTaskModalProps) 
                 </Select>
               </div>
 
-              <div>
+              {/* Subcategoría - mitad del ancho */}
+              <div className="col-span-1">
                 <Label htmlFor="subcategory_id">Subcategoría</Label>
                 <Select
                   value={form.watch("subcategory_id") || "none"}
@@ -327,7 +330,8 @@ export function NewTaskModal({ open, onClose, editingTask }: NewTaskModalProps) 
                 </Select>
               </div>
 
-              <div>
+              {/* Categoría de Elemento - mitad del ancho */}
+              <div className="col-span-1">
                 <Label htmlFor="element_category_id">Categoría de Elemento</Label>
                 <Select
                   value={form.watch("element_category_id") || "none"}
@@ -347,7 +351,8 @@ export function NewTaskModal({ open, onClose, editingTask }: NewTaskModalProps) 
                 </Select>
               </div>
 
-              <div>
+              {/* Elemento - mitad del ancho */}
+              <div className="col-span-1">
                 <Label htmlFor="element_id">Elemento</Label>
                 <Select
                   value={form.watch("element_id") || "none"}
@@ -367,7 +372,8 @@ export function NewTaskModal({ open, onClose, editingTask }: NewTaskModalProps) 
                 </Select>
               </div>
 
-              <div>
+              {/* Acción - mitad del ancho */}
+              <div className="col-span-1">
                 <Label htmlFor="action_id">Acción</Label>
                 <Select
                   value={form.watch("action_id") || "none"}
@@ -387,7 +393,8 @@ export function NewTaskModal({ open, onClose, editingTask }: NewTaskModalProps) 
                 </Select>
               </div>
 
-              <div>
+              {/* Unidad - mitad del ancho */}
+              <div className="col-span-1">
                 <Label htmlFor="unit_id">Unidad</Label>
                 <Select
                   value={form.watch("unit_id") || "none"}
@@ -407,7 +414,8 @@ export function NewTaskModal({ open, onClose, editingTask }: NewTaskModalProps) 
                 </Select>
               </div>
 
-              <div>
+              {/* Precio Mano de Obra - mitad del ancho */}
+              <div className="col-span-1">
                 <Label htmlFor="unit_labor_price">Precio Unitario de Mano de Obra</Label>
                 <Input
                   id="unit_labor_price"
@@ -422,7 +430,8 @@ export function NewTaskModal({ open, onClose, editingTask }: NewTaskModalProps) 
                 )}
               </div>
 
-              <div>
+              {/* Precio Material - mitad del ancho */}
+              <div className="col-span-1">
                 <Label htmlFor="unit_material_price">Precio Unitario de Material</Label>
                 <Input
                   id="unit_material_price"
