@@ -61,7 +61,8 @@ const menuGroups = [
     icon: Settings,
     items: [
       { label: 'Gestión de Organizaciones', href: '/admin/organizaciones' },
-      { label: 'Gestión de Usuarios', href: '/admin/usuarios' }
+      { label: 'Gestión de Usuarios', href: '/admin/usuarios' },
+      { label: 'Gestión de Tareas', href: '/admin/tareas' }
     ]
   }
 ];

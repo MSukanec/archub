@@ -16,6 +16,7 @@ import ProfilePage from "@/pages/ProfilePage";
 import Contacts from "@/pages/Contacts";
 import { AdminOrganizations } from "@/pages/AdminOrganizations";
 import { AdminUsers } from "@/pages/AdminUsers";
+import { AdminTasks } from "@/pages/AdminTasks";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/not-found";
 
@@ -90,6 +91,13 @@ function Router() {
         <ProtectedRoute>
           <Layout>
             <AdminUsers />
+          </Layout>
+        </ProtectedRoute>
+      </Route>
+      <Route path="/admin/tareas">
+        <ProtectedRoute>
+          <Layout>
+            <AdminTasks />
           </Layout>
         </ProtectedRoute>
       </Route>
