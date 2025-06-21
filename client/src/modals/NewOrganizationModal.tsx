@@ -1,158 +1,140 @@
-import { useState, useEffect } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { useMutation } from '@tanstack/react-query'
-import { Building, Calendar, User } from 'lucide-react'
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
+import { Calendar } from "lucide-react";
 
-import { CustomModalLayout } from '@/components/ui-custom/CustomModalLayout'
-import { CustomModalHeader } from '@/components/ui-custom/CustomModalHeader'
-import { CustomModalBody } from '@/components/ui-custom/CustomModalBody'
-import { CustomModalFooter } from '@/components/ui-custom/CustomModalFooter'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Calendar as CalendarComponent } from '@/components/ui/calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { cn } from '@/lib/utils'
-import { useToast } from '@/hooks/use-toast'
-import { queryClient } from '@/lib/queryClient'
-import { useCurrentUser } from '@/hooks/use-current-user'
-import { useOrganizationMembers } from '@/hooks/use-organization-members'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { CustomModalLayout } from "@/components/ui-custom/CustomModalLayout";
+import { CustomModalHeader } from "@/components/ui-custom/CustomModalHeader";
+import { CustomModalBody } from "@/components/ui-custom/CustomModalBody";
+import { CustomModalFooter } from "@/components/ui-custom/CustomModalFooter";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+
+import { useCurrentUser } from "@/hooks/use-current-user";
+import { useOrganizationMembers } from "@/hooks/use-organization-members";
+import { supabase } from "@/lib/supabase";
+import { useToast } from "@/hooks/use-toast";
+import { queryClient } from "@/lib/queryClient";
 
 const createOrganizationSchema = z.object({
-  name: z.string().min(1, 'El nombre es requerido'),
+  name: z.string().min(1, "El nombre es requerido"),
   created_at: z.date(),
-  created_by: z.string().min(1, 'El creador es requerido')
-})
+  created_by: z.string().min(1, "El creador es requerido"),
+});
 
-type CreateOrganizationForm = z.infer<typeof createOrganizationSchema>
+type CreateOrganizationForm = z.infer<typeof createOrganizationSchema>;
 
 interface Organization {
-  id: string
-  name: string
-  is_active: boolean
-  is_system: boolean
-  created_at: string
-  created_by?: string
+  id: string;
+  name: string;
+  is_active: boolean;
+  is_system: boolean;
+  created_at: string;
+  created_by?: string;
   plan?: {
-    id: string
-    name: string
-    price: number
-  } | null
+    id: string;
+    name: string;
+    price: number;
+  } | null;
 }
 
 interface NewOrganizationModalProps {
-  open: boolean
-  onClose: () => void
-  editingOrganization?: Organization | null
+  open: boolean;
+  onClose: () => void;
+  editingOrganization?: Organization | null;
 }
 
 export function NewOrganizationModal({ open, onClose, editingOrganization }: NewOrganizationModalProps) {
-  const { data: userData } = useCurrentUser()
-  const { data: organizationMembers } = useOrganizationMembers(userData?.organization?.id)
-  const { toast } = useToast()
-  const [loading, setLoading] = useState(false)
+  const { toast } = useToast();
+  const { data: userData } = useCurrentUser();
+  const organizationId = userData?.preferences?.last_organization_id;
+  const { data: organizationMembers = [] } = useOrganizationMembers(organizationId);
 
   const form = useForm<CreateOrganizationForm>({
     resolver: zodResolver(createOrganizationSchema),
     defaultValues: {
-      name: '',
-      created_at: new Date(),
-      created_by: ''
-    }
-  })
-
-  // Update form when editing organization changes
-  useEffect(() => {
-    if (editingOrganization) {
-      console.log('Editing organization data:', editingOrganization) // Debug log
-      
-      form.reset({
-        name: editingOrganization.name,
-        created_at: new Date(editingOrganization.created_at),
-        created_by: editingOrganization.created_by || ''
-      })
-    } else {
-      form.reset({
-        name: '',
-        created_at: new Date(),
-        created_by: ''
-      })
-    }
-  }, [editingOrganization, form])
+      name: editingOrganization?.name || "",
+      created_at: editingOrganization ? new Date(editingOrganization.created_at) : new Date(),
+      created_by: editingOrganization?.created_by || userData?.user?.id || "",
+    },
+  });
 
   const createOrganizationMutation = useMutation({
     mutationFn: async (formData: CreateOrganizationForm) => {
-      if (!userData?.user?.id) {
-        throw new Error('Usuario no autenticado')
-      }
-
-      const organizationData = {
-        name: formData.name,
-        created_by: formData.created_by,
-        created_at: formData.created_at.toISOString()
+      if (!supabase) {
+        throw new Error('Supabase client not initialized');
       }
 
       if (editingOrganization) {
-        // Update existing organization
-        return await fetch(`/api/organizations/${editingOrganization.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(organizationData)
-        }).then(res => res.json())
+        const { error } = await supabase
+          .from('organizations')
+          .update({
+            name: formData.name,
+          })
+          .eq('id', editingOrganization.id);
+
+        if (error) {
+          throw new Error(`Error al actualizar organización: ${error.message}`);
+        }
       } else {
-        // Create new organization
-        return await fetch('/api/organizations', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(organizationData)
-        }).then(res => res.json())
+        const { error } = await supabase
+          .from('organizations')
+          .insert({
+            name: formData.name,
+            created_by: formData.created_by,
+            created_at: formData.created_at.toISOString(),
+            is_active: true,
+            is_system: false,
+          });
+
+        if (error) {
+          throw new Error(`Error al crear organización: ${error.message}`);
+        }
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['current-user'] })
-      queryClient.refetchQueries({ queryKey: ['current-user'] })
-      
       toast({
-        title: editingOrganization ? "Organización actualizada" : "Organización creada",
+        title: "Éxito",
         description: editingOrganization 
-          ? "La organización se ha actualizado correctamente." 
-          : "La nueva organización se ha creado correctamente."
-      })
-      
-      onClose()
-      form.reset()
+          ? "Organización actualizada correctamente"
+          : "Organización creada correctamente"
+      });
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      onClose();
+      form.reset();
     },
     onError: (error: any) => {
-      console.error('Error saving organization:', error)
       toast({
-        variant: "destructive",
         title: "Error",
-        description: error.message || "No se pudo guardar la organización"
-      })
+        description: error.message || "No se pudo guardar la organización",
+        variant: "destructive"
+      });
     }
-  })
+  });
 
   const handleSubmit = (data: CreateOrganizationForm) => {
-    createOrganizationMutation.mutate(data)
-  }
+    createOrganizationMutation.mutate(data);
+  };
 
   const getCreatorInfo = () => {
-    if (userData?.user_data?.first_name && userData?.user_data?.last_name) {
-      return `${userData.user_data.first_name} ${userData.user_data.last_name}`
-    }
-    return userData?.user?.full_name || userData?.user?.email || 'Usuario'
-  }
+    return (userData?.user_data?.first_name && userData?.user_data?.last_name 
+      ? `${userData.user_data.first_name} ${userData.user_data.last_name}`
+      : userData?.user?.email) || 'Usuario';
+  };
 
   const getCreatorInitials = () => {
-    const name = getCreatorInfo()
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
-  }
+    const name = getCreatorInfo();
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  };
 
   return (
     <CustomModalLayout open={open} onClose={onClose}>
@@ -169,102 +151,97 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleSubmit)}>
                 <div className="space-y-4">
-            <div className="space-y-4">
-              {/* Fecha de creación */}
-              <FormField
-                control={form.control}
-                name="created_at"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel className="text-sm font-medium">Fecha de creación</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
+                  {/* Fecha de creación */}
+                  <FormField
+                    control={form.control}
+                    name="created_at"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel className="text-sm font-medium">Fecha de creación</FormLabel>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                className={cn(
+                                  "w-full pl-3 text-left font-normal",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                {field.value ? (
+                                  format(field.value, "PPP", { locale: es })
+                                ) : (
+                                  <span>Selecciona una fecha</span>
+                                )}
+                                <Calendar className="ml-auto h-4 w-4 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <CalendarComponent
+                              mode="single"
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              disabled={(date) =>
+                                date > new Date() || date < new Date("1900-01-01")
+                              }
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Creador */}
+                  <FormField
+                    control={form.control}
+                    name="created_by"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">Creador</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Seleccionar creador" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {organizationMembers.map((member) => (
+                              <SelectItem key={member.id} value={member.id}>
+                                <div className="flex items-center gap-2">
+                                  <div className="h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center text-xs">
+                                    {getCreatorInitials()}
+                                  </div>
+                                  {getCreatorInfo()}
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Nombre */}
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">Nombre de la organización</FormLabel>
                         <FormControl>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "PPP", { locale: es })
-                            ) : (
-                              <span>Selecciona una fecha</span>
-                            )}
-                            <Calendar className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
+                          <Input
+                            placeholder="Ej: Mi empresa constructora"
+                            {...field}
+                          />
                         </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <CalendarComponent
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={(date) =>
-                            date > new Date() || date < new Date("1900-01-01")
-                          }
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Creador */}
-              <FormField
-                control={form.control}
-                name="created_by"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">Creador</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona un miembro" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="none">Selecciona un miembro</SelectItem>
-                        {organizationMembers?.map((member) => (
-                          <SelectItem key={member.id} value={member.id}>
-                            <div className="flex items-center gap-2">
-                              <Avatar className="h-6 w-6">
-                                <AvatarImage src={member.users?.avatar_url || ''} />
-                                <AvatarFallback className="text-xs">
-                                  {member.users?.full_name ? member.users.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) : 'U'}
-                                </AvatarFallback>
-                              </Avatar>
-                              <span>{member.users?.full_name || member.users?.email || 'Usuario'}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Nombre de la organización */}
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">Nombre de la organización</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Ej: Mi empresa constructora"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </form>
             </Form>
@@ -280,5 +257,5 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
         )
       }}
     </CustomModalLayout>
-  )
+  );
 }
