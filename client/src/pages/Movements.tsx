@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
-import { DollarSign, Plus, Edit, Trash2, MoreHorizontal, Filter } from 'lucide-react'
+import { DollarSign, Plus, Edit, Trash2, MoreHorizontal } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Button } from '@/components/ui/button'
@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { CustomPageLayout } from '@/components/ui-custom/CustomPageLayout'
+import { CustomTable } from '@/components/ui-custom/CustomTable'
 import { NewMovementModal } from '@/modals/NewMovementModal'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useMovements } from '@/hooks/use-movements'
@@ -238,29 +239,142 @@ export default function Movements() {
     </div>
   )
 
-  if (isLoading) {
-    return (
-      <CustomPageLayout
-        icon={DollarSign}
-        title="Gestión de Movimientos"
-        showSearch={true}
-        searchValue={searchTerm}
-        onSearchChange={setSearchTerm}
-        actions={[
-          <Button key="new" onClick={() => setShowNewMovementModal(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Nuevo movimiento
-          </Button>
-        ]}
-        customFilters={customFilters}
-        onClearFilters={clearFilters}
-      >
-        <div className="flex items-center justify-center h-64">
-          <div className="text-muted-foreground">Cargando movimientos...</div>
+  const tableColumns = [
+    {
+      key: 'created_at',
+      label: 'Fecha',
+      render: (movement: Movement) => (
+        <div className="text-xs">
+          {format(new Date(movement.created_at), 'dd/MM/yyyy', { locale: es })}
         </div>
-      </CustomPageLayout>
-    )
-  }
+      )
+    },
+    {
+      key: 'creator',
+      label: 'Creador',
+      render: (movement: Movement) => (
+        <div className="flex items-center gap-2">
+          <Avatar className="h-6 w-6">
+            <AvatarImage src={movement.creator?.avatar_url} />
+            <AvatarFallback className="text-xs">
+              {movement.creator?.full_name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 
+               movement.creator?.email?.slice(0, 2).toUpperCase() || 'U'}
+            </AvatarFallback>
+          </Avatar>
+          <span className="text-xs truncate">
+            {movement.creator?.full_name || movement.creator?.email || 'Usuario'}
+          </span>
+        </div>
+      )
+    },
+    {
+      key: 'type',
+      label: 'Tipo',
+      render: (movement: Movement) => (
+        <Badge variant="secondary" className="text-xs">
+          {movement.movement_data?.type?.name || 'Sin tipo'}
+        </Badge>
+      )
+    },
+    {
+      key: 'category',
+      label: 'Categoría',
+      render: (movement: Movement) => (
+        <Badge variant="outline" className="text-xs">
+          {movement.movement_data?.category?.name || 'Sin categoría'}
+        </Badge>
+      )
+    },
+    {
+      key: 'subcategory',
+      label: 'Subcategoría',
+      render: (movement: Movement) => (
+        movement.movement_data?.subcategory?.name ? (
+          <Badge variant="outline" className="text-xs">
+            {movement.movement_data.subcategory.name}
+          </Badge>
+        ) : (
+          <span className="text-muted-foreground">-</span>
+        )
+      )
+    },
+    {
+      key: 'description',
+      label: 'Descripción',
+      render: (movement: Movement) => (
+        <div className="text-xs truncate">
+          {movement.description || <span className="text-muted-foreground">Sin descripción</span>}
+        </div>
+      )
+    },
+    {
+      key: 'currency',
+      label: 'Moneda',
+      render: (movement: Movement) => (
+        <Badge variant="secondary" className="text-xs">
+          {movement.movement_data?.currency?.code || movement.movement_data?.currency?.name || 'N/A'}
+        </Badge>
+      )
+    },
+    {
+      key: 'wallet',
+      label: 'Billetera',
+      render: (movement: Movement) => (
+        <Badge variant="outline" className="text-xs">
+          {movement.movement_data?.wallet?.name || 'N/A'}
+        </Badge>
+      )
+    },
+    {
+      key: 'amount',
+      label: 'Cantidad',
+      render: (movement: Movement) => (
+        <div className="text-xs font-medium">
+          {movement.movement_data?.currency?.symbol || '$'}{movement.amount.toLocaleString()}
+        </div>
+      )
+    },
+    {
+      key: 'actions',
+      label: 'Acciones',
+      render: (movement: Movement) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => handleEdit(movement)}>
+              <Edit className="h-4 w-4 mr-2" />
+              Editar
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => handleDelete(movement)}
+              className="text-destructive"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Eliminar
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )
+    }
+  ]
+
+  const emptyState = (
+    <div className="text-center py-12">
+      <DollarSign className="mx-auto h-12 w-12 text-muted-foreground" />
+      <h3 className="mt-4 text-sm font-medium">No hay movimientos</h3>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Comienza creando tu primer movimiento financiero.
+      </p>
+      <Button className="mt-4" onClick={() => setShowNewMovementModal(true)}>
+        <Plus className="h-4 w-4 mr-2" />
+        Nuevo movimiento
+      </Button>
+    </div>
+  )
 
   return (
     <>
@@ -279,135 +393,12 @@ export default function Movements() {
         customFilters={customFilters}
         onClearFilters={clearFilters}
       >
-        {/* Column Headers */}
-        <div className="grid grid-cols-10 gap-4 p-4 bg-muted/50 rounded-lg text-xs font-medium text-muted-foreground mb-4">
-          <div>Fecha</div>
-          <div>Creador</div>
-          <div>Tipo</div>
-          <div>Categoría</div>
-          <div>Subcategoría</div>
-          <div>Descripción</div>
-          <div>Moneda</div>
-          <div>Billetera</div>
-          <div>Cantidad</div>
-          <div>Acciones</div>
-        </div>
-
-        {/* Movement Cards */}
-        <div className="space-y-3">
-          {filteredAndSortedMovements.length === 0 ? (
-            <div className="text-center py-12">
-              <DollarSign className="mx-auto h-12 w-12 text-muted-foreground" />
-              <h3 className="mt-4 text-sm font-medium">No hay movimientos</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Comienza creando tu primer movimiento financiero.
-              </p>
-              <Button className="mt-4" onClick={() => setShowNewMovementModal(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Nuevo movimiento
-              </Button>
-            </div>
-          ) : (
-            filteredAndSortedMovements.map((movement) => (
-              <div
-                key={movement.id}
-                className="grid grid-cols-10 gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-              >
-                {/* Fecha */}
-                <div className="text-xs">
-                  {format(new Date(movement.created_at), 'dd/MM/yyyy', { locale: es })}
-                </div>
-
-                {/* Creador */}
-                <div className="flex items-center gap-2">
-                  <Avatar className="h-6 w-6">
-                    <AvatarImage src={movement.creator?.avatar_url} />
-                    <AvatarFallback className="text-xs">
-                      {movement.creator?.full_name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 
-                       movement.creator?.email?.slice(0, 2).toUpperCase() || 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="text-xs truncate">
-                    {movement.creator?.full_name || movement.creator?.email || 'Usuario'}
-                  </span>
-                </div>
-
-                {/* Tipo */}
-                <div className="text-xs">
-                  <Badge variant="secondary" className="text-xs">
-                    {movement.movement_data?.type?.name || 'Sin tipo'}
-                  </Badge>
-                </div>
-
-                {/* Categoría */}
-                <div className="text-xs">
-                  <Badge variant="outline" className="text-xs">
-                    {movement.movement_data?.category?.name || 'Sin categoría'}
-                  </Badge>
-                </div>
-
-                {/* Subcategoría */}
-                <div className="text-xs">
-                  {movement.movement_data?.subcategory?.name ? (
-                    <Badge variant="outline" className="text-xs">
-                      {movement.movement_data.subcategory.name}
-                    </Badge>
-                  ) : (
-                    <span className="text-muted-foreground">-</span>
-                  )}
-                </div>
-
-                {/* Descripción */}
-                <div className="text-xs truncate">
-                  {movement.description || <span className="text-muted-foreground">Sin descripción</span>}
-                </div>
-
-                {/* Moneda */}
-                <div className="text-xs">
-                  <Badge variant="secondary" className="text-xs">
-                    {movement.movement_data?.currency?.code || movement.movement_data?.currency?.name || 'N/A'}
-                  </Badge>
-                </div>
-
-                {/* Billetera */}
-                <div className="text-xs">
-                  <Badge variant="outline" className="text-xs">
-                    {movement.movement_data?.wallet?.name || 'N/A'}
-                  </Badge>
-                </div>
-
-                {/* Cantidad */}
-                <div className="text-xs font-medium">
-                  {movement.movement_data?.currency?.symbol || '$'}{movement.amount.toLocaleString()}
-                </div>
-
-                {/* Acciones */}
-                <div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleEdit(movement)}>
-                        <Edit className="h-4 w-4 mr-2" />
-                        Editar
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={() => handleDelete(movement)}
-                        className="text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Eliminar
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
+        <CustomTable
+          columns={tableColumns}
+          data={filteredAndSortedMovements}
+          isLoading={isLoading}
+          emptyState={emptyState}
+        />
       </CustomPageLayout>
 
       {/* New/Edit Movement Modal */}

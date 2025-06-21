@@ -509,6 +509,15 @@ Changelog:
   • Updated CreateContactModal, NewProjectModal, NewOrganizationModal, NewMovementModal to follow standardized pattern
   • Eliminated "Cannot read properties of undefined (reading 'header')" runtime errors across all modals
   • Established scalable and consistent modal architecture preventing future implementation errors
+
+- June 21, 2025. Created CustomTable component and refactored Movements page with real Supabase data
+  • Built reusable CustomTable.tsx component supporting generic types, custom column rendering, loading states, and empty states
+  • Fixed foreign key relationship errors in useMovements hook by fetching movement_concepts data separately
+  • Refactored Movements.tsx to use CustomTable instead of custom grid layout, maintaining all existing functionality
+  • Table columns follow specified order: Fecha, Creador, Tipo, Categoría, Subcategoría, Descripción, Moneda, Billetera, Cantidad, Acciones
+  • Preserved dynamic filtering system with sort options, type filters, and conversion toggles
+  • All data now comes from authentic Supabase queries with proper error handling and no mock data
+  • CustomTable component ready for reuse across Contacts, Projects, and other table-based pages
 ```
 
 ## User Preferences

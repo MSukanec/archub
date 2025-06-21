@@ -68,35 +68,7 @@ export function useMovements(organizationId: string | undefined, projectId: stri
           file_url,
           related_contact_id,
           related_task_id,
-          is_conversion,
-          users:created_by (
-            id,
-            full_name,
-            email,
-            avatar_url
-          ),
-          type:movement_concepts!movements_type_id_fkey (
-            id,
-            name
-          ),
-          category:movement_concepts!movements_category_id_fkey (
-            id,
-            name
-          ),
-          subcategory:movement_concepts!movements_subcategory_id_fkey (
-            id,
-            name
-          ),
-          currencies (
-            id,
-            name,
-            code,
-            symbol
-          ),
-          wallets (
-            id,
-            name
-          )
+          is_conversion
         `)
         .eq('organization_id', organizationId)
         .eq('project_id', projectId)
@@ -107,15 +79,84 @@ export function useMovements(organizationId: string | undefined, projectId: stri
         throw error
       }
 
+      // Get related data separately to avoid foreign key issues
+      let userData: any[] = []
+      let typeData: any[] = []
+      let categoryData: any[] = []
+      let subcategoryData: any[] = []
+      let currencyData: any[] = []
+      let walletData: any[] = []
+
+      if (data && data.length > 0) {
+        // Get user data
+        const userIds = [...new Set(data.map(m => m.created_by).filter(Boolean))]
+        if (userIds.length > 0) {
+          const { data: users } = await supabase
+            .from('users')
+            .select('id, full_name, email, avatar_url')
+            .in('id', userIds)
+          userData = users || []
+        }
+
+        // Get movement concepts
+        const typeIds = [...new Set(data.map(m => m.type_id).filter(Boolean))]
+        const categoryIds = [...new Set(data.map(m => m.category_id).filter(Boolean))]
+        const subcategoryIds = [...new Set(data.map(m => m.subcategory_id).filter(Boolean))]
+        
+        if (typeIds.length > 0) {
+          const { data: types } = await supabase
+            .from('movement_concepts')
+            .select('id, name')
+            .in('id', typeIds)
+          typeData = types || []
+        }
+
+        if (categoryIds.length > 0) {
+          const { data: categories } = await supabase
+            .from('movement_concepts')
+            .select('id, name')
+            .in('id', categoryIds)
+          categoryData = categories || []
+        }
+
+        if (subcategoryIds.length > 0) {
+          const { data: subcategories } = await supabase
+            .from('movement_concepts')
+            .select('id, name')
+            .in('id', subcategoryIds)
+          subcategoryData = subcategories || []
+        }
+
+        // Get currency and wallet data
+        const currencyIds = [...new Set(data.map(m => m.currency_id).filter(Boolean))]
+        const walletIds = [...new Set(data.map(m => m.wallet_id).filter(Boolean))]
+
+        if (currencyIds.length > 0) {
+          const { data: currencies } = await supabase
+            .from('currencies')
+            .select('id, name, code, symbol')
+            .in('id', currencyIds)
+          currencyData = currencies || []
+        }
+
+        if (walletIds.length > 0) {
+          const { data: wallets } = await supabase
+            .from('wallets')
+            .select('id, name')
+            .in('id', walletIds)
+          walletData = wallets || []
+        }
+      }
+
       return data?.map(movement => ({
         ...movement,
-        creator: movement.users,
+        creator: userData.find(u => u.id === movement.created_by),
         movement_data: {
-          type: movement.type,
-          category: movement.category,
-          subcategory: movement.subcategory,
-          currency: movement.currencies,
-          wallet: movement.wallets
+          type: typeData.find(t => t.id === movement.type_id),
+          category: categoryData.find(c => c.id === movement.category_id),
+          subcategory: subcategoryData.find(s => s.id === movement.subcategory_id),
+          currency: currencyData.find(c => c.id === movement.currency_id),
+          wallet: walletData.find(w => w.id === movement.wallet_id)
         }
       })) || []
     },
