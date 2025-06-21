@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { User } from "@supabase/supabase-js";
-import { supabase } from "@/lib/supabaseClient";
+import { supabase } from "@/lib/supabase";
 
 interface AuthState {
   user: User | null;
@@ -18,6 +18,12 @@ export const useAuthStore = create<AuthState>((set) => ({
   initialize: async () => {
     set({ loading: true });
 
+    if (!supabase) {
+      console.error("Supabase client not initialized");
+      set({ user: null, loading: false, initialized: true });
+      return;
+    }
+
     const { data, error } = await supabase.auth.getSession();
 
     if (error) {
@@ -34,6 +40,10 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout: async () => {
+    if (!supabase) {
+      console.error("Supabase client not initialized");
+      return;
+    }
     await supabase.auth.signOut();
     set({ user: null });
   },
