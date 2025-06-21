@@ -37,23 +37,29 @@ export function SidebarSubmenu({ title, items, isVisible, onMouseEnter, onMouseL
 
       {/* Submenu items */}
       <nav className="flex-1">
-        {items.map((item) => (
-          <Link key={item.href} href={item.href}>
-            <Button
-              variant="ghost"
-              className={cn(
-                "w-full justify-start h-10 px-4 text-sm font-normal transition-colors rounded-none",
-                "hover:bg-[var(--sidebar-hover-bg)] hover:text-[var(--sidebar-hover-fg)]",
-                location === item.href && "bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-fg)]"
-              )}
-              style={{
-                backgroundColor: location === item.href ? 'var(--sidebar-active-bg)' : 'transparent',
-                color: location === item.href ? 'var(--sidebar-active-fg)' : 'var(--sidebar-fg)'
-              }}
-            >
-              {item.label}
-            </Button>
-          </Link>
+        {items.map((item, index) => (
+          <div key={item.href}>
+            <Link href={item.href}>
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start h-10 px-4 text-sm font-normal transition-colors rounded-none",
+                  "hover:bg-[var(--sidebar-hover-bg)] hover:text-[var(--sidebar-hover-fg)]",
+                  location === item.href && "bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-fg)]"
+                )}
+                style={{
+                  backgroundColor: location === item.href ? 'var(--sidebar-active-bg)' : 'transparent',
+                  color: location === item.href ? 'var(--sidebar-active-fg)' : 'var(--sidebar-fg)'
+                }}
+              >
+                {item.label}
+              </Button>
+            </Link>
+            {/* Add separator before "Gestión de Proyectos" if this is a projects list */}
+            {item.label.includes('Gestión de Proyectos') && index === items.length - 1 && (
+              <div className="border-t border-[var(--sidebar-border)] mx-4 my-2" />
+            )}
+          </div>
         ))}
       </nav>
     </div>

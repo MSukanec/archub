@@ -39,13 +39,13 @@ const createSiteLogSchema = z.object({
 
 type CreateSiteLogForm = z.infer<typeof createSiteLogSchema>
 
-interface CreateSiteLogModalProps {
+interface NewSiteLogModalProps {
   open: boolean
   onClose: () => void
   editingSiteLog?: any | null
 }
 
-export function CreateSiteLogModal({ open, onClose, editingSiteLog }: CreateSiteLogModalProps) {
+export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogModalProps) {
   const { toast } = useToast()
   const { data: userData } = useCurrentUser()
   const projectId = userData?.preferences?.last_project_id

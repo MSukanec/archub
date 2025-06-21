@@ -9,7 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { CustomPageLayout } from '@/components/ui-custom/CustomPageLayout'
 import { CustomTable } from '@/components/ui-custom/CustomTable'
-import { CreateAdminOrganizationModal } from '@/modals/CreateAdminOrganizationModal'
+import { NewAdminOrganizationModal } from '@/modals/NewAdminOrganizationModal'
 import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/lib/supabase'
 import { queryClient } from '@/lib/queryClient'
@@ -277,7 +277,7 @@ export function AdminOrganizations() {
 
       {/* Create/Edit Organization Modal */}
       {showNewOrganizationModal && (
-        <CreateAdminOrganizationModal
+        <NewAdminOrganizationModal
           open={showNewOrganizationModal}
           onClose={() => {
             setShowNewOrganizationModal(false)

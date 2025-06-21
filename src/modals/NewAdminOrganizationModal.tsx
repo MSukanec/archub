@@ -49,13 +49,13 @@ interface Organization {
   }
 }
 
-interface CreateAdminOrganizationModalProps {
+interface NewAdminOrganizationModalProps {
   open: boolean
   onClose: () => void
   editingOrganization?: Organization | null
 }
 
-export function CreateAdminOrganizationModal({ open, onClose, editingOrganization }: CreateAdminOrganizationModalProps) {
+export function NewAdminOrganizationModal({ open, onClose, editingOrganization }: CreateAdminOrganizationModalProps) {
   const { toast } = useToast()
 
   // Fetch users for creator dropdown
@@ -311,7 +311,7 @@ export function CreateAdminOrganizationModal({ open, onClose, editingOrganizatio
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="">Sin plan</SelectItem>
+                    <SelectItem value="none">Sin plan</SelectItem>
                     {plans.map((plan: any) => (
                       <SelectItem key={plan.id} value={plan.id}>
                         {plan.name}

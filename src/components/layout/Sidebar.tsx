@@ -74,9 +74,24 @@ export function Sidebar() {
   const [isMainSidebarHovered, setIsMainSidebarHovered] = useState(false);
   const [isSubmenuHovered, setIsSubmenuHovered] = useState(false);
   const { data: userData } = useCurrentUser();
+  const { data: projects = [] } = useProjects(userData?.preferences?.last_organization_id);
 
   // Check if sidebar should be docked from user preferences
   const isSidebarDocked = userData?.preferences?.sidebar_docked ?? false;
+
+  // Populate projects list dynamically
+  const dynamicMenuGroups = menuGroups.map(group => {
+    if (group.id === 'proyectos-lista') {
+      return {
+        ...group,
+        items: projects.map(project => ({
+          label: project.name,
+          href: `/proyecto/${project.id}` // You'll need to create this route
+        }))
+      };
+    }
+    return group;
+  });
 
   const handleGroupClick = (groupId: string, href?: string) => {
     if (href) {
@@ -129,11 +144,11 @@ export function Sidebar() {
   };
 
   const getActiveGroup = () => {
-    return menuGroups.find(group => isGroupActive(group));
+    return dynamicMenuGroups.find(group => isGroupActive(group));
   };
 
   const activeGroupData = getActiveGroup();
-  const submenuGroup = menuGroups.find(g => g.id === activeGroup);
+  const submenuGroup = dynamicMenuGroups.find(g => g.id === activeGroup);
 
   // Show submenu based on different conditions
   const shouldShowSubmenu = (() => {

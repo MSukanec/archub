@@ -451,7 +451,7 @@ export default function SiteLogs() {
         )}
       </CustomPageLayout>
 
-      <CreateSiteLogModal
+      <NewSiteLogModal
         open={openModal}
         onClose={handleCloseModal}
         editingSiteLog={editingSiteLog}

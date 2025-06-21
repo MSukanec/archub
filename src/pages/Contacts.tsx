@@ -355,7 +355,7 @@ export default function Contacts() {
         )}
       </CustomPageLayout>
 
-      <CreateContactModal
+      <NewContactModal
         open={openModal}
         onClose={handleCloseModal}
         editingContact={editingContact}

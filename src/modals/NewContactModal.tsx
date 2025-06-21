@@ -57,13 +57,13 @@ interface Contact {
   };
 }
 
-interface CreateContactModalProps {
+interface NewContactModalProps {
   open: boolean;
   onClose: () => void;
   editingContact?: Contact | null;
 }
 
-export function CreateContactModal({ open, onClose, editingContact }: CreateContactModalProps) {
+export function NewContactModal({ open, onClose, editingContact }: NewContactModalProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const { data: contactTypes = [] } = useContactTypes();
