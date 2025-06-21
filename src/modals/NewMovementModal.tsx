@@ -295,49 +295,48 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-0" id="movement-form">
         <CustomModalBody padding="md">
-          <div className="space-y-4">
-            {/* 1. Fecha */}
-            <FormField
-              control={form.control}
-              name="created_at"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel className="text-sm font-medium">Fecha</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "PPP", { locale: es })
-                          ) : (
-                            <span>Seleccionar fecha</span>
-                          )}
-                          <Calendar className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <CalendarComponent
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) =>
-                          date > new Date() || date < new Date("1900-01-01")
-                        }
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          {/* 1. Fecha */}
+          <FormField
+            control={form.control}
+            name="created_at"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel className="text-sm font-medium">Fecha</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "PPP", { locale: es })
+                        ) : (
+                          <span>Seleccionar fecha</span>
+                        )}
+                        <Calendar className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) =>
+                        date > new Date() || date < new Date("1900-01-01")
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
             {/* 2. Creador */}
             <FormField
@@ -392,138 +391,138 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
               )}
             />
 
-            {/* 3. Tipo */}
-            <FormField
-              control={form.control}
-              name="type_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium">Tipo</FormLabel>
-                  <Select onValueChange={handleTypeChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar tipo" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="none">Seleccionar tipo</SelectItem>
-                      {types.map((type: any) => (
-                        <SelectItem key={type.id} value={type.id}>
-                          {type.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          {/* 3. Tipo */}
+          <FormField
+            control={form.control}
+            name="type_id"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel className="text-sm font-medium">Tipo</FormLabel>
+                <Select onValueChange={handleTypeChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar tipo" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="none">Seleccionar tipo</SelectItem>
+                    {types.map((type: any) => (
+                      <SelectItem key={type.id} value={type.id}>
+                        {type.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            {/* 4. Categoría */}
-            <FormField
-              control={form.control}
-              name="category_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium">Categoría</FormLabel>
-                  <Select onValueChange={handleCategoryChange} value={field.value} disabled={!selectedTypeId || selectedTypeId === ''}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar categoría" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="none">Seleccionar categoría</SelectItem>
-                      {categories.map((category: any) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          {/* 4. Categoría */}
+          <FormField
+            control={form.control}
+            name="category_id"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel className="text-sm font-medium">Categoría</FormLabel>
+                <Select onValueChange={handleCategoryChange} value={field.value} disabled={!selectedTypeId || selectedTypeId === 'none'}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar categoría" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="none">Seleccionar categoría</SelectItem>
+                    {categories.map((category: any) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            {/* 5. Subcategoría */}
-            <FormField
-              control={form.control}
-              name="subcategory_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium">Subcategoría</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value} disabled={!selectedCategoryId || selectedCategoryId === ''}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar subcategoría" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="none">Seleccionar subcategoría</SelectItem>
-                      {subcategories.map((subcategory: any) => (
-                        <SelectItem key={subcategory.id} value={subcategory.id}>
-                          {subcategory.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          {/* 5. Subcategoría */}
+          <FormField
+            control={form.control}
+            name="subcategory_id"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel className="text-sm font-medium">Subcategoría</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value} disabled={!selectedCategoryId || selectedCategoryId === 'none'}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar subcategoría" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="none">Seleccionar subcategoría</SelectItem>
+                    {subcategories.map((subcategory: any) => (
+                      <SelectItem key={subcategory.id} value={subcategory.id}>
+                        {subcategory.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            {/* 6. Moneda */}
-            <FormField
-              control={form.control}
-              name="currency_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium">Moneda</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar moneda" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {currencies.map((currency: any) => (
-                        <SelectItem key={currency.id} value={currency.currency_id}>
-                          {currency.currencies?.name} ({currency.currencies?.code}) {currency.is_default && "(Por defecto)"}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          {/* 6. Moneda */}
+          <FormField
+            control={form.control}
+            name="currency_id"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel className="text-sm font-medium">Moneda</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar moneda" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {currencies.map((currency: any) => (
+                      <SelectItem key={currency.id} value={currency.currency_id}>
+                        {currency.currencies?.name} ({currency.currencies?.code}) {currency.is_default && "(Por defecto)"}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            {/* 7. Billetera */}
-            <FormField
-              control={form.control}
-              name="wallet_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium">Billetera</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar billetera" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {wallets.map((wallet: any) => (
-                        <SelectItem key={wallet.id} value={wallet.wallet_id}>
-                          {wallet.wallets?.name} {wallet.is_default && "(Por defecto)"}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          {/* 7. Billetera */}
+          <FormField
+            control={form.control}
+            name="wallet_id"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel className="text-sm font-medium">Billetera</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar billetera" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {wallets.map((wallet: any) => (
+                      <SelectItem key={wallet.id} value={wallet.wallet_id}>
+                        {wallet.wallets?.name} {wallet.is_default && "(Por defecto)"}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
             {/* 8. Cantidad */}
             <FormField
@@ -613,7 +612,6 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                 </FormItem>
               )}
             />
-          </div>
         </CustomModalBody>
       </form>
     </Form>
