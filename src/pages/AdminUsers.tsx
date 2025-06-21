@@ -360,65 +360,78 @@ export function AdminUsers() {
 
   const columns = [
     {
-      key: 'full_name' as keyof User,
-      header: 'Nombre Completo',
+      key: 'full_name',
+      label: 'Usuario',
+      sortable: true,
+      sortType: 'string' as const,
       render: (user: User) => (
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
             <User className="h-4 w-4 text-blue-600" />
           </div>
-          <span className="font-medium">{user.full_name}</span>
+          <span className="font-medium text-sm">{user.full_name}</span>
         </div>
       )
     },
     {
-      key: 'email' as keyof User,
-      header: 'Email',
-      render: (user: User) => <span className="text-gray-600">{user.email}</span>
+      key: 'email',
+      label: 'Email',
+      sortable: true,
+      sortType: 'string' as const,
+      render: (user: User) => <span className="text-xs">{user.email}</span>
     },
     {
-      key: 'role' as keyof User,
-      header: 'Rol',
+      key: 'role',
+      label: 'Rol',
+      sortable: true,
+      sortType: 'string' as const,
       render: (user: User) => (
-        <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
+        <Badge variant={user.role === 'admin' ? 'default' : 'secondary'} className="text-xs">
           {user.role === 'admin' ? 'Administrador' : 'Usuario'}
         </Badge>
       )
     },
     {
-      key: 'is_active' as keyof User,
-      header: 'Estado',
+      key: 'is_active',
+      label: 'Estado',
+      sortable: true,
+      sortType: 'string' as const,
       render: (user: User) => (
-        <Badge variant={user.is_active ? 'default' : 'destructive'}>
+        <Badge variant={user.is_active ? 'default' : 'destructive'} className="text-xs">
           {user.is_active ? 'Activo' : 'Inactivo'}
         </Badge>
       )
     },
     {
-      key: 'organization' as keyof User,
-      header: 'Organización',
+      key: 'organization',
+      label: 'Organización',
+      sortable: true,
+      sortType: 'string' as const,
       render: (user: User) => (
-        <span className="text-gray-600">
+        <span className="text-xs">
           {user.organization?.name || 'Sin asignar'}
         </span>
       )
     },
     {
-      key: 'created_at' as keyof User,
-      header: 'Fecha de Registro',
+      key: 'created_at',
+      label: 'Fecha de Registro',
+      sortable: true,
+      sortType: 'date' as const,
       render: (user: User) => (
-        <span className="text-gray-600">
+        <span className="text-xs">
           {new Date(user.created_at).toLocaleDateString()}
         </span>
       )
     },
     {
-      key: 'actions' as keyof User,
-      header: 'Acciones',
+      key: 'actions',
+      label: 'Acciones',
+      sortable: false,
       render: (user: User) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="sm">
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -429,7 +442,7 @@ export function AdminUsers() {
             </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={() => handleDelete(user)}
-              className="text-red-600"
+              className="text-destructive"
             >
               <Trash2 className="h-4 w-4 mr-2" />
               Desactivar
@@ -467,88 +480,12 @@ export function AdminUsers() {
       customFilters={customFilters}
       onClearFilters={handleClearFilters}
     >
-      {isLoading ? (
-        <div className="flex justify-center py-8">
-          <div className="text-muted-foreground">Cargando usuarios...</div>
-        </div>
-      ) : filteredUsers.length === 0 ? (
-        emptyState
-      ) : (
-        <div className="space-y-4">
-          {/* Column Headers */}
-          <div className="grid grid-cols-7 gap-4 text-xs font-medium text-muted-foreground uppercase tracking-wide px-4">
-            <div>Usuario</div>
-            <div>Email</div>
-            <div>Rol</div>
-            <div>Estado</div>
-            <div>Organización</div>
-            <div>Fecha Registro</div>
-            <div>Acciones</div>
-          </div>
-
-          {/* User Cards */}
-          {filteredUsers.map((user) => (
-            <div
-              key={user.id}
-              className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-sm transition-shadow"
-            >
-              <div className="grid grid-cols-7 gap-4 items-center">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                    <User className="h-4 w-4 text-blue-600" />
-                  </div>
-                  <span className="font-medium text-sm">{user.full_name}</span>
-                </div>
-                
-                <div className="text-xs text-gray-600">{user.email}</div>
-                
-                <div>
-                  <Badge variant={user.role === 'admin' ? 'default' : 'secondary'} className="text-xs">
-                    {user.role === 'admin' ? 'Administrador' : 'Usuario'}
-                  </Badge>
-                </div>
-                
-                <div>
-                  <Badge variant={user.is_active ? 'default' : 'destructive'} className="text-xs">
-                    {user.is_active ? 'Activo' : 'Inactivo'}
-                  </Badge>
-                </div>
-                
-                <div className="text-xs text-gray-600">
-                  {user.organization?.name || 'Sin asignar'}
-                </div>
-                
-                <div className="text-xs text-gray-600">
-                  {new Date(user.created_at).toLocaleDateString()}
-                </div>
-                
-                <div className="flex justify-end">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleEdit(user)}>
-                        <Edit className="h-4 w-4 mr-2" />
-                        Editar
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={() => handleDelete(user)}
-                        className="text-red-600"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Desactivar
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      <CustomTable 
+        columns={columns}
+        data={filteredUsers}
+        isLoading={isLoading}
+        emptyState={emptyState}
+      />
 
       <Dialog open={openModal} onOpenChange={setOpenModal}>
         <DialogContent className="sm:max-w-[600px]">
@@ -622,14 +559,14 @@ export function AdminUsers() {
               <div>
                 <Label htmlFor="organization_id">Organización</Label>
                 <Select
-                  value={form.watch("organization_id")}
-                  onValueChange={(value) => form.setValue("organization_id", value)}
+                  value={form.watch("organization_id") || "none"}
+                  onValueChange={(value) => form.setValue("organization_id", value === "none" ? "" : value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecciona una organización" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Sin asignar</SelectItem>
+                    <SelectItem value="none">Sin asignar</SelectItem>
                     {organizations.map((org) => (
                       <SelectItem key={org.id} value={org.id}>
                         {org.name}
