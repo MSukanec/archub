@@ -15,6 +15,7 @@ import SiteLogs from "@/pages/SiteLogs";
 import ProfilePage from "@/pages/ProfilePage";
 import Contacts from "@/pages/Contacts";
 import { AdminOrganizations } from "@/pages/AdminOrganizations";
+import { AdminUsers } from "@/pages/AdminUsers";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/not-found";
 
@@ -82,6 +83,13 @@ function Router() {
         <ProtectedRoute>
           <Layout>
             <AdminOrganizations />
+          </Layout>
+        </ProtectedRoute>
+      </Route>
+      <Route path="/admin/usuarios">
+        <ProtectedRoute>
+          <Layout>
+            <AdminUsers />
           </Layout>
         </ProtectedRoute>
       </Route>

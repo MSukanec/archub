@@ -38,14 +38,7 @@ const menuGroups = [
       { label: 'Contactos', href: '/contactos' }
     ]
   },
-  {
-    id: 'proyectos',
-    label: 'Proyectos',
-    icon: Folder,
-    items: [
-      { label: 'Gestión de Proyectos', href: '/gestion-proyectos' }
-    ]
-  },
+
   {
     id: 'obra',
     label: 'Obra',
@@ -67,7 +60,8 @@ const menuGroups = [
     label: 'Configuración',
     icon: Settings,
     items: [
-      { label: 'Admin de Organizaciones', href: '/admin/organizaciones' }
+      { label: 'Admin de Organizaciones', href: '/admin/organizaciones' },
+      { label: 'Gestión de Usuarios', href: '/admin/usuarios' }
     ]
   }
 ];
@@ -322,7 +316,7 @@ export function Sidebar() {
             </Button>
           </Link>
 
-          {/* Projects list button */}
+          {/* Projects list and management button */}
           <Button
             variant="ghost"
             className={cn(
@@ -340,26 +334,6 @@ export function Sidebar() {
               activeGroup === 'proyectos-lista' ? "text-[var(--sidebar-active-fg)]" : "text-[var(--sidebar-fg)]"
             )} />
           </Button>
-
-          {/* Project management button */}
-          <Link href="/gestion-proyectos">
-            <Button
-              variant="ghost"
-              className={cn(
-                "w-10 h-10 p-0 transition-colors rounded-none",
-                "hover:bg-[var(--sidebar-hover-bg)]",
-                location === '/gestion-proyectos' && "bg-[var(--sidebar-active-bg)]"
-              )}
-              style={{
-                backgroundColor: location === '/gestion-proyectos' ? 'var(--sidebar-active-bg)' : 'transparent'
-              }}
-            >
-              <Folder className={cn(
-                "h-4 w-4",
-                location === '/gestion-proyectos' ? "text-[var(--sidebar-active-fg)]" : "text-[var(--sidebar-fg)]"
-              )} />
-            </Button>
-          </Link>
         </div>
       </aside>
 
