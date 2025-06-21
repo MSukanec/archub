@@ -9,6 +9,7 @@ import Dashboard from "@/pages/Dashboard";
 import Organizations from "@/pages/Organizations";
 import Projects from "@/pages/Projects";
 import Movements from "@/pages/Movements";
+import SiteLogs from "@/pages/SiteLogs";
 import ProfilePage from "@/pages/ProfilePage";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/not-found";
@@ -49,6 +50,13 @@ function Router() {
         <ProtectedRoute>
           <Layout>
             <Movements />
+          </Layout>
+        </ProtectedRoute>
+      </Route>
+      <Route path="/bitacora">
+        <ProtectedRoute>
+          <Layout>
+            <SiteLogs />
           </Layout>
         </ProtectedRoute>
       </Route>

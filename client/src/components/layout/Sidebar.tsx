@@ -13,6 +13,7 @@ import {
   CreditCard,
   BarChart3,
   DollarSign,
+  FileText,
   Settings,
   User,
 } from "lucide-react";
@@ -27,6 +28,7 @@ const iconMap = {
   building: Building,
   folder: Folder,
   "dollar-sign": DollarSign,
+  "file-text": FileText,
   "check-square": CheckSquare,
   users: Users,
   "credit-card": CreditCard,

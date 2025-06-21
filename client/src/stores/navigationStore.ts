@@ -28,6 +28,7 @@ export const useNavigationStore = create<NavigationState>((set) => ({
     { id: 'organizations', name: 'Gestión de Organizaciones', icon: 'building', href: '/organizaciones' },
     { id: 'projects', name: 'Gestión de Proyectos', icon: 'folder', href: '/proyectos' },
     { id: 'movements', name: 'Gestión de Movimientos', icon: 'dollar-sign', href: '/movimientos' },
+    { id: 'bitacora', name: 'Bitácora de Obra', icon: 'file-text', href: '/bitacora' },
   ],
 
   setCurrentPage: (page) => set({ currentPage: page }),
