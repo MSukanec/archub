@@ -82,8 +82,8 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
   const { data: currencies = [] } = useCurrencies(organizationId)
   const { data: wallets = [] } = useWallets(organizationId)
 
-  const [selectedTypeId, setSelectedTypeId] = useState<string>(editingMovement?.type_id || '')
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string>(editingMovement?.category_id || '')
+  const [selectedTypeId, setSelectedTypeId] = useState<string>(editingMovement?.type_id || 'none')
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>(editingMovement?.category_id || 'none')
   const { data: categories = [] } = useMovementConcepts('categories', selectedTypeId)
   const { data: subcategories = [] } = useMovementConcepts('categories', selectedCategoryId)
 
@@ -93,8 +93,8 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
       setSelectedTypeId(editingMovement.type_id)
       setSelectedCategoryId(editingMovement.category_id)
     } else {
-      setSelectedTypeId('')
-      setSelectedCategoryId('')
+      setSelectedTypeId('none')
+      setSelectedCategoryId('none')
     }
   }, [editingMovement])
 
@@ -105,9 +105,9 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
       created_by: editingMovement?.created_by || userData?.user?.id || '',
       description: editingMovement?.description || '',
       amount: editingMovement?.amount || 0,
-      type_id: editingMovement?.type_id || '',
-      category_id: editingMovement?.category_id || '',
-      subcategory_id: editingMovement?.subcategory_id || '',
+      type_id: editingMovement?.type_id || 'none',
+      category_id: editingMovement?.category_id || 'none',
+      subcategory_id: editingMovement?.subcategory_id || 'none',
       currency_id: editingMovement?.currency_id || '',
       wallet_id: editingMovement?.wallet_id || '',
       file_url: editingMovement?.file_url || '',
@@ -238,16 +238,16 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
 
   const handleTypeChange = (typeId: string) => {
     setSelectedTypeId(typeId)
-    setSelectedCategoryId('')
+    setSelectedCategoryId('none')
     form.setValue('type_id', typeId)
-    form.setValue('category_id', '')
-    form.setValue('subcategory_id', '')
+    form.setValue('category_id', 'none')
+    form.setValue('subcategory_id', 'none')
   }
 
   const handleCategoryChange = (categoryId: string) => {
     setSelectedCategoryId(categoryId)
     form.setValue('category_id', categoryId)
-    form.setValue('subcategory_id', '')
+    form.setValue('subcategory_id', 'none')
   }
 
   const header = (
@@ -586,14 +586,9 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
   const footer = (
     <CustomModalFooter
       onCancel={onClose}
-      onSubmit={() => {
-        const formElement = document.getElementById('movement-form') as HTMLFormElement
-        if (formElement) {
-          formElement.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }))
-        }
-      }}
-      submitLabel="Crear"
-      disabled={createMovementMutation.isPending}
+      onSave={form.handleSubmit(handleSubmit)}
+      saveText={editingMovement ? 'Actualizar' : 'Crear movimiento'}
+      saveLoading={createMovementMutation.isPending}
     />
   )
 
