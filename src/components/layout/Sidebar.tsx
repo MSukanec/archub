@@ -1,9 +1,13 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useProjects } from "@/hooks/use-projects";
 import { SidebarSubmenu } from "./SidebarSubmenu";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/lib/supabase";
+import { useMutation } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
 import {
   Home,
   Building2,
@@ -13,6 +17,7 @@ import {
   FileText,
   Settings,
   User,
+  FolderOpen,
 } from "lucide-react";
 
 // Define menu structure
@@ -73,9 +78,29 @@ export function Sidebar() {
   const [isMainSidebarHovered, setIsMainSidebarHovered] = useState(false);
   const [isSubmenuHovered, setIsSubmenuHovered] = useState(false);
   const { data: userData } = useCurrentUser();
+  const { data: projects = [] } = useProjects(userData?.preferences?.last_organization_id);
 
   // Check if sidebar should be docked from user preferences
   const isSidebarDocked = userData?.preferences?.sidebar_docked ?? false;
+
+  // Project selection mutation
+  const selectProjectMutation = useMutation({
+    mutationFn: async (projectId: string) => {
+      if (!supabase || !userData?.preferences?.id) {
+        throw new Error('Missing required data');
+      }
+      
+      const { error } = await supabase
+        .from('user_preferences')
+        .update({ last_project_id: projectId })
+        .eq('id', userData.preferences.id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+    }
+  });
 
   const handleGroupClick = (groupId: string, href?: string) => {
     if (href) {
@@ -134,6 +159,26 @@ export function Sidebar() {
   const activeGroupData = getActiveGroup();
   const submenuGroup = menuGroups.find(g => g.id === activeGroup);
 
+  // Generate projects submenu items
+  const getProjectsSubmenu = () => {
+    if (activeGroup !== 'proyectos-lista') return [];
+    
+    const sortedProjects = [...projects].sort((a, b) => {
+      // Current active project first
+      if (a.id === userData?.preferences?.last_project_id) return -1;
+      if (b.id === userData?.preferences?.last_project_id) return 1;
+      // Then by creation date desc
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+
+    return sortedProjects.map(project => ({
+      label: project.name,
+      href: '#', // Don't navigate, just select
+      onClick: () => selectProjectMutation.mutate(project.id),
+      isActive: project.id === userData?.preferences?.last_project_id
+    }));
+  };
+
   // Show submenu based on different conditions
   const shouldShowSubmenu = (() => {
     // Always show if docked
@@ -174,7 +219,7 @@ export function Sidebar() {
 
         {/* Main Navigation */}
         <nav className="flex-1">
-          {menuGroups.map((group) => (
+          {menuGroups.slice(0, -1).map((group) => ( // All groups except configuracion
             <div key={group.id}>
               {group.href ? (
                 <Link href={group.href}>
@@ -222,8 +267,9 @@ export function Sidebar() {
           ))}
         </nav>
 
-        {/* User Avatar - Bottom */}
+        {/* User Section - Profile + Settings */}
         <div className="border-t border-[var(--sidebar-border)]">
+          {/* Profile button */}
           <Link href="/perfil">
             <Button
               variant="ghost"
@@ -250,14 +296,54 @@ export function Sidebar() {
               )}
             </Button>
           </Link>
+
+          {/* Settings button */}
+          <Button
+            variant="ghost"
+            className={cn(
+              "w-10 h-10 p-0 transition-colors rounded-none",
+              "hover:bg-[var(--sidebar-hover-bg)]",
+              activeGroup === 'configuracion' && "bg-[var(--sidebar-active-bg)]"
+            )}
+            style={{
+              backgroundColor: activeGroup === 'configuracion' ? 'var(--sidebar-active-bg)' : 'transparent'
+            }}
+            onClick={() => handleGroupClick('configuracion')}
+          >
+            <Settings className={cn(
+              "h-4 w-4",
+              activeGroup === 'configuracion' ? "text-[var(--sidebar-active-fg)]" : "text-[var(--sidebar-fg)]"
+            )} />
+          </Button>
+        </div>
+
+        {/* Projects Section */}
+        <div className="border-t border-[var(--sidebar-border)]">
+          <Button
+            variant="ghost"
+            className={cn(
+              "w-10 h-10 p-0 transition-colors rounded-none",
+              "hover:bg-[var(--sidebar-hover-bg)]",
+              activeGroup === 'proyectos-lista' && "bg-[var(--sidebar-active-bg)]"
+            )}
+            style={{
+              backgroundColor: activeGroup === 'proyectos-lista' ? 'var(--sidebar-active-bg)' : 'transparent'
+            }}
+            onClick={() => handleGroupClick('proyectos-lista')}
+          >
+            <FolderOpen className={cn(
+              "h-4 w-4",
+              activeGroup === 'proyectos-lista' ? "text-[var(--sidebar-active-fg)]" : "text-[var(--sidebar-fg)]"
+            )} />
+          </Button>
         </div>
       </aside>
 
       {/* Secondary Sidebar - Shows submenu */}
       {shouldShowSubmenu && (
         <SidebarSubmenu
-          title={submenuGroup?.label || activeGroupData?.label || ''}
-          items={submenuGroup?.items || activeGroupData?.items || []}
+          title={activeGroup === 'proyectos-lista' ? 'Proyectos' : (submenuGroup?.label || activeGroupData?.label || '')}
+          items={activeGroup === 'proyectos-lista' ? getProjectsSubmenu() : (submenuGroup?.items || activeGroupData?.items || [])}
           isVisible={true}
           onMouseEnter={handleSubmenuMouseEnter}
           onMouseLeave={handleSubmenuMouseLeave}
