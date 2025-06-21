@@ -11,6 +11,7 @@ import { queryClient } from "@/lib/queryClient";
 import {
   Home,
   Building2,
+  Building,
   Folder,
   Users,
   DollarSign,

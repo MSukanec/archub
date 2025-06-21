@@ -5,6 +5,8 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { CustomPageLayout } from '@/components/ui-custom/CustomPageLayout'
@@ -34,6 +36,9 @@ export function AdminOrganizations() {
   const [editingOrganization, setEditingOrganization] = useState<Organization | null>(null)
   const [deletingOrganization, setDeletingOrganization] = useState<Organization | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [sortBy, setSortBy] = useState("name")
+  const [sortOrder, setSortOrder] = useState("asc")
+  const [statusFilter, setStatusFilter] = useState("all")
 
   // Fetch organizations with joins
   const { data: organizations = [], isLoading, refetch } = useQuery({
@@ -129,7 +134,54 @@ export function AdminOrganizations() {
 
   const clearFilters = () => {
     setSearchTerm('')
+    setSortBy("name")
+    setSortOrder("asc")
+    setStatusFilter("all")
   }
+
+  const customFilters = (
+    <div className="space-y-4 w-[288px]">
+      <div>
+        <Label>Ordenar por</Label>
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="name">Nombre</SelectItem>
+            <SelectItem value="created_at">Fecha de creación</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label>Orden</Label>
+        <Select value={sortOrder} onValueChange={setSortOrder}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="asc">Ascendente</SelectItem>
+            <SelectItem value="desc">Descendente</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label>Estado</Label>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos</SelectItem>
+            <SelectItem value="active">Activo</SelectItem>
+            <SelectItem value="inactive">Inactivo</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  )
 
   // Filter organizations by search term
   const filteredOrganizations = organizations.filter(org => 
@@ -254,6 +306,7 @@ export function AdminOrganizations() {
         searchValue={searchTerm}
         onSearchChange={setSearchTerm}
         onClearFilters={clearFilters}
+        customFilters={customFilters}
         actions={[
           <Button 
             key="new"
