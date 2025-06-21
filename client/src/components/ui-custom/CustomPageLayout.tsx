@@ -10,7 +10,8 @@ interface CustomPageLayoutProps {
   searchValue?: string;
   onSearchChange?: (value: string) => void;
   showFilters?: boolean;
-  filters?: { label: string; onClick: () => void }[];
+  filters?: { label: string; onClick: () => void }[]; // Deprecated: keep for backward compatibility
+  customFilters?: React.ReactNode;
   onClearFilters?: () => void;
   wide?: boolean;
   children: React.ReactNode;
@@ -24,7 +25,8 @@ export function CustomPageLayout({
   searchValue = "",
   onSearchChange,
   showFilters = true,
-  filters = [],
+  filters = [], // Deprecated: keep for backward compatibility
+  customFilters,
   onClearFilters,
   wide = false,
   children,
@@ -45,6 +47,7 @@ export function CustomPageLayout({
           onSearchChange={onSearchChange}
           showFilters={showFilters}
           filters={filters}
+          customFilters={customFilters}
           onClearFilters={onClearFilters}
         />
         

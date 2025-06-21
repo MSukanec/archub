@@ -16,7 +16,8 @@ interface CustomPageHeaderProps {
   searchValue?: string;
   onSearchChange?: (value: string) => void;
   showFilters?: boolean;
-  filters?: { label: string; onClick: () => void }[];
+  filters?: { label: string; onClick: () => void }[]; // Deprecated: keep for backward compatibility
+  customFilters?: React.ReactNode;
   onClearFilters?: () => void;
 }
 
@@ -28,10 +29,11 @@ export function CustomPageHeader({
   searchValue = "",
   onSearchChange,
   showFilters = true,
-  filters = [],
+  filters = [], // Deprecated: keep for backward compatibility
+  customFilters,
   onClearFilters,
 }: CustomPageHeaderProps) {
-  const hasFilters = filters.length > 0;
+  const hasFilters = filters.length > 0 || customFilters;
 
   return (
     <div className="w-full border-b border-slate-200 dark:border-slate-700">
@@ -62,23 +64,27 @@ export function CustomPageHeader({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-10 w-10 rounded-full"
+                  variant="outline"
+                  className="h-10 px-3"
                 >
-                  <Filter className="h-4 w-4" />
+                  <Filter className="mr-2 h-4 w-4" />
+                  Filtros
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                {filters.map((filter, index) => (
-                  <DropdownMenuItem
-                    key={index}
-                    onClick={filter.onClick}
-                    className="text-sm"
-                  >
-                    {filter.label}
-                  </DropdownMenuItem>
-                ))}
+              <DropdownMenuContent align="end" className={customFilters ? "w-72 p-2 space-y-3" : "w-48"}>
+                {customFilters ? (
+                  customFilters
+                ) : (
+                  filters.map((filter, index) => (
+                    <DropdownMenuItem
+                      key={index}
+                      onClick={filter.onClick}
+                      className="text-sm"
+                    >
+                      {filter.label}
+                    </DropdownMenuItem>
+                  ))
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           )}
@@ -86,11 +92,10 @@ export function CustomPageHeader({
           {onClearFilters && (
             <Button
               variant="ghost"
-              size="icon"
               onClick={onClearFilters}
-              className="h-10 w-10 rounded-full"
+              className="h-10 px-3"
             >
-              <X className="h-4 w-4" />
+              Limpiar filtros
             </Button>
           )}
 

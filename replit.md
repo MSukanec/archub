@@ -480,6 +480,16 @@ Changelog:
   • Added column headers above cards: Fecha, Creador, Tipo de Entrada, Clima, Comentarios, Acciones
   • Integrated actions dropdown menu (Edit/Delete) matching projects page functionality
   • Accordion content shows full details: visibility status, creation date, complete comments, weather conditions
+
+- June 21, 2025. Implemented dynamic and scalable filter system for CustomPageLayout
+  • Enhanced CustomPageLayout and CustomPageHeader to support customFilters prop alongside legacy filters
+  • Added customFilters prop that accepts React components for complex filter interfaces
+  • Maintained backward compatibility with existing filters array prop (deprecated but functional)
+  • Updated SiteLogs.tsx to use new dynamic filter system with sorting, type filtering, and toggle switches
+  • Filter dropdown now supports complex layouts: Select dropdowns, Switch components, and proper spacing
+  • Implemented comprehensive filtering: sort by date/type, filter by entry type, favorites only, public only
+  • "Limpiar filtros" button now resets all filter states including search value in single action
+  • Filter UI uses proper Labels, Select components, and Switch toggles with 288px width dropdown
 ```
 
 ## User Preferences
