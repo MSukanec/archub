@@ -171,103 +171,39 @@ export function AdminTasks() {
     setCategoryFilter("all");
   };
 
-  // Get status badge variant
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return 'default';
-      case 'in_progress':
-        return 'secondary';
-      case 'pending':
-        return 'outline';
-      case 'cancelled':
-        return 'destructive';
-      default:
-        return 'outline';
-    }
-  };
 
-  // Get priority badge variant
-  const getPriorityBadgeVariant = (priority: string) => {
-    switch (priority) {
-      case 'urgent':
-        return 'destructive';
-      case 'high':
-        return 'default';
-      case 'medium':
-        return 'secondary';
-      case 'low':
-        return 'outline';
-      default:
-        return 'outline';
-    }
-  };
-
-  // Get status label
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'Pendiente';
-      case 'in_progress':
-        return 'En Progreso';
-      case 'completed':
-        return 'Completada';
-      case 'cancelled':
-        return 'Cancelada';
-      default:
-        return status;
-    }
-  };
-
-  // Get priority label
-  const getPriorityLabel = (priority: string) => {
-    switch (priority) {
-      case 'low':
-        return 'Baja';
-      case 'medium':
-        return 'Media';
-      case 'high':
-        return 'Alta';
-      case 'urgent':
-        return 'Urgente';
-      default:
-        return priority;
-    }
-  };
 
   // Filter and sort tasks
   const filteredTasks = tasks
     .filter(task => {
-      const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      const matchesSearch = task.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            task.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           task.assignee?.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           task.project?.name.toLowerCase().includes(searchTerm.toLowerCase());
+                           task.category?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           task.element?.name.toLowerCase().includes(searchTerm.toLowerCase());
       
-      const matchesStatus = statusFilter === "all" || task.status === statusFilter;
-      const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
-      const matchesProject = projectFilter === "all" || task.project_id === projectFilter;
+      const matchesCategory = categoryFilter === "all" || task.category_id === categoryFilter;
       
-      return matchesSearch && matchesStatus && matchesPriority && matchesProject;
+      return matchesSearch && matchesCategory;
     })
     .sort((a, b) => {
       let aValue, bValue;
       
       switch (sortBy) {
-        case "title":
-          aValue = a.title;
-          bValue = b.title;
+        case "name":
+          aValue = a.name;
+          bValue = b.name;
           break;
-        case "status":
-          aValue = a.status;
-          bValue = b.status;
+        case "category":
+          aValue = a.category?.name || '';
+          bValue = b.category?.name || '';
           break;
-        case "priority":
-          aValue = a.priority;
-          bValue = b.priority;
+        case "unit_labor_price":
+          aValue = a.unit_labor_price || 0;
+          bValue = b.unit_labor_price || 0;
           break;
-        case "due_date":
-          aValue = a.due_date || '';
-          bValue = b.due_date || '';
+        case "unit_material_price":
+          aValue = a.unit_material_price || 0;
+          bValue = b.unit_material_price || 0;
           break;
         default:
           aValue = a.created_at;
@@ -281,8 +217,8 @@ export function AdminTasks() {
       }
     });
 
-  // Get unique projects for filter
-  const projects = [...new Set(tasks.filter(t => t.project).map(t => t.project))];
+  // Get unique categories for filter
+  const categories = [...new Set(tasks.filter(t => t.category).map(t => t.category))];
 
   const customFilters = (
     <div className="space-y-4 w-[288px]">
@@ -294,10 +230,10 @@ export function AdminTasks() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="created_at">Fecha de creación</SelectItem>
-            <SelectItem value="title">Título</SelectItem>
-            <SelectItem value="status">Estado</SelectItem>
-            <SelectItem value="priority">Prioridad</SelectItem>
-            <SelectItem value="due_date">Fecha límite</SelectItem>
+            <SelectItem value="name">Nombre</SelectItem>
+            <SelectItem value="category">Categoría</SelectItem>
+            <SelectItem value="unit_labor_price">Precio de Mano de Obra</SelectItem>
+            <SelectItem value="unit_material_price">Precio de Material</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -316,48 +252,16 @@ export function AdminTasks() {
       </div>
 
       <div>
-        <Label>Filtrar por estado</Label>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <Label>Filtrar por categoría</Label>
+        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
           <SelectTrigger>
-            <SelectValue placeholder="Todos los estados" />
+            <SelectValue placeholder="Todas las categorías" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todos los estados</SelectItem>
-            <SelectItem value="pending">Pendiente</SelectItem>
-            <SelectItem value="in_progress">En Progreso</SelectItem>
-            <SelectItem value="completed">Completada</SelectItem>
-            <SelectItem value="cancelled">Cancelada</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div>
-        <Label>Filtrar por prioridad</Label>
-        <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-          <SelectTrigger>
-            <SelectValue placeholder="Todas las prioridades" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todas las prioridades</SelectItem>
-            <SelectItem value="low">Baja</SelectItem>
-            <SelectItem value="medium">Media</SelectItem>
-            <SelectItem value="high">Alta</SelectItem>
-            <SelectItem value="urgent">Urgente</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div>
-        <Label>Filtrar por proyecto</Label>
-        <Select value={projectFilter} onValueChange={setProjectFilter}>
-          <SelectTrigger>
-            <SelectValue placeholder="Todos los proyectos" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos los proyectos</SelectItem>
-            {projects.map((project) => (
-              <SelectItem key={project.id} value={project.id}>
-                {project.name}
+            <SelectItem value="all">Todas las categorías</SelectItem>
+            {categories.map((category) => (
+              <SelectItem key={category.id} value={category.id}>
+                {category.name}
               </SelectItem>
             ))}
           </SelectContent>
@@ -368,7 +272,7 @@ export function AdminTasks() {
 
   const columns = [
     {
-      key: 'title',
+      key: 'name',
       label: 'Tarea',
       sortable: true,
       sortType: 'string' as const,
@@ -376,7 +280,7 @@ export function AdminTasks() {
         <div className="flex items-center gap-2">
           <CheckSquare className="h-4 w-4 text-blue-600" />
           <div>
-            <span className="font-medium text-sm">{task.title}</span>
+            <span className="font-medium text-sm">{task.name}</span>
             {task.description && (
               <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                 {task.description}
@@ -387,57 +291,68 @@ export function AdminTasks() {
       )
     },
     {
-      key: 'assignee',
-      label: 'Asignado a',
+      key: 'category',
+      label: 'Categoría',
       sortable: true,
       sortType: 'string' as const,
       render: (task: Task) => (
         <span className="text-xs">
-          {task.assignee?.full_name || 'Sin asignar'}
+          {task.category?.name || 'Sin categoría'}
         </span>
       )
     },
     {
-      key: 'project',
-      label: 'Proyecto',
+      key: 'subcategory',
+      label: 'Subcategoría',
       sortable: true,
       sortType: 'string' as const,
       render: (task: Task) => (
         <span className="text-xs">
-          {task.project?.name || 'Sin proyecto'}
+          {task.subcategory?.name || 'Sin subcategoría'}
         </span>
       )
     },
     {
-      key: 'status',
-      label: 'Estado',
+      key: 'element',
+      label: 'Elemento',
       sortable: true,
       sortType: 'string' as const,
-      render: (task: Task) => (
-        <Badge variant={getStatusBadgeVariant(task.status)} className="text-xs">
-          {getStatusLabel(task.status)}
-        </Badge>
-      )
-    },
-    {
-      key: 'priority',
-      label: 'Prioridad',
-      sortable: true,
-      sortType: 'string' as const,
-      render: (task: Task) => (
-        <Badge variant={getPriorityBadgeVariant(task.priority)} className="text-xs">
-          {getPriorityLabel(task.priority)}
-        </Badge>
-      )
-    },
-    {
-      key: 'due_date',
-      label: 'Fecha Límite',
-      sortable: true,
-      sortType: 'date' as const,
       render: (task: Task) => (
         <span className="text-xs">
-          {task.due_date ? new Date(task.due_date).toLocaleDateString() : 'Sin fecha'}
+          {task.element?.name || 'Sin elemento'}
+        </span>
+      )
+    },
+    {
+      key: 'unit',
+      label: 'Unidad',
+      sortable: true,
+      sortType: 'string' as const,
+      render: (task: Task) => (
+        <span className="text-xs">
+          {task.unit?.name || 'Sin unidad'}
+        </span>
+      )
+    },
+    {
+      key: 'unit_labor_price',
+      label: 'Precio M.O.',
+      sortable: true,
+      sortType: 'number' as const,
+      render: (task: Task) => (
+        <span className="text-xs">
+          ${task.unit_labor_price?.toFixed(2) || '0.00'}
+        </span>
+      )
+    },
+    {
+      key: 'unit_material_price',
+      label: 'Precio Material',
+      sortable: true,
+      sortType: 'number' as const,
+      render: (task: Task) => (
+        <span className="text-xs">
+          ${task.unit_material_price?.toFixed(2) || '0.00'}
         </span>
       )
     },
