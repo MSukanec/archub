@@ -62,9 +62,18 @@ export function CustomTable<T = any>({
       } else if (sortKey === 'category') {
         aValue = (a as any)?.movement_data?.category?.name || ''
         bValue = (b as any)?.movement_data?.category?.name || ''
+      } else if (sortKey === 'subcategory') {
+        aValue = (a as any)?.movement_data?.subcategory?.name || ''
+        bValue = (b as any)?.movement_data?.subcategory?.name || ''
       } else if (sortKey === 'creator') {
         aValue = (a as any)?.creator?.full_name || (a as any)?.creator?.email || ''
         bValue = (b as any)?.creator?.full_name || (b as any)?.creator?.email || ''
+      } else if (sortKey === 'currency') {
+        aValue = (a as any)?.movement_data?.currency?.name || (a as any)?.movement_data?.currency?.code || ''
+        bValue = (b as any)?.movement_data?.currency?.name || (b as any)?.movement_data?.currency?.code || ''
+      } else if (sortKey === 'wallet') {
+        aValue = (a as any)?.movement_data?.wallet?.name || ''
+        bValue = (b as any)?.movement_data?.wallet?.name || ''
       }
 
       // Convert values based on sort type
