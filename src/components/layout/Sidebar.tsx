@@ -57,16 +57,7 @@ export function Sidebar() {
           transitionDuration: `${TRANSITION_DURATION}ms`,
         }}
       >
-        {/* Logo */}
-        <Link href="/">
-          <SidebarButton
-            icon={Building}
-            isExpanded={isExpanded}
-            isActive={location === "/"}
-          >
-            Archub
-          </SidebarButton>
-        </Link>
+
 
         {/* Navegación */}
         <nav className="flex flex-col flex-1">
@@ -92,13 +83,13 @@ export function Sidebar() {
                 isExpanded={isExpanded}
                 isActive={isGroupActive(['/organizaciones', '/contactos'])}
               >
-                Organización {isExpanded && (expandedGroups.organizacion ? '▼' : '▶')}
+                Organización
               </SidebarButton>
             </div>
             {isExpanded && expandedGroups.organizacion && (
               <div className="transition-all duration-200">
                 <Link href="/organizaciones">
-                  <div className="pl-4">
+                  <div className="pl-6">
                     <SidebarButton
                       isExpanded={isExpanded}
                       isActive={location === '/organizaciones'}
@@ -109,7 +100,7 @@ export function Sidebar() {
                   </div>
                 </Link>
                 <Link href="/contactos">
-                  <div className="pl-4">
+                  <div className="pl-6">
                     <SidebarButton
                       isExpanded={isExpanded}
                       isActive={location === '/contactos'}
@@ -134,13 +125,13 @@ export function Sidebar() {
                 isExpanded={isExpanded}
                 isActive={isGroupActive(['/proyectos'])}
               >
-                Proyectos {isExpanded && (expandedGroups.proyectos ? '▼' : '▶')}
+                Proyectos
               </SidebarButton>
             </div>
             {isExpanded && expandedGroups.proyectos && (
               <div className="transition-all duration-200">
                 <Link href="/proyectos">
-                  <div className="pl-4">
+                  <div className="pl-6">
                     <SidebarButton
                       isExpanded={isExpanded}
                       isActive={location === '/proyectos'}
@@ -165,13 +156,13 @@ export function Sidebar() {
                 isExpanded={isExpanded}
                 isActive={isGroupActive(['/bitacora'])}
               >
-                Obra {isExpanded && (expandedGroups.obra ? '▼' : '▶')}
+                Obra
               </SidebarButton>
             </div>
             {isExpanded && expandedGroups.obra && (
               <div className="transition-all duration-200">
                 <Link href="/bitacora">
-                  <div className="pl-4">
+                  <div className="pl-6">
                     <SidebarButton
                       isExpanded={isExpanded}
                       isActive={location === '/bitacora'}
@@ -196,13 +187,13 @@ export function Sidebar() {
                 isExpanded={isExpanded}
                 isActive={isGroupActive(['/movimientos'])}
               >
-                Finanzas {isExpanded && (expandedGroups.finanzas ? '▼' : '▶')}
+                Finanzas
               </SidebarButton>
             </div>
             {isExpanded && expandedGroups.finanzas && (
               <div className="transition-all duration-200">
                 <Link href="/movimientos">
-                  <div className="pl-4">
+                  <div className="pl-6">
                     <SidebarButton
                       isExpanded={isExpanded}
                       isActive={location === '/movimientos'}

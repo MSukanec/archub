@@ -538,6 +538,18 @@ Changelog:
   • Implemented proper auth state change listener for session management
   • Enhanced null safety checks for Supabase client throughout application
   • Application now starts correctly without loading state issues
+
+- June 21, 2025. Complete sidebar navigation restructuring with grouped menu items
+  • Reorganized navigation into hierarchical groups with expandable subitems
+  • Dashboard as standalone first item with home icon (route: /dashboard)
+  • Group "Organización" with Users icon: Gestión de Organizaciones, Contactos
+  • Group "Proyectos" with Folder icon: Gestión de Proyectos
+  • Group "Obra" with FileText icon: Bitácora
+  • Group "Finanzas" with DollarSign icon: Movimientos
+  • Click-to-expand/collapse functionality with smooth transitions
+  • Eliminated navigationStore dependency, all items defined manually
+  • Removed duplicate Archub logo button, cleaned visual hierarchy
+  • Subitems aligned with parent text for clean indentation structure
 ```
 
 ## User Preferences
