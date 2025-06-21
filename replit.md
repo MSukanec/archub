@@ -468,6 +468,18 @@ Changelog:
   • Fixed wallet_id and currency_id references to use actual table IDs instead of organization table IDs
   • Auto-selects current user as creator and defaults for currency/wallet selections
   • Complete 11-field modal with hierarchical Type → Category → Subcategory functionality working correctly
+
+- June 21, 2025. Complete site logs (bitácora) system with accordion cards and CRUD operations
+  • Removed "title" field from site logs schema and modal as requested
+  • Rebuilt SiteLogs.tsx with accordion card layout instead of table (matching projects page style)
+  • Cards expand/collapse to show detailed information with ChevronDown/ChevronRight icons
+  • Reordered modal fields: Fecha, Creador, Tipo de Entrada, Clima, Comentarios
+  • Added creator dropdown with organization members selection functionality
+  • Implemented complete CRUD operations: create, edit, delete with confirmation dialogs
+  • Enhanced modal to support both creation and editing modes with proper form pre-population
+  • Added column headers above cards: Fecha, Creador, Tipo de Entrada, Clima, Comentarios, Acciones
+  • Integrated actions dropdown menu (Edit/Delete) matching projects page functionality
+  • Accordion content shows full details: visibility status, creation date, complete comments, weather conditions
 ```
 
 ## User Preferences

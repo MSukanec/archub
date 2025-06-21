@@ -23,15 +23,16 @@ import { useToast } from '@/hooks/use-toast'
 import { queryClient } from '@/lib/queryClient'
 import { supabase } from '@/lib/supabase'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { useOrganizationMembers } from '@/hooks/use-organization-members'
 
 const createSiteLogSchema = z.object({
   log_date: z.date({
     required_error: "La fecha es requerida",
   }),
-  title: z.string().min(1, 'El título es requerido'),
+  created_by: z.string().min(1, 'El creador es requerido'),
   entry_type: z.string().min(1, 'El tipo de entrada es requerido'),
-  comments: z.string().min(1, 'Los comentarios son requeridos'),
   weather: z.string().optional(),
+  comments: z.string().min(1, 'Los comentarios son requeridos'),
   is_public: z.boolean().default(false),
   is_favorite: z.boolean().default(false)
 })
@@ -41,23 +42,26 @@ type CreateSiteLogForm = z.infer<typeof createSiteLogSchema>
 interface CreateSiteLogModalProps {
   open: boolean
   onClose: () => void
+  editingSiteLog?: any | null
 }
 
-export function CreateSiteLogModal({ open, onClose }: CreateSiteLogModalProps) {
+export function CreateSiteLogModal({ open, onClose, editingSiteLog }: CreateSiteLogModalProps) {
   const { toast } = useToast()
   const { data: userData } = useCurrentUser()
   const projectId = userData?.preferences?.last_project_id
+  const organizationId = userData?.preferences?.last_organization_id
+  const { data: organizationMembers = [] } = useOrganizationMembers(organizationId)
   
   const form = useForm<CreateSiteLogForm>({
     resolver: zodResolver(createSiteLogSchema),
     defaultValues: {
-      log_date: new Date(),
-      title: '',
-      entry_type: '',
-      comments: '',
-      weather: '',
-      is_public: false,
-      is_favorite: false
+      log_date: editingSiteLog ? new Date(editingSiteLog.log_date) : new Date(),
+      created_by: editingSiteLog?.created_by || userData?.user?.id || '',
+      entry_type: editingSiteLog?.entry_type || '',
+      weather: editingSiteLog?.weather || '',
+      comments: editingSiteLog?.comments || '',
+      is_public: editingSiteLog?.is_public || false,
+      is_favorite: editingSiteLog?.is_favorite || false
     }
   })
 
@@ -67,52 +71,65 @@ export function CreateSiteLogModal({ open, onClose }: CreateSiteLogModalProps) {
         throw new Error('Supabase client not initialized')
       }
 
-      if (!projectId || !userData?.user?.id) {
-        throw new Error('Project ID or User ID not available')
+      if (!projectId) {
+        throw new Error('Project ID not available')
       }
 
       const siteLogData = {
         log_date: formData.log_date.toISOString().split('T')[0], // Format as date string
-        title: formData.title,
         entry_type: formData.entry_type,
         comments: formData.comments,
         weather: formData.weather || null,
         is_public: formData.is_public,
         is_favorite: formData.is_favorite,
         project_id: projectId,
-        created_by: userData.user.id,
-        created_at: new Date().toISOString()
+        created_by: formData.created_by,
+        ...(!editingSiteLog && { created_at: new Date().toISOString() })
       }
 
-      console.log('Creating site log with data:', siteLogData)
+      console.log(editingSiteLog ? 'Updating site log with data:' : 'Creating site log with data:', siteLogData)
 
-      const { data, error } = await supabase
-        .from('site_logs')
-        .insert([siteLogData])
-        .select()
+      let data, error
+      
+      if (editingSiteLog) {
+        const result = await supabase
+          .from('site_logs')
+          .update(siteLogData)
+          .eq('id', editingSiteLog.id)
+          .select()
+        data = result.data
+        error = result.error
+      } else {
+        const result = await supabase
+          .from('site_logs')
+          .insert([siteLogData])
+          .select()
+        data = result.data
+        error = result.error
+      }
 
       if (error) {
-        console.error('Supabase error creating site log:', error)
-        throw new Error(`Error al crear bitácora: ${error.message}`)
+        console.error('Supabase error with site log:', error)
+        throw new Error(`Error al ${editingSiteLog ? 'actualizar' : 'crear'} bitácora: ${error.message}`)
       }
 
-      console.log('Site log created successfully:', data[0])
+      console.log('Site log saved successfully:', data[0])
       return data[0]
     },
     onSuccess: () => {
       toast({
         title: "Éxito",
-        description: "Entrada de bitácora creada correctamente"
+        description: `Entrada de bitácora ${editingSiteLog ? 'actualizada' : 'creada'} correctamente`
       })
       queryClient.invalidateQueries({ queryKey: ['bitacora', projectId] })
       form.reset()
       onClose()
     },
     onError: (error: any) => {
-      console.error('Error creating site log:', error)
+      console.error(`Error ${editingSiteLog ? 'updating' : 'creating'} site log:`, error)
       toast({
         title: "Error",
-        description: error.message || "No se pudo crear la entrada de bitácora",
+        description: error.message || `No se pudo ${editingSiteLog ? 'actualizar' : 'crear'} la entrada de bitácora`,
         variant: "destructive"
       })
     }
@@ -131,8 +148,8 @@ export function CreateSiteLogModal({ open, onClose }: CreateSiteLogModalProps) {
 
   const header = (
     <CustomModalHeader
-      title="Nueva Entrada de Bitácora"
-      description="Registra una nueva entrada en la bitácora del proyecto"
+      title={editingSiteLog ? "Editar Entrada de Bitácora" : "Nueva Entrada de Bitácora"}
+      description={editingSiteLog ? "Modifica la entrada de bitácora" : "Registra una nueva entrada en la bitácora del proyecto"}
       onClose={onClose}
     />
   )
@@ -185,19 +202,32 @@ export function CreateSiteLogModal({ open, onClose }: CreateSiteLogModalProps) {
               )}
             />
 
-            {/* 2. Título */}
+            {/* 2. Creador */}
             <FormField
               control={form.control}
-              name="title"
+              name="created_by"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium">Título</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Título de la entrada..."
-                      {...field}
-                    />
-                  </FormControl>
+                  <FormLabel className="text-sm font-medium">Creador</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar creador" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {organizationMembers.map((member) => (
+                        <SelectItem key={member.user_id} value={member.user_id}>
+                          <div className="flex items-center gap-2">
+                            <div className="h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center text-xs">
+                              {member.users?.full_name?.charAt(0) || member.users?.email?.charAt(0)}
+                            </div>
+                            <span>{member.users?.full_name || member.users?.email}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -229,7 +259,25 @@ export function CreateSiteLogModal({ open, onClose }: CreateSiteLogModalProps) {
               )}
             />
 
-            {/* 4. Comentarios */}
+            {/* 4. Clima */}
+            <FormField
+              control={form.control}
+              name="weather"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-medium">Clima</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Condiciones climáticas (opcional)..."
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* 5. Comentarios */}
             <FormField
               control={form.control}
               name="comments"
@@ -240,24 +288,6 @@ export function CreateSiteLogModal({ open, onClose }: CreateSiteLogModalProps) {
                     <Textarea
                       placeholder="Describe los detalles de esta entrada..."
                       className="min-h-[100px]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* 5. Clima */}
-            <FormField
-              control={form.control}
-              name="weather"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium">Clima</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Condiciones climáticas (opcional)..."
                       {...field}
                     />
                   </FormControl>
@@ -328,7 +358,7 @@ export function CreateSiteLogModal({ open, onClose }: CreateSiteLogModalProps) {
           formElement.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }))
         }
       }}
-      submitLabel="Guardar"
+      submitLabel={editingSiteLog ? "Actualizar" : "Guardar"}
       disabled={createSiteLogMutation.isPending}
     />
   )
