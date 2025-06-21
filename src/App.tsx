@@ -1,10 +1,12 @@
 import { Switch, Route } from "wouter";
+import { useEffect } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Layout } from "@/components/layout/Layout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { useAuthStore } from "@/stores/authStore";
 import Dashboard from "@/pages/Dashboard";
 import Organizations from "@/pages/Organizations";
 import Projects from "@/pages/Projects";

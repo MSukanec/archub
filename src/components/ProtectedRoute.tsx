@@ -7,14 +7,28 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user } = useAuthStore()
-  const [showAuthModal, setShowAuthModal] = useState(!user)
+  const { user, loading, initialized } = useAuthStore()
+  const [showAuthModal, setShowAuthModal] = useState(false)
 
   useEffect(() => {
-    setShowAuthModal(!user)
-  }, [user])
+    // Solo mostrar modal si ya se inicializó y no hay usuario
+    if (initialized && !user) {
+      setShowAuthModal(true)
+    } else if (user) {
+      setShowAuthModal(false)
+    }
+  }, [user, initialized])
 
-  // Si hay usuario, mostrar contenido directamente
+  // Mostrar loading mientras se inicializa
+  if (!initialized || loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    )
+  }
+
+  // Si hay usuario, mostrar contenido
   if (user) {
     return <>{children}</>
   }

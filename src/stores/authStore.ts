@@ -16,8 +16,8 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   session: null,
-  loading: false,
-  initialized: true,
+  loading: true,
+  initialized: false,
 
   signIn: async (email, password) => {
     if (!supabase) throw new Error('Supabase not configured');
@@ -68,37 +68,50 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   initialize: async () => {
     if (!supabase) {
+      set({ loading: false, initialized: true });
       return;
     }
 
     console.log('Initializing auth...');
+    set({ loading: true, initialized: false });
     
-    // Configurar listener primero para capturar la sesión existente
-    supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state changed:', event);
-      
-      set({
-        session: session,
-        user: session?.user || null,
-        loading: false,
-        initialized: true
-      });
-    });
-
-    // Obtener sesión actual silenciosamente
     try {
+      // Obtener sesión actual primero
       const { data: { session } } = await supabase.auth.getSession();
       
       console.log('Got session:', session ? 'user logged in' : 'no session');
+      
+      // Configurar el estado con la sesión actual
       set({
         session: session,
         user: session?.user || null,
         loading: false,
         initialized: true
       });
+
+      // Configurar listener para cambios futuros
+      supabase.auth.onAuthStateChange((event, session) => {
+        console.log('Auth state changed:', event);
+        
+        // Solo actualizar si ya estamos inicializados
+        if (get().initialized) {
+          set({
+            session: session,
+            user: session?.user || null,
+            loading: false
+          });
+        }
+      });
+
     } catch (error) {
       console.error('Session check failed:', error);
-      // No bloquear la aplicación por errores de sesión
+      // En caso de error, marcar como inicializado sin sesión
+      set({
+        session: null,
+        user: null,
+        loading: false,
+        initialized: true
+      });
     }
   },
 }));
