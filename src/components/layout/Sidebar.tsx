@@ -34,10 +34,21 @@ export function Sidebar() {
   const { data } = useCurrentUser();
 
   const toggleGroup = (groupKey: keyof typeof expandedGroups) => {
-    setExpandedGroups(prev => ({
-      ...prev,
-      [groupKey]: !prev[groupKey],
-    }));
+    setExpandedGroups(prev => {
+      // Cerrar todos los grupos primero
+      const allClosed = {
+        organizacion: false,
+        proyectos: false,
+        obra: false,
+        finanzas: false,
+      };
+      
+      // Si el grupo actual está cerrado, abrirlo. Si está abierto, cerrarlo.
+      return {
+        ...allClosed,
+        [groupKey]: !prev[groupKey],
+      };
+    });
   };
 
   const isGroupActive = (routes: string[]) => {
@@ -89,26 +100,22 @@ export function Sidebar() {
             {isExpanded && expandedGroups.organizacion && (
               <div className="transition-all duration-200">
                 <Link href="/organizaciones">
-                  <div className="pl-6">
-                    <SidebarButton
-                      isExpanded={isExpanded}
-                      isActive={location === '/organizaciones'}
-                      className="text-sm"
-                    >
-                      Gestión de Organizaciones
-                    </SidebarButton>
-                  </div>
+                  <SidebarButton
+                    isExpanded={isExpanded}
+                    isActive={location === '/organizaciones'}
+                    className="text-sm"
+                  >
+                    Gestión de Organizaciones
+                  </SidebarButton>
                 </Link>
                 <Link href="/contactos">
-                  <div className="pl-6">
-                    <SidebarButton
-                      isExpanded={isExpanded}
-                      isActive={location === '/contactos'}
-                      className="text-sm"
-                    >
-                      Contactos
-                    </SidebarButton>
-                  </div>
+                  <SidebarButton
+                    isExpanded={isExpanded}
+                    isActive={location === '/contactos'}
+                    className="text-sm"
+                  >
+                    Contactos
+                  </SidebarButton>
                 </Link>
               </div>
             )}
@@ -131,15 +138,13 @@ export function Sidebar() {
             {isExpanded && expandedGroups.proyectos && (
               <div className="transition-all duration-200">
                 <Link href="/proyectos">
-                  <div className="pl-6">
-                    <SidebarButton
-                      isExpanded={isExpanded}
-                      isActive={location === '/proyectos'}
-                      className="text-sm"
-                    >
-                      Gestión de Proyectos
-                    </SidebarButton>
-                  </div>
+                  <SidebarButton
+                    isExpanded={isExpanded}
+                    isActive={location === '/proyectos'}
+                    className="text-sm"
+                  >
+                    Gestión de Proyectos
+                  </SidebarButton>
                 </Link>
               </div>
             )}
@@ -162,15 +167,13 @@ export function Sidebar() {
             {isExpanded && expandedGroups.obra && (
               <div className="transition-all duration-200">
                 <Link href="/bitacora">
-                  <div className="pl-6">
-                    <SidebarButton
-                      isExpanded={isExpanded}
-                      isActive={location === '/bitacora'}
-                      className="text-sm"
-                    >
-                      Bitácora
-                    </SidebarButton>
-                  </div>
+                  <SidebarButton
+                    isExpanded={isExpanded}
+                    isActive={location === '/bitacora'}
+                    className="text-sm"
+                  >
+                    Bitácora
+                  </SidebarButton>
                 </Link>
               </div>
             )}
@@ -193,15 +196,13 @@ export function Sidebar() {
             {isExpanded && expandedGroups.finanzas && (
               <div className="transition-all duration-200">
                 <Link href="/movimientos">
-                  <div className="pl-6">
-                    <SidebarButton
-                      isExpanded={isExpanded}
-                      isActive={location === '/movimientos'}
-                      className="text-sm"
-                    >
-                      Movimientos
-                    </SidebarButton>
-                  </div>
+                  <SidebarButton
+                    isExpanded={isExpanded}
+                    isActive={location === '/movimientos'}
+                    className="text-sm"
+                  >
+                    Movimientos
+                  </SidebarButton>
                 </Link>
               </div>
             )}
