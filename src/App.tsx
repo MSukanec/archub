@@ -14,6 +14,7 @@ import Movements from "@/pages/Movements";
 import SiteLogs from "@/pages/SiteLogs";
 import ProfilePage from "@/pages/ProfilePage";
 import Contacts from "@/pages/Contacts";
+import { AdminOrganizations } from "@/pages/AdminOrganizations";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/not-found";
 
@@ -67,6 +68,13 @@ function Router() {
         <ProtectedRoute>
           <Layout>
             <Contacts />
+          </Layout>
+        </ProtectedRoute>
+      </Route>
+      <Route path="/admin/organizaciones">
+        <ProtectedRoute>
+          <Layout>
+            <AdminOrganizations />
           </Layout>
         </ProtectedRoute>
       </Route>

@@ -30,6 +30,7 @@ export function Sidebar() {
     proyectos: false,
     obra: false,
     finanzas: false,
+    configuracion: false,
   });
   const { data } = useCurrentUser();
 
@@ -207,19 +208,39 @@ export function Sidebar() {
               </div>
             )}
           </div>
+
+          {/* Grupo Configuración */}
+          <div>
+            <div
+              onClick={() => toggleGroup('configuracion')}
+              className="cursor-pointer"
+            >
+              <SidebarButton
+                icon={Settings}
+                isExpanded={isExpanded}
+                isActive={isGroupActive(['/admin/organizaciones'])}
+              >
+                Configuración
+              </SidebarButton>
+            </div>
+            {isExpanded && expandedGroups.configuracion && (
+              <div className="transition-all duration-200">
+                <Link href="/admin/organizaciones">
+                  <SidebarButton
+                    isExpanded={isExpanded}
+                    isActive={location === '/admin/organizaciones'}
+                    className="text-sm"
+                  >
+                    Organizaciones
+                  </SidebarButton>
+                </Link>
+              </div>
+            )}
+          </div>
         </nav>
 
-        {/* Bloque inferior (settings, perfil) */}
+        {/* Bloque inferior (perfil) */}
         <div className="flex flex-col">
-          <Link href="/settings">
-            <SidebarButton
-              icon={Settings}
-              isExpanded={isExpanded}
-              isActive={location === "/settings"}
-            >
-              Configuración
-            </SidebarButton>
-          </Link>
           <Link href="/perfil">
             <SidebarButton
               isExpanded={isExpanded}
