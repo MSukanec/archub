@@ -62,20 +62,40 @@ export function useMovements(organizationId: string | undefined, projectId: stri
           project_id,
           type_id,
           category_id,
+          subcategory_id,
           currency_id,
           wallet_id,
           file_url,
           related_contact_id,
           related_task_id,
           is_conversion,
-          organization_members!movements_created_by_fkey (
+          users:created_by (
             id,
-            users (
-              id,
-              full_name,
-              email,
-              avatar_url
-            )
+            full_name,
+            email,
+            avatar_url
+          ),
+          type:movement_concepts!movements_type_id_fkey (
+            id,
+            name
+          ),
+          category:movement_concepts!movements_category_id_fkey (
+            id,
+            name
+          ),
+          subcategory:movement_concepts!movements_subcategory_id_fkey (
+            id,
+            name
+          ),
+          currencies (
+            id,
+            name,
+            code,
+            symbol
+          ),
+          wallets (
+            id,
+            name
           )
         `)
         .eq('organization_id', organizationId)
@@ -87,13 +107,17 @@ export function useMovements(organizationId: string | undefined, projectId: stri
         throw error
       }
 
-      // Transform the data to match our interface
-      const transformedData = data?.map((movement: any) => ({
+      return data?.map(movement => ({
         ...movement,
-        creator: movement.organization_members?.users || null
+        creator: movement.users,
+        movement_data: {
+          type: movement.type,
+          category: movement.category,
+          subcategory: movement.subcategory,
+          currency: movement.currencies,
+          wallet: movement.wallets
+        }
       })) || []
-
-      return transformedData
     },
     enabled: !!organizationId && !!projectId
   })

@@ -1,47 +1,51 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 
-interface Wallet {
+interface OrganizationWallet {
   id: string
-  name: string
-  description?: string
-  currency_id: string
   organization_id: string
+  wallet_id: string
+  is_active: boolean
+  is_default: boolean
   created_at: string
+  wallets: {
+    id: string
+    name: string
+  }
 }
 
 export function useWallets(organizationId: string | undefined) {
   return useQuery({
-    queryKey: ['wallets', organizationId],
+    queryKey: ['organization-wallets', organizationId],
     queryFn: async () => {
-      if (!organizationId) return []
-
       if (!supabase) {
         throw new Error('Supabase client not initialized')
       }
 
-      // Query organization_wallets with fallback for wallet names
       const { data, error } = await supabase
         .from('organization_wallets')
-        .select('id, organization_id, wallet_id, is_active, is_default, created_at')
+        .select(`
+          id, 
+          organization_id, 
+          wallet_id, 
+          is_active, 
+          is_default, 
+          created_at,
+          wallets (
+            id,
+            name
+          )
+        `)
         .eq('organization_id', organizationId)
         .eq('is_active', true)
         .order('is_default', { ascending: false })
 
       if (error) {
-        console.error('Error fetching wallets:', error)
+        console.error('Error fetching organization wallets:', error)
         throw error
       }
 
-      // Transform data to include a display name
-      const transformedData = (data || []).map(wallet => ({
-        ...wallet,
-        wallets: {
-          name: `Billetera ${wallet.wallet_id.slice(-8)}` // Use last 8 chars of ID as name
-        }
-      }))
-
-      return transformedData
+      return data || []
     },
     enabled: !!organizationId
   })

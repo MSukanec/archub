@@ -29,6 +29,7 @@ import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useMovementConcepts } from '@/hooks/use-movement-concepts'
 import { useCurrencies } from '@/hooks/use-currencies'
 import { useWallets } from '@/hooks/use-wallets'
+import { useEffect } from 'react'
 
 const createMovementSchema = z.object({
   description: z.string().optional(),
@@ -82,10 +83,21 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
   const { data: currencies = [] } = useCurrencies(organizationId)
   const { data: wallets = [] } = useWallets(organizationId)
 
-  const [selectedTypeId, setSelectedTypeId] = useState<string>('')
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('')
+  const [selectedTypeId, setSelectedTypeId] = useState<string>(editingMovement?.type_id || '')
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>(editingMovement?.category_id || '')
   const { data: categories = [] } = useMovementConcepts('categories', selectedTypeId)
   const { data: subcategories = [] } = useMovementConcepts('categories', selectedCategoryId)
+
+  // Update selected IDs when editing movement changes
+  useEffect(() => {
+    if (editingMovement) {
+      setSelectedTypeId(editingMovement.type_id)
+      setSelectedCategoryId(editingMovement.category_id)
+    } else {
+      setSelectedTypeId('')
+      setSelectedCategoryId('')
+    }
+  }, [editingMovement])
 
   const form = useForm<CreateMovementForm>({
     resolver: zodResolver(createMovementSchema),
@@ -413,7 +425,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                     <SelectContent>
                       {currencies.map((currency: any) => (
                         <SelectItem key={currency.id} value={currency.currency_id}>
-                          {currency.currencies?.name || currency.currencies?.code || currency.currency_id} {currency.is_default && "(Por defecto)"}
+                          {currency.currencies?.name} ({currency.currencies?.code}) {currency.is_default && "(Por defecto)"}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -439,7 +451,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                     <SelectContent>
                       {wallets.map((wallet: any) => (
                         <SelectItem key={wallet.id} value={wallet.wallet_id}>
-                          {wallet.wallets?.name || wallet.wallet_id} {wallet.is_default && "(Por defecto)"}
+                          {wallet.wallets?.name} {wallet.is_default && "(Por defecto)"}
                         </SelectItem>
                       ))}
                     </SelectContent>
