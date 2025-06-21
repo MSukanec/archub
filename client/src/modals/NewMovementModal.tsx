@@ -29,7 +29,6 @@ import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useMovementConcepts } from '@/hooks/use-movement-concepts'
 import { useCurrencies } from '@/hooks/use-currencies'
 import { useWallets } from '@/hooks/use-wallets'
-import { useEffect } from 'react'
 
 const createMovementSchema = z.object({
   description: z.string().optional(),
@@ -102,17 +101,17 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
   const form = useForm<CreateMovementForm>({
     resolver: zodResolver(createMovementSchema),
     defaultValues: {
-      description: '',
-      amount: 0,
-      type_id: '',
-      category_id: '',
-      subcategory_id: '',
-      currency_id: '',
-      wallet_id: '',
-      created_by: '',
-      file_url: '',
-      is_conversion: false,
-      created_at: new Date()
+      created_at: editingMovement ? new Date(editingMovement.created_at) : new Date(),
+      created_by: editingMovement?.created_by || userData?.user?.id || '',
+      description: editingMovement?.description || '',
+      amount: editingMovement?.amount || 0,
+      type_id: editingMovement?.type_id || '',
+      category_id: editingMovement?.category_id || '',
+      subcategory_id: editingMovement?.subcategory_id || '',
+      currency_id: editingMovement?.currency_id || '',
+      wallet_id: editingMovement?.wallet_id || '',
+      file_url: editingMovement?.file_url || '',
+      is_conversion: editingMovement?.is_conversion || false,
     }
   })
 
@@ -147,42 +146,71 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
 
   const createMovementMutation = useMutation({
     mutationFn: async (formData: CreateMovementForm) => {
-      console.log('Creating movement with data:', formData)
+      console.log('Processing movement with data:', formData)
       
       if (!supabase) {
         throw new Error('Supabase client not initialized')
       }
 
-      const movementData = {
-        description: formData.description || '',
-        amount: formData.amount,
-        type_id: formData.type_id,
-        category_id: formData.category_id,
-        subcategory_id: formData.subcategory_id || null,
-        currency_id: formData.currency_id,
-        wallet_id: formData.wallet_id,
-        created_by: formData.created_by,
-        file_url: formData.file_url || null,
-        is_conversion: formData.is_conversion,
-        created_at: formData.created_at.toISOString(),
-        organization_id: organizationId,
-        project_id: projectId
-      }
-      
-      console.log('Submitting movement data to Supabase:', movementData)
-
-      const { data, error } = await supabase
-        .from('movements')
-        .insert([movementData])
-        .select()
-
-      if (error) {
-        console.error('Supabase error creating movement:', error)
-        throw new Error(`Error al crear movimiento: ${error.message}`)
+      if (!organizationId || !projectId) {
+        throw new Error('Organization and project must be selected')
       }
 
-      console.log('Movement created successfully:', data[0])
-      return data[0]
+      if (editingMovement) {
+        // Update existing movement
+        const { error } = await supabase
+          .from('movements')
+          .update({
+            description: formData.description || null,
+            amount: formData.amount,
+            type_id: formData.type_id,
+            category_id: formData.category_id,
+            subcategory_id: formData.subcategory_id || null,
+            currency_id: formData.currency_id,
+            wallet_id: formData.wallet_id,
+            is_conversion: formData.is_conversion,
+          })
+          .eq('id', editingMovement.id)
+
+        if (error) {
+          console.error('Supabase error updating movement:', error)
+          throw new Error(`Error updating movement: ${error.message}`)
+        }
+
+        console.log('Movement updated successfully')
+      } else {
+        // Create new movement
+        const movementData = {
+          description: formData.description || null,
+          amount: formData.amount,
+          type_id: formData.type_id,
+          category_id: formData.category_id,
+          subcategory_id: formData.subcategory_id || null,
+          currency_id: formData.currency_id,
+          wallet_id: formData.wallet_id,
+          created_by: formData.created_by,
+          file_url: formData.file_url || null,
+          is_conversion: formData.is_conversion,
+          created_at: formData.created_at.toISOString(),
+          organization_id: organizationId,
+          project_id: projectId
+        }
+
+        console.log('Submitting movement data to Supabase:', movementData)
+
+        const { data, error } = await supabase
+          .from('movements')
+          .insert(movementData)
+          .select()
+          .single()
+
+        if (error) {
+          console.error('Supabase error:', error)
+          throw new Error(`Error creating movement: ${error.message}`)
+        }
+
+        console.log('Movement created successfully:', data)
+      }
     },
     onSuccess: () => {
       toast({
