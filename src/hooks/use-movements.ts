@@ -68,7 +68,16 @@ export function useMovements(organizationId: string | undefined, projectId: stri
           file_url,
           related_contact_id,
           related_task_id,
-          is_conversion
+          is_conversion,
+          creator:organization_members!created_by (
+            id,
+            users (
+              id,
+              full_name,
+              email,
+              avatar_url
+            )
+          )
         `)
         .eq('organization_id', organizationId)
         .eq('project_id', projectId)
@@ -161,7 +170,8 @@ export function useMovements(organizationId: string | undefined, projectId: stri
 
       return data?.map(movement => ({
         ...movement,
-        creator: userData.find(u => u.id === movement.created_by),
+        // Use the joined creator data or fallback to separate queries
+        creator: movement.creator || userData.find(u => u.id === movement.created_by),
         movement_data: {
           type: typeData.find(t => t.id === movement.type_id),
           category: categoryData.find(c => c.id === movement.category_id),

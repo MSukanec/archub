@@ -1,0 +1,79 @@
+Necesito que resuelvas dos problemas en la app:
+
+---
+
+### 1. Mostrar correctamente el nombre del creador en la tabla de movimientos
+
+Actualmente, en la tabla de `Movements.tsx`, el campo `Creador` muestra a veces "Usuario" porque no se está haciendo correctamente el join para obtener los datos del usuario.
+
+Quiero que modifiques el hook que carga los movimientos (probablemente `useMovements()` o similar) para que al consultar los movimientos desde Supabase, traiga también los siguientes campos relacionados:
+
+```sql
+.from('movements')
+.select(`
+  *,
+  creator:organization_members (
+    id,
+    users (
+      id,
+      full_name,
+      email,
+      avatar_url
+    )
+  ),
+  movement_data:movement_data_view ( ... )
+`)
+Asegurate de que el alias creator esté correctamente usado en la tabla
+
+La columna created_by de movements debe estar relacionada a organization_members.id
+
+Mostrá el full_name del usuario. Si no hay, usá el email. Si no hay ninguno, mostrá “Usuario”
+
+Usá el avatar_url también si está disponible, y mostralo con el nombre
+
+2. Cargar correctamente todos los datos al editar un movimiento
+Actualmente, cuando se abre el modal de edición (NewMovementModal.tsx), muchos campos no se completan bien.
+
+Necesito que reemplaces el handler de edición (handleEdit) en Movements.tsx por una función que haga una nueva consulta a Supabase y cargue correctamente los datos del movimiento que se quiere editar.
+
+Debe hacer esto:
+
+ts
+Copiar
+Editar
+const handleEdit = async (movementId: string) => {
+  const { data, error } = await supabase
+    .from('movements')
+    .select(`
+      *,
+      creator:organization_members (
+        id,
+        users (
+          id,
+          full_name,
+          email,
+          avatar_url
+        )
+      ),
+      movement_data:movement_data_view ( ... )
+    `)
+    .eq('id', movementId)
+    .single()
+
+  if (error || !data) {
+    toast({ title: 'Error', description: 'No se pudo cargar el movimiento', variant: 'destructive' })
+    return
+  }
+
+  setEditingMovement(data)
+  setShowNewMovementModal(true)
+}
+Luego, en el botón de editar: onClick={() => handleEdit(movement.id)}
+
+Asegurate de que todos los campos del formulario se completen correctamente al abrir el modal
+
+No toques la lógica de creación o eliminación. Solo arreglá lo necesario para que los datos del creador se vean bien en la tabla y se carguen bien al editar.
+
+yaml
+Copiar
+Editar
