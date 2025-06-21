@@ -392,6 +392,7 @@ export default function Movements() {
         ]}
         customFilters={customFilters}
         onClearFilters={clearFilters}
+        wide={true}
       >
         <CustomTable
           columns={tableColumns}
