@@ -1,24 +1,19 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { SidebarButton } from "@/components/ui/sidebar-button";
+import { SidebarSubmenu } from "./SidebarSubmenu";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   Home,
-  Building,
+  Building2,
   Folder,
   Users,
   DollarSign,
   FileText,
   Settings,
   User,
-  ChevronDown,
-  ChevronRight,
 } from "lucide-react";
-import {
-  SIDEBAR_WIDTH,
-  SIDEBAR_EXPANDED_WIDTH,
-  TRANSITION_DURATION,
-} from "@/lib/constants/ui";
 
 
 
