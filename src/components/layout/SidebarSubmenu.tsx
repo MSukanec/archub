@@ -20,14 +20,14 @@ export function SidebarSubmenu({ title, items, isVisible }: SidebarSubmenuProps)
 
   return (
     <div 
-      className="fixed top-0 left-12 h-full w-48 bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] z-40 flex flex-col"
+      className="fixed top-0 left-10 h-full w-48 bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] z-40 flex flex-col"
       style={{ 
         backgroundColor: 'var(--sidebar-bg)',
         borderColor: 'var(--sidebar-border)'
       }}
     >
       {/* Header with group title */}
-      <div className="h-12 flex items-center px-4 border-b border-[var(--sidebar-border)]">
+      <div className="h-10 flex items-center px-4 border-b border-[var(--sidebar-border)]">
         <h2 className="text-sm font-medium text-[var(--sidebar-fg)]">{title}</h2>
       </div>
 

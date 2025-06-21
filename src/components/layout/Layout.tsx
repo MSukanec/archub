@@ -38,7 +38,7 @@ export function Layout({ children }: LayoutProps) {
       <main 
         className="transition-all duration-200"
         style={{ 
-          marginLeft: '240px', // 48px (main sidebar) + 192px (submenu when visible)
+          marginLeft: '232px', // 40px (main sidebar) + 192px (submenu when visible)
           minHeight: '100vh'
         }}
       >
