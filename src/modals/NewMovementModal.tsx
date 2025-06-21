@@ -111,7 +111,6 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
       currency_id: '',
       wallet_id: '',
       file_url: '',
-      is_conversion: false,
     }
   })
 
@@ -553,68 +552,46 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
             )}
           />
 
-            {/* 9. Descripción */}
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium">Descripción</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Describe el movimiento financiero..."
-                      className="min-h-[80px]"
+          {/* 9. Descripción */}
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem className="col-span-2">
+                <FormLabel className="text-sm font-medium">Descripción</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Describe el movimiento financiero..."
+                    className="min-h-[80px]"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* 10. Archivo */}
+          <FormField
+            control={form.control}
+            name="file_url"
+            render={({ field }) => (
+              <FormItem className="col-span-2">
+                <FormLabel className="text-sm font-medium">Archivo</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="https://ejemplo.com/archivo.pdf"
+                      className="pl-10"
                       {...field}
                     />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* 10. Conversión */}
-            <FormField
-              control={form.control}
-              name="is_conversion"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-sm font-medium">Conversión</FormLabel>
-                    <div className="text-xs text-muted-foreground">
-                      Marca si este movimiento es una conversión entre monedas
-                    </div>
                   </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            {/* 11. Archivo */}
-            <FormField
-              control={form.control}
-              name="file_url"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium">Archivo</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="https://ejemplo.com/archivo.pdf"
-                        className="pl-10"
-                        {...field}
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </CustomModalBody>
       </form>
     </Form>
