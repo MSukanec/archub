@@ -60,7 +60,7 @@ const menuGroups = [
     label: 'Configuración',
     icon: Settings,
     items: [
-      { label: 'Admin de Organizaciones', href: '/admin/organizaciones' },
+      { label: 'Gestión de Organizaciones', href: '/admin/organizaciones' },
       { label: 'Gestión de Usuarios', href: '/admin/usuarios' }
     ]
   }

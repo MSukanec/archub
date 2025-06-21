@@ -2,15 +2,8 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Plus, MoreHorizontal, Edit, Trash2, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { CustomPageLayout } from "@/components/ui-custom/CustomPageLayout";
-import { CustomPageHeader } from "@/components/ui-custom/CustomPageHeader";
-import { CustomSearchButton } from "@/components/ui-custom/CustomSearchButton";
 import { CustomTable } from "@/components/ui-custom/CustomTable";
-import { CustomModalLayout } from "@/components/ui-custom/CustomModalLayout";
-import { CustomModalHeader } from "@/components/ui-custom/CustomModalHeader";
-import { CustomModalBody } from "@/components/ui-custom/CustomModalBody";
-import { CustomModalFooter } from "@/components/ui-custom/CustomModalFooter";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -18,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
@@ -55,7 +49,11 @@ const userSchema = z.object({
 type UserFormData = z.infer<typeof userSchema>;
 
 export function AdminUsers() {
-  const [searchValue, setSearchValue] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("created_at");
+  const [sortOrder, setSortOrder] = useState("desc");
+  const [roleFilter, setRoleFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const [openModal, setOpenModal] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -250,11 +248,114 @@ export function AdminUsers() {
     userMutation.mutate(data);
   };
 
-  // Filter users based on search
-  const filteredUsers = users.filter(user =>
-    user.full_name.toLowerCase().includes(searchValue.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchValue.toLowerCase()) ||
-    user.organization?.name.toLowerCase().includes(searchValue.toLowerCase())
+  const handleClearFilters = () => {
+    setSearchTerm("");
+    setSortBy("created_at");
+    setSortOrder("desc");
+    setRoleFilter("");
+    setStatusFilter("");
+  };
+
+  // Filter and sort users
+  const filteredUsers = users
+    .filter(user => {
+      const matchesSearch = user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           user.organization?.name.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesRole = roleFilter === "" || user.role === roleFilter;
+      const matchesStatus = statusFilter === "" || 
+                           (statusFilter === "active" && user.is_active) ||
+                           (statusFilter === "inactive" && !user.is_active);
+      
+      return matchesSearch && matchesRole && matchesStatus;
+    })
+    .sort((a, b) => {
+      let aValue, bValue;
+      
+      switch (sortBy) {
+        case "full_name":
+          aValue = a.full_name;
+          bValue = b.full_name;
+          break;
+        case "email":
+          aValue = a.email;
+          bValue = b.email;
+          break;
+        case "role":
+          aValue = a.role;
+          bValue = b.role;
+          break;
+        default:
+          aValue = a.created_at;
+          bValue = b.created_at;
+      }
+      
+      if (sortOrder === "asc") {
+        return aValue > bValue ? 1 : -1;
+      } else {
+        return aValue < bValue ? 1 : -1;
+      }
+    });
+
+  const customFilters = (
+    <div className="space-y-4 w-[288px]">
+      <div>
+        <Label>Ordenar por</Label>
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="created_at">Fecha de registro</SelectItem>
+            <SelectItem value="full_name">Nombre</SelectItem>
+            <SelectItem value="email">Email</SelectItem>
+            <SelectItem value="role">Rol</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label>Dirección</Label>
+        <Select value={sortOrder} onValueChange={setSortOrder}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="desc">Descendente</SelectItem>
+            <SelectItem value="asc">Ascendente</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label>Filtrar por rol</Label>
+        <Select value={roleFilter} onValueChange={setRoleFilter}>
+          <SelectTrigger>
+            <SelectValue placeholder="Todos los roles" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Todos los roles</SelectItem>
+            <SelectItem value="admin">Administrador</SelectItem>
+            <SelectItem value="user">Usuario</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label>Filtrar por estado</Label>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger>
+            <SelectValue placeholder="Todos los estados" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Todos los estados</SelectItem>
+            <SelectItem value="active">Activos</SelectItem>
+            <SelectItem value="inactive">Inactivos</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
   );
 
   const columns = [
@@ -339,143 +440,150 @@ export function AdminUsers() {
     }
   ];
 
+  const emptyState = (
+    <div className="text-center py-12">
+      <User className="mx-auto h-10 w-10 text-muted-foreground" />
+      <p className="mt-2 text-muted-foreground">No se encontraron usuarios</p>
+      <Button className="mt-4" onClick={() => setOpenModal(true)}>
+        <Plus className="mr-2 h-4 w-4" />
+        Crear nuevo usuario
+      </Button>
+    </div>
+  );
+
   return (
-    <CustomPageLayout isWide={true}>
-      <CustomPageHeader
-        icon={User}
-        title="Gestión de Usuarios"
-        actions={[
-          <CustomSearchButton
-            key="search"
-            value={searchValue}
-            onChange={setSearchValue}
-            placeholder="Buscar usuarios..."
-          />,
-          <Button key="new" onClick={() => setOpenModal(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Nuevo Usuario
-          </Button>
-        ]}
+    <CustomPageLayout
+      icon={User}
+      title="Gestión de Usuarios"
+      actions={[
+        <Button key="new" onClick={() => setOpenModal(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Nuevo Usuario
+        </Button>
+      ]}
+      showSearch
+      searchValue={searchTerm}
+      onSearchChange={setSearchTerm}
+      customFilters={customFilters}
+      onClearFilters={handleClearFilters}
+    >
+      <CustomTable
+        columns={columns}
+        data={filteredUsers}
+        isLoading={isLoading}
+        emptyState={emptyState}
       />
 
-      <Card className="p-0">
-        <CustomTable
-          data={filteredUsers}
-          columns={columns}
-          loading={isLoading}
-          emptyMessage="No se encontraron usuarios"
-        />
-      </Card>
-
-      <CustomModalLayout open={openModal} onClose={handleCloseModal}>
-        {{
-          header: (
-            <CustomModalHeader
-              title={editingUser ? "Editar Usuario" : "Nuevo Usuario"}
-              description={editingUser ? "Modifica la información del usuario" : "Crea un nuevo usuario en el sistema"}
-              onClose={handleCloseModal}
-            />
-          ),
-          body: (
-            <CustomModalBody>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
-                <div className="col-span-2">
-                  <Label htmlFor="full_name">Nombre Completo</Label>
-                  <Input
-                    id="full_name"
-                    {...form.register("full_name")}
-                    placeholder="Ingresa el nombre completo"
-                  />
-                  {form.formState.errors.full_name && (
-                    <p className="text-red-500 text-sm mt-1">{form.formState.errors.full_name.message}</p>
-                  )}
-                </div>
-
-                <div className="col-span-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    {...form.register("email")}
-                    placeholder="usuario@ejemplo.com"
-                  />
-                  {form.formState.errors.email && (
-                    <p className="text-red-500 text-sm mt-1">{form.formState.errors.email.message}</p>
-                  )}
-                </div>
-
-                {!editingUser && (
-                  <div className="col-span-2">
-                    <Label htmlFor="password">Contraseña</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      {...form.register("password")}
-                      placeholder="Mínimo 6 caracteres"
-                    />
-                    {form.formState.errors.password && (
-                      <p className="text-red-500 text-sm mt-1">{form.formState.errors.password.message}</p>
-                    )}
-                  </div>
+      <Dialog open={openModal} onOpenChange={setOpenModal}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>
+              {editingUser ? "Editar Usuario" : "Nuevo Usuario"}
+            </DialogTitle>
+            <DialogDescription>
+              {editingUser ? "Modifica la información del usuario" : "Crea un nuevo usuario en el sistema"}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-2">
+                <Label htmlFor="full_name">Nombre Completo</Label>
+                <Input
+                  id="full_name"
+                  {...form.register("full_name")}
+                  placeholder="Ingresa el nombre completo"
+                />
+                {form.formState.errors.full_name && (
+                  <p className="text-red-500 text-sm mt-1">{form.formState.errors.full_name.message}</p>
                 )}
+              </div>
 
-                <div>
-                  <Label htmlFor="role">Rol</Label>
-                  <Select
-                    value={form.watch("role")}
-                    onValueChange={(value) => form.setValue("role", value as "admin" | "user")}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecciona un rol" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="user">Usuario</SelectItem>
-                      <SelectItem value="admin">Administrador</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="col-span-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  {...form.register("email")}
+                  placeholder="usuario@ejemplo.com"
+                />
+                {form.formState.errors.email && (
+                  <p className="text-red-500 text-sm mt-1">{form.formState.errors.email.message}</p>
+                )}
+              </div>
 
-                <div>
-                  <Label htmlFor="organization_id">Organización</Label>
-                  <Select
-                    value={form.watch("organization_id")}
-                    onValueChange={(value) => form.setValue("organization_id", value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecciona una organización" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">Sin asignar</SelectItem>
-                      {organizations.map((org) => (
-                        <SelectItem key={org.id} value={org.id}>
-                          {org.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="col-span-2 flex items-center space-x-2">
-                  <Switch
-                    id="is_active"
-                    checked={form.watch("is_active")}
-                    onCheckedChange={(checked) => form.setValue("is_active", checked)}
+              {!editingUser && (
+                <div className="col-span-2">
+                  <Label htmlFor="password">Contraseña</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    {...form.register("password")}
+                    placeholder="Mínimo 6 caracteres"
                   />
-                  <Label htmlFor="is_active">Usuario activo</Label>
+                  {form.formState.errors.password && (
+                    <p className="text-red-500 text-sm mt-1">{form.formState.errors.password.message}</p>
+                  )}
                 </div>
-              </form>
-            </CustomModalBody>
-          ),
-          footer: (
-            <CustomModalFooter
-              onCancel={handleCloseModal}
-              onSave={form.handleSubmit(onSubmit)}
-              saveText={editingUser ? "Actualizar" : "Crear"}
-              isLoading={userMutation.isPending}
-            />
-          )
-        }}
-      </CustomModalLayout>
+              )}
+
+              <div>
+                <Label htmlFor="role">Rol</Label>
+                <Select
+                  value={form.watch("role")}
+                  onValueChange={(value) => form.setValue("role", value as "admin" | "user")}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona un rol" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="user">Usuario</SelectItem>
+                    <SelectItem value="admin">Administrador</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="organization_id">Organización</Label>
+                <Select
+                  value={form.watch("organization_id")}
+                  onValueChange={(value) => form.setValue("organization_id", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona una organización" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Sin asignar</SelectItem>
+                    {organizations.map((org) => (
+                      <SelectItem key={org.id} value={org.id}>
+                        {org.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="col-span-2 flex items-center space-x-2">
+                <Switch
+                  id="is_active"
+                  checked={form.watch("is_active")}
+                  onCheckedChange={(checked) => form.setValue("is_active", checked)}
+                />
+                <Label htmlFor="is_active">Usuario activo</Label>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={handleCloseModal}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={userMutation.isPending}>
+                {userMutation.isPending ? "Guardando..." : (editingUser ? "Actualizar" : "Crear")}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
