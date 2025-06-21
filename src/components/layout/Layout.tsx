@@ -33,9 +33,15 @@ export function Layout({ children }: LayoutProps) {
   }, [data?.preferences?.theme]) // Eliminé isDark y setTheme de las dependencias
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-900">
+    <div className="min-h-screen bg-background">
       <Sidebar />
-      <main className="flex-1 overflow-y-auto">
+      <main 
+        className="transition-all duration-200"
+        style={{ 
+          marginLeft: '240px', // 48px (main sidebar) + 192px (submenu when visible)
+          minHeight: '100vh'
+        }}
+      >
         {children}
       </main>
     </div>

@@ -15,237 +15,182 @@ import {
   User,
 } from "lucide-react";
 
-
+// Define menu structure
+const menuGroups = [
+  {
+    id: 'dashboard',
+    label: 'Dashboard',
+    icon: Home,
+    href: '/dashboard',
+    items: [] // No submenu - direct navigation
+  },
+  {
+    id: 'organizacion',
+    label: 'Organización',
+    icon: Users,
+    items: [
+      { label: 'Gestión de Organizaciones', href: '/organizaciones' },
+      { label: 'Contactos', href: '/contactos' }
+    ]
+  },
+  {
+    id: 'proyectos',
+    label: 'Proyectos',
+    icon: Folder,
+    items: [
+      { label: 'Gestión de Proyectos', href: '/proyectos' }
+    ]
+  },
+  {
+    id: 'obra',
+    label: 'Obra',
+    icon: FileText,
+    items: [
+      { label: 'Bitácora de Obra', href: '/bitacora' }
+    ]
+  },
+  {
+    id: 'finanzas',
+    label: 'Finanzas',
+    icon: DollarSign,
+    items: [
+      { label: 'Movimientos', href: '/movimientos' }
+    ]
+  },
+  {
+    id: 'configuracion',
+    label: 'Configuración',
+    icon: Settings,
+    items: [
+      { label: 'Admin de Organizaciones', href: '/admin/organizaciones' },
+      { label: 'Ver perfil', href: '/perfil' }
+    ]
+  }
+];
 
 export function Sidebar() {
   const [location] = useLocation();
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [expandedGroups, setExpandedGroups] = useState({
-    organizacion: false,
-    proyectos: false,
-    obra: false,
-    finanzas: false,
-    configuracion: false,
-  });
-  const { data } = useCurrentUser();
+  const [activeGroup, setActiveGroup] = useState<string | null>(null);
+  const { data: userData } = useCurrentUser();
 
-  const toggleGroup = (groupKey: keyof typeof expandedGroups) => {
-    setExpandedGroups(prev => {
-      // Cerrar todos los grupos primero
-      const allClosed = {
-        organizacion: false,
-        proyectos: false,
-        obra: false,
-        finanzas: false,
-      };
-      
-      // Si el grupo actual está cerrado, abrirlo. Si está abierto, cerrarlo.
-      return {
-        ...allClosed,
-        [groupKey]: !prev[groupKey],
-      };
-    });
+  const handleGroupClick = (groupId: string, href?: string) => {
+    if (href) {
+      // Direct navigation for items without submenu (like Dashboard)
+      setActiveGroup(null);
+      return;
+    }
+    
+    // Toggle submenu for groups with items
+    setActiveGroup(activeGroup === groupId ? null : groupId);
   };
 
-  const isGroupActive = (routes: string[]) => {
-    return routes.some(route => location === route);
+  const isGroupActive = (group: typeof menuGroups[0]) => {
+    if (group.href) {
+      return location === group.href;
+    }
+    return group.items.some(item => location === item.href);
   };
+
+  const getActiveGroup = () => {
+    return menuGroups.find(group => isGroupActive(group));
+  };
+
+  const activeGroupData = getActiveGroup();
+  const submenuGroup = menuGroups.find(g => g.id === activeGroup);
 
   return (
-    <div
-      className="hidden lg:flex lg:flex-shrink-0"
-      onMouseEnter={() => setIsExpanded(true)}
-      onMouseLeave={() => setIsExpanded(false)}
-    >
+    <>
+      {/* Main Sidebar - Always compact with icons only */}
       <aside
-        className="flex flex-col bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] transition-all"
+        className="fixed left-0 top-0 h-full w-12 bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] flex flex-col z-50"
         style={{
-          width: isExpanded ? SIDEBAR_EXPANDED_WIDTH : SIDEBAR_WIDTH,
-          transitionDuration: `${TRANSITION_DURATION}ms`,
+          backgroundColor: 'var(--sidebar-bg)',
+          borderColor: 'var(--sidebar-border)'
         }}
       >
-
-
-        {/* Navegación */}
-        <nav className="flex flex-col flex-1">
-          {/* Dashboard */}
+        {/* Logo/Header */}
+        <div className="h-12 flex items-center justify-center border-b border-[var(--sidebar-border)]">
           <Link href="/dashboard">
-            <SidebarButton
-              icon={Home}
-              isExpanded={isExpanded}
-              isActive={location === "/dashboard" || location === "/"}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-8 h-8 p-0 hover:bg-[var(--sidebar-hover-bg)]"
             >
-              Dashboard
-            </SidebarButton>
-          </Link>
-
-          {/* Grupo Organización */}
-          <div>
-            <div
-              onClick={() => toggleGroup('organizacion')}
-              className="cursor-pointer"
-            >
-              <SidebarButton
-                icon={Users}
-                isExpanded={isExpanded}
-                isActive={isGroupActive(['/organizaciones', '/contactos'])}
-              >
-                Organización
-              </SidebarButton>
-            </div>
-            {isExpanded && expandedGroups.organizacion && (
-              <div className="transition-all duration-200">
-                <Link href="/organizaciones">
-                  <SidebarButton
-                    isExpanded={isExpanded}
-                    isActive={location === '/organizaciones'}
-                    className="text-sm"
-                  >
-                    Gestión de Organizaciones
-                  </SidebarButton>
-                </Link>
-                <Link href="/contactos">
-                  <SidebarButton
-                    isExpanded={isExpanded}
-                    isActive={location === '/contactos'}
-                    className="text-sm"
-                  >
-                    Contactos
-                  </SidebarButton>
-                </Link>
-              </div>
-            )}
-          </div>
-
-          {/* Grupo Proyectos */}
-          <div>
-            <div
-              onClick={() => toggleGroup('proyectos')}
-              className="cursor-pointer"
-            >
-              <SidebarButton
-                icon={Folder}
-                isExpanded={isExpanded}
-                isActive={isGroupActive(['/proyectos'])}
-              >
-                Proyectos
-              </SidebarButton>
-            </div>
-            {isExpanded && expandedGroups.proyectos && (
-              <div className="transition-all duration-200">
-                <Link href="/proyectos">
-                  <SidebarButton
-                    isExpanded={isExpanded}
-                    isActive={location === '/proyectos'}
-                    className="text-sm"
-                  >
-                    Gestión de Proyectos
-                  </SidebarButton>
-                </Link>
-              </div>
-            )}
-          </div>
-
-          {/* Grupo Obra */}
-          <div>
-            <div
-              onClick={() => toggleGroup('obra')}
-              className="cursor-pointer"
-            >
-              <SidebarButton
-                icon={FileText}
-                isExpanded={isExpanded}
-                isActive={isGroupActive(['/bitacora'])}
-              >
-                Obra
-              </SidebarButton>
-            </div>
-            {isExpanded && expandedGroups.obra && (
-              <div className="transition-all duration-200">
-                <Link href="/bitacora">
-                  <SidebarButton
-                    isExpanded={isExpanded}
-                    isActive={location === '/bitacora'}
-                    className="text-sm"
-                  >
-                    Bitácora
-                  </SidebarButton>
-                </Link>
-              </div>
-            )}
-          </div>
-
-          {/* Grupo Finanzas */}
-          <div>
-            <div
-              onClick={() => toggleGroup('finanzas')}
-              className="cursor-pointer"
-            >
-              <SidebarButton
-                icon={DollarSign}
-                isExpanded={isExpanded}
-                isActive={isGroupActive(['/movimientos'])}
-              >
-                Finanzas
-              </SidebarButton>
-            </div>
-            {isExpanded && expandedGroups.finanzas && (
-              <div className="transition-all duration-200">
-                <Link href="/movimientos">
-                  <SidebarButton
-                    isExpanded={isExpanded}
-                    isActive={location === '/movimientos'}
-                    className="text-sm"
-                  >
-                    Movimientos
-                  </SidebarButton>
-                </Link>
-              </div>
-            )}
-          </div>
-
-          {/* Grupo Configuración */}
-          <div>
-            <div
-              onClick={() => toggleGroup('configuracion')}
-              className="cursor-pointer"
-            >
-              <SidebarButton
-                icon={Settings}
-                isExpanded={isExpanded}
-                isActive={isGroupActive(['/admin/organizaciones'])}
-              >
-                Configuración
-              </SidebarButton>
-            </div>
-            {isExpanded && expandedGroups.configuracion && (
-              <div className="transition-all duration-200">
-                <Link href="/admin/organizaciones">
-                  <SidebarButton
-                    isExpanded={isExpanded}
-                    isActive={location === '/admin/organizaciones'}
-                    className="text-sm"
-                  >
-                    Organizaciones
-                  </SidebarButton>
-                </Link>
-              </div>
-            )}
-          </div>
-        </nav>
-
-        {/* Bloque inferior (perfil) */}
-        <div className="flex flex-col">
-          <Link href="/perfil">
-            <SidebarButton
-              isExpanded={isExpanded}
-              icon={User}
-            >
-              Ver perfil
-            </SidebarButton>
+              <Building2 className="h-4 w-4 text-[var(--sidebar-fg)]" />
+            </Button>
           </Link>
         </div>
+
+        {/* Main Navigation */}
+        <nav className="flex-1 p-2 space-y-1">
+          {menuGroups.map((group) => (
+            <div key={group.id}>
+              {group.href ? (
+                <Link href={group.href}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn(
+                      "w-8 h-8 p-0 transition-colors",
+                      "hover:bg-[var(--sidebar-hover-bg)]",
+                      isGroupActive(group) && "bg-[var(--sidebar-active-bg)]"
+                    )}
+                    style={{
+                      backgroundColor: isGroupActive(group) ? 'var(--sidebar-active-bg)' : 'transparent'
+                    }}
+                  >
+                    <group.icon 
+                      className={cn(
+                        "h-4 w-4",
+                        isGroupActive(group) ? "text-[var(--sidebar-active-fg)]" : "text-[var(--sidebar-fg)]"
+                      )} 
+                    />
+                  </Button>
+                </Link>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={cn(
+                    "w-8 h-8 p-0 transition-colors",
+                    "hover:bg-[var(--sidebar-hover-bg)]",
+                    (isGroupActive(group) || activeGroup === group.id) && "bg-[var(--sidebar-active-bg)]"
+                  )}
+                  style={{
+                    backgroundColor: (isGroupActive(group) || activeGroup === group.id) ? 'var(--sidebar-active-bg)' : 'transparent'
+                  }}
+                  onClick={() => handleGroupClick(group.id)}
+                >
+                  <group.icon 
+                    className={cn(
+                      "h-4 w-4",
+                      (isGroupActive(group) || activeGroup === group.id) ? "text-[var(--sidebar-active-fg)]" : "text-[var(--sidebar-fg)]"
+                    )} 
+                  />
+                </Button>
+              )}
+            </div>
+          ))}
+        </nav>
       </aside>
-    </div>
+
+      {/* Secondary Sidebar - Shows submenu for active group */}
+      {submenuGroup && (
+        <SidebarSubmenu
+          title={submenuGroup.label}
+          items={submenuGroup.items}
+          isVisible={true}
+        />
+      )}
+
+      {/* Auto-show submenu for currently active page group */}
+      {!submenuGroup && activeGroupData && activeGroupData.items.length > 0 && (
+        <SidebarSubmenu
+          title={activeGroupData.label}
+          items={activeGroupData.items}
+          isVisible={true}
+        />
+      )}
+    </>
   );
 }
