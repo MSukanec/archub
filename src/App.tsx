@@ -50,6 +50,13 @@ function Router() {
           </Layout>
         </ProtectedRoute>
       </Route>
+      <Route path="/gestion-proyectos">
+        <ProtectedRoute>
+          <Layout>
+            <Projects />
+          </Layout>
+        </ProtectedRoute>
+      </Route>
       <Route path="/movimientos">
         <ProtectedRoute>
           <Layout>

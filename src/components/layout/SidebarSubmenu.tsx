@@ -7,6 +7,7 @@ interface SubmenuItem {
   href: string
   onClick?: () => void
   isActive?: boolean
+  isDivider?: boolean
 }
 
 interface SidebarSubmenuProps {
@@ -40,7 +41,12 @@ export function SidebarSubmenu({ title, items, isVisible, onMouseEnter, onMouseL
       {/* Submenu items */}
       <nav className="flex-1">
         {items.map((item, index) => (
-          <div key={item.href || item.label}>
+          <div key={`${item.href || item.label}-${index}`}>
+            {/* Show divider before item if it has isDivider flag */}
+            {item.isDivider && (
+              <div className="border-t border-[var(--sidebar-border)] mx-4 my-2" />
+            )}
+            
             {item.onClick ? (
               // Clickable item without navigation
               <Button
@@ -76,10 +82,6 @@ export function SidebarSubmenu({ title, items, isVisible, onMouseEnter, onMouseL
                   {item.label}
                 </Button>
               </Link>
-            )}
-            {/* Add separator before "Gestión de Proyectos" if this is a projects list */}
-            {item.label.includes('Gestión de Proyectos') && index === items.length - 1 && (
-              <div className="border-t border-[var(--sidebar-border)] mx-4 my-2" />
             )}
           </div>
         ))}

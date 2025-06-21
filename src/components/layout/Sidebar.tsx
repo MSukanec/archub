@@ -171,12 +171,21 @@ export function Sidebar() {
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
 
-    return sortedProjects.map(project => ({
+    const projectItems = sortedProjects.map(project => ({
       label: project.name,
       href: '#', // Don't navigate, just select
       onClick: () => selectProjectMutation.mutate(project.id),
       isActive: project.id === userData?.preferences?.last_project_id
     }));
+
+    // Add "Gestión de Proyectos" button at the end
+    projectItems.push({
+      label: 'Gestión de Proyectos',
+      href: '/gestion-proyectos',
+      isDivider: true // Special flag to show divider before this item
+    });
+
+    return projectItems;
   };
 
   // Show submenu based on different conditions
