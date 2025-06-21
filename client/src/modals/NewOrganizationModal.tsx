@@ -156,15 +156,19 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
 
   return (
     <CustomModalLayout open={open} onClose={onClose}>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col h-full">
+      {{
+        header: (
           <CustomModalHeader
             title={editingOrganization ? "Editar organización" : "Nueva organización"}
             description={editingOrganization ? "Actualiza los datos de la organización" : "Crea una nueva organización para gestionar tus proyectos"}
             onClose={onClose}
           />
-
+        ),
+        body: (
           <CustomModalBody padding="md">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleSubmit)}>
+                <div className="space-y-4">
             <div className="space-y-4">
               {/* Fecha de creación */}
               <FormField
@@ -261,18 +265,20 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
                   </FormItem>
                 )}
               />
-            </div>
+                </div>
+              </form>
+            </Form>
           </CustomModalBody>
-
+        ),
+        footer: (
           <CustomModalFooter
             onCancel={onClose}
-            onSubmit={form.handleSubmit(handleSubmit)}
-            cancelLabel="Cancelar"
-            submitLabel="Guardar"
-            disabled={createOrganizationMutation.isPending}
+            onSave={form.handleSubmit(handleSubmit)}
+            saveText={editingOrganization ? 'Actualizar' : 'Crear organización'}
+            saveLoading={createOrganizationMutation.isPending}
           />
-        </form>
-      </Form>
+        )
+      }}
     </CustomModalLayout>
   )
 }

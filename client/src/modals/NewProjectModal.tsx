@@ -305,7 +305,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
         body: (
           <CustomModalBody padding="md">
             <Form {...form}>
-          <div className="space-y-4">
+              <div className="space-y-4">
             {/* Fecha de creación */}
             <FormField
               control={form.control}
@@ -489,17 +489,19 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
                 </FormItem>
               )}
             />
-          </div>
-        </CustomModalBody>
-      </Form>
-
-      <CustomModalFooter
-        cancelLabel="Cancelar"
-        submitLabel={loading ? 'Guardando...' : (editingProject ? 'Actualizar' : 'Crear proyecto')}
-        onCancel={onClose}
-        onSubmit={() => form.handleSubmit(handleSubmit)()}
-        disabled={loading || createProjectMutation.isPending}
-      />
+              </div>
+            </Form>
+          </CustomModalBody>
+        ),
+        footer: (
+          <CustomModalFooter
+            onCancel={onClose}
+            onSave={form.handleSubmit(handleSubmit)}
+            saveText={editingProject ? 'Actualizar' : 'Crear proyecto'}
+            saveLoading={mutation.isPending}
+          />
+        )
+      }}
     </CustomModalLayout>
   )
 }
