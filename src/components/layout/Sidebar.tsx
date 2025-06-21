@@ -71,6 +71,7 @@ const menuGroups = [
 export function Sidebar() {
   const [location] = useLocation();
   const [activeGroup, setActiveGroup] = useState<string | null>(null);
+  const [isMainSidebarHovered, setIsMainSidebarHovered] = useState(false);
   const [isSubmenuHovered, setIsSubmenuHovered] = useState(false);
   const { data: userData } = useCurrentUser();
 
@@ -84,8 +85,24 @@ export function Sidebar() {
       return;
     }
     
-    // Toggle submenu for groups with items
-    setActiveGroup(activeGroup === groupId ? null : groupId);
+    // Show submenu for groups with items
+    setActiveGroup(groupId);
+  };
+
+  const handleMainSidebarMouseEnter = () => {
+    setIsMainSidebarHovered(true);
+  };
+
+  const handleMainSidebarMouseLeave = () => {
+    setIsMainSidebarHovered(false);
+    // Close submenu after delay if not docked and no hover on either sidebar
+    if (!isSidebarDocked && !isSubmenuHovered) {
+      setTimeout(() => {
+        if (!isSubmenuHovered && !isMainSidebarHovered) {
+          setActiveGroup(null);
+        }
+      }, 200);
+    }
   };
 
   const handleSubmenuMouseEnter = () => {
@@ -94,11 +111,13 @@ export function Sidebar() {
 
   const handleSubmenuMouseLeave = () => {
     setIsSubmenuHovered(false);
-    // Close submenu after a small delay if not docked
-    if (!isSidebarDocked) {
+    // Close submenu after delay if not docked and no hover on main sidebar
+    if (!isSidebarDocked && !isMainSidebarHovered) {
       setTimeout(() => {
-        setActiveGroup(null);
-      }, 150); // Small delay to prevent flicker
+        if (!isMainSidebarHovered && !isSubmenuHovered) {
+          setActiveGroup(null);
+        }
+      }, 200);
     }
   };
 
@@ -121,8 +140,8 @@ export function Sidebar() {
     // Always show if docked
     if (isSidebarDocked) return true;
     
-    // Show if user clicked on a group
-    if (submenuGroup) return true;
+    // Show if user clicked on a group OR is hovering over either sidebar
+    if (activeGroup && (isMainSidebarHovered || isSubmenuHovered)) return true;
     
     // Auto-show for current page only if user hasn't manually clicked anything
     if (!activeGroup && activeGroupData && activeGroupData.items.length > 0) return true;
@@ -139,6 +158,8 @@ export function Sidebar() {
           backgroundColor: 'var(--sidebar-bg)',
           borderColor: 'var(--sidebar-border)'
         }}
+        onMouseEnter={handleMainSidebarMouseEnter}
+        onMouseLeave={handleMainSidebarMouseLeave}
       >
         {/* Logo/Header */}
         <div className="h-10 flex items-center justify-center border-b border-[var(--sidebar-border)]">
@@ -235,16 +256,13 @@ export function Sidebar() {
 
       {/* Secondary Sidebar - Shows submenu */}
       {shouldShowSubmenu && (
-        <div
+        <SidebarSubmenu
+          title={submenuGroup?.label || activeGroupData?.label || ''}
+          items={submenuGroup?.items || activeGroupData?.items || []}
+          isVisible={true}
           onMouseEnter={handleSubmenuMouseEnter}
           onMouseLeave={handleSubmenuMouseLeave}
-        >
-          <SidebarSubmenu
-            title={submenuGroup?.label || activeGroupData?.label || ''}
-            items={submenuGroup?.items || activeGroupData?.items || []}
-            isVisible={true}
-          />
-        </div>
+        />
       )}
     </>
   );

@@ -11,9 +11,11 @@ interface SidebarSubmenuProps {
   title: string
   items: SubmenuItem[]
   isVisible: boolean
+  onMouseEnter?: () => void
+  onMouseLeave?: () => void
 }
 
-export function SidebarSubmenu({ title, items, isVisible }: SidebarSubmenuProps) {
+export function SidebarSubmenu({ title, items, isVisible, onMouseEnter, onMouseLeave }: SidebarSubmenuProps) {
   const [location] = useLocation()
 
   if (!isVisible) return null
@@ -25,6 +27,8 @@ export function SidebarSubmenu({ title, items, isVisible }: SidebarSubmenuProps)
         backgroundColor: 'var(--sidebar-bg)',
         borderColor: 'var(--sidebar-border)'
       }}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
     >
       {/* Header with group title */}
       <div className="h-10 flex items-center px-4 border-b border-[var(--sidebar-border)]">
