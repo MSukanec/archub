@@ -163,8 +163,8 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
           .update({
             description: formData.description || null,
             amount: formData.amount,
-            type_id: formData.type_id,
-            category_id: formData.category_id,
+            type_id: formData.type_id || null,
+            category_id: formData.category_id || null,
             subcategory_id: formData.subcategory_id || null,
             currency_id: formData.currency_id,
             wallet_id: formData.wallet_id,
@@ -183,8 +183,8 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         const movementData = {
           description: formData.description || null,
           amount: formData.amount,
-          type_id: formData.type_id,
-          category_id: formData.category_id,
+          type_id: formData.type_id || null,
+          category_id: formData.category_id || null,
           subcategory_id: formData.subcategory_id || null,
           currency_id: formData.currency_id,
           wallet_id: formData.wallet_id,
