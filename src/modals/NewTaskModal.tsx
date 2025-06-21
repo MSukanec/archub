@@ -10,28 +10,26 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { CalendarIcon } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
-import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { useCurrentUser } from "@/hooks/use-current-user";
 
+// Interfaz basada en la estructura real de la tabla tasks
 interface Task {
   id: string;
-  title: string;
+  name: string;
   description?: string;
-  status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  due_date?: string;
-  assigned_to?: string;
-  project_id?: string;
   organization_id: string;
+  category_id?: string;
+  subcategory_id?: string;
+  element_category_id?: string;
+  unit_id?: string;
+  action_id?: string;
+  element_id?: string;
+  unit_labor_price?: number;
+  unit_material_price?: number;
+  created_at: string;
 }
 
 interface NewTaskModalProps {
@@ -41,13 +39,16 @@ interface NewTaskModalProps {
 }
 
 const taskSchema = z.object({
-  title: z.string().min(1, "El título es requerido"),
+  name: z.string().min(1, "El nombre es requerido"),
   description: z.string().optional(),
-  status: z.enum(["pending", "in_progress", "completed", "cancelled"]),
-  priority: z.enum(["low", "medium", "high", "urgent"]),
-  due_date: z.date().optional(),
-  assigned_to: z.string().optional(),
-  project_id: z.string().optional(),
+  category_id: z.string().optional(),
+  subcategory_id: z.string().optional(),
+  element_category_id: z.string().optional(),
+  unit_id: z.string().optional(),
+  action_id: z.string().optional(),
+  element_id: z.string().optional(),
+  unit_labor_price: z.number().min(0, "El precio debe ser mayor o igual a 0").optional(),
+  unit_material_price: z.number().min(0, "El precio debe ser mayor o igual a 0").optional(),
 });
 
 type TaskFormData = z.infer<typeof taskSchema>;
@@ -59,58 +60,115 @@ export function NewTaskModal({ open, onClose, editingTask }: NewTaskModalProps) 
   const form = useForm<TaskFormData>({
     resolver: zodResolver(taskSchema),
     defaultValues: {
-      title: editingTask?.title || "",
+      name: editingTask?.name || "",
       description: editingTask?.description || "",
-      status: editingTask?.status || "pending",
-      priority: editingTask?.priority || "medium",
-      due_date: editingTask?.due_date ? new Date(editingTask.due_date) : undefined,
-      assigned_to: editingTask?.assigned_to || "",
-      project_id: editingTask?.project_id || "",
+      category_id: editingTask?.category_id || "",
+      subcategory_id: editingTask?.subcategory_id || "",
+      element_category_id: editingTask?.element_category_id || "",
+      unit_id: editingTask?.unit_id || "",
+      action_id: editingTask?.action_id || "",
+      element_id: editingTask?.element_id || "",
+      unit_labor_price: editingTask?.unit_labor_price || 0,
+      unit_material_price: editingTask?.unit_material_price || 0,
     }
   });
 
-  // Fetch organization members for assignment
-  const { data: members = [] } = useQuery({
-    queryKey: ['organization-members', userData?.preferences?.last_organization_id],
+  // Fetch categories
+  const { data: categories = [] } = useQuery({
+    queryKey: ['task-categories'],
     queryFn: async () => {
-      if (!supabase || !userData?.preferences?.last_organization_id) return [];
+      if (!supabase) return [];
       
       const { data, error } = await supabase
-        .from('organization_members')
-        .select(`
-          user_id,
-          users (
-            id,
-            full_name,
-            email
-          )
-        `)
-        .eq('organization_id', userData.preferences.last_organization_id)
-        .eq('is_active', true);
+        .from('categories')
+        .select('id, name')
+        .order('name');
 
       if (error) throw error;
-      return data?.map(member => member.users).filter(Boolean) || [];
-    },
-    enabled: !!userData?.preferences?.last_organization_id
+      return data || [];
+    }
   });
 
-  // Fetch projects for assignment
-  const { data: projects = [] } = useQuery({
-    queryKey: ['projects-for-tasks', userData?.preferences?.last_organization_id],
+  // Fetch subcategories based on selected category
+  const { data: subcategories = [] } = useQuery({
+    queryKey: ['task-subcategories', form.watch('category_id')],
     queryFn: async () => {
-      if (!supabase || !userData?.preferences?.last_organization_id) return [];
+      if (!supabase || !form.watch('category_id')) return [];
       
       const { data, error } = await supabase
-        .from('projects')
+        .from('subcategories')
         .select('id, name')
-        .eq('organization_id', userData.preferences.last_organization_id)
-        .eq('is_active', true)
+        .eq('category_id', form.watch('category_id'))
         .order('name');
 
       if (error) throw error;
       return data || [];
     },
-    enabled: !!userData?.preferences?.last_organization_id
+    enabled: !!form.watch('category_id')
+  });
+
+  // Fetch element categories
+  const { data: elementCategories = [] } = useQuery({
+    queryKey: ['element-categories'],
+    queryFn: async () => {
+      if (!supabase) return [];
+      
+      const { data, error } = await supabase
+        .from('element_categories')
+        .select('id, name')
+        .order('name');
+
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  // Fetch units
+  const { data: units = [] } = useQuery({
+    queryKey: ['units'],
+    queryFn: async () => {
+      if (!supabase) return [];
+      
+      const { data, error } = await supabase
+        .from('units')
+        .select('id, name')
+        .order('name');
+
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  // Fetch actions
+  const { data: actions = [] } = useQuery({
+    queryKey: ['actions'],
+    queryFn: async () => {
+      if (!supabase) return [];
+      
+      const { data, error } = await supabase
+        .from('actions')
+        .select('id, name')
+        .order('name');
+
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  // Fetch elements
+  const { data: elements = [] } = useQuery({
+    queryKey: ['elements'],
+    queryFn: async () => {
+      if (!supabase) return [];
+      
+      const { data, error } = await supabase
+        .from('elements')
+        .select('id, name')
+        .order('name');
+
+      if (error) throw error;
+      return data || [];
+    }
   });
 
   // Create/Update task mutation
@@ -121,13 +179,16 @@ export function NewTaskModal({ open, onClose, editingTask }: NewTaskModalProps) 
       }
 
       const taskData = {
-        title: formData.title,
+        name: formData.name,
         description: formData.description || null,
-        status: formData.status,
-        priority: formData.priority,
-        due_date: formData.due_date ? formData.due_date.toISOString().split('T')[0] : null,
-        assigned_to: formData.assigned_to || null,
-        project_id: formData.project_id || null,
+        category_id: formData.category_id || null,
+        subcategory_id: formData.subcategory_id || null,
+        element_category_id: formData.element_category_id || null,
+        unit_id: formData.unit_id || null,
+        action_id: formData.action_id || null,
+        element_id: formData.element_id || null,
+        unit_labor_price: formData.unit_labor_price || 0,
+        unit_material_price: formData.unit_material_price || 0,
         organization_id: userData.preferences.last_organization_id,
       };
 
@@ -198,150 +259,184 @@ export function NewTaskModal({ open, onClose, editingTask }: NewTaskModalProps) 
         ),
         body: (
           <CustomModalBody padding="md">
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2">
-                  <Label htmlFor="title">Título de la tarea</Label>
-                  <Input
-                    id="title"
-                    {...form.register("title")}
-                    placeholder="Ingresa el título de la tarea"
-                  />
-                  {form.formState.errors.title && (
-                    <p className="text-red-500 text-sm mt-1">{form.formState.errors.title.message}</p>
-                  )}
-                </div>
-
-                <div className="col-span-2">
-                  <Label htmlFor="description">Descripción</Label>
-                  <Textarea
-                    id="description"
-                    {...form.register("description")}
-                    placeholder="Describe los detalles de la tarea (opcional)"
-                    rows={3}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="status">Estado</Label>
-                  <Select
-                    value={form.watch("status")}
-                    onValueChange={(value) => form.setValue("status", value as any)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecciona un estado" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="pending">Pendiente</SelectItem>
-                      <SelectItem value="in_progress">En Progreso</SelectItem>
-                      <SelectItem value="completed">Completada</SelectItem>
-                      <SelectItem value="cancelled">Cancelada</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="priority">Prioridad</Label>
-                  <Select
-                    value={form.watch("priority")}
-                    onValueChange={(value) => form.setValue("priority", value as any)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecciona una prioridad" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="low">Baja</SelectItem>
-                      <SelectItem value="medium">Media</SelectItem>
-                      <SelectItem value="high">Alta</SelectItem>
-                      <SelectItem value="urgent">Urgente</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="assigned_to">Asignar a</Label>
-                  <Select
-                    value={form.watch("assigned_to") || "none"}
-                    onValueChange={(value) => form.setValue("assigned_to", value === "none" ? "" : value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecciona un miembro" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Sin asignar</SelectItem>
-                      {members.map((member) => (
-                        <SelectItem key={member.id} value={member.id}>
-                          {member.full_name || member.email}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="project_id">Proyecto</Label>
-                  <Select
-                    value={form.watch("project_id") || "none"}
-                    onValueChange={(value) => form.setValue("project_id", value === "none" ? "" : value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecciona un proyecto" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Sin proyecto</SelectItem>
-                      {projects.map((project) => (
-                        <SelectItem key={project.id} value={project.id}>
-                          {project.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="col-span-2">
-                  <Label>Fecha límite</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !form.watch("due_date") && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {form.watch("due_date") ? (
-                          format(form.watch("due_date")!, "PPP", { locale: es })
-                        ) : (
-                          <span>Selecciona una fecha (opcional)</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={form.watch("due_date")}
-                        onSelect={(date) => form.setValue("due_date", date)}
-                        disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
-                        initialFocus
-                      />
-                      {form.watch("due_date") && (
-                        <div className="p-3 border-t">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => form.setValue("due_date", undefined)}
-                            className="w-full"
-                          >
-                            Quitar fecha
-                          </Button>
-                        </div>
-                      )}
-                    </PopoverContent>
-                  </Popover>
-                </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-2">
+                <Label htmlFor="name">Nombre de la tarea</Label>
+                <Input
+                  id="name"
+                  {...form.register("name")}
+                  placeholder="Ingresa el nombre de la tarea"
+                />
+                {form.formState.errors.name && (
+                  <p className="text-red-500 text-sm mt-1">{form.formState.errors.name.message}</p>
+                )}
               </div>
-            </form>
+
+              <div className="col-span-2">
+                <Label htmlFor="description">Descripción</Label>
+                <Textarea
+                  id="description"
+                  {...form.register("description")}
+                  placeholder="Describe los detalles de la tarea (opcional)"
+                  rows={3}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="category_id">Categoría</Label>
+                <Select
+                  value={form.watch("category_id") || "none"}
+                  onValueChange={(value) => {
+                    form.setValue("category_id", value === "none" ? "" : value);
+                    // Reset subcategory when category changes
+                    form.setValue("subcategory_id", "");
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona una categoría" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Sin categoría</SelectItem>
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="subcategory_id">Subcategoría</Label>
+                <Select
+                  value={form.watch("subcategory_id") || "none"}
+                  onValueChange={(value) => form.setValue("subcategory_id", value === "none" ? "" : value)}
+                  disabled={!form.watch("category_id")}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona una subcategoría" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Sin subcategoría</SelectItem>
+                    {subcategories.map((subcategory) => (
+                      <SelectItem key={subcategory.id} value={subcategory.id}>
+                        {subcategory.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="element_category_id">Categoría de Elemento</Label>
+                <Select
+                  value={form.watch("element_category_id") || "none"}
+                  onValueChange={(value) => form.setValue("element_category_id", value === "none" ? "" : value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona categoría de elemento" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Sin categoría de elemento</SelectItem>
+                    {elementCategories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="element_id">Elemento</Label>
+                <Select
+                  value={form.watch("element_id") || "none"}
+                  onValueChange={(value) => form.setValue("element_id", value === "none" ? "" : value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona un elemento" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Sin elemento</SelectItem>
+                    {elements.map((element) => (
+                      <SelectItem key={element.id} value={element.id}>
+                        {element.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="action_id">Acción</Label>
+                <Select
+                  value={form.watch("action_id") || "none"}
+                  onValueChange={(value) => form.setValue("action_id", value === "none" ? "" : value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona una acción" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Sin acción</SelectItem>
+                    {actions.map((action) => (
+                      <SelectItem key={action.id} value={action.id}>
+                        {action.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="unit_id">Unidad</Label>
+                <Select
+                  value={form.watch("unit_id") || "none"}
+                  onValueChange={(value) => form.setValue("unit_id", value === "none" ? "" : value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona una unidad" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Sin unidad</SelectItem>
+                    {units.map((unit) => (
+                      <SelectItem key={unit.id} value={unit.id}>
+                        {unit.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="unit_labor_price">Precio Unitario de Mano de Obra</Label>
+                <Input
+                  id="unit_labor_price"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  {...form.register("unit_labor_price", { valueAsNumber: true })}
+                  placeholder="0.00"
+                />
+                {form.formState.errors.unit_labor_price && (
+                  <p className="text-red-500 text-sm mt-1">{form.formState.errors.unit_labor_price.message}</p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="unit_material_price">Precio Unitario de Material</Label>
+                <Input
+                  id="unit_material_price"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  {...form.register("unit_material_price", { valueAsNumber: true })}
+                  placeholder="0.00"
+                />
+                {form.formState.errors.unit_material_price && (
+                  <p className="text-red-500 text-sm mt-1">{form.formState.errors.unit_material_price.message}</p>
+                )}
+              </div>
+            </div>
           </CustomModalBody>
         ),
         footer: (

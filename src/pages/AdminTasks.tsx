@@ -16,27 +16,39 @@ import { queryClient } from "@/lib/queryClient";
 
 interface Task {
   id: string;
-  title: string;
+  name: string;
   description?: string;
-  status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  due_date?: string;
-  created_at: string;
-  assigned_to?: string;
-  created_by: string;
-  project_id?: string;
   organization_id: string;
-  assignee?: {
+  category_id?: string;
+  subcategory_id?: string;
+  element_category_id?: string;
+  unit_id?: string;
+  action_id?: string;
+  element_id?: string;
+  unit_labor_price?: number;
+  unit_material_price?: number;
+  created_at: string;
+  category?: {
     id: string;
-    full_name: string;
-    email: string;
+    name: string;
   };
-  creator?: {
+  subcategory?: {
     id: string;
-    full_name: string;
-    email: string;
+    name: string;
   };
-  project?: {
+  element_category?: {
+    id: string;
+    name: string;
+  };
+  unit?: {
+    id: string;
+    name: string;
+  };
+  action?: {
+    id: string;
+    name: string;
+  };
+  element?: {
     id: string;
     name: string;
   };
@@ -46,9 +58,7 @@ export function AdminTasks() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("created_at");
   const [sortOrder, setSortOrder] = useState("desc");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [priorityFilter, setPriorityFilter] = useState("all");
-  const [projectFilter, setProjectFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const [openModal, setOpenModal] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -65,27 +75,39 @@ export function AdminTasks() {
         .from('tasks')
         .select(`
           id,
-          title,
+          name,
           description,
-          status,
-          priority,
-          due_date,
-          created_at,
-          assigned_to,
-          created_by,
-          project_id,
           organization_id,
-          assignee:users!assigned_to (
+          category_id,
+          subcategory_id,
+          element_category_id,
+          unit_id,
+          action_id,
+          element_id,
+          unit_labor_price,
+          unit_material_price,
+          created_at,
+          category:categories (
             id,
-            full_name,
-            email
+            name
           ),
-          creator:users!created_by (
+          subcategory:subcategories (
             id,
-            full_name,
-            email
+            name
           ),
-          project:projects (
+          element_category:element_categories (
+            id,
+            name
+          ),
+          unit:units (
+            id,
+            name
+          ),
+          action:actions (
+            id,
+            name
+          ),
+          element:elements (
             id,
             name
           )
@@ -146,9 +168,7 @@ export function AdminTasks() {
     setSearchTerm("");
     setSortBy("created_at");
     setSortOrder("desc");
-    setStatusFilter("all");
-    setPriorityFilter("all");
-    setProjectFilter("all");
+    setCategoryFilter("all");
   };
 
   // Get status badge variant
