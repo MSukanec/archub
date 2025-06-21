@@ -2,14 +2,16 @@
 import { useEffect } from "react";
 import { cn } from "@/lib/utils";
 
+interface ModalChildren {
+  header?: React.ReactNode;
+  body?: React.ReactNode;
+  footer?: React.ReactNode;
+}
+
 interface CustomModalLayoutProps {
   open: boolean;
   onClose: () => void;
-  children: {
-    header: React.ReactNode;
-    body: React.ReactNode;
-    footer: React.ReactNode;
-  };
+  children: ModalChildren;
   className?: string;
 }
 
@@ -57,9 +59,15 @@ export function CustomModalLayout({
       >
         {/* Layout vertical con header/footer fijos */}
         <div className="flex flex-col h-full">
-          <div className="shrink-0">{children.header}</div>
-          <div className="flex-1 min-h-0 overflow-y-auto">{children.body}</div>
-          <div className="shrink-0">{children.footer}</div>
+          {children?.header && (
+            <div className="shrink-0">{children.header}</div>
+          )}
+          {children?.body && (
+            <div className="flex-1 min-h-0 overflow-y-auto">{children.body}</div>
+          )}
+          {children?.footer && (
+            <div className="shrink-0">{children.footer}</div>
+          )}
         </div>
       </div>
     </div>

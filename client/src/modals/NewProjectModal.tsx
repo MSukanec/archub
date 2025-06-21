@@ -294,14 +294,17 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
 
   return (
     <CustomModalLayout open={open} onClose={onClose}>
-      <CustomModalHeader
-        title={editingProject ? 'Editar proyecto' : 'Nuevo proyecto'}
-        description={editingProject ? 'Actualiza la información del proyecto' : 'Crea un nuevo proyecto para tu organización'}
-        onClose={onClose}
-      />
-
-      <Form {...form}>
-        <CustomModalBody padding="md">
+      {{
+        header: (
+          <CustomModalHeader
+            title={editingProject ? 'Editar proyecto' : 'Nuevo proyecto'}
+            description={editingProject ? 'Actualiza la información del proyecto' : 'Crea un nuevo proyecto para tu organización'}
+            onClose={onClose}
+          />
+        ),
+        body: (
+          <CustomModalBody padding="md">
+            <Form {...form}>
           <div className="space-y-4">
             {/* Fecha de creación */}
             <FormField

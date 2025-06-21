@@ -164,164 +164,164 @@ export function CreateContactModal({ open, onClose, editingContact }: CreateCont
   };
 
   return (
-    <CustomModalLayout
-      open={open}
-      onClose={handleClose}
-      header={
-        <CustomModalHeader
-          title={editingContact ? "Editar contacto" : "Nuevo contacto"}
-          description={editingContact ? "Modifica la información del contacto" : "Agrega un nuevo contacto a tu organización"}
-          onClose={handleClose}
-        />
-      }
-      body={
-        <CustomModalBody padding="md">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <CustomModalLayout open={open} onClose={handleClose}>
+      {{
+        header: (
+          <CustomModalHeader
+            title={editingContact ? "Editar contacto" : "Nuevo contacto"}
+            description={editingContact ? "Modifica la información del contacto" : "Agrega un nuevo contacto a tu organización"}
+            onClose={handleClose}
+          />
+        ),
+        body: (
+          <CustomModalBody padding="md">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="first_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">Nombre</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Ingresa el nombre" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="last_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">Apellido</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Ingresa el apellido" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">Email</FormLabel>
+                        <FormControl>
+                          <Input placeholder="ejemplo@correo.com" type="email" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">Teléfono</FormLabel>
+                        <FormControl>
+                          <Input placeholder="+54 11 1234-5678" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 <FormField
                   control={form.control}
-                  name="first_name"
+                  name="contact_type_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Nombre</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Ingresa el nombre" {...field} />
-                      </FormControl>
+                      <FormLabel className="text-sm font-medium">Tipo de contacto</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecciona el tipo de contacto" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {contactTypes.map((type) => (
+                            <SelectItem key={type.id} value={type.id}>
+                              {type.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="company_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">Empresa</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Nombre de la empresa" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="location"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">Ubicación</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Ciudad, País" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 <FormField
                   control={form.control}
-                  name="last_name"
+                  name="notes"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Apellido</FormLabel>
+                      <FormLabel className="text-sm font-medium">Notas</FormLabel>
                       <FormControl>
-                        <Input placeholder="Ingresa el apellido" {...field} />
+                        <Textarea 
+                          placeholder="Notas adicionales sobre el contacto..."
+                          className="min-h-[80px]"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium">Email</FormLabel>
-                      <FormControl>
-                        <Input placeholder="ejemplo@correo.com" type="email" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium">Teléfono</FormLabel>
-                      <FormControl>
-                        <Input placeholder="+54 11 1234-5678" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="contact_type_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">Tipo de contacto</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona el tipo de contacto" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {contactTypes.map((type) => (
-                          <SelectItem key={type.id} value={type.id}>
-                            {type.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="company_name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium">Empresa</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Nombre de la empresa" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="location"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium">Ubicación</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Ciudad, País" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="notes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">Notas</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Notas adicionales sobre el contacto..."
-                        className="min-h-[80px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </form>
-          </Form>
-        </CustomModalBody>
-      }
-      footer={
-        <CustomModalFooter
-          onCancel={handleClose}
-          onSave={form.handleSubmit(handleSubmit)}
-          saveText={editingContact ? "Actualizar" : "Crear contacto"}
-          saveLoading={createContactMutation.isPending}
-        />
-      }
-    />
+              </form>
+            </Form>
+          </CustomModalBody>
+        ),
+        footer: (
+          <CustomModalFooter
+            onCancel={handleClose}
+            onSave={form.handleSubmit(handleSubmit)}
+            saveText={editingContact ? "Actualizar" : "Crear contacto"}
+            saveLoading={createContactMutation.isPending}
+          />
+        )
+      }}
+    </CustomModalLayout>
   );
 }

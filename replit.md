@@ -501,6 +501,14 @@ Changelog:
   • Added "Contactos" navigation item with Users icon and /contactos route in App.tsx routing system
   • Modal supports both creation and editing modes with form pre-population and validation using Zod schemas
   • All components follow established design patterns from SiteLogs and other pages for consistent UX
+
+- June 21, 2025. Fixed CustomModalLayout runtime errors and standardized modal usage across application
+  • Enhanced CustomModalLayout.tsx interface to make header, body, footer optional with proper TypeScript typing
+  • Added null safety checks with children?.header, children?.body, children?.footer for robust error handling
+  • Corrected all modal implementations to use proper {{ header, body, footer }} object syntax instead of JSX children
+  • Updated CreateContactModal, NewProjectModal, NewOrganizationModal, NewMovementModal to follow standardized pattern
+  • Eliminated "Cannot read properties of undefined (reading 'header')" runtime errors across all modals
+  • Established scalable and consistent modal architecture preventing future implementation errors
 ```
 
 ## User Preferences
