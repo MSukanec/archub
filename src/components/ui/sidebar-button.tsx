@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { BUTTON_SIZE, ICON_SIZE } from "@/lib/constants/ui";
 
 interface SidebarButtonProps {
-  icon: LucideIcon;
+  icon?: LucideIcon;
   children?: React.ReactNode;
   isActive?: boolean;
   onClick?: () => void;
@@ -35,13 +35,15 @@ export function SidebarButton({
       }}
     >
       {/* Icono siempre visible */}
-      <Icon
-        className="flex-shrink-0"
-        style={{
-          width: `${ICON_SIZE}px`,
-          height: `${ICON_SIZE}px`,
-        }}
-      />
+      {Icon && (
+        <Icon
+          className="flex-shrink-0"
+          style={{
+            width: `${ICON_SIZE}px`,
+            height: `${ICON_SIZE}px`,
+          }}
+        />
+      )}
 
       {/* Texto que se desliza como en Supabase */}
       <span

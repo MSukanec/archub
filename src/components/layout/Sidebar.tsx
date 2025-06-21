@@ -1,21 +1,18 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { useNavigationStore } from "@/stores/navigationStore";
-import { useThemeStore } from "@/stores/themeStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { SidebarButton } from "@/components/ui/sidebar-button";
 import {
   Home,
   Building,
   Folder,
-  CheckSquare,
   Users,
-  CreditCard,
-  BarChart3,
   DollarSign,
   FileText,
   Settings,
   User,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 import {
   SIDEBAR_WIDTH,
@@ -23,38 +20,29 @@ import {
   TRANSITION_DURATION,
 } from "@/lib/constants/ui";
 
-const iconMap = {
-  home: Home,
-  building: Building,
-  folder: Folder,
-  "dollar-sign": DollarSign,
-  "file-text": FileText,
-  "check-square": CheckSquare,
-  users: Users,
-  "credit-card": CreditCard,
-  "bar-chart-3": BarChart3,
-};
-
 
 
 export function Sidebar() {
   const [location] = useLocation();
-  const { navigationItems } = useNavigationStore();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState({
+    organizacion: false,
+    proyectos: false,
+    obra: false,
+    finanzas: false,
+  });
   const { data } = useCurrentUser();
 
-  const avatarUrl = data?.user?.avatar_url;
-  const fullName = data?.user?.full_name || data?.user?.email || "Usuario";
+  const toggleGroup = (groupKey: keyof typeof expandedGroups) => {
+    setExpandedGroups(prev => ({
+      ...prev,
+      [groupKey]: !prev[groupKey],
+    }));
+  };
 
-  const getInitials = (name: string) =>
-    name
-      .split(" ")
-      .map((word) => word.charAt(0))
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-
-  const initials = getInitials(fullName);
+  const isGroupActive = (routes: string[]) => {
+    return routes.some(route => location === route);
+  };
 
   return (
     <div
@@ -82,22 +70,141 @@ export function Sidebar() {
 
         {/* Navegación */}
         <nav className="flex flex-col flex-1">
-          {navigationItems.map((item) => {
-            const Icon = iconMap[item.icon as keyof typeof iconMap];
-            const isActive = location === item.href;
+          {/* Dashboard */}
+          <Link href="/dashboard">
+            <SidebarButton
+              icon={Home}
+              isExpanded={isExpanded}
+              isActive={location === "/dashboard" || location === "/"}
+            >
+              Dashboard
+            </SidebarButton>
+          </Link>
 
-            return (
-              <Link key={item.id} href={item.href}>
-                <SidebarButton
-                  icon={Icon}
-                  isExpanded={isExpanded}
-                  isActive={isActive}
-                >
-                  {item.name}
-                </SidebarButton>
-              </Link>
-            );
-          })}
+          {/* Grupo Organización */}
+          <div>
+            <div
+              onClick={() => toggleGroup('organizacion')}
+              className="cursor-pointer"
+            >
+              <SidebarButton
+                icon={Users}
+                isExpanded={isExpanded}
+                isActive={isGroupActive(['/organizaciones', '/contactos'])}
+              >
+                Organización {isExpanded && (expandedGroups.organizacion ? '▼' : '▶')}
+              </SidebarButton>
+            </div>
+            {isExpanded && expandedGroups.organizacion && (
+              <div className="ml-4 transition-all duration-200">
+                <Link href="/organizaciones">
+                  <SidebarButton
+                    isExpanded={isExpanded}
+                    isActive={location === '/organizaciones'}
+                    className="text-sm"
+                  >
+                    Gestión de Organizaciones
+                  </SidebarButton>
+                </Link>
+                <Link href="/contactos">
+                  <SidebarButton
+                    isExpanded={isExpanded}
+                    isActive={location === '/contactos'}
+                    className="text-sm"
+                  >
+                    Contactos
+                  </SidebarButton>
+                </Link>
+              </div>
+            )}
+          </div>
+
+          {/* Grupo Proyectos */}
+          <div>
+            <div
+              onClick={() => toggleGroup('proyectos')}
+              className="cursor-pointer"
+            >
+              <SidebarButton
+                icon={Folder}
+                isExpanded={isExpanded}
+                isActive={isGroupActive(['/proyectos'])}
+              >
+                Proyectos {isExpanded && (expandedGroups.proyectos ? '▼' : '▶')}
+              </SidebarButton>
+            </div>
+            {isExpanded && expandedGroups.proyectos && (
+              <div className="ml-4 transition-all duration-200">
+                <Link href="/proyectos">
+                  <SidebarButton
+                    isExpanded={isExpanded}
+                    isActive={location === '/proyectos'}
+                    className="text-sm"
+                  >
+                    Gestión de Proyectos
+                  </SidebarButton>
+                </Link>
+              </div>
+            )}
+          </div>
+
+          {/* Grupo Obra */}
+          <div>
+            <div
+              onClick={() => toggleGroup('obra')}
+              className="cursor-pointer"
+            >
+              <SidebarButton
+                icon={FileText}
+                isExpanded={isExpanded}
+                isActive={isGroupActive(['/bitacora'])}
+              >
+                Obra {isExpanded && (expandedGroups.obra ? '▼' : '▶')}
+              </SidebarButton>
+            </div>
+            {isExpanded && expandedGroups.obra && (
+              <div className="ml-4 transition-all duration-200">
+                <Link href="/bitacora">
+                  <SidebarButton
+                    isExpanded={isExpanded}
+                    isActive={location === '/bitacora'}
+                    className="text-sm"
+                  >
+                    Bitácora
+                  </SidebarButton>
+                </Link>
+              </div>
+            )}
+          </div>
+
+          {/* Grupo Finanzas */}
+          <div>
+            <div
+              onClick={() => toggleGroup('finanzas')}
+              className="cursor-pointer"
+            >
+              <SidebarButton
+                icon={DollarSign}
+                isExpanded={isExpanded}
+                isActive={isGroupActive(['/movimientos'])}
+              >
+                Finanzas {isExpanded && (expandedGroups.finanzas ? '▼' : '▶')}
+              </SidebarButton>
+            </div>
+            {isExpanded && expandedGroups.finanzas && (
+              <div className="ml-4 transition-all duration-200">
+                <Link href="/movimientos">
+                  <SidebarButton
+                    isExpanded={isExpanded}
+                    isActive={location === '/movimientos'}
+                    className="text-sm"
+                  >
+                    Movimientos
+                  </SidebarButton>
+                </Link>
+              </div>
+            )}
+          </div>
         </nav>
 
         {/* Bloque inferior (settings, perfil) */}
