@@ -64,11 +64,11 @@ export function CustomPageHeader({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
-                  variant="outline"
-                  className="h-10 px-3"
+                  variant="ghost"
+                  size="icon"
+                  className="h-10 w-10 rounded-full"
                 >
-                  <Filter className="mr-2 h-4 w-4" />
-                  Filtros
+                  <Filter className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className={customFilters ? "w-72 p-2 space-y-3" : "w-48"}>
@@ -92,10 +92,11 @@ export function CustomPageHeader({
           {onClearFilters && (
             <Button
               variant="ghost"
+              size="icon"
               onClick={onClearFilters}
-              className="h-10 px-3"
+              className="h-10 w-10 rounded-full"
             >
-              Limpiar filtros
+              <X className="h-4 w-4" />
             </Button>
           )}
 

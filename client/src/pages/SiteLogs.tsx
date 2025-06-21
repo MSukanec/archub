@@ -49,7 +49,7 @@ export default function SiteLogs() {
   const [sortBy, setSortBy] = useState('date_desc');
   const [onlyFavorites, setOnlyFavorites] = useState(false);
   const [onlyPublic, setOnlyPublic] = useState(false);
-  const [filterByType, setFilterByType] = useState('');
+  const [filterByType, setFilterByType] = useState('all');
 
   const projectId = userData?.preferences?.last_project_id;
   const organizationId = userData?.preferences?.last_organization_id;
@@ -101,7 +101,7 @@ export default function SiteLogs() {
     const matchesPublic = !onlyPublic || log.is_public;
     
     // Type filter
-    const matchesType = !filterByType || log.entry_type === filterByType;
+    const matchesType = filterByType === 'all' || log.entry_type === filterByType;
     
     return matchesSearch && matchesFavorites && matchesPublic && matchesType;
   });
@@ -124,7 +124,7 @@ export default function SiteLogs() {
     setSortBy('date_desc');
     setOnlyFavorites(false);
     setOnlyPublic(false);
-    setFilterByType('');
+    setFilterByType('all');
     setSearchValue('');
   };
 
@@ -151,7 +151,7 @@ export default function SiteLogs() {
             <SelectValue placeholder="Todos los tipos" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todos los tipos</SelectItem>
+            <SelectItem value="all">Todos los tipos</SelectItem>
             <SelectItem value="avance">Avance</SelectItem>
             <SelectItem value="incidente">Incidente</SelectItem>
             <SelectItem value="entrega">Entrega</SelectItem>
