@@ -243,15 +243,19 @@ export default function Movements() {
     {
       key: 'created_at',
       label: 'Fecha',
+      sortable: true,
+      sortType: 'date' as const,
       render: (movement: Movement) => (
-        <div className="text-xs">
+        <span className="text-xs">
           {format(new Date(movement.created_at), 'dd/MM/yyyy', { locale: es })}
-        </div>
+        </span>
       )
     },
     {
       key: 'creator',
       label: 'Creador',
+      sortable: true,
+      sortType: 'string' as const,
       render: (movement: Movement) => (
         <div className="flex items-center gap-2">
           <Avatar className="h-6 w-6">
@@ -270,73 +274,99 @@ export default function Movements() {
     {
       key: 'type',
       label: 'Tipo',
-      render: (movement: Movement) => (
-        <Badge variant="secondary" className="text-xs">
-          {movement.movement_data?.type?.name || 'Sin tipo'}
-        </Badge>
-      )
+      sortable: true,
+      sortType: 'string' as const,
+      render: (movement: Movement) => {
+        const typeName = movement.movement_data?.type?.name || 'Sin tipo'
+        const isIngreso = typeName.toLowerCase().includes('ingreso')
+        const isEgreso = typeName.toLowerCase().includes('egreso')
+        
+        return (
+          <span 
+            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white"
+            style={{
+              backgroundColor: isIngreso 
+                ? 'hsl(var(--chart-1))' 
+                : isEgreso 
+                ? 'hsl(var(--chart-5))' 
+                : 'hsl(var(--muted))'
+            }}
+          >
+            {typeName}
+          </span>
+        )
+      }
     },
     {
       key: 'category',
       label: 'Categoría',
+      sortable: true,
+      sortType: 'string' as const,
       render: (movement: Movement) => (
-        <Badge variant="outline" className="text-xs">
+        <span className="text-xs">
           {movement.movement_data?.category?.name || 'Sin categoría'}
-        </Badge>
+        </span>
       )
     },
     {
       key: 'subcategory',
       label: 'Subcategoría',
+      sortable: true,
+      sortType: 'string' as const,
       render: (movement: Movement) => (
-        movement.movement_data?.subcategory?.name ? (
-          <Badge variant="outline" className="text-xs">
-            {movement.movement_data.subcategory.name}
-          </Badge>
-        ) : (
-          <span className="text-muted-foreground">-</span>
-        )
+        <span className="text-xs text-muted-foreground">
+          {movement.movement_data?.subcategory?.name || '-'}
+        </span>
       )
     },
     {
       key: 'description',
       label: 'Descripción',
+      sortable: true,
+      sortType: 'string' as const,
       render: (movement: Movement) => (
-        <div className="text-xs truncate">
+        <span className="text-xs truncate">
           {movement.description || <span className="text-muted-foreground">Sin descripción</span>}
-        </div>
+        </span>
       )
     },
     {
       key: 'currency',
       label: 'Moneda',
+      sortable: true,
+      sortType: 'string' as const,
       render: (movement: Movement) => (
-        <Badge variant="secondary" className="text-xs">
+        <span className="text-xs">
           {movement.movement_data?.currency?.code || movement.movement_data?.currency?.name || 'N/A'}
-        </Badge>
+        </span>
       )
     },
     {
       key: 'wallet',
       label: 'Billetera',
+      sortable: true,
+      sortType: 'string' as const,
       render: (movement: Movement) => (
-        <Badge variant="outline" className="text-xs">
+        <span className="text-xs">
           {movement.movement_data?.wallet?.name || 'N/A'}
-        </Badge>
+        </span>
       )
     },
     {
       key: 'amount',
       label: 'Cantidad',
+      sortable: true,
+      sortType: 'number' as const,
       render: (movement: Movement) => (
-        <div className="text-xs font-medium">
+        <span className="text-xs font-medium">
           {movement.movement_data?.currency?.symbol || '$'}{movement.amount.toLocaleString()}
-        </div>
+        </span>
       )
     },
     {
       key: 'actions',
       label: 'Acciones',
+      sortable: false,
       render: (movement: Movement) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

@@ -72,11 +72,11 @@
   --warning-text: hsl(240, 10%, 4%);
 
   /* Charts */
-  --chart-1: hsl(210, 40%, 50%);
+  --chart-1: hsl(110, 40%, 50%);
   --chart-2: hsl(173, 58%, 39%);
   --chart-3: hsl(197, 37%, 24%);
   --chart-4: hsl(43, 74%, 66%);
-  --chart-5: hsl(27, 87%, 67%);
+  --chart-5: hsl(0, 87%, 67%);
 
   /* Text */
   --text-default: hsl(240, 10%, 4%);
