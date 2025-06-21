@@ -84,7 +84,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // Configurar el estado con la sesión actual
       set({
         session: session,
-        user: session?.user || null,
+        user: session?.user ?? null,
         loading: false,
         initialized: true
       });

@@ -91,6 +91,12 @@ function Router() {
 }
 
 function App() {
+  const { initialize } = useAuthStore();
+
+  useEffect(() => {
+    initialize();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
