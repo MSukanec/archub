@@ -55,7 +55,7 @@ interface NewAdminOrganizationModalProps {
   editingOrganization?: Organization | null
 }
 
-export function NewAdminOrganizationModal({ open, onClose, editingOrganization }: CreateAdminOrganizationModalProps) {
+export function NewAdminOrganizationModal({ open, onClose, editingOrganization }: NewAdminOrganizationModalProps) {
   const { toast } = useToast()
 
   // Fetch users for creator dropdown
