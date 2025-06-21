@@ -11,6 +11,7 @@ import Projects from "@/pages/Projects";
 import Movements from "@/pages/Movements";
 import SiteLogs from "@/pages/SiteLogs";
 import ProfilePage from "@/pages/ProfilePage";
+import Contacts from "@/pages/Contacts";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/not-found";
 
@@ -57,6 +58,13 @@ function Router() {
         <ProtectedRoute>
           <Layout>
             <SiteLogs />
+          </Layout>
+        </ProtectedRoute>
+      </Route>
+      <Route path="/contactos">
+        <ProtectedRoute>
+          <Layout>
+            <Contacts />
           </Layout>
         </ProtectedRoute>
       </Route>

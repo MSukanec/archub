@@ -490,6 +490,17 @@ Changelog:
   • Implemented comprehensive filtering: sort by date/type, filter by entry type, favorites only, public only
   • "Limpiar filtros" button now resets all filter states including search value in single action
   • Filter UI uses proper Labels, Select components, and Switch toggles with 288px width dropdown
+
+- June 21, 2025. Complete Contacts management system following all established patterns
+  • Created Contacts.tsx page with table layout showing full contact information and company details
+  • Implemented useContacts and useContactTypes hooks for Supabase data integration with proper JOIN queries
+  • Built CreateContactModal.tsx with comprehensive form: name, email, phone, type, company, location, notes
+  • Added dynamic filtering system: sort by name/date, filter by contact type with proper dropdown interface
+  • Contact cards display: full name with initials avatar, email, phone, type badge, company/location icons
+  • Integrated full CRUD operations: create, edit, delete with confirmation dialogs and proper error handling
+  • Added "Contactos" navigation item with Users icon and /contactos route in App.tsx routing system
+  • Modal supports both creation and editing modes with form pre-population and validation using Zod schemas
+  • All components follow established design patterns from SiteLogs and other pages for consistent UX
 ```
 
 ## User Preferences
