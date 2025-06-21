@@ -44,6 +44,15 @@ export function SidebarButton({
           }}
         />
       )}
+      {!Icon && (
+        <div
+          className="flex-shrink-0"
+          style={{
+            width: `${ICON_SIZE}px`,
+            height: `${ICON_SIZE}px`,
+          }}
+        />
+      )}
 
       {/* Texto que se desliza como en Supabase */}
       <span

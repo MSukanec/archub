@@ -96,24 +96,28 @@ export function Sidebar() {
               </SidebarButton>
             </div>
             {isExpanded && expandedGroups.organizacion && (
-              <div className="ml-4 transition-all duration-200">
+              <div className="transition-all duration-200">
                 <Link href="/organizaciones">
-                  <SidebarButton
-                    isExpanded={isExpanded}
-                    isActive={location === '/organizaciones'}
-                    className="text-sm"
-                  >
-                    Gestión de Organizaciones
-                  </SidebarButton>
+                  <div className="pl-4">
+                    <SidebarButton
+                      isExpanded={isExpanded}
+                      isActive={location === '/organizaciones'}
+                      className="text-sm"
+                    >
+                      Gestión de Organizaciones
+                    </SidebarButton>
+                  </div>
                 </Link>
                 <Link href="/contactos">
-                  <SidebarButton
-                    isExpanded={isExpanded}
-                    isActive={location === '/contactos'}
-                    className="text-sm"
-                  >
-                    Contactos
-                  </SidebarButton>
+                  <div className="pl-4">
+                    <SidebarButton
+                      isExpanded={isExpanded}
+                      isActive={location === '/contactos'}
+                      className="text-sm"
+                    >
+                      Contactos
+                    </SidebarButton>
+                  </div>
                 </Link>
               </div>
             )}
@@ -134,15 +138,17 @@ export function Sidebar() {
               </SidebarButton>
             </div>
             {isExpanded && expandedGroups.proyectos && (
-              <div className="ml-4 transition-all duration-200">
+              <div className="transition-all duration-200">
                 <Link href="/proyectos">
-                  <SidebarButton
-                    isExpanded={isExpanded}
-                    isActive={location === '/proyectos'}
-                    className="text-sm"
-                  >
-                    Gestión de Proyectos
-                  </SidebarButton>
+                  <div className="pl-4">
+                    <SidebarButton
+                      isExpanded={isExpanded}
+                      isActive={location === '/proyectos'}
+                      className="text-sm"
+                    >
+                      Gestión de Proyectos
+                    </SidebarButton>
+                  </div>
                 </Link>
               </div>
             )}
@@ -163,15 +169,17 @@ export function Sidebar() {
               </SidebarButton>
             </div>
             {isExpanded && expandedGroups.obra && (
-              <div className="ml-4 transition-all duration-200">
+              <div className="transition-all duration-200">
                 <Link href="/bitacora">
-                  <SidebarButton
-                    isExpanded={isExpanded}
-                    isActive={location === '/bitacora'}
-                    className="text-sm"
-                  >
-                    Bitácora
-                  </SidebarButton>
+                  <div className="pl-4">
+                    <SidebarButton
+                      isExpanded={isExpanded}
+                      isActive={location === '/bitacora'}
+                      className="text-sm"
+                    >
+                      Bitácora
+                    </SidebarButton>
+                  </div>
                 </Link>
               </div>
             )}
@@ -192,15 +200,17 @@ export function Sidebar() {
               </SidebarButton>
             </div>
             {isExpanded && expandedGroups.finanzas && (
-              <div className="ml-4 transition-all duration-200">
+              <div className="transition-all duration-200">
                 <Link href="/movimientos">
-                  <SidebarButton
-                    isExpanded={isExpanded}
-                    isActive={location === '/movimientos'}
-                    className="text-sm"
-                  >
-                    Movimientos
-                  </SidebarButton>
+                  <div className="pl-4">
+                    <SidebarButton
+                      isExpanded={isExpanded}
+                      isActive={location === '/movimientos'}
+                      className="text-sm"
+                    >
+                      Movimientos
+                    </SidebarButton>
+                  </div>
                 </Link>
               </div>
             )}
