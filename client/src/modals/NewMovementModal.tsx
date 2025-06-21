@@ -82,19 +82,19 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
   const { data: currencies = [] } = useCurrencies(organizationId)
   const { data: wallets = [] } = useWallets(organizationId)
 
-  const [selectedTypeId, setSelectedTypeId] = useState<string>(editingMovement?.type_id || 'none')
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string>(editingMovement?.category_id || 'none')
-  const { data: categories = [] } = useMovementConcepts('categories', selectedTypeId === 'none' ? undefined : selectedTypeId)
-  const { data: subcategories = [] } = useMovementConcepts('categories', selectedCategoryId === 'none' ? undefined : selectedCategoryId)
+  const [selectedTypeId, setSelectedTypeId] = useState<string>(editingMovement?.type_id || '')
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>(editingMovement?.category_id || '')
+  const { data: categories = [] } = useMovementConcepts('categories', selectedTypeId || undefined)
+  const { data: subcategories = [] } = useMovementConcepts('categories', selectedCategoryId || undefined)
 
   // Update selected IDs when editing movement changes
   useEffect(() => {
     if (editingMovement) {
-      setSelectedTypeId(editingMovement.type_id || 'none')
-      setSelectedCategoryId(editingMovement.category_id || 'none')
+      setSelectedTypeId(editingMovement.type_id || '')
+      setSelectedCategoryId(editingMovement.category_id || '')
     } else {
-      setSelectedTypeId('none')
-      setSelectedCategoryId('none')
+      setSelectedTypeId('')
+      setSelectedCategoryId('')
     }
   }, [editingMovement])
 
@@ -105,9 +105,9 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
       created_by: editingMovement?.created_by || userData?.user?.id || '',
       description: editingMovement?.description || '',
       amount: editingMovement?.amount || 0,
-      type_id: editingMovement?.type_id || 'none',
-      category_id: editingMovement?.category_id || 'none',
-      subcategory_id: editingMovement?.subcategory_id || 'none',
+      type_id: editingMovement?.type_id || '',
+      category_id: editingMovement?.category_id || '',
+      subcategory_id: editingMovement?.subcategory_id || '',
       currency_id: editingMovement?.currency_id || '',
       wallet_id: editingMovement?.wallet_id || '',
       file_url: editingMovement?.file_url || '',
@@ -238,16 +238,16 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
 
   const handleTypeChange = (typeId: string) => {
     setSelectedTypeId(typeId)
-    setSelectedCategoryId('none')
+    setSelectedCategoryId('')
     form.setValue('type_id', typeId)
-    form.setValue('category_id', 'none')
-    form.setValue('subcategory_id', 'none')
+    form.setValue('category_id', '')
+    form.setValue('subcategory_id', '')
   }
 
   const handleCategoryChange = (categoryId: string) => {
     setSelectedCategoryId(categoryId)
     form.setValue('category_id', categoryId)
-    form.setValue('subcategory_id', 'none')
+    form.setValue('subcategory_id', '')
   }
 
   const header = (
@@ -373,7 +373,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="none">Seleccionar tipo</SelectItem>
+                      <SelectItem value="">Seleccionar tipo</SelectItem>
                       {types.map((type: any) => (
                         <SelectItem key={type.id} value={type.id}>
                           {type.name}
@@ -393,14 +393,14 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-sm font-medium">Categoría</FormLabel>
-                  <Select onValueChange={handleCategoryChange} value={field.value} disabled={!selectedTypeId || selectedTypeId === 'none'}>
+                  <Select onValueChange={handleCategoryChange} value={field.value} disabled={!selectedTypeId || selectedTypeId === ''}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Seleccionar categoría" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="none">Seleccionar categoría</SelectItem>
+                      <SelectItem value="">Seleccionar categoría</SelectItem>
                       {categories.map((category: any) => (
                         <SelectItem key={category.id} value={category.id}>
                           {category.name}
@@ -420,14 +420,14 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-sm font-medium">Subcategoría</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value} disabled={!selectedCategoryId || selectedCategoryId === 'none'}>
+                  <Select onValueChange={field.onChange} value={field.value} disabled={!selectedCategoryId || selectedCategoryId === ''}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Seleccionar subcategoría" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="none">Seleccionar subcategoría</SelectItem>
+                      <SelectItem value="">Seleccionar subcategoría</SelectItem>
                       {subcategories.map((subcategory: any) => (
                         <SelectItem key={subcategory.id} value={subcategory.id}>
                           {subcategory.name}
