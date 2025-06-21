@@ -117,6 +117,12 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
   // Reset form when editing movement changes
   useEffect(() => {
     if (editingMovement) {
+      console.log('Editing movement:', editingMovement)
+      // Set selected IDs first for dropdowns
+      setSelectedTypeId(editingMovement.type_id || 'none')
+      setSelectedCategoryId(editingMovement.category_id || 'none')
+      
+      // Then reset form with data
       form.reset({
         created_at: new Date(editingMovement.created_at),
         created_by: editingMovement.created_by || '',
@@ -129,10 +135,9 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         wallet_id: editingMovement.wallet_id || '',
         file_url: editingMovement.file_url || '',
       })
-      // Set selected IDs for dropdowns
-      setSelectedTypeId(editingMovement.type_id || 'none')
-      setSelectedCategoryId(editingMovement.category_id || 'none')
     } else {
+      setSelectedTypeId('none')
+      setSelectedCategoryId('none')
       form.reset({
         created_at: new Date(),
         created_by: '',
@@ -145,8 +150,6 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         wallet_id: '',
         file_url: '',
       })
-      setSelectedTypeId('none')
-      setSelectedCategoryId('none')
     }
   }, [editingMovement, form])
 
