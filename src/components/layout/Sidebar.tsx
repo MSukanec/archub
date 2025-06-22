@@ -78,13 +78,12 @@ export function Sidebar() {
     >
       {/* Navigation Items */}
       <div className="flex-1 py-2">
-        <div className="space-y-1 px-2">
+        <div className="flex flex-col gap-1">
           {navigationItems.map((item) => (
             <button
               key={item.href}
               className={cn(
-                'flex items-center w-full h-8 px-2 py-2 rounded-md transition-all duration-200 ease-in-out',
-                'group relative',
+                'flex items-center h-8 rounded-md px-2 py-2 mx-1 transition-all duration-200 ease-in-out',
                 location === item.href 
                   ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]' 
                   : 'text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]'
@@ -92,16 +91,13 @@ export function Sidebar() {
               onClick={() => navigate(item.href)}
               title={!isExpanded ? item.label : undefined}
             >
-              {/* Icon - always centered when collapsed */}
-              <div className={cn(
-                "flex items-center justify-center flex-shrink-0",
-                isExpanded ? "w-4 h-4" : "w-full h-full"
-              )}>
+              {/* Icon container - centered when collapsed */}
+              <div className="w-6 h-6 flex items-center justify-center mx-auto">
                 <item.icon className={cn(
                   "w-4 h-4",
                   location === item.href 
                     ? 'text-[var(--menues-active-fg)]'
-                    : 'text-[var(--menues-fg)] group-hover:text-[var(--menues-hover-fg)]'
+                    : 'text-[var(--menues-fg)]'
                 )} />
               </div>
               
@@ -111,7 +107,7 @@ export function Sidebar() {
                   "ml-2 text-sm font-medium whitespace-nowrap",
                   location === item.href 
                     ? 'text-[var(--menues-active-fg)]'
-                    : 'text-[var(--menues-fg)] group-hover:text-[var(--menues-hover-fg)]'
+                    : 'text-[var(--menues-fg)]'
                 )}>
                   {item.label}
                 </span>
@@ -123,12 +119,11 @@ export function Sidebar() {
 
       {/* Bottom Section - Fixed Buttons */}
       <div className="border-t border-[var(--menues-border)] py-2">
-        <div className="space-y-1 px-2">
+        <div className="flex flex-col gap-1">
           {/* Settings */}
           <button
             className={cn(
-              'flex items-center w-full h-8 px-2 py-2 rounded-md transition-all duration-200 ease-in-out',
-              'group relative',
+              'flex items-center h-8 rounded-md px-2 py-2 mx-1 transition-all duration-200 ease-in-out',
               location === '/configuracion' 
                 ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]' 
                 : 'text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]'
@@ -136,15 +131,12 @@ export function Sidebar() {
             onClick={() => navigate('/configuracion')}
             title={!isExpanded ? 'Configuración' : undefined}
           >
-            <div className={cn(
-              "flex items-center justify-center flex-shrink-0",
-              isExpanded ? "w-4 h-4" : "w-full h-full"
-            )}>
+            <div className="w-6 h-6 flex items-center justify-center mx-auto">
               <Settings className={cn(
                 "w-4 h-4",
                 location === '/configuracion' 
                   ? 'text-[var(--menues-active-fg)]'
-                  : 'text-[var(--menues-fg)] group-hover:text-[var(--menues-hover-fg)]'
+                  : 'text-[var(--menues-fg)]'
               )} />
             </div>
             {isExpanded && (
@@ -152,7 +144,7 @@ export function Sidebar() {
                 "ml-2 text-sm font-medium whitespace-nowrap",
                 location === '/configuracion' 
                   ? 'text-[var(--menues-active-fg)]'
-                  : 'text-[var(--menues-fg)] group-hover:text-[var(--menues-hover-fg)]'
+                  : 'text-[var(--menues-fg)]'
               )}>
                 Configuración
               </span>
@@ -162,26 +154,22 @@ export function Sidebar() {
           {/* Theme Toggle */}
           <button
             className={cn(
-              'flex items-center w-full h-8 px-2 py-2 rounded-md transition-all duration-200 ease-in-out',
-              'group relative',
+              'flex items-center h-8 rounded-md px-2 py-2 mx-1 transition-all duration-200 ease-in-out',
               'text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]'
             )}
             onClick={() => toggleThemeMutation.mutate()}
             disabled={toggleThemeMutation.isPending}
             title={!isExpanded ? 'Cambiar tema' : undefined}
           >
-            <div className={cn(
-              "flex items-center justify-center flex-shrink-0",
-              isExpanded ? "w-4 h-4" : "w-full h-full"
-            )}>
+            <div className="w-6 h-6 flex items-center justify-center mx-auto">
               {userData?.preferences?.theme === 'dark' ? (
-                <Sun className="w-4 h-4 text-[var(--menues-fg)] group-hover:text-[var(--menues-hover-fg)]" />
+                <Sun className="w-4 h-4 text-[var(--menues-fg)]" />
               ) : (
-                <Moon className="w-4 h-4 text-[var(--menues-fg)] group-hover:text-[var(--menues-hover-fg)]" />
+                <Moon className="w-4 h-4 text-[var(--menues-fg)]" />
               )}
             </div>
             {isExpanded && (
-              <span className="ml-2 text-sm font-medium whitespace-nowrap text-[var(--menues-fg)] group-hover:text-[var(--menues-hover-fg)]">
+              <span className="ml-2 text-sm font-medium whitespace-nowrap text-[var(--menues-fg)]">
                 Cambiar tema
               </span>
             )}
@@ -190,8 +178,7 @@ export function Sidebar() {
           {/* Profile */}
           <button
             className={cn(
-              'flex items-center w-full h-8 px-2 py-2 rounded-md transition-all duration-200 ease-in-out',
-              'group relative',
+              'flex items-center h-8 rounded-md px-2 py-2 mx-1 transition-all duration-200 ease-in-out',
               location === '/perfil' 
                 ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]' 
                 : 'text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]'
@@ -199,22 +186,19 @@ export function Sidebar() {
             onClick={() => navigate('/perfil')}
             title={!isExpanded ? 'Mi Perfil' : undefined}
           >
-            <div className={cn(
-              "flex items-center justify-center flex-shrink-0",
-              isExpanded ? "w-4 h-4" : "w-full h-full"
-            )}>
+            <div className="w-6 h-6 flex items-center justify-center mx-auto">
               {userData?.user?.avatar_url ? (
                 <img 
                   src={userData.user.avatar_url} 
                   alt="Avatar"
-                  className="w-4 h-4 rounded-full"
+                  className="w-5 h-5 rounded-full"
                 />
               ) : (
                 <UserCircle className={cn(
                   "w-4 h-4",
                   location === '/perfil' 
                     ? 'text-[var(--menues-active-fg)]'
-                    : 'text-[var(--menues-fg)] group-hover:text-[var(--menues-hover-fg)]'
+                    : 'text-[var(--menues-fg)]'
                 )} />
               )}
             </div>
@@ -223,7 +207,7 @@ export function Sidebar() {
                 "ml-2 text-sm font-medium whitespace-nowrap",
                 location === '/perfil' 
                   ? 'text-[var(--menues-active-fg)]'
-                  : 'text-[var(--menues-fg)] group-hover:text-[var(--menues-hover-fg)]'
+                  : 'text-[var(--menues-fg)]'
               )}>
                 Mi Perfil
               </span>
