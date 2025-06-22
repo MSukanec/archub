@@ -193,54 +193,39 @@ export default function Contacts() {
     setEditingContact(null);
   };
 
+  const headerProps = {
+    title: "Contactos",
+    showSearch: true,
+    searchValue,
+    onSearchChange: setSearchValue,
+    showFilters: true,
+    customFilters,
+    onClearFilters: handleClearFilters,
+    actions
+  };
+
   if (isLoading) {
     return (
-      <CustomPageLayout
-        icon={Users}
-        title="Contactos"
-        actions={actions}
-        searchValue={searchValue}
-        onSearchChange={setSearchValue}
-        customFilters={customFilters}
-        onClearFilters={handleClearFilters}
-        showSearch={true}
-      >
+      <Layout headerProps={headerProps}>
         <div className="p-8 text-center text-muted-foreground">
           Cargando contactos...
         </div>
-      
+      </Layout>
     );
   }
 
   if (error) {
-      <CustomPageLayout
-        icon={Users}
-        title="Contactos"
-        actions={actions}
-        searchValue={searchValue}
-        onSearchChange={setSearchValue}
-        customFilters={customFilters}
-        onClearFilters={handleClearFilters}
-        showSearch={true}
-      >
+    return (
+      <Layout headerProps={headerProps}>
         <div className="p-8 text-center text-muted-foreground">
           Error al cargar los contactos: {(error as Error).message}
         </div>
-      
+      </Layout>
     );
   }
 
-    <>
-      <CustomPageLayout
-        icon={Users}
-        title="Contactos"
-        actions={actions}
-        searchValue={searchValue}
-        onSearchChange={setSearchValue}
-        customFilters={customFilters}
-        onClearFilters={handleClearFilters}
-        showSearch={true}
-      >
+  return (
+    <Layout headerProps={headerProps}>
         {filteredContacts.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground">
             {contacts.length === 0 
@@ -378,6 +363,6 @@ export default function Contacts() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+    </Layout>
   );
 }
