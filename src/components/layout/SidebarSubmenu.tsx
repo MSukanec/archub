@@ -10,18 +10,21 @@ interface SubmenuItem {
   isDivider?: boolean
 }
 
-interface SidebarSubmenuProps {
-  title: string
+interface MenuGroup {
+  id: string
+  label: string
+  icon: any
   items: SubmenuItem[]
-  isVisible: boolean
+}
+
+interface SidebarSubmenuProps {
+  group: MenuGroup
   onMouseEnter?: () => void
   onMouseLeave?: () => void
 }
 
-export function SidebarSubmenu({ title, items, isVisible, onMouseEnter, onMouseLeave }: SidebarSubmenuProps) {
+export function SidebarSubmenu({ group, onMouseEnter, onMouseLeave }: SidebarSubmenuProps) {
   const [location] = useLocation()
-
-  if (!isVisible) return null
 
   return (
     <div 

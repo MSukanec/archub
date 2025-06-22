@@ -217,11 +217,20 @@ export function Sidebar() {
     
     if (currentGroup) {
       setActiveSidebarMenu(currentGroup.id);
+      // Auto-open submenu if group has items and is docked
+      if (isSidebarDocked && currentGroup.items.length > 0) {
+        // Use a small delay to ensure the state is set
+        setTimeout(() => {
+          if (!isSidebarMenuOpen) {
+            toggleSidebarMenu(currentGroup.id);
+          }
+        }, 100);
+      }
     } else if (!activeSidebarMenu) {
       // Default to organizacion group
       setActiveSidebarMenu('organizacion');
     }
-  }, [location, activeSidebarMenu, setActiveSidebarMenu]);
+  }, [location, activeSidebarMenu, setActiveSidebarMenu, isSidebarDocked, isSidebarMenuOpen, toggleSidebarMenu]);
 
   // Close sidebar when navigating if not docked
   useEffect(() => {
@@ -280,8 +289,8 @@ export function Sidebar() {
     // Always show if docked and menu is open
     if (isSidebarDocked) return isSidebarMenuOpen;
     
-    // Show if hovered and active
-    if (isMainSidebarHovered && activeSidebarMenu) return true;
+    // Show if hovered and active (for non-docked mode)
+    if (!isSidebarDocked && isMainSidebarHovered && activeSidebarMenu && activeGroupData.items.length > 0) return true;
     
     // Show if menu is explicitly open
     return isSidebarMenuOpen;
