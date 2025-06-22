@@ -14,8 +14,10 @@ import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { queryClient } from "@/lib/queryClient";
 import { useNavigationStore } from "@/stores/navigationStore";
+import { useLocation } from "wouter";
 
 export function Header() {
+  const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const { data: projects = [] } = useProjects(userData?.preferences?.last_organization_id);
   const { setSidebarContext, currentSidebarContext } = useNavigationStore();
@@ -77,6 +79,7 @@ export function Header() {
             className="h-8 px-2 text-sm font-medium text-[var(--sidebar-fg)] hover:bg-[var(--sidebar-hover-bg)]"
             onClick={() => {
               setSidebarContext('organization');
+              navigate('/organizaciones');
             }}
           >
             {currentOrganization?.name || 'Sin organización'}
@@ -130,6 +133,7 @@ export function Header() {
                 className="h-8 px-2 text-sm font-medium text-[var(--sidebar-fg)] hover:bg-[var(--sidebar-hover-bg)]"
                 onClick={() => {
                   setSidebarContext('project');
+                  navigate('/proyectos');
                 }}
               >
                 {currentProject?.name || 'Sin proyecto'}
