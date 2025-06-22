@@ -14,9 +14,7 @@ import Movements from "@/pages/Movements";
 import SiteLogs from "@/pages/SiteLogs";
 
 import Contacts from "@/pages/Contacts";
-import { AdminOrganizations } from "@/pages/AdminOrganizations";
-import { AdminUsers } from "@/pages/AdminUsers";
-import { AdminTasks } from "@/pages/AdminTasks";
+
 import Login from "@/pages/Login";
 import NotFound from "@/pages/not-found";
 
@@ -83,21 +81,21 @@ function Router() {
       <Route path="/admin/organizaciones">
         <ProtectedRoute>
           <Layout>
-            <AdminOrganizations />
+            <Dashboard />
           </Layout>
         </ProtectedRoute>
       </Route>
       <Route path="/admin/usuarios">
         <ProtectedRoute>
           <Layout>
-            <AdminUsers />
+            <Dashboard />
           </Layout>
         </ProtectedRoute>
       </Route>
       <Route path="/admin/tareas">
         <ProtectedRoute>
           <Layout>
-            <AdminTasks />
+            <Dashboard />
           </Layout>
         </ProtectedRoute>
       </Route>
