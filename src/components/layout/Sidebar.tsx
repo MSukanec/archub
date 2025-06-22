@@ -81,11 +81,19 @@ const menuGroups = [
 
 export function Sidebar() {
   const [location] = useLocation();
-  const [activeGroup, setActiveGroup] = useState<string | null>(null);
   const [isMainSidebarHovered, setIsMainSidebarHovered] = useState(false);
   const [isSubmenuHovered, setIsSubmenuHovered] = useState(false);
   const { data: userData } = useCurrentUser();
   const { data: projects = [] } = useProjects(userData?.preferences?.last_organization_id);
+  
+  // Use Zustand store for sidebar state
+  const { 
+    activeSidebarMenu, 
+    isSidebarMenuOpen, 
+    toggleSidebarMenu, 
+    closeSidebarMenu,
+    setActiveSidebarMenu 
+  } = useSidebarStore();
 
   // Check if sidebar should be docked from user preferences
   const isSidebarDocked = userData?.preferences?.sidebar_docked ?? false;
@@ -103,6 +111,48 @@ export function Sidebar() {
         .eq('id', userData.preferences.id);
       
       if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+    }
+  });
+
+  // Theme toggle mutation
+  const toggleThemeMutation = useMutation({
+    mutationFn: async () => {
+      if (!supabase || !userData?.preferences?.id) {
+        throw new Error('Missing required data');
+      }
+      
+      const newTheme = userData.preferences.theme === 'light' ? 'dark' : 'light';
+      const { error } = await supabase
+        .from('user_preferences')
+        .update({ theme: newTheme })
+        .eq('id', userData.preferences.id);
+      
+      if (error) throw error;
+      return newTheme;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+    }
+  });
+
+  // Sidebar docking toggle mutation
+  const toggleSidebarDockMutation = useMutation({
+    mutationFn: async () => {
+      if (!supabase || !userData?.preferences?.id) {
+        throw new Error('Missing required data');
+      }
+      
+      const newDocked = !userData.preferences.sidebar_docked;
+      const { error } = await supabase
+        .from('user_preferences')
+        .update({ sidebar_docked: newDocked })
+        .eq('id', userData.preferences.id);
+      
+      if (error) throw error;
+      return newDocked;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
@@ -152,19 +202,53 @@ export function Sidebar() {
     }
   };
 
-  const isGroupActive = (group: typeof menuGroups[0]) => {
-    if (group.href) {
-      return location === group.href;
+  // Helper function to check if a group is active
+  const isGroupActive = (group: any) => {
+    if (group.href && location === group.href) return true;
+    return group.items && group.items.some((item: any) => location === item.href);
+  };
+
+  // Auto-activate group based on current location and set default
+  useEffect(() => {
+    const currentGroup = menuGroups.find(group => {
+      if (group.href && location === group.href) return true;
+      return group.items && group.items.some(item => location === item.href);
+    });
+    
+    if (currentGroup) {
+      setActiveSidebarMenu(currentGroup.id);
+    } else if (!activeSidebarMenu) {
+      // Default to organizacion group
+      setActiveSidebarMenu('organizacion');
     }
-    return group.items.some(item => location === item.href);
-  };
+  }, [location, activeSidebarMenu, setActiveSidebarMenu]);
 
-  const getActiveGroup = () => {
-    return menuGroups.find(group => isGroupActive(group));
-  };
+  // Close sidebar when navigating if not docked
+  useEffect(() => {
+    if (!isSidebarDocked) {
+      closeSidebarMenu();
+    }
+  }, [location, isSidebarDocked, closeSidebarMenu]);
 
-  const activeGroupData = getActiveGroup();
-  const submenuGroup = menuGroups.find(g => g.id === activeGroup);
+  // Click outside handler
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!isSidebarDocked && isSidebarMenuOpen) {
+        const target = event.target as Element;
+        const sidebarElement = document.querySelector('[data-sidebar]');
+        const submenuElement = document.querySelector('[data-submenu]');
+        
+        if (sidebarElement && submenuElement && 
+            !sidebarElement.contains(target) && 
+            !submenuElement.contains(target)) {
+          closeSidebarMenu();
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isSidebarDocked, isSidebarMenuOpen, closeSidebarMenu]);
 
   // Generate projects submenu items
   const getProjectsSubmenu = () => {
@@ -188,18 +272,19 @@ export function Sidebar() {
     return projectItems;
   };
 
-  // Show submenu based on different conditions
+  // Determine if submenu should be shown
+  const activeGroupData = menuGroups.find(group => group.id === activeSidebarMenu);
   const shouldShowSubmenu = (() => {
-    // Always show if docked
-    if (isSidebarDocked) return true;
+    if (!activeGroupData || !activeGroupData.items || activeGroupData.items.length === 0) return false;
     
-    // Show if user clicked on a group OR is hovering over either sidebar
-    if (activeGroup && (isMainSidebarHovered || isSubmenuHovered)) return true;
+    // Always show if docked and menu is open
+    if (isSidebarDocked) return isSidebarMenuOpen;
     
-    // Auto-show for current page only if user hasn't manually clicked anything
-    if (!activeGroup && activeGroupData && activeGroupData.items.length > 0) return true;
+    // Show if hovered and active
+    if (isMainSidebarHovered && activeSidebarMenu) return true;
     
-    return false;
+    // Show if menu is explicitly open
+    return isSidebarMenuOpen;
   })();
 
   return (
@@ -357,34 +442,13 @@ export function Sidebar() {
               activeSidebarMenu === 'configuracion' ? "text-[var(--sidebar-active-fg)]" : "text-[var(--sidebar-fg)]"
             )} />
           </Button>
-
-          {/* Projects list and management button */}
-          <Button
-            variant="ghost"
-            className={cn(
-              "w-10 h-10 p-0 transition-colors rounded-none",
-              "hover:bg-[var(--sidebar-hover-bg)]",
-              activeSidebarMenu === 'proyectos-lista' && "bg-[var(--sidebar-active-bg)]"
-            )}
-            style={{
-              backgroundColor: activeSidebarMenu === 'proyectos-lista' ? 'var(--sidebar-active-bg)' : 'transparent'
-            }}
-            onClick={() => handleGroupClick('proyectos-lista')}
-          >
-            <FolderOpen className={cn(
-              "h-4 w-4",
-              activeSidebarMenu === 'proyectos-lista' ? "text-[var(--sidebar-active-fg)]" : "text-[var(--sidebar-fg)]"
-            )} />
-          </Button>
         </div>
       </aside>
 
-      {/* Secondary Sidebar - Shows submenu */}
-      {shouldShowSubmenu && (
+      {/* Secondary Sidebar */}
+      {shouldShowSubmenu && activeGroupData && (
         <SidebarSubmenu
-          title={activeGroup === 'proyectos-lista' ? 'Proyectos' : (submenuGroup?.label || activeGroupData?.label || '')}
-          items={activeGroup === 'proyectos-lista' ? getProjectsSubmenu() : (submenuGroup?.items || activeGroupData?.items || [])}
-          isVisible={true}
+          group={activeGroupData}
           onMouseEnter={handleSubmenuMouseEnter}
           onMouseLeave={handleSubmenuMouseLeave}
         />
