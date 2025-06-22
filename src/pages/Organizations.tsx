@@ -1,6 +1,6 @@
 import { Building, Calendar, Plus, CheckCircle, ShieldCheck, BadgeCheck, Crown, MoreHorizontal, Edit, Trash2 } from 'lucide-react'
 import { Layout } from '@/components/layout/Layout'
-import { CustomPageLayout } from '@/components/ui-custom/CustomPageLayout'
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -154,7 +154,7 @@ export default function Organizations() {
             ))}
           </div>
         </div>
-        </CustomPageLayout>
+
       </Layout>
     )
   }
@@ -162,7 +162,6 @@ export default function Organizations() {
   if (error) {
     return (
       <Layout headerProps={headerProps}>
-        <CustomPageLayout>
         <div className="space-y-6">
           <Card>
             <CardContent className="pt-6">
@@ -175,7 +174,6 @@ export default function Organizations() {
             </CardContent>
           </Card>
         </div>
-        </CustomPageLayout>
       </Layout>
     )
   }
@@ -183,24 +181,22 @@ export default function Organizations() {
   if (!organizations.length) {
     return (
       <Layout headerProps={headerProps}>
-        <CustomPageLayout>
-          <div className="space-y-6">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-center py-8">
-                  <Building className="h-12 w-12 text-[var(--text-muted)] mx-auto mb-4" />
-                  <p className="text-lg font-medium text-[var(--text-muted)] mb-2">No se encontraron organizaciones</p>
-                  <p className="text-sm text-[var(--text-muted)]">
-                    {searchValue || activeFilter !== 'all' 
-                      ? "Intenta ajustar tu búsqueda o filtros" 
-                      : "Aún no eres miembro de ninguna organización."
-                    }
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </CustomPageLayout>
+        <div className="space-y-6">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center py-8">
+                <Building className="h-12 w-12 text-[var(--text-muted)] mx-auto mb-4" />
+                <p className="text-lg font-medium text-[var(--text-muted)] mb-2">No se encontraron organizaciones</p>
+                <p className="text-sm text-[var(--text-muted)]">
+                  {searchValue || activeFilter !== 'all' 
+                    ? "Intenta ajustar tu búsqueda o filtros" 
+                    : "Aún no eres miembro de ninguna organización."
+                  }
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </Layout>
     )
   }

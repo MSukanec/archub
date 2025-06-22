@@ -1,6 +1,6 @@
 import { Home, Download, Plus } from 'lucide-react'
 import { Layout } from '@/components/layout/Layout'
-import { CustomPageLayout } from '@/components/ui-custom/CustomPageLayout'
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useState } from 'react'

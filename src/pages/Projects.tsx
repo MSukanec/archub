@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { Folder, Plus, Edit, Trash2, MoreHorizontal } from 'lucide-react'
 import { Layout } from '@/components/layout/Layout'
-import { CustomPageLayout } from '@/components/ui-custom/CustomPageLayout'
+
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
@@ -308,15 +308,13 @@ export default function Projects() {
   if (isLoading || projectsLoading) {
     return (
       <Layout headerProps={headerProps}>
-        <CustomPageLayout>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center py-8">
-                <p className="text-lg font-medium text-muted-foreground">Cargando proyectos...</p>
-              </div>
-            </CardContent>
-          </Card>
-        </CustomPageLayout>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center py-8">
+              <p className="text-lg font-medium text-muted-foreground">Cargando proyectos...</p>
+            </div>
+          </CardContent>
+        </Card>
       </Layout>
     )
   }
@@ -324,19 +322,17 @@ export default function Projects() {
   if (error || projectsError) {
     return (
       <Layout headerProps={headerProps}>
-        <CustomPageLayout>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center py-8">
-                <Folder className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-lg font-medium text-muted-foreground mb-2">Error al cargar proyectos</p>
-                <p className="text-sm text-muted-foreground">
-                  Intenta recargar la página o contacta al soporte técnico.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </CustomPageLayout>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center py-8">
+              <Folder className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-lg font-medium text-muted-foreground mb-2">Error al cargar proyectos</p>
+              <p className="text-sm text-muted-foreground">
+                Intenta recargar la página o contacta al soporte técnico.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </Layout>
     )
   }
@@ -344,22 +340,20 @@ export default function Projects() {
   if (!filteredProjects.length) {
     return (
       <Layout headerProps={headerProps}>
-        <CustomPageLayout>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center py-8">
-                <Folder className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-lg font-medium text-muted-foreground mb-2">No se encontraron proyectos</p>
-                <p className="text-sm text-muted-foreground">
-                  {searchTerm || activeFilter !== 'all' 
-                    ? "Intenta ajustar tu búsqueda o filtros" 
-                    : "Aún no hay proyectos en esta organización."
-                  }
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </CustomPageLayout>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center py-8">
+              <Folder className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-lg font-medium text-muted-foreground mb-2">No se encontraron proyectos</p>
+              <p className="text-sm text-muted-foreground">
+                {searchTerm || activeFilter !== 'all' 
+                  ? "Intenta ajustar tu búsqueda o filtros" 
+                  : "Aún no hay proyectos en esta organización."
+                }
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </Layout>
     )
   }
