@@ -18,7 +18,7 @@ import { useNavigationStore } from "@/stores/navigationStore";
 export function Header() {
   const { data: userData } = useCurrentUser();
   const { data: projects = [] } = useProjects(userData?.preferences?.last_organization_id);
-  const { setSidebarContext } = useNavigationStore();
+  const { setSidebarContext, currentSidebarContext } = useNavigationStore();
 
   // Organization selection mutation
   const selectOrganizationMutation = useMutation({
@@ -77,7 +77,6 @@ export function Header() {
             className="h-8 px-2 text-sm font-medium text-[var(--sidebar-fg)] hover:bg-[var(--sidebar-hover-bg)]"
             onClick={() => {
               setSidebarContext('organization');
-              console.log('Open organization sidebar');
             }}
           >
             {currentOrganization?.name || 'Sin organización'}
@@ -119,56 +118,60 @@ export function Header() {
           </DropdownMenu>
         </div>
 
-        <span className="text-[var(--sidebar-secondary-fg)]">›</span>
+        {/* Only show project breadcrumb if NOT in organization context */}
+        {currentSidebarContext !== 'organization' && (
+          <>
+            <span className="text-[var(--sidebar-secondary-fg)]">›</span>
 
-        {/* Project - Text clickable + Dropdown arrow */}
-        <div className="flex items-center">
-          <Button
-            variant="ghost"
-            className="h-8 px-2 text-sm font-medium text-[var(--sidebar-fg)] hover:bg-[var(--sidebar-hover-bg)]"
-            onClick={() => {
-              setSidebarContext('project');
-              console.log('Open project sidebar');
-            }}
-          >
-            {currentProject?.name || 'Sin proyecto'}
-          </Button>
-          
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+            {/* Project - Text clickable + Dropdown arrow */}
+            <div className="flex items-center">
               <Button
                 variant="ghost"
-                size="icon"
-                className="h-8 w-8 hover:bg-[var(--sidebar-hover-bg)]"
+                className="h-8 px-2 text-sm font-medium text-[var(--sidebar-fg)] hover:bg-[var(--sidebar-hover-bg)]"
+                onClick={() => {
+                  setSidebarContext('project');
+                }}
               >
-                <ChevronDown className="h-3 w-3 text-[var(--sidebar-fg)]" />
+                {currentProject?.name || 'Sin proyecto'}
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-64">
-              <div className="px-2 py-1.5 text-xs text-[var(--sidebar-secondary-fg)] font-medium">
-                Buscar proyecto...
-              </div>
-              <DropdownMenuSeparator />
-              {projects.map((project) => (
-                <DropdownMenuItem
-                  key={project.id}
-                  onClick={() => selectProjectMutation.mutate(project.id)}
-                  className="flex items-center justify-between"
-                >
-                  <span>{project.name}</span>
-                  {project.id === currentProject?.id && (
-                    <div className="h-2 w-2 rounded-full bg-green-500" />
-                  )}
-                </DropdownMenuItem>
-              ))}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <Plus className="mr-2 h-4 w-4" />
-                Nuevo proyecto
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 hover:bg-[var(--sidebar-hover-bg)]"
+                  >
+                    <ChevronDown className="h-3 w-3 text-[var(--sidebar-fg)]" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-64">
+                  <div className="px-2 py-1.5 text-xs text-[var(--sidebar-secondary-fg)] font-medium">
+                    Buscar proyecto...
+                  </div>
+                  <DropdownMenuSeparator />
+                  {projects.map((project) => (
+                    <DropdownMenuItem
+                      key={project.id}
+                      onClick={() => selectProjectMutation.mutate(project.id)}
+                      className="flex items-center justify-between"
+                    >
+                      <span>{project.name}</span>
+                      {project.id === currentProject?.id && (
+                        <div className="h-2 w-2 rounded-full bg-green-500" />
+                      )}
+                    </DropdownMenuItem>
+                  ))}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Nuevo proyecto
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </>
+        )}
       </div>
     </header>
   );
