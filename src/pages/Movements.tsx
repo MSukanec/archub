@@ -11,7 +11,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { CustomTable } from '@/components/ui-custom/CustomTable'
+import { Layout } from '@/components/layout/Layout'
 import { NewMovementModal } from '@/modals/NewMovementModal'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useMovements } from '@/hooks/use-movements'
@@ -289,3 +289,163 @@ export default function Movements() {
         }
         
         return (
+          <span className={badgeClasses}>
+            {typeName}
+          </span>
+        )
+      }
+    }
+  ]
+
+  const actions = (
+    <Button variant="default" onClick={() => setShowNewMovementModal(true)}>
+      <Plus className="mr-2 h-4 w-4" />
+      Nuevo movimiento
+    </Button>
+  )
+
+  const headerProps = {
+    title: "Gestión de Movimientos",
+    showSearch: true,
+    searchValue: searchTerm,
+    onSearchChange: setSearchTerm,
+    showFilters: true,
+    customFilters,
+    onClearFilters: handleClearFilters,
+    actions
+  }
+
+  if (isLoading) {
+    return (
+      <Layout headerProps={headerProps}>
+        <div className="p-8 text-center text-muted-foreground">
+          Cargando movimientos...
+        </div>
+      </Layout>
+    )
+  }
+
+  return (
+    <Layout headerProps={headerProps}>
+      <div className="space-y-0">
+        {filteredMovements.length === 0 ? (
+          <div className="p-8 text-center text-muted-foreground">
+            {movements.length === 0 
+              ? "No hay movimientos registrados. Agrega el primer movimiento financiero del proyecto."
+              : "No se encontraron movimientos que coincidan con tu búsqueda."
+            }
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="border-b border-[var(--card-border)]">
+                <tr className="text-xs font-medium text-muted-foreground">
+                  <th className="text-left p-3">Fecha</th>
+                  <th className="text-left p-3">Creador</th>
+                  <th className="text-left p-3">Tipo</th>
+                  <th className="text-left p-3">Categoría</th>
+                  <th className="text-left p-3">Descripción</th>
+                  <th className="text-left p-3">Moneda</th>
+                  <th className="text-left p-3">Cantidad</th>
+                  <th className="text-left p-3">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredMovements.map((movement) => (
+                  <tr key={movement.id} className="border-b border-[var(--card-border)] hover:bg-[var(--card-hover-bg)]">
+                    <td className="p-3 text-xs">
+                      {format(new Date(movement.created_at), 'dd/MM/yyyy', { locale: es })}
+                    </td>
+                    <td className="p-3">
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-6 w-6">
+                          <AvatarImage src={movement.creator?.avatar_url} />
+                          <AvatarFallback className="text-xs">
+                            {movement.creator?.full_name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 
+                             movement.creator?.email?.slice(0, 2).toUpperCase() || 'U'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-xs truncate">
+                          {movement.creator?.full_name || movement.creator?.email || 'Usuario'}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="p-3">
+                      <Badge variant="outline" className="text-xs">
+                        {movement.movement_data?.type?.name || 'Sin tipo'}
+                      </Badge>
+                    </td>
+                    <td className="p-3">
+                      <Badge variant="secondary" className="text-xs">
+                        {movement.movement_data?.category?.name || 'Sin categoría'}
+                      </Badge>
+                    </td>
+                    <td className="p-3 text-xs">{movement.description || 'Sin descripción'}</td>
+                    <td className="p-3">
+                      <Badge variant="outline" className="text-xs">
+                        {movement.movement_data?.currency?.code || 'USD'}
+                      </Badge>
+                    </td>
+                    <td className="p-3 text-xs font-medium">${movement.amount.toLocaleString()}</td>
+                    <td className="p-3">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => setEditingMovement(movement)}>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => setDeletingMovement(movement)}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Eliminar
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      <NewMovementModal
+        open={showNewMovementModal}
+        onClose={() => {
+          setShowNewMovementModal(false)
+          setEditingMovement(null)
+        }}
+        editingMovement={editingMovement}
+      />
+
+      <AlertDialog open={!!deletingMovement} onOpenChange={() => setDeletingMovement(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar movimiento?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. El movimiento será eliminado permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deletingMovement && deleteMovementMutation.mutate(deletingMovement.id)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteMovementMutation.isPending}
+            >
+              {deleteMovementMutation.isPending ? 'Eliminando...' : 'Eliminar'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </Layout>
+  )
+}

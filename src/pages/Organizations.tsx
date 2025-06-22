@@ -249,7 +249,7 @@ export default function Organizations() {
         </div>
         
         <div className="space-y-3">
-        {filteredOrganizations.map((org) => {
+          {filteredOrganizations.map((org) => {
           const isSelected = org.id === currentOrganization?.id
           const isSelecting = selectOrganizationMutation.isPending && selectOrganizationMutation.variables === org.id
 
@@ -346,7 +346,7 @@ export default function Organizations() {
               </CardContent>
             </Card>
           )
-        })}
+          })}
         </div>
 
         {/* Modal for creating/editing organizations */}
