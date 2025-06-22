@@ -10,7 +10,7 @@
 
   /* Sidebar */
   --sidebar-bg: hsl(0, 0%, 97%);
-  --sidebar-fg: hsl(0, 0%, 35%);
+  --sidebar-fg: hsl(0, 50%, 50%);
   --sidebar-secondary-fg: hsl(0, 0%, 50%);
   --sidebar-border: hsl(0, 0%, 85%);
   --sidebar-hover-bg: hsl(0, 0%, 82%);

@@ -87,7 +87,7 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "fixed left-0 top-10 h-[calc(100vh-40px)] bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] flex flex-col z-40",
+        "fixed left-0 top-10 h-[calc(100vh-40px)] bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] flex flex-col z-40 text-[var(--sidebar-fg)]",
         "transition-all duration-300 ease-in-out",
         isExpanded ? "w-[240px]" : "w-[40px]"
       )}
@@ -114,12 +114,12 @@ export function Sidebar() {
           >
             {/* Icon container - fixed position, always centered when collapsed */}
             <div className="flex items-center justify-center w-8 h-8 flex-shrink-0">
-              <item.icon className="h-5 w-5" />
+              <item.icon className="h-5 w-5 text-[var(--sidebar-fg)]" />
             </div>
             
             {/* Label - only show when expanded */}
             {isExpanded && (
-              <span className="ml-2 text-sm whitespace-nowrap overflow-hidden">
+              <span className="ml-2 text-sm whitespace-nowrap overflow-hidden text-[var(--sidebar-fg)]">
                 {item.label}
               </span>
             )}
@@ -141,10 +141,10 @@ export function Sidebar() {
           title={!isExpanded ? 'Configuración' : undefined}
         >
           <div className="flex items-center justify-center w-8 h-8 flex-shrink-0">
-            <Settings className="h-5 w-5" />
+            <Settings className="h-5 w-5 text-[var(--sidebar-fg)]" />
           </div>
           {isExpanded && (
-            <span className="ml-2 text-sm whitespace-nowrap overflow-hidden">
+            <span className="ml-2 text-sm whitespace-nowrap overflow-hidden text-[var(--sidebar-fg)]">
               Configuración
             </span>
           )}
@@ -162,13 +162,13 @@ export function Sidebar() {
         >
           <div className="flex items-center justify-center w-8 h-8 flex-shrink-0">
             {userData?.preferences?.theme === 'dark' ? (
-              <Sun className="h-5 w-5" />
+              <Sun className="h-5 w-5 text-[var(--sidebar-fg)]" />
             ) : (
-              <Moon className="h-5 w-5" />
+              <Moon className="h-5 w-5 text-[var(--sidebar-fg)]" />
             )}
           </div>
           {isExpanded && (
-            <span className="ml-2 text-sm whitespace-nowrap overflow-hidden">
+            <span className="ml-2 text-sm whitespace-nowrap overflow-hidden text-[var(--sidebar-fg)]">
               Cambiar tema
             </span>
           )}
@@ -193,11 +193,11 @@ export function Sidebar() {
                 className="w-5 h-5 rounded-full"
               />
             ) : (
-              <UserCircle className="h-5 w-5" />
+              <UserCircle className="h-5 w-5 text-[var(--sidebar-fg)]" />
             )}
           </div>
           {isExpanded && (
-            <span className="ml-2 text-sm whitespace-nowrap overflow-hidden">
+            <span className="ml-2 text-sm whitespace-nowrap overflow-hidden text-[var(--sidebar-fg)]">
               Mi Perfil
             </span>
           )}
