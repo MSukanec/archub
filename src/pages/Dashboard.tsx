@@ -5,13 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useState } from 'react'
 
 export default function Dashboard() {
-  const [searchValue, setSearchValue] = useState("");
-
-  const headerProps = {
-    title: "Panel Principal",
-    showSearch: false,
-    showFilters: false,
-  };
+  const [searchTerm, setSearchTerm] = useState('')
 
   const statsCards = [
     {

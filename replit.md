@@ -550,6 +550,17 @@ Changelog:
   • Eliminated navigationStore dependency, all items defined manually
   • Removed duplicate Archub logo button, cleaned visual hierarchy
   • Subitems aligned with parent text for clean indentation structure
+
+- June 22, 2025. Complete header system consolidation and CustomPageLayout elimination
+  • Completely eliminated CustomPageLayout, CustomPageHeader, and CustomPageBody components
+  • Unified all header logic into single Header.tsx component with breadcrumb navigation
+  • Header has fixed 40px height with sticky positioning (top-0 z-50)
+  • Layout.tsx passes headerProps to Header, main content has py-6 px-4 padding with marginTop: 40px
+  • All pages (Dashboard, Projects, Organizations, Movements, Contacts, SiteLogs, Profile) use Layout with headerProps
+  • Header includes Organization > Project breadcrumb with dropdown menus for navigation
+  • Right side has search, filters dropdown, clear filters button, and action buttons all properly aligned
+  • Removed all redundant components and imports, cleaned up JSX syntax errors
+  • System now matches Supabase/Vercel dashboard architecture with centralized header management
 ```
 
 ## User Preferences

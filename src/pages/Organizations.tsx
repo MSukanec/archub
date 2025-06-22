@@ -134,8 +134,11 @@ export default function Organizations() {
     )
   };
 
+;
+
   if (isLoading) {
     return (
+      <Layout headerProps={headerProps}>
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[1, 2, 3].map((i) => (
