@@ -51,6 +51,7 @@ interface Project {
     modality?: {
       id: string
       name: string
+    }
   }
   creator?: {
     id: string
@@ -304,6 +305,7 @@ export default function Projects() {
 
   if (isLoading || projectsLoading) {
     return (
+      <Layout headerProps={headerProps}>
         <Card>
           <CardContent className="pt-6">
             <div className="text-center py-8">
@@ -316,6 +318,8 @@ export default function Projects() {
   }
 
   if (error || projectsError) {
+    return (
+      <Layout headerProps={headerProps}>
         <Card>
           <CardContent className="pt-6">
             <div className="text-center py-8">
