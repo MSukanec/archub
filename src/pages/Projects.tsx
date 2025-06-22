@@ -336,6 +336,8 @@ export default function Projects() {
   }
 
   if (!filteredProjects.length) {
+    return (
+      <Layout headerProps={headerProps}>
         <Card>
           <CardContent className="pt-6">
             <div className="text-center py-8">
@@ -354,6 +356,9 @@ export default function Projects() {
     )
   }
 
+  return (
+    <Layout headerProps={headerProps}>
+      <div>
       {/* Encabezados de columnas */}
       <div className="w-full px-4 py-2 border-b border-border/50 mb-3">
         <div className="flex items-center justify-between w-full text-xs font-medium text-muted-foreground uppercase tracking-wide">
@@ -399,6 +404,7 @@ export default function Projects() {
           const isSelecting = selectProjectMutation.isPending && selectProjectMutation.variables === project.id
           const creator = getCreatorInfo(project)
 
+          return (
             <Card 
               key={project.id} 
               className={cn(
@@ -517,6 +523,7 @@ export default function Projects() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      </div>
     </Layout>
   )
 }
