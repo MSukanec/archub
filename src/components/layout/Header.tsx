@@ -88,11 +88,11 @@ export function Header({
   const hasFilters = filters.length > 0 || customFilters;
 
   return (
-    <header className="sticky top-0 z-50 h-9 border-b border-[var(--menues-border)] bg-[var(--menues-bg)] flex items-center justify-between px-4 gap-2">
+    <header className="sticky top-0 z-50 h-9 border-b border-[var(--menues-border)] bg-[var(--menues-bg)] flex items-center justify-between gap-2">
       {/* Left side - Logo + Breadcrumb */}
       <div className="flex items-center gap-2">
-        {/* Logo */}
-        <div className="w-9 h-9 flex items-center justify-center border-r border-[var(--menues-border)] mr-2">
+        {/* Logo - exact same width as sidebar when collapsed */}
+        <div className="w-[40px] h-9 flex items-center justify-center border-r border-[var(--menues-border)]">
           <span className="text-base font-bold leading-none text-[var(--menues-fg)]">A</span>
         </div>
 
@@ -214,7 +214,7 @@ export function Header({
       </div>
 
       {/* Right side - Search, Filters, Actions */}
-      <div className="flex items-center gap-2 ml-auto">
+      <div className="flex items-center gap-2 ml-auto pr-4">
         {showSearch && (
           <div className="relative">
             <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-[var(--menues-fg)] opacity-50" />
