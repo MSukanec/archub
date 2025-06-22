@@ -407,7 +407,6 @@ export function AdminTasks() {
   );
 
   return (
-    <Layout headerProps={headerProps}>
     <CustomPageLayout
       icon={CheckSquare}
       title="Gestión de Tareas"

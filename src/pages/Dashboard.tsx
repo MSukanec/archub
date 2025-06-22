@@ -122,7 +122,6 @@ export default function Dashboard() {
     </>
   )
 
-  return (
     <Layout headerProps={headerProps}>
     <Layout headerProps={headerProps}>
       <div className="space-y-6">

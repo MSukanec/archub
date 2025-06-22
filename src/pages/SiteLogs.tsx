@@ -189,7 +189,6 @@ export default function SiteLogs() {
     } as const
 
     return (
-    <Layout headerProps={headerProps}>
       <Badge variant={variants[type as keyof typeof variants] || 'outline'}>
         {type.charAt(0).toUpperCase() + type.slice(1)}
       </Badge>
@@ -265,7 +264,6 @@ export default function SiteLogs() {
   }
 
   if (isLoading) {
-    return (
     <Layout headerProps={headerProps}>
       <CustomPageLayout
         icon={FileText}
@@ -285,7 +283,6 @@ export default function SiteLogs() {
   }
 
   if (error) {
-    return (
     <Layout headerProps={headerProps}>
       <CustomPageLayout
         icon={FileText}
@@ -304,7 +301,6 @@ export default function SiteLogs() {
     )
   }
 
-  return (
     <Layout headerProps={headerProps}>
     <>
       <CustomPageLayout
@@ -341,7 +337,6 @@ export default function SiteLogs() {
               const isExpanded = expandedCards.has(log.id)
               const creator = getCreator(log.created_by)
               
-              return (
     <Layout headerProps={headerProps}>
                 <Collapsible key={log.id} open={isExpanded} onOpenChange={() => toggleCardExpansion(log.id)}>
                   <Card 

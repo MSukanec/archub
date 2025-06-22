@@ -136,7 +136,6 @@ export default function Organizations() {
 
   if (isLoading) {
     return (
-    <Layout headerProps={headerProps}>
       <Layout headerProps={headerProps}>
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -158,7 +157,6 @@ export default function Organizations() {
   }
 
   if (error) {
-    return (
     <Layout headerProps={headerProps}>
       <Layout headerProps={headerProps}>
         <div className="space-y-6">
@@ -178,7 +176,6 @@ export default function Organizations() {
   }
 
   if (!organizations.length) {
-    return (
     <Layout headerProps={headerProps}>
       <Layout headerProps={headerProps}>
         <div className="space-y-6">
@@ -201,7 +198,6 @@ export default function Organizations() {
     )
   }
 
-  return (
     <Layout headerProps={headerProps}>
     <Layout headerProps={headerProps}>
         {/* Encabezados de columnas */}
@@ -243,7 +239,6 @@ export default function Organizations() {
           const isSelected = org.id === selectedOrganization?.id
           const isSelecting = selectOrganizationMutation.isPending && selectOrganizationMutation.variables === org.id
 
-          return (
     <Layout headerProps={headerProps}>
             <Card 
               key={org.id} 

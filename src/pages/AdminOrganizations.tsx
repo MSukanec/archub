@@ -297,7 +297,6 @@ export function AdminOrganizations() {
   )
 
   return (
-    <Layout headerProps={headerProps}>
     <>
       <CustomPageLayout
         icon={Building2}

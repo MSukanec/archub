@@ -187,7 +187,6 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
-    <Layout headerProps={headerProps}>
       <CustomPageLayout
         icon={User}
         title="Mi Perfil"
@@ -209,7 +208,6 @@ export default function ProfilePage() {
   }
 
   if (error) {
-    return (
     <Layout headerProps={headerProps}>
       <CustomPageLayout
         icon={User}
@@ -230,7 +228,6 @@ export default function ProfilePage() {
     )
   }
 
-  return (
     <Layout headerProps={headerProps}>
     <CustomPageLayout
       icon={User}

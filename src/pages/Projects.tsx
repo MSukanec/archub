@@ -306,7 +306,6 @@ export default function Projects() {
 
   if (isLoading || projectsLoading) {
     return (
-    <Layout headerProps={headerProps}>
       <Layout headerProps={headerProps}>
         <Card>
           <CardContent className="pt-6">
@@ -320,7 +319,6 @@ export default function Projects() {
   }
 
   if (error || projectsError) {
-    return (
     <Layout headerProps={headerProps}>
       <Layout headerProps={headerProps}>
         <Card>
@@ -339,7 +337,6 @@ export default function Projects() {
   }
 
   if (!filteredProjects.length) {
-    return (
     <Layout headerProps={headerProps}>
       <Layout headerProps={headerProps}>
         <Card>
@@ -360,7 +357,6 @@ export default function Projects() {
     )
   }
 
-  return (
     <Layout headerProps={headerProps}>
     <Layout headerProps={headerProps}>
       {/* Encabezados de columnas */}
@@ -408,7 +404,6 @@ export default function Projects() {
           const isSelecting = selectProjectMutation.isPending && selectProjectMutation.variables === project.id
           const creator = getCreatorInfo(project)
 
-          return (
     <Layout headerProps={headerProps}>
             <Card 
               key={project.id} 

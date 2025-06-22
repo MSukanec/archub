@@ -195,7 +195,6 @@ export default function Contacts() {
 
   if (isLoading) {
     return (
-    <Layout headerProps={headerProps}>
       <CustomPageLayout
         icon={Users}
         title="Contactos"
@@ -214,7 +213,6 @@ export default function Contacts() {
   }
 
   if (error) {
-    return (
     <Layout headerProps={headerProps}>
       <CustomPageLayout
         icon={Users}
@@ -233,7 +231,6 @@ export default function Contacts() {
     );
   }
 
-  return (
     <Layout headerProps={headerProps}>
     <>
       <CustomPageLayout

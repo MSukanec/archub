@@ -464,7 +464,6 @@ export function AdminUsers() {
   );
 
   return (
-    <Layout headerProps={headerProps}>
     <CustomPageLayout
       icon={User}
       title="Gestión de Usuarios"
