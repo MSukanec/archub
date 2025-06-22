@@ -101,18 +101,20 @@ export function Header({
           {title && (
             <span className="text-sm font-medium text-[var(--menues-fg)]">{title}</span>
           )}
-        {/* Organization - Text clickable + Dropdown arrow */}
-        <div className="flex items-center">
-          <Button
-            variant="ghost"
-            className="h-8 px-2 text-sm font-medium text-[var(--sidebar-fg)] hover:bg-[var(--sidebar-hover-bg)]"
-            onClick={() => {
-              setSidebarContext('organization');
-              navigate('/proyectos');
-            }}
-          >
-            {currentOrganization?.name || 'Sin organización'}
-          </Button>
+
+          {/* Organization - Text clickable + Dropdown arrow */}
+          {!title && (
+            <div className="flex items-center">
+              <Button
+                variant="ghost"
+                className="h-8 px-2 text-sm font-medium text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+                onClick={() => {
+                  setSidebarContext('organization');
+                  navigate('/proyectos');
+                }}
+              >
+                {currentOrganization?.name || 'Sin organización'}
+              </Button>
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -125,7 +127,7 @@ export function Header({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-64">
-              <div className="px-2 py-1.5 text-xs text-[var(--sidebar-secondary-fg)] font-medium">
+              <div className="px-2 py-1.5 text-xs text-[var(--menues-fg)] opacity-70 font-medium">
                 Buscar organización...
               </div>
               <DropdownMenuSeparator />
@@ -204,8 +206,6 @@ export function Header({
               </DropdownMenu>
             </div>
           </>
-          )}
-            </div>
           )}
         </div>
       </div>
