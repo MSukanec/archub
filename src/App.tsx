@@ -8,52 +8,22 @@ import { Layout } from "@/components/layout/Layout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { useAuthStore } from "@/stores/authStore";
 import Dashboard from "@/pages/Dashboard";
-import Organizations from "@/pages/Organizations";
-
+import OrganizationManagement from "@/pages/organization/index";
 import Movements from "@/pages/Movements";
 import SiteLogs from "@/pages/SiteLogs";
-
 import Contacts from "@/pages/Contacts";
-
-
 
 function Router() {
   return (
     <Switch>
-
       <Route path="/organizations">
         <ProtectedRoute>
-          <Layout>
-            <Organizations />
-          </Layout>
+          <OrganizationManagement />
         </ProtectedRoute>
       </Route>
       <Route path="/organizaciones">
         <ProtectedRoute>
-          <Layout>
-            <Organizations />
-          </Layout>
-        </ProtectedRoute>
-      </Route>
-      <Route path="/projects">
-        <ProtectedRoute>
-          <Layout>
-            <Dashboard />
-          </Layout>
-        </ProtectedRoute>
-      </Route>
-      <Route path="/proyectos">
-        <ProtectedRoute>
-          <Layout>
-            <Dashboard />
-          </Layout>
-        </ProtectedRoute>
-      </Route>
-      <Route path="/gestion-proyectos">
-        <ProtectedRoute>
-          <Layout>
-            <Dashboard />
-          </Layout>
+          <OrganizationManagement />
         </ProtectedRoute>
       </Route>
       <Route path="/movimientos">
@@ -77,41 +47,6 @@ function Router() {
           </Layout>
         </ProtectedRoute>
       </Route>
-      <Route path="/admin/organizaciones">
-        <ProtectedRoute>
-          <Layout>
-            <Dashboard />
-          </Layout>
-        </ProtectedRoute>
-      </Route>
-      <Route path="/admin/usuarios">
-        <ProtectedRoute>
-          <Layout>
-            <Dashboard />
-          </Layout>
-        </ProtectedRoute>
-      </Route>
-      <Route path="/admin/tareas">
-        <ProtectedRoute>
-          <Layout>
-            <Dashboard />
-          </Layout>
-        </ProtectedRoute>
-      </Route>
-      <Route path="/perfil">
-        <ProtectedRoute>
-          <Layout>
-            <Dashboard />
-          </Layout>
-        </ProtectedRoute>
-      </Route>
-      <Route path="/organizaciones">
-        <ProtectedRoute>
-          <Layout>
-            <Organizations />
-          </Layout>
-        </ProtectedRoute>
-      </Route>
       <Route path="/dashboard">
         <ProtectedRoute>
           <Layout>
@@ -126,7 +61,6 @@ function Router() {
           </Layout>
         </ProtectedRoute>
       </Route>
-      {/* Add more protected routes here */}
     </Switch>
   );
 }
