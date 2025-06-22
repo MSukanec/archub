@@ -39,12 +39,12 @@ export function SidebarSubmenu({ group, onMouseEnter, onMouseLeave }: SidebarSub
     >
       {/* Header with group title */}
       <div className="h-10 flex items-center px-4 border-b border-[var(--sidebar-border)]">
-        <h2 className="text-sm font-medium text-[var(--sidebar-fg)]">{title}</h2>
+        <h2 className="text-sm font-medium text-[var(--sidebar-fg)]">{group.label}</h2>
       </div>
 
       {/* Submenu items */}
       <nav className="flex-1">
-        {items.map((item, index) => (
+        {group.items.map((item, index) => (
           <div key={`${item.href || item.label}-${index}`}>
 
             
