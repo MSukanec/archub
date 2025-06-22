@@ -64,10 +64,10 @@ export function Header() {
   const currentProject = projects.find(p => p.id === userData?.preferences?.last_project_id);
 
   return (
-    <header className="sticky top-0 z-50 h-10 border-b border-[var(--sidebar-border)] bg-[var(--sidebar-bg)] flex items-center">
+    <header className="sticky top-0 z-50 h-10 border-b border-[var(--menues-border)] bg-[var(--menues-bg)] flex items-center">
       {/* Logo */}
-      <div className="w-10 h-10 flex items-center justify-center border-r border-[var(--sidebar-border)]">
-        <span className="text-lg font-bold text-[var(--sidebar-fg)]">A</span>
+      <div className="w-10 h-10 flex items-center justify-center border-r border-[var(--menues-border)]">
+        <span className="text-lg font-bold text-[var(--menues-fg)]">A</span>
       </div>
 
       {/* Breadcrumb */}
@@ -124,13 +124,13 @@ export function Header() {
         {/* Only show project breadcrumb if NOT in organization context */}
         {currentSidebarContext !== 'organization' && (
           <>
-            <span className="text-[var(--sidebar-secondary-fg)]">›</span>
+            <span className="text-[var(--menues-fg)] opacity-70">›</span>
 
             {/* Project - Text clickable + Dropdown arrow */}
             <div className="flex items-center">
               <Button
                 variant="ghost"
-                className="h-8 px-2 text-sm font-medium text-[var(--sidebar-fg)] hover:bg-[var(--sidebar-hover-bg)]"
+                className="h-8 px-2 text-sm font-medium text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
                 onClick={() => {
                   setSidebarContext('project');
                   navigate('/proyectos');
@@ -144,13 +144,13 @@ export function Header() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 hover:bg-[var(--sidebar-hover-bg)]"
+                    className="h-8 w-8 hover:bg-[var(--menues-hover-bg)]"
                   >
-                    <ChevronDown className="h-3 w-3 text-[var(--sidebar-fg)]" />
+                    <ChevronDown className="h-3 w-3 text-[var(--menues-fg)]" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-64">
-                  <div className="px-2 py-1.5 text-xs text-[var(--sidebar-secondary-fg)] font-medium">
+                  <div className="px-2 py-1.5 text-xs text-[var(--menues-fg)] opacity-70 font-medium">
                     Buscar proyecto...
                   </div>
                   <DropdownMenuSeparator />

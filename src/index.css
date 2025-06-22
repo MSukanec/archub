@@ -10,10 +10,10 @@
 
   /* Sidebar */
   --sidebar-bg: hsl(0, 0%, 97%);
-  --sidebar-fg: hsl(0, 50%, 50%);
+  --sidebar-fg: hsl(0, 0%, 60%);
   --sidebar-secondary-fg: hsl(0, 0%, 50%);
   --sidebar-border: hsl(0, 0%, 85%);
-  --sidebar-hover-bg: hsl(0, 0%, 82%);
+  --sidebar-hover-bg: hsl(0, 50%, 50%);
   --sidebar-active-bg: hsl(0, 0%, 50%);
   --sidebar-active-text: hsl(0, 0%, 100%);
 
@@ -102,14 +102,14 @@
   --layout-text: hsl(0, 0%, 90%);
   --layout-border: hsl(240, 8%, 15%);
 
-  /* Sidebar */
-  --sidebar-bg: hsl(0, 0%, 14%);
-  --sidebar-fg: hsl(0, 0%, 90%);
-  --sidebar-secondary-fg: hsl(0, 0%, 70%);
-  --sidebar-border: hsl(240, 8%, 15%);
-  --sidebar-hover-bg: hsl(0, 0%, 8%);
-  --sidebar-active-bg: hsl(0, 0%, 8%);
-  --sidebar-active-text: hsl(0, 0%, 90%);
+  /* Menues (Sidebar & Header) */
+  --menues-bg: hsl(0, 0%, 14%);
+  --menues-fg: hsl(0, 0%, 90%);
+  --menues-border: hsl(240, 8%, 15%);
+  --menues-hover-bg: hsl(0, 0%, 8%);
+  --menues-hover-fg: hsl(0, 0%, 100%);
+  --menues-active-bg: hsl(0, 0%, 8%);
+  --menues-active-fg: hsl(0, 0%, 90%);
 
   /* Cards */
   --card-bg: hsl(0, 0%, 14%);

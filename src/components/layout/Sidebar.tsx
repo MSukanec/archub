@@ -87,13 +87,13 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "fixed left-0 top-10 h-[calc(100vh-40px)] bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] flex flex-col z-40 text-[var(--sidebar-fg)]",
+        "fixed left-0 top-10 h-[calc(100vh-40px)] bg-[var(--menues-bg)] border-r border-[var(--menues-border)] flex flex-col z-40 text-[var(--menues-fg)]",
         "transition-all duration-300 ease-in-out",
         isExpanded ? "w-[240px]" : "w-[40px]"
       )}
       style={{
-        backgroundColor: 'var(--sidebar-bg)',
-        borderColor: 'var(--sidebar-border)'
+        backgroundColor: 'var(--menues-bg)',
+        borderColor: 'var(--menues-border)'
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -106,20 +106,20 @@ export function Sidebar() {
             className={cn(
               'flex items-center w-full h-8 rounded-md transition-all duration-300 ease-in-out mb-1',
               location === item.href 
-                ? 'bg-muted text-foreground font-semibold' 
-                : 'hover:bg-muted transition-colors'
+                ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)] font-semibold' 
+                : 'hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)] transition-colors'
             )}
             onClick={() => navigate(item.href)}
             title={!isExpanded ? item.label : undefined}
           >
             {/* Icon container - fixed position, always centered when collapsed */}
             <div className="flex items-center justify-center w-8 h-8 flex-shrink-0">
-              <item.icon className="h-5 w-5 text-[var(--sidebar-fg)]" />
+              <item.icon className="h-5 w-5 text-[var(--menues-fg)]" />
             </div>
             
             {/* Label - only show when expanded */}
             {isExpanded && (
-              <span className="ml-2 text-sm whitespace-nowrap overflow-hidden text-[var(--sidebar-fg)]">
+              <span className="ml-2 text-sm whitespace-nowrap overflow-hidden text-[var(--menues-fg)]">
                 {item.label}
               </span>
             )}
@@ -128,20 +128,20 @@ export function Sidebar() {
       </div>
 
       {/* Bottom Section - Fixed Buttons */}
-      <div className="py-2 px-1 border-t border-[var(--sidebar-border)]">
+      <div className="py-2 px-1 border-t border-[var(--menues-border)]">
         {/* Settings */}
         <button
           className={cn(
             'flex items-center w-full h-8 rounded-md transition-all duration-300 ease-in-out mb-1',
             location === '/configuracion' 
-              ? 'bg-muted text-foreground font-semibold' 
-              : 'hover:bg-muted transition-colors'
+              ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)] font-semibold' 
+              : 'hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)] transition-colors'
           )}
           onClick={() => navigate('/configuracion')}
           title={!isExpanded ? 'Configuración' : undefined}
         >
           <div className="flex items-center justify-center w-8 h-8 flex-shrink-0">
-            <Settings className="h-5 w-5 text-[var(--sidebar-fg)]" />
+            <Settings className="h-5 w-5 text-[var(--menues-fg)]" />
           </div>
           {isExpanded && (
             <span className="ml-2 text-sm whitespace-nowrap overflow-hidden text-[var(--sidebar-fg)]">
@@ -154,7 +154,7 @@ export function Sidebar() {
         <button
           className={cn(
             'flex items-center w-full h-8 rounded-md transition-all duration-300 ease-in-out mb-1',
-            'hover:bg-muted transition-colors'
+            'hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)] transition-colors'
           )}
           onClick={() => toggleThemeMutation.mutate()}
           disabled={toggleThemeMutation.isPending}
@@ -162,13 +162,13 @@ export function Sidebar() {
         >
           <div className="flex items-center justify-center w-8 h-8 flex-shrink-0">
             {userData?.preferences?.theme === 'dark' ? (
-              <Sun className="h-5 w-5 text-[var(--sidebar-fg)]" />
+              <Sun className="h-5 w-5 text-[var(--menues-fg)]" />
             ) : (
-              <Moon className="h-5 w-5 text-[var(--sidebar-fg)]" />
+              <Moon className="h-5 w-5 text-[var(--menues-fg)]" />
             )}
           </div>
           {isExpanded && (
-            <span className="ml-2 text-sm whitespace-nowrap overflow-hidden text-[var(--sidebar-fg)]">
+            <span className="ml-2 text-sm whitespace-nowrap overflow-hidden text-[var(--menues-fg)]">
               Cambiar tema
             </span>
           )}
@@ -179,8 +179,8 @@ export function Sidebar() {
           className={cn(
             'flex items-center w-full h-8 rounded-md transition-all duration-300 ease-in-out',
             location === '/perfil' 
-              ? 'bg-muted text-foreground font-semibold' 
-              : 'hover:bg-muted transition-colors'
+              ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)] font-semibold' 
+              : 'hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)] transition-colors'
           )}
           onClick={() => navigate('/perfil')}
           title={!isExpanded ? 'Mi Perfil' : undefined}
@@ -193,11 +193,11 @@ export function Sidebar() {
                 className="w-5 h-5 rounded-full"
               />
             ) : (
-              <UserCircle className="h-5 w-5 text-[var(--sidebar-fg)]" />
+              <UserCircle className="h-5 w-5 text-[var(--menues-fg)]" />
             )}
           </div>
           {isExpanded && (
-            <span className="ml-2 text-sm whitespace-nowrap overflow-hidden text-[var(--sidebar-fg)]">
+            <span className="ml-2 text-sm whitespace-nowrap overflow-hidden text-[var(--menues-fg)]">
               Mi Perfil
             </span>
           )}
