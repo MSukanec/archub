@@ -19,11 +19,9 @@ interface MenuGroup {
 
 interface SidebarSubmenuProps {
   group: MenuGroup
-  onMouseEnter?: () => void
-  onMouseLeave?: () => void
 }
 
-export function SidebarSubmenu({ group, onMouseEnter, onMouseLeave }: SidebarSubmenuProps) {
+export function SidebarSubmenu({ group }: SidebarSubmenuProps) {
   const [location] = useLocation()
   
   console.log('SidebarSubmenu rendering with group:', group);
@@ -36,8 +34,6 @@ export function SidebarSubmenu({ group, onMouseEnter, onMouseLeave }: SidebarSub
         backgroundColor: 'var(--sidebar-secondary-bg)',
         borderColor: 'var(--sidebar-secondary-border)'
       }}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
     >
       {/* Header with group title */}
       <div className="h-10 flex items-center px-4 border-b border-[var(--sidebar-secondary-border)]">

@@ -83,8 +83,6 @@ const menuGroups = [
 
 export function Sidebar() {
   const [location] = useLocation();
-  const [isMainSidebarHovered, setIsMainSidebarHovered] = useState(false);
-  const [isSubmenuHovered, setIsSubmenuHovered] = useState(false);
   const { data: userData } = useCurrentUser();
   const { data: projects = [] } = useProjects(userData?.preferences?.last_organization_id);
   
@@ -161,65 +159,20 @@ export function Sidebar() {
     }
   });
 
-  const handleGroupClick = (groupId: string, href?: string) => {
-    console.log('handleGroupClick called with:', { groupId, href });
+  const handleGroupClick = (groupId: string) => {
+    console.log('handleGroupClick called with:', { groupId });
     
-    if (href) {
-      // Direct navigation for items without submenu
-      setActiveSidebarMenu(groupId);
+    if (isSidebarMenuOpen && activeSidebarMenu === groupId) {
+      console.log('Closing same menu');
       closeSidebarMenu();
-      return;
-    }
-    
-    // Always set the active menu
-    console.log('Setting active sidebar menu to:', groupId);
-    setActiveSidebarMenu(groupId);
-    
-    // Find the group and check if it has items
-    const group = menuGroups.find(g => g.id === groupId);
-    console.log('Found group:', group);
-    
-    if (group && group.items && group.items.length > 0) {
-      console.log('Group has items, toggling submenu');
-      toggleSidebarMenu(groupId);
     } else {
-      console.log('Group has no items or is empty');
-      // Force open submenu even if no items for debugging
+      console.log('Opening new menu:', groupId);
+      setActiveSidebarMenu(groupId);
       toggleSidebarMenu(groupId);
     }
   };
 
-  const handleMainSidebarMouseEnter = () => {
-    setIsMainSidebarHovered(true);
-  };
 
-  const handleMainSidebarMouseLeave = () => {
-    setIsMainSidebarHovered(false);
-    // Close submenu after delay if not docked and no hover on either sidebar
-    if (!isSidebarDocked && !isSubmenuHovered) {
-      setTimeout(() => {
-        if (!isSubmenuHovered && !isMainSidebarHovered) {
-          closeSidebarMenu();
-        }
-      }, 200);
-    }
-  };
-
-  const handleSubmenuMouseEnter = () => {
-    setIsSubmenuHovered(true);
-  };
-
-  const handleSubmenuMouseLeave = () => {
-    setIsSubmenuHovered(false);
-    // Close submenu after delay if not docked and no hover on either sidebar
-    if (!isSidebarDocked && !isMainSidebarHovered) {
-      setTimeout(() => {
-        if (!isSubmenuHovered && !isMainSidebarHovered) {
-          closeSidebarMenu();
-        }
-      }, 200);
-    }
-  };
 
   // Helper function to check if a group is active
   const isGroupActive = (group: any) => {
@@ -247,7 +200,7 @@ export function Sidebar() {
     if (!isSidebarDocked) {
       closeSidebarMenu();
     }
-  }, [location, isSidebarDocked, closeSidebarMenu]);
+  }, [location]);
 
   // Click outside handler
   useEffect(() => {
@@ -267,7 +220,7 @@ export function Sidebar() {
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isSidebarDocked, isSidebarMenuOpen, closeSidebarMenu]);
+  }, [isSidebarDocked, isSidebarMenuOpen]);
 
   // Generate projects submenu items
   const getProjectsSubmenu = () => {
@@ -295,28 +248,8 @@ export function Sidebar() {
   const activeGroupData = menuGroups.find(group => group.id === activeSidebarMenu);
   console.log('Sidebar state:', { activeSidebarMenu, isSidebarMenuOpen, isSidebarDocked, activeGroupData });
   
-  const shouldShowSubmenu = (() => {
-    // Simplified logic: if we have an active menu and it's docked, always show
-    if (isSidebarDocked && activeSidebarMenu && activeGroupData) {
-      console.log('Should show submenu (docked):', true);
-      return true;
-    }
-    
-    // For non-docked mode
-    if (!isSidebarDocked && isSidebarMenuOpen && activeSidebarMenu === activeGroupData?.id) {
-      console.log('Should show submenu (non-docked, open):', true);
-      return true;
-    }
-    
-    // Show if hovered and active (for non-docked mode)
-    if (!isSidebarDocked && isMainSidebarHovered && activeSidebarMenu && activeGroupData) {
-      console.log('Should show submenu (hovered):', true);
-      return true;
-    }
-    
-    console.log('Should show submenu:', false);
-    return false;
-  })();
+  const shouldShowSubmenu = isSidebarDocked || (isSidebarMenuOpen && activeGroupData);
+  console.log('Should show submenu:', shouldShowSubmenu);
 
   return (
     <>
@@ -328,8 +261,6 @@ export function Sidebar() {
           backgroundColor: 'var(--sidebar-bg)',
           borderColor: 'var(--sidebar-border)'
         }}
-        onMouseEnter={handleMainSidebarMouseEnter}
-        onMouseLeave={handleMainSidebarMouseLeave}
       >
         {/* Logo/Header */}
         <div className="h-10 flex items-center justify-center border-b border-[var(--sidebar-border)]">
@@ -480,8 +411,6 @@ export function Sidebar() {
       {shouldShowSubmenu && activeGroupData && (
         <SidebarSubmenu
           group={activeGroupData}
-          onMouseEnter={handleSubmenuMouseEnter}
-          onMouseLeave={handleSubmenuMouseLeave}
         />
       )}
     </>
