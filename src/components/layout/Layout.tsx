@@ -42,10 +42,9 @@ export function Layout({ children }: LayoutProps) {
     const mainSidebarWidth = 40; // 10 * 4 = 40px (w-10)
     const submenuWidth = 192; // 48 * 4 = 192px (w-48)
     
-    // Only add submenu width if it should be visible
-    const shouldShowSubmenu = isSidebarDocked ? isSidebarMenuOpen : false;
-    
-    return shouldShowSubmenu ? mainSidebarWidth + submenuWidth : mainSidebarWidth;
+    // If sidebar is docked, always show submenu space regardless of which menu is active
+    // If not docked, submenu should not affect layout (it overlays)
+    return isSidebarDocked ? mainSidebarWidth + submenuWidth : mainSidebarWidth;
   }
 
   return (

@@ -29,17 +29,17 @@ export function SidebarSubmenu({ group, onMouseEnter, onMouseLeave }: SidebarSub
   return (
     <div 
       data-submenu
-      className="fixed top-0 left-10 h-full w-48 bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] z-40 flex flex-col"
+      className="fixed top-0 left-10 h-full w-48 bg-[var(--sidebar-secondary-bg)] border-r border-[var(--sidebar-secondary-border)] z-40 flex flex-col"
       style={{ 
-        backgroundColor: 'var(--sidebar-bg)',
-        borderColor: 'var(--sidebar-border)'
+        backgroundColor: 'var(--sidebar-secondary-bg)',
+        borderColor: 'var(--sidebar-secondary-border)'
       }}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
       {/* Header with group title */}
-      <div className="h-10 flex items-center px-4 border-b border-[var(--sidebar-border)]">
-        <h2 className="text-sm font-medium text-[var(--sidebar-fg)]">{group.label}</h2>
+      <div className="h-10 flex items-center px-4 border-b border-[var(--sidebar-secondary-border)]">
+        <h2 className="text-sm font-medium text-[var(--sidebar-secondary-fg)]">{group.label}</h2>
       </div>
 
       {/* Submenu items */}
@@ -54,12 +54,12 @@ export function SidebarSubmenu({ group, onMouseEnter, onMouseLeave }: SidebarSub
                 variant="ghost"
                 className={cn(
                   "w-full justify-start h-10 px-4 text-sm font-normal transition-colors rounded-none",
-                  "hover:bg-[var(--sidebar-hover-bg)] hover:text-[var(--sidebar-hover-fg)]",
-                  item.isActive && "bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-fg)]"
+                  "hover:bg-[var(--sidebar-secondary-hover-bg)]",
+                  item.isActive && "bg-[var(--sidebar-secondary-active-bg)]"
                 )}
                 style={{
-                  backgroundColor: item.isActive ? 'var(--sidebar-active-bg)' : 'transparent',
-                  color: item.isActive ? 'var(--sidebar-active-fg)' : 'var(--sidebar-fg)'
+                  backgroundColor: item.isActive ? 'var(--sidebar-secondary-active-bg)' : 'transparent',
+                  color: item.isActive ? 'var(--sidebar-secondary-active-fg)' : 'var(--sidebar-secondary-fg)'
                 }}
                 onClick={item.onClick}
               >
@@ -72,12 +72,12 @@ export function SidebarSubmenu({ group, onMouseEnter, onMouseLeave }: SidebarSub
                   variant="ghost"
                   className={cn(
                     "w-full justify-start h-10 px-4 text-sm font-normal transition-colors rounded-none",
-                    "hover:bg-[var(--sidebar-hover-bg)] hover:text-[var(--sidebar-hover-fg)]",
-                    location === item.href && "bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-fg)]"
+                    "hover:bg-[var(--sidebar-secondary-hover-bg)]",
+                    location === item.href && "bg-[var(--sidebar-secondary-active-bg)]"
                   )}
                   style={{
-                    backgroundColor: location === item.href ? 'var(--sidebar-active-bg)' : 'transparent',
-                    color: location === item.href ? 'var(--sidebar-active-fg)' : 'var(--sidebar-fg)'
+                    backgroundColor: location === item.href ? 'var(--sidebar-secondary-active-bg)' : 'transparent',
+                    color: location === item.href ? 'var(--sidebar-secondary-active-fg)' : 'var(--sidebar-secondary-fg)'
                   }}
                 >
                   {item.label}

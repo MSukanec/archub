@@ -286,14 +286,16 @@ export function Sidebar() {
   const shouldShowSubmenu = (() => {
     if (!activeGroupData || !activeGroupData.items || activeGroupData.items.length === 0) return false;
     
-    // Always show if docked and menu is open
-    if (isSidebarDocked) return isSidebarMenuOpen;
+    // Always show if docked (regardless of which menu is open)
+    if (isSidebarDocked) return true;
     
     // Show if hovered and active (for non-docked mode)
     if (!isSidebarDocked && isMainSidebarHovered && activeSidebarMenu && activeGroupData.items.length > 0) return true;
     
-    // Show if menu is explicitly open
-    return isSidebarMenuOpen;
+    // Show if menu is explicitly open (for non-docked mode)
+    if (!isSidebarDocked) return isSidebarMenuOpen;
+    
+    return false;
   })();
 
   return (
