@@ -165,7 +165,7 @@ export function Header({
                 className="h-8 px-2 text-sm font-medium text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
                 onClick={() => {
                   setSidebarContext('project');
-                  navigate('/proyectos');
+                  navigate('/dashboard');
                 }}
               >
                 {currentProject?.name || 'Sin proyecto'}

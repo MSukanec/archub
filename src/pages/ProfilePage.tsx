@@ -126,6 +126,7 @@ export default function ProfilePage() {
     if (url.trim()) {
       setAvatarPreview(url)
       handleInputChange('avatar_url', url)
+    }
   }
 
   const handleThemeToggle = async () => {
