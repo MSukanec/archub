@@ -25,6 +25,8 @@ interface SidebarSubmenuProps {
 
 export function SidebarSubmenu({ group, onMouseEnter, onMouseLeave }: SidebarSubmenuProps) {
   const [location] = useLocation()
+  
+  console.log('SidebarSubmenu rendering with group:', group);
 
   return (
     <div 

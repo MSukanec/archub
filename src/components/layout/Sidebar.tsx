@@ -162,6 +162,8 @@ export function Sidebar() {
   });
 
   const handleGroupClick = (groupId: string, href?: string) => {
+    console.log('handleGroupClick called with:', { groupId, href });
+    
     if (href) {
       // Direct navigation for items without submenu
       setActiveSidebarMenu(groupId);
@@ -169,10 +171,20 @@ export function Sidebar() {
       return;
     }
     
-    // Set active menu and toggle submenu for groups with items
+    // Always set the active menu
+    console.log('Setting active sidebar menu to:', groupId);
     setActiveSidebarMenu(groupId);
+    
+    // Find the group and check if it has items
     const group = menuGroups.find(g => g.id === groupId);
+    console.log('Found group:', group);
+    
     if (group && group.items && group.items.length > 0) {
+      console.log('Group has items, toggling submenu');
+      toggleSidebarMenu(groupId);
+    } else {
+      console.log('Group has no items or is empty');
+      // Force open submenu even if no items for debugging
       toggleSidebarMenu(groupId);
     }
   };
@@ -281,18 +293,28 @@ export function Sidebar() {
 
   // Determine if submenu should be shown
   const activeGroupData = menuGroups.find(group => group.id === activeSidebarMenu);
+  console.log('Sidebar state:', { activeSidebarMenu, isSidebarMenuOpen, isSidebarDocked, activeGroupData });
+  
   const shouldShowSubmenu = (() => {
-    if (!activeGroupData || !activeGroupData.items || activeGroupData.items.length === 0) return false;
+    // Simplified logic: if we have an active menu and it's docked, always show
+    if (isSidebarDocked && activeSidebarMenu && activeGroupData) {
+      console.log('Should show submenu (docked):', true);
+      return true;
+    }
     
-    // Always show if docked and has active menu with items
-    if (isSidebarDocked && activeSidebarMenu && activeGroupData.items.length > 0) return true;
+    // For non-docked mode
+    if (!isSidebarDocked && isSidebarMenuOpen && activeSidebarMenu === activeGroupData?.id) {
+      console.log('Should show submenu (non-docked, open):', true);
+      return true;
+    }
     
     // Show if hovered and active (for non-docked mode)
-    if (!isSidebarDocked && isMainSidebarHovered && activeSidebarMenu && activeGroupData.items.length > 0) return true;
+    if (!isSidebarDocked && isMainSidebarHovered && activeSidebarMenu && activeGroupData) {
+      console.log('Should show submenu (hovered):', true);
+      return true;
+    }
     
-    // Show if menu is explicitly open (for non-docked mode)
-    if (!isSidebarDocked && isSidebarMenuOpen && activeSidebarMenu === activeGroupData.id) return true;
-    
+    console.log('Should show submenu:', false);
     return false;
   })();
 
