@@ -184,13 +184,23 @@ export default function ProfilePage() {
       .slice(0, 2)
   }
 
+  const headerProps = {
+    title: "Mi Perfil",
+    showSearch: false,
+    actions: (
+      <Button
+        onClick={handleSave}
+        disabled={updateProfileMutation.isPending}
+        className="h-8 px-3 text-sm"
+      >
+        {updateProfileMutation.isPending ? 'Guardando...' : 'Guardar'}
+      </Button>
+    )
+  }
+
   if (isLoading) {
     return (
-      <CustomPageLayout
-        icon={User}
-        title="Mi Perfil"
-        showSearch={false}
-      >
+      <Layout headerProps={headerProps}>
         <div className="space-y-6">
           <Card className="animate-pulse">
             <CardHeader>
@@ -202,16 +212,13 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
         </div>
-      
+      </Layout>
     )
   }
 
   if (error) {
-      <CustomPageLayout
-        icon={User}
-        title="Mi Perfil"
-        showSearch={false}
-      >
+    return (
+      <Layout headerProps={headerProps}>
         <Card>
           <CardContent className="pt-6">
             <div className="text-center py-8">
@@ -222,7 +229,7 @@ export default function ProfilePage() {
             </div>
           </CardContent>
         </Card>
-      
+      </Layout>
     )
   }
 
