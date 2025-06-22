@@ -18,8 +18,10 @@ export default function Organizations() {
   const { data, isLoading, error, refetch } = useCurrentUser()
   const [searchValue, setSearchValue] = useState("")
   const [activeFilter, setActiveFilter] = useState<FilterType>('all')
-  const [editingOrganization, setEditingOrganization] = useState<any>(null)
-  const [showNewOrgModal, setShowNewOrgModal] = useState(false)
+  const [showNewModal, setShowNewModal] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [selectedOrganization, setSelectedOrganization] = useState<any>(null)
+  const [deletingOrganization, setDeletingOrganization] = useState<any>(null)
 
   // Mutation for selecting an organization
   const selectOrganizationMutation = useMutation({
@@ -45,7 +47,7 @@ export default function Organizations() {
     return data.organizations
   }, [data])
 
-  const selectedOrganization = data?.organization
+  const currentOrganization = data?.organization
 
   // Filter organizations based on search and filter type
   const filteredOrganizations = useMemo(() => {
@@ -237,7 +239,7 @@ export default function Organizations() {
         
         <div className="space-y-3">
         {filteredOrganizations.map((org) => {
-          const isSelected = org.id === selectedOrganization?.id
+          const isSelected = org.id === currentOrganization?.id
           const isSelecting = selectOrganizationMutation.isPending && selectOrganizationMutation.variables === org.id
 
           return (
