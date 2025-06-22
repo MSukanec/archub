@@ -64,7 +64,7 @@ export function Header() {
   const currentProject = projects.find(p => p.id === userData?.preferences?.last_project_id);
 
   return (
-    <header className="h-10 border-b border-[var(--sidebar-border)] bg-[var(--sidebar-bg)] flex items-center">
+    <header className="sticky top-0 z-50 h-10 border-b border-[var(--sidebar-border)] bg-[var(--sidebar-bg)] flex items-center">
       {/* Logo */}
       <div className="w-10 h-10 flex items-center justify-center border-r border-[var(--sidebar-border)]">
         <span className="text-lg font-bold text-[var(--sidebar-fg)]">A</span>

@@ -42,7 +42,6 @@ export function Layout({ children }: LayoutProps) {
         className="transition-all duration-300 ease-in-out"
         style={{ 
           marginLeft: isExpanded ? '240px' : '40px',
-          marginTop: '40px',
           minHeight: 'calc(100vh - 40px)'
         }}
       >
