@@ -29,6 +29,7 @@ import { supabase } from '@/lib/supabase'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import { NewProjectModal } from '@/modals/NewProjectModal'
+import { useNavigationStore } from '@/stores/navigationStore'
 
 type FilterType = 'all' | 'active' | 'completed' | 'on-hold' | 'planning'
 
@@ -71,6 +72,7 @@ export default function Projects() {
   const [editingProject, setEditingProject] = useState<Project | null>(null)
   const [deletingProject, setDeletingProject] = useState<Project | null>(null)
   const { toast } = useToast()
+  const { setSidebarContext } = useNavigationStore()
 
   // Mutation for selecting a project
   const selectProjectMutation = useMutation({
@@ -161,6 +163,7 @@ export default function Projects() {
 
   const handleSelectProject = (projectId: string) => {
     selectProjectMutation.mutate(projectId)
+    setSidebarContext('project')
   }
 
   const handleEditProject = (project: Project) => {
