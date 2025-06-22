@@ -1,202 +1,134 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { useCurrentUser } from "@/hooks/use-current-user";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/lib/supabase";
-import { useMutation } from "@tanstack/react-query";
-import { queryClient } from "@/lib/queryClient";
+import { useCurrentUser } from "@/hooks/use-current-user";
 import {
   Home,
   Users,
   Building,
-  Settings,
-  Moon,
   Sun,
+  Moon,
   UserCircle,
-  FileText,
-  DollarSign,
+  Settings,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useMutation } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
+import { queryClient } from "@/lib/queryClient";
 
-// Default organization sidebar items
+// Ítems del sidebar (por ahora solo organización)
 const organizationItems = [
-  { label: 'Dashboard', href: '/dashboard', icon: Home },
-  { label: 'Contactos', href: '/contactos', icon: Users },
-  { label: 'Gestión de Organizaciones', href: '/organizaciones', icon: Building },
+  { label: "Dashboard", href: "/dashboard", icon: Home },
+  { label: "Contactos", href: "/contactos", icon: Users },
+  {
+    label: "Gestión de Organizaciones",
+    href: "/organizaciones",
+    icon: Building,
+  },
 ];
-
-// TODO: Add other sidebar contexts (project, design, construction, finance)
-const getSidebarItems = (context: string) => {
-  switch (context) {
-    case 'organization':
-    default:
-      return organizationItems;
-  }
-};
 
 export function Sidebar() {
   const [location] = useLocation();
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const { data: userData } = useCurrentUser();
-  
-  // For now, always show organization context
-  // TODO: Make this dynamic based on which breadcrumb is clicked
-  const currentContext = 'organization';
-  const currentItems = getSidebarItems(currentContext);
 
-
-
-  // Theme toggle mutation
+  // Mutaciones
   const toggleThemeMutation = useMutation({
     mutationFn: async () => {
-      if (!supabase || !userData?.preferences?.id) {
-        throw new Error('Missing required data');
-      }
-      
-      const newTheme = userData.preferences.theme === 'light' ? 'dark' : 'light';
+      if (!userData?.preferences?.id) return;
+      const newTheme = userData.preferences.theme === "dark" ? "light" : "dark";
       const { error } = await supabase
-        .from('user_preferences')
+        .from("user_preferences")
         .update({ theme: newTheme })
-        .eq('id', userData.preferences.id);
-      
+        .eq("id", userData.preferences.id);
       if (error) throw error;
       return newTheme;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-    }
-  });
-
-  // Sidebar docking toggle mutation
-  const toggleSidebarDockMutation = useMutation({
-    mutationFn: async () => {
-      if (!supabase || !userData?.preferences?.id) {
-        throw new Error('Missing required data');
-      }
-      
-      const newDocked = !userData.preferences.sidebar_docked;
-      const { error } = await supabase
-        .from('user_preferences')
-        .update({ sidebar_docked: newDocked })
-        .eq('id', userData.preferences.id);
-      
-      if (error) throw error;
-      return newDocked;
+      queryClient.invalidateQueries({ queryKey: ["current-user"] });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-    }
   });
-
-
-
-
-
-
 
   return (
     <aside
       className={cn(
-        "fixed left-0 top-10 h-[calc(100vh-40px)] bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] flex flex-col z-40 transition-all duration-200",
-        isExpanded ? "w-64" : "w-12"
+        "fixed top-10 left-0 z-40 h-[calc(100vh-40px)] border-r transition-all duration-300",
+        "bg-[var(--sidebar-bg)] border-[var(--sidebar-border)]",
+        isHovered ? "w-52" : "w-10",
       )}
-      style={{
-        backgroundColor: 'var(--sidebar-bg)',
-        borderColor: 'var(--sidebar-border)'
-      }}
-      onMouseEnter={() => setIsExpanded(true)}
-      onMouseLeave={() => setIsExpanded(false)}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Navigation Items */}
-      <nav className="flex-1 p-2">
-        {currentItems.map((item) => (
-          <Link key={item.href} href={item.href}>
-            <Button
-              variant="ghost"
-              className={cn(
-                "w-full justify-start h-9 mb-1 text-sm font-normal",
-                "hover:bg-[var(--sidebar-hover-bg)]",
-                location === item.href && "bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-fg)]",
-                !isExpanded && "px-2" // Centered when collapsed
-              )}
-              style={{
-                backgroundColor: location === item.href ? 'var(--sidebar-active-bg)' : 'transparent',
-                color: location === item.href ? 'var(--sidebar-active-fg)' : 'var(--sidebar-fg)'
-              }}
-            >
-              <item.icon className={cn("h-4 w-4", isExpanded && "mr-3")} />
-              {isExpanded && <span>{item.label}</span>}
-            </Button>
-          </Link>
-        ))}
+      <nav className="flex flex-col items-start gap-1 p-2">
+        {organizationItems.map(({ href, icon: Icon, label }) => {
+          const isActive = location === href;
+          return (
+            <Link key={href} href={href}>
+              <button
+                className={cn(
+                  "group relative flex items-center h-8 w-8 rounded-md transition-all duration-200",
+                  "hover:bg-[var(--sidebar-hover-bg)]",
+                  isActive &&
+                    "bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-text)]",
+                )}
+              >
+                <Icon className="h-5 w-5 mx-auto text-[var(--sidebar-text)] group-hover:text-[var(--sidebar-active-text)]" />
+                <span
+                  className={cn(
+                    "absolute left-full ml-2 text-sm text-muted",
+                    "opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200",
+                  )}
+                >
+                  {label}
+                </span>
+              </button>
+            </Link>
+          );
+        })}
       </nav>
 
-      {/* Bottom Section */}
-      <div className="p-2 border-t border-[var(--sidebar-border)]">
-        {/* Theme toggle */}
-        <Button
-          variant="ghost"
-          className={cn(
-            "w-full justify-start h-9 mb-1 text-sm font-normal hover:bg-[var(--sidebar-hover-bg)]",
-            !isExpanded && "px-2"
-          )}
+      {/* Separador inferior */}
+      <div className="mt-auto border-t border-[var(--sidebar-border)] p-2 flex flex-col gap-1">
+        {/* Cambiar tema */}
+        <button
           onClick={() => toggleThemeMutation.mutate()}
-          disabled={toggleThemeMutation.isPending}
+          className="group relative flex items-center h-8 w-8 rounded-md transition-all duration-200 hover:bg-[var(--sidebar-hover-bg)]"
         >
-          {userData?.preferences?.theme === 'dark' ? (
-            <Sun className={cn("h-4 w-4", isExpanded && "mr-3")} />
+          {userData?.preferences?.theme === "dark" ? (
+            <Sun className="h-5 w-5 mx-auto text-[var(--sidebar-text)]" />
           ) : (
-            <Moon className={cn("h-4 w-4", isExpanded && "mr-3")} />
+            <Moon className="h-5 w-5 mx-auto text-[var(--sidebar-text)]" />
           )}
-          {isExpanded && <span>Cambiar tema</span>}
-        </Button>
+          <span className="absolute left-full ml-2 text-sm opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200">
+            Cambiar tema
+          </span>
+        </button>
 
-        {/* Profile */}
+        {/* Perfil */}
         <Link href="/perfil">
-          <Button
-            variant="ghost"
-            className={cn(
-              "w-full justify-start h-9 mb-1 text-sm font-normal",
-              "hover:bg-[var(--sidebar-hover-bg)]",
-              location === '/perfil' && "bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-fg)]",
-              !isExpanded && "px-2"
-            )}
-            style={{
-              backgroundColor: location === '/perfil' ? 'var(--sidebar-active-bg)' : 'transparent',
-              color: location === '/perfil' ? 'var(--sidebar-active-fg)' : 'var(--sidebar-fg)'
-            }}
-          >
+          <button className="group relative flex items-center h-8 w-8 rounded-md transition-all duration-200 hover:bg-[var(--sidebar-hover-bg)]">
             {userData?.user?.avatar_url ? (
-              <img 
-                src={userData.user.avatar_url} 
-                alt="Avatar"
-                className={cn("w-4 h-4 rounded-full", isExpanded && "mr-3")}
+              <img
+                src={userData.user.avatar_url}
+                className="h-5 w-5 rounded-full mx-auto"
               />
             ) : (
-              <UserCircle className={cn("h-4 w-4", isExpanded && "mr-3")} />
+              <UserCircle className="h-5 w-5 mx-auto text-[var(--sidebar-text)]" />
             )}
-            {isExpanded && <span>Mi Perfil</span>}
-          </Button>
+            <span className="absolute left-full ml-2 text-sm opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200">
+              Mi perfil
+            </span>
+          </button>
         </Link>
 
-        {/* Settings */}
+        {/* Configuración */}
         <Link href="/configuracion">
-          <Button
-            variant="ghost"
-            className={cn(
-              "w-full justify-start h-9 text-sm font-normal",
-              "hover:bg-[var(--sidebar-hover-bg)]",
-              location === '/configuracion' && "bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-fg)]",
-              !isExpanded && "px-2"
-            )}
-            style={{
-              backgroundColor: location === '/configuracion' ? 'var(--sidebar-active-bg)' : 'transparent',
-              color: location === '/configuracion' ? 'var(--sidebar-active-fg)' : 'var(--sidebar-fg)'
-            }}
-          >
-            <Settings className={cn("h-4 w-4", isExpanded && "mr-3")} />
-            {isExpanded && <span>Configuración</span>}
-          </Button>
+          <button className="group relative flex items-center h-8 w-8 rounded-md transition-all duration-200 hover:bg-[var(--sidebar-hover-bg)]">
+            <Settings className="h-5 w-5 mx-auto text-[var(--sidebar-text)]" />
+            <span className="absolute left-full ml-2 text-sm opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200">
+              Configuración
+            </span>
+          </button>
         </Link>
       </div>
     </aside>
