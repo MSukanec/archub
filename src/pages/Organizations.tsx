@@ -184,22 +184,22 @@ export default function Organizations() {
     return (
       <Layout headerProps={headerProps}>
         <CustomPageLayout>
-        <div className="space-y-6">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center py-8">
-                <Building className="h-12 w-12 text-[var(--text-muted)] mx-auto mb-4" />
-                <p className="text-lg font-medium text-[var(--text-muted)] mb-2">No se encontraron organizaciones</p>
-                <p className="text-sm text-[var(--text-muted)]">
-                  {searchValue || activeFilter !== 'all' 
-                    ? "Intenta ajustar tu búsqueda o filtros" 
-                    : "Aún no eres miembro de ninguna organización."
-                  }
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+          <div className="space-y-6">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center py-8">
+                  <Building className="h-12 w-12 text-[var(--text-muted)] mx-auto mb-4" />
+                  <p className="text-lg font-medium text-[var(--text-muted)] mb-2">No se encontraron organizaciones</p>
+                  <p className="text-sm text-[var(--text-muted)]">
+                    {searchValue || activeFilter !== 'all' 
+                      ? "Intenta ajustar tu búsqueda o filtros" 
+                      : "Aún no eres miembro de ninguna organización."
+                    }
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </CustomPageLayout>
       </Layout>
     )
@@ -208,9 +208,9 @@ export default function Organizations() {
   return (
     <Layout headerProps={headerProps}>
       <CustomPageLayout>
-      {/* Encabezados de columnas */}
-      <div className="w-full px-4 py-2 border-b border-border/50 mb-3">
-        <div className="flex items-center justify-between w-full text-xs font-medium text-muted-foreground uppercase tracking-wide">
+        {/* Encabezados de columnas */}
+        <div className="w-full px-4 py-2 border-b border-border/50 mb-3">
+          <div className="flex items-center justify-between w-full text-xs font-medium text-muted-foreground uppercase tracking-wide">
           {/* Fecha */}
           <div className="flex-shrink-0 w-24">
             Fecha

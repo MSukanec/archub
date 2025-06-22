@@ -67,11 +67,13 @@ interface Project {
 export default function Projects() {
   const { data, isLoading, error, refetch } = useCurrentUser()
   const { data: projectsData, isLoading: projectsLoading, error: projectsError } = useProjects(data?.organization?.id)
-  const [searchValue, setSearchValue] = useState("")
+  const [searchTerm, setSearchTerm] = useState("")
   const [activeFilter, setActiveFilter] = useState<FilterType>('all')
-  const [showNewProjectModal, setShowNewProjectModal] = useState(false)
+  const [showModal, setShowModal] = useState(false)
   const [editingProject, setEditingProject] = useState<Project | null>(null)
   const [deletingProject, setDeletingProject] = useState<Project | null>(null)
+  const [sortBy, setSortBy] = useState('created_at')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const { toast } = useToast()
   const { setSidebarContext } = useNavigationStore()
 
@@ -258,36 +260,70 @@ export default function Projects() {
     return { name: creatorName, initials: creatorInitials, avatar: data?.user?.avatar_url || '' }
   }
 
+  const headerProps = {
+    title: "Gestión de Proyectos",
+    showSearch: true,
+    searchValue: searchTerm,
+    onSearchChange: setSearchTerm,
+    showFilters: true,
+    customFilters: (
+      <div className="space-y-3">
+        <div className="space-y-2">
+          <label className="text-xs font-medium">Ordenar por</label>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="w-full h-8 text-xs border border-gray-200 rounded px-2"
+          >
+            <option value="created_at">Fecha</option>
+            <option value="name">Nombre</option>
+          </select>
+        </div>
+        <div className="space-y-2">
+          <label className="text-xs font-medium">Dirección</label>
+          <select
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
+            className="w-full h-8 text-xs border border-gray-200 rounded px-2"
+          >
+            <option value="desc">Descendente</option>
+            <option value="asc">Ascendente</option>
+          </select>
+        </div>
+      </div>
+    ),
+    onClearFilters: handleClearFilters,
+    actions: (
+      <Button 
+        onClick={() => setShowModal(true)}
+        className="h-8 px-3 text-sm"
+      >
+        <Plus className="h-3 w-3 mr-1" />
+        Nuevo Proyecto
+      </Button>
+    )
+  };
+
   if (isLoading || projectsLoading) {
     return (
-      <CustomPageLayout
-        icon={Folder}
-        title="Proyectos"
-        actions={actions}
-        searchValue={searchValue}
-        onSearchChange={setSearchValue}
-        filters={filters}
-        onClearFilters={handleClearFilters}
-      >
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center py-8">
-              <p className="text-lg font-medium text-muted-foreground">Cargando proyectos...</p>
-            </div>
-          </CardContent>
-        </Card>
-      </CustomPageLayout>
+      <Layout headerProps={headerProps}>
+        <CustomPageLayout>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center py-8">
+                <p className="text-lg font-medium text-muted-foreground">Cargando proyectos...</p>
+              </div>
+            </CardContent>
+          </Card>
+        </CustomPageLayout>
+      </Layout>
     )
   }
 
   if (error || projectsError) {
     return (
-      <CustomPageLayout
-        icon={Folder}
-        title="Proyectos"
-        actions={actions}
-        searchValue={searchValue}
-        onSearchChange={setSearchValue}
+      <Layout headerProps={headerProps}>
+        <CustomPageLayout>
         filters={filters}
         onClearFilters={handleClearFilters}
       >
