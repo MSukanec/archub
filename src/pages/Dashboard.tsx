@@ -125,7 +125,6 @@ export default function Dashboard() {
 
   return (
     <Layout headerProps={headerProps}>
-      <CustomPageLayout>
       <div className="space-y-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -220,7 +219,6 @@ export default function Dashboard() {
           </Card>
         </div>
       </div>
-      </CustomPageLayout>
     </Layout>
   )
 }
