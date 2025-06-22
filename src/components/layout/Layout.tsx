@@ -50,7 +50,7 @@ export function Layout({ children, headerProps }: LayoutProps) {
       <Header {...headerProps} />
       <Sidebar />
       <main 
-        className="transition-all duration-300 ease-in-out"
+        className="transition-all duration-300 ease-in-out flex-1 overflow-auto px-4 pt-4 pb-8"
         style={{ 
           marginLeft: isExpanded ? '240px' : '40px',
           minHeight: 'calc(100vh - 40px)'
