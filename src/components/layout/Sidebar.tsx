@@ -128,7 +128,7 @@ export function Sidebar() {
       </div>
 
       {/* Bottom Section - Fixed Buttons */}
-      <div className="py-2 px-1 border-t border-border">
+      <div className="py-2 px-1 border-t border-[var(--sidebar-border)]">
         {/* Settings */}
         <button
           className={cn(

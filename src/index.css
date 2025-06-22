@@ -6,24 +6,21 @@
   /* Layout */
   --layout-bg: hsl(0, 0%, 99%);
   --layout-text: hsl(0, 0%, 35%);
-  --layout-border: hsl(240, 6%, 90%);
+  --layout-border: hsl(240, 6%, 85%);
 
   /* Sidebar */
   --sidebar-bg: hsl(0, 0%, 97%);
-  --sidebar-text: hsl(0, 0%, 50%);
-  --sidebar-border: hsl(0, 0%, 50%);
+  --sidebar-fg: hsl(0, 0%, 35%);
+  --sidebar-secondary-fg: hsl(0, 0%, 50%);
+  --sidebar-border: hsl(0, 0%, 85%);
   --sidebar-hover-bg: hsl(0, 0%, 82%);
   --sidebar-active-bg: hsl(0, 0%, 50%);
   --sidebar-active-text: hsl(0, 0%, 100%);
 
-  /* Header - uses same variables as sidebar */
-  --sidebar-fg: hsl(0, 0%, 35%);
-  --sidebar-secondary-fg: hsl(0, 0%, 55%);
-
   /* Cards */
   --card-bg: hsl(0, 0%, 97%);
   --card-text: hsl(0, 0%, 35%);
-  --card-border: hsl(240, 6%, 90%);
+  --card-border: hsl(0, 0%, 85%);
   --card-hover-bg: hsl(240, 3%, 98%);
 
   /* Buttons - Primary */
@@ -107,7 +104,8 @@
 
   /* Sidebar */
   --sidebar-bg: hsl(0, 0%, 14%);
-  --sidebar-text: hsl(0, 0%, 98%);
+  --sidebar-fg: hsl(0, 0%, 90%);
+  --sidebar-secondary-fg: hsl(0, 0%, 70%);
   --sidebar-border: hsl(240, 8%, 15%);
   --sidebar-hover-bg: hsl(0, 0%, 8%);
   --sidebar-active-bg: hsl(0, 0%, 8%);
