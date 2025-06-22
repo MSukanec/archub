@@ -12,7 +12,7 @@ import Organizations from "@/pages/Organizations";
 
 import Movements from "@/pages/Movements";
 import SiteLogs from "@/pages/SiteLogs";
-import ProfilePage from "@/pages/ProfilePage";
+
 import Contacts from "@/pages/Contacts";
 import { AdminOrganizations } from "@/pages/AdminOrganizations";
 import { AdminUsers } from "@/pages/AdminUsers";
@@ -104,7 +104,7 @@ function Router() {
       <Route path="/perfil">
         <ProtectedRoute>
           <Layout>
-            <ProfilePage />
+            <Dashboard />
           </Layout>
         </ProtectedRoute>
       </Route>
