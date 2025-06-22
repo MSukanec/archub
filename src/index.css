@@ -16,6 +16,14 @@
   --sidebar-active-bg: hsl(0, 0%, 15%);
   --sidebar-active-text: hsl(0, 0%, 100%);
 
+  /* Secondary Sidebar */
+  --sidebar-secondary-bg: hsl(0, 0%, 99%);
+  --sidebar-secondary-fg: hsl(0, 0%, 35%);
+  --sidebar-secondary-border: hsl(240, 6%, 85%);
+  --sidebar-secondary-hover-bg: hsl(0, 0%, 92%);
+  --sidebar-secondary-active-bg: hsl(0, 0%, 15%);
+  --sidebar-secondary-active-fg: hsl(0, 0%, 100%);
+
   /* Cards */
   --card-bg: hsl(0, 0%, 97%);
   --card-text: hsl(0, 0%, 35%);
