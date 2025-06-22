@@ -79,7 +79,7 @@ export function Header() {
             className="h-8 px-2 text-sm font-medium text-[var(--sidebar-fg)] hover:bg-[var(--sidebar-hover-bg)]"
             onClick={() => {
               setSidebarContext('organization');
-              navigate('/organizaciones');
+              navigate('/proyectos');
             }}
           >
             {currentOrganization?.name || 'Sin organización'}
