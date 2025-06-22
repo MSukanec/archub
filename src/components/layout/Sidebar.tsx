@@ -99,27 +99,37 @@ export function Sidebar() {
       onMouseLeave={() => setHovered(false)}
     >
       {/* Navigation Items */}
-      <div className="flex-1">
+      <div className="flex-1 p-1">
         {navigationItems.map((item) => (
           <button
             key={item.href}
             className={cn(
-              'flex items-center w-full h-8 transition-all duration-300 ease-in-out',
+              'flex items-center justify-center w-full h-8 transition-all duration-300 ease-in-out',
               location === item.href 
-                ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)] font-semibold' 
-                : 'hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)] transition-colors'
+                ? 'bg-[var(--menues-active-bg)]' 
+                : 'hover:bg-[var(--menues-hover-bg)] transition-colors'
             )}
             onClick={() => navigate(item.href)}
             title={!isExpanded ? item.label : undefined}
           >
-            {/* Icon container - fixed position, always centered when collapsed */}
+            {/* Icon container - always centered */}
             <div className="flex items-center justify-center w-8 h-8 flex-shrink-0">
-              <item.icon className="h-4 w-4 text-[var(--menues-fg)]" />
+              <item.icon className={cn(
+                "h-4 w-4",
+                location === item.href 
+                  ? 'text-[var(--menues-active-fg)]' 
+                  : 'text-[var(--menues-fg)] group-hover:text-[var(--menues-hover-fg)]'
+              )} />
             </div>
             
             {/* Label - only show when expanded */}
             {isExpanded && (
-              <span className="ml-2 text-sm whitespace-nowrap overflow-hidden text-[var(--menues-fg)]">
+              <span className={cn(
+                "ml-2 text-sm whitespace-nowrap overflow-hidden",
+                location === item.href 
+                  ? 'text-[var(--menues-active-fg)]' 
+                  : 'text-[var(--menues-fg)] group-hover:text-[var(--menues-hover-fg)]'
+              )}>
                 {item.label}
               </span>
             )}
@@ -128,23 +138,33 @@ export function Sidebar() {
       </div>
 
       {/* Bottom Section - Fixed Buttons */}
-      <div className="border-t border-[var(--menues-border)]">
+      <div className="border-t border-[var(--menues-border)] p-1">
         {/* Settings */}
         <button
           className={cn(
-            'flex items-center w-full h-8 transition-all duration-300 ease-in-out',
+            'flex items-center justify-center w-full h-8 transition-all duration-300 ease-in-out',
             location === '/configuracion' 
-              ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)] font-semibold' 
-              : 'hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)] transition-colors'
+              ? 'bg-[var(--menues-active-bg)]' 
+              : 'hover:bg-[var(--menues-hover-bg)] transition-colors'
           )}
           onClick={() => navigate('/configuracion')}
           title={!isExpanded ? 'Configuración' : undefined}
         >
           <div className="flex items-center justify-center w-8 h-8 flex-shrink-0">
-            <Settings className="h-4 w-4 text-[var(--menues-fg)]" />
+            <Settings className={cn(
+              "h-4 w-4",
+              location === '/configuracion' 
+                ? 'text-[var(--menues-active-fg)]' 
+                : 'text-[var(--menues-fg)] group-hover:text-[var(--menues-hover-fg)]'
+            )} />
           </div>
           {isExpanded && (
-            <span className="ml-2 text-sm whitespace-nowrap overflow-hidden text-[var(--sidebar-fg)]">
+            <span className={cn(
+              "ml-2 text-sm whitespace-nowrap overflow-hidden",
+              location === '/configuracion' 
+                ? 'text-[var(--menues-active-fg)]' 
+                : 'text-[var(--menues-fg)] group-hover:text-[var(--menues-hover-fg)]'
+            )}>
               Configuración
             </span>
           )}
@@ -153,8 +173,8 @@ export function Sidebar() {
         {/* Theme Toggle */}
         <button
           className={cn(
-            'flex items-center w-full h-8 transition-all duration-300 ease-in-out',
-            'hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)] transition-colors'
+            'flex items-center justify-center w-full h-8 transition-all duration-300 ease-in-out',
+            'hover:bg-[var(--menues-hover-bg)] transition-colors'
           )}
           onClick={() => toggleThemeMutation.mutate()}
           disabled={toggleThemeMutation.isPending}
@@ -162,13 +182,13 @@ export function Sidebar() {
         >
           <div className="flex items-center justify-center w-8 h-8 flex-shrink-0">
             {userData?.preferences?.theme === 'dark' ? (
-              <Sun className="h-4 w-4 text-[var(--menues-fg)]" />
+              <Sun className="h-4 w-4 text-[var(--menues-fg)] group-hover:text-[var(--menues-hover-fg)]" />
             ) : (
-              <Moon className="h-4 w-4 text-[var(--menues-fg)]" />
+              <Moon className="h-4 w-4 text-[var(--menues-fg)] group-hover:text-[var(--menues-hover-fg)]" />
             )}
           </div>
           {isExpanded && (
-            <span className="ml-2 text-sm whitespace-nowrap overflow-hidden text-[var(--menues-fg)]">
+            <span className="ml-2 text-sm whitespace-nowrap overflow-hidden text-[var(--menues-fg)] group-hover:text-[var(--menues-hover-fg)]">
               Cambiar tema
             </span>
           )}
@@ -177,10 +197,10 @@ export function Sidebar() {
         {/* Profile */}
         <button
           className={cn(
-            'flex items-center w-full h-8 transition-all duration-300 ease-in-out',
+            'flex items-center justify-center w-full h-8 transition-all duration-300 ease-in-out',
             location === '/perfil' 
-              ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)] font-semibold' 
-              : 'hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)] transition-colors'
+              ? 'bg-[var(--menues-active-bg)]' 
+              : 'hover:bg-[var(--menues-hover-bg)] transition-colors'
           )}
           onClick={() => navigate('/perfil')}
           title={!isExpanded ? 'Mi Perfil' : undefined}
@@ -193,7 +213,12 @@ export function Sidebar() {
                 className="w-4 h-4 rounded-full"
               />
             ) : (
-              <UserCircle className="h-4 w-4 text-[var(--menues-fg)]" />
+              <UserCircle className={cn(
+                "h-4 w-4",
+                location === '/perfil' 
+                  ? 'text-[var(--menues-active-fg)]' 
+                  : 'text-[var(--menues-fg)] group-hover:text-[var(--menues-hover-fg)]'
+              )} />
             )}
           </div>
           {isExpanded && (
