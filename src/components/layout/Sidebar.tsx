@@ -14,10 +14,7 @@ import {
   Building,
   FileText,
   DollarSign,
-  FolderOpen,
-  Palette,
-  HardHat,
-  Calculator
+  FolderOpen
 } from "lucide-react";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
@@ -41,21 +38,6 @@ export function Sidebar() {
       { icon: FolderOpen, label: 'Gestión de Proyectos', href: '/proyectos' },
       { icon: FileText, label: 'Bitácora de Obra', href: '/bitacora' },
       { icon: DollarSign, label: 'Movimientos', href: '/movimientos' },
-    ],
-    design: [
-      { icon: Palette, label: 'Planos', href: '/planos' },
-      { icon: FileText, label: 'Especificaciones', href: '/especificaciones' },
-      { icon: Building, label: 'Modelos 3D', href: '/modelos' },
-    ],
-    construction: [
-      { icon: HardHat, label: 'Avances de Obra', href: '/avances' },
-      { icon: FileText, label: 'Reportes Diarios', href: '/reportes' },
-      { icon: Users, label: 'Equipos de Trabajo', href: '/equipos' },
-    ],
-    finance: [
-      { icon: DollarSign, label: 'Presupuestos', href: '/presupuestos' },
-      { icon: Calculator, label: 'Costos', href: '/costos' },
-      { icon: FileText, label: 'Facturas', href: '/facturas' },
     ]
   };
 
@@ -64,11 +46,12 @@ export function Sidebar() {
   // Theme toggle mutation
   const toggleThemeMutation = useMutation({
     mutationFn: async () => {
+      const currentTheme = userData?.preferences?.theme || 'light';
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      
       if (!supabase || !userData?.preferences?.id) {
         throw new Error('Missing required data');
       }
-      
-      const newTheme = userData.preferences.theme === 'dark' ? 'light' : 'dark';
       
       const { error } = await supabase
         .from('user_preferences')
@@ -76,7 +59,6 @@ export function Sidebar() {
         .eq('id', userData.preferences.id);
       
       if (error) throw error;
-      
       return newTheme;
     },
     onSuccess: () => {
@@ -87,121 +69,167 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "fixed left-0 top-9 h-[calc(100vh-36px)] bg-[var(--menues-bg)] border-r border-[var(--menues-border)] flex flex-col z-40 text-[var(--menues-fg)]",
+        "fixed left-0 top-9 h-[calc(100vh-36px)] bg-[var(--menues-bg)] border-r border-[var(--menues-border)] flex flex-col z-40",
         "transition-all duration-300 ease-in-out",
         isExpanded ? "w-[240px]" : "w-[40px]"
       )}
-      style={{
-        backgroundColor: 'var(--menues-bg)',
-        borderColor: 'var(--menues-border)'
-      }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
       {/* Navigation Items */}
-      <div className="flex-1">
-        {navigationItems.map((item) => (
-          <button
-            key={item.href}
-            className={cn(
-              'flex items-center w-full h-8 transition-all duration-300 ease-in-out',
-              location === item.href 
-                ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)] font-semibold' 
-                : 'hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)] transition-colors'
-            )}
-            onClick={() => navigate(item.href)}
-            title={!isExpanded ? item.label : undefined}
-          >
-            {/* Icon container - fixed position, always centered when collapsed */}
-            <div className="flex items-center justify-center w-8 h-8 flex-shrink-0">
-              <item.icon className="h-4 w-4 text-[var(--menues-fg)]" />
-            </div>
-            
-            {/* Label - only show when expanded */}
-            {isExpanded && (
-              <span className="ml-2 text-sm whitespace-nowrap overflow-hidden text-[var(--menues-fg)]">
-                {item.label}
-              </span>
-            )}
-          </button>
-        ))}
+      <div className="flex-1 py-2">
+        <div className="space-y-1 px-2">
+          {navigationItems.map((item) => (
+            <button
+              key={item.href}
+              className={cn(
+                'flex items-center w-full h-8 px-2 py-2 rounded-md transition-all duration-200 ease-in-out',
+                'group relative',
+                location === item.href 
+                  ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]' 
+                  : 'text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]'
+              )}
+              onClick={() => navigate(item.href)}
+              title={!isExpanded ? item.label : undefined}
+            >
+              {/* Icon - always centered when collapsed */}
+              <div className={cn(
+                "flex items-center justify-center flex-shrink-0",
+                isExpanded ? "w-4 h-4" : "w-full h-full"
+              )}>
+                <item.icon className={cn(
+                  "w-4 h-4",
+                  location === item.href 
+                    ? 'text-[var(--menues-active-fg)]'
+                    : 'text-[var(--menues-fg)] group-hover:text-[var(--menues-hover-fg)]'
+                )} />
+              </div>
+              
+              {/* Label - only show when expanded */}
+              {isExpanded && (
+                <span className={cn(
+                  "ml-2 text-sm font-medium whitespace-nowrap",
+                  location === item.href 
+                    ? 'text-[var(--menues-active-fg)]'
+                    : 'text-[var(--menues-fg)] group-hover:text-[var(--menues-hover-fg)]'
+                )}>
+                  {item.label}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Bottom Section - Fixed Buttons */}
-      <div className="border-t border-[var(--menues-border)]">
-        {/* Settings */}
-        <button
-          className={cn(
-            'flex items-center w-full h-8 transition-all duration-300 ease-in-out',
-            location === '/configuracion' 
-              ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)] font-semibold' 
-              : 'hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)] transition-colors'
-          )}
-          onClick={() => navigate('/configuracion')}
-          title={!isExpanded ? 'Configuración' : undefined}
-        >
-          <div className="flex items-center justify-center w-8 h-8 flex-shrink-0">
-            <Settings className="h-4 w-4 text-[var(--menues-fg)]" />
-          </div>
-          {isExpanded && (
-            <span className="ml-2 text-sm whitespace-nowrap overflow-hidden text-[var(--sidebar-fg)]">
-              Configuración
-            </span>
-          )}
-        </button>
-
-        {/* Theme Toggle */}
-        <button
-          className={cn(
-            'flex items-center w-full h-8 transition-all duration-300 ease-in-out',
-            'hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)] transition-colors'
-          )}
-          onClick={() => toggleThemeMutation.mutate()}
-          disabled={toggleThemeMutation.isPending}
-          title={!isExpanded ? 'Cambiar tema' : undefined}
-        >
-          <div className="flex items-center justify-center w-8 h-8 flex-shrink-0">
-            {userData?.preferences?.theme === 'dark' ? (
-              <Sun className="h-4 w-4 text-[var(--menues-fg)]" />
-            ) : (
-              <Moon className="h-4 w-4 text-[var(--menues-fg)]" />
+      <div className="border-t border-[var(--menues-border)] py-2">
+        <div className="space-y-1 px-2">
+          {/* Settings */}
+          <button
+            className={cn(
+              'flex items-center w-full h-8 px-2 py-2 rounded-md transition-all duration-200 ease-in-out',
+              'group relative',
+              location === '/configuracion' 
+                ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]' 
+                : 'text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]'
             )}
-          </div>
-          {isExpanded && (
-            <span className="ml-2 text-sm whitespace-nowrap overflow-hidden text-[var(--menues-fg)]">
-              Cambiar tema
-            </span>
-          )}
-        </button>
-
-        {/* Profile */}
-        <button
-          className={cn(
-            'flex items-center w-full h-8 transition-all duration-300 ease-in-out',
-            location === '/perfil' 
-              ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)] font-semibold' 
-              : 'hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)] transition-colors'
-          )}
-          onClick={() => navigate('/perfil')}
-          title={!isExpanded ? 'Mi Perfil' : undefined}
-        >
-          <div className="flex items-center justify-center w-8 h-8 flex-shrink-0">
-            {userData?.user?.avatar_url ? (
-              <img 
-                src={userData.user.avatar_url} 
-                alt="Avatar"
-                className="w-4 h-4 rounded-full"
-              />
-            ) : (
-              <UserCircle className="h-4 w-4 text-[var(--menues-fg)]" />
+            onClick={() => navigate('/configuracion')}
+            title={!isExpanded ? 'Configuración' : undefined}
+          >
+            <div className={cn(
+              "flex items-center justify-center flex-shrink-0",
+              isExpanded ? "w-4 h-4" : "w-full h-full"
+            )}>
+              <Settings className={cn(
+                "w-4 h-4",
+                location === '/configuracion' 
+                  ? 'text-[var(--menues-active-fg)]'
+                  : 'text-[var(--menues-fg)] group-hover:text-[var(--menues-hover-fg)]'
+              )} />
+            </div>
+            {isExpanded && (
+              <span className={cn(
+                "ml-2 text-sm font-medium whitespace-nowrap",
+                location === '/configuracion' 
+                  ? 'text-[var(--menues-active-fg)]'
+                  : 'text-[var(--menues-fg)] group-hover:text-[var(--menues-hover-fg)]'
+              )}>
+                Configuración
+              </span>
             )}
-          </div>
-          {isExpanded && (
-            <span className="ml-2 text-sm whitespace-nowrap overflow-hidden text-[var(--menues-fg)]">
-              Mi Perfil
-            </span>
-          )}
-        </button>
+          </button>
+
+          {/* Theme Toggle */}
+          <button
+            className={cn(
+              'flex items-center w-full h-8 px-2 py-2 rounded-md transition-all duration-200 ease-in-out',
+              'group relative',
+              'text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]'
+            )}
+            onClick={() => toggleThemeMutation.mutate()}
+            disabled={toggleThemeMutation.isPending}
+            title={!isExpanded ? 'Cambiar tema' : undefined}
+          >
+            <div className={cn(
+              "flex items-center justify-center flex-shrink-0",
+              isExpanded ? "w-4 h-4" : "w-full h-full"
+            )}>
+              {userData?.preferences?.theme === 'dark' ? (
+                <Sun className="w-4 h-4 text-[var(--menues-fg)] group-hover:text-[var(--menues-hover-fg)]" />
+              ) : (
+                <Moon className="w-4 h-4 text-[var(--menues-fg)] group-hover:text-[var(--menues-hover-fg)]" />
+              )}
+            </div>
+            {isExpanded && (
+              <span className="ml-2 text-sm font-medium whitespace-nowrap text-[var(--menues-fg)] group-hover:text-[var(--menues-hover-fg)]">
+                Cambiar tema
+              </span>
+            )}
+          </button>
+
+          {/* Profile */}
+          <button
+            className={cn(
+              'flex items-center w-full h-8 px-2 py-2 rounded-md transition-all duration-200 ease-in-out',
+              'group relative',
+              location === '/perfil' 
+                ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]' 
+                : 'text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]'
+            )}
+            onClick={() => navigate('/perfil')}
+            title={!isExpanded ? 'Mi Perfil' : undefined}
+          >
+            <div className={cn(
+              "flex items-center justify-center flex-shrink-0",
+              isExpanded ? "w-4 h-4" : "w-full h-full"
+            )}>
+              {userData?.user?.avatar_url ? (
+                <img 
+                  src={userData.user.avatar_url} 
+                  alt="Avatar"
+                  className="w-4 h-4 rounded-full"
+                />
+              ) : (
+                <UserCircle className={cn(
+                  "w-4 h-4",
+                  location === '/perfil' 
+                    ? 'text-[var(--menues-active-fg)]'
+                    : 'text-[var(--menues-fg)] group-hover:text-[var(--menues-hover-fg)]'
+                )} />
+              )}
+            </div>
+            {isExpanded && (
+              <span className={cn(
+                "ml-2 text-sm font-medium whitespace-nowrap",
+                location === '/perfil' 
+                  ? 'text-[var(--menues-active-fg)]'
+                  : 'text-[var(--menues-fg)] group-hover:text-[var(--menues-hover-fg)]'
+              )}>
+                Mi Perfil
+              </span>
+            )}
+          </button>
+        </div>
       </div>
     </aside>
   );
