@@ -145,7 +145,7 @@ export default function Projects() {
     if (!projectsData) return []
     
     const filtered = projectsData.filter((project) => {
-      const matchesSearch = project.name.toLowerCase().includes(searchValue.toLowerCase())
+      const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase())
       const matchesFilter = activeFilter === 'all' || project.status === activeFilter
       
       return matchesSearch && matchesFilter
@@ -162,7 +162,7 @@ export default function Projects() {
       // If neither or both are selected, sort by creation date (newest first)
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     })
-  }, [projectsData, searchValue, activeFilter, selectedProject])
+  }, [projectsData, searchTerm, activeFilter, selectedProject])
 
   const handleSelectProject = (projectId: string) => {
     selectProjectMutation.mutate(projectId)
@@ -171,7 +171,13 @@ export default function Projects() {
 
   const handleEditProject = (project: Project) => {
     setEditingProject(project)
-    setShowNewProjectModal(true)
+    setShowModal(true)
+  }
+
+  const handleClearFilters = () => {
+    setSearchTerm('')
+    setSortBy('created_at')
+    setSortOrder('desc')
   }
 
   const handleDeleteProject = (project: Project) => {
@@ -191,11 +197,6 @@ export default function Projects() {
     { label: 'En pausa', onClick: () => setActiveFilter('on-hold') },
     { label: 'Planificación', onClick: () => setActiveFilter('planning') },
   ]
-
-  const handleClearFilters = () => {
-    setSearchValue("")
-    setActiveFilter('all')
-  }
 
   const handleNewProject = () => {
     setEditingProject(null)
@@ -324,50 +325,42 @@ export default function Projects() {
     return (
       <Layout headerProps={headerProps}>
         <CustomPageLayout>
-        filters={filters}
-        onClearFilters={handleClearFilters}
-      >
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center py-8">
-              <Folder className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-lg font-medium text-muted-foreground mb-2">Error al cargar proyectos</p>
-              <p className="text-sm text-muted-foreground">
-                Intenta recargar la página o contacta al soporte técnico.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </CustomPageLayout>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center py-8">
+                <Folder className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-lg font-medium text-muted-foreground mb-2">Error al cargar proyectos</p>
+                <p className="text-sm text-muted-foreground">
+                  Intenta recargar la página o contacta al soporte técnico.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </CustomPageLayout>
+      </Layout>
     )
   }
 
   if (!filteredProjects.length) {
     return (
-      <CustomPageLayout
-        icon={Folder}
-        title="Proyectos"
-        actions={actions}
-        searchValue={searchValue}
-        onSearchChange={setSearchValue}
-        filters={filters}
-        onClearFilters={handleClearFilters}
-      >
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center py-8">
-              <Folder className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-lg font-medium text-muted-foreground mb-2">No se encontraron proyectos</p>
-              <p className="text-sm text-muted-foreground">
-                {searchValue || activeFilter !== 'all' 
-                  ? "Intenta ajustar tu búsqueda o filtros" 
-                  : "Aún no hay proyectos en esta organización."
-                }
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </CustomPageLayout>
+      <Layout headerProps={headerProps}>
+        <CustomPageLayout>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center py-8">
+                <Folder className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-lg font-medium text-muted-foreground mb-2">No se encontraron proyectos</p>
+                <p className="text-sm text-muted-foreground">
+                  {searchTerm || activeFilter !== 'all' 
+                    ? "Intenta ajustar tu búsqueda o filtros" 
+                    : "Aún no hay proyectos en esta organización."
+                  }
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </CustomPageLayout>
+      </Layout>
     )
   }
 

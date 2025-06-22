@@ -124,15 +124,8 @@ export default function Dashboard() {
   )
 
   return (
-    <CustomPageLayout
-      icon={Home}
-      title="Dashboard"
-      actions={actions}
-      searchValue={searchValue}
-      onSearchChange={setSearchValue}
-      filters={filters}
-      onClearFilters={() => setSearchValue("")}
-    >
+    <Layout headerProps={headerProps}>
+      <CustomPageLayout>
       <div className="space-y-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
