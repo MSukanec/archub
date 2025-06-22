@@ -99,30 +99,32 @@ export default function Dashboard() {
     }
   ]
 
-  const filters = [
-    { label: "All Projects", onClick: () => console.log("All Projects") },
-    { label: "Active", onClick: () => console.log("Active") },
-    { label: "Completed", onClick: () => console.log("Completed") },
-    { label: "On Hold", onClick: () => console.log("On Hold") },
-    { label: "Last 30 days", onClick: () => console.log("Last 30 days") },
-    { label: "Last 90 days", onClick: () => console.log("Last 90 days") },
-    { label: "This year", onClick: () => console.log("This year") },
-  ]
+  const headerProps = {
+    title: "Panel Principal",
+    showSearch: true,
+    searchValue: searchTerm,
+    onSearchChange: setSearchTerm,
+    showFilters: true,
+    filters: [
+      { label: 'Todos', onClick: () => {} },
+      { label: 'Activos', onClick: () => {} },
+      { label: 'Inactivos', onClick: () => {} },
+    ],
+    actions: (
+      <div className="flex gap-2">
+        <Button variant="outline" size="sm" className="h-8 px-3 text-sm">
+          <Download className="w-3 h-3 mr-1" />
+          Exportar
+        </Button>
+        <Button size="sm" className="h-8 px-3 text-sm">
+          <Plus className="w-3 h-3 mr-1" />
+          Nuevo Elemento
+        </Button>
+      </div>
+    )
+  }
 
-  const actions = (
-    <>
-      <Button variant="outline">
-        <Download className="w-4 h-4 mr-2" />
-        Export
-      </Button>
-      <Button>
-        <Plus className="w-4 h-4 mr-2" />
-        New Project
-      </Button>
-    </>
-  )
-
-    <Layout headerProps={headerProps}>
+  return (
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
         {/* Stats Cards */}

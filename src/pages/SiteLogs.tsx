@@ -264,7 +264,6 @@ export default function SiteLogs() {
   }
 
   if (isLoading) {
-    <Layout headerProps={headerProps}>
       <CustomPageLayout
         icon={FileText}
         title="Bitácora de Obra"
@@ -283,7 +282,6 @@ export default function SiteLogs() {
   }
 
   if (error) {
-    <Layout headerProps={headerProps}>
       <CustomPageLayout
         icon={FileText}
         title="Bitácora de Obra"
@@ -301,7 +299,6 @@ export default function SiteLogs() {
     )
   }
 
-    <Layout headerProps={headerProps}>
     <>
       <CustomPageLayout
         icon={FileText}
@@ -337,7 +334,6 @@ export default function SiteLogs() {
               const isExpanded = expandedCards.has(log.id)
               const creator = getCreator(log.created_by)
               
-    <Layout headerProps={headerProps}>
                 <Collapsible key={log.id} open={isExpanded} onOpenChange={() => toggleCardExpansion(log.id)}>
                   <Card 
                     className={`rounded-none border-x-0 border-t-0 border-b border-[var(--card-border)] ${

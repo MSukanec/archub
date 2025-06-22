@@ -213,7 +213,6 @@ export default function Contacts() {
   }
 
   if (error) {
-    <Layout headerProps={headerProps}>
       <CustomPageLayout
         icon={Users}
         title="Contactos"
@@ -231,7 +230,6 @@ export default function Contacts() {
     );
   }
 
-    <Layout headerProps={headerProps}>
     <>
       <CustomPageLayout
         icon={Users}
