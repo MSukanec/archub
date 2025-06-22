@@ -93,7 +93,7 @@ export function Header({
       <div className="flex items-center gap-2">
         {/* Logo */}
         <div className="w-10 h-10 flex items-center justify-center border-r border-[var(--menues-border)] mr-2">
-          <span className="text-lg font-bold text-[var(--menues-fg)]">A</span>
+          <span className="text-base font-bold leading-none text-[var(--menues-fg)]">A</span>
         </div>
 
         {/* Breadcrumb */}
