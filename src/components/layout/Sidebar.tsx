@@ -1,121 +1,77 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useProjects } from "@/hooks/use-projects";
-import { useSidebarStore } from "@/stores/sidebarStore";
-import { SidebarSubmenu } from "./SidebarSubmenu";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 import { useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import {
-  Home,
-  Building2,
   Building,
-  Folder,
-  Users,
+  Palette,
+  HardHat,
   DollarSign,
-  FileText,
   Settings,
   User,
-  FolderOpen,
   Moon,
   Sun,
-  Sidebar as SidebarIcon,
+  Home,
+  Users,
+  FileText,
+  TrendingUp,
+  ClipboardList,
+  Calculator,
+  UserCircle,
+  Shield,
 } from "lucide-react";
 
-// Define menu structure
-const menuGroups = [
-  {
-    id: 'organizacion',
-    label: 'Organización',
-    icon: Building,
-    items: [
-      { label: 'Dashboard', href: '/dashboard' },
-      { label: 'Contactos', href: '/contactos' }
-    ]
-  },
-  {
-    id: 'proyecto',
-    label: 'Proyecto',
-    icon: Folder,
-    items: [
-      { label: 'Gestión de Proyectos', href: '/proyectos' }
-    ]
-  },
-  {
-    id: 'obra',
-    label: 'Obra',
-    icon: FileText,
-    items: [
-      { label: 'Bitácora de Obra', href: '/bitacora' }
-    ]
-  },
-  {
-    id: 'finanzas',
-    label: 'Finanzas',
-    icon: DollarSign,
-    items: [
-      { label: 'Movimientos', href: '/movimientos' }
-    ]
-  },
-  {
-    id: 'configuracion',
-    label: 'Configuración',
-    icon: Settings,
-    items: [
-      { label: 'Gestión de Organizaciones', href: '/admin/organizaciones' },
-      { label: 'Gestión de Usuarios', href: '/admin/usuarios' },
-      { label: 'Gestión de Tareas', href: '/admin/tareas' }
-    ]
-  },
-  {
-    id: 'perfil',
-    label: 'Perfil',
-    icon: User,
-    items: [
-      { label: 'Mi Perfil', href: '/perfil' },
-      { label: 'Mis Organizaciones', href: '/organizaciones' }
-    ]
+// Define sidebar contexts
+const sidebarContexts = {
+  organizacion: [
+    { label: 'Dashboard', href: '/dashboard', icon: Home },
+    { label: 'Contactos', href: '/contactos', icon: Users },
+    { label: 'Gestión de Organizaciones', href: '/organizaciones', icon: Building },
+  ],
+  diseno: [
+    { label: 'Planos', href: '/planos', icon: FileText },
+    { label: 'Especificaciones', href: '/especificaciones', icon: ClipboardList },
+    { label: 'Aprobaciones', href: '/aprobaciones', icon: Shield },
+  ],
+  obra: [
+    { label: 'Gestión de Proyectos', href: '/proyectos', icon: Building },
+    { label: 'Bitácora de Obra', href: '/bitacora', icon: FileText },
+    { label: 'Avances', href: '/avances', icon: TrendingUp },
+  ],
+  finanzas: [
+    { label: 'Movimientos', href: '/movimientos', icon: DollarSign },
+    { label: 'Presupuestos', href: '/presupuestos', icon: Calculator },
+    { label: 'Reportes', href: '/reportes', icon: TrendingUp },
+  ]
+};
+
+// Define context mapping based on routes
+const getContextFromLocation = (location: string): string => {
+  if (location.startsWith('/planos') || location.startsWith('/especificaciones') || location.startsWith('/aprobaciones')) {
+    return 'diseno';
   }
-];
+  if (location.startsWith('/proyectos') || location.startsWith('/bitacora') || location.startsWith('/avances')) {
+    return 'obra';
+  }
+  if (location.startsWith('/movimientos') || location.startsWith('/presupuestos') || location.startsWith('/reportes')) {
+    return 'finanzas';
+  }
+  return 'organizacion'; // Default
+};
 
 export function Sidebar() {
   const [location] = useLocation();
   const { data: userData } = useCurrentUser();
-  const { data: projects = [] } = useProjects(userData?.preferences?.last_organization_id);
   
-  // Use Zustand store for sidebar state
-  const { 
-    activeSidebarMenu, 
-    isSidebarMenuOpen, 
-    toggleSidebarMenu, 
-    closeSidebarMenu,
-    setActiveSidebarMenu 
-  } = useSidebarStore();
+  // Determine current context based on location
+  const currentContext = getContextFromLocation(location);
+  const currentItems = sidebarContexts[currentContext as keyof typeof sidebarContexts] || sidebarContexts.organizacion;
 
-  // Check if sidebar should be docked from user preferences
-  const isSidebarDocked = userData?.preferences?.sidebar_docked ?? false;
 
-  // Project selection mutation
-  const selectProjectMutation = useMutation({
-    mutationFn: async (projectId: string) => {
-      if (!supabase || !userData?.preferences?.id) {
-        throw new Error('Missing required data');
-      }
-      
-      const { error } = await supabase
-        .from('user_preferences')
-        .update({ last_project_id: projectId })
-        .eq('id', userData.preferences.id);
-      
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-    }
-  });
 
   // Theme toggle mutation
   const toggleThemeMutation = useMutation({
@@ -159,260 +115,156 @@ export function Sidebar() {
     }
   });
 
-  const handleGroupClick = (groupId: string) => {
-    console.log('handleGroupClick called with:', { groupId });
-    
-    if (isSidebarMenuOpen && activeSidebarMenu === groupId) {
-      console.log('Closing same menu');
-      closeSidebarMenu();
-    } else {
-      console.log('Opening new menu:', groupId);
-      setActiveSidebarMenu(groupId);
-      toggleSidebarMenu(groupId);
-    }
-  };
 
 
 
-  // Helper function to check if a group is active
-  const isGroupActive = (group: any) => {
-    if (group.href && location === group.href) return true;
-    return group.items && group.items.some((item: any) => location === item.href);
-  };
 
-  // Auto-activate group based on current location and set default
-  useEffect(() => {
-    const currentGroup = menuGroups.find(group => {
-      if (group.href && location === group.href) return true;
-      return group.items && group.items.some(item => location === item.href);
-    });
-    
-    if (currentGroup) {
-      setActiveSidebarMenu(currentGroup.id);
-    } else if (!activeSidebarMenu) {
-      // Default to organizacion group
-      setActiveSidebarMenu('organizacion');
-    }
-  }, [location, activeSidebarMenu, setActiveSidebarMenu]);
 
-  // Close sidebar when navigating if not docked
-  useEffect(() => {
-    if (!isSidebarDocked) {
-      closeSidebarMenu();
-    }
-  }, [location]);
-
-  // Click outside handler
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (!isSidebarDocked && isSidebarMenuOpen) {
-        const target = event.target as Element;
-        const sidebarElement = document.querySelector('[data-sidebar]');
-        const submenuElement = document.querySelector('[data-submenu]');
-        
-        if (sidebarElement && submenuElement && 
-            !sidebarElement.contains(target) && 
-            !submenuElement.contains(target)) {
-          closeSidebarMenu();
-        }
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isSidebarDocked, isSidebarMenuOpen]);
-
-  // Generate projects submenu items
-  const getProjectsSubmenu = () => {
-    if (activeSidebarMenu !== 'proyectos-lista') return [];
-    
-    const sortedProjects = [...projects].sort((a, b) => {
-      // Current active project first
-      if (a.id === userData?.preferences?.last_project_id) return -1;
-      if (b.id === userData?.preferences?.last_project_id) return 1;
-      // Then by creation date desc
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-    });
-
-    const projectItems = sortedProjects.map(project => ({
-      label: project.name,
-      href: '#', // Don't navigate, just select
-      onClick: () => selectProjectMutation.mutate(project.id),
-      isActive: project.id === userData?.preferences?.last_project_id
-    }));
-
-    return projectItems;
-  };
-
-  // Determine if submenu should be shown
-  const activeGroupData = menuGroups.find(group => group.id === activeSidebarMenu);
-  console.log('Sidebar state:', { activeSidebarMenu, isSidebarMenuOpen, isSidebarDocked, activeGroupData });
-  
-  const shouldShowSubmenu = isSidebarDocked || (isSidebarMenuOpen && activeGroupData);
-  console.log('Should show submenu:', shouldShowSubmenu);
 
   return (
-    <>
-      {/* Main Sidebar - Always compact with icons only */}
-      <aside
-        data-sidebar
-        className="fixed left-0 top-0 h-full w-10 bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] flex flex-col z-50"
-        style={{
-          backgroundColor: 'var(--sidebar-bg)',
-          borderColor: 'var(--sidebar-border)'
-        }}
-      >
-        {/* Logo/Header */}
-        <div className="h-10 flex items-center justify-center border-b border-[var(--sidebar-border)]">
-          <span className="text-lg font-bold text-[var(--sidebar-fg)]">A</span>
+    <aside
+      className="fixed left-0 top-10 h-[calc(100vh-40px)] w-64 bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] flex flex-col z-40"
+      style={{
+        backgroundColor: 'var(--sidebar-bg)',
+        borderColor: 'var(--sidebar-border)'
+      }}
+    >
+      {/* Context Selector */}
+      <div className="p-4 border-b border-[var(--sidebar-border)]">
+        <div className="flex gap-1">
+          <Button
+            variant={currentContext === 'organizacion' ? 'default' : 'ghost'}
+            size="sm"
+            className="flex-1 text-xs"
+            asChild
+          >
+            <Link href="/dashboard">
+              <Building className="h-3 w-3 mr-1" />
+              Organización
+            </Link>
+          </Button>
+          <Button
+            variant={currentContext === 'diseno' ? 'default' : 'ghost'}
+            size="sm"
+            className="flex-1 text-xs"
+            asChild
+          >
+            <Link href="/planos">
+              <Palette className="h-3 w-3 mr-1" />
+              Diseño
+            </Link>
+          </Button>
+          <Button
+            variant={currentContext === 'obra' ? 'default' : 'ghost'}
+            size="sm"
+            className="flex-1 text-xs"
+            asChild
+          >
+            <Link href="/proyectos">
+              <HardHat className="h-3 w-3 mr-1" />
+              Obra
+            </Link>
+          </Button>
+          <Button
+            variant={currentContext === 'finanzas' ? 'default' : 'ghost'}
+            size="sm"
+            className="flex-1 text-xs"
+            asChild
+          >
+            <Link href="/movimientos">
+              <DollarSign className="h-3 w-3 mr-1" />
+              Finanzas
+            </Link>
+          </Button>
         </div>
+      </div>
 
-        {/* Main Navigation */}
-        <nav className="flex-1">
-          {menuGroups.slice(0, -2).map((group) => ( // All groups except configuracion and perfil
-            <div key={group.id}>
-              {group.href ? (
-                <Link href={group.href}>
-                  <Button
-                    variant="ghost"
-                    className={cn(
-                      "w-10 h-10 p-0 transition-colors rounded-none",
-                      "hover:bg-[var(--sidebar-hover-bg)]",
-                      isGroupActive(group) && "bg-[var(--sidebar-active-bg)]"
-                    )}
-                    style={{
-                      backgroundColor: isGroupActive(group) ? 'var(--sidebar-active-bg)' : 'transparent'
-                    }}
-                  >
-                    <group.icon 
-                      className={cn(
-                        "h-4 w-4",
-                        isGroupActive(group) ? "text-[var(--sidebar-active-fg)]" : "text-[var(--sidebar-fg)]"
-                      )} 
-                    />
-                  </Button>
-                </Link>
-              ) : (
-                <Button
-                  variant="ghost"
-                  className={cn(
-                    "w-10 h-10 p-0 transition-colors rounded-none",
-                    "hover:bg-[var(--sidebar-hover-bg)]",
-                    (isGroupActive(group) || activeSidebarMenu === group.id) && "bg-[var(--sidebar-active-bg)]"
-                  )}
-                  style={{
-                    backgroundColor: (isGroupActive(group) || activeSidebarMenu === group.id) ? 'var(--sidebar-active-bg)' : 'transparent'
-                  }}
-                  onClick={() => handleGroupClick(group.id)}
-                >
-                  <group.icon 
-                    className={cn(
-                      "h-4 w-4",
-                      (isGroupActive(group) || activeSidebarMenu === group.id) ? "text-[var(--sidebar-active-fg)]" : "text-[var(--sidebar-fg)]"
-                    )} 
-                  />
-                </Button>
+      {/* Navigation Items */}
+      <nav className="flex-1 p-2">
+        {currentItems.map((item) => (
+          <Link key={item.href} href={item.href}>
+            <Button
+              variant="ghost"
+              className={cn(
+                "w-full justify-start h-9 px-3 mb-1 text-sm font-normal",
+                "hover:bg-[var(--sidebar-hover-bg)]",
+                location === item.href && "bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-fg)]"
               )}
-            </div>
-          ))}
-        </nav>
+              style={{
+                backgroundColor: location === item.href ? 'var(--sidebar-active-bg)' : 'transparent',
+                color: location === item.href ? 'var(--sidebar-active-fg)' : 'var(--sidebar-fg)'
+              }}
+            >
+              <item.icon className="mr-3 h-4 w-4" />
+              {item.label}
+            </Button>
+          </Link>
+        ))}
+      </nav>
 
-        {/* User Controls Section */}
-        <div className="border-t border-[var(--sidebar-border)]">
-          {/* Theme toggle button */}
+      {/* Bottom Section */}
+      <div className="p-2 border-t border-[var(--sidebar-border)]">
+        {/* Theme toggle */}
+        <Button
+          variant="ghost"
+          className="w-full justify-start h-9 px-3 mb-1 text-sm font-normal hover:bg-[var(--sidebar-hover-bg)]"
+          onClick={() => toggleThemeMutation.mutate()}
+          disabled={toggleThemeMutation.isPending}
+        >
+          {userData?.preferences?.theme === 'dark' ? (
+            <Sun className="mr-3 h-4 w-4" />
+          ) : (
+            <Moon className="mr-3 h-4 w-4" />
+          )}
+          Cambiar tema
+        </Button>
+
+        {/* Profile */}
+        <Link href="/perfil">
           <Button
             variant="ghost"
             className={cn(
-              "w-10 h-10 p-0 transition-colors rounded-none",
-              "hover:bg-[var(--sidebar-hover-bg)]"
-            )}
-            onClick={() => toggleThemeMutation.mutate()}
-            disabled={toggleThemeMutation.isPending}
-          >
-            {userData?.preferences?.theme === 'dark' ? (
-              <Sun className="h-4 w-4 text-[var(--sidebar-fg)]" />
-            ) : (
-              <Moon className="h-4 w-4 text-[var(--sidebar-fg)]" />
-            )}
-          </Button>
-
-          {/* Sidebar dock toggle button */}
-          <Button
-            variant="ghost"
-            className={cn(
-              "w-10 h-10 p-0 transition-colors rounded-none",
+              "w-full justify-start h-9 px-3 mb-1 text-sm font-normal",
               "hover:bg-[var(--sidebar-hover-bg)]",
-              isSidebarDocked && "bg-[var(--sidebar-active-bg)]"
+              location === '/perfil' && "bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-fg)]"
             )}
             style={{
-              backgroundColor: isSidebarDocked ? 'var(--sidebar-active-bg)' : 'transparent'
+              backgroundColor: location === '/perfil' ? 'var(--sidebar-active-bg)' : 'transparent',
+              color: location === '/perfil' ? 'var(--sidebar-active-fg)' : 'var(--sidebar-fg)'
             }}
-            onClick={() => toggleSidebarDockMutation.mutate()}
-            disabled={toggleSidebarDockMutation.isPending}
-          >
-            <SidebarIcon className={cn(
-              "h-4 w-4",
-              isSidebarDocked ? "text-[var(--sidebar-active-fg)]" : "text-[var(--sidebar-fg)]"
-            )} />
-          </Button>
-
-          {/* Profile button */}
-          <Button
-            variant="ghost"
-            className={cn(
-              "w-10 h-10 p-0 transition-colors rounded-none",
-              "hover:bg-[var(--sidebar-hover-bg)]",
-              activeSidebarMenu === 'perfil' && "bg-[var(--sidebar-active-bg)]"
-            )}
-            style={{
-              backgroundColor: activeSidebarMenu === 'perfil' ? 'var(--sidebar-active-bg)' : 'transparent'
-            }}
-            onClick={() => handleGroupClick('perfil')}
           >
             {userData?.user?.avatar_url ? (
               <img 
                 src={userData.user.avatar_url} 
                 alt="Avatar"
-                className="w-6 h-6 rounded-full"
+                className="w-4 h-4 rounded-full mr-3"
               />
             ) : (
-              <User className={cn(
-                "h-4 w-4",
-                activeSidebarMenu === 'perfil' ? "text-[var(--sidebar-active-fg)]" : "text-[var(--sidebar-fg)]"
-              )} />
+              <UserCircle className="mr-3 h-4 w-4" />
             )}
+            Mi Perfil
           </Button>
-        </div>
+        </Link>
 
-        {/* Configuration Section */}
-        <div className="border-t border-[var(--sidebar-border)]">
-          {/* Settings button */}
+        {/* Settings */}
+        <Link href="/configuracion">
           <Button
             variant="ghost"
             className={cn(
-              "w-10 h-10 p-0 transition-colors rounded-none",
+              "w-full justify-start h-9 px-3 text-sm font-normal",
               "hover:bg-[var(--sidebar-hover-bg)]",
-              activeSidebarMenu === 'configuracion' && "bg-[var(--sidebar-active-bg)]"
+              location === '/configuracion' && "bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-fg)]"
             )}
             style={{
-              backgroundColor: activeSidebarMenu === 'configuracion' ? 'var(--sidebar-active-bg)' : 'transparent'
+              backgroundColor: location === '/configuracion' ? 'var(--sidebar-active-bg)' : 'transparent',
+              color: location === '/configuracion' ? 'var(--sidebar-active-fg)' : 'var(--sidebar-fg)'
             }}
-            onClick={() => handleGroupClick('configuracion')}
           >
-            <Settings className={cn(
-              "h-4 w-4",
-              activeSidebarMenu === 'configuracion' ? "text-[var(--sidebar-active-fg)]" : "text-[var(--sidebar-fg)]"
-            )} />
+            <Settings className="mr-3 h-4 w-4" />
+            Configuración
           </Button>
-        </div>
-      </aside>
-
-      {/* Secondary Sidebar */}
-      {shouldShowSubmenu && activeGroupData && (
-        <SidebarSubmenu
-          group={activeGroupData}
-        />
-      )}
-    </>
+        </Link>
+      </div>
+    </aside>
   );
 }

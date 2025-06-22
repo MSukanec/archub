@@ -10,10 +10,10 @@
 
   /* Sidebar */
   --sidebar-bg: hsl(0, 0%, 97%);
-  --sidebar-text: hsl(0, 0%, 35%);
-  --sidebar-border: hsl(0, 0%, 35%);
+  --sidebar-text: hsl(0, 0%, 50%);
+  --sidebar-border: hsl(0, 0%, 50%);
   --sidebar-hover-bg: hsl(0, 0%, 82%);
-  --sidebar-active-bg: hsl(0, 0%, 25%);
+  --sidebar-active-bg: hsl(0, 0%, 50%);
   --sidebar-active-text: hsl(0, 0%, 100%);
 
   /* Secondary Sidebar */
