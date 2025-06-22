@@ -17,7 +17,7 @@ export function CustomPageBody({
   padding = "none" 
 }: CustomPageBodyProps) {
   return (
-    <div className={`mt-4 ${paddingClasses[padding]}`}>
+    <div className={`mt-6 ${paddingClasses[padding]}`}>
       {children}
     </div>
   );

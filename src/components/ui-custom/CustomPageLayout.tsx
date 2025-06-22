@@ -34,8 +34,8 @@ export function CustomPageLayout({
   return (
     <div className="flex justify-center bg-[var(--layout-bg)]">
       <div 
-        className={`px-4 pt-4 pb-4 min-h-screen ${
-          wide ? "max-w-none w-full" : "max-w-[1440px] w-full"
+        className={`py-6 px-4 min-h-screen mx-auto ${
+          wide ? "max-w-full w-full" : "max-w-7xl w-full"
         }`}
       >
         <CustomPageHeader
