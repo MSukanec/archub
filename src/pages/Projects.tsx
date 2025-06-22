@@ -51,7 +51,6 @@ interface Project {
     modality?: {
       id: string
       name: string
-    }
   }
   creator?: {
     id: string
@@ -61,7 +60,6 @@ interface Project {
     email: string
     avatar_url?: string
   }
-}
 
 export default function Projects() {
   const { data, isLoading, error, refetch } = useCurrentUser()
@@ -186,7 +184,6 @@ export default function Projects() {
   const confirmDeleteProject = () => {
     if (deletingProject) {
       deleteProjectMutation.mutate(deletingProject.id)
-    }
   }
 
   const filters = [

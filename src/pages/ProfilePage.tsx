@@ -119,7 +119,6 @@ export default function ProfilePage() {
         handleInputChange('avatar_url', result)
       }
       reader.readAsDataURL(file)
-    }
   }
 
   const handleUrlChange = (url: string) => {
@@ -127,7 +126,6 @@ export default function ProfilePage() {
     if (url.trim()) {
       setAvatarPreview(url)
       handleInputChange('avatar_url', url)
-    }
   }
 
   const handleThemeToggle = async () => {

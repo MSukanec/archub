@@ -37,7 +37,6 @@ export default function Login() {
         description: error.message || "Failed to sign in",
         variant: "destructive",
       })
-    }
   }
 
   const handleGoogleLogin = async () => {
@@ -49,7 +48,6 @@ export default function Login() {
         description: error.message || "Failed to sign in with Google",
         variant: "destructive",
       })
-    }
   }
 
   return (

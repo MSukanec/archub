@@ -68,7 +68,6 @@ interface Movement {
     wallet?: {
       id: string
       name: string
-    }
   }
 }
 
@@ -135,7 +134,6 @@ export default function Movements() {
   const confirmDelete = () => {
     if (deletingMovement) {
       deleteMovementMutation.mutate(deletingMovement.id)
-    }
   }
 
   const clearFilters = () => {

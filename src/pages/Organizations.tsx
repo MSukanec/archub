@@ -99,7 +99,6 @@ export default function Organizations() {
   const handleSelectOrganization = (organizationId: string) => {
     if (organizationId !== selectedOrganization?.id) {
       selectOrganizationMutation.mutate(organizationId)
-    }
   }
 
   const handleClearFilters = () => {
@@ -134,8 +133,6 @@ export default function Organizations() {
     )
   };
 
-;
-
   if (isLoading) {
     return (
       <Layout headerProps={headerProps}>
@@ -159,6 +156,8 @@ export default function Organizations() {
   }
 
   if (error) {
+    return (
+      <Layout headerProps={headerProps}>
         <div className="space-y-6">
           <Card>
             <CardContent className="pt-6">
@@ -176,6 +175,8 @@ export default function Organizations() {
   }
 
   if (!organizations.length) {
+    return (
+      <Layout headerProps={headerProps}>
         <div className="space-y-6">
           <Card>
             <CardContent className="pt-6">

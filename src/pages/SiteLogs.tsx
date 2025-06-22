@@ -255,7 +255,6 @@ export default function SiteLogs() {
   const handleConfirmDelete = () => {
     if (siteLogToDelete) {
       deleteSiteLogMutation.mutate(siteLogToDelete.id)
-    }
   }
 
   const handleCloseModal = () => {

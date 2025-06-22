@@ -27,7 +27,6 @@ interface Organization {
     full_name?: string
     email: string
   }
-}
 
 export function AdminOrganizations() {
   const { toast } = useToast()
@@ -128,7 +127,6 @@ export function AdminOrganizations() {
   const confirmDelete = () => {
     if (deletingOrganization) {
       deleteOrganizationMutation.mutate(deletingOrganization.id)
-    }
   }
 
   const clearFilters = () => {
