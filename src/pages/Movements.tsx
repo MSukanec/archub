@@ -134,9 +134,10 @@ export default function Movements() {
   const confirmDelete = () => {
     if (deletingMovement) {
       deleteMovementMutation.mutate(deletingMovement.id)
+    }
   }
 
-  const clearFilters = () => {
+  const handleClearFilters = () => {
     setSearchTerm('')
     setSortBy('date')
     setSortOrder('desc')
@@ -145,7 +146,7 @@ export default function Movements() {
     setShowConversionsOnly(false)
   }
 
-  const filteredAndSortedMovements = movements
+  const filteredMovements = movements
     .filter(movement => {
       const matchesSearch = movement.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            movement.movement_data?.type?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||

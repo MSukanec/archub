@@ -250,20 +250,20 @@ export default function Organizations() {
         
         <div className="space-y-3">
           {filteredOrganizations.map((org) => {
-          const isSelected = org.id === currentOrganization?.id
-          const isSelecting = selectOrganizationMutation.isPending && selectOrganizationMutation.variables === org.id
+            const isSelected = org.id === currentOrganization?.id
+            const isSelecting = selectOrganizationMutation.isPending && selectOrganizationMutation.variables === org.id
 
-          return (
-            <Card 
-              key={org.id} 
-              className={cn(
+            return (
+              <Card 
+                key={org.id} 
+                className={cn(
                 "w-full transition-all duration-200 hover:shadow-md cursor-pointer",
                 isSelected && "border-[var(--accent)] ring-1 ring-[var(--accent)] bg-[var(--accent)]/5"
-              )}
-              onClick={() => handleSelectOrganization(org.id)}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between w-full">
+                )}
+                onClick={() => handleSelectOrganization(org.id)}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between w-full">
                   {/* Fecha */}
                   <div className="flex-shrink-0 w-24">
                     <span className="text-xs text-muted-foreground">
@@ -344,8 +344,8 @@ export default function Organizations() {
                   </div>
                 )}
               </CardContent>
-            </Card>
-          )
+              </Card>
+            )
           })}
         </div>
 
