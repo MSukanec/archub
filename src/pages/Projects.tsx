@@ -359,8 +359,8 @@ export default function Projects() {
   return (
     <Layout headerProps={headerProps}>
       <div>
-      {/* Encabezados de columnas */}
-      <div className="w-full px-4 py-2 border-b border-border/50 mb-3">
+        {/* Encabezados de columnas */}
+        <div className="w-full px-4 py-2 border-b border-border/50 mb-3">
         <div className="flex items-center justify-between w-full text-xs font-medium text-muted-foreground uppercase tracking-wide">
           {/* Fecha */}
           <div className="flex-shrink-0 w-20">
