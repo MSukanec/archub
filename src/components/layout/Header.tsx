@@ -150,7 +150,7 @@ export function Header({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>
+          </div>
 
           {/* Only show project breadcrumb if NOT in organization context */}
           {currentSidebarContext !== 'organization' && !title && (

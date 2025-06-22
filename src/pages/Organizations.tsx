@@ -116,24 +116,29 @@ export default function Organizations() {
     })
   }
 
-  const actions = (
-    <Button size="sm" onClick={handleCreateOrganization}>
-      <Plus className="w-4 h-4 mr-2" />
-      Nueva organización
-    </Button>
-  )
+  const headerProps = {
+    title: "Gestión de Organizaciones",
+    showSearch: true,
+    searchValue: searchValue,
+    onSearchChange: setSearchValue,
+    showFilters: true,
+    filters: filters,
+    onClearFilters: handleClearFilters,
+    actions: (
+      <Button 
+        onClick={handleCreateOrganization}
+        className="h-8 px-3 text-sm"
+      >
+        <Plus className="h-3 w-3 mr-1" />
+        Nueva Organización
+      </Button>
+    )
+  };
 
   if (isLoading) {
     return (
-      <CustomPageLayout
-        icon={Building}
-        title="Organizations"
-        actions={actions}
-        searchValue={searchValue}
-        onSearchChange={setSearchValue}
-        filters={filters}
-        onClearFilters={handleClearFilters}
-      >
+      <Layout headerProps={headerProps}>
+        <CustomPageLayout>
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[1, 2, 3].map((i) => (
@@ -149,21 +154,15 @@ export default function Organizations() {
             ))}
           </div>
         </div>
-      </CustomPageLayout>
+        </CustomPageLayout>
+      </Layout>
     )
   }
 
   if (error) {
     return (
-      <CustomPageLayout
-        icon={Building}
-        title="Gestión de Organizaciones"
-        actions={actions}
-        searchValue={searchValue}
-        onSearchChange={setSearchValue}
-        filters={filters}
-        onClearFilters={handleClearFilters}
-      >
+      <Layout headerProps={headerProps}>
+        <CustomPageLayout>
         <div className="space-y-6">
           <Card>
             <CardContent className="pt-6">
@@ -176,21 +175,15 @@ export default function Organizations() {
             </CardContent>
           </Card>
         </div>
-      </CustomPageLayout>
+        </CustomPageLayout>
+      </Layout>
     )
   }
 
   if (!organizations.length) {
     return (
-      <CustomPageLayout
-        icon={Building}
-        title="Gestión de Organizaciones"
-        actions={actions}
-        searchValue={searchValue}
-        onSearchChange={setSearchValue}
-        filters={filters}
-        onClearFilters={handleClearFilters}
-      >
+      <Layout headerProps={headerProps}>
+        <CustomPageLayout>
         <div className="space-y-6">
           <Card>
             <CardContent className="pt-6">
@@ -207,20 +200,14 @@ export default function Organizations() {
             </CardContent>
           </Card>
         </div>
-      </CustomPageLayout>
+        </CustomPageLayout>
+      </Layout>
     )
   }
 
   return (
-    <CustomPageLayout
-      icon={Building}
-      title="Gestión de Organizaciones"
-      actions={actions}
-      searchValue={searchValue}
-      onSearchChange={setSearchValue}
-      filters={filters}
-      onClearFilters={handleClearFilters}
-    >
+    <Layout headerProps={headerProps}>
+      <CustomPageLayout>
       {/* Encabezados de columnas */}
       <div className="w-full px-4 py-2 border-b border-border/50 mb-3">
         <div className="flex items-center justify-between w-full text-xs font-medium text-muted-foreground uppercase tracking-wide">
@@ -365,6 +352,7 @@ export default function Organizations() {
         }}
         editingOrganization={editingOrganization}
       />
-    </CustomPageLayout>
+      </CustomPageLayout>
+    </Layout>
   )
 }

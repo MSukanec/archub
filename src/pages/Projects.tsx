@@ -335,16 +335,53 @@ export default function Projects() {
     )
   }
 
+  const headerProps = {
+    title: "Gestión de Proyectos",
+    showSearch: true,
+    searchValue: searchTerm,
+    onSearchChange: setSearchTerm,
+    showFilters: true,
+    customFilters: (
+      <div className="space-y-3">
+        <div className="space-y-2">
+          <label className="text-xs font-medium">Ordenar por</label>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="w-full h-8 text-xs border border-gray-200 rounded px-2"
+          >
+            <option value="created_at">Fecha</option>
+            <option value="name">Nombre</option>
+          </select>
+        </div>
+        <div className="space-y-2">
+          <label className="text-xs font-medium">Dirección</label>
+          <select
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
+            className="w-full h-8 text-xs border border-gray-200 rounded px-2"
+          >
+            <option value="desc">Descendente</option>
+            <option value="asc">Ascendente</option>
+          </select>
+        </div>
+      </div>
+    ),
+    onClearFilters: handleClearFilters,
+    actions: (
+      <Button 
+        onClick={() => setShowModal(true)}
+        className="h-8 px-3 text-sm"
+      >
+        <Plus className="h-3 w-3 mr-1" />
+        Nuevo Proyecto
+      </Button>
+    )
+  };
+
   return (
-    <CustomPageLayout
-      icon={Folder}
-      title="Gestión de Proyectos"
-      actions={actions}
-      searchValue={searchValue}
-      onSearchChange={setSearchValue}
-      filters={filters}
-      onClearFilters={handleClearFilters}
-    >
+    <Layout headerProps={headerProps}>
+      <CustomPageLayout>
       {/* Encabezados de columnas */}
       <div className="w-full px-4 py-2 border-b border-border/50 mb-3">
         <div className="flex items-center justify-between w-full text-xs font-medium text-muted-foreground uppercase tracking-wide">
@@ -509,6 +546,7 @@ export default function Projects() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </CustomPageLayout>
+      </CustomPageLayout>
+    </Layout>
   )
 }
