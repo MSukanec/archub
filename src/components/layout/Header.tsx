@@ -122,9 +122,9 @@ export function Header({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 hover:bg-[var(--sidebar-hover-bg)]"
+                className="h-8 w-8 hover:bg-[var(--menues-hover-bg)]"
               >
-                <ChevronDown className="h-3 w-3 text-[var(--sidebar-fg)]" />
+                <ChevronDown className="h-3 w-3 text-[var(--menues-fg)]" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-64">
