@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjects } from "@/hooks/use-projects";
+import { useSidebarStore } from "@/stores/sidebarStore";
 import { SidebarSubmenu } from "./SidebarSubmenu";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -19,6 +20,9 @@ import {
   Settings,
   User,
   FolderOpen,
+  Moon,
+  Sun,
+  Sidebar as SidebarIcon,
 } from "lucide-react";
 
 // Define menu structure
@@ -107,17 +111,13 @@ export function Sidebar() {
 
   const handleGroupClick = (groupId: string, href?: string) => {
     if (href) {
-      // Direct navigation for items without submenu (like Dashboard)
-      setActiveGroup(null);
+      // Direct navigation for items without submenu
+      closeSidebarMenu();
       return;
     }
     
     // Toggle submenu for groups with items
-    if (activeGroup === groupId) {
-      setActiveGroup(null); // Close if already open
-    } else {
-      setActiveGroup(groupId); // Open new group
-    }
+    toggleSidebarMenu(groupId);
   };
 
   const handleMainSidebarMouseEnter = () => {
@@ -206,6 +206,7 @@ export function Sidebar() {
     <>
       {/* Main Sidebar - Always compact with icons only */}
       <aside
+        data-sidebar
         className="fixed left-0 top-0 h-full w-10 bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] flex flex-col z-50"
         style={{
           backgroundColor: 'var(--sidebar-bg)',
@@ -250,17 +251,17 @@ export function Sidebar() {
                   className={cn(
                     "w-10 h-10 p-0 transition-colors rounded-none",
                     "hover:bg-[var(--sidebar-hover-bg)]",
-                    (isGroupActive(group) || activeGroup === group.id) && "bg-[var(--sidebar-active-bg)]"
+                    (isGroupActive(group) || activeSidebarMenu === group.id) && "bg-[var(--sidebar-active-bg)]"
                   )}
                   style={{
-                    backgroundColor: (isGroupActive(group) || activeGroup === group.id) ? 'var(--sidebar-active-bg)' : 'transparent'
+                    backgroundColor: (isGroupActive(group) || activeSidebarMenu === group.id) ? 'var(--sidebar-active-bg)' : 'transparent'
                   }}
                   onClick={() => handleGroupClick(group.id)}
                 >
                   <group.icon 
                     className={cn(
                       "h-4 w-4",
-                      (isGroupActive(group) || activeGroup === group.id) ? "text-[var(--sidebar-active-fg)]" : "text-[var(--sidebar-fg)]"
+                      (isGroupActive(group) || activeSidebarMenu === group.id) ? "text-[var(--sidebar-active-fg)]" : "text-[var(--sidebar-fg)]"
                     )} 
                   />
                 </Button>
@@ -269,24 +270,42 @@ export function Sidebar() {
           ))}
         </nav>
 
-        {/* User and Projects Section */}
+        {/* User Controls Section */}
         <div className="border-t border-[var(--sidebar-border)]">
-          {/* Settings button */}
+          {/* Theme toggle button */}
+          <Button
+            variant="ghost"
+            className={cn(
+              "w-10 h-10 p-0 transition-colors rounded-none",
+              "hover:bg-[var(--sidebar-hover-bg)]"
+            )}
+            onClick={() => toggleThemeMutation.mutate()}
+            disabled={toggleThemeMutation.isPending}
+          >
+            {userData?.preferences?.theme === 'dark' ? (
+              <Sun className="h-4 w-4 text-[var(--sidebar-fg)]" />
+            ) : (
+              <Moon className="h-4 w-4 text-[var(--sidebar-fg)]" />
+            )}
+          </Button>
+
+          {/* Sidebar dock toggle button */}
           <Button
             variant="ghost"
             className={cn(
               "w-10 h-10 p-0 transition-colors rounded-none",
               "hover:bg-[var(--sidebar-hover-bg)]",
-              activeGroup === 'configuracion' && "bg-[var(--sidebar-active-bg)]"
+              isSidebarDocked && "bg-[var(--sidebar-active-bg)]"
             )}
             style={{
-              backgroundColor: activeGroup === 'configuracion' ? 'var(--sidebar-active-bg)' : 'transparent'
+              backgroundColor: isSidebarDocked ? 'var(--sidebar-active-bg)' : 'transparent'
             }}
-            onClick={() => handleGroupClick('configuracion')}
+            onClick={() => toggleSidebarDockMutation.mutate()}
+            disabled={toggleSidebarDockMutation.isPending}
           >
-            <Settings className={cn(
+            <SidebarIcon className={cn(
               "h-4 w-4",
-              activeGroup === 'configuracion' ? "text-[var(--sidebar-active-fg)]" : "text-[var(--sidebar-fg)]"
+              isSidebarDocked ? "text-[var(--sidebar-active-fg)]" : "text-[var(--sidebar-fg)]"
             )} />
           </Button>
 
@@ -296,10 +315,10 @@ export function Sidebar() {
             className={cn(
               "w-10 h-10 p-0 transition-colors rounded-none",
               "hover:bg-[var(--sidebar-hover-bg)]",
-              activeGroup === 'perfil' && "bg-[var(--sidebar-active-bg)]"
+              activeSidebarMenu === 'perfil' && "bg-[var(--sidebar-active-bg)]"
             )}
             style={{
-              backgroundColor: activeGroup === 'perfil' ? 'var(--sidebar-active-bg)' : 'transparent'
+              backgroundColor: activeSidebarMenu === 'perfil' ? 'var(--sidebar-active-bg)' : 'transparent'
             }}
             onClick={() => handleGroupClick('perfil')}
           >
@@ -312,9 +331,31 @@ export function Sidebar() {
             ) : (
               <User className={cn(
                 "h-4 w-4",
-                activeGroup === 'perfil' ? "text-[var(--sidebar-active-fg)]" : "text-[var(--sidebar-fg)]"
+                activeSidebarMenu === 'perfil' ? "text-[var(--sidebar-active-fg)]" : "text-[var(--sidebar-fg)]"
               )} />
             )}
+          </Button>
+        </div>
+
+        {/* Configuration Section */}
+        <div className="border-t border-[var(--sidebar-border)]">
+          {/* Settings button */}
+          <Button
+            variant="ghost"
+            className={cn(
+              "w-10 h-10 p-0 transition-colors rounded-none",
+              "hover:bg-[var(--sidebar-hover-bg)]",
+              activeSidebarMenu === 'configuracion' && "bg-[var(--sidebar-active-bg)]"
+            )}
+            style={{
+              backgroundColor: activeSidebarMenu === 'configuracion' ? 'var(--sidebar-active-bg)' : 'transparent'
+            }}
+            onClick={() => handleGroupClick('configuracion')}
+          >
+            <Settings className={cn(
+              "h-4 w-4",
+              activeSidebarMenu === 'configuracion' ? "text-[var(--sidebar-active-fg)]" : "text-[var(--sidebar-fg)]"
+            )} />
           </Button>
 
           {/* Projects list and management button */}
@@ -323,16 +364,16 @@ export function Sidebar() {
             className={cn(
               "w-10 h-10 p-0 transition-colors rounded-none",
               "hover:bg-[var(--sidebar-hover-bg)]",
-              activeGroup === 'proyectos-lista' && "bg-[var(--sidebar-active-bg)]"
+              activeSidebarMenu === 'proyectos-lista' && "bg-[var(--sidebar-active-bg)]"
             )}
             style={{
-              backgroundColor: activeGroup === 'proyectos-lista' ? 'var(--sidebar-active-bg)' : 'transparent'
+              backgroundColor: activeSidebarMenu === 'proyectos-lista' ? 'var(--sidebar-active-bg)' : 'transparent'
             }}
             onClick={() => handleGroupClick('proyectos-lista')}
           >
             <FolderOpen className={cn(
               "h-4 w-4",
-              activeGroup === 'proyectos-lista' ? "text-[var(--sidebar-active-fg)]" : "text-[var(--sidebar-fg)]"
+              activeSidebarMenu === 'proyectos-lista' ? "text-[var(--sidebar-active-fg)]" : "text-[var(--sidebar-fg)]"
             )} />
           </Button>
         </div>

@@ -1,0 +1,52 @@
+Modificá el `Sidebar.tsx` y `SidebarSubmenu.tsx` para que funcionen de la siguiente forma:
+
+---
+
+🔹 **Sidebar Principal (Sidebar.tsx)**
+
+1. El sidebar principal debe ser **estático**, solo mostrar **iconos**, y al hacer clic en un botón, debe abrir el `SidebarSubmenu`.
+
+2. El espacio superior del sidebar principal debe contener el logo o ícono principal (sin cambiar).
+
+3. El botón de “⚙️ Configuración” debe actuar como **divisor visual**:
+   - Los botones ubicados **antes de Configuración** (como Finanzas, Proyectos, etc.) deben ir en la parte superior del sidebar.
+   - Los botones ubicados **después** deben ir abajo del todo (perfil, ajustes de tema, etc.).
+
+4. Agregá dos nuevos botones **arriba del botón de perfil**:
+   - `🌓 Theme`: alterna entre `light` y `dark`, y guarda el valor en `user_preferences.theme`.
+   - `📐 Sidebar`: alterna entre `sidebar_docked = true/false` y guarda ese valor en `user_preferences`.
+
+---
+
+🔹 **SidebarSecundario (SidebarSubmenu.tsx)**
+
+1. El componente debe tener una **propiedad global `isSidebarDocked`** (leer desde `user_preferences.sidebar_docked`) para saber si debe estar siempre abierto o solo mostrarse al hacer clic en el ícono principal correspondiente.
+
+2. Cuando no está “docked”, el submenu debe **cerrarse automáticamente** si:
+   - El usuario hace clic afuera.
+   - El usuario navega a otra página.
+   - El usuario vuelve a hacer clic en el mismo botón del sidebar principal.
+
+3. El nombre del botón activo del sidebar debe mostrarse como **título del SidebarSubmenu**, reemplazando el lugar habitual del logo.
+
+4. Los botones del submenu deben ser **solo texto**, con el mismo `height` y `separación` que los botones del sidebar principal.
+
+---
+
+🔹 Estado Persistente
+
+Usá Zustand o Context para:
+- Guardar el estado de si el sidebar secundario está abierto o no (`sidebarMenuOpen`).
+- Guardar el ítem activo (`activeSidebarMenu`).
+
+Además, asegurate de que las preferencias del usuario (`theme`, `sidebar_docked`) estén correctamente sincronizadas desde `user_preferences`.
+
+---
+
+📦 Extra
+
+- Asegurate de que el botón `Theme` cambie correctamente el tema visual de la app.
+- Asegurate de que el botón `Sidebar` actualice visualmente si el secundario está “dockeado” o no.
+- Todo debe estar alineado con el sistema actual de autenticación y visualización de usuario.
+
+No toques la lógica de navegación general ni otros archivos que no sean `Sidebar.tsx`, `SidebarSubmenu.tsx`, o el store relacionado a preferencias si fuera necesario.
