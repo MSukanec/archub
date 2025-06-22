@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Plus, MoreHorizontal, Edit, Trash2, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CustomPageLayout } from "@/components/ui-custom/CustomPageLayout";
 import { CustomTable } from "@/components/ui-custom/CustomTable";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -465,6 +464,7 @@ export function AdminUsers() {
   );
 
   return (
+    <Layout headerProps={headerProps}>
     <CustomPageLayout
       icon={User}
       title="Gestión de Usuarios"
@@ -618,6 +618,6 @@ export function AdminUsers() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </CustomPageLayout>
+    
   );
 }

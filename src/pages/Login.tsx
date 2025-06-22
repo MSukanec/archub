@@ -53,6 +53,7 @@ export default function Login() {
   }
 
   return (
+    <Layout headerProps={headerProps}>
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">

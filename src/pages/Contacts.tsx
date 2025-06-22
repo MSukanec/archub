@@ -4,7 +4,6 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Users, Plus, Edit, Trash2, MoreHorizontal, Mail, Phone, Building, MapPin } from "lucide-react";
 
-import { CustomPageLayout } from "@/components/ui-custom/CustomPageLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -196,6 +195,7 @@ export default function Contacts() {
 
   if (isLoading) {
     return (
+    <Layout headerProps={headerProps}>
       <CustomPageLayout
         icon={Users}
         title="Contactos"
@@ -209,12 +209,13 @@ export default function Contacts() {
         <div className="p-8 text-center text-muted-foreground">
           Cargando contactos...
         </div>
-      </CustomPageLayout>
+      
     );
   }
 
   if (error) {
     return (
+    <Layout headerProps={headerProps}>
       <CustomPageLayout
         icon={Users}
         title="Contactos"
@@ -228,11 +229,12 @@ export default function Contacts() {
         <div className="p-8 text-center text-muted-foreground">
           Error al cargar los contactos: {(error as Error).message}
         </div>
-      </CustomPageLayout>
+      
     );
   }
 
   return (
+    <Layout headerProps={headerProps}>
     <>
       <CustomPageLayout
         icon={Users}
@@ -353,7 +355,7 @@ export default function Contacts() {
             ))}
           </div>
         )}
-      </CustomPageLayout>
+      
 
       <NewContactModal
         open={openModal}

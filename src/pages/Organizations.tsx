@@ -1,6 +1,5 @@
 import { Building, Calendar, Plus, CheckCircle, ShieldCheck, BadgeCheck, Crown, MoreHorizontal, Edit, Trash2 } from 'lucide-react'
 import { Layout } from '@/components/layout/Layout'
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -137,6 +136,7 @@ export default function Organizations() {
 
   if (isLoading) {
     return (
+    <Layout headerProps={headerProps}>
       <Layout headerProps={headerProps}>
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -159,6 +159,7 @@ export default function Organizations() {
 
   if (error) {
     return (
+    <Layout headerProps={headerProps}>
       <Layout headerProps={headerProps}>
         <div className="space-y-6">
           <Card>
@@ -178,6 +179,7 @@ export default function Organizations() {
 
   if (!organizations.length) {
     return (
+    <Layout headerProps={headerProps}>
       <Layout headerProps={headerProps}>
         <div className="space-y-6">
           <Card>
@@ -200,6 +202,7 @@ export default function Organizations() {
   }
 
   return (
+    <Layout headerProps={headerProps}>
     <Layout headerProps={headerProps}>
         {/* Encabezados de columnas */}
         <div className="w-full px-4 py-2 border-b border-border/50 mb-3">
@@ -241,6 +244,7 @@ export default function Organizations() {
           const isSelecting = selectOrganizationMutation.isPending && selectOrganizationMutation.variables === org.id
 
           return (
+    <Layout headerProps={headerProps}>
             <Card 
               key={org.id} 
               className={cn(

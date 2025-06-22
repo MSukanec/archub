@@ -1,5 +1,5 @@
 import { User, Camera, Settings } from 'lucide-react'
-import { CustomPageLayout } from '@/components/ui-custom/CustomPageLayout'
+import { Layout } from '@/components/layout/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -187,6 +187,7 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
+    <Layout headerProps={headerProps}>
       <CustomPageLayout
         icon={User}
         title="Mi Perfil"
@@ -203,12 +204,13 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
         </div>
-      </CustomPageLayout>
+      
     )
   }
 
   if (error) {
     return (
+    <Layout headerProps={headerProps}>
       <CustomPageLayout
         icon={User}
         title="Mi Perfil"
@@ -224,11 +226,12 @@ export default function ProfilePage() {
             </div>
           </CardContent>
         </Card>
-      </CustomPageLayout>
+      
     )
   }
 
   return (
+    <Layout headerProps={headerProps}>
     <CustomPageLayout
       icon={User}
       title="Mi Perfil"
@@ -432,6 +435,6 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
       </div>
-    </CustomPageLayout>
+    
   )
 }

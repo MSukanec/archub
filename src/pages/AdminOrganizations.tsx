@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
-import { CustomPageLayout } from '@/components/ui-custom/CustomPageLayout'
 import { CustomTable } from '@/components/ui-custom/CustomTable'
 import { NewAdminOrganizationModal } from '@/modals/NewAdminOrganizationModal'
 import { useToast } from '@/hooks/use-toast'
@@ -298,6 +297,7 @@ export function AdminOrganizations() {
   )
 
   return (
+    <Layout headerProps={headerProps}>
     <>
       <CustomPageLayout
         icon={Building2}
@@ -326,7 +326,7 @@ export function AdminOrganizations() {
           isLoading={isLoading}
           emptyState={emptyState}
         />
-      </CustomPageLayout>
+      
 
       {/* Create/Edit Organization Modal */}
       {showNewOrganizationModal && (

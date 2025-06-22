@@ -1,0 +1,22 @@
+Quiero que consolides completamente el sistema de headers de mi app:
+
+1. **Eliminá por completo el archivo `src/components/ui-custom/CustomPageLayout.tsx`** y cualquier uso o importación del mismo.
+2. Toda la lógica de títulos de página, filtros, buscador y botones debe estar integrada dentro del componente `Header.tsx`.
+3. Asegurate de que `Layout.tsx` pase correctamente los props necesarios (`title`, `buttons`, `filters`, `search`) a `Header.tsx`, y que no haya lógica duplicada.
+4. Elimina cualquier componente o lógica redundante que haya quedado de sistemas anteriores como `CustomPageHeader`, `CustomPageBody`, `CustomPageLayout`, etc.
+5. El `Header.tsx` debe tener:
+   - Un breadcrumb en la izquierda: Organización > Proyecto > Página actual
+   - Un título principal alineado (si es necesario) o que sea reemplazado por el breadcrumb
+   - A la derecha: los filtros, el buscador (si existe), y los botones primario y secundario, todos bien alineados
+6. Todo el header debe tener una altura fija de **40px** y ser completamente **sticky en la parte superior**, sin espacios verticales innecesarios.
+7. Asegurate de que el padding entre el header y el contenido principal sea de 24px (`py-6`) y que no haya ningún `mt-10` o `marginTop` que agregue espacio.
+8. Las páginas (`Projects.tsx`, `Organizations.tsx`, etc.) deben usar solo `Layout` con `headerProps`, sin `CustomPageLayout` ni nada extra.
+9. Verificá que el botón principal (`+ Nueva Organización`) esté dentro del header y no en otro lugar del DOM.
+10. Hacé una limpieza general del código para asegurar consistencia, claridad y eliminación de lógica innecesaria.
+
+IMPORTANTE: 
+- Todo el sistema debe funcionar y verse igual que el dashboard de Supabase/Vercel.
+- Elimina cualquier componente o archivo obsoleto que ya no sea usado.
+- Reestructurá los archivos si es necesario, pero mantené el diseño limpio, sticky y compacto.
+
+¿Entendiste todo? Eliminá, centralizá, alineá y mantené la UI como Supabase. ¡Gracias!

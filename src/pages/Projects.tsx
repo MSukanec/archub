@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react'
 import { Folder, Plus, Edit, Trash2, MoreHorizontal } from 'lucide-react'
 import { Layout } from '@/components/layout/Layout'
-
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
@@ -307,6 +306,7 @@ export default function Projects() {
 
   if (isLoading || projectsLoading) {
     return (
+    <Layout headerProps={headerProps}>
       <Layout headerProps={headerProps}>
         <Card>
           <CardContent className="pt-6">
@@ -321,6 +321,7 @@ export default function Projects() {
 
   if (error || projectsError) {
     return (
+    <Layout headerProps={headerProps}>
       <Layout headerProps={headerProps}>
         <Card>
           <CardContent className="pt-6">
@@ -339,6 +340,7 @@ export default function Projects() {
 
   if (!filteredProjects.length) {
     return (
+    <Layout headerProps={headerProps}>
       <Layout headerProps={headerProps}>
         <Card>
           <CardContent className="pt-6">
@@ -359,6 +361,7 @@ export default function Projects() {
   }
 
   return (
+    <Layout headerProps={headerProps}>
     <Layout headerProps={headerProps}>
       {/* Encabezados de columnas */}
       <div className="w-full px-4 py-2 border-b border-border/50 mb-3">
@@ -406,6 +409,7 @@ export default function Projects() {
           const creator = getCreatorInfo(project)
 
           return (
+    <Layout headerProps={headerProps}>
             <Card 
               key={project.id} 
               className={cn(

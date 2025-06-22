@@ -1,6 +1,5 @@
 import { Home, Download, Plus } from 'lucide-react'
 import { Layout } from '@/components/layout/Layout'
-
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useState } from 'react'
@@ -124,6 +123,7 @@ export default function Dashboard() {
   )
 
   return (
+    <Layout headerProps={headerProps}>
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
         {/* Stats Cards */}

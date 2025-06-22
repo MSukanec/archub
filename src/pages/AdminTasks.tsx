@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Plus, MoreHorizontal, Edit, Trash2, CheckSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CustomPageLayout } from "@/components/ui-custom/CustomPageLayout";
 import { CustomTable } from "@/components/ui-custom/CustomTable";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -408,6 +407,7 @@ export function AdminTasks() {
   );
 
   return (
+    <Layout headerProps={headerProps}>
     <CustomPageLayout
       icon={CheckSquare}
       title="Gestión de Tareas"
@@ -456,6 +456,6 @@ export function AdminTasks() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </CustomPageLayout>
+    
   );
 }

@@ -50,10 +50,10 @@ export function Layout({ children, headerProps }: LayoutProps) {
       <Header {...headerProps} />
       <Sidebar />
       <main 
-        className="transition-all duration-300 ease-in-out flex-1 overflow-auto px-4 pt-4 pb-8"
+        className="transition-all duration-300 ease-in-out flex-1 overflow-auto py-6 px-4"
         style={{ 
           marginLeft: isExpanded ? '240px' : '40px',
-          minHeight: 'calc(100vh - 40px)'
+          marginTop: '40px'
         }}
       >
         {children}

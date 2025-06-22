@@ -4,7 +4,6 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { FileText, Plus, Star, Globe, Lock, ChevronDown, ChevronRight, Edit, Trash2, MoreHorizontal } from "lucide-react";
 
-import { CustomPageLayout } from "@/components/ui-custom/CustomPageLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -190,6 +189,7 @@ export default function SiteLogs() {
     } as const
 
     return (
+    <Layout headerProps={headerProps}>
       <Badge variant={variants[type as keyof typeof variants] || 'outline'}>
         {type.charAt(0).toUpperCase() + type.slice(1)}
       </Badge>
@@ -266,6 +266,7 @@ export default function SiteLogs() {
 
   if (isLoading) {
     return (
+    <Layout headerProps={headerProps}>
       <CustomPageLayout
         icon={FileText}
         title="Bitácora de Obra"
@@ -279,12 +280,13 @@ export default function SiteLogs() {
         <div className="p-8 text-center text-muted-foreground">
           Cargando bitácora...
         </div>
-      </CustomPageLayout>
+      
     )
   }
 
   if (error) {
     return (
+    <Layout headerProps={headerProps}>
       <CustomPageLayout
         icon={FileText}
         title="Bitácora de Obra"
@@ -298,11 +300,12 @@ export default function SiteLogs() {
         <div className="p-8 text-center text-muted-foreground">
           Error al cargar la bitácora: {(error as Error).message}
         </div>
-      </CustomPageLayout>
+      
     )
   }
 
   return (
+    <Layout headerProps={headerProps}>
     <>
       <CustomPageLayout
         icon={FileText}
@@ -339,6 +342,7 @@ export default function SiteLogs() {
               const creator = getCreator(log.created_by)
               
               return (
+    <Layout headerProps={headerProps}>
                 <Collapsible key={log.id} open={isExpanded} onOpenChange={() => toggleCardExpansion(log.id)}>
                   <Card 
                     className={`rounded-none border-x-0 border-t-0 border-b border-[var(--card-border)] ${
@@ -449,7 +453,7 @@ export default function SiteLogs() {
             })}
           </div>
         )}
-      </CustomPageLayout>
+      
 
       <NewSiteLogModal
         open={openModal}

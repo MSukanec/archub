@@ -11,7 +11,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { CustomPageLayout } from '@/components/ui-custom/CustomPageLayout'
 import { CustomTable } from '@/components/ui-custom/CustomTable'
 import { NewMovementModal } from '@/modals/NewMovementModal'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -292,6 +291,7 @@ export default function Movements() {
         }
         
         return (
+    <Layout headerProps={headerProps}>
           <span className={badgeClasses}>
             {typeName}
           </span>
@@ -408,6 +408,7 @@ export default function Movements() {
   )
 
   return (
+    <Layout headerProps={headerProps}>
     <>
       <CustomPageLayout
         icon={DollarSign}
@@ -431,7 +432,7 @@ export default function Movements() {
           isLoading={isLoading}
           emptyState={emptyState}
         />
-      </CustomPageLayout>
+      
 
       {/* New/Edit Movement Modal */}
       <NewMovementModal
@@ -466,6 +467,6 @@ export default function Movements() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+    </Layout>
   )
 }
