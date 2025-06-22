@@ -40,7 +40,9 @@ const menuGroups = [
     id: 'proyecto',
     label: 'Proyecto',
     icon: Folder,
-    items: []
+    items: [
+      { label: 'Gestión de Proyectos', href: '/proyectos' }
+    ]
   },
   {
     id: 'obra',
@@ -162,12 +164,17 @@ export function Sidebar() {
   const handleGroupClick = (groupId: string, href?: string) => {
     if (href) {
       // Direct navigation for items without submenu
+      setActiveSidebarMenu(groupId);
       closeSidebarMenu();
       return;
     }
     
-    // Toggle submenu for groups with items
-    toggleSidebarMenu(groupId);
+    // Set active menu and toggle submenu for groups with items
+    setActiveSidebarMenu(groupId);
+    const group = menuGroups.find(g => g.id === groupId);
+    if (group && group.items && group.items.length > 0) {
+      toggleSidebarMenu(groupId);
+    }
   };
 
   const handleMainSidebarMouseEnter = () => {
@@ -217,20 +224,11 @@ export function Sidebar() {
     
     if (currentGroup) {
       setActiveSidebarMenu(currentGroup.id);
-      // Auto-open submenu if group has items and is docked
-      if (isSidebarDocked && currentGroup.items.length > 0) {
-        // Use a small delay to ensure the state is set
-        setTimeout(() => {
-          if (!isSidebarMenuOpen) {
-            toggleSidebarMenu(currentGroup.id);
-          }
-        }, 100);
-      }
     } else if (!activeSidebarMenu) {
       // Default to organizacion group
       setActiveSidebarMenu('organizacion');
     }
-  }, [location, activeSidebarMenu, setActiveSidebarMenu, isSidebarDocked, isSidebarMenuOpen, toggleSidebarMenu]);
+  }, [location, activeSidebarMenu, setActiveSidebarMenu]);
 
   // Close sidebar when navigating if not docked
   useEffect(() => {
@@ -286,14 +284,14 @@ export function Sidebar() {
   const shouldShowSubmenu = (() => {
     if (!activeGroupData || !activeGroupData.items || activeGroupData.items.length === 0) return false;
     
-    // Always show if docked (regardless of which menu is open)
-    if (isSidebarDocked) return true;
+    // Always show if docked and has active menu with items
+    if (isSidebarDocked && activeSidebarMenu && activeGroupData.items.length > 0) return true;
     
     // Show if hovered and active (for non-docked mode)
     if (!isSidebarDocked && isMainSidebarHovered && activeSidebarMenu && activeGroupData.items.length > 0) return true;
     
     // Show if menu is explicitly open (for non-docked mode)
-    if (!isSidebarDocked) return isSidebarMenuOpen;
+    if (!isSidebarDocked && isSidebarMenuOpen && activeSidebarMenu === activeGroupData.id) return true;
     
     return false;
   })();

@@ -22,12 +22,12 @@ export const useSidebarStore = create<SidebarStore>((set, get) => ({
     
     if (activeSidebarMenu === menu && isSidebarMenuOpen) {
       // Close if same menu is already open
-      set({ activeSidebarMenu: null, isSidebarMenuOpen: false });
+      set({ isSidebarMenuOpen: false });
     } else {
-      // Open new menu
+      // Open new menu or switch to different menu
       set({ activeSidebarMenu: menu, isSidebarMenuOpen: true });
     }
   },
   
-  closeSidebarMenu: () => set({ activeSidebarMenu: null, isSidebarMenuOpen: false }),
+  closeSidebarMenu: () => set({ isSidebarMenuOpen: false }),
 }));

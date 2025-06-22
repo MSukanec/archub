@@ -11,17 +11,17 @@
   /* Sidebar */
   --sidebar-bg: hsl(0, 0%, 97%);
   --sidebar-text: hsl(0, 0%, 35%);
-  --sidebar-border: hsl(240, 6%, 90%);
+  --sidebar-border: hsl(0, 0%, 35%);
   --sidebar-hover-bg: hsl(0, 0%, 82%);
-  --sidebar-active-bg: hsl(0, 0%, 15%);
+  --sidebar-active-bg: hsl(0, 0%, 25%);
   --sidebar-active-text: hsl(0, 0%, 100%);
 
   /* Secondary Sidebar */
-  --sidebar-secondary-bg: hsl(0, 0%, 99%);
+  --sidebar-secondary-bg: hsl(0, 0%, 97%);
   --sidebar-secondary-fg: hsl(0, 0%, 35%);
-  --sidebar-secondary-border: hsl(240, 6%, 85%);
+  --sidebar-secondary-border: hsl(0, 0%, 35%);
   --sidebar-secondary-hover-bg: hsl(0, 0%, 92%);
-  --sidebar-secondary-active-bg: hsl(0, 0%, 15%);
+  --sidebar-secondary-active-bg: hsl(0, 0%, 25%);
   --sidebar-secondary-active-fg: hsl(0, 0%, 100%);
 
   /* Cards */
