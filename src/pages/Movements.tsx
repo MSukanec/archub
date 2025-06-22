@@ -68,6 +68,7 @@ interface Movement {
     wallet?: {
       id: string
       name: string
+    }
   }
 }
 

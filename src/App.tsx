@@ -9,7 +9,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { useAuthStore } from "@/stores/authStore";
 import Dashboard from "@/pages/Dashboard";
 import Organizations from "@/pages/Organizations";
-import Projects from "@/pages/Projects";
+
 import Movements from "@/pages/Movements";
 import SiteLogs from "@/pages/SiteLogs";
 import ProfilePage from "@/pages/ProfilePage";
@@ -41,21 +41,21 @@ function Router() {
       <Route path="/projects">
         <ProtectedRoute>
           <Layout>
-            <Projects />
+            <Dashboard />
           </Layout>
         </ProtectedRoute>
       </Route>
       <Route path="/proyectos">
         <ProtectedRoute>
           <Layout>
-            <Projects />
+            <Dashboard />
           </Layout>
         </ProtectedRoute>
       </Route>
       <Route path="/gestion-proyectos">
         <ProtectedRoute>
           <Layout>
-            <Projects />
+            <Dashboard />
           </Layout>
         </ProtectedRoute>
       </Route>
