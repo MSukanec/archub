@@ -25,6 +25,7 @@ export function SidebarSubmenu({ title, items, isVisible, onMouseEnter, onMouseL
 
   return (
     <div 
+      data-submenu
       className="fixed top-0 left-10 h-full w-48 bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] z-40 flex flex-col"
       style={{ 
         backgroundColor: 'var(--sidebar-bg)',

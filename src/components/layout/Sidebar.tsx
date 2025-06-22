@@ -130,7 +130,7 @@ export function Sidebar() {
     if (!isSidebarDocked && !isSubmenuHovered) {
       setTimeout(() => {
         if (!isSubmenuHovered && !isMainSidebarHovered) {
-          setActiveGroup(null);
+          closeSidebarMenu();
         }
       }, 200);
     }
@@ -146,7 +146,7 @@ export function Sidebar() {
     if (!isSidebarDocked && !isMainSidebarHovered) {
       setTimeout(() => {
         if (!isSubmenuHovered && !isMainSidebarHovered) {
-          setActiveGroup(null);
+          closeSidebarMenu();
         }
       }, 200);
     }
@@ -168,7 +168,7 @@ export function Sidebar() {
 
   // Generate projects submenu items
   const getProjectsSubmenu = () => {
-    if (activeGroup !== 'proyectos-lista') return [];
+    if (activeSidebarMenu !== 'proyectos-lista') return [];
     
     const sortedProjects = [...projects].sort((a, b) => {
       // Current active project first
