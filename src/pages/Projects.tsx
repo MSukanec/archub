@@ -200,7 +200,7 @@ export default function Projects() {
 
   const handleNewProject = () => {
     setEditingProject(null)
-    setShowNewProjectModal(true)
+    setShowModal(true)
   }
 
   const actions = (
@@ -364,50 +364,6 @@ export default function Projects() {
     )
   }
 
-  const headerProps = {
-    title: "Gestión de Proyectos",
-    showSearch: true,
-    searchValue: searchTerm,
-    onSearchChange: setSearchTerm,
-    showFilters: true,
-    customFilters: (
-      <div className="space-y-3">
-        <div className="space-y-2">
-          <label className="text-xs font-medium">Ordenar por</label>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="w-full h-8 text-xs border border-gray-200 rounded px-2"
-          >
-            <option value="created_at">Fecha</option>
-            <option value="name">Nombre</option>
-          </select>
-        </div>
-        <div className="space-y-2">
-          <label className="text-xs font-medium">Dirección</label>
-          <select
-            value={sortOrder}
-            onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
-            className="w-full h-8 text-xs border border-gray-200 rounded px-2"
-          >
-            <option value="desc">Descendente</option>
-            <option value="asc">Ascendente</option>
-          </select>
-        </div>
-      </div>
-    ),
-    onClearFilters: handleClearFilters,
-    actions: (
-      <Button 
-        onClick={() => setShowModal(true)}
-        className="h-8 px-3 text-sm"
-      >
-        <Plus className="h-3 w-3 mr-1" />
-        Nuevo Proyecto
-      </Button>
-    )
-  };
-
   return (
     <Layout headerProps={headerProps}>
       <CustomPageLayout>
@@ -546,9 +502,9 @@ export default function Projects() {
 
       {/* New/Edit Project Modal */}
       <NewProjectModal
-        open={showNewProjectModal}
+        open={showModal}
         onClose={() => {
-          setShowNewProjectModal(false)
+          setShowModal(false)
           setEditingProject(null)
         }}
         editingProject={editingProject}
