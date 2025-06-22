@@ -254,61 +254,48 @@ export default function SiteLogs() {
 
   const handleConfirmDelete = () => {
     if (siteLogToDelete) {
-      deleteSiteLogMutation.mutate(siteLogToDelete.id)
-  }
+      deleteSiteLogMutation.mutate(siteLogToDelete.id);
+    }
+  };
 
   const handleCloseModal = () => {
-    setOpenModal(false)
-    setEditingSiteLog(null)
-  }
+    setOpenModal(false);
+    setEditingSiteLog(null);
+  };
+
+  const headerProps = {
+    title: "Bitácora de Obra",
+    showSearch: true,
+    searchValue,
+    onSearchChange: setSearchValue,
+    showFilters: true,
+    customFilters,
+    onClearFilters: handleClearFilters,
+    actions
+  };
 
   if (isLoading) {
-      <CustomPageLayout
-        icon={FileText}
-        title="Bitácora de Obra"
-        actions={actions}
-        searchValue={searchValue}
-        onSearchChange={setSearchValue}
-        customFilters={customFilters}
-        onClearFilters={handleClearFilters}
-        showSearch={true}
-      >
+    return (
+      <Layout headerProps={headerProps}>
         <div className="p-8 text-center text-muted-foreground">
           Cargando bitácora...
         </div>
-      
-    )
+      </Layout>
+    );
   }
 
   if (error) {
-      <CustomPageLayout
-        icon={FileText}
-        title="Bitácora de Obra"
-        actions={actions}
-        searchValue={searchValue}
-        onSearchChange={setSearchValue}
-        customFilters={customFilters}
-        onClearFilters={handleClearFilters}
-        showSearch={true}
-      >
+    return (
+      <Layout headerProps={headerProps}>
         <div className="p-8 text-center text-muted-foreground">
           Error al cargar la bitácora: {(error as Error).message}
         </div>
-      
-    )
+      </Layout>
+    );
   }
 
-    <>
-      <CustomPageLayout
-        icon={FileText}
-        title="Bitácora de Obra"
-        actions={actions}
-        searchValue={searchValue}
-        onSearchChange={setSearchValue}
-        customFilters={customFilters}
-        onClearFilters={handleClearFilters}
-        showSearch={true}
-      >
+  return (
+    <Layout headerProps={headerProps}>
         {filteredSiteLogs.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground">
             {siteLogs.length === 0 
@@ -333,6 +320,7 @@ export default function SiteLogs() {
               const isExpanded = expandedCards.has(log.id)
               const creator = getCreator(log.created_by)
               
+              return (
                 <Collapsible key={log.id} open={isExpanded} onOpenChange={() => toggleCardExpansion(log.id)}>
                   <Card 
                     className={`rounded-none border-x-0 border-t-0 border-b border-[var(--card-border)] ${
@@ -471,6 +459,6 @@ export default function SiteLogs() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+    </Layout>
   )
 }
