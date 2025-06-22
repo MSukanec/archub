@@ -428,6 +428,6 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
       </div>
-    
+    </Layout>
   )
 }

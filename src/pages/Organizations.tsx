@@ -264,30 +264,30 @@ export default function Organizations() {
               >
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between w-full">
-                  {/* Fecha */}
-                  <div className="flex-shrink-0 w-24">
-                    <span className="text-xs text-muted-foreground">
-                      {formatDate(org.created_at)}
-                    </span>
-                  </div>
+                    {/* Fecha */}
+                    <div className="flex-shrink-0 w-24">
+                      <span className="text-xs text-muted-foreground">
+                        {formatDate(org.created_at)}
+                      </span>
+                    </div>
 
-                  {/* Creador */}
-                  <div className="w-32 flex-shrink-0 px-2">
-                    <span className="text-xs text-muted-foreground truncate">
-                      {/* TODO: Get creator info from org.created_by */}
-                      Sistema
-                    </span>
-                  </div>
+                    {/* Creador */}
+                    <div className="w-32 flex-shrink-0 px-2">
+                      <span className="text-xs text-muted-foreground truncate">
+                        {/* TODO: Get creator info from org.created_by */}
+                        Sistema
+                      </span>
+                    </div>
 
-                  {/* Nombre de la organización */}
-                  <div className="flex-1 min-w-0 px-4">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium truncate">{org.name}</span>
-                      {isSelected && (
-                        <Badge variant="default" className="text-xs bg-[var(--accent)]/10 text-[var(--accent)] border-[var(--accent)]/20">
-                          Seleccionada
-                        </Badge>
-                      )}
+                    {/* Nombre de la organización */}
+                    <div className="flex-1 min-w-0 px-4">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium truncate">{org.name}</span>
+                        {isSelected && (
+                          <Badge variant="default" className="text-xs bg-[var(--accent)]/10 text-[var(--accent)] border-[var(--accent)]/20">
+                            Seleccionada
+                          </Badge>
+                        )}
                     </div>
                   </div>
 
@@ -335,15 +335,15 @@ export default function Organizations() {
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
+                    </div>
                   </div>
-                </div>
 
                 {isSelecting && (
                   <div className="flex items-center justify-center py-2 mt-2">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
                   </div>
                 )}
-              </CardContent>
+                </CardContent>
               </Card>
             )
           })}
