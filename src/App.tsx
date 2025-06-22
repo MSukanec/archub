@@ -15,13 +15,12 @@ import SiteLogs from "@/pages/SiteLogs";
 
 import Contacts from "@/pages/Contacts";
 
-import Login from "@/pages/Login";
-import NotFound from "@/pages/not-found";
+
 
 function Router() {
   return (
     <Switch>
-      <Route path="/login" component={Login} />
+
       <Route path="/organizations">
         <ProtectedRoute>
           <Layout>
@@ -128,7 +127,6 @@ function Router() {
         </ProtectedRoute>
       </Route>
       {/* Add more protected routes here */}
-      <Route component={NotFound} />
     </Switch>
   );
 }
