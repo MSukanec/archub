@@ -208,41 +208,7 @@ export default function Organizations() {
   return (
     <Layout headerProps={headerProps}>
       <CustomPageLayout>
-        {/* Encabezados de columnas */}
-        <div className="w-full px-4 py-2 border-b border-border/50 mb-3">
-          <div className="flex items-center justify-between w-full text-xs font-medium text-muted-foreground uppercase tracking-wide">
-          {/* Fecha */}
-          <div className="flex-shrink-0 w-24">
-            Fecha
-          </div>
-          
-          {/* Creador */}
-          <div className="w-32 flex-shrink-0 px-2">
-            Creador
-          </div>
-          
-          {/* Nombre */}
-          <div className="flex-1 min-w-0 px-4">
-            Organización
-          </div>
-
-          {/* Plan */}
-          <div className="w-32 flex-shrink-0 px-2">
-            Plan
-          </div>
-
-          {/* Estado */}
-          <div className="w-28 flex-shrink-0">
-            Estado
-          </div>
-
-          {/* Acciones */}
-          <div className="w-10 flex-shrink-0">
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-3">
+        <div className="space-y-3">
         {filteredOrganizations.map((org) => {
           const isSelected = org.id === selectedOrganization?.id
           const isSelecting = selectOrganizationMutation.isPending && selectOrganizationMutation.variables === org.id
