@@ -85,23 +85,34 @@ export default function Organizations() {
   ]
 
   const handleCreateOrganization = () => {
-    setEditingOrganization(null)
-    setShowNewOrgModal(true)
+    setShowNewModal(true)
   }
 
   const handleEditOrganization = (org: any) => {
-    setEditingOrganization(org)
-    setShowNewOrgModal(true)
+    setSelectedOrganization(org)
+    setShowEditModal(true)
   }
 
   const handleDeleteOrganization = (org: any) => {
-    // TODO: Implement delete functionality
-    console.log('Delete organization:', org)
+    setDeletingOrganization(org)
+  }
+
+  const confirmDelete = async () => {
+    if (!deletingOrganization) return
+    
+    try {
+      await apiRequest('DELETE', `/api/organizations/${deletingOrganization.id}`)
+      queryClient.invalidateQueries({ queryKey: ['current-user'] })
+      setDeletingOrganization(null)
+    } catch (error) {
+      console.error('Error deleting organization:', error)
+    }
   }
 
   const handleSelectOrganization = (organizationId: string) => {
-    if (organizationId !== selectedOrganization?.id) {
+    if (organizationId !== currentOrganization?.id) {
       selectOrganizationMutation.mutate(organizationId)
+    }
   }
 
   const handleClearFilters = () => {
@@ -134,7 +145,7 @@ export default function Organizations() {
         Nueva Organización
       </Button>
     )
-  };
+  }
 
   if (isLoading) {
     return (

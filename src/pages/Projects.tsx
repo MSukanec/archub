@@ -60,6 +60,7 @@ interface Project {
     email: string
     avatar_url?: string
   }
+}
 
 export default function Projects() {
   const { data, isLoading, error, refetch } = useCurrentUser()
