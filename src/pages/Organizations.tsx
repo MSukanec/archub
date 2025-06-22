@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils'
 import { apiRequest, queryClient } from '@/lib/queryClient'
 import { useMutation } from '@tanstack/react-query'
 import { NewOrganizationModal } from '@/modals/NewOrganizationModal'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 
 type FilterType = 'all' | 'active' | 'archived' | 'system'
 
@@ -336,14 +337,40 @@ export default function Organizations() {
         </div>
 
         {/* Modal for creating/editing organizations */}
-        <NewOrganizationModal
-          open={showNewOrgModal}
-          onClose={() => {
-            setShowNewOrgModal(false)
-            setEditingOrganization(null)
-          }}
-          editingOrganization={editingOrganization}
-        />
+        {showNewModal && (
+          <NewOrganizationModal
+            isOpen={showNewModal}
+            onClose={() => setShowNewModal(false)}
+          />
+        )}
+
+        {showEditModal && selectedOrganization && (
+          <NewOrganizationModal
+            isOpen={showEditModal}
+            onClose={() => setShowEditModal(false)}
+            organizationToEdit={selectedOrganization}
+          />
+        )}
+
+        <AlertDialog open={!!deletingOrganization} onOpenChange={() => setDeletingOrganization(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta acción no se puede deshacer. La organización será eliminada permanentemente.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={confirmDelete}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Eliminar
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </Layout>
   )
