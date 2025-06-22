@@ -35,7 +35,7 @@ export function Layout({ children }: LayoutProps) {
       <Header />
       <Sidebar />
       <main 
-        className="ml-64 mt-10"
+        className="ml-12 mt-10 transition-all duration-200"
         style={{ 
           minHeight: 'calc(100vh - 40px)'
         }}
