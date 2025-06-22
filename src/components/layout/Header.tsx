@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { ChevronDown, Plus } from "lucide-react";
+import { ChevronDown, Plus, Filter, X, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +17,29 @@ import { queryClient } from "@/lib/queryClient";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useLocation } from "wouter";
 
-export function Header() {
+interface HeaderProps {
+  title?: string;
+  showSearch?: boolean;
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
+  showFilters?: boolean;
+  filters?: { label: string; onClick: () => void }[];
+  customFilters?: React.ReactNode;
+  onClearFilters?: () => void;
+  actions?: React.ReactNode;
+}
+
+export function Header({
+  title,
+  showSearch = false,
+  searchValue = "",
+  onSearchChange,
+  showFilters = false,
+  filters = [],
+  customFilters,
+  onClearFilters,
+  actions,
+}: HeaderProps = {}) {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const { data: projects = [] } = useProjects(userData?.preferences?.last_organization_id);
@@ -62,16 +85,22 @@ export function Header() {
 
   const currentOrganization = userData?.organization;
   const currentProject = projects.find(p => p.id === userData?.preferences?.last_project_id);
+  const hasFilters = filters.length > 0 || customFilters;
 
   return (
-    <header className="sticky top-0 z-50 h-10 border-b border-[var(--menues-border)] bg-[var(--menues-bg)] flex items-center">
-      {/* Logo */}
-      <div className="w-10 h-10 flex items-center justify-center border-r border-[var(--menues-border)]">
-        <span className="text-lg font-bold text-[var(--menues-fg)]">A</span>
-      </div>
+    <header className="sticky top-0 z-50 h-10 border-b border-[var(--menues-border)] bg-[var(--menues-bg)] flex items-center justify-between px-4 gap-2">
+      {/* Left side - Logo + Breadcrumb */}
+      <div className="flex items-center gap-2">
+        {/* Logo */}
+        <div className="w-10 h-10 flex items-center justify-center border-r border-[var(--menues-border)] mr-2">
+          <span className="text-lg font-bold text-[var(--menues-fg)]">A</span>
+        </div>
 
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 px-4">
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-2">
+          {title && (
+            <span className="text-sm font-medium text-[var(--menues-fg)]">{title}</span>
+          )}
         {/* Organization - Text clickable + Dropdown arrow */}
         <div className="flex items-center">
           <Button
@@ -121,9 +150,9 @@ export function Header() {
           </DropdownMenu>
         </div>
 
-        {/* Only show project breadcrumb if NOT in organization context */}
-        {currentSidebarContext !== 'organization' && (
-          <>
+          {/* Only show project breadcrumb if NOT in organization context */}
+          {currentSidebarContext !== 'organization' && !title && (
+            <>
             <span className="text-[var(--menues-fg)] opacity-70">›</span>
 
             {/* Project - Text clickable + Dropdown arrow */}
@@ -175,6 +204,69 @@ export function Header() {
               </DropdownMenu>
             </div>
           </>
+          )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Right side - Search, Filters, Actions */}
+      <div className="flex items-center gap-2 ml-auto">
+        {showSearch && (
+          <div className="relative">
+            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-[var(--menues-fg)] opacity-50" />
+            <Input
+              type="text"
+              placeholder="Buscar..."
+              value={searchValue}
+              onChange={(e) => onSearchChange?.(e.target.value)}
+              className="h-8 pl-7 pr-3 text-sm w-48"
+            />
+          </div>
+        )}
+
+        {showFilters && hasFilters && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+              >
+                <Filter className="h-3 w-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className={customFilters ? "w-72 p-2 space-y-3" : "w-48"}>
+              {customFilters ? (
+                customFilters
+              ) : (
+                filters.map((filter, index) => (
+                  <DropdownMenuItem
+                    key={index}
+                    onClick={filter.onClick}
+                    className="text-sm"
+                  >
+                    {filter.label}
+                  </DropdownMenuItem>
+                ))
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+
+        {onClearFilters && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClearFilters}
+            className="h-8 w-8"
+          >
+            <X className="h-3 w-3" />
+          </Button>
+        )}
+
+        {actions && (
+          <div className="flex items-center gap-2">{actions}</div>
         )}
       </div>
     </header>

@@ -8,9 +8,20 @@ import { useSidebarStore } from '@/stores/sidebarStore'
 
 interface LayoutProps {
   children: React.ReactNode
+  headerProps?: {
+    title?: string;
+    showSearch?: boolean;
+    searchValue?: string;
+    onSearchChange?: (value: string) => void;
+    showFilters?: boolean;
+    filters?: { label: string; onClick: () => void }[];
+    customFilters?: React.ReactNode;
+    onClearFilters?: () => void;
+    actions?: React.ReactNode;
+  }
 }
 
-export function Layout({ children }: LayoutProps) {
+export function Layout({ children, headerProps }: LayoutProps) {
   const { isDark, setTheme } = useThemeStore()
   const { data } = useCurrentUser()
   const { isDocked, isHovered } = useSidebarStore()
@@ -36,7 +47,7 @@ export function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <Header {...headerProps} />
       <Sidebar />
       <main 
         className="transition-all duration-300 ease-in-out"

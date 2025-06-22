@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { Folder, Plus, Edit, Trash2, MoreHorizontal } from 'lucide-react'
+import { Layout } from '@/components/layout/Layout'
 import { CustomPageLayout } from '@/components/ui-custom/CustomPageLayout'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
