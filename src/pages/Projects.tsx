@@ -492,38 +492,38 @@ export default function Projects() {
         })}
       </div>
 
-      {/* New/Edit Project Modal */}
-      <NewProjectModal
-        open={showModal}
-        onClose={() => {
-          setShowModal(false)
-          setEditingProject(null)
-        }}
-        editingProject={editingProject}
-      />
+        {/* New/Edit Project Modal */}
+        <NewProjectModal
+          open={showModal}
+          onClose={() => {
+            setShowModal(false)
+            setEditingProject(null)
+          }}
+          editingProject={editingProject}
+        />
 
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!deletingProject} onOpenChange={() => setDeletingProject(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar proyecto?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción no se puede deshacer. El proyecto "{deletingProject?.name}" será eliminado permanentemente.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDeleteProject}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              disabled={deleteProjectMutation.isPending}
-            >
-              {deleteProjectMutation.isPending ? 'Eliminando...' : 'Eliminar'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={!!deletingProject} onOpenChange={() => setDeletingProject(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>¿Eliminar proyecto?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta acción no se puede deshacer. El proyecto "{deletingProject?.name}" será eliminado permanentemente.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={confirmDeleteProject}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                disabled={deleteProjectMutation.isPending}
+              >
+                {deleteProjectMutation.isPending ? 'Eliminando...' : 'Eliminar'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </Layout>
-  );
+  )
 }
