@@ -4,6 +4,7 @@ import { Header } from './Header'
 import { useAuthStore } from '@/stores/authStore'
 import { useThemeStore } from '@/stores/themeStore'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { useSidebarStore } from '@/stores/sidebarStore'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -12,6 +13,9 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
   const { isDark, setTheme } = useThemeStore()
   const { data } = useCurrentUser()
+  const { isDocked, isHovered } = useSidebarStore()
+  
+  const isExpanded = isDocked || isHovered
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', isDark)
@@ -35,8 +39,9 @@ export function Layout({ children }: LayoutProps) {
       <Header />
       <Sidebar />
       <main 
-        className="ml-[40px] mt-10 transition-all duration-300 ease-in-out"
+        className="mt-10 transition-all duration-300 ease-in-out"
         style={{ 
+          marginLeft: isExpanded ? '240px' : '40px',
           minHeight: 'calc(100vh - 40px)'
         }}
       >

@@ -14,26 +14,52 @@ import {
   Building,
   FileText,
   DollarSign,
-  FolderOpen
+  FolderOpen,
+  Palette,
+  HardHat,
+  Calculator
 } from "lucide-react";
 import { useSidebarStore } from "@/stores/sidebarStore";
+import { useNavigationStore } from "@/stores/navigationStore";
 
 export function Sidebar() {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const { isDocked, isHovered, setDocked, setHovered } = useSidebarStore();
+  const { currentSidebarContext } = useNavigationStore();
   
   const isExpanded = isDocked || isHovered;
 
-  // Navigation items
-  const navigationItems = [
-    { icon: Home, label: 'Dashboard', href: '/dashboard' },
-    { icon: Users, label: 'Contactos', href: '/contactos' },
-    { icon: Building, label: 'Gestión de Organizaciones', href: '/organizaciones' },
-    { icon: FolderOpen, label: 'Gestión de Proyectos', href: '/proyectos' },
-    { icon: FileText, label: 'Bitácora de Obra', href: '/bitacora' },
-    { icon: DollarSign, label: 'Movimientos', href: '/movimientos' },
-  ];
+  // Different navigation items based on context
+  const sidebarContexts = {
+    organization: [
+      { icon: Home, label: 'Dashboard', href: '/dashboard' },
+      { icon: Users, label: 'Contactos', href: '/contactos' },
+      { icon: Building, label: 'Gestión de Organizaciones', href: '/organizaciones' },
+    ],
+    project: [
+      { icon: FolderOpen, label: 'Gestión de Proyectos', href: '/proyectos' },
+      { icon: FileText, label: 'Bitácora de Obra', href: '/bitacora' },
+      { icon: DollarSign, label: 'Movimientos', href: '/movimientos' },
+    ],
+    design: [
+      { icon: Palette, label: 'Planos', href: '/planos' },
+      { icon: FileText, label: 'Especificaciones', href: '/especificaciones' },
+      { icon: Building, label: 'Modelos 3D', href: '/modelos' },
+    ],
+    construction: [
+      { icon: HardHat, label: 'Avances de Obra', href: '/avances' },
+      { icon: FileText, label: 'Reportes Diarios', href: '/reportes' },
+      { icon: Users, label: 'Equipos de Trabajo', href: '/equipos' },
+    ],
+    finance: [
+      { icon: DollarSign, label: 'Presupuestos', href: '/presupuestos' },
+      { icon: Calculator, label: 'Costos', href: '/costos' },
+      { icon: FileText, label: 'Facturas', href: '/facturas' },
+    ]
+  };
+
+  const navigationItems = sidebarContexts[currentSidebarContext] || sidebarContexts.organization;
 
   // Theme toggle mutation
   const toggleThemeMutation = useMutation({
@@ -61,10 +87,14 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "fixed left-0 top-10 h-[calc(100vh-40px)] bg-background border-r border-border flex flex-col z-40",
+        "fixed left-0 top-10 h-[calc(100vh-40px)] bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] flex flex-col z-40",
         "transition-all duration-300 ease-in-out",
         isExpanded ? "w-[240px]" : "w-[40px]"
       )}
+      style={{
+        backgroundColor: 'var(--sidebar-bg)',
+        borderColor: 'var(--sidebar-border)'
+      }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >

@@ -13,10 +13,12 @@ import { useProjects } from "@/hooks/use-projects";
 import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { queryClient } from "@/lib/queryClient";
+import { useNavigationStore } from "@/stores/navigationStore";
 
 export function Header() {
   const { data: userData } = useCurrentUser();
   const { data: projects = [] } = useProjects(userData?.preferences?.last_organization_id);
+  const { setSidebarContext } = useNavigationStore();
 
   // Organization selection mutation
   const selectOrganizationMutation = useMutation({
@@ -74,7 +76,7 @@ export function Header() {
             variant="ghost"
             className="h-8 px-2 text-sm font-medium text-[var(--sidebar-fg)] hover:bg-[var(--sidebar-hover-bg)]"
             onClick={() => {
-              // TODO: Open organization sidebar
+              setSidebarContext('organization');
               console.log('Open organization sidebar');
             }}
           >
@@ -125,7 +127,7 @@ export function Header() {
             variant="ghost"
             className="h-8 px-2 text-sm font-medium text-[var(--sidebar-fg)] hover:bg-[var(--sidebar-hover-bg)]"
             onClick={() => {
-              // TODO: Open project sidebar
+              setSidebarContext('project');
               console.log('Open project sidebar');
             }}
           >
