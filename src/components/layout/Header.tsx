@@ -88,11 +88,11 @@ export function Header({
   const hasFilters = filters.length > 0 || customFilters;
 
   return (
-    <header className="sticky top-0 z-50 h-10 border-b border-[var(--menues-border)] bg-[var(--menues-bg)] flex items-center justify-between px-4 gap-2">
+    <header className="sticky top-0 z-50 h-9 border-b border-[var(--menues-border)] bg-[var(--menues-bg)] flex items-center justify-between px-4 gap-2">
       {/* Left side - Logo + Breadcrumb */}
       <div className="flex items-center gap-2">
         {/* Logo */}
-        <div className="w-10 h-10 flex items-center justify-center border-r border-[var(--menues-border)] mr-2">
+        <div className="w-9 h-9 flex items-center justify-center border-r border-[var(--menues-border)] mr-2">
           <span className="text-base font-bold leading-none text-[var(--menues-fg)]">A</span>
         </div>
 

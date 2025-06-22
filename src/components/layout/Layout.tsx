@@ -53,7 +53,7 @@ export function Layout({ children, headerProps }: LayoutProps) {
         className="transition-all duration-300 ease-in-out flex-1 overflow-auto py-6 px-4"
         style={{ 
           marginLeft: isExpanded ? '240px' : '40px',
-          marginTop: '40px'
+          marginTop: '36px'
         }}
       >
         {children}
