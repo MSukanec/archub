@@ -104,17 +104,18 @@ export function Header({
 
           {/* Organization - Text clickable + Dropdown arrow */}
           {!title && (
-            <div className="flex items-center">
-              <Button
-                variant="ghost"
-                className="h-8 px-2 text-sm font-medium text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
-                onClick={() => {
-                  setSidebarContext('organization');
-                  navigate('/proyectos');
-                }}
-              >
-                {currentOrganization?.name || 'Sin organización'}
-              </Button>
+            <>
+              <div className="flex items-center">
+                <Button
+                  variant="ghost"
+                  className="h-8 px-2 text-sm font-medium text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+                  onClick={() => {
+                    setSidebarContext('organization');
+                    navigate('/proyectos');
+                  }}
+                >
+                  {currentOrganization?.name || 'Sin organización'}
+                </Button>
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -149,13 +150,13 @@ export function Header({
                 Nueva organización
               </DropdownMenuItem>
             </DropdownMenuContent>
-          </DropdownMenu>
-          </div>
+            </DropdownMenu>
+              </div>
 
-          {/* Only show project breadcrumb if NOT in organization context */}
-          {currentSidebarContext !== 'organization' && !title && (
-            <>
-            <span className="text-[var(--menues-fg)] opacity-70">›</span>
+              {/* Only show project breadcrumb if NOT in organization context */}
+              {currentSidebarContext !== 'organization' && (
+                <>
+                  <span className="text-[var(--menues-fg)] opacity-70">›</span>
 
             {/* Project - Text clickable + Dropdown arrow */}
             <div className="flex items-center">
@@ -204,8 +205,10 @@ export function Header({
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </div>
-          </>
+                </div>
+                </>
+              )}
+            </>
           )}
         </div>
       </div>
