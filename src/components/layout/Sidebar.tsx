@@ -93,7 +93,12 @@ export function Sidebar() {
             >
               {/* Icon - FIXED position, never moves */}
               <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
-                <item.icon className="w-[18px] h-[18px]" />
+                <item.icon className={cn(
+                  "w-[18px] h-[18px]",
+                  location === item.href 
+                    ? 'text-[var(--menues-active-fg)]'
+                    : 'text-[var(--menues-fg)]'
+                )} />
               </div>
               
               {/* Text - inside button when expanded */}
@@ -121,7 +126,12 @@ export function Sidebar() {
             title={!isExpanded ? 'Configuración' : undefined}
           >
             <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
-              <Settings className="w-[18px] h-[18px]" />
+              <Settings className={cn(
+                "w-[18px] h-[18px]",
+                location === '/configuracion' 
+                  ? 'text-[var(--menues-active-fg)]'
+                  : 'text-[var(--menues-fg)]'
+              )} />
             </div>
             {isExpanded && (
               <span className="text-sm font-medium whitespace-nowrap ml-1">Configuración</span>
@@ -141,9 +151,9 @@ export function Sidebar() {
           >
             <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
               {userData?.preferences?.theme === 'dark' ? (
-                <Sun className="w-[18px] h-[18px]" />
+                <Sun className="w-[18px] h-[18px] text-[var(--menues-fg)]" />
               ) : (
-                <Moon className="w-[18px] h-[18px]" />
+                <Moon className="w-[18px] h-[18px] text-[var(--menues-fg)]" />
               )}
             </div>
             {isExpanded && (
@@ -171,7 +181,12 @@ export function Sidebar() {
                   className="w-[18px] h-[18px] rounded-full"
                 />
               ) : (
-                <UserCircle className="w-[18px] h-[18px]" />
+                <UserCircle className={cn(
+                  "w-[18px] h-[18px]",
+                  location === '/perfil' 
+                    ? 'text-[var(--menues-active-fg)]'
+                    : 'text-[var(--menues-fg)]'
+                )} />
               )}
             </div>
             {isExpanded && (
