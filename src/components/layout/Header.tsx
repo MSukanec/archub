@@ -92,6 +92,7 @@ export function Header({
   const hasFilters = filters.length > 0 || customFilters;
 
   return (
+    <>
     <header className="sticky top-0 z-50 h-9 border-b border-[var(--menues-border)] bg-[var(--menues-bg)] flex items-center justify-between gap-2">
       {/* Left side - Logo + Breadcrumb */}
       <div className="flex items-center gap-2">
@@ -361,6 +362,6 @@ export function Header({
       open={showNewOrganizationModal}
       onClose={() => setShowNewOrganizationModal(false)}
     />
-  </>
+    </>
   );
 }
