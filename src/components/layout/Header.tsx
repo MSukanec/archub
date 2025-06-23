@@ -149,8 +149,8 @@ export function Header({
             </DropdownMenu>
           </div>
 
-          {/* Project Breadcrumb - Show if not in organization context */}
-          {currentSidebarContext !== 'organization' && (
+          {/* Project Breadcrumb - Show if there's a project selected */}
+          {currentProject && (
             <>
               <span className="text-[var(--menues-fg)] opacity-70">›</span>
               
