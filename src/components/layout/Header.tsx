@@ -111,7 +111,7 @@ export function Header({
                   className="h-8 px-2 text-sm font-medium bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]"
                   onClick={() => {
                     setSidebarContext('organization');
-                    navigate('/organizaciones');
+                    navigate('/organization/dashboard');
                   }}
                 >
                   {currentOrganization?.name || 'Sin organización'}
