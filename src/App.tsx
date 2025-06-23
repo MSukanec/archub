@@ -7,7 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Layout } from "@/components/layout/Layout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { useAuthStore } from "@/stores/authStore";
-import Dashboard from "@/pages/Dashboard";
+
 import OrganizationManagement from "@/pages/organization/OrganizationList";
 import OrganizationProjects from "@/pages/organization/OrganizationProjects";
 import OrganizationContacts from "@/pages/organization/OrganizationContacts";
@@ -61,16 +61,12 @@ function Router() {
       </Route>
       <Route path="/dashboard">
         <ProtectedRoute>
-          <Layout>
-            <Dashboard />
-          </Layout>
+          <OrganizationDashboard />
         </ProtectedRoute>
       </Route>
       <Route path="/">
         <ProtectedRoute>
-          <Layout>
-            <Dashboard />
-          </Layout>
+          <OrganizationDashboard />
         </ProtectedRoute>
       </Route>
     </Switch>

@@ -28,7 +28,7 @@ export default function OrganizationDashboard() {
     .slice(0, 3)
 
   const headerProps = {
-    title: "Organización › Dashboard",
+    title: "Dashboard",
     showSearch: false,
     showFilters: false
   }

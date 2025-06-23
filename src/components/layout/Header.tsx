@@ -98,117 +98,115 @@ export function Header({
 
         {/* Breadcrumb */}
         <div className="flex items-center gap-2">
-          {title && (
-            <span className="text-sm font-medium text-[var(--menues-fg)]">{title}</span>
-          )}
-
-          {/* Organization - Text clickable + Dropdown arrow */}
-          {!title && (
-            <>
-              <div className="flex items-center">
+          {/* Organization Button - ALWAYS visible */}
+          <div className="flex items-center">
+            <Button
+              variant="ghost"
+              className="h-8 px-2 text-sm font-medium bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]"
+              onClick={() => {
+                setSidebarContext('organization');
+                navigate('/organization/dashboard');
+              }}
+            >
+              {currentOrganization?.name || 'Sin organización'}
+            </Button>
+          
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="h-8 px-2 text-sm font-medium bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]"
-                  onClick={() => {
-                    setSidebarContext('organization');
-                    navigate('/organization/dashboard');
-                  }}
+                  size="icon"
+                  className="h-8 w-8"
                 >
-                  {currentOrganization?.name || 'Sin organización'}
+                  <ChevronDown className="h-3 w-3 text-[var(--menues-fg)]" />
                 </Button>
-          
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-              >
-                <ChevronDown className="h-3 w-3 text-[var(--menues-fg)]" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-64">
-              <div className="px-2 py-1.5 text-xs text-[var(--menues-fg)] opacity-70 font-medium">
-                Buscar organización...
-              </div>
-              <DropdownMenuSeparator />
-              {userData?.organizations?.map((org) => (
-                <DropdownMenuItem
-                  key={org.id}
-                  onClick={() => selectOrganizationMutation.mutate(org.id)}
-                  className="flex items-center justify-between"
-                >
-                  <span>{org.name}</span>
-                  {org.id === currentOrganization?.id && (
-                    <div className="h-2 w-2 rounded-full bg-green-500" />
-                  )}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-64">
+                <div className="px-2 py-1.5 text-xs text-[var(--menues-fg)] opacity-70 font-medium">
+                  Buscar organización...
+                </div>
+                <DropdownMenuSeparator />
+                {userData?.organizations?.map((org) => (
+                  <DropdownMenuItem
+                    key={org.id}
+                    onClick={() => selectOrganizationMutation.mutate(org.id)}
+                    className="flex items-center justify-between"
+                  >
+                    <span>{org.name}</span>
+                    {org.id === currentOrganization?.id && (
+                      <div className="h-2 w-2 rounded-full bg-green-500" />
+                    )}
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Nueva organización
                 </DropdownMenuItem>
-              ))}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <Plus className="mr-2 h-4 w-4" />
-                Nueva organización
-              </DropdownMenuItem>
-            </DropdownMenuContent>
+              </DropdownMenuContent>
             </DropdownMenu>
-              </div>
+          </div>
 
-              {/* Only show project breadcrumb if NOT in organization context */}
-              {currentSidebarContext !== 'organization' && (
-                <>
-                  <span className="text-[var(--menues-fg)] opacity-70">›</span>
-
-            {/* Project - Text clickable + Dropdown arrow */}
-            <div className="flex items-center">
-              <Button
-                variant="ghost"
-                className="h-8 px-2 text-sm font-medium text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
-                onClick={() => {
-                  setSidebarContext('project');
-                  navigate('/dashboard');
-                }}
-              >
-                {currentProject?.name || 'Sin proyecto'}
-              </Button>
-              
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+          {/* Title or Project Breadcrumb */}
+          {title ? (
+            <>
+              <span className="text-[var(--menues-fg)] opacity-70">›</span>
+              <span className="text-sm font-medium text-[var(--menues-fg)]">{title}</span>
+            </>
+          ) : (
+            currentSidebarContext !== 'organization' && (
+              <>
+                <span className="text-[var(--menues-fg)] opacity-70">›</span>
+                
+                <div className="flex items-center">
                   <Button
                     variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 hover:bg-[var(--menues-hover-bg)]"
+                    className="h-8 px-2 text-sm font-medium text-[var(--menues-fg)]"
+                    onClick={() => {
+                      setSidebarContext('project');
+                      navigate('/dashboard');
+                    }}
                   >
-                    <ChevronDown className="h-3 w-3 text-[var(--menues-fg)]" />
+                    {currentProject?.name || 'Sin proyecto'}
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-64">
-                  <div className="px-2 py-1.5 text-xs text-[var(--menues-fg)] opacity-70 font-medium">
-                    Buscar proyecto...
-                  </div>
-                  <DropdownMenuSeparator />
-                  {projects.map((project) => (
-                    <DropdownMenuItem
-                      key={project.id}
-                      onClick={() => selectProjectMutation.mutate(project.id)}
-                      className="flex items-center justify-between"
-                    >
-                      <span>{project.name}</span>
-                      {project.id === currentProject?.id && (
-                        <div className="h-2 w-2 rounded-full bg-green-500" />
-                      )}
-                    </DropdownMenuItem>
-                  ))}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Nuevo proyecto
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                  
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                      >
+                        <ChevronDown className="h-3 w-3 text-[var(--menues-fg)]" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="w-64">
+                      <div className="px-2 py-1.5 text-xs text-[var(--menues-fg)] opacity-70 font-medium">
+                        Buscar proyecto...
+                      </div>
+                      <DropdownMenuSeparator />
+                      {projects.map((project) => (
+                        <DropdownMenuItem
+                          key={project.id}
+                          onClick={() => selectProjectMutation.mutate(project.id)}
+                          className="flex items-center justify-between"
+                        >
+                          <span>{project.name}</span>
+                          {project.id === currentProject?.id && (
+                            <div className="h-2 w-2 rounded-full bg-green-500" />
+                          )}
+                        </DropdownMenuItem>
+                      ))}
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Nuevo proyecto
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
-                </>
-              )}
-            </>
+              </>
+            )
           )}
         </div>
       </div>
