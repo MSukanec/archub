@@ -20,7 +20,7 @@ export default function SidebarButton({
   return (
     <button
       className={cn(
-        'relative flex items-center rounded-md transition-all duration-200',
+        'relative flex items-center transition-all duration-200',
         // Botón SIEMPRE 32x32px (w-8 h-8), centrado cuando colapsado
         'w-8 h-8',
         // Cuando expandido, el botón se extiende pero el icono queda fijo
@@ -31,6 +31,7 @@ export default function SidebarButton({
       )}
       onClick={onClick}
       title={!isExpanded ? label : undefined}
+      style={{ borderRadius: '3px' }}
     >
       {/* Contenedor del icono - SIEMPRE centrado en 32x32px */}
       <div className="absolute left-0 top-0 w-8 h-8 flex items-center justify-center flex-shrink-0">
