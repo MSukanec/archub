@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useNavigationStore } from '@/stores/navigationStore'
+import { useLocation } from 'wouter'
 
 export default function OrganizationProjects() {
   const [searchValue, setSearchValue] = useState("")
@@ -31,6 +32,7 @@ export default function OrganizationProjects() {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { setSidebarContext } = useNavigationStore()
+  const [, navigate] = useLocation()
 
   // Filtrar y ordenar proyectos
   let filteredProjects = projects?.filter(project => {
@@ -83,6 +85,7 @@ export default function OrganizationProjects() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['current-user'] })
       setSidebarContext('project')
+      navigate('/project/dashboard')
       toast({
         title: "Proyecto seleccionado",
         description: "El proyecto se ha seleccionado correctamente"

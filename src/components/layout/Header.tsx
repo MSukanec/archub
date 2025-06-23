@@ -80,6 +80,8 @@ export function Header({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      setSidebarContext('project');
+      navigate('/project/dashboard');
     }
   });
 
