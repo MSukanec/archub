@@ -14,7 +14,8 @@ import {
   Building,
   FileText,
   DollarSign,
-  FolderOpen
+  FolderOpen,
+  Mail
 } from "lucide-react";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";

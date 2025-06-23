@@ -180,7 +180,7 @@ export function Header({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 hover:bg-transparent"
+                      className="h-8 w-6 p-0 hover:bg-transparent"
                     >
                       <ChevronDown className="h-3 w-3 text-[var(--menues-fg)]" />
                     </Button>
@@ -241,7 +241,7 @@ export function Header({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 hover:bg-transparent"
+                      className="h-8 w-6 p-0 hover:bg-transparent"
                     >
                       <ChevronDown className="h-3 w-3 text-[var(--menues-fg)]" />
                     </Button>
