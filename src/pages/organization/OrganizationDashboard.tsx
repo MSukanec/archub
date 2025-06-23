@@ -193,69 +193,55 @@ export default function OrganizationDashboard() {
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
         {/* Organization Overview */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Building className="h-5 w-5" />
-              {currentOrganization?.name || 'Organización'}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
-                  <Calendar className="h-4 w-4" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium">Creada</p>
-                  <p className="text-xs text-muted-foreground">
-                    {currentOrganization?.created_at ? 
-                      format(new Date(currentOrganization.created_at), 'dd MMM yyyy', { locale: es }) 
-                      : '---'}
-                  </p>
-                </div>
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6 mb-6">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-4">
+              <div className="bg-blue-500 text-white p-3 rounded-lg">
+                <Building className="h-6 w-6" />
               </div>
-
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-green-100 text-green-600 rounded-lg">
-                  <CheckCircle className="h-4 w-4" />
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <h1 className="text-2xl font-bold text-gray-900">
+                    {currentOrganization?.name || 'Organización'}
+                  </h1>
+                  {currentOrganization?.is_active && (
+                    <Badge variant="default" className="bg-green-100 text-green-800">
+                      Activa
+                    </Badge>
+                  )}
                 </div>
-                <div>
-                  <p className="text-sm font-medium">Estado</p>
-                  <p className="text-xs text-muted-foreground">
-                    {currentOrganization?.is_active ? 'Activa' : 'Inactiva'}
-                  </p>
-                </div>
-              </div>
-
-              {currentOrganization?.plan && (
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-purple-100 text-purple-600 rounded-lg">
-                    <Crown className="h-4 w-4" />
+                <p className="text-sm text-gray-600 mb-3">
+                  Organización creada el {currentOrganization?.created_at ? 
+                    format(new Date(currentOrganization.created_at), 'dd de MMMM de yyyy', { locale: es }) 
+                    : '---'}
+                </p>
+                <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1 bg-blue-100 text-blue-600 rounded">
+                      <Folder className="h-3 w-3" />
+                    </div>
+                    <span className="text-sm text-gray-600">
+                      {recentProjects.length} proyectos
+                    </span>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium">Plan</p>
-                    <p className="text-xs text-muted-foreground">
-                      {currentOrganization.plan.name}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-orange-100 text-orange-600 rounded-lg">
-                  <Users className="h-4 w-4" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium">Proyectos</p>
-                  <p className="text-xs text-muted-foreground">
-                    {recentProjects.length} total
-                  </p>
+                  {currentOrganization?.plan && (
+                    <div className="flex items-center gap-2">
+                      <div className="p-1 bg-purple-100 text-purple-600 rounded">
+                        <Crown className="h-3 w-3" />
+                      </div>
+                      <span className="text-sm text-gray-600">
+                        Plan {currentOrganization.plan.name}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        ${currentOrganization.plan.price}/mes
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Recent Activity Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -409,8 +395,8 @@ export default function OrganizationDashboard() {
                 <Button 
                   variant="ghost" 
                   size="sm"
-                  disabled
-                  className="h-8 px-2 opacity-50"
+                  onClick={() => navigate('/organization/activity')}
+                  className="h-8 px-2"
                 >
                   Ver toda
                   <ArrowRight className="ml-1 h-4 w-4" />
