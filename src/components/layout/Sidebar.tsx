@@ -40,10 +40,10 @@ export function Sidebar() {
     ],
     project: [
       { icon: Home, label: 'Dashboard', href: '/project/dashboard' },
-      { icon: FolderOpen, label: 'Proyecto', href: '#', onClick: () => setSidebarContext('design') },
-      { icon: Building, label: 'Obra', href: '#', onClick: () => setSidebarContext('construction') },
-      { icon: DollarSign, label: 'Finanzas', href: '#', onClick: () => setSidebarContext('finance') },
-      { icon: Users, label: 'Comercialización', href: '#', onClick: () => setSidebarContext('commercialization') },
+      { icon: FolderOpen, label: 'Proyecto', href: '#', onClick: () => { setSidebarContext('design'); navigate('/design/dashboard'); } },
+      { icon: Building, label: 'Obra', href: '#', onClick: () => { setSidebarContext('construction'); navigate('/construction/dashboard'); } },
+      { icon: DollarSign, label: 'Finanzas', href: '#', onClick: () => { setSidebarContext('finance'); navigate('/finance/dashboard'); } },
+      { icon: Users, label: 'Comercialización', href: '#', onClick: () => { setSidebarContext('commercialization'); navigate('/commercialization/dashboard'); } },
     ],
     design: [
       { icon: Home, label: 'Dashboard', href: '/design/dashboard' },
