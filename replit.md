@@ -571,6 +571,15 @@ Changelog:
   • Icons perfectly centered at 18x18px with w-8 h-8 flex containers for proper positioning
   • Collapsed state (40px) shows only centered icons, expanded shows text inside buttons with ml-1
   • All colors use CSS variables: --menues-fg, --menues-hover-bg/fg, --menues-active-bg/fg
+
+- June 23, 2025. Enhanced sidebar hover animations and organization page structure
+  • Improved sidebar hover transitions with 300ms duration and 100ms text delay for progressive effect
+  • Created OrganizationProjects.tsx following identical pattern to OrganizationList.tsx
+  • Added organization context switching that updates sidebar when organizations are selected
+  • Removed hover/active effects from header buttons for consistent static appearance
+  • Created OrganizationContacts.tsx with complete contact management functionality
+  • Updated sidebar navigation to use /organization/contactos route for organization-specific contacts
+  • All organization pages now accessible from sidebar with proper context switching
   • Eliminated all fixed color classes for consistent theming throughout sidebar
   • Text appears inside button elements for proper hover behavior across entire clickable area
   • Sidebar positioned with proper dimensions and border alignment with header
