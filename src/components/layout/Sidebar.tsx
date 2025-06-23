@@ -90,7 +90,7 @@ export function Sidebar() {
     >
       {/* Navigation Items */}
       <div className="flex-1 p-1">
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-[2px]">
           {navigationItems.map((item) => (
             <SidebarButton
               key={item.href}
@@ -106,7 +106,7 @@ export function Sidebar() {
 
       {/* Bottom Section - Fixed Buttons */}
       <div className="border-t border-[var(--menues-border)] p-1">
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-[2px]">
           {/* Settings */}
           <SidebarButton
             icon={<Settings className="w-[18px] h-[18px]" />}

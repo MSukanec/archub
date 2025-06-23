@@ -31,7 +31,7 @@ export default function SidebarButton({
       )}
       onClick={onClick}
       title={!isExpanded ? label : undefined}
-      style={{ borderRadius: '3px' }}
+      style={{ borderRadius: '4px' }}
     >
       {/* Contenedor del icono - SIEMPRE centrado en 32x32px */}
       <div className="absolute left-0 top-0 w-8 h-8 flex items-center justify-center flex-shrink-0">
