@@ -103,14 +103,15 @@
   --layout-text: hsl(0, 0%, 90%);
   --layout-border: hsl(240, 8%, 15%);
 
-  /* Sidebar */
-  --sidebar-bg: hsl(0, 0%, 14%);
-  --sidebar-fg: hsl(0, 0%, 90%);
-  --sidebar-secondary-fg: hsl(0, 0%, 70%);
-  --sidebar-border: hsl(240, 8%, 15%);
-  --sidebar-hover-bg: hsl(0, 0%, 8%);
-  --sidebar-active-bg: hsl(0, 0%, 8%);
-  --sidebar-active-text: hsl(0, 0%, 90%);
+  /* Menus/Sidebar */
+  --menues-bg: hsl(0, 0%, 14%);
+  --menues-fg: hsl(0, 0%, 70%);
+  --menues-secondary-fg: hsl(0, 0%, 60%);
+  --menues-border: hsl(240, 8%, 20%);
+  --menues-hover-bg: hsl(0, 0%, 20%);
+  --menues-hover-fg: hsl(0, 0%, 90%);
+  --menues-active-bg: hsl(0, 0%, 25%);
+  --menues-active-fg: hsl(0, 0%, 98%);
 
   /* Cards */
   --card-bg: hsl(0, 0%, 14%);
