@@ -1,33 +1,69 @@
 import { Layout } from '@/components/layout/Layout'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
 import { useState } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { Building, Crown, Plus, Users, Calendar, Shield } from 'lucide-react'
+import { Building, Crown, Plus, Calendar, Shield, MoreHorizontal, Edit, Trash2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
 
 export default function OrganizationManagement() {
   const [searchValue, setSearchValue] = useState("")
-  const [selectedFilter, setSelectedFilter] = useState("all")
+  const [sortBy, setSortBy] = useState('date_recent')
+  const [filterByStatus, setFilterByStatus] = useState('all')
+  const [editingOrganization, setEditingOrganization] = useState<any>(null)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [organizationToDelete, setOrganizationToDelete] = useState<any>(null)
+  
   const { data: userData, isLoading } = useCurrentUser()
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
-  // Filtrar organizaciones basado en búsqueda y filtros
-  const filteredOrganizations = userData?.organizations?.filter(org => {
+  // Filtrar y ordenar organizaciones
+  let filteredOrganizations = userData?.organizations?.filter(org => {
     const matchesSearch = org.name.toLowerCase().includes(searchValue.toLowerCase())
     
-    if (selectedFilter === "all") return matchesSearch
-    if (selectedFilter === "active") return matchesSearch && org.is_active
-    if (selectedFilter === "system") return matchesSearch && org.is_system
-    if (selectedFilter === "regular") return matchesSearch && !org.is_system
+    if (filterByStatus === "all") return matchesSearch
+    if (filterByStatus === "active") return matchesSearch && org.is_active
+    if (filterByStatus === "system") return matchesSearch && org.is_system
+    if (filterByStatus === "regular") return matchesSearch && !org.is_system
     
     return matchesSearch
   }) || []
+
+  // Aplicar ordenamiento
+  filteredOrganizations = [...filteredOrganizations].sort((a, b) => {
+    switch (sortBy) {
+      case 'name_asc':
+        return a.name.localeCompare(b.name)
+      case 'name_desc':
+        return b.name.localeCompare(a.name)
+      case 'date_recent':
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      case 'date_oldest':
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      default:
+        return 0
+    }
+  })
+
+  // Poner la organización activa primero
+  const activeOrgId = userData?.preferences?.last_organization_id
+  if (activeOrgId) {
+    filteredOrganizations = [
+      ...filteredOrganizations.filter(org => org.id === activeOrgId),
+      ...filteredOrganizations.filter(org => org.id !== activeOrgId)
+    ]
+  }
 
   // Mutación para seleccionar organización
   const selectOrganizationMutation = useMutation({
@@ -59,10 +95,63 @@ export default function OrganizationManagement() {
     selectOrganizationMutation.mutate(organizationId)
   }
 
+  const handleEdit = (organization: any) => {
+    setEditingOrganization(organization)
+    // TODO: Abrir modal de edición
+  }
+
+  const handleDeleteClick = (organization: any) => {
+    setOrganizationToDelete(organization)
+    setDeleteDialogOpen(true)
+  }
+
   const clearFilters = () => {
     setSearchValue("")
-    setSelectedFilter("all")
+    setSortBy('date_recent')
+    setFilterByStatus('all')
   }
+
+  // Filtros personalizados
+  const customFilters = (
+    <div className="w-72 p-4 space-y-4">
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Ordenar por</Label>
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="date_recent">Fecha (Más reciente)</SelectItem>
+            <SelectItem value="date_oldest">Fecha (Más antigua)</SelectItem>
+            <SelectItem value="name_asc">Nombre (A-Z)</SelectItem>
+            <SelectItem value="name_desc">Nombre (Z-A)</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Filtrar por estado</Label>
+        <Select value={filterByStatus} onValueChange={setFilterByStatus}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas</SelectItem>
+            <SelectItem value="active">Activas</SelectItem>
+            <SelectItem value="system">Sistema</SelectItem>
+            <SelectItem value="regular">Regulares</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  )
+
+  const actions = (
+    <Button className="h-8 px-3 text-sm">
+      <Plus className="w-4 h-4 mr-2" />
+      Nueva Organización
+    </Button>
+  )
 
   const headerProps = {
     title: "Gestión de Organizaciones",
@@ -70,54 +159,16 @@ export default function OrganizationManagement() {
     searchValue,
     onSearchChange: setSearchValue,
     showFilters: true,
-    filters: [
-      { 
-        label: "Todas", 
-        onClick: () => setSelectedFilter("all"),
-        active: selectedFilter === "all"
-      },
-      { 
-        label: "Activas", 
-        onClick: () => setSelectedFilter("active"),
-        active: selectedFilter === "active"
-      },
-      { 
-        label: "Sistema", 
-        onClick: () => setSelectedFilter("system"),
-        active: selectedFilter === "system"
-      },
-      { 
-        label: "Regulares", 
-        onClick: () => setSelectedFilter("regular"),
-        active: selectedFilter === "regular"
-      }
-    ],
+    customFilters,
     onClearFilters: clearFilters,
-    actions: (
-      <Button className="h-8 px-3 text-sm">
-        <Plus className="w-4 h-4 mr-2" />
-        Nueva Organización
-      </Button>
-    )
+    actions
   }
 
   if (isLoading) {
     return (
       <Layout headerProps={headerProps}>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {[...Array(6)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader className="pb-3">
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="h-3 bg-gray-200 rounded"></div>
-                  <div className="h-3 bg-gray-200 rounded w-2/3"></div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+        <div className="p-8 text-center text-muted-foreground">
+          Cargando organizaciones...
         </div>
       </Layout>
     )
@@ -126,153 +177,117 @@ export default function OrganizationManagement() {
   return (
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
-        {/* Organización actual */}
-        {userData?.organization && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex items-center gap-3 mb-2">
-              <Crown className="w-5 h-5 text-blue-600" />
-              <h3 className="font-medium text-blue-900">Organización Actual</h3>
-            </div>
-            <div className="flex items-center gap-3">
-              <Avatar className="w-8 h-8">
-                <AvatarFallback className="text-xs bg-blue-100 text-blue-600">
-                  {userData.organization.name.substring(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="font-medium text-blue-900">{userData.organization.name}</p>
-                <div className="flex items-center gap-2 text-sm text-blue-700">
-                  <Calendar className="w-3 h-3" />
-                  {new Date(userData.organization.created_at).toLocaleDateString('es-ES')}
-                  {userData.organization.is_system && (
-                    <Badge variant="secondary" className="text-xs">
-                      <Shield className="w-3 h-3 mr-1" />
-                      Sistema
-                    </Badge>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Estadísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <Building className="w-4 h-4 text-blue-600" />
-                <div>
-                  <p className="text-sm text-gray-600">Total</p>
-                  <p className="text-xl font-bold">{userData?.organizations?.length || 0}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <Users className="w-4 h-4 text-green-600" />
-                <div>
-                  <p className="text-sm text-gray-600">Activas</p>
-                  <p className="text-xl font-bold">
-                    {userData?.organizations?.filter(org => org.is_active).length || 0}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <Shield className="w-4 h-4 text-purple-600" />
-                <div>
-                  <p className="text-sm text-gray-600">Sistema</p>
-                  <p className="text-xl font-bold">
-                    {userData?.organizations?.filter(org => org.is_system).length || 0}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <Building className="w-4 h-4 text-orange-600" />
-                <div>
-                  <p className="text-sm text-gray-600">Regulares</p>
-                  <p className="text-xl font-bold">
-                    {userData?.organizations?.filter(org => !org.is_system).length || 0}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Headers de columnas */}
+        <div className="grid grid-cols-12 gap-4 px-4 py-2 text-xs font-medium text-muted-foreground border-b">
+          <div className="col-span-2">Fecha</div>
+          <div className="col-span-3">Organización</div>
+          <div className="col-span-2">Plan</div>
+          <div className="col-span-2">Estado</div>
+          <div className="col-span-2">Tipo</div>
+          <div className="col-span-1">Acciones</div>
         </div>
 
         {/* Lista de organizaciones */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="space-y-2">
           {filteredOrganizations.map((organization) => {
             const isSelected = userData?.organization?.id === organization.id
             
             return (
               <Card 
                 key={organization.id} 
-                className={`cursor-pointer transition-all hover:shadow-md ${
-                  isSelected ? 'ring-2 ring-blue-500 bg-blue-50' : ''
+                className={`w-full cursor-pointer transition-all hover:shadow-sm border ${
+                  isSelected ? 'border-[var(--accent)] bg-[var(--accent-bg)]' : ''
                 }`}
-                onClick={() => handleSelectOrganization(organization.id)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleSelectOrganization(organization.id)
+                }}
               >
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="w-10 h-10">
-                        <AvatarFallback className="text-sm">
+                <CardContent className="p-4">
+                  <div className="grid grid-cols-12 gap-4 items-center">
+                    {/* Fecha */}
+                    <div className="col-span-2 text-xs text-muted-foreground">
+                      {format(new Date(organization.created_at), 'dd/MM/yyyy', { locale: es })}
+                    </div>
+
+                    {/* Organización */}
+                    <div className="col-span-3 flex items-center gap-2">
+                      <Avatar className="w-8 h-8">
+                        <AvatarFallback className="text-xs">
                           {organization.name.substring(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <CardTitle className="text-base flex items-center gap-2">
+                        <div className="font-medium flex items-center gap-2">
                           {organization.name}
-                          {isSelected && <Crown className="w-4 h-4 text-blue-600" />}
-                        </CardTitle>
+                          {isSelected && (
+                            <Badge variant="secondary" className="text-xs">
+                              Activa
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </CardHeader>
-                
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Calendar className="w-3 h-3" />
-                      Creada: {new Date(organization.created_at).toLocaleDateString('es-ES')}
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <Badge variant={organization.is_active ? "default" : "secondary"}>
-                        {organization.is_active ? "Activa" : "Inactiva"}
-                      </Badge>
-                      
-                      {organization.is_system && (
-                        <Badge variant="outline">
-                          <Shield className="w-3 h-3 mr-1" />
-                          Sistema
-                        </Badge>
+
+                    {/* Plan */}
+                    <div className="col-span-2 text-xs">
+                      {organization.plan ? (
+                        <div className="flex items-center gap-1">
+                          <Crown className="w-3 h-3 text-yellow-500" />
+                          <span>{organization.plan.name}</span>
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground">Sin plan</span>
                       )}
                     </div>
 
-                    {organization.plan && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <Crown className="w-3 h-3 text-yellow-500" />
-                        <span className="text-gray-600">Plan: {organization.plan.name}</span>
-                        <Badge variant="secondary" className="text-xs">
-                          ${organization.plan.price}
+                    {/* Estado */}
+                    <div className="col-span-2">
+                      <Badge variant={organization.is_active ? "default" : "secondary"} className="text-xs">
+                        {organization.is_active ? "Activa" : "Inactiva"}
+                      </Badge>
+                    </div>
+
+                    {/* Tipo */}
+                    <div className="col-span-2">
+                      {organization.is_system ? (
+                        <Badge variant="outline" className="text-xs">
+                          <Shield className="w-3 h-3 mr-1" />
+                          Sistema
                         </Badge>
-                      </div>
-                    )}
+                      ) : (
+                        <span className="text-xs text-muted-foreground">Regular</span>
+                      )}
+                    </div>
+
+                    {/* Acciones */}
+                    <div className="col-span-1">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-8 w-8 p-0"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEdit(organization)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => handleDeleteClick(organization)}
+                            className="text-destructive"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Eliminar
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -283,12 +298,12 @@ export default function OrganizationManagement() {
         {filteredOrganizations.length === 0 && (
           <Card>
             <CardContent className="text-center py-8">
-              <Building className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
+              <Building className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium mb-2">
                 No se encontraron organizaciones
               </h3>
-              <p className="text-gray-600">
-                {searchValue || selectedFilter !== "all" 
+              <p className="text-muted-foreground">
+                {searchValue || filterByStatus !== "all" 
                   ? "Intenta ajustar los filtros de búsqueda" 
                   : "Aún no perteneces a ninguna organización"
                 }
@@ -296,6 +311,32 @@ export default function OrganizationManagement() {
             </CardContent>
           </Card>
         )}
+
+        {/* Diálogo de confirmación para eliminar */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>¿Eliminar organización?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta acción eliminará permanentemente la organización "{organizationToDelete?.name}". 
+                Esta acción no se puede deshacer.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction 
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={() => {
+                  // TODO: Implementar eliminación
+                  setDeleteDialogOpen(false)
+                  setOrganizationToDelete(null)
+                }}
+              >
+                Eliminar
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </Layout>
   )
