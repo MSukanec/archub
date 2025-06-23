@@ -1,0 +1,356 @@
+import { Layout } from '@/components/layout/Layout'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
+import { useState } from 'react'
+import { useCurrentUser } from '@/hooks/use-current-user'
+import { useProjects } from '@/hooks/use-projects'
+import { Folder, Crown, Plus, Calendar, MoreHorizontal, Edit, Trash2 } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useToast } from '@/hooks/use-toast'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
+import { useNavigationStore } from '@/stores/navigationStore'
+
+export default function OrganizationProjects() {
+  const [searchValue, setSearchValue] = useState("")
+  const [sortBy, setSortBy] = useState('date_recent')
+  const [filterByStatus, setFilterByStatus] = useState('all')
+  const [editingProject, setEditingProject] = useState<any>(null)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [projectToDelete, setProjectToDelete] = useState<any>(null)
+  
+  const { data: userData, isLoading } = useCurrentUser()
+  const { data: projects = [], isLoading: projectsLoading } = useProjects(userData?.organization?.id)
+  const { toast } = useToast()
+  const queryClient = useQueryClient()
+  const { setSidebarContext } = useNavigationStore()
+
+  // Filtrar y ordenar proyectos
+  let filteredProjects = projects?.filter(project => {
+    const matchesSearch = project.name.toLowerCase().includes(searchValue.toLowerCase())
+    
+    if (filterByStatus === "all") return matchesSearch
+    if (filterByStatus === "active") return matchesSearch && project.status === 'active'
+    if (filterByStatus === "planning") return matchesSearch && project.status === 'planning'
+    if (filterByStatus === "completed") return matchesSearch && project.status === 'completed'
+    if (filterByStatus === "on-hold") return matchesSearch && project.status === 'on-hold'
+    
+    return matchesSearch
+  }) || []
+
+  // Aplicar ordenamiento
+  filteredProjects = [...filteredProjects].sort((a, b) => {
+    switch (sortBy) {
+      case 'name_asc':
+        return a.name.localeCompare(b.name)
+      case 'name_desc':
+        return b.name.localeCompare(a.name)
+      case 'date_recent':
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      case 'date_oldest':
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      default:
+        return 0
+    }
+  })
+
+  // Poner el proyecto activo primero
+  const activeProjectId = userData?.preferences?.last_project_id
+  if (activeProjectId) {
+    filteredProjects = [
+      ...filteredProjects.filter(project => project.id === activeProjectId),
+      ...filteredProjects.filter(project => project.id !== activeProjectId)
+    ]
+  }
+
+  // Mutación para seleccionar proyecto
+  const selectProjectMutation = useMutation({
+    mutationFn: async (projectId: string) => {
+      const { error } = await supabase
+        .from('user_preferences')
+        .update({ last_project_id: projectId })
+        .eq('user_id', userData?.user.id)
+      
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['current-user'] })
+      setSidebarContext('project')
+      toast({
+        title: "Proyecto seleccionado",
+        description: "El proyecto se ha seleccionado correctamente"
+      })
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "No se pudo seleccionar el proyecto",
+        variant: "destructive"
+      })
+    }
+  })
+
+  const handleSelectProject = (projectId: string) => {
+    selectProjectMutation.mutate(projectId)
+  }
+
+  const handleEdit = (project: any) => {
+    setEditingProject(project)
+    // TODO: Abrir modal de edición
+  }
+
+  const handleDeleteClick = (project: any) => {
+    setProjectToDelete(project)
+    setDeleteDialogOpen(true)
+  }
+
+  const clearFilters = () => {
+    setSearchValue("")
+    setSortBy('date_recent')
+    setFilterByStatus('all')
+  }
+
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case 'active': return 'default'
+      case 'planning': return 'secondary'
+      case 'completed': return 'outline'
+      case 'on-hold': return 'destructive'
+      default: return 'secondary'
+    }
+  }
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'active': return 'Activo'
+      case 'planning': return 'Planificación'
+      case 'completed': return 'Completado'
+      case 'on-hold': return 'En pausa'
+      default: return status
+    }
+  }
+
+  // Filtros personalizados
+  const customFilters = (
+    <div className="w-72 p-4 space-y-4">
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Ordenar por</Label>
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="date_recent">Fecha (Más reciente)</SelectItem>
+            <SelectItem value="date_oldest">Fecha (Más antigua)</SelectItem>
+            <SelectItem value="name_asc">Nombre (A-Z)</SelectItem>
+            <SelectItem value="name_desc">Nombre (Z-A)</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Filtrar por estado</Label>
+        <Select value={filterByStatus} onValueChange={setFilterByStatus}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos los estados</SelectItem>
+            <SelectItem value="active">Activos</SelectItem>
+            <SelectItem value="planning">En planificación</SelectItem>
+            <SelectItem value="completed">Completados</SelectItem>
+            <SelectItem value="on-hold">En pausa</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  )
+
+  const actions = (
+    <Button className="h-8 px-3 text-sm">
+      <Plus className="w-4 h-4 mr-2" />
+      Nuevo Proyecto
+    </Button>
+  )
+
+  const headerProps = {
+    title: "Gestión de Proyectos",
+    showSearch: true,
+    searchValue,
+    onSearchChange: setSearchValue,
+    showFilters: true,
+    customFilters,
+    onClearFilters: clearFilters,
+    actions
+  }
+
+  if (isLoading || projectsLoading) {
+    return (
+      <Layout headerProps={headerProps}>
+        <div className="p-8 text-center text-muted-foreground">
+          Cargando proyectos...
+        </div>
+      </Layout>
+    )
+  }
+
+  return (
+    <Layout headerProps={headerProps}>
+      <div className="space-y-6">
+        {/* Headers de columnas */}
+        <div className="grid grid-cols-12 gap-4 px-4 py-2 text-xs font-medium text-muted-foreground border-b">
+          <div className="col-span-2">Fecha</div>
+          <div className="col-span-2">Creador</div>
+          <div className="col-span-3">Proyecto</div>
+          <div className="col-span-2">Tipología</div>
+          <div className="col-span-2">Estado</div>
+          <div className="col-span-1">Acciones</div>
+        </div>
+
+        {/* Lista de proyectos */}
+        <div className="space-y-2">
+          {filteredProjects.map((project) => {
+            const isSelected = userData?.preferences?.last_project_id === project.id
+            
+            return (
+              <Card 
+                key={project.id} 
+                className={`w-full cursor-pointer transition-all hover:shadow-sm border ${
+                  isSelected ? 'border-[var(--accent)] bg-[var(--accent-bg)]' : ''
+                }`}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleSelectProject(project.id)
+                }}
+              >
+                <CardContent className="p-4">
+                  <div className="grid grid-cols-12 gap-4 items-center">
+                    {/* Fecha */}
+                    <div className="col-span-2 text-xs text-muted-foreground">
+                      {format(new Date(project.created_at), 'dd/MM/yyyy', { locale: es })}
+                    </div>
+
+                    {/* Creador */}
+                    <div className="col-span-2 flex items-center gap-2">
+                      <Avatar className="w-6 h-6">
+                        <AvatarFallback className="text-xs">
+                          {project.creator?.full_name?.substring(0, 2).toUpperCase() || 
+                           project.creator?.email?.substring(0, 2).toUpperCase() || 'XX'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-xs text-muted-foreground truncate">
+                        {project.creator?.full_name || project.creator?.email || 'Sin asignar'}
+                      </span>
+                    </div>
+
+                    {/* Proyecto */}
+                    <div className="col-span-3 flex items-center gap-2">
+                      <Folder className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                      <div>
+                        <div className="font-medium flex items-center gap-2">
+                          {project.name}
+                          {isSelected && (
+                            <Badge variant="secondary" className="text-xs">
+                              Activo
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Tipología */}
+                    <div className="col-span-2 text-xs text-muted-foreground">
+                      {project.project_data?.project_type?.name || 'Sin especificar'}
+                    </div>
+
+                    {/* Estado */}
+                    <div className="col-span-2">
+                      <Badge variant={getStatusBadgeVariant(project.status)} className="text-xs">
+                        {getStatusLabel(project.status)}
+                      </Badge>
+                    </div>
+
+                    {/* Acciones */}
+                    <div className="col-span-1 flex justify-end">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEdit(project)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => handleDeleteClick(project)}
+                            className="text-destructive"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Eliminar
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })}
+
+          {filteredProjects.length === 0 && (
+            <div className="text-center py-12 text-muted-foreground">
+              <Folder className="mx-auto h-12 w-12 mb-4 opacity-50" />
+              <h3 className="text-sm font-medium mb-1">No se encontraron proyectos</h3>
+              <p className="text-xs">
+                {searchValue || filterByStatus !== 'all' 
+                  ? 'Prueba ajustando los filtros de búsqueda' 
+                  : 'Comienza creando tu primer proyecto'
+                }
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Dialog de confirmación para eliminar */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar proyecto?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción eliminará permanentemente el proyecto "{projectToDelete?.name}". 
+              Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                // TODO: Implementar eliminación
+                setDeleteDialogOpen(false)
+                setProjectToDelete(null)
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </Layout>
+  )
+}

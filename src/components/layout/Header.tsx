@@ -108,10 +108,10 @@ export function Header({
               <div className="flex items-center">
                 <Button
                   variant="ghost"
-                  className="h-8 px-2 text-sm font-medium text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+                  className="h-8 px-2 text-sm font-medium bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
                   onClick={() => {
                     setSidebarContext('organization');
-                    navigate('/proyectos');
+                    navigate('/organizaciones');
                   }}
                 >
                   {currentOrganization?.name || 'Sin organización'}

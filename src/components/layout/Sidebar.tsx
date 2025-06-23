@@ -34,8 +34,9 @@ export function Sidebar() {
   const sidebarContexts = {
     organization: [
       { icon: Home, label: 'Dashboard', href: '/dashboard' },
-      { icon: Users, label: 'Contactos', href: '/contactos' },
       { icon: Building, label: 'Gestión de Organizaciones', href: '/organizaciones' },
+      { icon: FolderOpen, label: 'Gestión de Proyectos', href: '/proyectos' },
+      { icon: Users, label: 'Contactos', href: '/contactos' },
     ],
     project: [
       { icon: FolderOpen, label: 'Gestión de Proyectos', href: '/proyectos' },

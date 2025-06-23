@@ -9,6 +9,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { useAuthStore } from "@/stores/authStore";
 import Dashboard from "@/pages/Dashboard";
 import OrganizationManagement from "@/pages/organization/OrganizationList";
+import OrganizationProjects from "@/pages/organization/OrganizationProjects";
 import Movements from "@/pages/Movements";
 import SiteLogs from "@/pages/SiteLogs";
 import Contacts from "@/pages/Contacts";
@@ -45,6 +46,11 @@ function Router() {
           <Layout>
             <Contacts />
           </Layout>
+        </ProtectedRoute>
+      </Route>
+      <Route path="/proyectos">
+        <ProtectedRoute>
+          <OrganizationProjects />
         </ProtectedRoute>
       </Route>
       <Route path="/dashboard">
