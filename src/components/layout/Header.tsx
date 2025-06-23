@@ -42,7 +42,7 @@ export function Header({
   actions,
 }: HeaderProps = {}) {
   const [showNewOrganizationModal, setShowNewOrganizationModal] = useState(false);
-  console.log('Header rendered, showNewOrganizationModal:', showNewOrganizationModal);
+
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const { data: projects = [] } = useProjects(userData?.preferences?.last_organization_id);
@@ -145,19 +145,16 @@ export function Header({
                   </DropdownMenuItem>
                 ))}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  className="text-sm"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('Clicked Nueva organización');
+                <div
+                  className="relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-[var(--accent-bg)] focus:bg-[var(--accent-bg)]"
+                  onClick={() => {
+                    console.log('Direct click Nueva organización');
                     setShowNewOrganizationModal(true);
-                    console.log('State should be true now');
                   }}
                 >
                   <Plus className="mr-2 h-4 w-4" />
                   Nueva organización
-                </DropdownMenuItem>
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -365,13 +362,12 @@ export function Header({
     </header>
 
     {/* New Organization Modal */}
-    <NewOrganizationModal
-      open={showNewOrganizationModal}
-      onClose={() => {
-        console.log('Closing modal');
-        setShowNewOrganizationModal(false);
-      }}
-    />
+    {showNewOrganizationModal && (
+      <NewOrganizationModal
+        open={showNewOrganizationModal}
+        onClose={() => setShowNewOrganizationModal(false)}
+      />
+    )}
     </>
   );
 }
