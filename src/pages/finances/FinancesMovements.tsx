@@ -372,16 +372,6 @@ export default function Movements() {
     )
   };
 
-  if (isLoading) {
-    return (
-      <Layout headerProps={headerProps}>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-sm text-muted-foreground">Cargando movimientos...</div>
-        </div>
-      </Layout>
-    );
-  }
-
   return (
     <Layout headerProps={headerProps}>
       <CustomTable
