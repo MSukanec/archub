@@ -16,6 +16,7 @@ import { supabase } from "@/lib/supabase";
 import { queryClient } from "@/lib/queryClient";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useLocation } from "wouter";
+import { NewOrganizationModal } from "@/modals/NewOrganizationModal";
 
 interface HeaderProps {
   title?: string;
@@ -40,6 +41,7 @@ export function Header({
   onClearFilters,
   actions,
 }: HeaderProps = {}) {
+  const [showNewOrganizationModal, setShowNewOrganizationModal] = useState(false);
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const { data: projects = [] } = useProjects(userData?.preferences?.last_organization_id);
@@ -141,7 +143,10 @@ export function Header({
                   </DropdownMenuItem>
                 ))}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-sm">
+                <DropdownMenuItem 
+                  className="text-sm"
+                  onClick={() => setShowNewOrganizationModal(true)}
+                >
                   <Plus className="mr-2 h-4 w-4" />
                   Nueva organización
                 </DropdownMenuItem>
@@ -350,5 +355,12 @@ export function Header({
         )}
       </div>
     </header>
+
+    {/* New Organization Modal */}
+    <NewOrganizationModal
+      open={showNewOrganizationModal}
+      onClose={() => setShowNewOrganizationModal(false)}
+    />
+  </>
   );
 }
