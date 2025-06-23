@@ -17,6 +17,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { NewContactModal } from '@/modals/NewContactModal'
 
 export default function OrganizationContacts() {
   const [searchValue, setSearchValue] = useState("")
@@ -25,6 +26,7 @@ export default function OrganizationContacts() {
   const [editingContact, setEditingContact] = useState<any>(null)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [contactToDelete, setContactToDelete] = useState<any>(null)
+  const [newContactModalOpen, setNewContactModalOpen] = useState(false)
   
   const { data: userData, isLoading } = useCurrentUser()
   const { data: contacts = [], isLoading: contactsLoading } = useContacts(userData?.organization?.id)
@@ -65,7 +67,7 @@ export default function OrganizationContacts() {
 
   const handleEdit = (contact: any) => {
     setEditingContact(contact)
-    // TODO: Abrir modal de edición
+    setNewContactModalOpen(true)
   }
 
   const handleDeleteClick = (contact: any) => {
@@ -124,7 +126,10 @@ export default function OrganizationContacts() {
   )
 
   const actions = (
-    <Button className="h-8 px-3 text-sm">
+    <Button 
+      className="h-8 px-3 text-sm"
+      onClick={() => setNewContactModalOpen(true)}
+    >
       <Plus className="w-4 h-4 mr-2" />
       Nuevo Contacto
     </Button>
@@ -300,6 +305,16 @@ export default function OrganizationContacts() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Modal para crear/editar contacto */}
+      <NewContactModal
+        open={newContactModalOpen}
+        onClose={() => {
+          setNewContactModalOpen(false)
+          setEditingContact(null)
+        }}
+        editingContact={editingContact}
+      />
     </Layout>
   )
 }
