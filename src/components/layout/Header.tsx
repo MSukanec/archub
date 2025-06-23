@@ -176,7 +176,7 @@ export function Header({
                       <ChevronDown className="h-3 w-3 text-[var(--menues-fg)]" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="w-64">
+                  <DropdownMenuContent align="start" className="w-56">
                     <div className="px-2 py-1.5 text-xs text-[var(--menues-fg)] opacity-70 font-medium">
                       Buscar proyecto...
                     </div>
@@ -185,16 +185,16 @@ export function Header({
                       <DropdownMenuItem
                         key={project.id}
                         onClick={() => selectProjectMutation.mutate(project.id)}
-                        className="flex items-center justify-between"
+                        className="flex items-center justify-between text-sm"
                       >
-                        <span>{project.name}</span>
+                        <span className="truncate">{project.name}</span>
                         {project.id === currentProject?.id && (
-                          <div className="h-2 w-2 rounded-full bg-green-500" />
+                          <div className="h-2 w-2 rounded-full bg-green-500 flex-shrink-0" />
                         )}
                       </DropdownMenuItem>
                     ))}
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>
+                    <DropdownMenuItem className="text-sm">
                       <Plus className="mr-2 h-4 w-4" />
                       Nuevo proyecto
                     </DropdownMenuItem>
