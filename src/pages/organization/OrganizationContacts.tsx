@@ -88,11 +88,11 @@ export default function OrganizationContacts() {
 
   // Filtros personalizados
   const customFilters = (
-    <div className="w-72 p-4 space-y-4">
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Ordenar por</Label>
+    <div className="w-64 p-3 space-y-3">
+      <div className="space-y-1.5">
+        <Label className="text-xs font-medium text-[var(--menues-fg)] opacity-70">Ordenar por</Label>
         <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger>
+          <SelectTrigger className="h-8">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -106,10 +106,10 @@ export default function OrganizationContacts() {
         </Select>
       </div>
 
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Filtrar por tipo</Label>
+      <div className="space-y-1.5">
+        <Label className="text-xs font-medium text-[var(--menues-fg)] opacity-70">Filtrar por tipo</Label>
         <Select value={filterByType} onValueChange={setFilterByType}>
-          <SelectTrigger>
+          <SelectTrigger className="h-8">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

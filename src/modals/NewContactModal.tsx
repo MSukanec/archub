@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -73,16 +73,43 @@ export function NewContactModal({ open, onClose, editingContact }: NewContactMod
   const form = useForm<CreateContactForm>({
     resolver: zodResolver(createContactSchema),
     defaultValues: {
-      first_name: editingContact?.first_name || "",
-      last_name: editingContact?.last_name || "",
-      email: editingContact?.email || "",
-      phone: editingContact?.phone || "",
-      contact_type_id: editingContact?.contact_type_id || "",
-      company_name: editingContact?.company_name || "",
-      location: editingContact?.location || "",
-      notes: editingContact?.notes || "",
+      first_name: "",
+      last_name: "",
+      email: "",
+      phone: "",
+      contact_type_id: "",
+      company_name: "",
+      location: "",
+      notes: "",
     },
   });
+
+  // Reset form when editingContact changes
+  React.useEffect(() => {
+    if (editingContact) {
+      form.reset({
+        first_name: editingContact.first_name || "",
+        last_name: editingContact.last_name || "",
+        email: editingContact.email || "",
+        phone: editingContact.phone || "",
+        contact_type_id: editingContact.contact_type_id || "",
+        company_name: editingContact.company_name || "",
+        location: editingContact.location || "",
+        notes: editingContact.notes || "",
+      });
+    } else {
+      form.reset({
+        first_name: "",
+        last_name: "",
+        email: "",
+        phone: "",
+        contact_type_id: "",
+        company_name: "",
+        location: "",
+        notes: "",
+      });
+    }
+  }, [editingContact, form]);
 
   const createContactMutation = useMutation({
     mutationFn: async (formData: CreateContactForm) => {
