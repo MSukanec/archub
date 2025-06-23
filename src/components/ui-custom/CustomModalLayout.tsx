@@ -53,7 +53,7 @@ export function CustomModalLayout({
       <div
         className={cn(
           "relative z-10 flex flex-col bg-[--layout-bg] shadow-2xl transition-all duration-300 ease-in-out",
-          "h-full w-full max-w-xl",
+          "h-full w-full max-w-2xl",
           className,
         )}
       >
