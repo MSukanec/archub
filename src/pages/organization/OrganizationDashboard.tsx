@@ -34,10 +34,10 @@ export default function OrganizationDashboard() {
           status,
           created_at,
           project_data (
-            project_type (
+            project_types (
               name
             ),
-            modality (
+            project_modalities (
               name
             )
           )

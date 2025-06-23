@@ -587,6 +587,17 @@ Changelog:
   • Resolved modal form submission issues by connecting submit button to form using form attribute
   • Fixed contact editing pre-population with useEffect hook, unified textarea styling with input CSS variables
   • Optimized dropdown menus (organization/project selection and filters) with consistent width and styling
+
+- June 23, 2025. Complete header system consolidation and page template compliance
+  • Fixed FinancesMovements.tsx double header issue by following ai-page-template.md strictly
+  • Completely rebuilt OrganizationDashboard.tsx with simplified two-column layout
+  • Changed dashboard title to "Resumen de la Organización" 
+  • Left column: clickable project selection cards with active project highlighting
+  • Right column: real activity feed showing projects, movements, and contacts
+  • Eliminated all metrics cards and member sections as requested
+  • Fixed header navigation: project button redirects to dashboard, dropdown only updates selection
+  • Corrected use-movements.ts hook to load authentic Supabase data with proper JOIN queries
+  • All pages now follow single header pattern with no duplicate components
   • Rebuilt NewOrganizationModal from scratch following ai-modal-template.md structure with proper form handling and Supabase integration
 
 - June 23, 2025. Complete 4-level navigation system implementation

@@ -91,11 +91,6 @@ export function Header({
     selectProjectMutation.mutate(projectId);
   };
 
-  const handleProjectClick = () => {
-    setSidebarContext('project');
-    navigate('/project/dashboard');
-  };
-
   const currentOrganization = userData?.organization;
   const currentProject = projects.find(p => p.id === userData?.preferences?.last_project_id);
   const hasFilters = filters.length > 0 || customFilters;
@@ -175,7 +170,10 @@ export function Header({
                 <Button
                   variant="ghost"
                   className="h-8 px-2 text-sm font-medium text-[var(--menues-fg)] hover:bg-transparent hover:text-[var(--menues-fg)]"
-                  onClick={handleProjectClick}
+                  onClick={() => {
+                    setSidebarContext('project');
+                    navigate('/project/dashboard');
+                  }}
                 >
                   {currentProject?.name || 'Sin proyecto'}
                 </Button>
