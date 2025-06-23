@@ -13,6 +13,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { CustomTable } from '@/components/ui-custom/CustomTable';
 
 import { NewMovementModal } from '@/modals/NewMovementModal';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -221,6 +222,140 @@ export default function Movements() {
 
 
 
+  const tableColumns = [
+    {
+      key: 'created_at',
+      label: 'Fecha',
+      sortable: true,
+      sortType: 'date' as const,
+      render: (movement: Movement) => (
+        <span className="text-xs">
+          {format(new Date(movement.created_at), 'dd/MM/yyyy', { locale: es })}
+        </span>
+      )
+    },
+    {
+      key: 'creator',
+      label: 'Creador',
+      sortable: true,
+      sortType: 'string' as const,
+      render: (movement: Movement) => (
+        <div className="flex items-center gap-2">
+          <Avatar className="h-6 w-6">
+            <AvatarImage src={movement.creator?.avatar_url} />
+            <AvatarFallback className="text-xs">
+              {movement.creator?.full_name?.charAt(0) || movement.creator?.email?.charAt(0) || 'U'}
+            </AvatarFallback>
+          </Avatar>
+          <span className="text-xs truncate">
+            {movement.creator?.full_name || movement.creator?.email || 'Usuario'}
+          </span>
+        </div>
+      )
+    },
+    {
+      key: 'type',
+      label: 'Tipo',
+      sortable: true,
+      sortType: 'string' as const,
+      render: (movement: Movement) => (
+        <Badge variant="outline" className="text-xs">
+          {movement.movement_data?.type?.name || 'Sin tipo'}
+        </Badge>
+      )
+    },
+    {
+      key: 'category',
+      label: 'Categoría',
+      sortable: true,
+      sortType: 'string' as const,
+      render: (movement: Movement) => (
+        <span className="text-xs">
+          {movement.movement_data?.category?.name || 'Sin categoría'}
+        </span>
+      )
+    },
+    {
+      key: 'subcategory',
+      label: 'Subcategoría',
+      sortable: false,
+      render: (movement: Movement) => (
+        <span className="text-xs text-muted-foreground">-</span>
+      )
+    },
+    {
+      key: 'description',
+      label: 'Descripción',
+      sortable: true,
+      sortType: 'string' as const,
+      render: (movement: Movement) => (
+        <span className="text-xs">
+          {movement.description || 'Sin descripción'}
+        </span>
+      )
+    },
+    {
+      key: 'currency',
+      label: 'Moneda',
+      sortable: true,
+      sortType: 'string' as const,
+      render: (movement: Movement) => (
+        <Badge variant="secondary" className="text-xs">
+          {movement.movement_data?.currency?.code || 'USD'}
+        </Badge>
+      )
+    },
+    {
+      key: 'wallet',
+      label: 'Billetera',
+      sortable: true,
+      sortType: 'string' as const,
+      render: (movement: Movement) => (
+        <span className="text-xs">
+          {movement.movement_data?.wallet?.name || 'Principal'}
+        </span>
+      )
+    },
+    {
+      key: 'amount',
+      label: 'Cantidad',
+      sortable: true,
+      sortType: 'number' as const,
+      render: (movement: Movement) => (
+        <span className="text-xs font-medium">
+          ${movement.amount?.toLocaleString() || '0'}
+        </span>
+      )
+    },
+    {
+      key: 'actions',
+      label: 'Acciones',
+      sortable: false,
+      render: (movement: Movement) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => handleEdit(movement)}>
+              <Edit className="mr-2 h-4 w-4" />
+              Editar
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              className="text-red-600"
+              onClick={() => handleDelete(movement)}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Eliminar
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )
+    }
+  ];
+
   const headerProps = {
     title: "Movimientos",
     icon: <DollarSign className="h-5 w-5" />,
@@ -249,98 +384,18 @@ export default function Movements() {
 
   return (
     <Layout headerProps={headerProps}>
-      <div className="rounded-md border">
-        <div className="p-4">
-          {/* Table header */}
-          <div className="grid grid-cols-10 gap-4 pb-3 text-xs font-medium text-muted-foreground border-b">
-            <div>Fecha</div>
-            <div>Creador</div>
-            <div>Tipo</div>
-            <div>Categoría</div>
-            <div>Subcategoría</div>
-            <div>Descripción</div>
-            <div>Moneda</div>
-            <div>Billetera</div>
-            <div>Cantidad</div>
-            <div>Acciones</div>
+      <CustomTable
+        columns={tableColumns}
+        data={filteredMovements}
+        isLoading={isLoading}
+        emptyState={
+          <div className="text-center py-8 text-muted-foreground">
+            <DollarSign className="h-12 w-12 mx-auto mb-4 opacity-20" />
+            <p className="text-sm">No hay movimientos registrados.</p>
+            <p className="text-xs">Crea el primer movimiento del proyecto.</p>
           </div>
-
-          {/* Table body */}
-          <div className="space-y-2 pt-3">
-            {filteredMovements.length > 0 ? (
-              filteredMovements.map((movement) => (
-                <div key={movement.id} className="grid grid-cols-10 gap-4 py-2 text-sm items-center border-b last:border-b-0">
-                  <div className="text-xs">
-                    {format(new Date(movement.created_at), 'dd/MM/yyyy', { locale: es })}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Avatar className="h-6 w-6">
-                      <AvatarImage src={movement.creator?.avatar_url} />
-                      <AvatarFallback className="text-xs">
-                        {movement.creator?.full_name?.charAt(0) || movement.creator?.email?.charAt(0) || 'U'}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-xs truncate">
-                      {movement.creator?.full_name || movement.creator?.email || 'Usuario'}
-                    </span>
-                  </div>
-                  <div>
-                    <Badge variant="outline" className="text-xs">
-                      {movement.movement_data?.type?.name || 'Sin tipo'}
-                    </Badge>
-                  </div>
-                  <div className="text-xs">
-                    {movement.movement_data?.category?.name || 'Sin categoría'}
-                  </div>
-                  <div className="text-xs text-muted-foreground">-</div>
-                  <div className="text-xs truncate">
-                    {movement.description || 'Sin descripción'}
-                  </div>
-                  <div>
-                    <Badge variant="secondary" className="text-xs">
-                      {movement.movement_data?.currency?.code || 'USD'}
-                    </Badge>
-                  </div>
-                  <div className="text-xs">
-                    {movement.movement_data?.wallet?.name || 'Principal'}
-                  </div>
-                  <div className="text-xs font-medium">
-                    ${movement.amount?.toLocaleString() || '0'}
-                  </div>
-                  <div>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleEdit(movement)}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Editar
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          className="text-red-600"
-                          onClick={() => handleDelete(movement)}
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Eliminar
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                <DollarSign className="h-12 w-12 mx-auto mb-4 opacity-20" />
-                <p className="text-sm">No hay movimientos registrados.</p>
-                <p className="text-xs">Crea el primer movimiento del proyecto.</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* New Movement Modal */}
       {showNewMovementModal && (
