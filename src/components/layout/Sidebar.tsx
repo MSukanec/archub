@@ -47,22 +47,26 @@ export function Sidebar() {
     ],
     design: [
       { icon: Home, label: 'Dashboard', href: '/design/dashboard' },
-      { icon: FolderOpen, label: 'Datos de Proyecto', href: '/design/data' },
       { icon: FileText, label: 'Moodboard', href: '/design/moodboard' },
+      { icon: FolderOpen, label: 'Documentación técnica', href: '/design/documentacion' },
     ],
     construction: [
       { icon: Home, label: 'Dashboard', href: '/construction/dashboard' },
-      { icon: Building, label: 'Tareas', href: '/construction/tasks' },
-      { icon: FileText, label: 'Bitácora de Obra', href: '/bitacora' },
+      { icon: FileText, label: 'Bitácora de obra', href: '/bitacora' },
+      { icon: DollarSign, label: 'Cómputo y presupuesto', href: '/construction/presupuesto' },
+      { icon: Building, label: 'Avance físico', href: '/construction/avance' },
     ],
     finance: [
       { icon: Home, label: 'Dashboard', href: '/finance/dashboard' },
       { icon: DollarSign, label: 'Movimientos', href: '/movimientos' },
+      { icon: FileText, label: 'Gráficos avanzados', href: '/finance/graficos' },
+      { icon: Users, label: 'Plan de pagos', href: '/finance/pagos' },
     ],
     commercialization: [
       { icon: Home, label: 'Dashboard', href: '/commercialization/dashboard' },
-      { icon: Users, label: 'Clientes', href: '/commercialization/clients' },
-      { icon: Building, label: 'Ventas', href: '/commercialization/sales' },
+      { icon: Building, label: 'Listado de unidades', href: '/commercialization/unidades' },
+      { icon: Users, label: 'Clientes interesados', href: '/commercialization/clientes' },
+      { icon: FileText, label: 'Estadísticas de venta', href: '/commercialization/estadisticas' },
     ]
   };
 
@@ -115,7 +119,7 @@ export function Sidebar() {
         <div className="flex flex-col gap-[2px]">
           {navigationItems.map((item, index) => (
             <SidebarButton
-              key={item.href || index}
+              key={`${item.label}-${index}`}
               icon={<item.icon className="w-[18px] h-[18px]" />}
               label={item.label}
               isActive={location === item.href}
