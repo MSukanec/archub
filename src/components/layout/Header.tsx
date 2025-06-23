@@ -122,7 +122,7 @@ export function Header({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 hover:bg-transparent"
+                  className="h-8 px-1 hover:bg-transparent"
                 >
                   <ChevronDown className="h-3 w-3 text-[var(--menues-fg)]" />
                 </Button>

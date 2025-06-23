@@ -13,9 +13,9 @@ import OrganizationProjects from "@/pages/organization/OrganizationProjects";
 import OrganizationContacts from "@/pages/organization/OrganizationContacts";
 import OrganizationDashboard from "@/pages/organization/OrganizationDashboard";
 import ProjectDashboard from "@/pages/project/ProjectDashboard";
-import Profile from "@/pages/Profile";
-import Movements from "@/pages/Movements";
-import SiteLogs from "@/pages/SiteLogs";
+import Profile from "@/pages/others/Profile";
+import Movements from "@/pages/finances/FinancesMovements";
+import SiteLogs from "@/pages/site/SiteLogs";
 
 
 function Router() {
