@@ -161,7 +161,7 @@ export function Header({
           {/* Project Breadcrumb - Show if not in organization context */}
           {currentSidebarContext !== 'organization' && (
             <>
-              <span className="text-[var(--menues-fg)] opacity-70">›</span>
+              <span className="text-[var(--menues-fg)] opacity-70">/</span>
               
               <div className="flex items-center">
                 <Button
@@ -216,7 +216,7 @@ export function Header({
           {/* Stage Breadcrumb - Show ONLY if in stage context (not project context) */}
           {['design', 'construction', 'finance', 'commercialization'].includes(currentSidebarContext) && (
             <>
-              <span className="text-[var(--menues-fg)] opacity-70">›</span>
+              <span className="text-[var(--menues-fg)] opacity-70">/</span>
               
               <div className="flex items-center">
                 <Button
@@ -292,7 +292,7 @@ export function Header({
           {/* Page Title - Show if title is provided */}
           {title && (
             <>
-              <span className="text-[var(--menues-fg)] opacity-70">›</span>
+              <span className="text-[var(--menues-fg)] opacity-70">/</span>
               <span className="text-sm font-medium text-[var(--menues-fg)]">{title}</span>
             </>
           )}
