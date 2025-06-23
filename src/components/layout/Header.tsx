@@ -83,10 +83,18 @@ export function Header({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      setSidebarContext('project');
-      navigate('/project/dashboard');
+      // No auto-redirect, just update selection
     }
   });
+
+  const handleProjectSelect = (projectId: string) => {
+    selectProjectMutation.mutate(projectId);
+  };
+
+  const handleProjectClick = () => {
+    setSidebarContext('project');
+    navigate('/project/dashboard');
+  };
 
   const currentOrganization = userData?.organization;
   const currentProject = projects.find(p => p.id === userData?.preferences?.last_project_id);
@@ -167,10 +175,7 @@ export function Header({
                 <Button
                   variant="ghost"
                   className="h-8 px-2 text-sm font-medium text-[var(--menues-fg)] hover:bg-transparent hover:text-[var(--menues-fg)]"
-                  onClick={() => {
-                    setSidebarContext('project');
-                    navigate('/project/dashboard');
-                  }}
+                  onClick={handleProjectClick}
                 >
                   {currentProject?.name || 'Sin proyecto'}
                 </Button>
@@ -193,7 +198,7 @@ export function Header({
                     {projects.map((project) => (
                       <DropdownMenuItem
                         key={project.id}
-                        onClick={() => selectProjectMutation.mutate(project.id)}
+                        onClick={() => handleProjectSelect(project.id)}
                         className="flex items-center justify-between text-sm"
                       >
                         <span className="truncate">{project.name}</span>

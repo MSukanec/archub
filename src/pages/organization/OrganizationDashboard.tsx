@@ -1,282 +1,289 @@
-import { Layout } from '@/components/layout/Layout'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { useCurrentUser } from '@/hooks/use-current-user'
-import { useProjects } from '@/hooks/use-projects'
-import { useContacts } from '@/hooks/use-contacts'
-import { Building, Users, Folder, TrendingUp, Calendar, Crown } from 'lucide-react'
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { Building, Users, DollarSign, Folder, BarChart3, Plus, Activity } from 'lucide-react';
+
+import { Layout } from '@/components/layout/Layout';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { supabase } from '@/lib/supabase';
+import { queryClient } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
 
 export default function OrganizationDashboard() {
-  const { data: userData, isLoading } = useCurrentUser()
-  const { data: projects = [], isLoading: projectsLoading } = useProjects(userData?.organization?.id)
-  const { data: contacts = [], isLoading: contactsLoading } = useContacts(userData?.organization?.id)
+  const { data: userData } = useCurrentUser();
+  const { toast } = useToast();
+  const currentOrganization = userData?.organization;
 
-  const organization = userData?.organization
+  // Fetch recent projects
+  const { data: recentProjects = [] } = useQuery({
+    queryKey: ['recent-projects', currentOrganization?.id],
+    queryFn: async () => {
+      if (!currentOrganization?.id) return [];
 
-  // Calcular estadísticas
-  const activeProjects = projects.filter(p => p.status === 'active').length
-  const totalProjects = projects.length
-  const totalContacts = contacts.length
-  const recentProjects = projects
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-    .slice(0, 3)
-  const recentContacts = contacts
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-    .slice(0, 3)
+      const { data, error } = await supabase
+        .from('projects')
+        .select(`
+          id,
+          name,
+          status,
+          created_at,
+          project_data (
+            project_type (
+              name
+            ),
+            modality (
+              name
+            )
+          )
+        `)
+        .eq('organization_id', currentOrganization.id)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (error) {
+        console.error('Error fetching recent projects:', error);
+        return [];
+      }
+
+      return data || [];
+    },
+    enabled: !!currentOrganization?.id
+  });
+
+  // Fetch recent activity
+  const { data: recentActivity = [] } = useQuery({
+    queryKey: ['recent-activity', currentOrganization?.id],
+    queryFn: async () => {
+      if (!currentOrganization?.id) return [];
+
+      const activities = [];
+
+      // Get recent projects
+      const { data: projects } = await supabase
+        .from('projects')
+        .select('id, name, created_at')
+        .eq('organization_id', currentOrganization.id)
+        .order('created_at', { ascending: false })
+        .limit(3);
+
+      projects?.forEach(project => {
+        activities.push({
+          type: 'project',
+          title: 'Nuevo proyecto creado',
+          description: `Se creó el proyecto "${project.name}"`,
+          created_at: project.created_at
+        });
+      });
+
+      // Get recent movements
+      const { data: movements } = await supabase
+        .from('movements')
+        .select('id, description, amount, created_at')
+        .eq('organization_id', currentOrganization.id)
+        .order('created_at', { ascending: false })
+        .limit(3);
+
+      movements?.forEach(movement => {
+        activities.push({
+          type: 'movement',
+          title: 'Movimiento financiero registrado',
+          description: `${movement.description || 'Movimiento'}: $${movement.amount?.toLocaleString()}`,
+          created_at: movement.created_at
+        });
+      });
+
+      // Get recent contacts
+      const { data: contacts } = await supabase
+        .from('contacts')
+        .select('id, first_name, last_name, created_at')
+        .eq('organization_id', currentOrganization.id)
+        .order('created_at', { ascending: false })
+        .limit(2);
+
+      contacts?.forEach(contact => {
+        activities.push({
+          type: 'contact',
+          title: 'Nuevo contacto agregado',
+          description: `Se agregó a ${contact.first_name} ${contact.last_name}`,
+          created_at: contact.created_at
+        });
+      });
+
+      // Sort all activities by date
+      return activities.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 5);
+    },
+    enabled: !!currentOrganization?.id
+  });
+
+  // Project selection mutation
+  const selectProjectMutation = useMutation({
+    mutationFn: async (projectId: string) => {
+      if (!userData?.preferences?.id) throw new Error('No user preferences found');
+
+      const { error } = await supabase
+        .from('user_preferences')
+        .update({ last_project_id: projectId })
+        .eq('id', userData.preferences.id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      toast({
+        title: "Proyecto seleccionado",
+        description: "El proyecto ha sido seleccionado correctamente"
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo seleccionar el proyecto",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const handleProjectSelect = (projectId: string) => {
+    selectProjectMutation.mutate(projectId);
+  };
 
   const headerProps = {
-    title: "Dashboard",
+    title: "Resumen de la Organización",
+    icon: <Building className="h-5 w-5" />,
     showSearch: false,
-    showFilters: false
-  }
+    actions: (
+      <div className="flex gap-2">
+        <Button variant="outline" size="sm">
+          <BarChart3 className="mr-2 h-4 w-4" />
+          Reportes
+        </Button>
+        <Button size="sm">
+          <Plus className="mr-2 h-4 w-4" />
+          Nuevo proyecto
+        </Button>
+      </div>
+    )
+  };
 
-  if (isLoading || projectsLoading || contactsLoading) {
+  if (!currentOrganization) {
     return (
       <Layout headerProps={headerProps}>
-        <div className="p-8 text-center text-muted-foreground">
-          Cargando dashboard...
+        <div className="text-center py-12 text-muted-foreground">
+          <Building className="h-12 w-12 mx-auto mb-4 opacity-20" />
+          <p className="text-sm">No hay organización seleccionada.</p>
+          <p className="text-xs">Selecciona una organización para ver el dashboard.</p>
         </div>
       </Layout>
-    )
-  }
-
-  if (!organization) {
-    return (
-      <Layout headerProps={headerProps}>
-        <div className="p-8 text-center text-muted-foreground">
-          <Building className="mx-auto h-12 w-12 mb-4 opacity-50" />
-          <h3 className="text-sm font-medium mb-1">No hay organización seleccionada</h3>
-          <p className="text-xs">Selecciona una organización para ver el dashboard</p>
-        </div>
-      </Layout>
-    )
+    );
   }
 
   return (
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
-        {/* Header de organización */}
-        <div className="bg-card border rounded-lg p-6">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-4">
-              <Avatar className="w-16 h-16">
-                <AvatarFallback className="text-lg font-bold">
-                  {organization.name.substring(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <h1 className="text-2xl font-bold">{organization.name}</h1>
-                  {organization.is_active && (
-                    <Badge variant="default" className="text-xs">
-                      Activa
-                    </Badge>
-                  )}
-                  {organization.is_system && (
-                    <Badge variant="outline" className="text-xs">
-                      Sistema
-                    </Badge>
-                  )}
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Creada el {format(new Date(organization.created_at), 'dd/MM/yyyy', { locale: es })}
-                </p>
-                {userData?.plan && (
-                  <div className="flex items-center gap-2 mt-2">
-                    <Crown className="w-4 h-4 text-yellow-500" />
-                    <span className="text-sm font-medium">{userData.plan.name}</span>
-                    <span className="text-xs text-muted-foreground">
-                      ${userData.plan.price}/mes
-                    </span>
+        {/* Recent Activity Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Recent Projects */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Folder className="h-5 w-5" />
+                Proyectos Recientes
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {recentProjects.length > 0 ? (
+                  recentProjects.map((project) => (
+                    <div 
+                      key={project.id} 
+                      className={`flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors ${
+                        project.id === userData?.preferences?.last_project_id ? 'border-[var(--accent)] ring-1 ring-[var(--accent)]' : ''
+                      }`}
+                      onClick={() => handleProjectSelect(project.id)}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                          <Folder className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium text-sm">{project.name}</p>
+                            {project.id === userData?.preferences?.last_project_id && (
+                              <Badge variant="default" className="text-xs">Activo</Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            {format(new Date(project.created_at), 'dd MMM yyyy', { locale: es })}
+                          </p>
+                        </div>
+                      </div>
+                      <Badge variant={project.status === 'active' ? 'default' : 'secondary'}>
+                        {project.status === 'active' ? 'Activo' : 
+                         project.status === 'planning' ? 'Planificación' : 
+                         project.status === 'completed' ? 'Completado' : 'En pausa'}
+                      </Badge>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Folder className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                    <p className="text-sm">No hay proyectos recientes.</p>
+                    <p className="text-xs">Crea tu primer proyecto para comenzar.</p>
                   </div>
                 )}
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Métricas principales */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Proyectos Totales</CardTitle>
-              <Folder className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalProjects}</div>
-              <p className="text-xs text-muted-foreground">
-                {activeProjects} activos
-              </p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Contactos</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalContacts}</div>
-              <p className="text-xs text-muted-foreground">
-                Total registrados
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Actividad</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {Math.round(((activeProjects / totalProjects) * 100) || 0)}%
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Proyectos activos
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Contenido principal */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Proyectos recientes */}
+          {/* Recent Activity */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Proyectos Recientes</CardTitle>
-              <CardDescription>
-                Los últimos proyectos creados en la organización
-              </CardDescription>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="h-5 w-5" />
+                Actividad Reciente
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              {recentProjects.length > 0 ? (
-                <div className="space-y-4">
-                  {recentProjects.map((project) => (
-                    <div key={project.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <Folder className="w-4 h-4 text-muted-foreground" />
-                        <div>
-                          <p className="text-sm font-medium">{project.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {project.project_data?.project_type?.name || 'Sin especificar'}
-                          </p>
-                        </div>
+              <div className="space-y-3">
+                {recentActivity.length > 0 ? (
+                  recentActivity.map((activity, index) => (
+                    <div key={index} className="flex items-start gap-3 p-3 border rounded-lg">
+                      <div className={`p-2 rounded-lg ${activity.type === 'project' ? 'bg-blue-100 text-blue-600' : 
+                                                          activity.type === 'movement' ? 'bg-green-100 text-green-600' :
+                                                          activity.type === 'contact' ? 'bg-purple-100 text-purple-600' :
+                                                          'bg-gray-100 text-gray-600'}`}>
+                        {activity.type === 'project' ? <Folder className="h-4 w-4" /> :
+                         activity.type === 'movement' ? <DollarSign className="h-4 w-4" /> :
+                         activity.type === 'contact' ? <Users className="h-4 w-4" /> :
+                         <Activity className="h-4 w-4" />}
                       </div>
-                      <div className="text-right">
-                        <Badge 
-                          variant={project.status === 'active' ? 'default' : 'secondary'}
-                          className="text-xs"
-                        >
-                          {project.status === 'active' ? 'Activo' : 
-                           project.status === 'planning' ? 'Planificación' : 
-                           project.status === 'completed' ? 'Completado' : 
-                           project.status}
-                        </Badge>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {format(new Date(project.created_at), 'dd/MM', { locale: es })}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Folder className="mx-auto h-8 w-8 mb-2 opacity-50" />
-                  <p className="text-sm">No hay proyectos aún</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Contactos recientes */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Contactos Recientes</CardTitle>
-              <CardDescription>
-                Los últimos contactos agregados a la organización
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {recentContacts.length > 0 ? (
-                <div className="space-y-4">
-                  {recentContacts.map((contact) => (
-                    <div key={contact.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="w-8 h-8">
-                          <AvatarFallback className="text-xs">
-                            {(contact.first_name.charAt(0) + contact.last_name.charAt(0)).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="text-sm font-medium">
-                            {contact.first_name} {contact.last_name}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {contact.email}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        {contact.company_name && (
-                          <p className="text-xs font-medium">{contact.company_name}</p>
-                        )}
-                        <p className="text-xs text-muted-foreground">
-                          {format(new Date(contact.created_at), 'dd/MM', { locale: es })}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Users className="mx-auto h-8 w-8 mb-2 opacity-50" />
-                  <p className="text-sm">No hay contactos aún</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Membresías */}
-        {userData?.memberships && userData.memberships.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Miembros de la Organización</CardTitle>
-              <CardDescription>
-                Usuarios con acceso a esta organización
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {userData.memberships
-                  .filter(membership => membership.organization_id === organization.id)
-                  .map((membership) => (
-                    <div key={membership.organization_id} className="flex items-center gap-3 p-3 border rounded-lg">
-                      <Avatar className="w-10 h-10">
-                        <AvatarFallback>
-                          {membership.organization_name.substring(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
                       <div className="flex-1">
-                        <p className="text-sm font-medium">{membership.organization_name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {membership.role.name}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          Desde {format(new Date(membership.joined_at), 'MMM yyyy', { locale: es })}
+                        <p className="font-medium text-sm">{activity.title}</p>
+                        <p className="text-xs text-muted-foreground">{activity.description}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {format(new Date(activity.created_at), 'dd MMM yyyy HH:mm', { locale: es })}
                         </p>
                       </div>
                     </div>
-                  ))}
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Activity className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                    <p className="text-sm">No hay actividad reciente.</p>
+                    <p className="text-xs">La actividad aparecerá aquí cuando empieces a trabajar.</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
-        )}
+        </div>
       </div>
     </Layout>
-  )
+  );
 }
