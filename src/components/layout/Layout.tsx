@@ -51,7 +51,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       <Header {...headerProps} />
       <Sidebar />
       <main 
-        className="transition-all duration-300 ease-in-out flex-1 overflow-auto"
+        className="transition-all duration-300 ease-in-out flex-1 overflow-auto p-3"
         style={{ 
           marginLeft: isExpanded ? '240px' : '40px',
           marginTop: '36px'

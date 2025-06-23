@@ -176,18 +176,19 @@ export default function OrganizationManagement() {
 
   return (
     <Layout headerProps={headerProps}>
-      {/* Headers de columnas */}
-      <div className="grid grid-cols-12 gap-4 px-3 py-2 text-xs font-medium text-muted-foreground border-b">
+      <div className="space-y-6">
+        {/* Headers de columnas */}
+        <div className="grid grid-cols-12 gap-4 px-4 py-2 text-xs font-medium text-muted-foreground border-b">
           <div className="col-span-2">Fecha</div>
           <div className="col-span-3">Organización</div>
           <div className="col-span-2">Plan</div>
           <div className="col-span-2">Estado</div>
           <div className="col-span-2">Tipo</div>
           <div className="col-span-1">Acciones</div>
-      </div>
+        </div>
 
-      {/* Lista de organizaciones */}
-      <div className="space-y-1 px-3">
+        {/* Lista de organizaciones */}
+        <div className="space-y-2">
           {filteredOrganizations.map((organization) => {
             const isSelected = userData?.organization?.id === organization.id
             
@@ -292,50 +293,51 @@ export default function OrganizationManagement() {
               </Card>
             )
           })}
+        </div>
+
+        {filteredOrganizations.length === 0 && (
+          <Card>
+            <CardContent className="text-center py-8">
+              <Building className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium mb-2">
+                No se encontraron organizaciones
+              </h3>
+              <p className="text-muted-foreground">
+                {searchValue || filterByStatus !== "all" 
+                  ? "Intenta ajustar los filtros de búsqueda" 
+                  : "Aún no perteneces a ninguna organización"
+                }
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Diálogo de confirmación para eliminar */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>¿Eliminar organización?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta acción eliminará permanentemente la organización "{organizationToDelete?.name}". 
+                Esta acción no se puede deshacer.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction 
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={() => {
+                  // TODO: Implementar eliminación
+                  setDeleteDialogOpen(false)
+                  setOrganizationToDelete(null)
+                }}
+              >
+                Eliminar
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
-
-      {filteredOrganizations.length === 0 && (
-        <Card className="mt-4">
-          <CardContent className="text-center py-8">
-            <Building className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-medium mb-2">
-              No se encontraron organizaciones
-            </h3>
-            <p className="text-muted-foreground">
-              {searchValue || filterByStatus !== "all" 
-                ? "Intenta ajustar los filtros de búsqueda" 
-                : "Aún no perteneces a ninguna organización"
-              }
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Diálogo de confirmación para eliminar */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar organización?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción eliminará permanentemente la organización "{organizationToDelete?.name}". 
-              Esta acción no se puede deshacer.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction 
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => {
-                // TODO: Implementar eliminación
-                setDeleteDialogOpen(false)
-                setOrganizationToDelete(null)
-              }}
-            >
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </Layout>
   )
 }
