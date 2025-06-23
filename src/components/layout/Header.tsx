@@ -17,6 +17,7 @@ import { queryClient } from "@/lib/queryClient";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useLocation } from "wouter";
 import { NewOrganizationModal } from "@/modals/NewOrganizationModal";
+import { NewProjectModal } from "@/modals/NewProjectModal";
 
 interface HeaderProps {
   title?: string;
@@ -42,6 +43,7 @@ export function Header({
   actions,
 }: HeaderProps = {}) {
   const [showNewOrganizationModal, setShowNewOrganizationModal] = useState(false);
+  const [showNewProjectModal, setShowNewProjectModal] = useState(false);
 
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
@@ -203,10 +205,15 @@ export function Header({
                       </DropdownMenuItem>
                     ))}
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-sm">
+                    <div
+                      className="relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-[var(--accent-bg)] focus:bg-[var(--accent-bg)]"
+                      onClick={() => {
+                        setShowNewProjectModal(true);
+                      }}
+                    >
                       <Plus className="mr-2 h-4 w-4" />
                       Nuevo proyecto
-                    </DropdownMenuItem>
+                    </div>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>

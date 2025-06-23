@@ -10,6 +10,7 @@ import { Calendar, Building } from "lucide-react";
 import { CustomModalLayout } from "@/components/ui-custom/CustomModalLayout";
 import { CustomModalHeader } from "@/components/ui-custom/CustomModalHeader";
 import { CustomModalBody } from "@/components/ui-custom/CustomModalBody";
+import { CustomModalFooter } from "@/components/ui-custom/CustomModalFooter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -228,26 +229,12 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
           </CustomModalBody>
         ),
         footer: (
-          <div className="p-3 border-t border-[var(--card-border)] mt-auto">
-            <div className="flex gap-2 w-full">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={handleClose}
-                className="w-1/4"
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                form="organization-form"
-                className="w-3/4"
-                disabled={createOrganizationMutation.isPending}
-              >
-                {createOrganizationMutation.isPending ? 'Guardando...' : (editingOrganization ? "Actualizar" : "Crear organización")}
-              </Button>
-            </div>
-          </div>
+          <CustomModalFooter
+            onCancel={handleClose}
+            onSave={form.handleSubmit(handleSubmit)}
+            saveText={editingOrganization ? 'Actualizar' : 'Crear organización'}
+            saveLoading={createOrganizationMutation.isPending}
+          />
         )
       }}
     </CustomModalLayout>
