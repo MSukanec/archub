@@ -36,7 +36,7 @@ export function Sidebar() {
       { icon: Home, label: 'Dashboard', href: '/dashboard' },
       { icon: Building, label: 'Gestión de Organizaciones', href: '/organizaciones' },
       { icon: FolderOpen, label: 'Gestión de Proyectos', href: '/proyectos' },
-      { icon: Users, label: 'Contactos', href: '/contactos' },
+      { icon: Users, label: 'Contactos', href: '/organization/contactos' },
     ],
     project: [
       { icon: FolderOpen, label: 'Gestión de Proyectos', href: '/proyectos' },

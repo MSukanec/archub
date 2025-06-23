@@ -108,7 +108,7 @@ export function Header({
               <div className="flex items-center">
                 <Button
                   variant="ghost"
-                  className="h-8 px-2 text-sm font-medium bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+                  className="h-8 px-2 text-sm font-medium bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]"
                   onClick={() => {
                     setSidebarContext('organization');
                     navigate('/organizaciones');
@@ -122,7 +122,7 @@ export function Header({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 hover:bg-[var(--menues-hover-bg)]"
+                className="h-8 w-8"
               >
                 <ChevronDown className="h-3 w-3 text-[var(--menues-fg)]" />
               </Button>
