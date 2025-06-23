@@ -14,6 +14,7 @@ import OrganizationContacts from "@/pages/organization/OrganizationContacts";
 import OrganizationDashboard from "@/pages/organization/OrganizationDashboard";
 import OrganizationMembers from "@/pages/organization/OrganizationMembers";
 import ProjectDashboard from "@/pages/project/ProjectDashboard";
+import FinancesDashboard from "@/pages/finance/FinancesDashboard";
 import Profile from "@/pages/others/Profile";
 import Movements from "@/pages/finances/FinancesMovements";
 import SiteLogs from "@/pages/site/SiteLogs";
@@ -70,6 +71,11 @@ function Router() {
       <Route path="/project/dashboard">
         <ProtectedRoute>
           <ProjectDashboard />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/finance/dashboard">
+        <ProtectedRoute>
+          <FinancesDashboard />
         </ProtectedRoute>
       </Route>
       <Route path="/perfil">
