@@ -31,7 +31,7 @@ const createContactSchema = z.object({
   last_name: z.string().min(1, "El apellido es requerido"),
   email: z.string().email("Email inválido"),
   phone: z.string().min(1, "El teléfono es requerido"),
-  contact_type_id: z.string().min(1, "El tipo de contacto es requerido"),
+  contact_type_id: z.string().optional(),
   company_name: z.string().optional(),
   location: z.string().optional(),
   notes: z.string().optional(),
@@ -103,7 +103,7 @@ export function NewContactModal({ open, onClose, editingContact }: NewContactMod
             last_name: formData.last_name,
             email: formData.email,
             phone: formData.phone,
-            contact_type_id: formData.contact_type_id,
+            contact_type_id: formData.contact_type_id || null,
             company_name: formData.company_name || '',
             location: formData.location || '',
             notes: formData.notes || '',
@@ -124,7 +124,7 @@ export function NewContactModal({ open, onClose, editingContact }: NewContactMod
             last_name: formData.last_name,
             email: formData.email,
             phone: formData.phone,
-            contact_type_id: formData.contact_type_id,
+            contact_type_id: formData.contact_type_id || null,
             company_name: formData.company_name || '',
             location: formData.location || '',
             notes: formData.notes || '',
@@ -133,11 +133,15 @@ export function NewContactModal({ open, onClose, editingContact }: NewContactMod
           .single();
 
         if (error) {
+          console.error('Supabase insert error:', error);
           throw new Error(`Error al crear contacto: ${error.message}`);
         }
+        
+        console.log('Contact inserted successfully:', contactData);
       }
     },
     onSuccess: () => {
+      console.log('Contact created successfully');
       toast({
         title: "Éxito",
         description: editingContact 
@@ -149,6 +153,7 @@ export function NewContactModal({ open, onClose, editingContact }: NewContactMod
       form.reset();
     },
     onError: (error: any) => {
+      console.error('Contact creation error:', error);
       toast({
         title: "Error",
         description: error.message || "No se pudo guardar el contacto",
@@ -158,6 +163,9 @@ export function NewContactModal({ open, onClose, editingContact }: NewContactMod
   });
 
   const handleSubmit = (data: CreateContactForm) => {
+    console.log('Form submitted with data:', data);
+    console.log('Organization ID:', organizationId);
+    console.log('Form errors:', form.formState.errors);
     createContactMutation.mutate(data);
   };
 
