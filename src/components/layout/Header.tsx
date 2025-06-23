@@ -157,6 +157,11 @@ export function Header({
                   <Plus className="mr-2 h-4 w-4" />
                   Nueva organización
                 </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate('/organizaciones')}>
+                  <Building className="mr-2 h-4 w-4" />
+                  Gestión de Organizaciones
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

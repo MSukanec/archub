@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Building, Users, DollarSign, Folder, Activity, Calendar, Crown, CheckCircle, StickyNote, ExternalLink, ArrowRight } from 'lucide-react';
+import { Building, Users, DollarSign, Folder, Activity, Calendar, Crown, CheckCircle, StickyNote, ExternalLink, ArrowRight, Plus } from 'lucide-react';
 import { useLocation } from 'wouter';
 
 import { Layout } from '@/components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { NewOrganizationModal } from '@/modals/NewOrganizationModal';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { supabase } from '@/lib/supabase';
@@ -175,14 +176,15 @@ export default function OrganizationDashboard() {
     title: "Resumen de la Organización",
     icon: <Building className="h-5 w-5" />,
     showSearch: false,
-    actions: [
-      {
-        label: "Nueva Organización",
-        onClick: () => setShowNewOrganizationModal(true),
-        variant: "default" as const,
-        icon: <Plus className="h-4 w-4" />
-      }
-    ]
+    actions: (
+      <Button 
+        onClick={() => setShowNewOrganizationModal(true)}
+        className="h-8"
+      >
+        <Plus className="h-4 w-4 mr-2" />
+        Nueva Organización
+      </Button>
+    )
   };
 
   const [showNewOrganizationModal, setShowNewOrganizationModal] = useState(false);
@@ -455,6 +457,13 @@ export default function OrganizationDashboard() {
           </Card>
         </div>
       </div>
+      
+      {/* New Organization Modal */}
+      {showNewOrganizationModal && (
+        <NewOrganizationModal 
+          onClose={() => setShowNewOrganizationModal(false)}
+        />
+      )}
     </Layout>
   );
 }
