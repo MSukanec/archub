@@ -133,6 +133,15 @@ export function Sidebar() {
       {/* Bottom Section - Fixed Buttons */}
       <div className="border-t border-[var(--menues-border)] p-1">
         <div className="flex flex-col gap-[2px]">
+          {/* Profile */}
+          <SidebarButton
+            icon={<UserCircle className="w-[18px] h-[18px]" />}
+            label="Perfil"
+            isActive={location === '/perfil'}
+            isExpanded={isExpanded}
+            onClick={() => navigate('/perfil')}
+          />
+
           {/* Settings */}
           <SidebarButton
             icon={<Settings className="w-[18px] h-[18px]" />}
