@@ -20,7 +20,7 @@ export default function SidebarButton({
   return (
     <button
       className={cn(
-        'relative flex items-center transition-all duration-200',
+        'relative flex items-center transition-all duration-300',
         // Botón SIEMPRE 32x32px (w-8 h-8), centrado cuando colapsado
         'w-8 h-8',
         // Cuando expandido, el botón se extiende pero el icono queda fijo
@@ -48,7 +48,7 @@ export default function SidebarButton({
       
       {/* Texto - solo cuando expandido, empieza después del icono */}
       {isExpanded && (
-        <span className="ml-8 text-sm font-medium whitespace-nowrap text-left">{label}</span>
+        <span className="ml-8 text-sm font-medium whitespace-nowrap text-left transition-opacity duration-300 delay-100">{label}</span>
       )}
     </button>
   );

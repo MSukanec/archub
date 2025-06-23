@@ -15,6 +15,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { useNavigationStore } from '@/stores/navigationStore'
 
 export default function OrganizationManagement() {
   const [searchValue, setSearchValue] = useState("")
@@ -27,6 +28,7 @@ export default function OrganizationManagement() {
   const { data: userData, isLoading } = useCurrentUser()
   const { toast } = useToast()
   const queryClient = useQueryClient()
+  const { setSidebarContext } = useNavigationStore()
 
   // Filtrar y ordenar organizaciones
   let filteredOrganizations = userData?.organizations?.filter(org => {
@@ -77,6 +79,7 @@ export default function OrganizationManagement() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['current-user'] })
+      setSidebarContext('organization')
       toast({
         title: "Organización seleccionada",
         description: "La organización se ha seleccionado correctamente"
