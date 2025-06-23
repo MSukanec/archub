@@ -42,6 +42,7 @@ export function Header({
   actions,
 }: HeaderProps = {}) {
   const [showNewOrganizationModal, setShowNewOrganizationModal] = useState(false);
+  console.log('Header rendered, showNewOrganizationModal:', showNewOrganizationModal);
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const { data: projects = [] } = useProjects(userData?.preferences?.last_organization_id);
@@ -146,7 +147,13 @@ export function Header({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem 
                   className="text-sm"
-                  onClick={() => setShowNewOrganizationModal(true)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Clicked Nueva organización');
+                    setShowNewOrganizationModal(true);
+                    console.log('State should be true now');
+                  }}
                 >
                   <Plus className="mr-2 h-4 w-4" />
                   Nueva organización
@@ -360,7 +367,10 @@ export function Header({
     {/* New Organization Modal */}
     <NewOrganizationModal
       open={showNewOrganizationModal}
-      onClose={() => setShowNewOrganizationModal(false)}
+      onClose={() => {
+        console.log('Closing modal');
+        setShowNewOrganizationModal(false);
+      }}
     />
     </>
   );

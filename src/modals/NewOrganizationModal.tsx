@@ -54,6 +54,12 @@ interface NewOrganizationModalProps {
 }
 
 export function NewOrganizationModal({ open, onClose, editingOrganization }: NewOrganizationModalProps) {
+  console.log('NewOrganizationModal rendered:', { open, editingOrganization });
+  
+  if (!open) {
+    console.log('Modal not open, returning null');
+    return null;
+  }
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.preferences?.last_organization_id;
