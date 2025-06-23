@@ -8,7 +8,7 @@ import { Layout } from "@/components/layout/Layout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { useAuthStore } from "@/stores/authStore";
 import Dashboard from "@/pages/Dashboard";
-import OrganizationManagement from "@/pages/organization/index";
+import OrganizationManagement from "@/pages/organization/OrganizationList";
 import Movements from "@/pages/Movements";
 import SiteLogs from "@/pages/SiteLogs";
 import Contacts from "@/pages/Contacts";

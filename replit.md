@@ -567,13 +567,23 @@ Changelog:
 - June 22, 2025. Complete Sidebar.tsx refactoring with Supabase-identical aesthetic
   • Changed CSS variables from --sidebar- to --menues- throughout entire codebase
   • Rebuilt Sidebar.tsx with flex-col gap-1 structure for predictable button spacing
-  • All buttons have rounded-md, px-2 py-2, mx-1, and clean transition-all animations
-  • Icons perfectly centered with w-6 h-6 flex items-center justify-center mx-auto containers
-  • Collapsed state (40px) shows only centered icons, expanded shows text with ml-2
+  • All buttons have rounded-lg styling matching Supabase design, with clean transition-all animations
+  • Icons perfectly centered at 18x18px with w-8 h-8 flex containers for proper positioning
+  • Collapsed state (40px) shows only centered icons, expanded shows text inside buttons with ml-1
   • All colors use CSS variables: --menues-fg, --menues-hover-bg/fg, --menues-active-bg/fg
-  • Eliminated all fixed color classes (text-gray-400, etc.) for consistent theming
-  • Avatar system with img w-5 h-5 rounded-full or UserCircle fallback
+  • Eliminated all fixed color classes for consistent theming throughout sidebar
+  • Text appears inside button elements for proper hover behavior across entire clickable area
   • Sidebar positioned with proper dimensions and border alignment with header
+
+- June 23, 2025. Layout system enhancement and Organizations page restructure
+  • Added wide prop to Layout component for controlling page width (1440px max vs full width)
+  • Layout now uses p-3 padding on main element with conditional max-width container
+  • Renamed organization/index.tsx to OrganizationList.tsx for better organization
+  • Completely refactored Organizations page from grid cards to horizontal full-width cards
+  • Organizations page uses table-style layout with column headers and proper structure
+  • Eliminated all hardcoded styling in favor of default shadcn/ui components
+  • Added dynamic filtering system with dropdown controls for sorting and status filtering
+  • Organizations page follows same visual patterns as Contacts and other management pages
 ```
 
 ## User Preferences

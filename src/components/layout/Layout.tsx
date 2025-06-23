@@ -8,6 +8,7 @@ import { useSidebarStore } from '@/stores/sidebarStore'
 
 interface LayoutProps {
   children: React.ReactNode
+  wide?: boolean
   headerProps?: {
     title?: string;
     showSearch?: boolean;
@@ -21,7 +22,7 @@ interface LayoutProps {
   }
 }
 
-export function Layout({ children, headerProps }: LayoutProps) {
+export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   const { isDark, setTheme } = useThemeStore()
   const { data } = useCurrentUser()
   const { isDocked, isHovered } = useSidebarStore()
@@ -50,13 +51,15 @@ export function Layout({ children, headerProps }: LayoutProps) {
       <Header {...headerProps} />
       <Sidebar />
       <main 
-        className="transition-all duration-300 ease-in-out flex-1 overflow-auto py-6 px-4"
+        className="transition-all duration-300 ease-in-out flex-1 overflow-auto p-3"
         style={{ 
           marginLeft: isExpanded ? '240px' : '40px',
           marginTop: '36px'
         }}
       >
-        {children}
+        <div className={wide ? '' : 'max-w-[1440px] mx-auto'}>
+          {children}
+        </div>
       </main>
     </div>
   )

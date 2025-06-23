@@ -82,7 +82,7 @@ export function Sidebar() {
             <button
               key={item.href}
               className={cn(
-                'flex items-center h-8 rounded-md transition-all duration-200',
+                'flex items-center h-8 rounded-lg transition-all duration-200',
                 isExpanded ? 'w-full' : 'w-8 justify-center',
                 location === item.href 
                   ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]' 
@@ -111,7 +111,7 @@ export function Sidebar() {
           {/* Settings */}
           <button
             className={cn(
-              'flex items-center h-8 rounded-md transition-all duration-200',
+              'flex items-center h-8 rounded-lg transition-all duration-200',
               isExpanded ? 'w-full' : 'w-8 justify-center',
               location === '/configuracion' 
                 ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]' 
@@ -131,7 +131,7 @@ export function Sidebar() {
           {/* Theme Toggle */}
           <button
             className={cn(
-              'flex items-center h-8 rounded-md transition-all duration-200',
+              'flex items-center h-8 rounded-lg transition-all duration-200',
               isExpanded ? 'w-full' : 'w-8 justify-center',
               'text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]'
             )}
@@ -154,7 +154,7 @@ export function Sidebar() {
           {/* Profile */}
           <button
             className={cn(
-              'flex items-center h-8 rounded-md transition-all duration-200',
+              'flex items-center h-8 rounded-lg transition-all duration-200',
               isExpanded ? 'w-full' : 'w-8 justify-center',
               location === '/perfil' 
                 ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]' 
