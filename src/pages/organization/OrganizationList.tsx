@@ -178,7 +178,7 @@ export default function OrganizationManagement() {
     <Layout headerProps={headerProps}>
       <div>
         {/* Headers de columnas */}
-        <div className="grid grid-cols-12 gap-4 px-4 py-2 text-xs font-medium text-muted-foreground border-b">
+        <div className="grid grid-cols-12 gap-4 px-3 py-2 text-xs font-medium text-muted-foreground border-b">
           <div className="col-span-2">Fecha</div>
           <div className="col-span-3">Organización</div>
           <div className="col-span-2">Plan</div>
@@ -188,7 +188,7 @@ export default function OrganizationManagement() {
         </div>
 
         {/* Lista de organizaciones */}
-        <div className="space-y-1">
+        <div className="space-y-1 px-3">
           {filteredOrganizations.map((organization) => {
             const isSelected = userData?.organization?.id === organization.id
             
