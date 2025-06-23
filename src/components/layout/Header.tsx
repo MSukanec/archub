@@ -147,66 +147,84 @@ export function Header({
             </DropdownMenu>
           </div>
 
-          {/* Title or Project Breadcrumb */}
-          {title ? (
+          {/* Project Breadcrumb - Show if not in organization context */}
+          {currentSidebarContext !== 'organization' && (
+            <>
+              <span className="text-[var(--menues-fg)] opacity-70">›</span>
+              
+              <div className="flex items-center">
+                <Button
+                  variant="ghost"
+                  className="h-8 px-2 text-sm font-medium text-[var(--menues-fg)]"
+                  onClick={() => {
+                    setSidebarContext('project');
+                    navigate('/project/dashboard');
+                  }}
+                >
+                  {currentProject?.name || 'Sin proyecto'}
+                </Button>
+                
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                    >
+                      <ChevronDown className="h-3 w-3 text-[var(--menues-fg)]" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-64">
+                    <div className="px-2 py-1.5 text-xs text-[var(--menues-fg)] opacity-70 font-medium">
+                      Buscar proyecto...
+                    </div>
+                    <DropdownMenuSeparator />
+                    {projects.map((project) => (
+                      <DropdownMenuItem
+                        key={project.id}
+                        onClick={() => selectProjectMutation.mutate(project.id)}
+                        className="flex items-center justify-between"
+                      >
+                        <span>{project.name}</span>
+                        {project.id === currentProject?.id && (
+                          <div className="h-2 w-2 rounded-full bg-green-500" />
+                        )}
+                      </DropdownMenuItem>
+                    ))}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Nuevo proyecto
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </>
+          )}
+
+          {/* Stage Breadcrumb - Show if in stage context */}
+          {['design', 'construction', 'finance', 'commercialization'].includes(currentSidebarContext) && (
+            <>
+              <span className="text-[var(--menues-fg)] opacity-70">›</span>
+              <Button
+                variant="ghost"
+                className="h-8 px-2 text-sm font-medium bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]"
+                onClick={() => setSidebarContext('project')}
+              >
+                {currentSidebarContext === 'design' && 'Proyecto'}
+                {currentSidebarContext === 'construction' && 'Obra'}
+                {currentSidebarContext === 'finance' && 'Finanzas'}
+                {currentSidebarContext === 'commercialization' && 'Comercialización'}
+              </Button>
+            </>
+          )}
+
+          {/* Page Title - Show if title is provided */}
+          {title && (
             <>
               <span className="text-[var(--menues-fg)] opacity-70">›</span>
               <span className="text-sm font-medium text-[var(--menues-fg)]">{title}</span>
             </>
-          ) : (
-            currentSidebarContext !== 'organization' && (
-              <>
-                <span className="text-[var(--menues-fg)] opacity-70">›</span>
-                
-                <div className="flex items-center">
-                  <Button
-                    variant="ghost"
-                    className="h-8 px-2 text-sm font-medium text-[var(--menues-fg)]"
-                    onClick={() => {
-                      setSidebarContext('project');
-                      navigate('/dashboard');
-                    }}
-                  >
-                    {currentProject?.name || 'Sin proyecto'}
-                  </Button>
-                  
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                      >
-                        <ChevronDown className="h-3 w-3 text-[var(--menues-fg)]" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-64">
-                      <div className="px-2 py-1.5 text-xs text-[var(--menues-fg)] opacity-70 font-medium">
-                        Buscar proyecto...
-                      </div>
-                      <DropdownMenuSeparator />
-                      {projects.map((project) => (
-                        <DropdownMenuItem
-                          key={project.id}
-                          onClick={() => selectProjectMutation.mutate(project.id)}
-                          className="flex items-center justify-between"
-                        >
-                          <span>{project.name}</span>
-                          {project.id === currentProject?.id && (
-                            <div className="h-2 w-2 rounded-full bg-green-500" />
-                          )}
-                        </DropdownMenuItem>
-                      ))}
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Nuevo proyecto
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </>
-            )
           )}
         </div>
       </div>
