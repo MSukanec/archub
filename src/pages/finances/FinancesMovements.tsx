@@ -1,433 +1,360 @@
-import { useState } from 'react'
-import { useMutation } from '@tanstack/react-query'
-import { DollarSign, Plus, Edit, Trash2, MoreHorizontal } from 'lucide-react'
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
-import { Layout } from '@/components/layout/Layout'
-import { NewMovementModal } from '@/modals/NewMovementModal'
-import { useCurrentUser } from '@/hooks/use-current-user'
-import { useMovements } from '@/hooks/use-movements'
-import { useMovementConcepts } from '@/hooks/use-movement-concepts'
-import { useToast } from '@/hooks/use-toast'
-import { supabase } from '@/lib/supabase'
-import { queryClient } from '@/lib/queryClient'
+import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { DollarSign, Plus, Edit, Trash2, MoreHorizontal } from 'lucide-react';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
-type SortBy = 'date' | 'amount' | 'type' | 'category'
-type SortOrder = 'asc' | 'desc'
+import { Layout } from '@/components/layout/Layout';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+
+import { NewMovementModal } from '@/modals/NewMovementModal';
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { useMovements } from '@/hooks/use-movements';
+import { supabase } from '@/lib/supabase';
+import { useToast } from '@/hooks/use-toast';
+import { queryClient } from '@/lib/queryClient';
 
 interface Movement {
-  id: string
-  description: string
-  amount: number
-  created_at: string
-  created_by: string
-  organization_id: string
-  project_id: string
-  type_id: string
-  category_id: string
-  subcategory_id?: string
-  currency_id: string
-  wallet_id: string
-  file_url?: string
-  related_contact_id?: string
-  related_task_id?: string
-  is_conversion: boolean
-  creator?: {
-    id: string
-    full_name?: string
-    email: string
-    avatar_url?: string
-  }
+  id: string;
+  description: string;
+  amount: number;
+  created_at: string;
+  created_by: string;
+  organization_id: string;
+  project_id: string;
+  type_id: string;
+  category_id: string;
+  currency_id: string;
+  wallet_id: string;
   movement_data?: {
     type?: {
-      id: string
-      name: string
-    }
+      id: string;
+      name: string;
+    };
     category?: {
-      id: string
-      name: string
-    }
-    subcategory?: {
-      id: string
-      name: string
-    }
+      id: string;
+      name: string;
+    };
     currency?: {
-      id: string
-      name: string
-      code: string
-      symbol?: string
-    }
+      id: string;
+      name: string;
+      code: string;
+    };
     wallet?: {
-      id: string
-      name: string
-    }
-  }
+      id: string;
+      name: string;
+    };
+  };
+  creator?: {
+    id: string;
+    full_name?: string;
+    email: string;
+    avatar_url?: string;
+  };
 }
 
 export default function Movements() {
-  const [searchTerm, setSearchTerm] = useState('')
-  const [sortBy, setSortBy] = useState<SortBy>('date')
-  const [sortOrder, setSortOrder] = useState<SortOrder>('desc')
-  const [filterByType, setFilterByType] = useState<string>('all')
-  const [filterByCategory, setFilterByCategory] = useState<string>('')
-  const [showConversionsOnly, setShowConversionsOnly] = useState(false)
-  const [showNewMovementModal, setShowNewMovementModal] = useState(false)
-  const [editingMovement, setEditingMovement] = useState<Movement | null>(null)
-  const [deletingMovement, setDeletingMovement] = useState<Movement | null>(null)
-
-  const { toast } = useToast()
-  const { data: userData } = useCurrentUser()
-  const organizationId = userData?.preferences?.last_organization_id
-  const projectId = userData?.preferences?.last_project_id
+  const [searchValue, setSearchValue] = useState('');
+  const [showNewMovementModal, setShowNewMovementModal] = useState(false);
+  const [editingMovement, setEditingMovement] = useState<Movement | null>(null);
+  const [deletingMovement, setDeletingMovement] = useState<Movement | null>(null);
   
-  const { data: movements = [], isLoading, refetch } = useMovements(organizationId, projectId)
-  const { data: movementTypes = [] } = useMovementConcepts('types')
+  // Filter states
+  const [sortBy, setSortBy] = useState('date');
+  const [filterByType, setFilterByType] = useState('all');
+  const [filterByCategory, setFilterByCategory] = useState('all');
+  const [showConversions, setShowConversions] = useState(false);
 
+  const { toast } = useToast();
+  const { data: userData } = useCurrentUser();
+  const organizationId = userData?.preferences?.last_organization_id;
+  const projectId = userData?.preferences?.last_project_id;
+  
+  const { data: movements = [], isLoading } = useMovements(organizationId, projectId);
+
+  // Delete movement mutation
   const deleteMovementMutation = useMutation({
     mutationFn: async (movementId: string) => {
-      if (!supabase) {
-        throw new Error('Supabase client not initialized')
-      }
-
       const { error } = await supabase
         .from('movements')
         .delete()
-        .eq('id', movementId)
+        .eq('id', movementId);
 
-      if (error) {
-        throw new Error(`Error al eliminar movimiento: ${error.message}`)
-      }
+      if (error) throw error;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['movements'] });
+      setDeletingMovement(null);
       toast({
-        title: "Éxito",
-        description: "Movimiento eliminado correctamente"
-      })
-      queryClient.invalidateQueries({ queryKey: ['movements', organizationId, projectId] })
-      setDeletingMovement(null)
+        title: "Movimiento eliminado",
+        description: "El movimiento ha sido eliminado correctamente"
+      });
     },
     onError: (error: any) => {
       toast({
         title: "Error",
         description: error.message || "No se pudo eliminar el movimiento",
         variant: "destructive"
-      })
+      });
     }
-  })
+  });
 
   const handleEdit = (movement: Movement) => {
-    setEditingMovement(movement)
-    setShowNewMovementModal(true)
-  }
+    setEditingMovement(movement);
+    setShowNewMovementModal(true);
+  };
 
   const handleDelete = (movement: Movement) => {
-    setDeletingMovement(movement)
-  }
+    setDeletingMovement(movement);
+  };
 
   const confirmDelete = () => {
     if (deletingMovement) {
-      deleteMovementMutation.mutate(deletingMovement.id)
+      deleteMovementMutation.mutate(deletingMovement.id);
     }
-  }
+  };
 
-  const handleClearFilters = () => {
-    setSearchTerm('')
-    setSortBy('date')
-    setSortOrder('desc')
-    setFilterByType('all')
-    setFilterByCategory('')
-    setShowConversionsOnly(false)
-  }
-
+  // Filter movements
   const filteredMovements = movements
-    .filter(movement => {
-      const matchesSearch = movement.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           movement.movement_data?.type?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           movement.movement_data?.category?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           movement.creator?.full_name?.toLowerCase().includes(searchTerm.toLowerCase())
+    .filter((movement) => {
+      const matchesSearch = movement.description?.toLowerCase().includes(searchValue.toLowerCase()) ||
+                          movement.movement_data?.type?.name?.toLowerCase().includes(searchValue.toLowerCase()) ||
+                          movement.movement_data?.category?.name?.toLowerCase().includes(searchValue.toLowerCase());
       
-      const matchesType = filterByType === 'all' || movement.type_id === filterByType
-      const matchesCategory = !filterByCategory || movement.category_id === filterByCategory
-      const matchesConversion = !showConversionsOnly || movement.is_conversion
+      const matchesType = filterByType === 'all' || movement.movement_data?.type?.name === filterByType;
+      const matchesCategory = filterByCategory === 'all' || movement.movement_data?.category?.name === filterByCategory;
+      const matchesConversion = true; // Add conversion logic if needed
       
-      return matchesSearch && matchesType && matchesCategory && matchesConversion
+      return matchesSearch && matchesType && matchesCategory && matchesConversion;
     })
     .sort((a, b) => {
-      let comparison = 0
+      let comparison = 0;
       
       switch (sortBy) {
         case 'date':
-          comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-          break
+          comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+          break;
         case 'amount':
-          comparison = a.amount - b.amount
-          break
+          comparison = a.amount - b.amount;
+          break;
         case 'type':
-          comparison = (a.movement_data?.type?.name || '').localeCompare(b.movement_data?.type?.name || '')
-          break
+          comparison = (a.movement_data?.type?.name || '').localeCompare(b.movement_data?.type?.name || '');
+          break;
         case 'category':
-          comparison = (a.movement_data?.category?.name || '').localeCompare(b.movement_data?.category?.name || '')
-          break
+          comparison = (a.movement_data?.category?.name || '').localeCompare(b.movement_data?.category?.name || '');
+          break;
       }
       
-      return sortOrder === 'asc' ? comparison : -comparison
-    })
+      return comparison;
+    });
 
+  // Custom filters component
   const customFilters = (
-    <div className="space-y-4 w-[288px]">
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Ordenar por</Label>
-        <Select value={sortBy} onValueChange={(value: SortBy) => setSortBy(value)}>
-          <SelectTrigger>
-            <SelectValue />
+    <div className="space-y-4">
+      <div>
+        <Label className="text-xs font-medium text-muted-foreground">Ordenar por</Label>
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger className="mt-1">
+            <SelectValue placeholder="Seleccionar orden" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="date">Fecha</SelectItem>
-            <SelectItem value="amount">Cantidad</SelectItem>
+            <SelectItem value="amount">Monto</SelectItem>
             <SelectItem value="type">Tipo</SelectItem>
             <SelectItem value="category">Categoría</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Orden</Label>
-        <Select value={sortOrder} onValueChange={(value: SortOrder) => setSortOrder(value)}>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="desc">Descendente</SelectItem>
-            <SelectItem value="asc">Ascendente</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Filtrar por tipo</Label>
+      <div>
+        <Label className="text-xs font-medium text-muted-foreground">Filtrar por tipo</Label>
         <Select value={filterByType} onValueChange={setFilterByType}>
-          <SelectTrigger>
+          <SelectTrigger className="mt-1">
             <SelectValue placeholder="Todos los tipos" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos los tipos</SelectItem>
-            {movementTypes.map((type) => (
-              <SelectItem key={type.id} value={type.id}>
-                {type.name}
-              </SelectItem>
-            ))}
+            <SelectItem value="ingreso">Ingresos</SelectItem>
+            <SelectItem value="gasto">Gastos</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      <div className="flex items-center justify-between">
-        <Label className="text-sm font-medium">Solo conversiones</Label>
-        <Switch
-          checked={showConversionsOnly}
-          onCheckedChange={setShowConversionsOnly}
-        />
+      <div>
+        <Label className="text-xs font-medium text-muted-foreground">Filtrar por categoría</Label>
+        <Select value={filterByCategory} onValueChange={setFilterByCategory}>
+          <SelectTrigger className="mt-1">
+            <SelectValue placeholder="Todas las categorías" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas las categorías</SelectItem>
+            <SelectItem value="materiales">Materiales</SelectItem>
+            <SelectItem value="mano_obra">Mano de obra</SelectItem>
+            <SelectItem value="equipos">Equipos</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <Label className="text-xs font-medium text-muted-foreground">Mostrar conversiones</Label>
+          <Switch checked={showConversions} onCheckedChange={setShowConversions} />
+        </div>
       </div>
     </div>
-  )
+  );
 
-  const tableColumns = [
-    {
-      key: 'created_at',
-      label: 'Fecha',
-      sortable: true,
-      sortType: 'date' as const,
-      render: (movement: Movement) => (
-        <span className="text-xs">
-          {format(new Date(movement.created_at), 'dd/MM/yyyy', { locale: es })}
-        </span>
-      )
-    },
-    {
-      key: 'creator',
-      label: 'Creador',
-      sortable: true,
-      sortType: 'string' as const,
-      render: (movement: Movement) => (
-        <div className="flex items-center gap-2">
-          <Avatar className="h-6 w-6">
-            <AvatarImage src={movement.creator?.avatar_url} />
-            <AvatarFallback className="text-xs">
-              {movement.creator?.full_name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 
-               movement.creator?.email?.slice(0, 2).toUpperCase() || 'U'}
-            </AvatarFallback>
-          </Avatar>
-          <span className="text-xs truncate">
-            {movement.creator?.full_name || movement.creator?.email || 'Usuario'}
-          </span>
-        </div>
-      )
-    },
-    {
-      key: 'type',
-      label: 'Tipo',
-      sortable: true,
-      sortType: 'string' as const,
-      render: (movement: Movement) => {
-        const typeName = movement.movement_data?.type?.name || 'Sin tipo'
-        const isIngreso = typeName.toLowerCase().includes('ingreso')
-        const isEgreso = typeName.toLowerCase().includes('egreso')
-        
-        let badgeClasses = "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white"
-        
-        if (isIngreso) {
-          badgeClasses += " bg-green-500"
-        } else if (isEgreso) {
-          badgeClasses += " bg-red-500"
-        } else {
-          badgeClasses += " bg-gray-400"
-        }
-        
-        return (
-          <span className={badgeClasses}>
-            {typeName}
-          </span>
-        )
-      }
-    }
-  ]
+  const handleClearFilters = () => {
+    setSortBy('date');
+    setFilterByType('all');
+    setFilterByCategory('all');
+    setShowConversions(false);
+    setSearchValue('');
+  };
 
-  const actions = (
-    <Button variant="default" onClick={() => setShowNewMovementModal(true)}>
-      <Plus className="mr-2 h-4 w-4" />
-      Nuevo movimiento
-    </Button>
-  )
+
 
   const headerProps = {
-    title: "Gestión de Movimientos",
+    title: "Movimientos",
+    icon: <DollarSign className="h-5 w-5" />,
     showSearch: true,
-    searchValue: searchTerm,
-    onSearchChange: setSearchTerm,
-    showFilters: true,
+    searchValue,
+    onSearchChange: setSearchValue,
     customFilters,
     onClearFilters: handleClearFilters,
-    actions
-  }
+    actions: (
+      <Button onClick={() => setShowNewMovementModal(true)}>
+        <Plus className="mr-2 h-4 w-4" />
+        Nuevo movimiento
+      </Button>
+    )
+  };
 
   if (isLoading) {
     return (
       <Layout headerProps={headerProps}>
-        <div className="p-8 text-center text-muted-foreground">
-          Cargando movimientos...
+        <div className="flex items-center justify-center h-64">
+          <div className="text-sm text-muted-foreground">Cargando movimientos...</div>
         </div>
       </Layout>
-    )
+    );
   }
 
   return (
     <Layout headerProps={headerProps}>
-      <div className="space-y-0">
-        {filteredMovements.length === 0 ? (
-          <div className="p-8 text-center text-muted-foreground">
-            {movements.length === 0 
-              ? "No hay movimientos registrados. Agrega el primer movimiento financiero del proyecto."
-              : "No se encontraron movimientos que coincidan con tu búsqueda."
-            }
+      <div className="rounded-md border">
+        <div className="p-4">
+          {/* Table header */}
+          <div className="grid grid-cols-10 gap-4 pb-3 text-xs font-medium text-muted-foreground border-b">
+            <div>Fecha</div>
+            <div>Creador</div>
+            <div>Tipo</div>
+            <div>Categoría</div>
+            <div>Subcategoría</div>
+            <div>Descripción</div>
+            <div>Moneda</div>
+            <div>Billetera</div>
+            <div>Cantidad</div>
+            <div>Acciones</div>
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="border-b border-[var(--card-border)]">
-                <tr className="text-xs font-medium text-muted-foreground">
-                  <th className="text-left p-3">Fecha</th>
-                  <th className="text-left p-3">Creador</th>
-                  <th className="text-left p-3">Tipo</th>
-                  <th className="text-left p-3">Categoría</th>
-                  <th className="text-left p-3">Descripción</th>
-                  <th className="text-left p-3">Moneda</th>
-                  <th className="text-left p-3">Cantidad</th>
-                  <th className="text-left p-3">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredMovements.map((movement) => (
-                  <tr key={movement.id} className="border-b border-[var(--card-border)] hover:bg-[var(--card-hover-bg)]">
-                    <td className="p-3 text-xs">
-                      {format(new Date(movement.created_at), 'dd/MM/yyyy', { locale: es })}
-                    </td>
-                    <td className="p-3">
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-6 w-6">
-                          <AvatarImage src={movement.creator?.avatar_url} />
-                          <AvatarFallback className="text-xs">
-                            {movement.creator?.full_name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 
-                             movement.creator?.email?.slice(0, 2).toUpperCase() || 'U'}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="text-xs truncate">
-                          {movement.creator?.full_name || movement.creator?.email || 'Usuario'}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="p-3">
-                      <Badge variant="outline" className="text-xs">
-                        {movement.movement_data?.type?.name || 'Sin tipo'}
-                      </Badge>
-                    </td>
-                    <td className="p-3">
-                      <Badge variant="secondary" className="text-xs">
-                        {movement.movement_data?.category?.name || 'Sin categoría'}
-                      </Badge>
-                    </td>
-                    <td className="p-3 text-xs">{movement.description || 'Sin descripción'}</td>
-                    <td className="p-3">
-                      <Badge variant="outline" className="text-xs">
-                        {movement.movement_data?.currency?.code || 'USD'}
-                      </Badge>
-                    </td>
-                    <td className="p-3 text-xs font-medium">${movement.amount.toLocaleString()}</td>
-                    <td className="p-3">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => setEditingMovement(movement)}>
-                            <Edit className="h-4 w-4 mr-2" />
-                            Editar
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={() => setDeletingMovement(movement)}
-                            className="text-destructive focus:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Eliminar
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+
+          {/* Table body */}
+          <div className="space-y-2 pt-3">
+            {filteredMovements.length > 0 ? (
+              filteredMovements.map((movement) => (
+                <div key={movement.id} className="grid grid-cols-10 gap-4 py-2 text-sm items-center border-b last:border-b-0">
+                  <div className="text-xs">
+                    {format(new Date(movement.created_at), 'dd/MM/yyyy', { locale: es })}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage src={movement.creator?.avatar_url} />
+                      <AvatarFallback className="text-xs">
+                        {movement.creator?.full_name?.charAt(0) || movement.creator?.email?.charAt(0) || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-xs truncate">
+                      {movement.creator?.full_name || movement.creator?.email || 'Usuario'}
+                    </span>
+                  </div>
+                  <div>
+                    <Badge variant="outline" className="text-xs">
+                      {movement.movement_data?.type?.name || 'Sin tipo'}
+                    </Badge>
+                  </div>
+                  <div className="text-xs">
+                    {movement.movement_data?.category?.name || 'Sin categoría'}
+                  </div>
+                  <div className="text-xs text-muted-foreground">-</div>
+                  <div className="text-xs truncate">
+                    {movement.description || 'Sin descripción'}
+                  </div>
+                  <div>
+                    <Badge variant="secondary" className="text-xs">
+                      {movement.movement_data?.currency?.code || 'USD'}
+                    </Badge>
+                  </div>
+                  <div className="text-xs">
+                    {movement.movement_data?.wallet?.name || 'Principal'}
+                  </div>
+                  <div className="text-xs font-medium">
+                    ${movement.amount?.toLocaleString() || '0'}
+                  </div>
+                  <div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleEdit(movement)}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Editar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          className="text-red-600"
+                          onClick={() => handleDelete(movement)}
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Eliminar
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <DollarSign className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                <p className="text-sm">No hay movimientos registrados.</p>
+                <p className="text-xs">Crea el primer movimiento del proyecto.</p>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
-      <NewMovementModal
-        open={showNewMovementModal}
-        onClose={() => {
-          setShowNewMovementModal(false)
-          setEditingMovement(null)
-        }}
-        editingMovement={editingMovement}
-      />
+      {/* New Movement Modal */}
+      {showNewMovementModal && (
+        <NewMovementModal
+          open={showNewMovementModal}
+          onClose={() => {
+            setShowNewMovementModal(false);
+            setEditingMovement(null);
+          }}
+          editingMovement={editingMovement}
+        />
+      )}
 
+      {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!deletingMovement} onOpenChange={() => setDeletingMovement(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -438,9 +365,8 @@ export default function Movements() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => deletingMovement && deleteMovementMutation.mutate(deletingMovement.id)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            <AlertDialogAction 
+              onClick={confirmDelete}
               disabled={deleteMovementMutation.isPending}
             >
               {deleteMovementMutation.isPending ? 'Eliminando...' : 'Eliminar'}
@@ -449,5 +375,5 @@ export default function Movements() {
         </AlertDialogContent>
       </AlertDialog>
     </Layout>
-  )
+  );
 }
