@@ -174,8 +174,18 @@ export default function OrganizationDashboard() {
   const headerProps = {
     title: "Resumen de la Organización",
     icon: <Building className="h-5 w-5" />,
-    showSearch: false
+    showSearch: false,
+    actions: [
+      {
+        label: "Nueva Organización",
+        onClick: () => setShowNewOrganizationModal(true),
+        variant: "default" as const,
+        icon: <Plus className="h-4 w-4" />
+      }
+    ]
   };
+
+  const [showNewOrganizationModal, setShowNewOrganizationModal] = useState(false);
 
   if (!currentOrganization) {
     return (

@@ -35,12 +35,11 @@ export function Sidebar() {
   // Different navigation items based on context
   const sidebarContexts = {
     organization: [
-      { icon: Home, label: 'Resumen de la Organización', href: '/organization/dashboard' },
+      { icon: Home, label: 'Resumen', href: '/organization/dashboard' },
       { icon: Users, label: 'Miembros', href: '/organization/members' },
       { icon: Activity, label: 'Actividad', href: '/organization/activity' },
-      { icon: Building, label: 'Gestión de Organizaciones', href: '/organizaciones' },
-      { icon: FolderOpen, label: 'Gestión de Proyectos', href: '/proyectos' },
       { icon: Mail, label: 'Contactos', href: '/organization/contactos' },
+      { icon: FolderOpen, label: 'Proyectos', href: '/proyectos' },
     ],
     project: [
       { icon: Home, label: 'Dashboard', href: '/project/dashboard' },
