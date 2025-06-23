@@ -2,14 +2,13 @@ import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Building, Users, DollarSign, Folder, Activity, Calendar, Crown, CheckCircle, StickyNote, ExternalLink } from 'lucide-react';
+import { Building, Users, DollarSign, Folder, Activity, Calendar, Crown, CheckCircle, StickyNote, ExternalLink, ArrowRight } from 'lucide-react';
 import { useLocation } from 'wouter';
 
 import { Layout } from '@/components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { supabase } from '@/lib/supabase';
@@ -263,9 +262,20 @@ export default function OrganizationDashboard() {
           {/* Recent Projects */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Folder className="h-5 w-5" />
-                Proyectos Recientes
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Folder className="h-5 w-5" />
+                  Proyectos Recientes
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => navigate('/organization/projects')}
+                  className="h-8 px-2"
+                >
+                  Ver todos
+                  <ArrowRight className="ml-1 h-4 w-4" />
+                </Button>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -277,7 +287,13 @@ export default function OrganizationDashboard() {
                       className={`flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors ${
                         project.id === userData?.preferences?.last_project_id ? 'border-[var(--accent)] ring-1 ring-[var(--accent)]' : ''
                       }`}
-                      onClick={() => handleProjectSelect(project.id)}
+                      onClick={() => {
+                        handleProjectSelect(project.id);
+                        // Navigate to project dashboard after selection
+                        setTimeout(() => {
+                          navigate('/project/dashboard');
+                        }, 100);
+                      }}
                     >
                       <div className="flex items-center gap-3">
                         <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
@@ -316,9 +332,20 @@ export default function OrganizationDashboard() {
           {/* Notes */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <StickyNote className="h-5 w-5" />
-                Notas
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <StickyNote className="h-5 w-5" />
+                  Notas
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  disabled
+                  className="h-8 px-2 opacity-50"
+                >
+                  Ver todas
+                  <ArrowRight className="ml-1 h-4 w-4" />
+                </Button>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -374,9 +401,20 @@ export default function OrganizationDashboard() {
           {/* Recent Activity */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Activity className="h-5 w-5" />
-                Actividad Reciente
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Activity className="h-5 w-5" />
+                  Actividad Reciente
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  disabled
+                  className="h-8 px-2 opacity-50"
+                >
+                  Ver toda
+                  <ArrowRight className="ml-1 h-4 w-4" />
+                </Button>
               </CardTitle>
             </CardHeader>
             <CardContent>

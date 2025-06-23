@@ -598,6 +598,16 @@ Changelog:
   • Fixed header navigation: project button redirects to dashboard, dropdown only updates selection
   • Corrected use-movements.ts hook to load authentic Supabase data with proper JOIN queries
   • All pages now follow single header pattern with no duplicate components
+
+- June 23, 2025. Enhanced Organization Dashboard with full-width layout and navigation
+  • Added organization info card at top (100% width) showing creation date, status, plan, and project count
+  • Restructured to 3-column layout: Projects | Notes | Activity with navigation buttons
+  • Projects now navigate to ProjectDashboard.tsx on click (select + redirect)
+  • Active projects automatically sort to first position in list
+  • Added "Ver todos" buttons in card headers linking to respective pages
+  • Notes card with example content (meetings, reminders, completed tasks) with colored backgrounds
+  • Activity items clickable to navigate to corresponding pages (projects, movements, contacts)
+  • Removed header action buttons (Reportes, Nuevo proyecto) for cleaner interface
   • Rebuilt NewOrganizationModal from scratch following ai-modal-template.md structure with proper form handling and Supabase integration
 
 - June 23, 2025. Complete 4-level navigation system implementation
