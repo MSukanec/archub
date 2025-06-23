@@ -1,26 +1,23 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { Calendar } from "lucide-react";
+import { Calendar, Building } from "lucide-react";
 
 import { CustomModalLayout } from "@/components/ui-custom/CustomModalLayout";
 import { CustomModalHeader } from "@/components/ui-custom/CustomModalHeader";
 import { CustomModalBody } from "@/components/ui-custom/CustomModalBody";
-import { CustomModalFooter } from "@/components/ui-custom/CustomModalFooter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useOrganizationMembers } from "@/hooks/use-organization-members";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
@@ -28,7 +25,6 @@ import { queryClient } from "@/lib/queryClient";
 const createOrganizationSchema = z.object({
   name: z.string().min(1, "El nombre es requerido"),
   created_at: z.date(),
-  created_by: z.string().min(1, "El creador es requerido"),
 });
 
 type CreateOrganizationForm = z.infer<typeof createOrganizationSchema>;
@@ -36,15 +32,9 @@ type CreateOrganizationForm = z.infer<typeof createOrganizationSchema>;
 interface Organization {
   id: string;
   name: string;
+  created_at: string;
   is_active: boolean;
   is_system: boolean;
-  created_at: string;
-  created_by?: string;
-  plan?: {
-    id: string;
-    name: string;
-    price: number;
-  } | null;
 }
 
 interface NewOrganizationModalProps {
@@ -56,25 +46,38 @@ interface NewOrganizationModalProps {
 export function NewOrganizationModal({ open, onClose, editingOrganization }: NewOrganizationModalProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
-  const organizationId = userData?.preferences?.last_organization_id;
-  const { data: organizationMembers = [] } = useOrganizationMembers(organizationId);
 
   const form = useForm<CreateOrganizationForm>({
     resolver: zodResolver(createOrganizationSchema),
     defaultValues: {
-      name: editingOrganization?.name || "",
-      created_at: editingOrganization ? new Date(editingOrganization.created_at) : new Date(),
-      created_by: editingOrganization?.created_by || userData?.user?.id || "",
+      name: "",
+      created_at: new Date(),
     },
   });
 
+  // Reset form when editingOrganization changes
+  React.useEffect(() => {
+    if (editingOrganization) {
+      form.reset({
+        name: editingOrganization.name,
+        created_at: new Date(editingOrganization.created_at),
+      });
+    } else {
+      form.reset({
+        name: "",
+        created_at: new Date(),
+      });
+    }
+  }, [editingOrganization, form]);
+
   const createOrganizationMutation = useMutation({
     mutationFn: async (formData: CreateOrganizationForm) => {
-      if (!supabase) {
-        throw new Error('Supabase client not initialized');
+      if (!userData?.user?.id) {
+        throw new Error('Usuario no autenticado');
       }
 
       if (editingOrganization) {
+        // Update existing organization
         const { error } = await supabase
           .from('organizations')
           .update({
@@ -86,18 +89,30 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
           throw new Error(`Error al actualizar organización: ${error.message}`);
         }
       } else {
-        const { error } = await supabase
+        // Create new organization
+        const { data: organizationData, error } = await supabase
           .from('organizations')
           .insert({
             name: formData.name,
-            created_by: formData.created_by,
             created_at: formData.created_at.toISOString(),
             is_active: true,
             is_system: false,
-          });
+          })
+          .select()
+          .single();
 
         if (error) {
           throw new Error(`Error al crear organización: ${error.message}`);
+        }
+
+        // Update user's last_organization_id to the new organization
+        if (organizationData && userData?.preferences?.id) {
+          await supabase
+            .from('user_preferences')
+            .update({
+              last_organization_id: organizationData.id,
+            })
+            .eq('id', userData.preferences.id);
         }
       }
     },
@@ -125,31 +140,27 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
     createOrganizationMutation.mutate(data);
   };
 
-  const getCreatorInfo = () => {
-    return (userData?.user_data?.first_name && userData?.user_data?.last_name 
-      ? `${userData.user_data.first_name} ${userData.user_data.last_name}`
-      : userData?.user?.email) || 'Usuario';
+  const handleClose = () => {
+    onClose();
+    form.reset();
   };
 
-  const getCreatorInitials = () => {
-    const name = getCreatorInfo();
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-  };
+  if (!open) return null;
 
   return (
-    <CustomModalLayout open={open} onClose={onClose}>
+    <CustomModalLayout open={open} onClose={handleClose}>
       {{
         header: (
           <CustomModalHeader
             title={editingOrganization ? "Editar organización" : "Nueva organización"}
-            description={editingOrganization ? "Actualiza los datos de la organización" : "Crea una nueva organización para gestionar tus proyectos"}
-            onClose={onClose}
+            description={editingOrganization ? "Modifica la información de la organización" : "Crea una nueva organización"}
+            onClose={handleClose}
           />
         ),
         body: (
           <CustomModalBody padding="md">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleSubmit)}>
+              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4" id="organization-form">
                 <div className="space-y-4">
                   {/* Fecha de creación */}
                   <FormField
@@ -194,38 +205,7 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
                     )}
                   />
 
-                  {/* Creador */}
-                  <FormField
-                    control={form.control}
-                    name="created_by"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium">Creador</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Seleccionar creador" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {organizationMembers.map((member) => (
-                              <SelectItem key={member.id} value={member.id}>
-                                <div className="flex items-center gap-2">
-                                  <div className="h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center text-xs">
-                                    {getCreatorInitials()}
-                                  </div>
-                                  {getCreatorInfo()}
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Nombre */}
+                  {/* Nombre de la organización */}
                   <FormField
                     control={form.control}
                     name="name"
@@ -248,12 +228,26 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
           </CustomModalBody>
         ),
         footer: (
-          <CustomModalFooter
-            onCancel={onClose}
-            onSave={form.handleSubmit(handleSubmit)}
-            saveText={editingOrganization ? 'Actualizar' : 'Crear organización'}
-            saveLoading={createOrganizationMutation.isPending}
-          />
+          <div className="p-3 border-t border-[var(--card-border)] mt-auto">
+            <div className="flex gap-2 w-full">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={handleClose}
+                className="w-1/4"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                form="organization-form"
+                className="w-3/4"
+                disabled={createOrganizationMutation.isPending}
+              >
+                {createOrganizationMutation.isPending ? 'Guardando...' : (editingOrganization ? "Actualizar" : "Crear organización")}
+              </Button>
+            </div>
+          </div>
         )
       }}
     </CustomModalLayout>

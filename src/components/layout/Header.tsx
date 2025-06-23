@@ -148,7 +148,6 @@ export function Header({
                 <div
                   className="relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-[var(--accent-bg)] focus:bg-[var(--accent-bg)]"
                   onClick={() => {
-                    console.log('Direct click Nueva organización');
                     setShowNewOrganizationModal(true);
                   }}
                 >
