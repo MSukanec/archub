@@ -76,14 +76,13 @@ export function Sidebar() {
       onMouseLeave={() => setHovered(false)}
     >
       {/* Navigation Items */}
-      <div className="flex-1 py-2">
+      <div className="flex-1 p-1">
         <div className="flex flex-col gap-1">
           {navigationItems.map((item) => (
             <button
               key={item.href}
               className={cn(
-                'flex items-center px-2 py-2 mx-1 rounded-md transition-all gap-2',
-                isExpanded ? '' : 'justify-center',
+                'flex items-center w-8 h-8 rounded-md transition-all duration-200',
                 location === item.href 
                   ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]' 
                   : 'text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]'
@@ -91,11 +90,14 @@ export function Sidebar() {
               onClick={() => navigate(item.href)}
               title={!isExpanded ? item.label : undefined}
             >
-              <div className="w-6 h-6 flex items-center justify-center">
-                <item.icon className="h-4 w-4" />
+              {/* Icon - FIXED position, never moves */}
+              <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
+                <item.icon className="w-5 h-5" />
               </div>
+              
+              {/* Text - appears to the right when expanded */}
               {isExpanded && (
-                <span className="text-sm truncate ml-2">{item.label}</span>
+                <span className="text-sm font-medium whitespace-nowrap ml-2">{item.label}</span>
               )}
             </button>
           ))}
@@ -103,13 +105,12 @@ export function Sidebar() {
       </div>
 
       {/* Bottom Section - Fixed Buttons */}
-      <div className="border-t border-[var(--menues-border)] py-2">
+      <div className="border-t border-[var(--menues-border)] p-1">
         <div className="flex flex-col gap-1">
           {/* Settings */}
           <button
             className={cn(
-              'flex items-center px-2 py-2 mx-1 rounded-md transition-all gap-2',
-              isExpanded ? '' : 'justify-center',
+              'flex items-center w-8 h-8 rounded-md transition-all duration-200',
               location === '/configuracion' 
                 ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]' 
                 : 'text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]'
@@ -117,42 +118,40 @@ export function Sidebar() {
             onClick={() => navigate('/configuracion')}
             title={!isExpanded ? 'Configuración' : undefined}
           >
-            <div className="w-6 h-6 flex items-center justify-center">
-              <Settings className="h-4 w-4" />
+            <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
+              <Settings className="w-5 h-5" />
             </div>
             {isExpanded && (
-              <span className="text-sm truncate ml-2">Configuración</span>
+              <span className="text-sm font-medium whitespace-nowrap ml-2">Configuración</span>
             )}
           </button>
 
           {/* Theme Toggle */}
           <button
             className={cn(
-              'flex items-center px-2 py-2 mx-1 rounded-md transition-all gap-2',
-              isExpanded ? '' : 'justify-center',
+              'flex items-center w-8 h-8 rounded-md transition-all duration-200',
               'text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]'
             )}
             onClick={() => toggleThemeMutation.mutate()}
             disabled={toggleThemeMutation.isPending}
             title={!isExpanded ? 'Cambiar tema' : undefined}
           >
-            <div className="w-6 h-6 flex items-center justify-center">
+            <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
               {userData?.preferences?.theme === 'dark' ? (
-                <Sun className="h-4 w-4" />
+                <Sun className="w-5 h-5" />
               ) : (
-                <Moon className="h-4 w-4" />
+                <Moon className="w-5 h-5" />
               )}
             </div>
             {isExpanded && (
-              <span className="text-sm truncate ml-2">Cambiar tema</span>
+              <span className="text-sm font-medium whitespace-nowrap ml-2">Cambiar tema</span>
             )}
           </button>
 
           {/* Profile */}
           <button
             className={cn(
-              'flex items-center px-2 py-2 mx-1 rounded-md transition-all gap-2',
-              isExpanded ? '' : 'justify-center',
+              'flex items-center w-8 h-8 rounded-md transition-all duration-200',
               location === '/perfil' 
                 ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]' 
                 : 'text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]'
@@ -160,7 +159,7 @@ export function Sidebar() {
             onClick={() => navigate('/perfil')}
             title={!isExpanded ? 'Mi Perfil' : undefined}
           >
-            <div className="w-6 h-6 flex items-center justify-center">
+            <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
               {userData?.user?.avatar_url ? (
                 <img 
                   src={userData.user.avatar_url} 
@@ -168,11 +167,11 @@ export function Sidebar() {
                   className="w-5 h-5 rounded-full"
                 />
               ) : (
-                <UserCircle className="h-4 w-4" />
+                <UserCircle className="w-5 h-5" />
               )}
             </div>
             {isExpanded && (
-              <span className="text-sm truncate ml-2">Mi Perfil</span>
+              <span className="text-sm font-medium whitespace-nowrap ml-2">Mi Perfil</span>
             )}
           </button>
         </div>
