@@ -83,7 +83,7 @@ export function Sidebar() {
               key={item.href}
               className={cn(
                 'flex items-center h-8 rounded-md transition-all duration-200',
-                isExpanded ? 'w-full px-1' : 'w-8 justify-center',
+                isExpanded ? 'w-full' : 'w-8 justify-center',
                 location === item.href 
                   ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]' 
                   : 'text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]'
@@ -112,7 +112,7 @@ export function Sidebar() {
           <button
             className={cn(
               'flex items-center h-8 rounded-md transition-all duration-200',
-              isExpanded ? 'w-full px-1' : 'w-8 justify-center',
+              isExpanded ? 'w-full' : 'w-8 justify-center',
               location === '/configuracion' 
                 ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]' 
                 : 'text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]'
@@ -132,7 +132,7 @@ export function Sidebar() {
           <button
             className={cn(
               'flex items-center h-8 rounded-md transition-all duration-200',
-              isExpanded ? 'w-full px-1' : 'w-8 justify-center',
+              isExpanded ? 'w-full' : 'w-8 justify-center',
               'text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]'
             )}
             onClick={() => toggleThemeMutation.mutate()}
@@ -155,7 +155,7 @@ export function Sidebar() {
           <button
             className={cn(
               'flex items-center h-8 rounded-md transition-all duration-200',
-              isExpanded ? 'w-full px-1' : 'w-8 justify-center',
+              isExpanded ? 'w-full' : 'w-8 justify-center',
               location === '/perfil' 
                 ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]' 
                 : 'text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]'
