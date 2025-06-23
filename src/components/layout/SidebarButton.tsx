@@ -20,7 +20,7 @@ export default function SidebarButton({
   return (
     <button
       className={cn(
-        'relative flex items-center rounded-lg transition-all duration-200',
+        'relative flex items-center rounded-md transition-all duration-200',
         // Botón SIEMPRE 32x32px (w-8 h-8), centrado cuando colapsado
         'w-8 h-8',
         // Cuando expandido, el botón se extiende pero el icono queda fijo

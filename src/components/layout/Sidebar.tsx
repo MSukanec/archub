@@ -83,13 +83,13 @@ export function Sidebar() {
     <aside 
       className={cn(
         "fixed top-9 left-0 h-[calc(100vh-36px)] border-r bg-[var(--menues-bg)] border-[var(--menues-border)] transition-all z-40 flex flex-col",
-        isExpanded ? "w-[240px]" : "w-[32px]"
+        isExpanded ? "w-[240px]" : "w-[40px]"
       )}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
       {/* Navigation Items */}
-      <div className="flex-1">
+      <div className="flex-1 p-1">
         <div className="flex flex-col">
           {navigationItems.map((item) => (
             <SidebarButton
@@ -105,7 +105,7 @@ export function Sidebar() {
       </div>
 
       {/* Bottom Section - Fixed Buttons */}
-      <div className="border-t border-[var(--menues-border)]">
+      <div className="border-t border-[var(--menues-border)] p-1">
         <div className="flex flex-col">
           {/* Settings */}
           <SidebarButton
