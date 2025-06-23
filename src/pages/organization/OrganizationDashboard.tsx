@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Building, Users, DollarSign, Folder, BarChart3, Plus, Activity } from 'lucide-react';
+import { Building, Users, DollarSign, Folder, Activity, Calendar, Crown, CheckCircle, StickyNote, ExternalLink } from 'lucide-react';
+import { useLocation } from 'wouter';
 
 import { Layout } from '@/components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,6 +19,7 @@ import { useToast } from '@/hooks/use-toast';
 export default function OrganizationDashboard() {
   const { data: userData } = useCurrentUser();
   const { toast } = useToast();
+  const [, navigate] = useLocation();
   const currentOrganization = userData?.organization;
 
   // Fetch recent projects
@@ -153,22 +155,27 @@ export default function OrganizationDashboard() {
     selectProjectMutation.mutate(projectId);
   };
 
+  // Sort projects to put active project first
+  const sortedProjects = [...recentProjects].sort((a, b) => {
+    if (a.id === userData?.preferences?.last_project_id) return -1;
+    if (b.id === userData?.preferences?.last_project_id) return 1;
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
+
+  const handleActivityClick = (activity: any) => {
+    if (activity.type === 'project') {
+      navigate('/organization/projects');
+    } else if (activity.type === 'movement') {
+      navigate('/finance/movements');
+    } else if (activity.type === 'contact') {
+      navigate('/organization/contacts');
+    }
+  };
+
   const headerProps = {
     title: "Resumen de la Organización",
     icon: <Building className="h-5 w-5" />,
-    showSearch: false,
-    actions: (
-      <div className="flex gap-2">
-        <Button variant="outline" size="sm">
-          <BarChart3 className="mr-2 h-4 w-4" />
-          Reportes
-        </Button>
-        <Button size="sm">
-          <Plus className="mr-2 h-4 w-4" />
-          Nuevo proyecto
-        </Button>
-      </div>
-    )
+    showSearch: false
   };
 
   if (!currentOrganization) {
@@ -186,8 +193,73 @@ export default function OrganizationDashboard() {
   return (
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
+        {/* Organization Overview */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Building className="h-5 w-5" />
+              {currentOrganization?.name || 'Organización'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                  <Calendar className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Creada</p>
+                  <p className="text-xs text-muted-foreground">
+                    {currentOrganization?.created_at ? 
+                      format(new Date(currentOrganization.created_at), 'dd MMM yyyy', { locale: es }) 
+                      : '---'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-green-100 text-green-600 rounded-lg">
+                  <CheckCircle className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Estado</p>
+                  <p className="text-xs text-muted-foreground">
+                    {currentOrganization?.is_active ? 'Activa' : 'Inactiva'}
+                  </p>
+                </div>
+              </div>
+
+              {currentOrganization?.plan && (
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-purple-100 text-purple-600 rounded-lg">
+                    <Crown className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Plan</p>
+                    <p className="text-xs text-muted-foreground">
+                      {currentOrganization.plan.name}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-orange-100 text-orange-600 rounded-lg">
+                  <Users className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Proyectos</p>
+                  <p className="text-xs text-muted-foreground">
+                    {recentProjects.length} total
+                  </p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Recent Activity Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Recent Projects */}
           <Card>
             <CardHeader>
@@ -198,8 +270,8 @@ export default function OrganizationDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {recentProjects.length > 0 ? (
-                  recentProjects.map((project) => (
+                {sortedProjects.length > 0 ? (
+                  sortedProjects.map((project) => (
                     <div 
                       key={project.id} 
                       className={`flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors ${
@@ -241,6 +313,64 @@ export default function OrganizationDashboard() {
             </CardContent>
           </Card>
 
+          {/* Notes */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <StickyNote className="h-5 w-5" />
+                Notas
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="p-3 border rounded-lg bg-yellow-50 border-yellow-200">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-yellow-100 text-yellow-600 rounded-lg">
+                      <StickyNote className="h-4 w-4" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">Reunión con cliente</p>
+                      <p className="text-xs text-muted-foreground">Revisar especificaciones del proyecto Villa Marina</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {format(new Date(), 'dd MMM yyyy', { locale: es })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-3 border rounded-lg bg-blue-50 border-blue-200">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                      <StickyNote className="h-4 w-4" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">Recordatorio</p>
+                      <p className="text-xs text-muted-foreground">Actualizar presupuesto para el segundo trimestre</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {format(new Date(Date.now() - 86400000), 'dd MMM yyyy', { locale: es })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-3 border rounded-lg bg-green-50 border-green-200">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-green-100 text-green-600 rounded-lg">
+                      <StickyNote className="h-4 w-4" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">Tarea completada</p>
+                      <p className="text-xs text-muted-foreground">Entrega de documentación técnica finalizada</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {format(new Date(Date.now() - 172800000), 'dd MMM yyyy', { locale: es })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Recent Activity */}
           <Card>
             <CardHeader>
@@ -253,7 +383,11 @@ export default function OrganizationDashboard() {
               <div className="space-y-3">
                 {recentActivity.length > 0 ? (
                   recentActivity.map((activity, index) => (
-                    <div key={index} className="flex items-start gap-3 p-3 border rounded-lg">
+                    <div 
+                      key={index} 
+                      className="flex items-start gap-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                      onClick={() => handleActivityClick(activity)}
+                    >
                       <div className={`p-2 rounded-lg ${activity.type === 'project' ? 'bg-blue-100 text-blue-600' : 
                                                           activity.type === 'movement' ? 'bg-green-100 text-green-600' :
                                                           activity.type === 'contact' ? 'bg-purple-100 text-purple-600' :
@@ -264,7 +398,10 @@ export default function OrganizationDashboard() {
                          <Activity className="h-4 w-4" />}
                       </div>
                       <div className="flex-1">
-                        <p className="font-medium text-sm">{activity.title}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium text-sm">{activity.title}</p>
+                          <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                        </div>
                         <p className="text-xs text-muted-foreground">{activity.description}</p>
                         <p className="text-xs text-muted-foreground mt-1">
                           {format(new Date(activity.created_at), 'dd MMM yyyy HH:mm', { locale: es })}
