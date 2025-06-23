@@ -1,57 +1,54 @@
-import { ReactNode } from 'react'
-import clsx from 'clsx'
+import { cn } from "@/lib/utils";
 
 interface SidebarButtonProps {
-  icon: ReactNode
-  label: string
-  isActive: boolean
-  isExpanded: boolean
-  onClick?: () => void
-  avatarUrl?: string
+  icon: React.ReactNode;
+  label: string;
+  isActive: boolean;
+  isExpanded: boolean;
+  onClick: () => void;
+  avatarUrl?: string;
 }
 
-export default function SidebarButton({
-  icon,
-  label,
-  isActive,
-  isExpanded,
+export default function SidebarButton({ 
+  icon, 
+  label, 
+  isActive, 
+  isExpanded, 
   onClick,
-  avatarUrl
+  avatarUrl 
 }: SidebarButtonProps) {
   return (
     <button
-      className={clsx(
-        'w-full h-8 rounded-xl px-2 py-1.5 transition-colors',
+      className={cn(
+        'relative flex items-center rounded-lg transition-all duration-200',
+        // Botón SIEMPRE 32x32px (w-8 h-8), centrado cuando colapsado
+        'w-8 h-8',
+        // Cuando expandido, el botón se extiende pero el icono queda fijo
+        isExpanded && 'w-full',
         isActive 
-          ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]'
+          ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]' 
           : 'text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]'
       )}
       onClick={onClick}
+      title={!isExpanded ? label : undefined}
     >
-      <div className="flex items-center">
-        <div className="w-10 h-10 flex items-center justify-center shrink-0">
-          {avatarUrl ? (
-            <img 
-              src={avatarUrl} 
-              alt="Avatar" 
-              className="w-[18px] h-[18px] rounded-full"
-            />
-          ) : (
-            <div className="w-[18px] h-[18px] flex items-center justify-center">
-              {icon}
-            </div>
-          )}
-        </div>
-        
-        <span
-          className={clsx(
-            'ml-2 text-sm truncate font-medium transition-opacity',
-            isExpanded ? 'opacity-100' : 'opacity-0 sr-only'
-          )}
-        >
-          {label}
-        </span>
+      {/* Contenedor del icono - SIEMPRE centrado en 32x32px */}
+      <div className="absolute left-0 top-0 w-8 h-8 flex items-center justify-center flex-shrink-0">
+        {avatarUrl ? (
+          <img 
+            src={avatarUrl} 
+            alt="Avatar"
+            className="w-[18px] h-[18px] rounded-full"
+          />
+        ) : (
+          icon
+        )}
       </div>
+      
+      {/* Texto - solo cuando expandido, empieza después del icono */}
+      {isExpanded && (
+        <span className="ml-8 text-sm font-medium whitespace-nowrap text-left">{label}</span>
+      )}
     </button>
-  )
+  );
 }
