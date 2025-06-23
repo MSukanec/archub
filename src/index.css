@@ -13,10 +13,10 @@
   --menues-fg: hsl(0, 0%, 60%);
   --menues-secondary-fg: hsl(0, 0%, 50%);
   --menues-border: hsl(0, 0%, 85%);
-  --menues-hover-bg: hsl(0, 0%, 35%);
-  --menues-hover-fg: hsl(0, 0%, 95%);
-  --menues-active-bg: hsl(0, 0%, 35%);
-  --menues-active-fg: hsl(0, 0%, 95%);
+  --menues-hover-bg: hsl(0, 50%, 50%);
+  --menues-hover-fg: hsl(0, 0%, 100%);
+  --menues-active-bg: hsl(0, 0%, 50%);
+  --menues-active-fg: hsl(0, 0%, 100%);
 
   /* Cards */
   --card-bg: hsl(0, 0%, 97%);
