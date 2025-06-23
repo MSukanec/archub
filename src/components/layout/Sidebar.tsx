@@ -18,12 +18,15 @@ import {
 } from "lucide-react";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
+import SidebarButton from "./SidebarButton";
+import { useToast } from "@/hooks/use-toast";
 
 export function Sidebar() {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
-  const { isDocked, isHovered, setDocked, setHovered } = useSidebarStore();
+  const { isDocked, isHovered, setHovered } = useSidebarStore();
   const { currentSidebarContext } = useNavigationStore();
+  const { toast } = useToast();
   
   const isExpanded = isDocked || isHovered;
 
@@ -59,10 +62,20 @@ export function Sidebar() {
         .eq('id', userData.preferences.id);
       
       if (error) throw error;
-      return newTheme;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      toast({
+        title: "Tema actualizado",
+        description: "El tema se ha cambiado correctamente"
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error", 
+        description: "No se pudo cambiar el tema",
+        variant: "destructive"
+      });
     }
   });
 
@@ -79,28 +92,14 @@ export function Sidebar() {
       <div className="flex-1 p-1">
         <div className="flex flex-col gap-1">
           {navigationItems.map((item) => (
-            <button
+            <SidebarButton
               key={item.href}
-              className={cn(
-                'flex items-center h-8 rounded-lg transition-all duration-200',
-                isExpanded ? 'w-full' : 'w-8 justify-center',
-                location === item.href 
-                  ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]' 
-                  : 'text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]'
-              )}
+              icon={<item.icon className="w-[18px] h-[18px]" />}
+              label={item.label}
+              isActive={location === item.href}
+              isExpanded={isExpanded}
               onClick={() => navigate(item.href)}
-              title={!isExpanded ? item.label : undefined}
-            >
-              {/* Icon - FIXED position, never moves */}
-              <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
-                <item.icon className="w-[18px] h-[18px]" />
-              </div>
-              
-              {/* Text - inside button when expanded */}
-              {isExpanded && (
-                <span className="text-sm font-medium whitespace-nowrap ml-1">{item.label}</span>
-              )}
-            </button>
+            />
           ))}
         </div>
       </div>
@@ -109,75 +108,35 @@ export function Sidebar() {
       <div className="border-t border-[var(--menues-border)] p-1">
         <div className="flex flex-col gap-1">
           {/* Settings */}
-          <button
-            className={cn(
-              'flex items-center h-8 rounded-lg transition-all duration-200',
-              isExpanded ? 'w-full' : 'w-8 justify-center',
-              location === '/configuracion' 
-                ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]' 
-                : 'text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]'
-            )}
+          <SidebarButton
+            icon={<Settings className="w-[18px] h-[18px]" />}
+            label="Configuración"
+            isActive={location === '/configuracion'}
+            isExpanded={isExpanded}
             onClick={() => navigate('/configuracion')}
-            title={!isExpanded ? 'Configuración' : undefined}
-          >
-            <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
-              <Settings className="w-[18px] h-[18px]" />
-            </div>
-            {isExpanded && (
-              <span className="text-sm font-medium whitespace-nowrap ml-1">Configuración</span>
-            )}
-          </button>
+          />
 
           {/* Theme Toggle */}
-          <button
-            className={cn(
-              'flex items-center h-8 rounded-lg transition-all duration-200',
-              isExpanded ? 'w-full' : 'w-8 justify-center',
-              'text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]'
-            )}
+          <SidebarButton
+            icon={userData?.preferences?.theme === 'dark' ? 
+              <Sun className="w-[18px] h-[18px]" /> : 
+              <Moon className="w-[18px] h-[18px]" />
+            }
+            label="Cambiar tema"
+            isActive={false}
+            isExpanded={isExpanded}
             onClick={() => toggleThemeMutation.mutate()}
-            disabled={toggleThemeMutation.isPending}
-            title={!isExpanded ? 'Cambiar tema' : undefined}
-          >
-            <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
-              {userData?.preferences?.theme === 'dark' ? (
-                <Sun className="w-[18px] h-[18px]" />
-              ) : (
-                <Moon className="w-[18px] h-[18px]" />
-              )}
-            </div>
-            {isExpanded && (
-              <span className="text-sm font-medium whitespace-nowrap ml-1">Cambiar tema</span>
-            )}
-          </button>
+          />
 
           {/* Profile */}
-          <button
-            className={cn(
-              'flex items-center h-8 rounded-lg transition-all duration-200',
-              isExpanded ? 'w-full' : 'w-8 justify-center',
-              location === '/perfil' 
-                ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]' 
-                : 'text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]'
-            )}
+          <SidebarButton
+            icon={<UserCircle className="w-[18px] h-[18px]" />}
+            label="Mi Perfil"
+            isActive={location === '/perfil'}
+            isExpanded={isExpanded}
             onClick={() => navigate('/perfil')}
-            title={!isExpanded ? 'Mi Perfil' : undefined}
-          >
-            <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
-              {userData?.user?.avatar_url ? (
-                <img 
-                  src={userData.user.avatar_url} 
-                  alt="Avatar"
-                  className="w-[18px] h-[18px] rounded-full"
-                />
-              ) : (
-                <UserCircle className="w-[18px] h-[18px]" />
-              )}
-            </div>
-            {isExpanded && (
-              <span className="text-sm font-medium whitespace-nowrap ml-1">Mi Perfil</span>
-            )}
-          </button>
+            avatarUrl={userData?.user?.avatar_url}
+          />
         </div>
       </div>
     </aside>
