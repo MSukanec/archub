@@ -39,7 +39,6 @@ export function useContacts(organizationId: string | undefined) {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching contacts:', error);
         throw error;
       }
 

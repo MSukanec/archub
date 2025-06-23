@@ -74,19 +74,15 @@ export function useProjects(organizationId: string | undefined) {
         .order('created_at', { ascending: false })
       
       if (error) {
-        console.error('Supabase error fetching projects:', error)
         throw error
       }
       
       // Transform the data to match our interface
       const transformedData = (data || []).map(project => {
-        console.log('Raw project from Supabase:', project) // Debug log
-        
         // Handle project_data which can be an array or object
         let projectData = null
         if (project.project_data) {
           const pd = Array.isArray(project.project_data) ? project.project_data[0] : project.project_data
-          console.log('Processing project_data:', pd) // Debug log
           if (pd) {
             projectData = {
               project_type_id: pd.project_type_id,
@@ -94,7 +90,6 @@ export function useProjects(organizationId: string | undefined) {
               project_type: pd.project_types,
               modality: pd.project_modalities
             }
-            console.log('Transformed project_data:', projectData) // Debug log
           }
         }
         
@@ -111,7 +106,6 @@ export function useProjects(organizationId: string | undefined) {
           } : undefined
         }
         
-        console.log('Final transformed project:', transformedProject) // Debug log
         return transformedProject
       })
 

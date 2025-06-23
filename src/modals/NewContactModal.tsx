@@ -115,17 +115,6 @@ export function NewContactModal({ open, onClose, editingContact }: NewContactMod
         }
       } else {
         // Create new contact
-        console.log('Submitting contact data to Supabase:', {
-          organization_id: organizationId,
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-          email: formData.email,
-          phone: formData.phone,
-          contact_type_id: formData.contact_type_id,
-          company_name: formData.company_name || '',
-          location: formData.location || '',
-          notes: formData.notes || '',
-        });
 
         const { data: contactData, error } = await supabase
           .from('contacts')
@@ -144,27 +133,22 @@ export function NewContactModal({ open, onClose, editingContact }: NewContactMod
           .single();
 
         if (error) {
-          console.error('Supabase error creating contact:', error);
           throw new Error(`Error al crear contacto: ${error.message}`);
         }
-
-        console.log('Contact created successfully:', contactData);
       }
     },
     onSuccess: () => {
-      console.log('Contact mutation successful, closing modal');
       toast({
         title: "Éxito",
         description: editingContact 
           ? "Contacto actualizado correctamente"
           : "Contacto creado correctamente"
       });
-      queryClient.invalidateQueries({ queryKey: ['contacts', organizationId] });
+      queryClient.invalidateQueries({ queryKey: ['contacts'] });
       onClose();
       form.reset();
     },
     onError: (error: any) => {
-      console.error('Contact mutation error:', error);
       toast({
         title: "Error",
         description: error.message || "No se pudo guardar el contacto",
@@ -174,7 +158,6 @@ export function NewContactModal({ open, onClose, editingContact }: NewContactMod
   });
 
   const handleSubmit = (data: CreateContactForm) => {
-    console.log('Creating contact with data:', data);
     createContactMutation.mutate(data);
   };
 
