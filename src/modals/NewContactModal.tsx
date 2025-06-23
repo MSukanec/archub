@@ -31,7 +31,7 @@ const createContactSchema = z.object({
   last_name: z.string().min(1, "El apellido es requerido"),
   email: z.string().email("Email inválido"),
   phone: z.string().min(1, "El teléfono es requerido"),
-  contact_type_id: z.string().optional(),
+  contact_type_id: z.string().min(1, "El tipo de contacto es requerido"),
   company_name: z.string().optional(),
   location: z.string().optional(),
   notes: z.string().optional(),
@@ -133,15 +133,11 @@ export function NewContactModal({ open, onClose, editingContact }: NewContactMod
           .single();
 
         if (error) {
-          console.error('Supabase insert error:', error);
           throw new Error(`Error al crear contacto: ${error.message}`);
         }
-        
-        console.log('Contact inserted successfully:', contactData);
       }
     },
     onSuccess: () => {
-      console.log('Contact created successfully');
       toast({
         title: "Éxito",
         description: editingContact 
@@ -153,7 +149,6 @@ export function NewContactModal({ open, onClose, editingContact }: NewContactMod
       form.reset();
     },
     onError: (error: any) => {
-      console.error('Contact creation error:', error);
       toast({
         title: "Error",
         description: error.message || "No se pudo guardar el contacto",
@@ -163,9 +158,6 @@ export function NewContactModal({ open, onClose, editingContact }: NewContactMod
   });
 
   const handleSubmit = (data: CreateContactForm) => {
-    console.log('Form submitted with data:', data);
-    console.log('Organization ID:', organizationId);
-    console.log('Form errors:', form.formState.errors);
     createContactMutation.mutate(data);
   };
 
@@ -187,7 +179,7 @@ export function NewContactModal({ open, onClose, editingContact }: NewContactMod
         body: (
           <CustomModalBody padding="md">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4" id="contact-form">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -325,12 +317,26 @@ export function NewContactModal({ open, onClose, editingContact }: NewContactMod
           </CustomModalBody>
         ),
         footer: (
-          <CustomModalFooter
-            onCancel={handleClose}
-            onSave={form.handleSubmit(handleSubmit)}
-            saveText={editingContact ? "Actualizar" : "Crear contacto"}
-            saveLoading={createContactMutation.isPending}
-          />
+          <div className="p-3 border-t border-[var(--card-border)] mt-auto">
+            <div className="flex gap-2 w-full">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={handleClose}
+                className="w-1/4"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                form="contact-form"
+                className="w-3/4"
+                disabled={createContactMutation.isPending}
+              >
+                {createContactMutation.isPending ? 'Guardando...' : (editingContact ? "Actualizar" : "Crear contacto")}
+              </Button>
+            </div>
+          </div>
         )
       }}
     </CustomModalLayout>
