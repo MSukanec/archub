@@ -204,8 +204,8 @@ export function Header({
             </>
           )}
 
-          {/* Stage Breadcrumb - Show if not in organization context */}
-          {currentSidebarContext !== 'organization' && (
+          {/* Stage Breadcrumb - Show ONLY if in stage context (not project context) */}
+          {['design', 'construction', 'finance', 'commercialization'].includes(currentSidebarContext) && (
             <>
               <span className="text-[var(--menues-fg)] opacity-70">›</span>
               
@@ -219,14 +219,12 @@ export function Header({
                     else if (currentSidebarContext === 'construction') navigate('/construction/dashboard');
                     else if (currentSidebarContext === 'finance') navigate('/finance/dashboard');
                     else if (currentSidebarContext === 'commercialization') navigate('/commercialization/dashboard');
-                    else navigate('/project/dashboard');
                   }}
                 >
                   {currentSidebarContext === 'design' && 'Proyecto'}
                   {currentSidebarContext === 'construction' && 'Obra'}
                   {currentSidebarContext === 'finance' && 'Finanzas'}
                   {currentSidebarContext === 'commercialization' && 'Comercialización'}
-                  {currentSidebarContext === 'project' && 'Proyecto'}
                 </Button>
                 
                 <DropdownMenu>

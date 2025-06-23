@@ -575,6 +575,15 @@ Changelog:
 - June 23, 2025. Enhanced sidebar hover animations and organization page structure
   • Improved sidebar hover transitions with 300ms duration and 100ms text delay for progressive effect
   • Created OrganizationProjects.tsx following identical pattern to OrganizationList.tsx
+
+- June 23, 2025. Complete 4-level navigation system implementation
+  • Implemented full breadcrumb system: ORGANIZATION > PROJECT > STAGE > PAGE
+  • Header shows dynamic breadcrumbs: Organization button (always visible) > Project button > Stage button (only for stages) > Page title
+  • Stage dropdown includes: Proyecto (design), Obra (construction), Finanzas (finance), Comercialización (commercialization)
+  • Sidebar contexts implemented for all levels: organization, project, design, construction, finance, commercialization
+  • Project selection now correctly navigates to /project/dashboard with proper context switching
+  • Fixed header to show correct breadcrumb depth based on current context (project dashboard vs stage dashboard)
+  • All navigation buttons in header use flat styling without hover/active effects as requested
   • Added organization context switching that updates sidebar when organizations are selected
   • Removed hover/active effects from header buttons for consistent static appearance
   • Created OrganizationContacts.tsx with complete contact management functionality
