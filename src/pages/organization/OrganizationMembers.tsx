@@ -325,7 +325,7 @@ export default function OrganizationMembers() {
           {/* Left Sidebar - Section Navigation */}
           <div className="col-span-3">
             <div className="space-y-1">
-              <div className="px-3 py-2">
+              <div className="px-3 pt-2 pb-2">
                 <h2 className="text-lg font-semibold">Miembros</h2>
                 <p className="text-sm text-muted-foreground mt-1">
                   Invita a miembros de tu equipo a Archub para trabajar juntos de forma rápida y 
@@ -356,27 +356,9 @@ export default function OrganizationMembers() {
 
           {/* Right Content - Members List */}
           <div className="col-span-9">
-            <div className="space-y-6">
+            <div className="space-y-6 pt-2">
               {/* Members Section */}
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h3 className="text-base font-medium">Miembros</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Invita a miembros de tu equipo a Archub para trabajar juntos de forma rápida.
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
-                      <Mail className="mr-2 h-4 w-4" />
-                      Descargar CSV
-                    </Button>
-                    <Button size="sm">
-                      Invitar nuevo miembro
-                    </Button>
-                  </div>
-                </div>
-
                 <div className="space-y-2">
                   {members.map((member) => (
                     <Card key={member.id} className="p-4">
