@@ -587,7 +587,7 @@ Changelog:
   • Resolved modal form submission issues by connecting submit button to form using form attribute
   • Fixed contact editing pre-population with useEffect hook, unified textarea styling with input CSS variables
   • Optimized dropdown menus (organization/project selection and filters) with consistent width and styling
-  • Connected "Nueva organización" button in header to NewOrganizationModal with proper state management
+  • Connected "Nueva organización" button in header to NewOrganizationModal with direct onClick handler bypassing DropdownMenuItem issues
 
 - June 23, 2025. Complete 4-level navigation system implementation
   • Implemented full breadcrumb system: ORGANIZATION > PROJECT > STAGE > PAGE
