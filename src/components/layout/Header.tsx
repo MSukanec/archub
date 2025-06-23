@@ -102,7 +102,7 @@ export function Header({
           <div className="flex items-center">
             <Button
               variant="ghost"
-              className="h-8 px-2 text-sm font-medium bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]"
+              className="h-8 px-2 text-sm font-medium text-[var(--menues-fg)] hover:bg-transparent hover:text-[var(--menues-fg)]"
               onClick={() => {
                 setSidebarContext('organization');
                 navigate('/organization/dashboard');
@@ -116,7 +116,7 @@ export function Header({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8"
+                  className="h-8 w-8 hover:bg-transparent"
                 >
                   <ChevronDown className="h-3 w-3 text-[var(--menues-fg)]" />
                 </Button>
@@ -155,7 +155,7 @@ export function Header({
               <div className="flex items-center">
                 <Button
                   variant="ghost"
-                  className="h-8 px-2 text-sm font-medium text-[var(--menues-fg)]"
+                  className="h-8 px-2 text-sm font-medium text-[var(--menues-fg)] hover:bg-transparent hover:text-[var(--menues-fg)]"
                   onClick={() => {
                     setSidebarContext('project');
                     navigate('/project/dashboard');
@@ -169,7 +169,7 @@ export function Header({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8"
+                      className="h-8 w-8 hover:bg-transparent"
                     >
                       <ChevronDown className="h-3 w-3 text-[var(--menues-fg)]" />
                     </Button>
@@ -202,20 +202,81 @@ export function Header({
             </>
           )}
 
-          {/* Stage Breadcrumb - Show if in stage context */}
-          {['design', 'construction', 'finance', 'commercialization'].includes(currentSidebarContext) && (
+          {/* Stage Breadcrumb - Show if not in organization context */}
+          {currentSidebarContext !== 'organization' && (
             <>
               <span className="text-[var(--menues-fg)] opacity-70">›</span>
-              <Button
-                variant="ghost"
-                className="h-8 px-2 text-sm font-medium bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]"
-                onClick={() => setSidebarContext('project')}
-              >
-                {currentSidebarContext === 'design' && 'Proyecto'}
-                {currentSidebarContext === 'construction' && 'Obra'}
-                {currentSidebarContext === 'finance' && 'Finanzas'}
-                {currentSidebarContext === 'commercialization' && 'Comercialización'}
-              </Button>
+              
+              <div className="flex items-center">
+                <Button
+                  variant="ghost"
+                  className="h-8 px-2 text-sm font-medium text-[var(--menues-fg)] hover:bg-transparent hover:text-[var(--menues-fg)]"
+                  onClick={() => {
+                    // Navigate to current stage dashboard
+                    if (currentSidebarContext === 'design') navigate('/design/dashboard');
+                    else if (currentSidebarContext === 'construction') navigate('/construction/dashboard');
+                    else if (currentSidebarContext === 'finance') navigate('/finance/dashboard');
+                    else if (currentSidebarContext === 'commercialization') navigate('/commercialization/dashboard');
+                    else navigate('/project/dashboard');
+                  }}
+                >
+                  {currentSidebarContext === 'design' && 'Proyecto'}
+                  {currentSidebarContext === 'construction' && 'Obra'}
+                  {currentSidebarContext === 'finance' && 'Finanzas'}
+                  {currentSidebarContext === 'commercialization' && 'Comercialización'}
+                  {currentSidebarContext === 'project' && 'Proyecto'}
+                </Button>
+                
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 hover:bg-transparent"
+                    >
+                      <ChevronDown className="h-3 w-3 text-[var(--menues-fg)]" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-64">
+                    <div className="px-2 py-1.5 text-xs text-[var(--menues-fg)] opacity-70 font-medium">
+                      Seleccionar etapa...
+                    </div>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSidebarContext('design');
+                        navigate('/design/dashboard');
+                      }}
+                    >
+                      Proyecto
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSidebarContext('construction');
+                        navigate('/construction/dashboard');
+                      }}
+                    >
+                      Obra
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSidebarContext('finance');
+                        navigate('/finance/dashboard');
+                      }}
+                    >
+                      Finanzas
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSidebarContext('commercialization');
+                        navigate('/commercialization/dashboard');
+                      }}
+                    >
+                      Comercialización
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </>
           )}
 

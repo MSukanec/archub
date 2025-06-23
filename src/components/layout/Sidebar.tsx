@@ -25,7 +25,7 @@ export function Sidebar() {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const { isDocked, isHovered, setHovered } = useSidebarStore();
-  const { currentSidebarContext } = useNavigationStore();
+  const { currentSidebarContext, setSidebarContext } = useNavigationStore();
   const { toast } = useToast();
   
   const isExpanded = isDocked || isHovered;
@@ -39,9 +39,30 @@ export function Sidebar() {
       { icon: Users, label: 'Contactos', href: '/organization/contactos' },
     ],
     project: [
-      { icon: FolderOpen, label: 'Gestión de Proyectos', href: '/proyectos' },
+      { icon: Home, label: 'Dashboard', href: '/project/dashboard' },
+      { icon: FolderOpen, label: 'Proyecto', href: '#', onClick: () => setSidebarContext('design') },
+      { icon: Building, label: 'Obra', href: '#', onClick: () => setSidebarContext('construction') },
+      { icon: DollarSign, label: 'Finanzas', href: '#', onClick: () => setSidebarContext('finance') },
+      { icon: Users, label: 'Comercialización', href: '#', onClick: () => setSidebarContext('commercialization') },
+    ],
+    design: [
+      { icon: Home, label: 'Dashboard', href: '/design/dashboard' },
+      { icon: FolderOpen, label: 'Datos de Proyecto', href: '/design/data' },
+      { icon: FileText, label: 'Moodboard', href: '/design/moodboard' },
+    ],
+    construction: [
+      { icon: Home, label: 'Dashboard', href: '/construction/dashboard' },
+      { icon: Building, label: 'Tareas', href: '/construction/tasks' },
       { icon: FileText, label: 'Bitácora de Obra', href: '/bitacora' },
+    ],
+    finance: [
+      { icon: Home, label: 'Dashboard', href: '/finance/dashboard' },
       { icon: DollarSign, label: 'Movimientos', href: '/movimientos' },
+    ],
+    commercialization: [
+      { icon: Home, label: 'Dashboard', href: '/commercialization/dashboard' },
+      { icon: Users, label: 'Clientes', href: '/commercialization/clients' },
+      { icon: Building, label: 'Ventas', href: '/commercialization/sales' },
     ]
   };
 
@@ -92,14 +113,14 @@ export function Sidebar() {
       {/* Navigation Items */}
       <div className="flex-1 p-1">
         <div className="flex flex-col gap-[2px]">
-          {navigationItems.map((item) => (
+          {navigationItems.map((item, index) => (
             <SidebarButton
-              key={item.href}
+              key={item.href || index}
               icon={<item.icon className="w-[18px] h-[18px]" />}
               label={item.label}
               isActive={location === item.href}
               isExpanded={isExpanded}
-              onClick={() => navigate(item.href)}
+              onClick={item.onClick || (() => navigate(item.href))}
             />
           ))}
         </div>
