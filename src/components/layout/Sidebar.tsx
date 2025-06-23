@@ -82,7 +82,8 @@ export function Sidebar() {
             <button
               key={item.href}
               className={cn(
-                'flex items-center w-8 h-8 rounded-md transition-all duration-200',
+                'flex items-center h-8 rounded-md transition-all duration-200',
+                isExpanded ? 'w-full px-1' : 'w-8 justify-center',
                 location === item.href 
                   ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]' 
                   : 'text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]'
@@ -92,12 +93,12 @@ export function Sidebar() {
             >
               {/* Icon - FIXED position, never moves */}
               <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
-                <item.icon className="w-5 h-5" />
+                <item.icon className="w-[18px] h-[18px]" />
               </div>
               
-              {/* Text - appears to the right when expanded */}
+              {/* Text - inside button when expanded */}
               {isExpanded && (
-                <span className="text-sm font-medium whitespace-nowrap ml-2">{item.label}</span>
+                <span className="text-sm font-medium whitespace-nowrap ml-1">{item.label}</span>
               )}
             </button>
           ))}
@@ -110,7 +111,8 @@ export function Sidebar() {
           {/* Settings */}
           <button
             className={cn(
-              'flex items-center w-8 h-8 rounded-md transition-all duration-200',
+              'flex items-center h-8 rounded-md transition-all duration-200',
+              isExpanded ? 'w-full px-1' : 'w-8 justify-center',
               location === '/configuracion' 
                 ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]' 
                 : 'text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]'
@@ -119,17 +121,18 @@ export function Sidebar() {
             title={!isExpanded ? 'Configuración' : undefined}
           >
             <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
-              <Settings className="w-5 h-5" />
+              <Settings className="w-[18px] h-[18px]" />
             </div>
             {isExpanded && (
-              <span className="text-sm font-medium whitespace-nowrap ml-2">Configuración</span>
+              <span className="text-sm font-medium whitespace-nowrap ml-1">Configuración</span>
             )}
           </button>
 
           {/* Theme Toggle */}
           <button
             className={cn(
-              'flex items-center w-8 h-8 rounded-md transition-all duration-200',
+              'flex items-center h-8 rounded-md transition-all duration-200',
+              isExpanded ? 'w-full px-1' : 'w-8 justify-center',
               'text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]'
             )}
             onClick={() => toggleThemeMutation.mutate()}
@@ -138,20 +141,21 @@ export function Sidebar() {
           >
             <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
               {userData?.preferences?.theme === 'dark' ? (
-                <Sun className="w-5 h-5" />
+                <Sun className="w-[18px] h-[18px]" />
               ) : (
-                <Moon className="w-5 h-5" />
+                <Moon className="w-[18px] h-[18px]" />
               )}
             </div>
             {isExpanded && (
-              <span className="text-sm font-medium whitespace-nowrap ml-2">Cambiar tema</span>
+              <span className="text-sm font-medium whitespace-nowrap ml-1">Cambiar tema</span>
             )}
           </button>
 
           {/* Profile */}
           <button
             className={cn(
-              'flex items-center w-8 h-8 rounded-md transition-all duration-200',
+              'flex items-center h-8 rounded-md transition-all duration-200',
+              isExpanded ? 'w-full px-1' : 'w-8 justify-center',
               location === '/perfil' 
                 ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]' 
                 : 'text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]'
@@ -164,14 +168,14 @@ export function Sidebar() {
                 <img 
                   src={userData.user.avatar_url} 
                   alt="Avatar"
-                  className="w-5 h-5 rounded-full"
+                  className="w-[18px] h-[18px] rounded-full"
                 />
               ) : (
-                <UserCircle className="w-5 h-5" />
+                <UserCircle className="w-[18px] h-[18px]" />
               )}
             </div>
             {isExpanded && (
-              <span className="text-sm font-medium whitespace-nowrap ml-2">Mi Perfil</span>
+              <span className="text-sm font-medium whitespace-nowrap ml-1">Mi Perfil</span>
             )}
           </button>
         </div>
