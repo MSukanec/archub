@@ -282,11 +282,12 @@ export default function OrganizationActivity() {
     );
   }
 
-  // Configuración de columnas para la tabla
+  // Configuración de columnas para la tabla con anchos personalizados
   const columns = [
     {
       key: 'created_at',
       label: 'Fecha',
+      width: '10%',
       render: (activity: any) => (
         <div className="flex flex-col">
           <span className="text-sm font-medium">
@@ -306,6 +307,7 @@ export default function OrganizationActivity() {
     {
       key: 'author',
       label: 'Autor',
+      width: '10%',
       render: (activity: any) => (
         <div className="flex items-center gap-2">
           <Avatar className="w-8 h-8">
@@ -325,6 +327,7 @@ export default function OrganizationActivity() {
     {
       key: 'type_label',
       label: 'Tipo',
+      width: '10%',
       render: (activity: any) => (
         <Badge variant="outline" className="text-xs">
           {activity.type_label}
@@ -336,6 +339,7 @@ export default function OrganizationActivity() {
     {
       key: 'description',
       label: 'Descripción',
+      // Sin width definido - ocupará el resto del espacio automáticamente
       render: (activity: any) => (
         <span className="text-sm text-muted-foreground">
           {activity.description}
@@ -347,6 +351,7 @@ export default function OrganizationActivity() {
     {
       key: 'actions',
       label: 'Acciones',
+      width: '10%',
       render: (activity: any) => (
         <Button 
           size="sm" 

@@ -11,6 +11,7 @@ interface CustomTableProps<T = any> {
     render?: (item: T) => React.ReactNode
     sortable?: boolean
     sortType?: 'string' | 'number' | 'date'
+    width?: string // Nuevo: ancho personalizado (ej: "10%", "100px", etc.)
   }[]
   data: T[]
   emptyState?: React.ReactNode
@@ -27,6 +28,22 @@ export function CustomTable<T = any>({
 }: CustomTableProps<T>) {
   const [sortKey, setSortKey] = useState<string | null>(null)
   const [sortDirection, setSortDirection] = useState<SortDirection>(null)
+
+  // Función para calcular gridTemplateColumns basado en anchos personalizados
+  const getGridTemplateColumns = () => {
+    const columnsWithWidth = columns.filter(col => col.width)
+    const columnsWithoutWidth = columns.filter(col => !col.width)
+    
+    if (columnsWithoutWidth.length === 0) {
+      // Todas las columnas tienen width definido
+      return columns.map(col => col.width).join(' ')
+    }
+    
+    // Algunas columnas no tienen width, usar 1fr para distribuir el espacio restante
+    const frValue = columnsWithoutWidth.length > 0 ? '1fr' : ''
+    
+    return columns.map(col => col.width || frValue).join(' ')
+  }
 
   const handleSort = (columnKey: string, sortType: 'string' | 'number' | 'date' = 'string') => {
     if (sortKey === columnKey) {
@@ -102,13 +119,13 @@ export function CustomTable<T = any>({
       <div className={cn("space-y-3", className)}>
         {/* Desktop loading skeleton */}
         <div className="hidden md:block">
-          <div className="grid gap-4 p-4 bg-muted/50 rounded-lg" style={{ gridTemplateColumns: `repeat(${columns.length}, 1fr)` }}>
+          <div className="grid gap-4 p-4 bg-muted/50 rounded-lg" style={{ gridTemplateColumns: getGridTemplateColumns() }}>
             {columns.map((_, index) => (
               <div key={index} className="h-4 bg-muted rounded animate-pulse" />
             ))}
           </div>
           {Array.from({ length: 5 }).map((_, index) => (
-            <div key={index} className="grid gap-4 p-4 border rounded-lg mt-3" style={{ gridTemplateColumns: `repeat(${columns.length}, 1fr)` }}>
+            <div key={index} className="grid gap-4 p-4 border rounded-lg mt-3" style={{ gridTemplateColumns: getGridTemplateColumns() }}>
               {columns.map((_, colIndex) => (
                 <div key={colIndex} className="h-4 bg-muted rounded animate-pulse" />
               ))}
@@ -148,7 +165,7 @@ export function CustomTable<T = any>({
       {/* Desktop Table View */}
       <div className="hidden md:block">
         {/* Column Headers */}
-        <div className="grid gap-4 p-4 bg-muted/50 rounded-lg text-xs font-medium text-muted-foreground" style={{ gridTemplateColumns: `repeat(${columns.length}, 1fr)` }}>
+        <div className="grid gap-4 p-4 bg-muted/50 rounded-lg text-xs font-medium text-muted-foreground" style={{ gridTemplateColumns: getGridTemplateColumns() }}>
           {columns.map((column) => (
             <div key={String(column.key)} className="flex items-center justify-between">
               <span>{column.label}</span>
@@ -182,7 +199,7 @@ export function CustomTable<T = any>({
             <div
               key={index}
               className="grid gap-4 p-4 border rounded-lg hover:bg-muted/40 transition-colors"
-              style={{ gridTemplateColumns: `repeat(${columns.length}, 1fr)` }}
+              style={{ gridTemplateColumns: getGridTemplateColumns() }}
             >
               {columns.map((column) => (
                 <div key={String(column.key)} className="text-xs flex items-center">
