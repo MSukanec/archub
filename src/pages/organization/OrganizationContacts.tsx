@@ -136,6 +136,7 @@ export default function OrganizationContacts() {
   )
 
   const headerProps = {
+    icon: Users,
     title: "Contactos",
     showSearch: true,
     searchValue,
@@ -143,7 +144,7 @@ export default function OrganizationContacts() {
     showFilters: true,
     customFilters,
     onClearFilters: clearFilters,
-    actions
+    actions: [actions]
   }
 
   if (isLoading || contactsLoading) {

@@ -78,6 +78,7 @@ interface PendingInvite {
 export default function OrganizationMembers() {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
+  const [showInviteModal, setShowInviteModal] = useState(false);
   const organizationId = userData?.preferences?.last_organization_id;
 
   // Fetch organization members
@@ -581,10 +582,17 @@ export default function OrganizationMembers() {
 
       {/* Invite Modal */}
       {showInviteModal && (
-        <InviteMemberModal 
-          organizationId={currentOrganization?.id || ''}
-          onClose={() => setShowInviteModal(false)}
-        />
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
+            <h2 className="text-lg font-semibold mb-4">Invitar Miembro</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Funcionalidad de invitación en desarrollo
+            </p>
+            <Button onClick={() => setShowInviteModal(false)}>
+              Cerrar
+            </Button>
+          </div>
+        </div>
       )}
     </Layout>
   );

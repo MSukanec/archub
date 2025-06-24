@@ -184,6 +184,7 @@ export default function OrganizationProjects() {
   )
 
   const headerProps = {
+    icon: Folder,
     title: "Gestión de Proyectos",
     showSearch: true,
     searchValue,
@@ -191,7 +192,7 @@ export default function OrganizationProjects() {
     showFilters: true,
     customFilters,
     onClearFilters: clearFilters,
-    actions
+    actions: [actions]
   }
 
   if (isLoading || projectsLoading) {
