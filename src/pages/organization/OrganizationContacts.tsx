@@ -1,5 +1,6 @@
 import { Layout } from '@/components/layout/Layout'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
@@ -17,7 +18,6 @@ import { useToast } from '@/hooks/use-toast'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { NewContactModal } from '@/modals/NewContactModal'
-import { CustomTable } from '@/components/ui-custom/CustomTable'
 
 export default function OrganizationContacts() {
   const [searchValue, setSearchValue] = useState("")
@@ -158,131 +158,129 @@ export default function OrganizationContacts() {
     )
   }
 
-  // Configuración de columnas para la tabla
-  const columns = [
-    {
-      key: 'full_name',
-      label: 'Contacto',
-      width: '20%',
-      render: (contact: any) => (
-        <div className="flex items-center gap-3">
-          <Avatar className="w-8 h-8">
-            <AvatarFallback className="text-xs bg-muted">
-              {`${contact.first_name?.charAt(0) || ''}${contact.last_name?.charAt(0) || ''}`.toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <div className="font-medium text-sm">
-              {contact.first_name} {contact.last_name}
-            </div>
-          </div>
-        </div>
-      ),
-      sortType: 'string' as const
-    },
-    {
-      key: 'email',
-      label: 'Email',
-      width: '20%',
-      render: (contact: any) => (
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Mail className="w-3 h-3" />
-          <span className="truncate">{contact.email}</span>
-        </div>
-      ),
-      sortType: 'string' as const
-    },
-    {
-      key: 'phone',
-      label: 'Teléfono',
-      width: '15%',
-      render: (contact: any) => (
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Phone className="w-3 h-3" />
-          <span>{contact.phone || 'Sin teléfono'}</span>
-        </div>
-      ),
-      sortType: 'string' as const
-    },
-    {
-      key: 'contact_type',
-      label: 'Tipo',
-      width: '15%',
-      render: (contact: any) => (
-        <Badge variant="outline" className="text-xs">
-          {contact.contact_type?.name || 'Sin tipo'}
-        </Badge>
-      ),
-      sortType: 'string' as const
-    },
-    {
-      key: 'company_location',
-      label: 'Empresa/Ubicación',
-      render: (contact: any) => (
-        <div className="text-xs">
-          {contact.company_name && (
-            <div className="flex items-center gap-1 mb-1">
-              <Building className="w-3 h-3 text-muted-foreground" />
-              <span className="font-medium">{contact.company_name}</span>
-            </div>
-          )}
-          {contact.location && (
-            <div className="flex items-center gap-1">
-              <MapPin className="w-3 h-3 text-muted-foreground" />
-              <span className="text-muted-foreground">{contact.location}</span>
-            </div>
-          )}
-        </div>
-      ),
-      sortType: 'string' as const
-    },
-    {
-      key: 'actions',
-      label: 'Acciones',
-      width: '10%',
-      render: (contact: any) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setEditingContact(contact)}>
-              <Edit className="mr-2 h-4 w-4" />
-              Editar
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={() => {
-                setContactToDelete(contact)
-                setDeleteDialogOpen(true)
-              }}
-              className="text-red-600"
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Eliminar
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ),
-      sortable: false
-    }
-  ];
-
   return (
     <Layout headerProps={headerProps}>
-      <CustomTable
-        columns={columns}
-        data={filteredContacts}
-        isLoading={contactsLoading}
-        emptyState={
-          <div className="text-center py-12 text-muted-foreground">
-            <Users className="h-12 w-12 mx-auto mb-4 opacity-20" />
-            <p className="text-sm">No hay contactos en esta organización.</p>
-            <p className="text-xs">Los contactos aparecerán aquí cuando los agregues.</p>
-          </div>
-        }
-      />
+      <div className="space-y-6">
+        {/* Headers de columnas */}
+        <div className="grid grid-cols-12 gap-4 px-4 py-2 text-xs font-medium text-muted-foreground border-b">
+          <div className="col-span-3">Contacto</div>
+          <div className="col-span-2">Email</div>
+          <div className="col-span-2">Teléfono</div>
+          <div className="col-span-2">Tipo</div>
+          <div className="col-span-2">Empresa</div>
+          <div className="col-span-1">Acciones</div>
+        </div>
+
+        {/* Lista de contactos */}
+        <div className="space-y-2">
+          {filteredContacts.map((contact) => {
+            return (
+              <Card 
+                key={contact.id} 
+                className="w-full transition-all hover:shadow-sm border"
+              >
+                <CardContent className="p-4">
+                  <div className="grid grid-cols-12 gap-4 items-center">
+                    {/* Contacto */}
+                    <div className="col-span-3 flex items-center gap-3">
+                      <Avatar className="w-8 h-8">
+                        <AvatarFallback className="text-xs">
+                          {(contact.first_name.charAt(0) + contact.last_name.charAt(0)).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="font-medium">
+                          {contact.first_name} {contact.last_name}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {contact.location && (
+                            <span className="flex items-center gap-1">
+                              <MapPin className="w-3 h-3" />
+                              {contact.location}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Email */}
+                    <div className="col-span-2 flex items-center gap-2">
+                      <Mail className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                      <span className="text-xs text-muted-foreground truncate">
+                        {contact.email}
+                      </span>
+                    </div>
+
+                    {/* Teléfono */}
+                    <div className="col-span-2 flex items-center gap-2">
+                      <Phone className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                      <span className="text-xs text-muted-foreground">
+                        {contact.phone || 'Sin especificar'}
+                      </span>
+                    </div>
+
+                    {/* Tipo */}
+                    <div className="col-span-2">
+                      <Badge variant="outline" className="text-xs">
+                        {getContactTypeLabel(contact.contact_type_id)}
+                      </Badge>
+                    </div>
+
+                    {/* Empresa */}
+                    <div className="col-span-2 flex items-center gap-2">
+                      <Building className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                      <span className="text-xs text-muted-foreground truncate">
+                        {contact.company_name || 'Sin especificar'}
+                      </span>
+                    </div>
+
+                    {/* Acciones */}
+                    <div className="col-span-1 flex justify-end">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEdit(contact)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => handleDeleteClick(contact)}
+                            className="text-destructive"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Eliminar
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })}
+
+          {filteredContacts.length === 0 && (
+            <div className="text-center py-12 text-muted-foreground">
+              <Users className="mx-auto h-12 w-12 mb-4 opacity-50" />
+              <h3 className="text-sm font-medium mb-1">No se encontraron contactos</h3>
+              <p className="text-xs">
+                {searchValue || filterByType !== 'all' 
+                  ? 'Prueba ajustando los filtros de búsqueda' 
+                  : 'Comienza agregando tu primer contacto'
+                }
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Dialog de confirmación para eliminar */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
