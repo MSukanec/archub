@@ -16,6 +16,7 @@ import { useToast } from '@/hooks/use-toast'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useNavigationStore } from '@/stores/navigationStore'
+import { NewOrganizationModal } from '@/modals/NewOrganizationModal'
 
 export default function OrganizationManagement() {
   const [searchValue, setSearchValue] = useState("")
