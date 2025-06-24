@@ -33,9 +33,9 @@ import { useWallets } from '@/hooks/use-wallets'
 const createMovementSchema = z.object({
   description: z.string().optional(),
   amount: z.number().min(0.01, 'La cantidad debe ser mayor a 0'),
-  type_id: z.string().min(1, 'El tipo es requerido').refine(val => val !== 'none', 'El tipo es requerido'),
-  category_id: z.string().min(1, 'La categoría es requerida').refine(val => val !== 'none', 'La categoría es requerida'),
-  subcategory_id: z.string().optional().refine(val => !val || val !== 'none', 'Selección inválida'),
+  type_id: z.string().optional(),
+  category_id: z.string().optional(), 
+  subcategory_id: z.string().optional(),
   currency_id: z.string().min(1, 'La moneda es requerida'),
   wallet_id: z.string().min(1, 'La billetera es requerida'),
   created_by: z.string().min(1, 'El creador es requerido'),
@@ -160,27 +160,35 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
       setSelectedTypeId(typeId)
       setSelectedCategoryId(categoryId)
       
-      // Reset form immediately with all values
-      form.reset({
-        created_at: new Date(editingMovement.created_at),
-        created_by: editingMovement.created_by || '',
-        description: editingMovement.description || '',
-        amount: editingMovement.amount || 0,
-        type_id: typeId,
-        category_id: categoryId,
-        subcategory_id: editingMovement.subcategory_id || 'none',
-        currency_id: editingMovement.currency_id || '',
-        wallet_id: editingMovement.wallet_id || '',
-        file_url: editingMovement.file_url || '',
-        is_conversion: editingMovement.is_conversion || false,
-      })
-      
-      console.log('Form reset with values:', {
-        type_id: typeId,
-        category_id: categoryId,
-        currency_id: editingMovement.currency_id,
-        wallet_id: editingMovement.wallet_id
-      })
+      // Wait for dependencies to load before setting form values
+      setTimeout(() => {
+        form.reset({
+          created_at: new Date(editingMovement.created_at),
+          created_by: editingMovement.created_by || '',
+          description: editingMovement.description || '',
+          amount: editingMovement.amount || 0,
+          type_id: typeId,
+          category_id: categoryId,
+          subcategory_id: editingMovement.subcategory_id || 'none',
+          currency_id: editingMovement.currency_id || '',
+          wallet_id: editingMovement.wallet_id || '',
+          file_url: editingMovement.file_url || '',
+          is_conversion: editingMovement.is_conversion || false,
+        })
+        
+        // Force update form values
+        form.setValue('type_id', typeId)
+        form.setValue('category_id', categoryId)
+        form.setValue('currency_id', editingMovement.currency_id || '')
+        form.setValue('wallet_id', editingMovement.wallet_id || '')
+        
+        console.log('Form reset with values:', {
+          type_id: typeId,
+          category_id: categoryId,
+          currency_id: editingMovement.currency_id,
+          wallet_id: editingMovement.wallet_id
+        })
+      }, 300)
     } else if (!editingMovement && open) {
       setSelectedTypeId('none')
       setSelectedCategoryId('none')
@@ -198,7 +206,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         is_conversion: false,
       })
     }
-  }, [editingMovement, open, form])
+  }, [editingMovement, open, form, categories, currencies, wallets])
 
   // Auto-select current user as creator for new movements only
   useEffect(() => {
@@ -254,12 +262,12 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
           .update({
             description: formData.description || null,
             amount: formData.amount,
-            type_id: formData.type_id === 'none' ? null : formData.type_id,
-            category_id: formData.category_id === 'none' ? null : formData.category_id,
-            subcategory_id: formData.subcategory_id === 'none' ? null : formData.subcategory_id,
+            type_id: formData.type_id || null,
+            category_id: formData.category_id || null,
+            subcategory_id: formData.subcategory_id || null,
             currency_id: formData.currency_id,
             wallet_id: formData.wallet_id,
-            is_conversion: formData.is_conversion,
+            is_conversion: formData.is_conversion || false,
           })
           .eq('id', editingMovement.id)
 
@@ -281,7 +289,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
           wallet_id: formData.wallet_id,
           created_by: formData.created_by,
           file_url: formData.file_url || null,
-          is_conversion: formData.is_conversion,
+          is_conversion: formData.is_conversion || false,
           created_at: formData.created_at.toISOString(),
           organization_id: organizationId,
           project_id: projectId
@@ -323,10 +331,28 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
 
   const handleSubmit = () => {
     console.log('handleSubmit called');
-    form.handleSubmit((data: CreateMovementForm) => {
-      console.log('Form validation passed, submitting:', data);
-      createMovementMutation.mutate(data);
-    })();
+    const formValues = form.getValues();
+    console.log('Current form values:', formValues);
+    
+    // Validate required fields manually
+    const errors = form.formState.errors;
+    console.log('Form errors:', errors);
+    
+    if (Object.keys(errors).length > 0) {
+      console.log('Form has validation errors, not submitting');
+      return;
+    }
+    
+    // Process the form data
+    const processedData = {
+      ...formValues,
+      type_id: formValues.type_id === 'none' ? null : formValues.type_id,
+      category_id: formValues.category_id === 'none' ? null : formValues.category_id,
+      subcategory_id: formValues.subcategory_id === 'none' ? null : formValues.subcategory_id,
+    };
+    
+    console.log('Processed data for submission:', processedData);
+    createMovementMutation.mutate(processedData);
   }
 
   const selectedMember = members.find(member => member.id === form.watch('created_by'))
