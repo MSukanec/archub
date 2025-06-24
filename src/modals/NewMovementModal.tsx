@@ -140,7 +140,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
       
       // Use setTimeout to ensure all data is ready
       setTimeout(() => {
-        form.reset({
+        const formData = {
           created_at: new Date(editingMovement.created_at),
           created_by: editingMovement.created_by || '',
           description: editingMovement.description || '',
@@ -152,10 +152,19 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
           wallet_id: editingMovement.wallet_id || '',
           file_url: editingMovement.file_url || '',
           is_conversion: editingMovement.is_conversion || false,
+        }
+        
+        console.log('Setting form data for edit:', formData)
+        
+        form.reset(formData)
+        
+        // Force update specific fields that might not update correctly
+        Object.keys(formData).forEach(key => {
+          form.setValue(key as keyof CreateMovementForm, formData[key as keyof typeof formData])
         })
         
-        console.log('Edit form initialized')
-      }, 100)
+        console.log('Edit form initialized with all values set')
+      }, 200)
     } else {
       // Create mode: use defaults
       setSelectedTypeId('')
@@ -268,8 +277,23 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
     }
   })
 
-  const handleSubmit = (data: CreateMovementForm) => {
+  const handleSubmit = async () => {
+    console.log('Handle submit called')
+    
+    // Trigger form validation
+    const isValid = await form.trigger()
+    console.log('Form validation result:', isValid)
+    console.log('Form errors:', form.formState.errors)
+    console.log('Form values:', form.getValues())
+    
+    if (!isValid) {
+      console.log('Form validation failed, not submitting')
+      return
+    }
+    
+    const data = form.getValues()
     console.log('Submitting movement data:', data)
+    
     createMovementMutation.mutate(data)
   }
 
@@ -339,7 +363,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-sm font-medium">Creador</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value || ''}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Seleccionar creador" />
@@ -514,8 +538,11 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                       type="number"
                       step="0.01"
                       placeholder="0.00"
-                      {...field}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      value={field.value || ''}
+                      onChange={(e) => {
+                        const value = parseFloat(e.target.value) || 0
+                        field.onChange(value)
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
@@ -620,7 +647,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
   const footer = (
     <CustomModalFooter
       onCancel={onClose}
-      onSave={form.handleSubmit(handleSubmit)}
+      onSave={handleSubmit}
       saveText={editingMovement ? 'Actualizar' : 'Crear movimiento'}
       saveLoading={createMovementMutation.isPending}
     />
