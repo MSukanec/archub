@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import { ChevronUp, ChevronDown, ArrowUpDown } from 'lucide-react'
+import { Checkbox } from '@/components/ui/checkbox'
 import { cn } from '@/lib/utils'
 
 type SortDirection = 'asc' | 'desc' | null
@@ -29,7 +30,11 @@ export function CustomTable<T = any>({
   data, 
   emptyState, 
   isLoading = false, 
-  className 
+  className,
+  selectable = false,
+  selectedItems = [],
+  onSelectionChange,
+  getItemId = (item: T) => (item as any).id
 }: CustomTableProps<T>) {
   const [sortKey, setSortKey] = useState<string | null>(null)
   const [sortDirection, setSortDirection] = useState<SortDirection>(null)
@@ -62,20 +67,11 @@ export function CustomTable<T = any>({
     return selectedItems.some(selected => getItemId(selected) === itemId)
   }
 
-  // Función para calcular gridTemplateColumns basado en anchos personalizados
+  // Calculate grid template columns based on widths and selection
   const getGridTemplateColumns = () => {
-    const columnsWithWidth = columns.filter(col => col.width)
-    const columnsWithoutWidth = columns.filter(col => !col.width)
-    
-    if (columnsWithoutWidth.length === 0) {
-      // Todas las columnas tienen width definido
-      return columns.map(col => col.width).join(' ')
-    }
-    
-    // Algunas columnas no tienen width, usar 1fr para distribuir el espacio restante
-    const frValue = columnsWithoutWidth.length > 0 ? '1fr' : ''
-    
-    return columns.map(col => col.width || frValue).join(' ')
+    const selectableColumn = selectable ? ['48px'] : []
+    const columnsWithWidths = columns.map(col => col.width || '1fr')
+    return [...selectableColumn, ...columnsWithWidths].join(' ')
   }
 
   const handleSort = (columnKey: string, sortType: 'string' | 'number' | 'date' = 'string') => {
