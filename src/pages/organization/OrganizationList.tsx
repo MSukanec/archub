@@ -151,15 +151,7 @@ export default function OrganizationManagement() {
     </div>
   )
 
-  const actions = (
-    <Button 
-      className="h-8 px-3 text-sm"
-      onClick={() => setShowNewOrganizationModal(true)}
-    >
-      <Plus className="w-4 h-4 mr-2" />
-      Nueva Organización
-    </Button>
-  )
+
 
   const headerProps = {
     title: "Gestión de Organizaciones",
@@ -169,7 +161,16 @@ export default function OrganizationManagement() {
     showFilters: true,
     customFilters,
     onClearFilters: clearFilters,
-    actions
+    actions: [
+      <Button 
+        key="new-organization"
+        className="h-8 px-3 text-sm"
+        onClick={() => setShowNewOrganizationModal(true)}
+      >
+        <Plus className="w-4 h-4 mr-2" />
+        Nueva Organización
+      </Button>
+    ]
   }
 
   if (isLoading) {
