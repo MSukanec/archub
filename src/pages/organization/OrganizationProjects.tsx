@@ -1,6 +1,5 @@
 import { Layout } from '@/components/layout/Layout'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
@@ -18,6 +17,7 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useLocation } from 'wouter'
+import { CustomTable } from '@/components/ui-custom/CustomTable'
 
 export default function OrganizationProjects() {
   const [searchValue, setSearchValue] = useState("")
