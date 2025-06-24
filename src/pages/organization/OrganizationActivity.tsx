@@ -148,13 +148,10 @@ export default function OrganizationActivity() {
   };
 
   const headerProps = {
+    icon: Activity,
     title: "Actividad",
-    icon: <Activity className="h-5 w-5" />,
-    showSearch: true,
-    searchPlaceholder: "Buscar en actividad...",
-    searchValue: "",
-    onSearchChange: () => {},
-    onSearchClear: () => {}
+    showSearch: false,
+    actions: []
   };
 
   if (!currentOrganization) {

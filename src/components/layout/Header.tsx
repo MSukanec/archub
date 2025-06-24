@@ -19,6 +19,7 @@ import { useLocation } from "wouter";
 import { NewOrganizationModal } from "@/modals/NewOrganizationModal";
 
 interface HeaderProps {
+  icon?: React.ComponentType<any>;
   title?: string;
   showSearch?: boolean;
   searchValue?: string;
@@ -27,10 +28,11 @@ interface HeaderProps {
   filters?: { label: string; onClick: () => void }[];
   customFilters?: React.ReactNode;
   onClearFilters?: () => void;
-  actions?: React.ReactNode;
+  actions?: React.ReactNode[];
 }
 
 export function Header({
+  icon: Icon,
   title,
   showSearch = false,
   searchValue = "",
@@ -39,7 +41,7 @@ export function Header({
   filters = [],
   customFilters,
   onClearFilters,
-  actions,
+  actions = [],
 }: HeaderProps = {}) {
   const [showNewOrganizationModal, setShowNewOrganizationModal] = useState(false);
 
@@ -362,8 +364,12 @@ export function Header({
           </Button>
         )}
 
-        {actions && (
-          <div className="flex items-center gap-2">{actions}</div>
+        {actions && actions.length > 0 && (
+          <div className="flex items-center gap-2">
+            {actions.map((action, index) => (
+              <div key={index}>{action}</div>
+            ))}
+          </div>
         )}
       </div>
     </header>

@@ -125,15 +125,16 @@ export default function OrganizationContacts() {
     </div>
   )
 
-  const actions = (
+  const actions = [
     <Button 
+      key="new-contact"
       className="h-8 px-3 text-sm"
       onClick={() => setNewContactModalOpen(true)}
     >
       <Plus className="w-4 h-4 mr-2" />
       Nuevo Contacto
     </Button>
-  )
+  ]
 
   const headerProps = {
     icon: Users,
@@ -144,7 +145,7 @@ export default function OrganizationContacts() {
     showFilters: true,
     customFilters,
     onClearFilters: clearFilters,
-    actions: [actions]
+    actions
   }
 
   if (isLoading || contactsLoading) {

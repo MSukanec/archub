@@ -176,12 +176,12 @@ export default function OrganizationProjects() {
     </div>
   )
 
-  const actions = (
-    <Button className="h-8 px-3 text-sm">
+  const actions = [
+    <Button key="new-project" className="h-8 px-3 text-sm">
       <Plus className="w-4 h-4 mr-2" />
       Nuevo Proyecto
     </Button>
-  )
+  ]
 
   const headerProps = {
     icon: Folder,
@@ -192,7 +192,7 @@ export default function OrganizationProjects() {
     showFilters: true,
     customFilters,
     onClearFilters: clearFilters,
-    actions: [actions]
+    actions
   }
 
   if (isLoading || projectsLoading) {
