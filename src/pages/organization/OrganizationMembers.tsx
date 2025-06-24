@@ -329,8 +329,7 @@ export default function OrganizationMembers() {
 
   return (
     <Layout headerProps={headerProps}>
-      <div className="max-w-7xl mx-auto py-6 px-4">
-        <div className="grid grid-cols-12 gap-8">
+      <div className="grid grid-cols-12 gap-8">
           {/* Left Sidebar - Section Navigation */}
           <div className="col-span-3">
             <div className="space-y-1">
@@ -580,6 +579,14 @@ export default function OrganizationMembers() {
           </div>
         </div>
       </div>
+
+      {/* Invite Modal */}
+      {showInviteModal && (
+        <InviteMemberModal 
+          organizationId={currentOrganization?.id || ''}
+          onClose={() => setShowInviteModal(false)}
+        />
+      )}
     </Layout>
   );
 }

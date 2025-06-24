@@ -5,6 +5,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { useThemeStore } from "@/stores/themeStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useSidebarStore } from "@/stores/sidebarStore";
+import { cn } from "@/lib/utils";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -51,13 +52,20 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       <Header {...headerProps} />
       <Sidebar />
       <main
-        className="transition-all duration-300 ease-in-out flex-1 overflow-auto p-3"
+        className={cn(
+          "transition-all duration-300 ease-in-out flex-1 overflow-auto"
+        )}
         style={{
           marginLeft: isExpanded ? "240px" : "40px",
           marginTop: "36px",
         }}
       >
-        <div className={wide ? "" : "max-w-[1440px] mx-auto"}>{children}</div>
+        <div className={cn(
+          "px-6 py-6 space-y-6",
+          wide ? "w-full" : "max-w-[1440px] mx-auto"
+        )}>
+          {children}
+        </div>
       </main>
     </div>
   );

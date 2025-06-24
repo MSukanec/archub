@@ -177,7 +177,6 @@ export default function FinancesDashboard() {
 
   return (
     <Layout headerProps={headerProps}>
-      <div className="space-y-6">
         {/* Financial Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Total Income */}

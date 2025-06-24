@@ -411,7 +411,6 @@ export default function Profile() {
             </div>
           </CardContent>
         </Card>
-      </div>
     </Layout>
   )
 }
