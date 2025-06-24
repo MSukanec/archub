@@ -10,6 +10,7 @@ interface LayoutProps {
   children: React.ReactNode;
   wide?: boolean;
   headerProps?: {
+    icon?: React.ComponentType<any>;
     title?: string;
     showSearch?: boolean;
     searchValue?: string;
@@ -18,7 +19,7 @@ interface LayoutProps {
     filters?: { label: string; onClick: () => void }[];
     customFilters?: React.ReactNode;
     onClearFilters?: () => void;
-    actions?: React.ReactNode;
+    actions?: React.ReactNode[];
   };
 }
 

@@ -300,14 +300,14 @@ export default function OrganizationMembers() {
 
   const headerProps = {
     title: "Miembros",
-    icon: <Users className="h-5 w-5" />,
+    icon: Users,
     showSearch: true,
     searchPlaceholder: "Buscar miembros...",
     searchValue: "",
     onSearchChange: () => {},
     onSearchClear: () => {},
-    actions: (
-      <CustomRestricted feature="max_members" current={members.length}>
+    actions: [
+      <CustomRestricted key="invite-member" feature="max_members" current={members.length}>
         <Button 
           onClick={() => setShowInviteModal(true)}
           className="h-8"
@@ -317,7 +317,7 @@ export default function OrganizationMembers() {
           Invitar miembro
         </Button>
       </CustomRestricted>
-    )
+    ]
   };
 
   const isLoading = loadingMembers || loadingGuests || loadingInvites;
