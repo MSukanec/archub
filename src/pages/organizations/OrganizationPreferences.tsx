@@ -20,7 +20,6 @@ import { useNavigationStore } from '@/stores/navigationStore';
 interface Wallet {
   id: string;
   name: string;
-  organization_id: string;
   is_active: boolean;
   created_at: string;
 }
@@ -62,9 +61,9 @@ interface OrganizationPreferences {
 }
 
 export default function OrganizationPreferences() {
-  const [defaultCurrency, setDefaultCurrency] = useState('');
-  const [defaultWallet, setDefaultWallet] = useState('');
-  const [defaultPdfTemplate, setDefaultPdfTemplate] = useState('');
+  const [defaultCurrency, setDefaultCurrency] = useState('none');
+  const [defaultWallet, setDefaultWallet] = useState('none');
+  const [defaultPdfTemplate, setDefaultPdfTemplate] = useState('none');
   const [secondaryCurrencies, setSecondaryCurrencies] = useState<string[]>([]);
   const [secondaryWallets, setSecondaryWallets] = useState<string[]>([]);
 
@@ -154,9 +153,9 @@ export default function OrganizationPreferences() {
   // Load current preferences when data is available
   useEffect(() => {
     if (orgPreferences) {
-      setDefaultCurrency(orgPreferences.default_currency_id || '');
-      setDefaultWallet(orgPreferences.default_wallet_id || '');
-      setDefaultPdfTemplate(orgPreferences.default_pdf_template_id || '');
+      setDefaultCurrency(orgPreferences.default_currency_id || 'none');
+      setDefaultWallet(orgPreferences.default_wallet_id || 'none');
+      setDefaultPdfTemplate(orgPreferences.default_pdf_template_id || 'none');
     }
   }, [orgPreferences]);
 
@@ -291,8 +290,12 @@ export default function OrganizationPreferences() {
   };
 
   // Filter out default selections from secondary options
-  const availableSecondaryCurrencies = allCurrencies.filter(c => c.id !== defaultCurrency && defaultCurrency !== 'none');
-  const availableSecondaryWallets = allWallets.filter(w => w.id !== defaultWallet && defaultWallet !== 'none');
+  const availableSecondaryCurrencies = allCurrencies.filter(c => 
+    c.id !== defaultCurrency || defaultCurrency === 'none'
+  );
+  const availableSecondaryWallets = allWallets.filter(w => 
+    w.id !== defaultWallet || defaultWallet === 'none'
+  );
 
   const handleSecondaryCurrencyToggle = (currencyId: string) => {
     setSecondaryCurrencies(prev => 

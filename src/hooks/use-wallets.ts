@@ -4,17 +4,14 @@ import { supabase } from '@/lib/supabase';
 interface Wallet {
   id: string;
   name: string;
-  organization_id: string;
   is_active: boolean;
   created_at: string;
 }
 
 export function useWallets(organizationId: string | undefined) {
   return useQuery({
-    queryKey: ['wallets', organizationId],
+    queryKey: ['wallets'],
     queryFn: async () => {
-      if (!organizationId) return [];
-      
       const { data, error } = await supabase
         .from('wallets')
         .select('*')
@@ -28,6 +25,5 @@ export function useWallets(organizationId: string | undefined) {
       
       return data as Wallet[];
     },
-    enabled: !!organizationId,
   });
 }
