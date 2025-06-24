@@ -69,7 +69,7 @@ export function CustomTable<T = any>({
 
   // Calculate grid template columns based on widths and selection
   const getGridTemplateColumns = () => {
-    const selectableColumn = selectable ? ['48px'] : []
+    const selectableColumn = selectable ? ['32px'] : []
     const columnsWithWidths = columns.map(col => col.width || '1fr')
     return [...selectableColumn, ...columnsWithWidths].join(' ')
   }
@@ -202,6 +202,7 @@ export function CustomTable<T = any>({
                 indeterminate={isIndeterminate}
                 onCheckedChange={handleSelectAll}
                 aria-label="Seleccionar todos"
+                className="h-3 w-3"
               />
             </div>
           )}
@@ -246,6 +247,7 @@ export function CustomTable<T = any>({
                     checked={isItemSelected(item)}
                     onCheckedChange={(checked) => handleSelectItem(item, checked as boolean)}
                     aria-label={`Seleccionar fila ${index + 1}`}
+                    className="h-3 w-3"
                   />
                 </div>
               )}

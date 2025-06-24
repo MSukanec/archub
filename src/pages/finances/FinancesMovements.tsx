@@ -396,6 +396,7 @@ export default function Movements() {
   const headerProps = {
     title: "Movimientos",
     icon: <DollarSign className="h-5 w-5" />,
+    breadcrumb: "FINANZAS",
     showSearch: true,
     searchValue,
     onSearchChange: setSearchValue,
