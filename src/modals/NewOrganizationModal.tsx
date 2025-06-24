@@ -137,88 +137,85 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
     onClose()
   }
 
-  const header = (
-    <CustomModalHeader
-      title={editingOrganization ? 'Editar organización' : 'Nueva organización'}
-      description={editingOrganization ? 'Actualiza la información de la organización' : 'Crea una nueva organización para tu equipo'}
-    />
-  )
-
-  const body = (
-    <CustomModalBody>
-      <form onSubmit={form.handleSubmit(handleSubmit)}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Fecha de creación */}
-          <div className="col-span-1">
-            <FormField
-              control={form.control}
-              name="created_at"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Fecha de creación</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button variant="outline" className="w-full justify-start text-left font-normal">
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {field.value ? format(field.value, "dd 'de' MMMM 'de' yyyy", { locale: es }) : "Seleccionar fecha"}
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          {/* Nombre de la organización */}
-          <div className="col-span-1">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nombre de la organización</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Ingresa el nombre de la organización"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </div>
-      </form>
-    </CustomModalBody>
-  )
-
-  const footer = (
-    <CustomModalFooter
-      onCancel={handleClose}
-      onSave={form.handleSubmit(handleSubmit)}
-      saveText={editingOrganization ? 'Actualizar' : 'Crear organización'}
-      saveLoading={organizationMutation.isPending}
-    />
-  )
-
   return (
-    <Form {...form}>
-      <CustomModalLayout open={open} onClose={handleClose}>
-        {{ header, body, footer }}
-      </CustomModalLayout>
-    </Form>
+    <CustomModalLayout open={open} onClose={handleClose}>
+      {{
+        header: (
+          <CustomModalHeader
+            title={editingOrganization ? 'Editar organización' : 'Nueva organización'}
+            description={editingOrganization ? 'Actualiza la información de la organización' : 'Crea una nueva organización para tu equipo'}
+            onClose={handleClose}
+          />
+        ),
+        body: (
+          <CustomModalBody padding="lg">
+            <Form {...form}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Fecha de creación */}
+                <div className="col-span-1">
+                  <FormField
+                    control={form.control}
+                    name="created_at"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">Fecha de creación</FormLabel>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button variant="outline" className="w-full justify-start text-left font-normal">
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {field.value ? format(field.value, "dd 'de' MMMM 'de' yyyy", { locale: es }) : "Seleccionar fecha"}
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Nombre de la organización */}
+                <div className="col-span-1">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">Nombre de la organización</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Ingresa el nombre de la organización"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+            </Form>
+          </CustomModalBody>
+        ),
+        footer: (
+          <CustomModalFooter
+            onCancel={handleClose}
+            onSave={form.handleSubmit(handleSubmit)}
+            saveText={editingOrganization ? 'Actualizar' : 'Crear organización'}
+            saveLoading={organizationMutation.isPending}
+          />
+        )
+      }}
+    </CustomModalLayout>
   )
 }
