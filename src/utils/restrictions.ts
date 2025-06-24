@@ -30,6 +30,11 @@ export const restrictionMessages: Record<string, RestrictionMessage> = {
     actionLabel: "Ver planes",
     actionUrl: "/billing",
   },
+  max_members: {
+    message: "Has alcanzado el límite máximo de miembros para tu plan actual.",
+    actionLabel: "Actualizar plan",
+    actionUrl: "/billing",
+  },
   custom_templates: {
     message: "Las plantillas personalizadas están disponibles en el plan PRO.",
     actionLabel: "Actualizar plan",
