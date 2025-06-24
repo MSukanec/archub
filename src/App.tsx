@@ -16,11 +16,11 @@ import OrganizationDashboard from "@/pages/organization/OrganizationDashboard";
 import OrganizationMembers from "@/pages/organization/OrganizationMembers";
 import OrganizationActivity from "@/pages/organization/OrganizationActivity";
 import ProjectDashboard from "@/pages/project/ProjectDashboard";
-import FinancesDashboard from "@/pages/finance/FinancesDashboard";
+import FinancesDashboard from "@/pages/finances/FinancesDashboard";
 import Profile from "@/pages/others/Profile";
 import Movements from "@/pages/finances/FinancesMovements";
 import SiteLogs from "@/pages/site/SiteLogs";
-import OrganizationPreferences from "@/pages/organizations/OrganizationPreferences";
+import OrganizationPreferences from "@/pages/organization/OrganizationPreferences";
 
 function Router() {
   return (
