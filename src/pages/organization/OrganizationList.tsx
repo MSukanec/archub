@@ -24,6 +24,7 @@ export default function OrganizationManagement() {
   const [editingOrganization, setEditingOrganization] = useState<any>(null)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [organizationToDelete, setOrganizationToDelete] = useState<any>(null)
+  const [showNewOrganizationModal, setShowNewOrganizationModal] = useState(false)
   
   const { data: userData, isLoading } = useCurrentUser()
   const { toast } = useToast()
@@ -100,7 +101,7 @@ export default function OrganizationManagement() {
 
   const handleEdit = (organization: any) => {
     setEditingOrganization(organization)
-    // TODO: Abrir modal de edición
+    setShowNewOrganizationModal(true)
   }
 
   const handleDeleteClick = (organization: any) => {
@@ -150,7 +151,10 @@ export default function OrganizationManagement() {
   )
 
   const actions = (
-    <Button className="h-8 px-3 text-sm">
+    <Button 
+      className="h-8 px-3 text-sm"
+      onClick={() => setShowNewOrganizationModal(true)}
+    >
       <Plus className="w-4 h-4 mr-2" />
       Nueva Organización
     </Button>
@@ -340,6 +344,16 @@ export default function OrganizationManagement() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Modal de nueva/editar organización */}
+        <NewOrganizationModal
+          open={showNewOrganizationModal}
+          onClose={() => {
+            setShowNewOrganizationModal(false)
+            setEditingOrganization(null)
+          }}
+          editingOrganization={editingOrganization}
+        />
       </div>
     </Layout>
   )
