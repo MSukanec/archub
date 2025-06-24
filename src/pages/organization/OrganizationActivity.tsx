@@ -48,8 +48,7 @@ export default function OrganizationActivity() {
           description: `Se creó el proyecto "${project.name}"`,
           created_at: project.created_at,
           author: userData?.user || { full_name: 'Sistema', avatar_url: '' },
-          status: project.status,
-          clickAction: () => navigate('/organization/projects')
+          status: project.status
         });
       });
 
@@ -81,8 +80,7 @@ export default function OrganizationActivity() {
           description: `${movement.description || 'Movimiento'}: $${movement.amount?.toLocaleString()}`,
           created_at: movement.created_at,
           author: movement.organization_members?.users || { full_name: 'Usuario', avatar_url: '' },
-          amount: movement.amount,
-          clickAction: () => navigate('/finance/movements')
+          amount: movement.amount
         });
       });
 
@@ -114,8 +112,7 @@ export default function OrganizationActivity() {
           title: 'Nuevo contacto agregado',
           description: `Se agregó a ${contact.first_name} ${contact.last_name}${contact.company_name ? ` de ${contact.company_name}` : ''}`,
           created_at: contact.created_at,
-          author: contact.organization_members?.users || userData?.user || { full_name: 'Usuario', avatar_url: '' },
-          clickAction: () => navigate('/organization/contacts')
+          author: contact.organization_members?.users || userData?.user || { full_name: 'Usuario', avatar_url: '' }
         });
       });
 
@@ -147,8 +144,7 @@ export default function OrganizationActivity() {
           title: 'Nueva entrada de bitácora',
           description: `Entrada ${log.entry_type} - ${log.weather}`,
           created_at: log.created_at,
-          author: log.organization_members?.users || userData?.user || { full_name: 'Usuario', avatar_url: '' },
-          clickAction: () => navigate('/construction/site-logs')
+          author: log.organization_members?.users || userData?.user || { full_name: 'Usuario', avatar_url: '' }
         });
       });
 
@@ -195,8 +191,22 @@ export default function OrganizationActivity() {
   };
 
   const handleActivityClick = (activity: any) => {
-    if (activity.clickAction) {
-      activity.clickAction();
+    switch (activity.type) {
+      case 'project':
+        navigate('/organization/projects');
+        break;
+      case 'movement':
+        navigate('/finance/movements');
+        break;
+      case 'contact':
+        navigate('/organization/contacts');
+        break;
+      case 'site_log':
+        navigate('/construction/site-logs');
+        break;
+      default:
+        console.log('Ver detalles para:', activity);
+        break;
     }
   };
 
