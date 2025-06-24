@@ -94,7 +94,7 @@ export default function OrganizationPreferences() {
     },
   });
 
-  // Fetch all wallets for this organization
+  // Fetch all wallets (not organization-specific based on schema)
   const { data: allWallets = [] } = useWallets(organizationId);
 
   // Fetch organization preferences
@@ -185,9 +185,9 @@ export default function OrganizationPreferences() {
         .from('organization_preferences')
         .upsert({
           organization_id: organizationId,
-          default_currency_id: defaultCurrency || null,
-          default_wallet_id: defaultWallet || null,
-          default_pdf_template_id: defaultPdfTemplate || null,
+          default_currency_id: defaultCurrency === 'none' ? null : defaultCurrency,
+          default_wallet_id: defaultWallet === 'none' ? null : defaultWallet,
+          default_pdf_template_id: defaultPdfTemplate === 'none' ? null : defaultPdfTemplate,
         }, {
           onConflict: 'organization_id'
         });
@@ -206,7 +206,7 @@ export default function OrganizationPreferences() {
         .eq('organization_id', organizationId);
 
       // Add default currency if selected
-      if (defaultCurrency) {
+      if (defaultCurrency && defaultCurrency !== 'none') {
         const { error: currError } = await supabase
           .from('organization_currencies')
           .insert({
@@ -236,7 +236,7 @@ export default function OrganizationPreferences() {
       }
 
       // Add default wallet if selected
-      if (defaultWallet) {
+      if (defaultWallet && defaultWallet !== 'none') {
         const { error: walletError } = await supabase
           .from('organization_wallets')
           .insert({
@@ -291,8 +291,8 @@ export default function OrganizationPreferences() {
   };
 
   // Filter out default selections from secondary options
-  const availableSecondaryCurrencies = allCurrencies.filter(c => c.id !== defaultCurrency);
-  const availableSecondaryWallets = allWallets.filter(w => w.id !== defaultWallet);
+  const availableSecondaryCurrencies = allCurrencies.filter(c => c.id !== defaultCurrency && defaultCurrency !== 'none');
+  const availableSecondaryWallets = allWallets.filter(w => w.id !== defaultWallet && defaultWallet !== 'none');
 
   const handleSecondaryCurrencyToggle = (currencyId: string) => {
     setSecondaryCurrencies(prev => 
@@ -312,7 +312,6 @@ export default function OrganizationPreferences() {
 
   const headerProps = {
     title: "Preferencias",
-    icon: Settings,
     actions: [
       <Button 
         key="save-preferences"
@@ -338,7 +337,7 @@ export default function OrganizationPreferences() {
 
   return (
     <Layout headerProps={headerProps}>
-      <div className="space-y-6 p-6">
+      <div className="space-y-6">
         {/* Default Settings */}
         <Card>
           <CardHeader>
@@ -356,7 +355,7 @@ export default function OrganizationPreferences() {
                     <SelectValue placeholder="Seleccionar moneda" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Sin seleccionar</SelectItem>
+                    <SelectItem value="none">Sin seleccionar</SelectItem>
                     {allCurrencies.map((currency) => (
                       <SelectItem key={currency.id} value={currency.id}>
                         {currency.code} - {currency.name}
@@ -373,7 +372,7 @@ export default function OrganizationPreferences() {
                     <SelectValue placeholder="Seleccionar billetera" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Sin seleccionar</SelectItem>
+                    <SelectItem value="none">Sin seleccionar</SelectItem>
                     {allWallets.map((wallet) => (
                       <SelectItem key={wallet.id} value={wallet.id}>
                         {wallet.name}
@@ -390,7 +389,7 @@ export default function OrganizationPreferences() {
                     <SelectValue placeholder="Seleccionar plantilla" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Sin seleccionar</SelectItem>
+                    <SelectItem value="none">Sin seleccionar</SelectItem>
                     <SelectItem value="template_1">Plantilla Estándar</SelectItem>
                     <SelectItem value="template_2">Plantilla Moderna</SelectItem>
                     <SelectItem value="template_3">Plantilla Corporativa</SelectItem>

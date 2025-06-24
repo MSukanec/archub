@@ -39,6 +39,7 @@ export function Sidebar() {
       { icon: Users, label: 'Miembros', href: '/organization/members' },
       { icon: Activity, label: 'Actividad', href: '/organization/activity' },
       { icon: Mail, label: 'Contactos', href: '/organization/contactos' },
+      { icon: Settings, label: 'Preferencias', href: '/preferencias' },
       { icon: FolderOpen, label: 'Proyectos', href: '/proyectos' },
     ],
     project: [
