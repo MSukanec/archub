@@ -105,9 +105,9 @@ export function CustomRestricted({
                 <p className="text-xs text-muted-foreground mt-1">
                   {restriction.message}
                 </p>
-                {current !== undefined && feature && limit(feature) !== Infinity && (
+                {current !== undefined && feature && (
                   <p className="text-xs text-muted-foreground mt-1">
-                    Límite actual: {current}/{limit(feature)}
+                    Límite actual: {current}/{limit(feature) === Infinity ? '∞' : limit(feature)}
                   </p>
                 )}
               </div>

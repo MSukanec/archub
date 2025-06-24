@@ -47,13 +47,13 @@ export function usePlanFeatures(): PlanFeatures {
     
     // Si no hay features o la feature no existe, usar valores por defecto basados en el plan
     const planName = userData?.organization?.plan?.name;
-    if (planName === 'TEAMS' && feature === 'max_members') {
+    if (planName === 'Teams' && feature === 'max_members') {
       return 999;
     }
-    if (planName === 'PRO' && feature === 'max_members') {
+    if (planName === 'Pro' && feature === 'max_members') {
       return Infinity;
     }
-    if (planName === 'FREE' && feature === 'max_members') {
+    if (planName === 'Free' && feature === 'max_members') {
       return 5;
     }
     

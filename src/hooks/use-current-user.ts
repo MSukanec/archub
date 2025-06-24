@@ -46,7 +46,7 @@ interface UserData {
   plan: {
     id: string
     name: string
-    features: string[]
+    features: Record<string, any>
     price: number
     [key: string]: any
   } | null
@@ -69,7 +69,7 @@ interface UserData {
     plan: {
       id: string
       name: string
-      features: string[]
+      features: Record<string, any>
       price: number
       [key: string]: any
     } | null
