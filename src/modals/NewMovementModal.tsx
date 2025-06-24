@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { Calendar, DollarSign, FileText } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -79,8 +79,50 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
   
   const { data: members = [] } = useOrganizationMembers(organizationId)
   const { data: types = [] } = useMovementConcepts('types')
-  const { data: currencies = [] } = useCurrencies(organizationId)
-  const { data: wallets = [] } = useWallets(organizationId)
+  // Fetch organization currencies and wallets (not direct tables)
+  const { data: currencies = [] } = useQuery({
+    queryKey: ['organization-currencies', organizationId],
+    queryFn: async () => {
+      if (!organizationId) return [];
+      
+      const { data, error } = await supabase
+        .from('organization_currencies')
+        .select(`
+          *,
+          currency:currencies(*)
+        `)
+        .eq('organization_id', organizationId);
+      
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching organization currencies:', error);
+        return [];
+      }
+      return data || [];
+    },
+    enabled: !!organizationId,
+  });
+
+  const { data: wallets = [] } = useQuery({
+    queryKey: ['organization-wallets', organizationId],
+    queryFn: async () => {
+      if (!organizationId) return [];
+      
+      const { data, error } = await supabase
+        .from('organization_wallets')
+        .select(`
+          *,
+          wallet:wallets(*)
+        `)
+        .eq('organization_id', organizationId);
+      
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching organization wallets:', error);
+        return [];
+      }
+      return data || [];
+    },
+    enabled: !!organizationId,
+  });
 
   const [selectedTypeId, setSelectedTypeId] = useState<string>('none')
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('none')
@@ -118,20 +160,22 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
       setSelectedTypeId(typeId)
       setSelectedCategoryId(categoryId)
       
-      // Reset form with all values
-      form.reset({
-        created_at: new Date(editingMovement.created_at),
-        created_by: editingMovement.created_by || '',
-        description: editingMovement.description || '',
-        amount: editingMovement.amount || 0,
-        type_id: typeId,
-        category_id: categoryId,
-        subcategory_id: editingMovement.subcategory_id || 'none',
-        currency_id: editingMovement.currency_id || '',
-        wallet_id: editingMovement.wallet_id || '',
-        file_url: editingMovement.file_url || '',
-        is_conversion: editingMovement.is_conversion || false,
-      })
+      // Add delay to ensure categories are loaded
+      setTimeout(() => {
+        form.reset({
+          created_at: new Date(editingMovement.created_at),
+          created_by: editingMovement.created_by || '',
+          description: editingMovement.description || '',
+          amount: editingMovement.amount || 0,
+          type_id: typeId,
+          category_id: categoryId,
+          subcategory_id: editingMovement.subcategory_id || 'none',
+          currency_id: editingMovement.currency_id || '',
+          wallet_id: editingMovement.wallet_id || '',
+          file_url: editingMovement.file_url || '',
+          is_conversion: editingMovement.is_conversion || false,
+        })
+      }, 200)
     } else if (!editingMovement && open) {
       setSelectedTypeId('none')
       setSelectedCategoryId('none')
@@ -166,7 +210,8 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
     if (!editingMovement && currencies.length > 0 && !form.getValues('currency_id')) {
       const defaultCurrency = currencies.find((c: any) => c.is_default) || currencies[0]
       if (defaultCurrency) {
-        form.setValue('currency_id', defaultCurrency.currency_id)
+        const currencyId = defaultCurrency.currency?.id || defaultCurrency.currency_id
+        form.setValue('currency_id', currencyId)
       }
     }
   }, [currencies, form, editingMovement])
@@ -175,7 +220,8 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
     if (!editingMovement && wallets.length > 0 && !form.getValues('wallet_id')) {
       const defaultWallet = wallets.find((w: any) => w.is_default) || wallets[0]
       if (defaultWallet) {
-        form.setValue('wallet_id', defaultWallet.wallet_id)
+        const walletId = defaultWallet.wallet?.id || defaultWallet.wallet_id
+        form.setValue('wallet_id', walletId)
       }
     }
   }, [wallets, form, editingMovement])
@@ -491,8 +537,8 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                   </FormControl>
                   <SelectContent>
                     {currencies.map((currency: any) => (
-                      <SelectItem key={currency.id} value={currency.currency_id}>
-                        {currency.currencies?.name} ({currency.currencies?.code}) {currency.is_default && "(Por defecto)"}
+                      <SelectItem key={currency.id} value={currency.currency?.id || currency.currency_id}>
+                        {currency.currency?.name} ({currency.currency?.code}) {currency.is_default && "(Por defecto)"}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -517,8 +563,8 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                   </FormControl>
                   <SelectContent>
                     {wallets.map((wallet: any) => (
-                      <SelectItem key={wallet.id} value={wallet.wallet_id}>
-                        {wallet.wallets?.name} {wallet.is_default && "(Por defecto)"}
+                      <SelectItem key={wallet.id} value={wallet.wallet?.id || wallet.wallet_id}>
+                        {wallet.wallet?.name} {wallet.is_default && "(Por defecto)"}
                       </SelectItem>
                     ))}
                   </SelectContent>
