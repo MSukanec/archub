@@ -9,10 +9,13 @@ interface PlanFeatures {
 export function usePlanFeatures(): PlanFeatures {
   const { data: userData } = useCurrentUser();
   
-  // Obtener features reales del plan desde la base de datos
-  const planFeatures = userData?.organization?.plan?.features || {};
+  // Obtener features del plan actual
+  const planFeatures = currentPlan?.features || {};
   
-  // Verificar si tenemos datos válidos del plan
+  // Obtener plan desde la organización actual
+  const organizationId = userData?.preferences?.last_organization_id;
+  const currentOrganization = userData?.organizations?.find(org => org.id === organizationId);
+  const currentPlan = currentOrganization?.plan;
 
   const can = (feature: string): boolean => {
     // Verificar si la feature existe en el plan actual
@@ -46,18 +49,26 @@ export function usePlanFeatures(): PlanFeatures {
     }
     
     // Si no hay features o la feature no existe, usar valores por defecto basados en el plan
-    const planName = userData?.organization?.plan?.name;
-    if (planName === 'Teams' && feature === 'max_members') {
-      return 999;
-    }
-    if (planName === 'Pro' && feature === 'max_members') {
-      return Infinity;
-    }
-    if (planName === 'Free' && feature === 'max_members') {
-      return 1; // Solo el admin
+    // Verificar múltiples rutas para obtener el plan
+    const planName = userData?.organization?.plan?.name || 
+                     userData?.plan?.name ||
+                     userData?.organizations?.[0]?.plan?.name;
+    
+    if (feature === 'max_members') {
+      if (planName === 'Teams') {
+        return 999;
+      }
+      if (planName === 'Pro') {
+        return Infinity;
+      }
+      if (planName === 'Free') {
+        return 1; // Solo el admin
+      }
+      // Si no hay plan definido, asumir Free por defecto
+      return 1;
     }
     
-    // Si es false o no existe, límite es 0
+    // Si es false o no existe, límite por defecto
     return 0;
   };
 

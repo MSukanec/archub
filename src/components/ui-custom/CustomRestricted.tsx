@@ -9,6 +9,7 @@ import {
 import { usePlanFeatures } from "@/hooks/usePlanFeatures";
 import { getRestrictionMessage } from "@/utils/restrictions";
 import { useLocation } from "wouter";
+import { useCurrentUser } from "@/hooks/use-current-user";
 
 interface CustomRestrictedProps {
   feature?: string;
@@ -27,7 +28,13 @@ export function CustomRestricted({
   const [, navigate] = useLocation();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  // Remover debug logs
+  // Debug información del usuario
+  const { data: userData } = useCurrentUser();
+  console.log('Current user plan info:', {
+    lastOrgId: userData?.preferences?.last_organization_id,
+    organizations: userData?.organizations?.map(org => ({ id: org.id, name: org.name, plan: org.plan?.name })),
+    organizationPlan: userData?.organization?.plan?.name
+  });
 
   // Determinar si está restringido
   let isRestricted = false;
@@ -41,7 +48,16 @@ export function CustomRestricted({
     // Verificar límites si se proporcionó current
     if (current !== undefined) {
       const featureLimit = limit(feature);
-      // Verificar límite
+      // Debug: verificar datos del plan
+      console.log('Plan check debug:', {
+        feature,
+        current,
+        featureLimit,
+        userData: !!userData,
+        organization: !!userData?.organization,
+        plan: userData?.organization?.plan,
+        willBlock: featureLimit !== Infinity && current >= featureLimit
+      });
       
       // Restringir si se alcanzó o superó el límite
       if (featureLimit !== Infinity && current >= featureLimit) {
