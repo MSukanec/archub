@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react'
-import { ChevronUp, ChevronDown } from 'lucide-react'
+import { ChevronUp, ChevronDown, ArrowUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type SortDirection = 'asc' | 'desc' | null
@@ -182,10 +182,7 @@ export function CustomTable<T = any>({
                       <ChevronDown className="w-3 h-3" />
                     )
                   ) : (
-                    <div className="w-3 h-3 flex flex-col items-center justify-center opacity-50">
-                      <ChevronUp className="w-2 h-1" style={{ marginBottom: '-2px' }} />
-                      <ChevronDown className="w-2 h-1" />
-                    </div>
+                    <ArrowUpDown className="w-3 h-3 opacity-50" />
                   )}
                 </button>
               )}

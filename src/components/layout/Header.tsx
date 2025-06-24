@@ -44,6 +44,7 @@ export function Header({
   actions = [],
 }: HeaderProps = {}) {
   const [showNewOrganizationModal, setShowNewOrganizationModal] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
