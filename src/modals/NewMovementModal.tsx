@@ -343,16 +343,16 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                 </Popover>
                 <FormMessage />
               </FormItem>
-                )}
-              />
+            )}
+          />
 
-              {/* 2. Creador */}
-              <FormField
-                control={form.control}
-                name="created_by"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">Creador</FormLabel>
+          {/* 2. Creador */}
+          <FormField
+            control={form.control}
+            name="created_by"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-medium">Creador</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
@@ -394,18 +394,18 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormMessage />
-                </FormItem>
-                  )}
-                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-              {/* 3. Tipo */}
-              <FormField
-                control={form.control}
-                name="type_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">Tipo</FormLabel>
+          {/* 3. Tipo */}
+          <FormField
+            control={form.control}
+            name="type_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-medium">Tipo</FormLabel>
                 <Select onValueChange={handleTypeChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
@@ -423,16 +423,16 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                 </Select>
                 <FormMessage />
               </FormItem>
-                )}
-              />
+            )}
+          />
 
-              {/* 4. Categoría */}
-              <FormField
-                control={form.control}
-                name="category_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">Categoría</FormLabel>
+          {/* 4. Categoría */}
+          <FormField
+            control={form.control}
+            name="category_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-medium">Categoría</FormLabel>
                 <Select onValueChange={handleCategoryChange} value={field.value} disabled={!selectedTypeId || selectedTypeId === 'none'}>
                   <FormControl>
                     <SelectTrigger>
@@ -450,16 +450,16 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                 </Select>
                 <FormMessage />
               </FormItem>
-                )}
-              />
+            )}
+          />
 
-              {/* 5. Subcategoría */}
-              <FormField
-                control={form.control}
-                name="subcategory_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">Subcategoría</FormLabel>
+          {/* 5. Subcategoría */}
+          <FormField
+            control={form.control}
+            name="subcategory_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-medium">Subcategoría</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value} disabled={!selectedCategoryId || selectedCategoryId === 'none'}>
                   <FormControl>
                     <SelectTrigger>
@@ -477,16 +477,16 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                 </Select>
                 <FormMessage />
               </FormItem>
-                )}
-              />
+            )}
+          />
 
-              {/* 6. Moneda */}
-              <FormField
-                control={form.control}
-                name="currency_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">Moneda</FormLabel>
+          {/* 6. Moneda */}
+          <FormField
+            control={form.control}
+            name="currency_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-medium">Moneda</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
@@ -503,16 +503,16 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                 </Select>
                 <FormMessage />
               </FormItem>
-                )}
-              />
+            )}
+          />
 
-              {/* 7. Billetera */}
-              <FormField
-                control={form.control}
-                name="wallet_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">Billetera</FormLabel>
+          {/* 7. Billetera */}
+          <FormField
+            control={form.control}
+            name="wallet_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-medium">Billetera</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
@@ -529,16 +529,16 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                 </Select>
                 <FormMessage />
               </FormItem>
-                )}
-              />
+            )}
+          />
 
-              {/* 8. Cantidad */}
-              <FormField
-                control={form.control}
-                name="amount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">Cantidad</FormLabel>
+          {/* 8. Cantidad */}
+          <FormField
+            control={form.control}
+            name="amount"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-medium">Cantidad</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -555,17 +555,17 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                 </FormControl>
                 <FormMessage />
               </FormItem>
-                )}
-              />
-            </div>
+            )}
+          />
+        </div>
 
-            {/* 9. Descripción - Full width */}
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem className="mt-4">
-                  <FormLabel className="text-sm font-medium">Descripción</FormLabel>
+        {/* 9. Descripción - Full width */}
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem className="mt-4">
+              <FormLabel className="text-sm font-medium">Descripción</FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder="Describe el movimiento financiero..."
@@ -573,18 +573,18 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                     {...field}
                   />
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-              )}
-            />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-            {/* 10. Archivo - Full width */}
-            <FormField
-              control={form.control}
-              name="file_url"
-              render={({ field }) => (
-                <FormItem className="mt-4">
-                  <FormLabel className="text-sm font-medium">Archivo</FormLabel>
+        {/* 10. Archivo - Full width */}
+        <FormField
+          control={form.control}
+          name="file_url"
+          render={({ field }) => (
+            <FormItem className="mt-4">
+              <FormLabel className="text-sm font-medium">Archivo</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
