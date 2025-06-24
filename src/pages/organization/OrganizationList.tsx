@@ -82,14 +82,14 @@ function OrganizationCard({ organization, isSelected, onSelect, onEdit, onDelete
             <span className="text-xs font-medium">({members.length})</span>
             <div className="flex -space-x-1">
               {members.slice(0, 3).map((member, index) => (
-                <Avatar key={member.id} className="w-6 h-6 avatar-border" style={{border: '2px solid var(--card-border)'}}>
+                <Avatar key={member.id} className="w-6 h-6 avatar-border" style={{border: '3px solid var(--card-border)'}}>
                   <AvatarFallback className="text-xs">
                     {member.users?.full_name?.substring(0, 2).toUpperCase() || member.users?.email?.substring(0, 2).toUpperCase() || 'U'}
                   </AvatarFallback>
                 </Avatar>
               ))}
               {members.length > 3 && (
-                <div className="w-6 h-6 rounded-full bg-[var(--muted)] flex items-center justify-center" style={{border: '2px solid var(--card-border)'}}>
+                <div className="w-6 h-6 rounded-full bg-[var(--muted)] flex items-center justify-center" style={{border: '3px solid var(--card-border)'}}>
                   <span className="text-xs font-medium text-[var(--muted-foreground)]">+{members.length - 3}</span>
                 </div>
               )}
