@@ -89,16 +89,32 @@ export default function OrganizationActivity() {
       // Get contacts
       const { data: contacts } = await supabase
         .from('contacts')
-        .select('id, first_name, last_name, created_at, company_name')
+        .select(`
+          id, 
+          first_name, 
+          last_name, 
+          created_at, 
+          company_name,
+          created_by,
+          organization_members!contacts_created_by_fkey (
+            users (
+              full_name,
+              avatar_url
+            )
+          )
+        `)
         .eq('organization_id', currentOrganization.id)
         .order('created_at', { ascending: false });
 
       contacts?.forEach(contact => {
         allActivities.push({
+          id: `contact-${contact.id}`,
           type: 'contact',
+          type_label: 'Nuevo Contacto',
           title: 'Nuevo contacto agregado',
           description: `Se agregó a ${contact.first_name} ${contact.last_name}${contact.company_name ? ` de ${contact.company_name}` : ''}`,
           created_at: contact.created_at,
+          author: contact.organization_members?.users || userData?.user || { full_name: 'Usuario', avatar_url: '' },
           clickAction: () => navigate('/organization/contacts')
         });
       });
@@ -106,16 +122,32 @@ export default function OrganizationActivity() {
       // Get site logs
       const { data: siteLogs } = await supabase
         .from('site_logs')
-        .select('id, entry_type, weather, comments, created_at')
+        .select(`
+          id, 
+          entry_type, 
+          weather, 
+          comments, 
+          created_at,
+          created_by,
+          organization_members!site_logs_created_by_fkey (
+            users (
+              full_name,
+              avatar_url
+            )
+          )
+        `)
         .eq('organization_id', currentOrganization.id)
         .order('created_at', { ascending: false });
 
       siteLogs?.forEach(log => {
         allActivities.push({
+          id: `site_log-${log.id}`,
           type: 'site_log',
+          type_label: 'Nueva Bitácora',
           title: 'Nueva entrada de bitácora',
           description: `Entrada ${log.entry_type} - ${log.weather}`,
           created_at: log.created_at,
+          author: log.organization_members?.users || userData?.user || { full_name: 'Usuario', avatar_url: '' },
           clickAction: () => navigate('/construction/site-logs')
         });
       });
@@ -237,61 +269,103 @@ export default function OrganizationActivity() {
     );
   }
 
+  // Configuración de columnas para la tabla
+  const columns = [
+    {
+      key: 'created_at',
+      label: 'Fecha',
+      render: (activity: any) => (
+        <div className="flex flex-col">
+          <span className="text-sm font-medium">
+            {format(new Date(activity.created_at), 'dd MMM yyyy', { locale: es })}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {formatDistanceToNow(new Date(activity.created_at), { 
+              addSuffix: true, 
+              locale: es 
+            })}
+          </span>
+        </div>
+      ),
+      sortable: true,
+      sortType: 'date' as const
+    },
+    {
+      key: 'author',
+      label: 'Autor',
+      render: (activity: any) => (
+        <div className="flex items-center gap-2">
+          <Avatar className="w-8 h-8">
+            <AvatarImage src={activity.author?.avatar_url} />
+            <AvatarFallback className="text-xs">
+              {getInitials(activity.author?.full_name || 'Usuario')}
+            </AvatarFallback>
+          </Avatar>
+          <span className="text-sm font-medium">
+            {activity.author?.full_name || 'Usuario'}
+          </span>
+        </div>
+      ),
+      sortable: true,
+      sortType: 'string' as const
+    },
+    {
+      key: 'type_label',
+      label: 'Tipo',
+      render: (activity: any) => (
+        <Badge variant="outline" className="text-xs">
+          {activity.type_label}
+        </Badge>
+      ),
+      sortable: true,
+      sortType: 'string' as const
+    },
+    {
+      key: 'description',
+      label: 'Descripción',
+      render: (activity: any) => (
+        <span className="text-sm text-muted-foreground">
+          {activity.description}
+        </span>
+      ),
+      sortable: true,
+      sortType: 'string' as const
+    },
+    {
+      key: 'actions',
+      label: 'Acciones',
+      render: (activity: any) => (
+        <Button 
+          size="sm" 
+          variant="ghost"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleActivityClick(activity);
+          }}
+          className="h-8 px-2 text-xs"
+        >
+          <Eye className="w-3 h-3 mr-1" />
+          Ver detalles
+        </Button>
+      ),
+      sortable: false
+    }
+  ];
+
   return (
     <Layout headerProps={headerProps}>
-        {isLoading ? (
-          <div className="text-center py-12 text-muted-foreground">
-            <Activity className="h-12 w-12 mx-auto mb-4 opacity-20 animate-spin" />
-            <p className="text-sm">Cargando actividad...</p>
-          </div>
-        ) : activities.length > 0 ? (
-          activities.map((activity, index) => (
-            <Card 
-              key={index}
-              className="hover:bg-gray-50 cursor-pointer transition-colors"
-              onClick={() => handleActivityClick(activity)}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-start gap-4">
-                  <div className={`p-3 rounded-lg ${getActivityColor(activity.type)}`}>
-                    {getActivityIcon(activity.type)}
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-medium text-sm">{activity.title}</h3>
-                      <div className="flex items-center gap-2">
-                        {getActivityBadge(activity)}
-                        <span className="text-xs text-muted-foreground">
-                          {format(new Date(activity.created_at), 'dd MMM yyyy HH:mm', { locale: es })}
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <p className="text-sm text-muted-foreground mb-2">
-                      {activity.description}
-                    </p>
-                    
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">
-                        Hace {format(new Date(activity.created_at), 'dd/MM/yyyy', { locale: es })}
-                      </span>
-                      <Button variant="ghost" size="sm" className="h-6 text-xs">
-                        Ver detalles →
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        ) : (
-          <div className="text-center py-12 text-muted-foreground">
-            <Activity className="h-12 w-12 mx-auto mb-4 opacity-20" />
-            <p className="text-sm">No hay actividad registrada.</p>
-            <p className="text-xs">La actividad aparecerá aquí cuando empieces a trabajar en la organización.</p>
-          </div>
-        )}
+        <CustomTable
+          columns={columns}
+          data={filteredActivities}
+          isLoading={isLoading}
+          emptyState={
+            <div className="text-center py-12 text-muted-foreground">
+              <Activity className="h-12 w-12 mx-auto mb-4 opacity-20" />
+              <p className="text-sm">No hay actividad reciente en esta organización.</p>
+              <p className="text-xs">La actividad aparecerá aquí cuando se creen proyectos, movimientos o contactos.</p>
+            </div>
+          }
+        />
     </Layout>
   );
 }
