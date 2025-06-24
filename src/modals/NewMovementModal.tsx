@@ -151,31 +151,36 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
   // Reset form when editing movement changes
   useEffect(() => {
     if (editingMovement && open) {
-      console.log('Editing movement:', editingMovement)
+      console.log('Loading movement for edit:', editingMovement)
       
-      // Set selected IDs first for dropdowns
+      // Set selected IDs for dropdown dependencies
       const typeId = editingMovement.type_id || 'none'
       const categoryId = editingMovement.category_id || 'none'
       
       setSelectedTypeId(typeId)
       setSelectedCategoryId(categoryId)
       
-      // Add delay to ensure categories are loaded
-      setTimeout(() => {
-        form.reset({
-          created_at: new Date(editingMovement.created_at),
-          created_by: editingMovement.created_by || '',
-          description: editingMovement.description || '',
-          amount: editingMovement.amount || 0,
-          type_id: typeId,
-          category_id: categoryId,
-          subcategory_id: editingMovement.subcategory_id || 'none',
-          currency_id: editingMovement.currency_id || '',
-          wallet_id: editingMovement.wallet_id || '',
-          file_url: editingMovement.file_url || '',
-          is_conversion: editingMovement.is_conversion || false,
-        })
-      }, 200)
+      // Reset form immediately with all values
+      form.reset({
+        created_at: new Date(editingMovement.created_at),
+        created_by: editingMovement.created_by || '',
+        description: editingMovement.description || '',
+        amount: editingMovement.amount || 0,
+        type_id: typeId,
+        category_id: categoryId,
+        subcategory_id: editingMovement.subcategory_id || 'none',
+        currency_id: editingMovement.currency_id || '',
+        wallet_id: editingMovement.wallet_id || '',
+        file_url: editingMovement.file_url || '',
+        is_conversion: editingMovement.is_conversion || false,
+      })
+      
+      console.log('Form reset with values:', {
+        type_id: typeId,
+        category_id: categoryId,
+        currency_id: editingMovement.currency_id,
+        wallet_id: editingMovement.wallet_id
+      })
     } else if (!editingMovement && open) {
       setSelectedTypeId('none')
       setSelectedCategoryId('none')
@@ -316,8 +321,12 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
     }
   })
 
-  const handleSubmit = (data: CreateMovementForm) => {
-    createMovementMutation.mutate(data)
+  const handleSubmit = () => {
+    console.log('handleSubmit called');
+    form.handleSubmit((data: CreateMovementForm) => {
+      console.log('Form validation passed, submitting:', data);
+      createMovementMutation.mutate(data);
+    })();
   }
 
   const selectedMember = members.find(member => member.id === form.watch('created_by'))
@@ -452,7 +461,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-sm font-medium">Tipo</FormLabel>
-                <Select onValueChange={handleTypeChange} value={field.value}>
+                <Select onValueChange={handleTypeChange} value={field.value || 'none'}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar tipo" />
@@ -479,7 +488,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-sm font-medium">Categoría</FormLabel>
-                <Select onValueChange={handleCategoryChange} value={field.value} disabled={!selectedTypeId || selectedTypeId === 'none'}>
+                <Select onValueChange={handleCategoryChange} value={field.value || 'none'} disabled={!selectedTypeId || selectedTypeId === 'none'}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar categoría" />
@@ -506,7 +515,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-sm font-medium">Subcategoría</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value} disabled={!selectedCategoryId || selectedCategoryId === 'none'}>
+                <Select onValueChange={field.onChange} value={field.value || 'none'} disabled={!selectedCategoryId || selectedCategoryId === 'none'}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar subcategoría" />
@@ -533,7 +542,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-sm font-medium">Moneda</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select onValueChange={field.onChange} value={field.value || ''}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar moneda" />
@@ -542,7 +551,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                   <SelectContent>
                     {currencies.map((currency: any) => (
                       <SelectItem key={currency.id} value={currency.currency?.id || currency.currency_id}>
-                        {currency.currency?.name} ({currency.currency?.code}){currency.is_default && " (Por defecto)"}
+                        {currency.currency?.name} ({currency.currency?.code}){currency.is_default ? " (Por defecto)" : ""}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -559,7 +568,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-sm font-medium">Billetera</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select onValueChange={field.onChange} value={field.value || ''}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar billetera" />
@@ -568,7 +577,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                   <SelectContent>
                     {wallets.map((wallet: any) => (
                       <SelectItem key={wallet.id} value={wallet.wallet?.id || wallet.wallet_id}>
-                        {wallet.wallet?.name}{wallet.is_default && " (Por defecto)"}
+                        {wallet.wallet?.name}{wallet.is_default ? " (Por defecto)" : ""}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -653,11 +662,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
   const footer = (
     <CustomModalFooter
       onCancel={onClose}
-      onSave={() => {
-        const formData = form.getValues();
-        console.log('Form submission triggered with data:', formData);
-        handleSubmit(formData);
-      }}
+      onSave={handleSubmit}
       saveText={editingMovement ? 'Actualizar' : 'Crear movimiento'}
       saveLoading={createMovementMutation.isPending}
     />
