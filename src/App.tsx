@@ -38,17 +38,13 @@ function Router() {
 
       <Route path="/movimientos">
         <ProtectedRoute>
-          <Layout>
-            <Movements />
-          </Layout>
+          <Movements />
         </ProtectedRoute>
       </Route>
 
       <Route path="/bitacora">
         <ProtectedRoute>
-          <Layout>
-            <SiteLogs />
-          </Layout>
+          <SiteLogs />
         </ProtectedRoute>
       </Route>
 
