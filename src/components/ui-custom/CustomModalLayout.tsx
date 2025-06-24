@@ -1,75 +1,53 @@
-// CustomModalLayout.tsx
-import { useEffect } from "react";
-import { cn } from "@/lib/utils";
-
-interface ModalChildren {
-  header?: React.ReactNode;
-  body?: React.ReactNode;
-  footer?: React.ReactNode;
-}
+import React, { useEffect } from 'react'
 
 interface CustomModalLayoutProps {
-  open: boolean;
-  onClose: () => void;
-  children: ModalChildren;
-  className?: string;
+  open: boolean
+  onClose: () => void
+  children: {
+    header?: React.ReactNode
+    body?: React.ReactNode
+    footer?: React.ReactNode
+  }
 }
 
-export function CustomModalLayout({
-  open,
-  onClose,
-  children,
-  className,
-}: CustomModalLayoutProps) {
+export function CustomModalLayout({ open, onClose, children }: CustomModalLayoutProps) {
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape" && open) {
-        onClose();
+        onClose()
       }
-    };
+    }
 
     if (open) {
-      document.addEventListener("keydown", handleEscape);
-      document.body.style.overflow = "hidden";
+      document.addEventListener("keydown", handleEscape)
+      document.body.style.overflow = "hidden"
     }
 
     return () => {
-      document.removeEventListener("keydown", handleEscape);
-      document.body.style.overflow = "unset";
-    };
-  }, [open, onClose]);
+      document.removeEventListener("keydown", handleEscape)
+      document.body.style.overflow = "unset"
+    }
+  }, [open, onClose])
 
-  if (!open) return null;
+  if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-end">
-      {/* Overlay */}
-      <div
-        className="absolute inset-0 bg-black/50 transition-opacity duration-300 ease-in-out"
+    <div className="fixed inset-0 z-50 flex justify-end items-start overflow-hidden">
+      <div 
+        className="fixed inset-0 bg-black/50" 
         onClick={onClose}
       />
-
-      {/* Modal */}
-      <div
-        className={cn(
-          "relative z-10 flex flex-col bg-[--layout-bg] shadow-2xl transition-all duration-300 ease-in-out",
-          "h-full w-full md:w-[30vw] md:max-w-none",
-          className,
+      <div className="relative max-w-[420px] h-screen bg-white shadow-xl border-l border-border flex flex-col">
+        {children?.header && children.header}
+        
+        {children?.body && (
+          <div className="flex-1 overflow-y-auto">
+            {children.body}
+          </div>
         )}
-      >
-        {/* Layout vertical con header/footer fijos */}
-        <div className="flex flex-col h-full">
-          {children?.header && (
-            <div className="shrink-0">{children.header}</div>
-          )}
-          {children?.body && (
-            <div className="flex-1 min-h-0 overflow-y-auto">{children.body}</div>
-          )}
-          {children?.footer && (
-            <div className="shrink-0">{children.footer}</div>
-          )}
-        </div>
+        
+        {children?.footer && children.footer}
       </div>
     </div>
-  );
+  )
 }
