@@ -238,7 +238,6 @@ export default function Profile() {
 
   return (
     <Layout headerProps={headerProps}>
-      <div className="max-w-2xl mx-auto space-y-6">
         {/* Avatar Section */}
         <Card>
           <CardHeader className="flex flex-row items-center gap-4">
