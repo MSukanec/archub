@@ -3,18 +3,18 @@ import { Button } from "@/components/ui/button";
 
 interface CustomModalFooterProps {
   onCancel: () => void;
-  onSubmit: () => void;
-  cancelLabel?: string;
-  submitLabel?: string;
-  disabled?: boolean;
+  onSave: () => void;
+  cancelText?: string;
+  saveText?: string;
+  saveLoading?: boolean;
 }
 
 export function CustomModalFooter({
   onCancel,
-  onSubmit,
-  cancelLabel = "Cancelar",
-  submitLabel = "Guardar",
-  disabled = false,
+  onSave,
+  cancelText = "Cancelar",
+  saveText = "Guardar",
+  saveLoading = false,
 }: CustomModalFooterProps) {
   return (
     <div className="p-3 border-t border-[var(--card-border)] mt-auto">
@@ -25,15 +25,15 @@ export function CustomModalFooter({
           onClick={onCancel}
           className="w-1/4"
         >
-          {cancelLabel}
+          {cancelText}
         </Button>
         <Button
-          type="submit"
-          onClick={onSubmit}
+          type="button"
+          onClick={onSave}
           className="w-3/4"
-          disabled={disabled}
+          disabled={saveLoading}
         >
-          {submitLabel}
+          {saveLoading ? "Guardando..." : saveText}
         </Button>
       </div>
     </div>

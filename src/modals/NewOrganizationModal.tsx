@@ -69,6 +69,9 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
 
   const organizationMutation = useMutation({
     mutationFn: async (formData: OrganizationFormData) => {
+      console.log('Mutation function called with:', formData)
+      console.log('User data:', userData?.user?.id)
+      
       if (editingOrganization) {
         const { error } = await supabase
           .from('organizations')
@@ -78,20 +81,26 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
           .eq('id', editingOrganization.id)
 
         if (error) {
+          console.error('Update error:', error)
           throw new Error('No se pudo actualizar la organización')
         }
       } else {
-        const { error } = await supabase.rpc('archub_new_organization', {
+        console.log('Creating new organization...')
+        const { data, error } = await supabase.rpc('archub_new_organization', {
           _organization_name: formData.name,
           _user_id: userData?.user?.id
         })
 
+        console.log('RPC response:', { data, error })
+
         if (error) {
+          console.error('Creation error:', error)
           throw new Error(error.message || 'No se pudo crear la organización')
         }
       }
     },
     onSuccess: () => {
+      console.log('Organization mutation succeeded')
       toast({
         title: "Éxito",
         description: editingOrganization ? "Organización actualizada correctamente" : "Organización creada correctamente"
@@ -100,6 +109,7 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
       handleClose()
     },
     onError: (error: any) => {
+      console.error('Organization mutation failed:', error)
       toast({
         title: "Error",
         description: error.message || "Ocurrió un error inesperado",
@@ -109,6 +119,7 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
   })
 
   const handleSubmit = (data: OrganizationFormData) => {
+    console.log('Form submitted with data:', data)
     organizationMutation.mutate(data)
   }
 
@@ -154,7 +165,12 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
         footer: (
           <CustomModalFooter
             onCancel={handleClose}
-            onSave={form.handleSubmit(handleSubmit)}
+            onSave={() => {
+              console.log('Save button clicked')
+              console.log('Form errors:', form.formState.errors)
+              console.log('Form values:', form.getValues())
+              form.handleSubmit(handleSubmit)()
+            }}
             saveText={editingOrganization ? 'Actualizar' : 'Crear organización'}
             saveLoading={organizationMutation.isPending}
           />
