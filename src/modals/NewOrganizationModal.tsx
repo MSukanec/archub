@@ -69,9 +69,6 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
 
   const organizationMutation = useMutation({
     mutationFn: async (formData: OrganizationFormData) => {
-      console.log('Mutation function called with:', formData)
-      console.log('User data:', userData?.user?.id)
-      
       if (editingOrganization) {
         const { error } = await supabase
           .from('organizations')
@@ -81,35 +78,45 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
           .eq('id', editingOrganization.id)
 
         if (error) {
-          console.error('Update error:', error)
           throw new Error('No se pudo actualizar la organización')
         }
       } else {
-        console.log('Creating new organization...')
         const { data, error } = await supabase.rpc('archub_new_organization', {
           _organization_name: formData.name,
           _user_id: userData?.user?.id
         })
 
-        console.log('RPC response:', { data, error })
-
         if (error) {
-          console.error('Creation error:', error)
           throw new Error(error.message || 'No se pudo crear la organización')
         }
+        
+        return data // Devuelve el ID de la nueva organización
       }
     },
-    onSuccess: () => {
-      console.log('Organization mutation succeeded')
+    onSuccess: async (result) => {
       toast({
         title: "Éxito",
         description: editingOrganization ? "Organización actualizada correctamente" : "Organización creada correctamente"
       })
+      
+      // Si es una nueva organización, seleccionarla automáticamente
+      if (!editingOrganization && result) {
+        try {
+          const { error } = await supabase
+            .from('user_preferences')
+            .update({ last_organization_id: result })
+            .eq('user_id', userData?.user.id)
+          
+          if (error) console.error('Error selecting new organization:', error)
+        } catch (err) {
+          console.error('Error updating organization selection:', err)
+        }
+      }
+      
       queryClient.invalidateQueries({ queryKey: ['current-user'] })
       handleClose()
     },
     onError: (error: any) => {
-      console.error('Organization mutation failed:', error)
       toast({
         title: "Error",
         description: error.message || "Ocurrió un error inesperado",
@@ -119,7 +126,6 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
   })
 
   const handleSubmit = (data: OrganizationFormData) => {
-    console.log('Form submitted with data:', data)
     organizationMutation.mutate(data)
   }
 
@@ -165,12 +171,7 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
         footer: (
           <CustomModalFooter
             onCancel={handleClose}
-            onSave={() => {
-              console.log('Save button clicked')
-              console.log('Form errors:', form.formState.errors)
-              console.log('Form values:', form.getValues())
-              form.handleSubmit(handleSubmit)()
-            }}
+            onSave={form.handleSubmit(handleSubmit)}
             saveText={editingOrganization ? 'Actualizar' : 'Crear organización'}
             saveLoading={organizationMutation.isPending}
           />

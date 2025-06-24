@@ -186,14 +186,47 @@ export default function OrganizationManagement() {
   return (
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
+        {/* Card con información de la organización seleccionada */}
+        {userData?.organization && (
+          <Card className="mb-6">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <Avatar className="w-16 h-16">
+                    <AvatarFallback className="text-lg font-semibold">
+                      {userData.organization.name.substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h2 className="text-xl font-semibold">{userData.organization.name}</h2>
+                    <p className="text-sm text-muted-foreground">
+                      Creada el {format(new Date(userData.organization.created_at), 'dd/MM/yyyy', { locale: es })}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  {userData.organization.plan && (
+                    <div className="flex items-center gap-2">
+                      <Crown className="w-4 h-4 text-yellow-500" />
+                      <span className="font-medium">{userData.organization.plan.name}</span>
+                    </div>
+                  )}
+                  <Badge variant={userData.organization.is_active ? "default" : "secondary"}>
+                    {userData.organization.is_active ? "Activa" : "Inactiva"}
+                  </Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Headers de columnas */}
         <div className="grid grid-cols-12 gap-4 px-4 py-2 text-xs font-medium text-muted-foreground border-b">
           <div className="col-span-2">Fecha</div>
-          <div className="col-span-3">Organización</div>
+          <div className="col-span-4">Organización</div>
           <div className="col-span-2">Plan</div>
           <div className="col-span-2">Estado</div>
-          <div className="col-span-2">Tipo</div>
-          <div className="col-span-1">Acciones</div>
+          <div className="col-span-2">Acciones</div>
         </div>
 
         {/* Lista de organizaciones */}
@@ -220,7 +253,7 @@ export default function OrganizationManagement() {
                     </div>
 
                     {/* Organización */}
-                    <div className="col-span-3 flex items-center gap-2">
+                    <div className="col-span-4 flex items-center gap-2">
                       <Avatar className="w-8 h-8">
                         <AvatarFallback className="text-xs">
                           {organization.name.substring(0, 2).toUpperCase()}
@@ -257,20 +290,8 @@ export default function OrganizationManagement() {
                       </Badge>
                     </div>
 
-                    {/* Tipo */}
-                    <div className="col-span-2">
-                      {organization.is_system ? (
-                        <Badge variant="outline" className="text-xs">
-                          <Shield className="w-3 h-3 mr-1" />
-                          Sistema
-                        </Badge>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">Regular</span>
-                      )}
-                    </div>
-
                     {/* Acciones */}
-                    <div className="col-span-1">
+                    <div className="col-span-2">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button 
