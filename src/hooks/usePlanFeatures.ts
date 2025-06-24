@@ -54,7 +54,7 @@ export function usePlanFeatures(): PlanFeatures {
       return Infinity;
     }
     if (planName === 'Free' && feature === 'max_members') {
-      return 5;
+      return 1; // Solo el admin
     }
     
     // Si es false o no existe, límite es 0

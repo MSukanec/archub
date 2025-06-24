@@ -43,8 +43,8 @@ export function CustomRestricted({
       const featureLimit = limit(feature);
       // Verificar límite
       
-      // Solo restringir si hay un límite válido y se alcanzó
-      if (featureLimit > 0 && featureLimit !== Infinity && current >= featureLimit) {
+      // Restringir si se alcanzó o superó el límite
+      if (featureLimit !== Infinity && current >= featureLimit) {
         isRestricted = true;
         restrictionKey = feature;
       }
