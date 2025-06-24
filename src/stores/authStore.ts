@@ -7,6 +7,8 @@ interface AuthState {
   loading: boolean;
   initialized: boolean;
   initialize: () => Promise<void>;
+  signIn: (email: string, password: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -56,6 +58,48 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       console.error("Initialize error:", err);
       set({ user: null, loading: false, initialized: true });
     }
+  },
+
+  signIn: async (email: string, password: string) => {
+    if (!supabase) {
+      throw new Error("Supabase client not initialized");
+    }
+
+    set({ loading: true });
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      set({ loading: false });
+      throw error;
+    }
+
+    set({ user: data.user, loading: false });
+  },
+
+  signInWithGoogle: async () => {
+    if (!supabase) {
+      throw new Error("Supabase client not initialized");
+    }
+
+    set({ loading: true });
+
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin
+      }
+    });
+
+    if (error) {
+      set({ loading: false });
+      throw error;
+    }
+
+    // OAuth redirect will handle the state change
   },
 
   logout: async () => {
