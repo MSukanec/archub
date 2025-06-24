@@ -68,6 +68,13 @@ export default function Movements() {
   const [deletingMovement, setDeletingMovement] = useState<Movement | null>(null);
   const [selectedMovements, setSelectedMovements] = useState<Movement[]>([]);
   
+  const { setSidebarContext } = useNavigationStore();
+  
+  // Set sidebar context to finance when component mounts
+  useEffect(() => {
+    setSidebarContext('finance');
+  }, [setSidebarContext]);
+  
   // Filter states
   const [sortBy, setSortBy] = useState('date');
   const [filterByType, setFilterByType] = useState('all');
@@ -396,34 +403,35 @@ export default function Movements() {
   const headerProps = {
     title: "Movimientos",
     icon: <DollarSign className="h-5 w-5" />,
-    breadcrumb: "FINANZAS",
     showSearch: true,
     searchValue,
     onSearchChange: setSearchValue,
     customFilters,
     onClearFilters: handleClearFilters,
-    actions: (
-      <div className="flex items-center gap-2">
-        {selectedMovements.length > 0 && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleDeleteSelected}
-            disabled={deleteMultipleMovementsMutation.isPending}
-            className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        )}
-        <Button onClick={() => {
+    actions: [
+      selectedMovements.length > 0 && (
+        <Button
+          key="delete-selected"
+          variant="ghost"
+          size="icon"
+          onClick={handleDeleteSelected}
+          disabled={deleteMultipleMovementsMutation.isPending}
+          className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      ),
+      <Button 
+        key="new-movement"
+        onClick={() => {
           setEditingMovement(null);
           setShowNewMovementModal(true);
-        }}>
-          <Plus className="mr-2 h-4 w-4" />
-          Nuevo movimiento
-        </Button>
-      </div>
-    )
+        }}
+      >
+        <Plus className="mr-2 h-4 w-4" />
+        Nuevo movimiento
+      </Button>
+    ].filter(Boolean)
   };
 
   return (

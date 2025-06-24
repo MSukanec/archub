@@ -37,7 +37,7 @@ export function Header({
   showSearch = false,
   searchValue = "",
   onSearchChange,
-  showFilters = false,
+  showFilters = true,
   filters = [],
   customFilters,
   onClearFilters,
@@ -355,7 +355,7 @@ export function Header({
           </div>
         )}
 
-        {showFilters && hasFilters && (
+        {hasFilters && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
