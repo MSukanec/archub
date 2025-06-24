@@ -1,30 +1,42 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
+import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { useMutation, useQuery } from '@tanstack/react-query'
-import { Calendar, DollarSign, FileText } from 'lucide-react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from '@/hooks/use-toast'
+import { supabase } from '@/lib/supabase'
+import { useCurrentUser } from '@/hooks/use-current-user'
+import { CalendarIcon, FileIcon } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Calendar } from '@/components/ui/calendar'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Checkbox } from '@/components/ui/checkbox'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { CustomModalLayout } from '@/components/ui-custom/CustomModalLayout'
 import { CustomModalHeader } from '@/components/ui-custom/CustomModalHeader'
 import { CustomModalBody } from '@/components/ui-custom/CustomModalBody'
 import { CustomModalFooter } from '@/components/ui-custom/CustomModalFooter'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Button } from '@/components/ui/button'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Calendar as CalendarComponent } from '@/components/ui/calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
-import { cn } from '@/lib/utils'
-import { useToast } from '@/hooks/use-toast'
-import { queryClient } from '@/lib/queryClient'
-import { supabase } from '@/lib/supabase'
-import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useMovementConcepts } from '@/hooks/use-movement-concepts'
 import { useCurrencies } from '@/hooks/use-currencies'
@@ -41,9 +53,7 @@ const createMovementSchema = z.object({
   created_by: z.string().min(1, 'El creador es requerido'),
   file_url: z.string().optional(),
   is_conversion: z.boolean().optional(),
-  created_at: z.date({
-    required_error: "La fecha es requerida",
-  })
+  created_at: z.date()
 })
 
 type CreateMovementForm = z.infer<typeof createMovementSchema>
@@ -72,64 +82,32 @@ interface NewMovementModalProps {
 }
 
 export function NewMovementModal({ open, onClose, editingMovement }: NewMovementModalProps) {
-  const { toast } = useToast()
-  const { data: userData } = useCurrentUser()
+  const { data: userData, isLoading: userLoading } = useCurrentUser()
+  const queryClient = useQueryClient()
+  
   const organizationId = userData?.preferences?.last_organization_id
   const projectId = userData?.preferences?.last_project_id
-  
-  const { data: members = [] } = useOrganizationMembers(organizationId)
-  const { data: types = [] } = useMovementConcepts('types')
-  // Fetch organization currencies and wallets (not direct tables)
-  const { data: currencies = [] } = useQuery({
-    queryKey: ['organization-currencies', organizationId],
-    queryFn: async () => {
-      if (!organizationId) return [];
-      
-      const { data, error } = await supabase
-        .from('organization_currencies')
-        .select(`
-          *,
-          currency:currencies(*)
-        `)
-        .eq('organization_id', organizationId);
-      
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching organization currencies:', error);
-        return [];
-      }
-      return data || [];
-    },
-    enabled: !!organizationId,
-  });
 
-  const { data: wallets = [] } = useQuery({
-    queryKey: ['organization-wallets', organizationId],
-    queryFn: async () => {
-      if (!organizationId) return [];
-      
-      const { data, error } = await supabase
-        .from('organization_wallets')
-        .select(`
-          *,
-          wallet:wallets(*)
-        `)
-        .eq('organization_id', organizationId);
-      
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching organization wallets:', error);
-        return [];
-      }
-      return data || [];
-    },
-    enabled: !!organizationId,
-  });
+  const { data: members = [], isLoading: membersLoading } = useOrganizationMembers(organizationId)
+  const { data: types = [], isLoading: typesLoading } = useMovementConcepts('parent')
+  const { data: currencies = [], isLoading: currenciesLoading } = useCurrencies(organizationId)
+  const { data: wallets = [], isLoading: walletsLoading } = useWallets(organizationId)
 
-  const [selectedTypeId, setSelectedTypeId] = useState<string>('none')
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('none')
-  const { data: categories = [] } = useMovementConcepts('categories', selectedTypeId === 'none' ? undefined : selectedTypeId)
-  const { data: subcategories = [] } = useMovementConcepts('categories', selectedCategoryId === 'none' ? undefined : selectedCategoryId)
+  const [selectedTypeId, setSelectedTypeId] = useState<string>('')
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('')
 
+  // Check if all data is loaded
+  const isDataLoading = userLoading || membersLoading || typesLoading || currenciesLoading || walletsLoading
+  const hasRequiredData = userData && organizationId && projectId
 
+  // Filter categories and subcategories based on selections
+  const categories = types.find(type => type.id === selectedTypeId)?.children || []
+  const subcategories = categories.find(category => category.id === selectedCategoryId)?.children || []
+
+  // Get default values from organization preferences
+  const defaultCurrency = currencies.find((c: any) => c.is_default)
+  const defaultWallet = wallets.find((w: any) => w.is_default)
+  const currentUser = members.find(member => member.user_id === userData?.user?.id)
 
   const form = useForm<CreateMovementForm>({
     resolver: zodResolver(createMovementSchema),
@@ -138,9 +116,9 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
       created_by: '',
       description: '',
       amount: 0,
-      type_id: 'none',
-      category_id: 'none',
-      subcategory_id: 'none',
+      type_id: '',
+      category_id: '',
+      subcategory_id: '',
       currency_id: '',
       wallet_id: '',
       file_url: '',
@@ -148,19 +126,19 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
     }
   })
 
-  // Reset form when editing movement changes
+  // Initialize form when data is loaded
   useEffect(() => {
-    if (editingMovement && open) {
-      console.log('Loading movement for edit:', editingMovement)
-      
-      // Set selected IDs for dropdown dependencies
-      const typeId = editingMovement.type_id || 'none'
-      const categoryId = editingMovement.category_id || 'none'
+    if (!open || isDataLoading || !hasRequiredData) return
+
+    if (editingMovement) {
+      // Edit mode: populate with existing data
+      const typeId = editingMovement.type_id || ''
+      const categoryId = editingMovement.category_id || ''
       
       setSelectedTypeId(typeId)
       setSelectedCategoryId(categoryId)
       
-      // Wait for dependencies to load before setting form values
+      // Use setTimeout to ensure all data is ready
       setTimeout(() => {
         form.reset({
           created_at: new Date(editingMovement.created_at),
@@ -169,88 +147,52 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
           amount: editingMovement.amount || 0,
           type_id: typeId,
           category_id: categoryId,
-          subcategory_id: editingMovement.subcategory_id || 'none',
+          subcategory_id: editingMovement.subcategory_id || '',
           currency_id: editingMovement.currency_id || '',
           wallet_id: editingMovement.wallet_id || '',
           file_url: editingMovement.file_url || '',
           is_conversion: editingMovement.is_conversion || false,
         })
         
-        // Force update form values
-        form.setValue('type_id', typeId)
-        form.setValue('category_id', categoryId)
-        form.setValue('currency_id', editingMovement.currency_id || '')
-        form.setValue('wallet_id', editingMovement.wallet_id || '')
-        
-        console.log('Form reset with values:', {
-          type_id: typeId,
-          category_id: categoryId,
-          currency_id: editingMovement.currency_id,
-          wallet_id: editingMovement.wallet_id
-        })
-      }, 300)
-    } else if (!editingMovement && open) {
-      setSelectedTypeId('none')
-      setSelectedCategoryId('none')
+        console.log('Edit form initialized')
+      }, 100)
+    } else {
+      // Create mode: use defaults
+      setSelectedTypeId('')
+      setSelectedCategoryId('')
+      
+      const defaultCurrencyId = defaultCurrency?.currency?.id || defaultCurrency?.currency_id || ''
+      const defaultWalletId = defaultWallet?.wallet?.id || defaultWallet?.wallet_id || ''
+      
       form.reset({
         created_at: new Date(),
-        created_by: '',
+        created_by: currentUser?.id || '',
         description: '',
         amount: 0,
-        type_id: 'none',
-        category_id: 'none',
-        subcategory_id: 'none',
-        currency_id: '',
-        wallet_id: '',
+        type_id: '',
+        category_id: '',
+        subcategory_id: '',
+        currency_id: defaultCurrencyId,
+        wallet_id: defaultWalletId,
         file_url: '',
         is_conversion: false,
       })
+      
+      console.log('Create form initialized with defaults')
     }
-  }, [editingMovement, open, form, categories, currencies, wallets])
+  }, [open, editingMovement, isDataLoading, hasRequiredData, defaultCurrency, defaultWallet, currentUser, form])
 
-  // Auto-select current user as creator for new movements only
+  // Reset form when modal closes
   useEffect(() => {
-    if (!editingMovement && userData?.user?.id && members.length > 0) {
-      const currentMember = members.find(member => member.user_id === userData.user.id)
-      if (currentMember && !form.getValues('created_by')) {
-        form.setValue('created_by', currentMember.id)
-      }
+    if (!open) {
+      setSelectedTypeId('')
+      setSelectedCategoryId('')
+      form.reset()
     }
-  }, [userData, members, form, editingMovement])
-
-  // Set default currency and wallet for new movements only
-  useEffect(() => {
-    if (!editingMovement && currencies.length > 0 && !form.getValues('currency_id')) {
-      console.log('Setting default currency from:', currencies);
-      const defaultCurrency = currencies.find((c: any) => c.is_default) || currencies[0]
-      if (defaultCurrency) {
-        const currencyId = defaultCurrency.currency?.id || defaultCurrency.currency_id
-        console.log('Setting default currency ID:', currencyId);
-        form.setValue('currency_id', currencyId)
-      }
-    }
-  }, [currencies, form, editingMovement])
-
-  useEffect(() => {
-    if (!editingMovement && wallets.length > 0 && !form.getValues('wallet_id')) {
-      console.log('Setting default wallet from:', wallets);
-      const defaultWallet = wallets.find((w: any) => w.is_default) || wallets[0]
-      if (defaultWallet) {
-        const walletId = defaultWallet.wallet?.id || defaultWallet.wallet_id
-        console.log('Setting default wallet ID:', walletId);
-        form.setValue('wallet_id', walletId)
-      }
-    }
-  }, [wallets, form, editingMovement])
+  }, [open, form])
 
   const createMovementMutation = useMutation({
     mutationFn: async (formData: CreateMovementForm) => {
-      console.log('Processing movement with data:', formData)
-      
-      if (!supabase) {
-        throw new Error('Supabase client not initialized')
-      }
-
       if (!organizationId || !projectId) {
         throw new Error('Organization and project must be selected')
       }
@@ -272,8 +214,8 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
           .eq('id', editingMovement.id)
 
         if (error) {
-          console.error('Supabase error updating movement:', error)
-          throw new Error(`Error updating movement: ${error.message}`)
+          console.error('Error updating movement:', error)
+          throw new Error('Failed to update movement')
         }
 
         console.log('Movement updated successfully')
@@ -295,17 +237,14 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
           project_id: projectId
         }
 
-        console.log('Submitting movement data to Supabase:', movementData)
-
-        const { data, error } = await supabase
+        const { error, data } = await supabase
           .from('movements')
-          .insert(movementData)
+          .insert([movementData])
           .select()
-          .single()
 
         if (error) {
-          console.error('Supabase error:', error)
-          throw new Error(`Error creating movement: ${error.message}`)
+          console.error('Error creating movement:', error)
+          throw new Error('Failed to create movement')
         }
 
         console.log('Movement created successfully:', data)
@@ -331,15 +270,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
 
   const handleSubmit = (data: CreateMovementForm) => {
     console.log('Submitting movement data:', data)
-    
-    const processedData = {
-      ...data,
-      type_id: data.type_id || null,
-      category_id: data.category_id || null,
-      subcategory_id: data.subcategory_id || null,
-    }
-    
-    createMovementMutation.mutate(processedData)
+    createMovementMutation.mutate(data)
   }
 
   const selectedMember = members.find(member => member.id === form.watch('created_by'))
@@ -360,16 +291,15 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
 
   const header = (
     <CustomModalHeader
-      title={editingMovement ? 'Editar movimiento' : 'Nuevo movimiento'}
-      description={editingMovement ? 'Actualiza la información del movimiento' : 'Registra un nuevo movimiento financiero'}
-      onClose={onClose}
+      title={editingMovement ? 'Editar movimiento' : 'Crear movimiento'}
+      description={editingMovement ? 'Actualiza la información del movimiento' : 'Crea un nuevo movimiento financiero'}
     />
   )
 
   const body = (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-0" id="movement-form">
-        <CustomModalBody padding="md">
+    <CustomModalBody padding="md">
+      <Form {...form}>
+        <form className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             {/* 1. Fecha */}
             <FormField
@@ -378,295 +308,282 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-sm font-medium">Fecha</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP", { locale: es })
-                        ) : (
-                          <span>Seleccionar fecha</span>
-                        )}
-                        <Calendar className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <CalendarComponent
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) =>
-                        date > new Date() || date < new Date("1900-01-01")
-                      }
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button variant="outline" className="w-full justify-start text-left font-normal">
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {field.value ? format(field.value, "dd 'de' MMMM 'de' yyyy", { locale: es }) : "Seleccionar fecha"}
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          {/* 2. Creador */}
-          <FormField
-            control={form.control}
-            name="created_by"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-sm font-medium">Creador</FormLabel>
+            {/* 2. Creador */}
+            <FormField
+              control={form.control}
+              name="created_by"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-medium">Creador</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <div className="flex items-center gap-2">
-                          {selectedMember && (
-                            <>
-                              <Avatar className="h-6 w-6">
-                                <AvatarImage src={(selectedMember as any).users?.avatar_url} />
-                                <AvatarFallback className="text-xs">
-                                  {(selectedMember as any).users?.full_name?.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) || 
-                                   (selectedMember as any).users?.email?.slice(0, 2).toUpperCase() || 'U'}
-                                </AvatarFallback>
-                              </Avatar>
-                              <span className="truncate">
-                                {(selectedMember as any).users?.full_name || (selectedMember as any).users?.email || 'Usuario'}
-                              </span>
-                            </>
-                          )}
-                          {!selectedMember && <SelectValue placeholder="Seleccionar creador" />}
-                        </div>
+                        <SelectValue placeholder="Seleccionar creador" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {members.map((member: any) => (
                         <SelectItem key={member.id} value={member.id}>
                           <div className="flex items-center gap-2">
-                            <Avatar className="h-6 w-6">
-                              <AvatarImage src={member.users?.avatar_url} />
+                            <Avatar className="h-5 w-5">
+                              <AvatarImage src={member.user?.avatar_url} />
                               <AvatarFallback className="text-xs">
-                                {member.users?.full_name?.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) || 
-                                 member.users?.email?.slice(0, 2).toUpperCase() || 'U'}
+                                {member.user?.full_name?.charAt(0) || member.user?.email?.charAt(0)}
                               </AvatarFallback>
                             </Avatar>
-                            <span className="truncate">
-                              {member.users?.full_name || member.users?.email || 'Usuario'}
-                            </span>
+                            <span>{member.user?.full_name || member.user?.email}</span>
                           </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
-          {/* 3. Tipo */}
-          <FormField
-            control={form.control}
-            name="type_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-sm font-medium">Tipo</FormLabel>
-                <Select onValueChange={handleTypeChange} value={field.value || ''}>
+          <div className="grid grid-cols-2 gap-4">
+            {/* 3. Tipo */}
+            <FormField
+              control={form.control}
+              name="type_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-medium">Tipo</FormLabel>
+                  <Select onValueChange={handleTypeChange} value={field.value || ''}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar tipo" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {types.map((type: any) => (
+                        <SelectItem key={type.id} value={type.id}>
+                          {type.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* 4. Categoría */}
+            <FormField
+              control={form.control}
+              name="category_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-medium">Categoría</FormLabel>
+                  <Select onValueChange={handleCategoryChange} value={field.value || ''} disabled={!selectedTypeId}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar categoría" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {categories.map((category: any) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            {/* 5. Subcategoría */}
+            <FormField
+              control={form.control}
+              name="subcategory_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-medium">Subcategoría</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value || ''} disabled={!selectedCategoryId}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar subcategoría" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {subcategories.map((subcategory: any) => (
+                        <SelectItem key={subcategory.id} value={subcategory.id}>
+                          {subcategory.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* 6. Moneda */}
+            <FormField
+              control={form.control}
+              name="currency_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-medium">Moneda</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value || ''}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar moneda" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {currencies.map((currency: any) => (
+                        <SelectItem key={currency.id} value={currency.currency?.id || currency.currency_id}>
+                          {currency.currency?.name} ({currency.currency?.code}){currency.is_default ? " (Por defecto)" : ""}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            {/* 7. Billetera */}
+            <FormField
+              control={form.control}
+              name="wallet_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-medium">Billetera</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value || ''}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar billetera" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {wallets.map((wallet: any) => (
+                        <SelectItem key={wallet.id} value={wallet.wallet?.id || wallet.wallet_id}>
+                          {wallet.wallet?.name}{wallet.is_default ? " (Por defecto)" : ""}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* 8. Cantidad */}
+            <FormField
+              control={form.control}
+              name="amount"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-medium">Cantidad</FormLabel>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar tipo" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {types.map((type: any) => (
-                      <SelectItem key={type.id} value={type.id}>
-                        {type.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* 4. Categoría */}
-          <FormField
-            control={form.control}
-            name="category_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-sm font-medium">Categoría</FormLabel>
-                <Select onValueChange={handleCategoryChange} value={field.value || ''} disabled={!selectedTypeId}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar categoría" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {categories.map((category: any) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* 5. Subcategoría */}
-          <FormField
-            control={form.control}
-            name="subcategory_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-sm font-medium">Subcategoría</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value || ''} disabled={!selectedCategoryId}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar subcategoría" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {subcategories.map((subcategory: any) => (
-                      <SelectItem key={subcategory.id} value={subcategory.id}>
-                        {subcategory.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* 6. Moneda */}
-          <FormField
-            control={form.control}
-            name="currency_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-sm font-medium">Moneda</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value || ''}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar moneda" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {currencies.map((currency: any) => (
-                      <SelectItem key={currency.id} value={currency.currency?.id || currency.currency_id}>
-                        {currency.currency?.name} ({currency.currency?.code}){currency.is_default ? " (Por defecto)" : ""}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* 7. Billetera */}
-          <FormField
-            control={form.control}
-            name="wallet_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-sm font-medium">Billetera</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value || ''}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar billetera" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {wallets.map((wallet: any) => (
-                      <SelectItem key={wallet.id} value={wallet.wallet?.id || wallet.wallet_id}>
-                        {wallet.wallet?.name}{wallet.is_default ? " (Por defecto)" : ""}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* 8. Cantidad */}
-          <FormField
-            control={form.control}
-            name="amount"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-sm font-medium">Cantidad</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       type="number"
                       step="0.01"
-                      min="0"
                       placeholder="0.00"
-                      className="pl-10"
                       {...field}
                       onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                     />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
-        {/* 9. Descripción - Full width */}
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem className="mt-4">
-              <FormLabel className="text-sm font-medium">Descripción</FormLabel>
+          {/* 9. Descripción */}
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-medium">Descripción</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder="Describe el movimiento financiero..."
-                    className="min-h-[80px]"
+                    placeholder="Describe el movimiento..."
                     {...field}
                   />
                 </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        {/* 10. Archivo - Full width */}
-        <FormField
-          control={form.control}
-          name="file_url"
-          render={({ field }) => (
-            <FormItem className="mt-4">
-              <FormLabel className="text-sm font-medium">Archivo</FormLabel>
+          {/* 10. Archivo */}
+          <FormField
+            control={form.control}
+            name="file_url"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-medium">Archivo</FormLabel>
                 <FormControl>
-                  <div className="relative">
-                    <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="https://ejemplo.com/archivo.pdf"
-                      className="pl-10"
-                      {...field}
-                    />
-                  </div>
+                  <Input
+                    type="url"
+                    placeholder="https://ejemplo.com/archivo.pdf"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-        </CustomModalBody>
-      </form>
-    </Form>
+
+          {/* 11. Es conversión */}
+          <FormField
+            control={form.control}
+            name="is_conversion"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel className="text-sm font-medium">
+                    Es una conversión de moneda
+                  </FormLabel>
+                </div>
+              </FormItem>
+            )}
+          />
+        </form>
+      </Form>
+    </CustomModalBody>
   )
 
   // Show loading state while data is being fetched
