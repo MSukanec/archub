@@ -122,19 +122,21 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
       setSelectedTypeId(editingMovement.type_id || 'none')
       setSelectedCategoryId(editingMovement.category_id || 'none')
       
-      // Then reset form with data
-      form.reset({
-        created_at: new Date(editingMovement.created_at),
-        created_by: editingMovement.created_by || '',
-        description: editingMovement.description || '',
-        amount: editingMovement.amount || 0,
-        type_id: editingMovement.type_id || 'none',
-        category_id: editingMovement.category_id || 'none',
-        subcategory_id: editingMovement.subcategory_id || 'none',
-        currency_id: editingMovement.currency_id || '',
-        wallet_id: editingMovement.wallet_id || '',
-        file_url: editingMovement.file_url || '',
-      })
+      // Use setTimeout to ensure state updates are processed
+      setTimeout(() => {
+        form.reset({
+          created_at: new Date(editingMovement.created_at),
+          created_by: editingMovement.created_by || '',
+          description: editingMovement.description || '',
+          amount: editingMovement.amount || 0,
+          type_id: editingMovement.type_id || 'none',
+          category_id: editingMovement.category_id || 'none',
+          subcategory_id: editingMovement.subcategory_id || 'none',
+          currency_id: editingMovement.currency_id || '',
+          wallet_id: editingMovement.wallet_id || '',
+          file_url: editingMovement.file_url || '',
+        })
+      }, 100)
     } else {
       setSelectedTypeId('none')
       setSelectedCategoryId('none')
@@ -300,13 +302,14 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-0" id="movement-form">
         <CustomModalBody padding="md">
-          {/* 1. Fecha */}
-          <FormField
-            control={form.control}
-            name="created_at"
-            render={({ field }) => (
-              <FormItem className="col-span-1">
-                <FormLabel className="text-sm font-medium">Fecha</FormLabel>
+          <div className="grid grid-cols-2 gap-4">
+            {/* 1. Fecha */}
+            <FormField
+              control={form.control}
+              name="created_at"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-medium">Fecha</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -340,16 +343,16 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                 </Popover>
                 <FormMessage />
               </FormItem>
-            )}
-          />
+                )}
+              />
 
-            {/* 2. Creador */}
-            <FormField
-              control={form.control}
-              name="created_by"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium">Creador</FormLabel>
+              {/* 2. Creador */}
+              <FormField
+                control={form.control}
+                name="created_by"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">Creador</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
@@ -393,16 +396,16 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                   </Select>
                   <FormMessage />
                 </FormItem>
-              )}
-            />
+                  )}
+                />
 
-          {/* 3. Tipo */}
-          <FormField
-            control={form.control}
-            name="type_id"
-            render={({ field }) => (
-              <FormItem className="col-span-1">
-                <FormLabel className="text-sm font-medium">Tipo</FormLabel>
+              {/* 3. Tipo */}
+              <FormField
+                control={form.control}
+                name="type_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">Tipo</FormLabel>
                 <Select onValueChange={handleTypeChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
@@ -420,16 +423,16 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                 </Select>
                 <FormMessage />
               </FormItem>
-            )}
-          />
+                )}
+              />
 
-          {/* 4. Categoría */}
-          <FormField
-            control={form.control}
-            name="category_id"
-            render={({ field }) => (
-              <FormItem className="col-span-1">
-                <FormLabel className="text-sm font-medium">Categoría</FormLabel>
+              {/* 4. Categoría */}
+              <FormField
+                control={form.control}
+                name="category_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">Categoría</FormLabel>
                 <Select onValueChange={handleCategoryChange} value={field.value} disabled={!selectedTypeId || selectedTypeId === 'none'}>
                   <FormControl>
                     <SelectTrigger>
@@ -447,16 +450,16 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                 </Select>
                 <FormMessage />
               </FormItem>
-            )}
-          />
+                )}
+              />
 
-          {/* 5. Subcategoría */}
-          <FormField
-            control={form.control}
-            name="subcategory_id"
-            render={({ field }) => (
-              <FormItem className="col-span-1">
-                <FormLabel className="text-sm font-medium">Subcategoría</FormLabel>
+              {/* 5. Subcategoría */}
+              <FormField
+                control={form.control}
+                name="subcategory_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">Subcategoría</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value} disabled={!selectedCategoryId || selectedCategoryId === 'none'}>
                   <FormControl>
                     <SelectTrigger>
@@ -474,16 +477,16 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                 </Select>
                 <FormMessage />
               </FormItem>
-            )}
-          />
+                )}
+              />
 
-          {/* 6. Moneda */}
-          <FormField
-            control={form.control}
-            name="currency_id"
-            render={({ field }) => (
-              <FormItem className="col-span-1">
-                <FormLabel className="text-sm font-medium">Moneda</FormLabel>
+              {/* 6. Moneda */}
+              <FormField
+                control={form.control}
+                name="currency_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">Moneda</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
@@ -500,16 +503,16 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                 </Select>
                 <FormMessage />
               </FormItem>
-            )}
-          />
+                )}
+              />
 
-          {/* 7. Billetera */}
-          <FormField
-            control={form.control}
-            name="wallet_id"
-            render={({ field }) => (
-              <FormItem className="col-span-1">
-                <FormLabel className="text-sm font-medium">Billetera</FormLabel>
+              {/* 7. Billetera */}
+              <FormField
+                control={form.control}
+                name="wallet_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">Billetera</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
@@ -526,16 +529,16 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                 </Select>
                 <FormMessage />
               </FormItem>
-            )}
-          />
+                )}
+              />
 
-          {/* 8. Cantidad */}
-          <FormField
-            control={form.control}
-            name="amount"
-            render={({ field }) => (
-              <FormItem className="col-span-1">
-                <FormLabel className="text-sm font-medium">Cantidad</FormLabel>
+              {/* 8. Cantidad */}
+              <FormField
+                control={form.control}
+                name="amount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">Cantidad</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -552,16 +555,17 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                 </FormControl>
                 <FormMessage />
               </FormItem>
-            )}
-          />
+                )}
+              />
+            </div>
 
-          {/* 9. Descripción */}
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem className="col-span-2">
-                <FormLabel className="text-sm font-medium">Descripción</FormLabel>
+            {/* 9. Descripción - Full width */}
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem className="mt-4">
+                  <FormLabel className="text-sm font-medium">Descripción</FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder="Describe el movimiento financiero..."
@@ -571,16 +575,16 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                 </FormControl>
                 <FormMessage />
               </FormItem>
-            )}
-          />
+              )}
+            />
 
-          {/* 10. Archivo */}
-          <FormField
-            control={form.control}
-            name="file_url"
-            render={({ field }) => (
-              <FormItem className="col-span-2">
-                <FormLabel className="text-sm font-medium">Archivo</FormLabel>
+            {/* 10. Archivo - Full width */}
+            <FormField
+              control={form.control}
+              name="file_url"
+              render={({ field }) => (
+                <FormItem className="mt-4">
+                  <FormLabel className="text-sm font-medium">Archivo</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />

@@ -229,9 +229,12 @@ export default function Movements() {
       sortable: true,
       sortType: 'date' as const,
       render: (movement: Movement) => (
-        <span className="text-xs">
-          {format(new Date(movement.created_at), 'dd/MM/yyyy', { locale: es })}
-        </span>
+        <div className="text-xs">
+          <div>{format(new Date(movement.created_at), 'dd/MM/yyyy', { locale: es })}</div>
+          <div className="text-muted-foreground text-xs">
+            {format(new Date(movement.created_at), 'HH:mm', { locale: es })}
+          </div>
+        </div>
       )
     },
     {
@@ -365,7 +368,10 @@ export default function Movements() {
     customFilters,
     onClearFilters: handleClearFilters,
     actions: (
-      <Button onClick={() => setShowNewMovementModal(true)}>
+      <Button onClick={() => {
+        setEditingMovement(null);
+        setShowNewMovementModal(true);
+      }}>
         <Plus className="mr-2 h-4 w-4" />
         Nuevo movimiento
       </Button>
