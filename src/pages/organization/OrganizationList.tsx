@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label'
 import { useState } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { Building, Crown, Plus, Calendar, Shield, MoreHorizontal, Edit, Trash2 } from 'lucide-react'
+import { Building, Crown, Plus, Calendar, Shield, MoreHorizontal, Edit, Trash2, Users } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
@@ -17,6 +17,133 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { NewOrganizationModal } from '@/modals/NewOrganizationModal'
+import { useOrganizationMembers } from '@/hooks/use-organization-members'
+
+// Componente para una sola tarjeta de organización
+function OrganizationCard({ organization, isSelected, onSelect, onEdit, onDelete }: {
+  organization: any,
+  isSelected: boolean,
+  onSelect: (id: string) => void,
+  onEdit: (org: any) => void,
+  onDelete: (org: any) => void
+}) {
+  const { data: members = [] } = useOrganizationMembers(organization.id)
+
+  return (
+    <Card 
+      className={`w-full cursor-pointer transition-all hover:shadow-sm border ${
+        isSelected ? 'border-[var(--accent)] bg-[var(--accent-bg)]' : ''
+      }`}
+      onClick={(e) => {
+        e.stopPropagation()
+        onSelect(organization.id)
+      }}
+    >
+      <CardContent className="p-4">
+        <div className="grid grid-cols-10 gap-4 items-center">
+          {/* Fecha */}
+          <div className="col-span-1 text-xs text-muted-foreground">
+            {format(new Date(organization.created_at), 'dd/MM/yyyy', { locale: es })}
+          </div>
+
+          {/* Organización */}
+          <div className="col-span-5 flex items-center gap-2">
+            <Avatar className="w-8 h-8 avatar-border">
+              <AvatarFallback className="text-xs">
+                {organization.name.substring(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <div className="font-medium flex items-center gap-2">
+                {organization.name}
+                {isSelected && (
+                  <Badge variant="secondary" className="text-xs">
+                    Activa
+                  </Badge>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Plan */}
+          <div className="col-span-1 text-xs">
+            {organization.plan ? (
+              <div className="flex items-center gap-1">
+                <Crown className="w-3 h-3 text-yellow-500" />
+                <span>{organization.plan.name}</span>
+              </div>
+            ) : (
+              <span className="text-muted-foreground">Sin plan</span>
+            )}
+          </div>
+
+          {/* Miembros */}
+          <div className="col-span-1 flex items-center gap-2">
+            <span className="text-xs font-medium">({members.length})</span>
+            <div className="flex -space-x-1">
+              {members.slice(0, 3).map((member, index) => (
+                <Avatar key={member.id} className="w-6 h-6 border-2 border-white avatar-border">
+                  <AvatarFallback className="text-xs">
+                    {member.users?.full_name?.substring(0, 2).toUpperCase() || member.users?.email?.substring(0, 2).toUpperCase() || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+              ))}
+              {members.length > 3 && (
+                <div className="w-6 h-6 rounded-full bg-[var(--muted)] border-2 border-white flex items-center justify-center">
+                  <span className="text-xs font-medium text-[var(--muted-foreground)]">+{members.length - 3}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Estado */}
+          <div className="col-span-1">
+            <Badge variant={organization.is_active ? "default" : "secondary"} className="text-xs">
+              {organization.is_active ? "Activa" : "Inactiva"}
+            </Badge>
+          </div>
+
+          {/* Acciones */}
+          <div className="col-span-1">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 w-8 p-0"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem 
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onEdit(organization)
+                  }}
+                >
+                  <Edit className="mr-2 h-4 w-4" />
+                  Editar
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onDelete(organization)
+                  }}
+                  className="text-destructive"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Eliminar
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
 
 export default function OrganizationManagement() {
   const [searchValue, setSearchValue] = useState("")
@@ -192,7 +319,7 @@ export default function OrganizationManagement() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <Avatar className="w-16 h-16">
+                  <Avatar className="w-16 h-16 avatar-border">
                     <AvatarFallback className="text-lg font-semibold">
                       {userData.organization.name.substring(0, 2).toUpperCase()}
                     </AvatarFallback>
@@ -221,12 +348,13 @@ export default function OrganizationManagement() {
         )}
 
         {/* Headers de columnas */}
-        <div className="grid grid-cols-12 gap-4 px-4 py-2 text-xs font-medium text-muted-foreground border-b">
-          <div className="col-span-2">Fecha</div>
-          <div className="col-span-4">Organización</div>
-          <div className="col-span-2">Plan</div>
-          <div className="col-span-2">Estado</div>
-          <div className="col-span-2">Acciones</div>
+        <div className="grid grid-cols-10 gap-4 px-4 py-2 text-xs font-medium text-muted-foreground border-b">
+          <div className="col-span-1">Fecha</div>
+          <div className="col-span-5">Organización</div>
+          <div className="col-span-1">Plan</div>
+          <div className="col-span-1">Miembros</div>
+          <div className="col-span-1">Estado</div>
+          <div className="col-span-1">Acciones</div>
         </div>
 
         {/* Lista de organizaciones */}
@@ -235,100 +363,14 @@ export default function OrganizationManagement() {
             const isSelected = userData?.organization?.id === organization.id
             
             return (
-              <Card 
-                key={organization.id} 
-                className={`w-full cursor-pointer transition-all hover:shadow-sm border ${
-                  isSelected ? 'border-[var(--accent)] bg-[var(--accent-bg)]' : ''
-                }`}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleSelectOrganization(organization.id)
-                }}
-              >
-                <CardContent className="p-4">
-                  <div className="grid grid-cols-12 gap-4 items-center">
-                    {/* Fecha */}
-                    <div className="col-span-2 text-xs text-muted-foreground">
-                      {format(new Date(organization.created_at), 'dd/MM/yyyy', { locale: es })}
-                    </div>
-
-                    {/* Organización */}
-                    <div className="col-span-4 flex items-center gap-2">
-                      <Avatar className="w-8 h-8">
-                        <AvatarFallback className="text-xs">
-                          {organization.name.substring(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="font-medium flex items-center gap-2">
-                          {organization.name}
-                          {isSelected && (
-                            <Badge variant="secondary" className="text-xs">
-                              Activa
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Plan */}
-                    <div className="col-span-2 text-xs">
-                      {organization.plan ? (
-                        <div className="flex items-center gap-1">
-                          <Crown className="w-3 h-3 text-yellow-500" />
-                          <span>{organization.plan.name}</span>
-                        </div>
-                      ) : (
-                        <span className="text-muted-foreground">Sin plan</span>
-                      )}
-                    </div>
-
-                    {/* Estado */}
-                    <div className="col-span-2">
-                      <Badge variant={organization.is_active ? "default" : "secondary"} className="text-xs">
-                        {organization.is_active ? "Activa" : "Inactiva"}
-                      </Badge>
-                    </div>
-
-                    {/* Acciones */}
-                    <div className="col-span-2">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="h-8 w-8 p-0"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem 
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleEdit(organization)
-                            }}
-                          >
-                            <Edit className="mr-2 h-4 w-4" />
-                            Editar
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleDeleteClick(organization)
-                            }}
-                            className="text-destructive"
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Eliminar
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <OrganizationCard 
+                key={organization.id}
+                organization={organization}
+                isSelected={isSelected}
+                onSelect={handleSelectOrganization}
+                onEdit={handleEdit}
+                onDelete={handleDeleteClick}
+              />
             )
           })}
         </div>

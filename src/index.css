@@ -99,12 +99,12 @@
 
 .dark {
   /* Layout */
-  --layout-bg: hsl(0, 0%, 12%);
+  --layout-bg: hsl(220, 4%, 14%);
   --layout-text: hsl(0, 0%, 90%);
   --layout-border: hsl(240, 8%, 15%);
 
   /* Menus/Sidebar */
-  --menues-bg: hsl(0, 0%, 14%);
+  --menues-bg: hsl(220, 4%, 10%);
   --menues-fg: hsl(0, 0%, 70%);
   --menues-secondary-fg: hsl(0, 0%, 60%);
   --menues-border: hsl(240, 8%, 20%);
@@ -114,13 +114,13 @@
   --menues-active-fg: hsl(0, 0%, 98%);
 
   /* Cards */
-  --card-bg: hsl(0, 0%, 14%);
+  --card-bg: hsl(220, 4%, 16%);
   --card-text: hsl(0, 0%, 90%);
   --card-border: hsl(240, 8%, 15%);
   --card-hover-bg: hsl(0, 0%, 16%);
 
   /* Buttons - Primary */
-  --button-primary-bg: hsl(0, 0%, 30%);
+  --button-primary-bg: hsl(90, 50%, 50%);
   --button-primary-text: hsl(0, 0%, 100%);
   --button-primary-border: transparent;
   --button-primary-hover-bg: hsl(90, 50%, 50%);
