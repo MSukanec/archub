@@ -370,7 +370,6 @@ export default function FinancesDashboard() {
             </CardContent>
           </Card>
         </div>
-      </div>
     </Layout>
   );
 }

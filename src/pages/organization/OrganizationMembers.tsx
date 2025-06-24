@@ -578,7 +578,6 @@ export default function OrganizationMembers() {
             </div>
           </div>
         </div>
-      </div>
 
       {/* Invite Modal */}
       {showInviteModal && (
