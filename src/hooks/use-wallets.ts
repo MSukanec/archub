@@ -4,7 +4,6 @@ import { supabase } from '@/lib/supabase';
 interface Wallet {
   id: string;
   name: string;
-  is_active: boolean;
   created_at: string;
 }
 
@@ -15,7 +14,6 @@ export function useWallets(organizationId: string | undefined) {
       const { data, error } = await supabase
         .from('wallets')
         .select('*')
-        .eq('is_active', true)
         .order('name');
       
       if (error) {

@@ -20,7 +20,6 @@ import { useNavigationStore } from '@/stores/navigationStore';
 interface Wallet {
   id: string;
   name: string;
-  is_active: boolean;
   created_at: string;
 }
 
@@ -29,7 +28,9 @@ interface Currency {
   name: string;
   code: string;
   symbol: string;
-  is_active: boolean;
+  country: string;
+  is_default: boolean;
+  created_at: string;
 }
 
 interface OrganizationCurrency {
@@ -86,7 +87,6 @@ export default function OrganizationPreferences() {
       const { data, error } = await supabase
         .from('currencies')
         .select('*')
-        .eq('is_active', true)
         .order('name');
       
       if (error) {
@@ -217,7 +217,6 @@ export default function OrganizationPreferences() {
           .insert({
             organization_id: organizationId,
             currency_id: defaultCurrency,
-            is_active: true,
             is_default: true,
           });
 
@@ -229,7 +228,6 @@ export default function OrganizationPreferences() {
         const secondaryCurrencyInserts = secondaryCurrencies.map(currencyId => ({
           organization_id: organizationId,
           currency_id: currencyId,
-          is_active: true,
           is_default: false,
         }));
 
@@ -247,7 +245,6 @@ export default function OrganizationPreferences() {
           .insert({
             organization_id: organizationId,
             wallet_id: defaultWallet,
-            is_active: true,
             is_default: true,
           });
 
@@ -259,7 +256,6 @@ export default function OrganizationPreferences() {
         const secondaryWalletInserts = secondaryWallets.map(walletId => ({
           organization_id: organizationId,
           wallet_id: walletId,
-          is_active: true,
           is_default: false,
         }));
 
