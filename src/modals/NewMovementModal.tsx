@@ -329,46 +329,33 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
     }
   })
 
-  const handleSubmit = () => {
-    console.log('handleSubmit called');
-    const formValues = form.getValues();
-    console.log('Current form values:', formValues);
+  const handleSubmit = (data: CreateMovementForm) => {
+    console.log('Submitting movement data:', data)
     
-    // Validate required fields manually
-    const errors = form.formState.errors;
-    console.log('Form errors:', errors);
-    
-    if (Object.keys(errors).length > 0) {
-      console.log('Form has validation errors, not submitting');
-      return;
+    const processedData = {
+      ...data,
+      type_id: data.type_id || null,
+      category_id: data.category_id || null,
+      subcategory_id: data.subcategory_id || null,
     }
     
-    // Process the form data
-    const processedData = {
-      ...formValues,
-      type_id: formValues.type_id === 'none' ? null : formValues.type_id,
-      category_id: formValues.category_id === 'none' ? null : formValues.category_id,
-      subcategory_id: formValues.subcategory_id === 'none' ? null : formValues.subcategory_id,
-    };
-    
-    console.log('Processed data for submission:', processedData);
-    createMovementMutation.mutate(processedData);
+    createMovementMutation.mutate(processedData)
   }
 
   const selectedMember = members.find(member => member.id === form.watch('created_by'))
 
   const handleTypeChange = (typeId: string) => {
     setSelectedTypeId(typeId)
-    setSelectedCategoryId('none')
+    setSelectedCategoryId('')
     form.setValue('type_id', typeId)
-    form.setValue('category_id', 'none')
-    form.setValue('subcategory_id', 'none')
+    form.setValue('category_id', '')
+    form.setValue('subcategory_id', '')
   }
 
   const handleCategoryChange = (categoryId: string) => {
     setSelectedCategoryId(categoryId)
     form.setValue('category_id', categoryId)
-    form.setValue('subcategory_id', 'none')
+    form.setValue('subcategory_id', '')
   }
 
   const header = (
@@ -487,14 +474,13 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-sm font-medium">Tipo</FormLabel>
-                <Select onValueChange={handleTypeChange} value={field.value || 'none'}>
+                <Select onValueChange={handleTypeChange} value={field.value || ''}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar tipo" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="none">Seleccionar tipo</SelectItem>
                     {types.map((type: any) => (
                       <SelectItem key={type.id} value={type.id}>
                         {type.name}
@@ -514,14 +500,13 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-sm font-medium">Categoría</FormLabel>
-                <Select onValueChange={handleCategoryChange} value={field.value || 'none'} disabled={!selectedTypeId || selectedTypeId === 'none'}>
+                <Select onValueChange={handleCategoryChange} value={field.value || ''} disabled={!selectedTypeId}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar categoría" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="none">Seleccionar categoría</SelectItem>
                     {categories.map((category: any) => (
                       <SelectItem key={category.id} value={category.id}>
                         {category.name}
@@ -541,14 +526,13 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-sm font-medium">Subcategoría</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value || 'none'} disabled={!selectedCategoryId || selectedCategoryId === 'none'}>
+                <Select onValueChange={field.onChange} value={field.value || ''} disabled={!selectedCategoryId}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar subcategoría" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="none">Seleccionar subcategoría</SelectItem>
                     {subcategories.map((subcategory: any) => (
                       <SelectItem key={subcategory.id} value={subcategory.id}>
                         {subcategory.name}
@@ -685,10 +669,41 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
     </Form>
   )
 
+  // Show loading state while data is being fetched
+  if (isDataLoading || !hasRequiredData) {
+    return (
+      <CustomModalLayout open={open} onClose={onClose}>
+        {{
+          header: (
+            <CustomModalHeader
+              title={editingMovement ? 'Editar movimiento' : 'Crear movimiento'}
+              description="Cargando información..."
+            />
+          ),
+          body: (
+            <CustomModalBody padding="md">
+              <div className="flex items-center justify-center py-8">
+                <div className="text-sm text-muted-foreground">Cargando datos...</div>
+              </div>
+            </CustomModalBody>
+          ),
+          footer: (
+            <CustomModalFooter
+              onCancel={onClose}
+              onSave={() => {}}
+              saveText="Cargando..."
+              saveLoading={true}
+            />
+          )
+        }}
+      </CustomModalLayout>
+    )
+  }
+
   const footer = (
     <CustomModalFooter
       onCancel={onClose}
-      onSave={handleSubmit}
+      onSave={form.handleSubmit(handleSubmit)}
       saveText={editingMovement ? 'Actualizar' : 'Crear movimiento'}
       saveLoading={createMovementMutation.isPending}
     />
