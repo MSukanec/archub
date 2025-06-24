@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
   Form,
@@ -56,7 +55,6 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
     }
   })
 
-  // Reset form when modal opens/closes or editing organization changes
   useEffect(() => {
     if (editingOrganization && open) {
       form.reset({
@@ -72,7 +70,6 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
   const organizationMutation = useMutation({
     mutationFn: async (formData: OrganizationFormData) => {
       if (editingOrganization) {
-        // Update existing organization
         const { error } = await supabase
           .from('organizations')
           .update({
@@ -81,19 +78,16 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
           .eq('id', editingOrganization.id)
 
         if (error) {
-          console.error('Error updating organization:', error)
           throw new Error('No se pudo actualizar la organización')
         }
       } else {
-        // Create new organization using RPC
         const { error } = await supabase.rpc('archub_new_organization', {
           _organization_name: formData.name,
           _user_id: userData?.user?.id
         })
 
         if (error) {
-          console.error('Error creating organization:', error)
-          throw new Error('No se pudo crear la organización')
+          throw new Error(error.message || 'No se pudo crear la organización')
         }
       }
     },
@@ -106,7 +100,6 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
       handleClose()
     },
     onError: (error: any) => {
-      console.error('Organization mutation error:', error)
       toast({
         title: "Error",
         description: error.message || "Ocurrió un error inesperado",
@@ -137,17 +130,16 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
         body: (
           <CustomModalBody>
             <Form {...form}>
-              <div className="space-y-4">
+              <div className="flex flex-col gap-4">
                 <FormField
                   control={form.control}
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Nombre de la organización</FormLabel>
+                      <FormLabel>Nombre de la organización</FormLabel>
                       <FormControl>
                         <Input
-                          className="w-full"
-                          placeholder="Ingresa el nombre de la organización"
+                          placeholder="Ingresá el nombre de la organización"
                           {...field}
                         />
                       </FormControl>
