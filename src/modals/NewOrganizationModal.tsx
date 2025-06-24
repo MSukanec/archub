@@ -19,6 +19,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
+
 import { CustomModalLayout } from '@/components/ui-custom/CustomModalLayout'
 import { CustomModalHeader } from '@/components/ui-custom/CustomModalHeader'
 import { CustomModalBody } from '@/components/ui-custom/CustomModalBody'
@@ -28,12 +29,12 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/hooks/use-toast'
 
-const createOrganizationSchema = z.object({
+const organizationSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   created_at: z.date()
 })
 
-type CreateOrganizationForm = z.infer<typeof createOrganizationSchema>
+type OrganizationFormData = z.infer<typeof organizationSchema>
 
 interface Organization {
   id: string
@@ -54,15 +55,15 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
-  const form = useForm<CreateOrganizationForm>({
-    resolver: zodResolver(createOrganizationSchema),
+  const form = useForm<OrganizationFormData>({
+    resolver: zodResolver(organizationSchema),
     defaultValues: {
       name: '',
       created_at: new Date(),
     }
   })
 
-  // Initialize form when editing
+  // Reset form when modal opens/closes or editing organization changes
   useEffect(() => {
     if (editingOrganization && open) {
       form.reset({
@@ -77,8 +78,8 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
     }
   }, [editingOrganization, open, form])
 
-  const createOrganizationMutation = useMutation({
-    mutationFn: async (formData: CreateOrganizationForm) => {
+  const organizationMutation = useMutation({
+    mutationFn: async (formData: OrganizationFormData) => {
       if (editingOrganization) {
         // Update existing organization
         const { error } = await supabase
@@ -90,7 +91,7 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
 
         if (error) {
           console.error('Error updating organization:', error)
-          throw new Error('Failed to update organization')
+          throw new Error('No se pudo actualizar la organización')
         }
       } else {
         // Create new organization
@@ -105,7 +106,7 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
 
         if (error) {
           console.error('Error creating organization:', error)
-          throw new Error('Failed to create organization')
+          throw new Error('No se pudo crear la organización')
         }
       }
     },
@@ -115,20 +116,25 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
         description: editingOrganization ? "Organización actualizada correctamente" : "Organización creada correctamente"
       })
       queryClient.invalidateQueries({ queryKey: ['current-user'] })
-      onClose()
+      handleClose()
     },
     onError: (error: any) => {
-      console.error('Error processing organization:', error)
+      console.error('Organization mutation error:', error)
       toast({
         title: "Error",
-        description: editingOrganization ? "No se pudo actualizar la organización" : "No se pudo crear la organización",
+        description: error.message || "Ocurrió un error inesperado",
         variant: "destructive"
       })
     }
   })
 
-  const handleSubmit = (data: CreateOrganizationForm) => {
-    createOrganizationMutation.mutate(data)
+  const handleSubmit = (data: OrganizationFormData) => {
+    organizationMutation.mutate(data)
+  }
+
+  const handleClose = () => {
+    form.reset()
+    onClose()
   }
 
   const header = (
@@ -139,80 +145,80 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
   )
 
   const body = (
-    <CustomModalBody padding="lg">
-      <Form {...form}>
-        <form className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Fecha de creación */}
-            <div className="col-span-1">
-              <FormField
-                control={form.control}
-                name="created_at"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">Fecha de creación</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button variant="outline" className="w-full justify-start text-left font-normal">
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {field.value ? format(field.value, "dd 'de' MMMM 'de' yyyy", { locale: es }) : "Seleccionar fecha"}
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            {/* Nombre de la organización */}
-            <div className="col-span-1">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">Nombre de la organización</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Ingresa el nombre de la organización"
-                        {...field}
+    <CustomModalBody>
+      <form onSubmit={form.handleSubmit(handleSubmit)}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Fecha de creación */}
+          <div className="col-span-1">
+            <FormField
+              control={form.control}
+              name="created_at"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Fecha de creación</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button variant="outline" className="w-full justify-start text-left font-normal">
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {field.value ? format(field.value, "dd 'de' MMMM 'de' yyyy", { locale: es }) : "Seleccionar fecha"}
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                        initialFocus
                       />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
-        </form>
-      </Form>
+
+          {/* Nombre de la organización */}
+          <div className="col-span-1">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nombre de la organización</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Ingresa el nombre de la organización"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+      </form>
     </CustomModalBody>
   )
 
   const footer = (
     <CustomModalFooter
-      onCancel={onClose}
+      onCancel={handleClose}
       onSave={form.handleSubmit(handleSubmit)}
       saveText={editingOrganization ? 'Actualizar' : 'Crear organización'}
-      saveLoading={createOrganizationMutation.isPending}
+      saveLoading={organizationMutation.isPending}
     />
   )
 
   return (
-    <CustomModalLayout open={open} onClose={onClose}>
-      {{ header, body, footer }}
-    </CustomModalLayout>
+    <Form {...form}>
+      <CustomModalLayout open={open} onClose={handleClose}>
+        {{ header, body, footer }}
+      </CustomModalLayout>
+    </Form>
   )
 }
