@@ -167,9 +167,9 @@ export function CustomTable<T = any>({
         {/* Column Headers */}
         <div className="grid gap-4 p-4 bg-muted/50 rounded-lg text-xs font-medium text-muted-foreground" style={{ gridTemplateColumns: getGridTemplateColumns() }}>
           {columns.map((column) => (
-            <div key={String(column.key)} className="flex items-center justify-between">
+            <div key={String(column.key)} className="flex items-center gap-1">
               <span>{column.label}</span>
-              {column.sortable !== false ? (
+              {column.sortable !== false && (
                 <button
                   onClick={() => handleSort(String(column.key), column.sortType)}
                   className="flex items-center justify-center w-4 h-4 rounded hover:bg-muted-foreground/20 transition-colors"
@@ -185,8 +185,6 @@ export function CustomTable<T = any>({
                     <ArrowUpDown className="w-3 h-3 opacity-50" />
                   )}
                 </button>
-              ) : (
-                <div className="w-4 h-4" />
               )}
             </div>
           ))}
@@ -201,7 +199,7 @@ export function CustomTable<T = any>({
               style={{ gridTemplateColumns: getGridTemplateColumns() }}
             >
               {columns.map((column) => (
-                <div key={String(column.key)} className="text-xs flex items-center">
+                <div key={String(column.key)} className="text-xs flex items-center justify-start">
                   {column.render 
                     ? column.render(item)
                     : String(item[column.key as keyof T] || '-')
