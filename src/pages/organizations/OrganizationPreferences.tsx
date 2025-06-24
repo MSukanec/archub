@@ -82,13 +82,19 @@ export default function OrganizationPreferences() {
   const { data: allCurrencies = [] } = useQuery({
     queryKey: ['currencies'],
     queryFn: async () => {
+      console.log('Fetching currencies...');
       const { data, error } = await supabase
         .from('currencies')
         .select('*')
         .eq('is_active', true)
         .order('name');
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching currencies:', error);
+        throw error;
+      }
+      
+      console.log('Currencies fetched:', data);
       return data as Currency[];
     },
   });
@@ -341,52 +347,143 @@ export default function OrganizationPreferences() {
   return (
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
-        {/* Default Settings */}
+        {/* Monedas */}
         <Card>
           <CardHeader>
-            <CardTitle>Configuración por defecto</CardTitle>
+            <CardTitle>Monedas</CardTitle>
             <CardDescription>
-              Selecciona las opciones que se usarán por defecto en esta organización
+              Configura las monedas disponibles en esta organización
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="default-currency">Moneda por defecto</Label>
-                <Select value={defaultCurrency} onValueChange={setDefaultCurrency}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar moneda" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Sin seleccionar</SelectItem>
-                    {allCurrencies.map((currency) => (
-                      <SelectItem key={currency.id} value={currency.id}>
-                        {currency.code} - {currency.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="default-currency">Moneda por defecto</Label>
+              <Select value={defaultCurrency} onValueChange={setDefaultCurrency}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar moneda" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Sin seleccionar</SelectItem>
+                  {allCurrencies.map((currency) => (
+                    <SelectItem key={currency.id} value={currency.id}>
+                      {currency.code} - {currency.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
+            <div className="space-y-2">
+              <Label>Monedas secundarias</Label>
               <div className="space-y-2">
-                <Label htmlFor="default-wallet">Billetera por defecto</Label>
-                <Select value={defaultWallet} onValueChange={setDefaultWallet}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar billetera" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Sin seleccionar</SelectItem>
-                    {allWallets.map((wallet) => (
-                      <SelectItem key={wallet.id} value={wallet.id}>
-                        {wallet.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex flex-wrap gap-2">
+                  {secondaryCurrencies.map((currencyId) => {
+                    const currency = allCurrencies.find(c => c.id === currencyId);
+                    return currency ? (
+                      <Badge 
+                        key={currencyId} 
+                        variant="secondary" 
+                        className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground"
+                        onClick={() => handleSecondaryCurrencyToggle(currencyId)}
+                      >
+                        {currency.code} - {currency.name} ×
+                      </Badge>
+                    ) : null;
+                  })}
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                  {availableSecondaryCurrencies.map((currency) => (
+                    <div 
+                      key={currency.id}
+                      className="p-2 border rounded cursor-pointer hover:bg-accent text-sm"
+                      onClick={() => handleSecondaryCurrencyToggle(currency.id)}
+                    >
+                      <div className="font-medium">{currency.code}</div>
+                      <div className="text-xs opacity-70">{currency.name}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
+            </div>
+          </CardContent>
+        </Card>
 
+        {/* Billeteras */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Billeteras</CardTitle>
+            <CardDescription>
+              Configura las billeteras disponibles en esta organización
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="default-wallet">Billetera por defecto</Label>
+              <Select value={defaultWallet} onValueChange={setDefaultWallet}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar billetera" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Sin seleccionar</SelectItem>
+                  {allWallets.map((wallet) => (
+                    <SelectItem key={wallet.id} value={wallet.id}>
+                      {wallet.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Billeteras secundarias</Label>
               <div className="space-y-2">
-                <Label htmlFor="default-pdf-template">Plantilla PDF por defecto</Label>
+                <div className="flex flex-wrap gap-2">
+                  {secondaryWallets.map((walletId) => {
+                    const wallet = allWallets.find(w => w.id === walletId);
+                    return wallet ? (
+                      <Badge 
+                        key={walletId} 
+                        variant="secondary" 
+                        className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground"
+                        onClick={() => handleSecondaryWalletToggle(walletId)}
+                      >
+                        {wallet.name} ×
+                      </Badge>
+                    ) : null;
+                  })}
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                  {availableSecondaryWallets.map((wallet) => (
+                    <div 
+                      key={wallet.id}
+                      className="p-2 border rounded cursor-pointer hover:bg-accent text-sm"
+                      onClick={() => handleSecondaryWalletToggle(wallet.id)}
+                    >
+                      <div className="font-medium">{wallet.name}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Plantillas */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Plantillas</CardTitle>
+            <CardDescription>
+              Configura las plantillas por defecto para diferentes tipos de reportes
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="budget-template" className="text-sm font-medium">
+                Plantilla de Cómputo y Presupuesto:
+              </Label>
+              <div className="w-64">
                 <Select value={defaultPdfTemplate} onValueChange={setDefaultPdfTemplate}>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar plantilla" />
@@ -400,87 +497,30 @@ export default function OrganizationPreferences() {
                 </Select>
               </div>
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Secondary Currencies */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Monedas secundarias</CardTitle>
-            <CardDescription>
-              Selecciona las monedas adicionales que estarán disponibles en esta organización
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex flex-wrap gap-2">
-                {secondaryCurrencies.map((currencyId) => {
-                  const currency = allCurrencies.find(c => c.id === currencyId);
-                  return currency ? (
-                    <Badge 
-                      key={currencyId} 
-                      variant="secondary" 
-                      className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground"
-                      onClick={() => handleSecondaryCurrencyToggle(currencyId)}
-                    >
-                      {currency.code} - {currency.name} ×
-                    </Badge>
-                  ) : null;
-                })}
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                {availableSecondaryCurrencies.map((currency) => (
-                  <div 
-                    key={currency.id}
-                    className="p-2 border rounded cursor-pointer hover:bg-accent text-sm"
-                    onClick={() => handleSecondaryCurrencyToggle(currency.id)}
-                  >
-                    <div className="font-medium">{currency.code}</div>
-                    <div className="text-xs opacity-70">{currency.name}</div>
-                  </div>
-                ))}
+            <div className="flex items-center justify-between">
+              <Label htmlFor="movements-template" className="text-sm font-medium">
+                Plantilla de Movimientos:
+              </Label>
+              <div className="w-64">
+                <Select value="none" disabled>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Próximamente" />
+                  </SelectTrigger>
+                </Select>
               </div>
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Secondary Wallets */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Billeteras secundarias</CardTitle>
-            <CardDescription>
-              Selecciona las billeteras adicionales que estarán disponibles en esta organización
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex flex-wrap gap-2">
-                {secondaryWallets.map((walletId) => {
-                  const wallet = allWallets.find(w => w.id === walletId);
-                  return wallet ? (
-                    <Badge 
-                      key={walletId} 
-                      variant="secondary" 
-                      className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground"
-                      onClick={() => handleSecondaryWalletToggle(walletId)}
-                    >
-                      {wallet.name} ×
-                    </Badge>
-                  ) : null;
-                })}
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                {availableSecondaryWallets.map((wallet) => (
-                  <div 
-                    key={wallet.id}
-                    className="p-2 border rounded cursor-pointer hover:bg-accent text-sm"
-                    onClick={() => handleSecondaryWalletToggle(wallet.id)}
-                  >
-                    <div className="font-medium">{wallet.name}</div>
-                  </div>
-                ))}
+            <div className="flex items-center justify-between">
+              <Label htmlFor="sitelog-template" className="text-sm font-medium">
+                Plantilla de Bitácora:
+              </Label>
+              <div className="w-64">
+                <Select value="none" disabled>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Próximamente" />
+                  </SelectTrigger>
+                </Select>
               </div>
             </div>
           </CardContent>
