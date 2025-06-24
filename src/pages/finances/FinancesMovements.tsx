@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { DollarSign, Plus, Edit, Trash2, MoreHorizontal } from 'lucide-react';
 import { format } from 'date-fns';
@@ -21,6 +21,7 @@ import { useMovements } from '@/hooks/use-movements';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { queryClient } from '@/lib/queryClient';
+import { useNavigationStore } from '@/stores/navigationStore';
 
 interface Movement {
   id: string;
