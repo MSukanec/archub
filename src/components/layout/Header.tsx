@@ -314,14 +314,44 @@ export function Header({
       <div className="flex items-center gap-2 ml-auto pr-4">
         {showSearch && (
           <div className="relative">
-            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-[var(--menues-fg)] opacity-50" />
-            <Input
-              type="text"
-              placeholder="Buscar..."
-              value={searchValue}
-              onChange={(e) => onSearchChange?.(e.target.value)}
-              className="h-8 pl-7 pr-3 text-sm w-48"
-            />
+            {!isSearchOpen ? (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsSearchOpen(true)}
+                className="h-8 w-8"
+              >
+                <Search className="h-3 w-3" />
+              </Button>
+            ) : (
+              <div className="relative flex items-center">
+                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-[var(--menues-fg)] opacity-50" />
+                <Input
+                  type="text"
+                  placeholder="Buscar..."
+                  value={searchValue}
+                  onChange={(e) => onSearchChange?.(e.target.value)}
+                  className="h-8 pl-7 pr-8 text-sm w-48"
+                  autoFocus
+                  onBlur={() => {
+                    if (!searchValue) {
+                      setIsSearchOpen(false)
+                    }
+                  }}
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    onSearchChange?.("")
+                    setIsSearchOpen(false)
+                  }}
+                  className="absolute right-1 h-6 w-6 p-0"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            )}
           </div>
         )}
 
