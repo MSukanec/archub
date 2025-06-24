@@ -16,6 +16,8 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
+import { CustomRestricted } from "@/components/ui-custom/CustomRestricted";
+import { NewMemberModal } from "@/modals/NewMemberModal";
 
 interface OrganizationMember {
   id: string;
@@ -305,14 +307,16 @@ export default function OrganizationMembers() {
     onSearchChange: () => {},
     onSearchClear: () => {},
     actions: (
-      <Button 
-        onClick={() => setShowInviteModal(true)}
-        className="h-8"
-        size="sm"
-      >
-        <Plus className="h-4 w-4 mr-2" />
-        Invitar miembro
-      </Button>
+      <CustomRestricted feature="max_members" current={members.length}>
+        <Button 
+          onClick={() => setShowInviteModal(true)}
+          className="h-8"
+          size="sm"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Invitar miembro
+        </Button>
+      </CustomRestricted>
     )
   };
 
