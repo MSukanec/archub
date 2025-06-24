@@ -9,13 +9,11 @@ interface PlanFeatures {
 export function usePlanFeatures(): PlanFeatures {
   const { data: userData } = useCurrentUser();
   
+  // Obtener features reales del plan desde la base de datos
   const planFeatures = userData?.organization?.plan?.features || {};
 
   const can = (feature: string): boolean => {
-    // Si no hay plan o features, asumir que está permitido (plan gratuito básico)
-    if (!planFeatures) return true;
-    
-    // Verificar si la feature existe y está habilitada
+    // Verificar si la feature existe en el plan actual
     const featureValue = planFeatures[feature];
     
     // Si es un booleano, devolver directamente
@@ -28,18 +26,21 @@ export function usePlanFeatures(): PlanFeatures {
       return featureValue > 0;
     }
     
-    // Si la feature no está definida, asumir que está permitida
+    // Si la feature no está definida, por defecto denegado para features específicas
+    const restrictedFeatures = ['max_members', 'team_management', 'advanced_analytics', 'export_data'];
+    if (restrictedFeatures.includes(feature)) {
+      return false;
+    }
+    
     return true;
   };
 
   const limit = (feature: string): number => {
-    if (!planFeatures) return 0;
-    
     const featureValue = planFeatures[feature];
     
     // Si es un número, devolver el límite
     if (typeof featureValue === 'number') {
-      return featureValue;
+      return featureValue === -1 ? Infinity : featureValue;
     }
     
     // Si es booleano y true, asumir límite ilimitado
