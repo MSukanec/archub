@@ -36,16 +36,17 @@ export function CustomRestricted({
     isRestricted = true;
     restrictionKey = reason;
   } else if (feature) {
-    // Verificar si la feature está permitida
-    const featureAllowed = can(feature);
-
-    if (!featureAllowed) {
-      isRestricted = true;
-      restrictionKey = feature;
-    } else if (current !== undefined) {
-      // Verificar límites si se proporcionó current
+    // Verificar límites si se proporcionó current
+    if (current !== undefined) {
       const featureLimit = limit(feature);
       if (featureLimit !== Infinity && current >= featureLimit) {
+        isRestricted = true;
+        restrictionKey = feature;
+      }
+    } else {
+      // Si no hay current, verificar si la feature está permitida (para features booleanas)
+      const featureAllowed = can(feature);
+      if (!featureAllowed) {
         isRestricted = true;
         restrictionKey = feature;
       }
@@ -82,8 +83,8 @@ export function CustomRestricted({
             onMouseEnter={() => setIsPopoverOpen(true)}
             onMouseLeave={() => setIsPopoverOpen(false)}
           >
-            <div className="bg-white rounded-full p-1.5 shadow-sm border border-orange-600 group-hover:shadow-md transition-shadow">
-              <Lock className="h-3 w-3 text-orange-600" />
+            <div className="bg-white rounded-full p-1.5 shadow-sm border border-gray-500 group-hover:shadow-md transition-shadow">
+              <Lock className="h-3 w-3 text-gray-500" />
             </div>
           </div>
         </PopoverTrigger>
@@ -92,16 +93,16 @@ export function CustomRestricted({
           <div className="space-y-3">
             <div className="flex items-start gap-3">
               <div className="bg-orange-100 rounded-full p-2 flex-shrink-0">
-                <Lock className="h-4 w-4 text-orange-600" />
+                <Lock className="h-4 w-4 text-gray-500" />
               </div>
               <div className="flex-1">
                 <h4 className="font-medium text-sm">Función bloqueada</h4>
                 <p className="text-xs text-muted-foreground mt-1">
                   {restriction.message}
                 </p>
-                {current !== undefined && limit && limit(restrictionKey) !== Infinity && (
+                {current !== undefined && feature && limit(feature) !== Infinity && (
                   <p className="text-xs text-muted-foreground mt-1">
-                    Límite actual: {current}/{limit(restrictionKey)}
+                    Límite actual: {current}/{limit(feature)}
                   </p>
                 )}
               </div>

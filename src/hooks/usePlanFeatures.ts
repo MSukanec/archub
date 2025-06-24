@@ -21,24 +21,19 @@ export function usePlanFeatures(): PlanFeatures {
       return featureValue;
     }
     
-    // Si es un número, verificar que sea mayor a 0
+    // Si es un número, verificar que sea mayor a 0 (0 significa no permitido)
     if (typeof featureValue === 'number') {
       return featureValue > 0;
     }
     
-    // Si la feature no está definida, por defecto denegado para features específicas
-    const restrictedFeatures = ['max_members', 'team_management', 'advanced_analytics', 'export_data'];
-    if (restrictedFeatures.includes(feature)) {
-      return false;
-    }
-    
+    // Si la feature no está definida, permitir por defecto (compatibilidad)
     return true;
   };
 
   const limit = (feature: string): number => {
     const featureValue = planFeatures[feature];
     
-    // Si es un número, devolver el límite
+    // Si es un número, devolver el límite exacto
     if (typeof featureValue === 'number') {
       return featureValue === -1 ? Infinity : featureValue;
     }
