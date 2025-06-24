@@ -9,7 +9,7 @@ interface CustomTableProps<T = any> {
     key: keyof T | string
     label: string
     render?: (item: T) => React.ReactNode
-    sortable?: boolean
+    sortable?: boolean // Por defecto true, usar false para deshabilitarlo
     sortType?: 'string' | 'number' | 'date'
     width?: string // Nuevo: ancho personalizado (ej: "10%", "100px", etc.)
   }[]
@@ -169,7 +169,7 @@ export function CustomTable<T = any>({
           {columns.map((column) => (
             <div key={String(column.key)} className="flex items-center justify-between">
               <span>{column.label}</span>
-              {column.sortable !== false && (
+              {column.sortable !== false ? (
                 <button
                   onClick={() => handleSort(String(column.key), column.sortType)}
                   className="flex items-center justify-center w-4 h-4 rounded hover:bg-muted-foreground/20 transition-colors"
@@ -185,6 +185,8 @@ export function CustomTable<T = any>({
                     <ArrowUpDown className="w-3 h-3 opacity-50" />
                   )}
                 </button>
+              ) : (
+                <div className="w-4 h-4" />
               )}
             </div>
           ))}
