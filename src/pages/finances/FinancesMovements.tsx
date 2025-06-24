@@ -66,6 +66,7 @@ export default function Movements() {
   const [showNewMovementModal, setShowNewMovementModal] = useState(false);
   const [editingMovement, setEditingMovement] = useState<Movement | null>(null);
   const [deletingMovement, setDeletingMovement] = useState<Movement | null>(null);
+  const [selectedMovements, setSelectedMovements] = useState<Movement[]>([]);
   
   // Filter states
   const [sortBy, setSortBy] = useState('date');
@@ -107,6 +108,33 @@ export default function Movements() {
     }
   });
 
+  // Delete multiple movements mutation
+  const deleteMultipleMovementsMutation = useMutation({
+    mutationFn: async (movementIds: string[]) => {
+      const { error } = await supabase
+        .from('movements')
+        .delete()
+        .in('id', movementIds);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['movements'] });
+      setSelectedMovements([]);
+      toast({
+        title: "Movimientos eliminados",
+        description: `${selectedMovements.length} movimientos han sido eliminados correctamente`
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "No se pudieron eliminar los movimientos",
+        variant: "destructive"
+      });
+    }
+  });
+
   const handleEdit = (movement: Movement) => {
     setEditingMovement(movement);
     setShowNewMovementModal(true);
@@ -119,6 +147,12 @@ export default function Movements() {
   const confirmDelete = () => {
     if (deletingMovement) {
       deleteMovementMutation.mutate(deletingMovement.id);
+    }
+  };
+
+  const handleDeleteSelected = () => {
+    if (selectedMovements.length > 0) {
+      deleteMultipleMovementsMutation.mutate(selectedMovements.map(m => m.id));
     }
   };
 
@@ -368,13 +402,26 @@ export default function Movements() {
     customFilters,
     onClearFilters: handleClearFilters,
     actions: (
-      <Button onClick={() => {
-        setEditingMovement(null);
-        setShowNewMovementModal(true);
-      }}>
-        <Plus className="mr-2 h-4 w-4" />
-        Nuevo movimiento
-      </Button>
+      <div className="flex items-center gap-2">
+        {selectedMovements.length > 0 && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleDeleteSelected}
+            disabled={deleteMultipleMovementsMutation.isPending}
+            className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        )}
+        <Button onClick={() => {
+          setEditingMovement(null);
+          setShowNewMovementModal(true);
+        }}>
+          <Plus className="mr-2 h-4 w-4" />
+          Nuevo movimiento
+        </Button>
+      </div>
     )
   };
 
@@ -384,6 +431,10 @@ export default function Movements() {
         columns={tableColumns}
         data={filteredMovements}
         isLoading={isLoading}
+        selectable={true}
+        selectedItems={selectedMovements}
+        onSelectionChange={setSelectedMovements}
+        getItemId={(movement) => movement.id}
         emptyState={
           <div className="text-center py-8 text-muted-foreground">
             <DollarSign className="h-12 w-12 mx-auto mb-4 opacity-20" />

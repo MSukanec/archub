@@ -17,6 +17,11 @@ interface CustomTableProps<T = any> {
   emptyState?: React.ReactNode
   isLoading?: boolean
   className?: string
+  // Nuevas props para selección múltiple
+  selectable?: boolean
+  selectedItems?: T[]
+  onSelectionChange?: (selectedItems: T[]) => void
+  getItemId?: (item: T) => string | number
 }
 
 export function CustomTable<T = any>({ 
@@ -28,6 +33,34 @@ export function CustomTable<T = any>({
 }: CustomTableProps<T>) {
   const [sortKey, setSortKey] = useState<string | null>(null)
   const [sortDirection, setSortDirection] = useState<SortDirection>(null)
+
+  // Selection logic
+  const isAllSelected = selectable && data.length > 0 && selectedItems.length === data.length
+  const isIndeterminate = selectable && selectedItems.length > 0 && selectedItems.length < data.length
+  
+  const handleSelectAll = (checked: boolean) => {
+    if (!onSelectionChange) return
+    if (checked) {
+      onSelectionChange(data)
+    } else {
+      onSelectionChange([])
+    }
+  }
+
+  const handleSelectItem = (item: T, checked: boolean) => {
+    if (!onSelectionChange) return
+    const itemId = getItemId(item)
+    if (checked) {
+      onSelectionChange([...selectedItems, item])
+    } else {
+      onSelectionChange(selectedItems.filter(selected => getItemId(selected) !== itemId))
+    }
+  }
+
+  const isItemSelected = (item: T) => {
+    const itemId = getItemId(item)
+    return selectedItems.some(selected => getItemId(selected) === itemId)
+  }
 
   // Función para calcular gridTemplateColumns basado en anchos personalizados
   const getGridTemplateColumns = () => {
@@ -166,6 +199,16 @@ export function CustomTable<T = any>({
       <div className="hidden md:block">
         {/* Column Headers */}
         <div className="grid gap-4 p-4 bg-muted/50 rounded-lg text-xs font-medium text-muted-foreground" style={{ gridTemplateColumns: getGridTemplateColumns() }}>
+          {selectable && (
+            <div className="flex items-center justify-center">
+              <Checkbox
+                checked={isAllSelected}
+                indeterminate={isIndeterminate}
+                onCheckedChange={handleSelectAll}
+                aria-label="Seleccionar todos"
+              />
+            </div>
+          )}
           {columns.map((column) => (
             <div key={String(column.key)} className="flex items-center gap-1">
               <span>{column.label}</span>
@@ -195,9 +238,21 @@ export function CustomTable<T = any>({
           {sortedData.map((item, index) => (
             <div
               key={index}
-              className="grid gap-4 p-4 border rounded-lg hover:bg-muted/40 transition-colors"
+              className={cn(
+                "grid gap-4 p-4 border rounded-lg hover:bg-muted/40 transition-colors",
+                selectable && isItemSelected(item) && "bg-muted/60 border-primary"
+              )}
               style={{ gridTemplateColumns: getGridTemplateColumns() }}
             >
+              {selectable && (
+                <div className="flex items-center justify-center">
+                  <Checkbox
+                    checked={isItemSelected(item)}
+                    onCheckedChange={(checked) => handleSelectItem(item, checked as boolean)}
+                    aria-label={`Seleccionar fila ${index + 1}`}
+                  />
+                </div>
+              )}
               {columns.map((column) => (
                 <div key={String(column.key)} className="text-xs flex items-center justify-start">
                   {column.render 
