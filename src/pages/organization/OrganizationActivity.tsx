@@ -191,21 +191,24 @@ export default function OrganizationActivity() {
   };
 
   const handleActivityClick = (activity: any) => {
+    console.log('Detalles de actividad:', activity);
+    
+    // Usar las rutas exactas del App.tsx
     switch (activity.type) {
       case 'project':
-        navigate('/organization/projects');
+        navigate('/proyectos');
         break;
       case 'movement':
-        navigate('/finance/movements');
+        navigate('/movimientos');
         break;
       case 'contact':
-        navigate('/organization/contacts');
+        navigate('/organization/contactos');
         break;
       case 'site_log':
-        navigate('/construction/site-logs');
+        navigate('/bitacora');
         break;
       default:
-        console.log('Ver detalles para:', activity);
+        alert(`Ver detalles de: ${activity.type_label}\n${activity.description}`);
         break;
     }
   };
