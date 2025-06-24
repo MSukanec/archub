@@ -171,7 +171,6 @@ export default function OrganizationActivity() {
 
   return (
     <Layout headerProps={headerProps}>
-      <div className="space-y-4">
         {isLoading ? (
           <div className="text-center py-12 text-muted-foreground">
             <Activity className="h-12 w-12 mx-auto mb-4 opacity-20 animate-spin" />
@@ -225,7 +224,6 @@ export default function OrganizationActivity() {
             <p className="text-xs">La actividad aparecerá aquí cuando empieces a trabajar en la organización.</p>
           </div>
         )}
-      </div>
     </Layout>
   );
 }

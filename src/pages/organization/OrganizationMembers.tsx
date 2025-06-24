@@ -298,10 +298,19 @@ export default function OrganizationMembers() {
   const headerProps = {
     title: "Miembros",
     icon: <Users className="h-5 w-5" />,
+    showSearch: true,
+    searchPlaceholder: "Buscar miembros...",
+    searchValue: "",
+    onSearchChange: () => {},
+    onSearchClear: () => {},
     actions: (
-      <Button>
-        <Plus className="mr-2 h-4 w-4" />
-        Nuevo miembro
+      <Button 
+        onClick={() => setShowInviteModal(true)}
+        className="h-8"
+        size="sm"
+      >
+        <Plus className="h-4 w-4 mr-2" />
+        Invitar miembro
       </Button>
     )
   };

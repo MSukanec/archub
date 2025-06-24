@@ -180,6 +180,7 @@ export default function OrganizationDashboard() {
       <Button 
         onClick={() => setShowNewOrganizationModal(true)}
         className="h-8"
+        size="sm"
       >
         <Plus className="h-4 w-4 mr-2" />
         Nueva Organización
@@ -203,7 +204,6 @@ export default function OrganizationDashboard() {
 
   return (
     <Layout headerProps={headerProps}>
-      <div className="space-y-6">
         {/* Organization Overview */}
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6 mb-6">
           <div className="flex items-start justify-between">
@@ -456,7 +456,6 @@ export default function OrganizationDashboard() {
             </CardContent>
           </Card>
         </div>
-      </div>
       
       {/* New Organization Modal */}
       {showNewOrganizationModal && (

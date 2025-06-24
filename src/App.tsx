@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, Redirect } from "wouter"; // 👈 asegurate de importar Redirect
 import { useEffect } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -8,6 +8,7 @@ import { Layout } from "@/components/layout/Layout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { useAuthStore } from "@/stores/authStore";
 
+// Páginas
 import OrganizationManagement from "@/pages/organization/OrganizationList";
 import OrganizationProjects from "@/pages/organization/OrganizationProjects";
 import OrganizationContacts from "@/pages/organization/OrganizationContacts";
@@ -20,7 +21,6 @@ import Profile from "@/pages/others/Profile";
 import Movements from "@/pages/finances/FinancesMovements";
 import SiteLogs from "@/pages/site/SiteLogs";
 
-
 function Router() {
   return (
     <Switch>
@@ -29,11 +29,13 @@ function Router() {
           <OrganizationManagement />
         </ProtectedRoute>
       </Route>
+
       <Route path="/organizaciones">
         <ProtectedRoute>
           <OrganizationManagement />
         </ProtectedRoute>
       </Route>
+
       <Route path="/movimientos">
         <ProtectedRoute>
           <Layout>
@@ -41,6 +43,7 @@ function Router() {
           </Layout>
         </ProtectedRoute>
       </Route>
+
       <Route path="/bitacora">
         <ProtectedRoute>
           <Layout>
@@ -54,50 +57,57 @@ function Router() {
           <OrganizationProjects />
         </ProtectedRoute>
       </Route>
+
       <Route path="/organization/contactos">
         <ProtectedRoute>
           <OrganizationContacts />
         </ProtectedRoute>
       </Route>
+
       <Route path="/organization/dashboard">
         <ProtectedRoute>
           <OrganizationDashboard />
         </ProtectedRoute>
       </Route>
+
       <Route path="/organization/members">
         <ProtectedRoute>
           <OrganizationMembers />
         </ProtectedRoute>
       </Route>
+
       <Route path="/organization/activity">
         <ProtectedRoute>
           <OrganizationActivity />
         </ProtectedRoute>
       </Route>
+
       <Route path="/project/dashboard">
         <ProtectedRoute>
           <ProjectDashboard />
         </ProtectedRoute>
       </Route>
+
       <Route path="/finance/dashboard">
         <ProtectedRoute>
           <FinancesDashboard />
         </ProtectedRoute>
       </Route>
+
       <Route path="/perfil">
         <ProtectedRoute>
           <Profile />
         </ProtectedRoute>
       </Route>
+
+      {/* Redirección de /dashboard por compatibilidad */}
       <Route path="/dashboard">
-        <ProtectedRoute>
-          <OrganizationDashboard />
-        </ProtectedRoute>
+        <Redirect to="/organization/dashboard" />
       </Route>
+
+      {/* Redirección principal */}
       <Route path="/">
-        <ProtectedRoute>
-          <OrganizationDashboard />
-        </ProtectedRoute>
+        <Redirect to="/organization/dashboard" />
       </Route>
     </Switch>
   );
