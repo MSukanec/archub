@@ -9,13 +9,13 @@ interface PlanFeatures {
 export function usePlanFeatures(): PlanFeatures {
   const { data: userData } = useCurrentUser();
   
-  // Obtener features del plan actual
-  const planFeatures = currentPlan?.features || {};
-  
   // Obtener plan desde la organización actual
   const organizationId = userData?.preferences?.last_organization_id;
   const currentOrganization = userData?.organizations?.find(org => org.id === organizationId);
   const currentPlan = currentOrganization?.plan;
+  
+  // Obtener features del plan actual
+  const planFeatures = currentPlan?.features || {};
 
   const can = (feature: string): boolean => {
     // Verificar si la feature existe en el plan actual
@@ -49,10 +49,7 @@ export function usePlanFeatures(): PlanFeatures {
     }
     
     // Si no hay features o la feature no existe, usar valores por defecto basados en el plan
-    // Verificar múltiples rutas para obtener el plan
-    const planName = userData?.organization?.plan?.name || 
-                     userData?.plan?.name ||
-                     userData?.organizations?.[0]?.plan?.name;
+    const planName = currentPlan?.name;
     
     if (feature === 'max_members') {
       if (planName === 'Teams') {

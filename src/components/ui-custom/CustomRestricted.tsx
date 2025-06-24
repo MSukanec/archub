@@ -28,13 +28,8 @@ export function CustomRestricted({
   const [, navigate] = useLocation();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  // Debug información del usuario
+  // Datos del usuario para debug
   const { data: userData } = useCurrentUser();
-  console.log('Current user plan info:', {
-    lastOrgId: userData?.preferences?.last_organization_id,
-    organizations: userData?.organizations?.map(org => ({ id: org.id, name: org.name, plan: org.plan?.name })),
-    organizationPlan: userData?.organization?.plan?.name
-  });
 
   // Determinar si está restringido
   let isRestricted = false;
@@ -48,16 +43,7 @@ export function CustomRestricted({
     // Verificar límites si se proporcionó current
     if (current !== undefined) {
       const featureLimit = limit(feature);
-      // Debug: verificar datos del plan
-      console.log('Plan check debug:', {
-        feature,
-        current,
-        featureLimit,
-        userData: !!userData,
-        organization: !!userData?.organization,
-        plan: userData?.organization?.plan,
-        willBlock: featureLimit !== Infinity && current >= featureLimit
-      });
+      // Verificar límite alcanzado
       
       // Restringir si se alcanzó o superó el límite
       if (featureLimit !== Infinity && current >= featureLimit) {
