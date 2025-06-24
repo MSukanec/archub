@@ -27,6 +27,8 @@ export function CustomRestricted({
   const [, navigate] = useLocation();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
+  // Remover debug logs
+
   // Determinar si está restringido
   let isRestricted = false;
   let restrictionKey = "";
@@ -39,7 +41,10 @@ export function CustomRestricted({
     // Verificar límites si se proporcionó current
     if (current !== undefined) {
       const featureLimit = limit(feature);
-      if (featureLimit !== Infinity && current >= featureLimit) {
+      // Verificar límite
+      
+      // Solo restringir si hay un límite válido y se alcanzó
+      if (featureLimit > 0 && featureLimit !== Infinity && current >= featureLimit) {
         isRestricted = true;
         restrictionKey = feature;
       }

@@ -11,6 +11,8 @@ export function usePlanFeatures(): PlanFeatures {
   
   // Obtener features reales del plan desde la base de datos
   const planFeatures = userData?.organization?.plan?.features || {};
+  
+  // Verificar si tenemos datos válidos del plan
 
   const can = (feature: string): boolean => {
     // Verificar si la feature existe en el plan actual
@@ -41,6 +43,18 @@ export function usePlanFeatures(): PlanFeatures {
     // Si es booleano y true, asumir límite ilimitado
     if (featureValue === true) {
       return Infinity;
+    }
+    
+    // Si no hay features o la feature no existe, usar valores por defecto basados en el plan
+    const planName = userData?.organization?.plan?.name;
+    if (planName === 'TEAMS' && feature === 'max_members') {
+      return 999;
+    }
+    if (planName === 'PRO' && feature === 'max_members') {
+      return Infinity;
+    }
+    if (planName === 'FREE' && feature === 'max_members') {
+      return 5;
     }
     
     // Si es false o no existe, límite es 0
