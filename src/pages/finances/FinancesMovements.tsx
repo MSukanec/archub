@@ -428,6 +428,7 @@ export default function Movements() {
           setEditingMovement(null);
           setShowNewMovementModal(true);
         }}
+        className="h-8"
       >
         <Plus className="mr-2 h-4 w-4" />
         Nuevo movimiento

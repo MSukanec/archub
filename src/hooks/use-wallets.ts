@@ -1,52 +1,34 @@
-import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase';
 
-interface OrganizationWallet {
-  id: string
-  organization_id: string
-  wallet_id: string
-  is_active: boolean
-  is_default: boolean
-  created_at: string
-  wallets: {
-    id: string
-    name: string
-  }
+interface Wallet {
+  id: string;
+  name: string;
+  organization_id: string;
+  is_active: boolean;
+  created_at: string;
 }
 
 export function useWallets(organizationId: string | undefined) {
   return useQuery({
-    queryKey: ['organization-wallets', organizationId],
+    queryKey: ['wallets', organizationId],
     queryFn: async () => {
-      if (!supabase) {
-        throw new Error('Supabase client not initialized')
-      }
-
+      if (!organizationId) return [];
+      
       const { data, error } = await supabase
-        .from('organization_wallets')
-        .select(`
-          id, 
-          organization_id, 
-          wallet_id, 
-          is_active, 
-          is_default, 
-          created_at,
-          wallets (
-            id,
-            name
-          )
-        `)
+        .from('wallets')
+        .select('*')
         .eq('organization_id', organizationId)
         .eq('is_active', true)
-        .order('is_default', { ascending: false })
-
+        .order('name');
+      
       if (error) {
-        console.error('Error fetching organization wallets:', error)
-        throw error
+        console.error('Error fetching wallets:', error);
+        throw error;
       }
-
-      return data || []
+      
+      return data as Wallet[];
     },
-    enabled: !!organizationId
-  })
+    enabled: !!organizationId,
+  });
 }
