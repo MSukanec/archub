@@ -37,7 +37,6 @@ interface OrganizationCurrency {
   id: string;
   organization_id: string;
   currency_id: string;
-  is_active: boolean;
   is_default: boolean;
   created_at: string;
 }
@@ -46,7 +45,6 @@ interface OrganizationWallet {
   id: string;
   organization_id: string;
   wallet_id: string;
-  is_active: boolean;
   is_default: boolean;
   created_at: string;
 }
