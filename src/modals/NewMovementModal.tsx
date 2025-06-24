@@ -208,9 +208,11 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
   // Set default currency and wallet for new movements only
   useEffect(() => {
     if (!editingMovement && currencies.length > 0 && !form.getValues('currency_id')) {
+      console.log('Setting default currency from:', currencies);
       const defaultCurrency = currencies.find((c: any) => c.is_default) || currencies[0]
       if (defaultCurrency) {
         const currencyId = defaultCurrency.currency?.id || defaultCurrency.currency_id
+        console.log('Setting default currency ID:', currencyId);
         form.setValue('currency_id', currencyId)
       }
     }
@@ -218,9 +220,11 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
 
   useEffect(() => {
     if (!editingMovement && wallets.length > 0 && !form.getValues('wallet_id')) {
+      console.log('Setting default wallet from:', wallets);
       const defaultWallet = wallets.find((w: any) => w.is_default) || wallets[0]
       if (defaultWallet) {
         const walletId = defaultWallet.wallet?.id || defaultWallet.wallet_id
+        console.log('Setting default wallet ID:', walletId);
         form.setValue('wallet_id', walletId)
       }
     }
@@ -297,16 +301,16 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
     onSuccess: () => {
       toast({
         title: "Éxito",
-        description: "Movimiento creado correctamente"
+        description: editingMovement ? "Movimiento actualizado correctamente" : "Movimiento creado correctamente"
       })
       queryClient.invalidateQueries({ queryKey: ['movements', organizationId, projectId] })
       onClose()
     },
     onError: (error: any) => {
-      console.error('Error creating movement:', error)
+      console.error('Error processing movement:', error)
       toast({
         title: "Error",
-        description: "No se pudo crear el movimiento",
+        description: editingMovement ? "No se pudo actualizar el movimiento" : "No se pudo crear el movimiento",
         variant: "destructive"
       })
     }
@@ -538,7 +542,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                   <SelectContent>
                     {currencies.map((currency: any) => (
                       <SelectItem key={currency.id} value={currency.currency?.id || currency.currency_id}>
-                        {currency.currency?.name} ({currency.currency?.code}) {currency.is_default && "(Por defecto)"}
+                        {currency.currency?.name} ({currency.currency?.code}){currency.is_default && " (Por defecto)"}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -564,7 +568,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                   <SelectContent>
                     {wallets.map((wallet: any) => (
                       <SelectItem key={wallet.id} value={wallet.wallet?.id || wallet.wallet_id}>
-                        {wallet.wallet?.name} {wallet.is_default && "(Por defecto)"}
+                        {wallet.wallet?.name}{wallet.is_default && " (Por defecto)"}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -649,7 +653,11 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
   const footer = (
     <CustomModalFooter
       onCancel={onClose}
-      onSave={form.handleSubmit(handleSubmit)}
+      onSave={() => {
+        const formData = form.getValues();
+        console.log('Form submission triggered with data:', formData);
+        handleSubmit(formData);
+      }}
       saveText={editingMovement ? 'Actualizar' : 'Crear movimiento'}
       saveLoading={createMovementMutation.isPending}
     />
