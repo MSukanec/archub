@@ -1,16 +1,11 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { CalendarIcon } from 'lucide-react'
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Calendar } from '@/components/ui/calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import {
   Form,
   FormControl,
@@ -30,8 +25,7 @@ import { supabase } from '@/lib/supabase'
 import { useToast } from '@/hooks/use-toast'
 
 const organizationSchema = z.object({
-  name: z.string().min(1, 'El nombre es requerido'),
-  created_at: z.date()
+  name: z.string().min(1, 'El nombre es requerido')
 })
 
 type OrganizationFormData = z.infer<typeof organizationSchema>
@@ -59,7 +53,6 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
     resolver: zodResolver(organizationSchema),
     defaultValues: {
       name: '',
-      created_at: new Date(),
     }
   })
 
@@ -68,12 +61,10 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
     if (editingOrganization && open) {
       form.reset({
         name: editingOrganization.name,
-        created_at: new Date(editingOrganization.created_at),
       })
     } else if (open) {
       form.reset({
         name: '',
-        created_at: new Date(),
       })
     }
   }, [editingOrganization, open, form])
@@ -94,15 +85,11 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
           throw new Error('No se pudo actualizar la organización')
         }
       } else {
-        // Create new organization
-        const { error } = await supabase
-          .from('organizations')
-          .insert([{
-            name: formData.name,
-            created_at: formData.created_at.toISOString(),
-            is_active: true,
-            is_system: false,
-          }])
+        // Create new organization using RPC
+        const { error } = await supabase.rpc('archub_new_organization', {
+          _organization_name: formData.name,
+          _user_id: userData?.user?.id
+        })
 
         if (error) {
           console.error('Error creating organization:', error)
@@ -148,61 +135,26 @@ export function NewOrganizationModal({ open, onClose, editingOrganization }: New
           />
         ),
         body: (
-          <CustomModalBody padding="lg">
+          <CustomModalBody>
             <Form {...form}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Fecha de creación */}
-                <div className="col-span-1">
-                  <FormField
-                    control={form.control}
-                    name="created_at"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium">Fecha de creación</FormLabel>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button variant="outline" className="w-full justify-start text-left font-normal">
-                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                {field.value ? format(field.value, "dd 'de' MMMM 'de' yyyy", { locale: es }) : "Seleccionar fecha"}
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={field.value}
-                              onSelect={field.onChange}
-                              disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* Nombre de la organización */}
-                <div className="col-span-1">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium">Nombre de la organización</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Ingresa el nombre de la organización"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">Nombre de la organización</FormLabel>
+                      <FormControl>
+                        <Input
+                          className="w-full"
+                          placeholder="Ingresa el nombre de la organización"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
             </Form>
           </CustomModalBody>
