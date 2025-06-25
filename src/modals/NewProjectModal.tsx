@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -96,10 +96,17 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
     },
   });
 
+  // Reset form when currentUserMember changes
+  React.useEffect(() => {
+    if (currentUserMember && !editingProject) {
+      form.setValue('created_by', currentUserMember.id);
+    }
+  }, [currentUserMember, editingProject, form]);
+
   // Helper para cerrar el modal y limpiar el formulario
   const handleClose = () => {
-    onClose();
     form.reset();
+    onClose();
   };
 
   const mutation = useMutation({
@@ -178,10 +185,6 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
           }
         }
 
-        if (projectDataError) {
-          console.error('Error inserting project data:', projectDataError);
-        }
-
         // Update user preferences to set this as the last project
         await supabase
           .from('user_preferences')
@@ -198,7 +201,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
       });
       queryClient.invalidateQueries({ queryKey: ['projects', organizationId] });
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      onClose();
+      handleClose();
       form.reset();
     },
     onError: (error: any) => {
