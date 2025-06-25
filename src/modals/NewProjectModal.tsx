@@ -78,6 +78,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
 
   // Helper para mostrar el nombre del miembro
   const getMemberLabel = (id: string) => {
+    if (!id) return "Seleccionar creador";
     const member = organizationMembers.find(m => m.id === id);
     if (!member) return "Seleccionar creador";
     const memberUser = member.users?.[0]; // Acceder al primer usuario del array
@@ -167,21 +168,23 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
           throw new Error(`Error al crear proyecto: ${error.message}`);
         }
 
-        // Insert project_data solo si hay datos que insertar
+        // Upsert project_data para evitar errores de clave duplicada
         const normalizedType = formData.project_type_id === 'none' ? null : formData.project_type_id;
         const normalizedModality = formData.modality_id === 'none' ? null : formData.modality_id;
         
         if (normalizedType || normalizedModality) {
           const { error: projectDataError } = await supabase
             .from('project_data')
-            .insert({
+            .upsert({
               project_id: projectData.id,
               project_type_id: normalizedType,
               modality_id: normalizedModality,
+            }, {
+              onConflict: 'project_id'
             });
             
           if (projectDataError) {
-            console.error('Error inserting project data:', projectDataError);
+            console.error('Error upserting project data:', projectDataError);
           }
         }
 
