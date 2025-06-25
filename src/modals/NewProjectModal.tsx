@@ -76,11 +76,11 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
     member.user_id === userData?.user?.id
   );
 
-  // Helper para mostrar el nombre del miembro
+  // Helper para mostrar el nombre del miembro - EXACTAMENTE igual que en la tabla
   const getMemberLabel = (id: string) => {
-    if (!id) return "Seleccionar creador";
+    if (!id) return "";
     const member = organizationMembers.find(m => m.id === id);
-    if (!member) return "Seleccionar creador";
+    if (!member) return "";
     const memberUser = member.users?.[0]; // Acceder al primer usuario del array
     return memberUser?.full_name || memberUser?.email || 'Usuario';
   };
@@ -109,6 +109,11 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
     form.reset();
     onClose();
   };
+
+  // Debug: verificar datos de miembros
+  console.log('Organization Members:', organizationMembers);
+  console.log('Current User Member:', currentUserMember);
+  console.log('Form Value created_by:', form.watch('created_by'));
 
   const mutation = useMutation({
     mutationFn: async (formData: CreateProjectForm) => {
@@ -299,7 +304,9 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue>{getMemberLabel(field.value)}</SelectValue>
+                            <SelectValue placeholder="Seleccionar creador">
+                              {field.value && getMemberLabel(field.value)}
+                            </SelectValue>
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
