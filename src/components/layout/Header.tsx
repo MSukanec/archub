@@ -17,6 +17,7 @@ import { queryClient } from "@/lib/queryClient";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useLocation } from "wouter";
 import { NewOrganizationModal } from "@/modals/NewOrganizationModal";
+import { NewProjectModal } from "@/modals/NewProjectModal";
 
 interface HeaderProps {
   icon?: React.ComponentType<any>;
@@ -44,6 +45,7 @@ export function Header({
   actions = [],
 }: HeaderProps = {}) {
   const [showNewOrganizationModal, setShowNewOrganizationModal] = useState(false);
+  const [showNewProjectModal, setShowNewProjectModal] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const [location, navigate] = useLocation();
@@ -214,7 +216,10 @@ export function Header({
                       </DropdownMenuItem>
                     ))}
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-sm">
+                    <DropdownMenuItem 
+                      className="text-sm"
+                      onClick={() => setShowNewProjectModal(true)}
+                    >
                       <Plus className="mr-2 h-4 w-4" />
                       Nuevo proyecto
                     </DropdownMenuItem>
@@ -410,6 +415,14 @@ export function Header({
       <NewOrganizationModal
         open={showNewOrganizationModal}
         onClose={() => setShowNewOrganizationModal(false)}
+      />
+    )}
+
+    {/* New Project Modal */}
+    {showNewProjectModal && (
+      <NewProjectModal
+        open={showNewProjectModal}
+        onClose={() => setShowNewProjectModal(false)}
       />
     )}
     </>

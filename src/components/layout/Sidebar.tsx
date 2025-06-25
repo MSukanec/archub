@@ -36,11 +36,11 @@ export function Sidebar() {
   const sidebarContexts = {
     organization: [
       { icon: Home, label: 'Resumen', href: '/organization/dashboard' },
-      { icon: Users, label: 'Miembros', href: '/organization/members' },
-      { icon: Activity, label: 'Actividad', href: '/organization/activity' },
-      { icon: Mail, label: 'Contactos', href: '/organization/contactos' },
-      { icon: Settings, label: 'Preferencias', href: '/preferencias' },
       { icon: FolderOpen, label: 'Proyectos', href: '/proyectos' },
+      { icon: Mail, label: 'Contactos', href: '/organization/contactos' },
+      { icon: Activity, label: 'Actividad', href: '/organization/activity' },
+      { icon: Users, label: 'Miembros', href: '/organization/members' },
+      { icon: Settings, label: 'Preferencias', href: '/preferencias' },
     ],
     project: [
       { icon: Home, label: 'Dashboard', href: '/project/dashboard' },

@@ -18,6 +18,7 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useLocation } from 'wouter'
+import { NewProjectModal } from '@/modals/NewProjectModal'
 
 export default function OrganizationProjects() {
   const [searchValue, setSearchValue] = useState("")
@@ -26,6 +27,7 @@ export default function OrganizationProjects() {
   const [editingProject, setEditingProject] = useState<any>(null)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [projectToDelete, setProjectToDelete] = useState<any>(null)
+  const [showNewProjectModal, setShowNewProjectModal] = useState(false)
   
   const { data: userData, isLoading } = useCurrentUser()
   const { data: projects = [], isLoading: projectsLoading } = useProjects(userData?.organization?.id)
@@ -177,7 +179,11 @@ export default function OrganizationProjects() {
   )
 
   const actions = [
-    <Button key="new-project" className="h-8 px-3 text-sm">
+    <Button 
+      key="new-project" 
+      className="h-8 px-3 text-sm"
+      onClick={() => setShowNewProjectModal(true)}
+    >
       <Plus className="w-4 h-4 mr-2" />
       Nuevo Proyecto
     </Button>
@@ -329,6 +335,14 @@ export default function OrganizationProjects() {
           )}
         </div>
       </div>
+
+      {/* New Project Modal */}
+      {showNewProjectModal && (
+        <NewProjectModal
+          open={showNewProjectModal}
+          onClose={() => setShowNewProjectModal(false)}
+        />
+      )}
 
       {/* Dialog de confirmación para eliminar */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
