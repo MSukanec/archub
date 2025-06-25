@@ -125,6 +125,12 @@ Changelog:
   • Modified header to hide project breadcrumb when in organization context
   • Header now shows "ORGANIZATION > Page" in organization context instead of "ORGANIZATION > PROJECT > Page"
   • Action buttons across all pages now consistently aligned to left with proper event handling
+
+- June 25, 2025. Added plan-based restrictions to "Nuevo Proyecto" buttons
+  • Wrapped "Nuevo Proyecto" buttons in CustomRestricted component with max_projects feature check
+  • Applied restrictions both in OrganizationProjects page header and Header dropdown menu
+  • Buttons now respect organization plan limits and show upgrade prompts when limits are reached
+  • Current project count is compared against plan's max_projects limit for proper restriction enforcement
 - June 18, 2025. Initial setup - Complete SPA base structure implemented
   • React + Vite + TypeScript frontend with shadcn/ui components
   • Supabase authentication (email + Google OAuth)

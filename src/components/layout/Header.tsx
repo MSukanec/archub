@@ -9,6 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { CustomRestricted } from "@/components/ui-custom/CustomRestricted";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjects } from "@/hooks/use-projects";
 import { useMutation } from "@tanstack/react-query";
@@ -216,13 +217,15 @@ export function Header({
                       </DropdownMenuItem>
                     ))}
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem 
-                      className="text-sm"
-                      onClick={() => setShowNewProjectModal(true)}
-                    >
-                      <Plus className="mr-2 h-4 w-4" />
-                      Nuevo proyecto
-                    </DropdownMenuItem>
+                    <CustomRestricted feature="max_projects" current={projects.length}>
+                      <DropdownMenuItem 
+                        className="text-sm"
+                        onClick={() => setShowNewProjectModal(true)}
+                      >
+                        <Plus className="mr-2 h-4 w-4" />
+                        Nuevo proyecto
+                      </DropdownMenuItem>
+                    </CustomRestricted>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>

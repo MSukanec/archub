@@ -7,6 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
+import { CustomRestricted } from '@/components/ui-custom/CustomRestricted'
 import { useState } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects } from '@/hooks/use-projects'
@@ -179,14 +180,15 @@ export default function OrganizationProjects() {
   )
 
   const actions = [
-    <Button 
-      key="new-project" 
-      className="h-8 px-3 text-sm"
-      onClick={() => setShowNewProjectModal(true)}
-    >
-      <Plus className="w-4 h-4 mr-2" />
-      Nuevo Proyecto
-    </Button>
+    <CustomRestricted key="new-project" feature="max_projects" current={filteredProjects.length}>
+      <Button 
+        className="h-8 px-3 text-sm"
+        onClick={() => setShowNewProjectModal(true)}
+      >
+        <Plus className="w-4 h-4 mr-2" />
+        Nuevo Proyecto
+      </Button>
+    </CustomRestricted>
   ]
 
   const headerProps = {
