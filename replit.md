@@ -138,6 +138,11 @@ Changelog:
   • Fixed typology and modality dropdowns to load data from Supabase with proper fallback options
   • Enhanced Profile page layout: Mail field inline with Nombre Completo, both read-only
   • Reorganized Profile form: Fecha de nacimiento now inline with País for better visual balance
+
+- June 25, 2025. Final UX improvements for contact modal and profile page
+  • Made Email and Phone fields optional in NewContactModal (removed required validation)
+  • Removed preferences card completely from Profile page for cleaner interface
+  • Contact creation now accepts empty email/phone values without validation errors
 - June 18, 2025. Initial setup - Complete SPA base structure implemented
   • React + Vite + TypeScript frontend with shadcn/ui components
   • Supabase authentication (email + Google OAuth)

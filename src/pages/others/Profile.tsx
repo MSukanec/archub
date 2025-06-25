@@ -384,46 +384,7 @@ export default function Profile() {
           </CardContent>
         </Card>
 
-        {/* Preferences */}
-        <Card>
-          <CardHeader className="flex flex-row items-center gap-4">
-            <Settings className="w-5 h-5" />
-            <CardTitle>Preferencias</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-2 gap-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>Tema</Label>
-                  <p className="text-sm text-muted-foreground">
-                    {userData?.preferences?.theme === 'dark' ? 'Oscuro' : 'Claro'}
-                  </p>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => toggleThemeMutation.mutate()}
-                  disabled={toggleThemeMutation.isPending}
-                >
-                  Cambiar
-                </Button>
-              </div>
 
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>Sidebar fijo</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Mantener sidebar expandido
-                  </p>
-                </div>
-                <Switch
-                  checked={sidebarDocked}
-                  onCheckedChange={setSidebarDocked}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
     </Layout>
   )
 }
