@@ -367,7 +367,7 @@ export default function SiteLogs() {
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
+                            <DropdownMenuContent align="start">
                               <DropdownMenuItem onClick={() => handleEdit(log)}>
                                 <Edit className="mr-2 h-4 w-4" />
                                 Editar
