@@ -180,7 +180,7 @@ export default function OrganizationProjects() {
   )
 
   const actions = [
-    <CustomRestricted key="new-project" feature="max_projects" current={filteredProjects.length}>
+    <CustomRestricted key="new-project" feature="max_projects" current={projects?.length || 0}>
       <Button 
         className="h-8 px-3 text-sm"
         onClick={() => setShowNewProjectModal(true)}
@@ -372,7 +372,7 @@ export default function OrganizationProjects() {
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={async () => {
-                if (projectToDelete) {
+                if (projectToDelete && supabase) {
                   try {
                     const { error } = await supabase
                       .from('projects')

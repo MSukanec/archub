@@ -217,7 +217,7 @@ export function Header({
                       </DropdownMenuItem>
                     ))}
                     <DropdownMenuSeparator />
-                    <CustomRestricted feature="max_projects" current={projects.length}>
+                    <CustomRestricted feature="max_projects" current={projects?.length || 0}>
                       <DropdownMenuItem 
                         className="text-sm"
                         onClick={() => setShowNewProjectModal(true)}
