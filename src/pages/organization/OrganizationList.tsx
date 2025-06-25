@@ -84,7 +84,7 @@ function OrganizationCard({ organization, isSelected, onSelect, onEdit, onDelete
               {members.slice(0, 3).map((member, index) => (
                 <Avatar key={member.id} className="w-6 h-6 avatar-border" style={{border: '3px solid var(--card-border)'}}>
                   <AvatarFallback className="text-xs">
-                    {(member.users?.full_name || member.users?.email || 'U').substring(0, 2).toUpperCase()}
+                    {(member.user?.full_name || member.user?.email || 'U').substring(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
               ))}
