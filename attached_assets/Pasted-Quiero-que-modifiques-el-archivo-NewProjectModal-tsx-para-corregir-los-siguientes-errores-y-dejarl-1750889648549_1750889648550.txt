@@ -1,0 +1,65 @@
+Quiero que modifiques el archivo `NewProjectModal.tsx` para corregir los siguientes errores y dejarlo perfectamente funcional:
+
+---
+
+### 1. El campo "Creador" no se preselecciona correctamente ni se muestra bien
+
+🔧 Solución:
+- Asegurate de que el `defaultValue` del form tenga correctamente `created_by` con el ID del miembro actual (`currentUserMember?.id`).
+- En el `<SelectValue>` del campo `created_by`, mostrá el nombre del miembro actualmente seleccionado. Usá un helper como:
+
+```ts
+const getMemberLabel = (id: string) => {
+  const member = organizationMembers.find(m => m.id === id);
+  if (!member) return "Seleccionar creador";
+  return member.user_data?.first_name && member.user_data?.last_name
+    ? `${member.user_data.first_name} ${member.user_data.last_name}`
+    : member.user?.email || 'Usuario';
+};
+Y usalo así:
+
+tsx
+Copiar
+Editar
+<SelectValue>{getMemberLabel(field.value)}</SelectValue>
+2. Los campos "Tipología" y "Modalidad" a veces no se guardan
+🔧 Solución:
+
+Antes del insert o upsert en project_data, asegurate de transformar el valor "none" en null. Hacelo así:
+
+ts
+Copiar
+Editar
+const normalizedType = formData.project_type_id === 'none' ? null : formData.project_type_id;
+const normalizedModality = formData.modality_id === 'none' ? null : formData.modality_id;
+Y luego usá:
+
+ts
+Copiar
+Editar
+project_type_id: normalizedType,
+modality_id: normalizedModality,
+3. El modal no debería permitir crear proyectos si no hay una organización activa
+🔧 Solución:
+
+Al principio del componente, agregá esta verificación:
+
+tsx
+Copiar
+Editar
+if (!organizationId) {
+  return <div className="p-6 text-center text-muted-foreground">No hay una organización activa seleccionada.</div>;
+}
+4. Limpieza al cerrar el modal
+🔧 Solución:
+
+Llamá a form.reset() dentro del onClose para limpiar los datos cuando se cierre el modal:
+
+tsx
+Copiar
+Editar
+onClose();
+form.reset();
+Podés incluirlo dentro de un helper handleClose() si querés mantenerlo limpio.
+
+Aplicá todos estos cambios manteniendo tu estilo actual, el uso de Tailwind y Zod, y sin modificar la estructura de layout del modal.

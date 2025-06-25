@@ -108,12 +108,15 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
         }
 
         // Update project_data
+        const normalizedType = formData.project_type_id === 'none' ? null : formData.project_type_id;
+        const normalizedModality = formData.modality_id === 'none' ? null : formData.modality_id;
+        
         const { error: projectDataError } = await supabase
           .from('project_data')
           .upsert({
             project_id: editingProject.id,
-            project_type_id: formData.project_type_id === 'none' ? null : formData.project_type_id,
-            modality_id: formData.modality_id === 'none' ? null : formData.modality_id,
+            project_type_id: normalizedType,
+            modality_id: normalizedModality,
           });
 
         if (projectDataError) {
@@ -138,14 +141,23 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
           throw new Error(`Error al crear proyecto: ${error.message}`);
         }
 
-        // Insert project_data
-        const { error: projectDataError } = await supabase
-          .from('project_data')
-          .insert({
-            project_id: projectData.id,
-            project_type_id: formData.project_type_id === 'none' ? null : formData.project_type_id,
-            modality_id: formData.modality_id === 'none' ? null : formData.modality_id,
-          });
+        // Insert project_data solo si hay datos que insertar
+        const normalizedType = formData.project_type_id === 'none' ? null : formData.project_type_id;
+        const normalizedModality = formData.modality_id === 'none' ? null : formData.modality_id;
+        
+        if (normalizedType || normalizedModality) {
+          const { error: projectDataError } = await supabase
+            .from('project_data')
+            .insert({
+              project_id: projectData.id,
+              project_type_id: normalizedType,
+              modality_id: normalizedModality,
+            });
+            
+          if (projectDataError) {
+            console.error('Error inserting project data:', projectDataError);
+          }
+        }
 
         if (projectDataError) {
           console.error('Error inserting project data:', projectDataError);
@@ -202,7 +214,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
           <CustomModalHeader
             title={editingProject ? 'Editar proyecto' : 'Nuevo proyecto'}
             description={editingProject ? 'Actualiza la información del proyecto' : 'Crea un nuevo proyecto para tu organización'}
-            onClose={onClose}
+            onClose={handleClose}
           />
         ),
         body: (
