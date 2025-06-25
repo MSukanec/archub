@@ -50,7 +50,7 @@ function OrganizationCard({ organization, isSelected, onSelect, onEdit, onDelete
           <div className="col-span-5 flex items-center gap-2">
             <Avatar className="w-8 h-8 avatar-border">
               <AvatarFallback className="text-xs">
-                {organization.name.substring(0, 2).toUpperCase()}
+                {organization.name?.substring(0, 2)?.toUpperCase() || 'ORG'}
               </AvatarFallback>
             </Avatar>
             <div>
@@ -84,7 +84,7 @@ function OrganizationCard({ organization, isSelected, onSelect, onEdit, onDelete
               {members.slice(0, 3).map((member, index) => (
                 <Avatar key={member.id} className="w-6 h-6 avatar-border" style={{border: '3px solid var(--card-border)'}}>
                   <AvatarFallback className="text-xs">
-                    {member.users?.full_name?.substring(0, 2).toUpperCase() || member.users?.email?.substring(0, 2).toUpperCase() || 'U'}
+                    {(member.users?.full_name || member.users?.email || 'U').substring(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
               ))}
@@ -321,7 +321,7 @@ export default function OrganizationManagement() {
                 <div className="flex items-center gap-4">
                   <Avatar className="w-16 h-16 avatar-border">
                     <AvatarFallback className="text-lg font-semibold">
-                      {userData.organization.name.substring(0, 2).toUpperCase()}
+                      {userData.organization?.name?.substring(0, 2).toUpperCase() || 'ORG'}
                     </AvatarFallback>
                   </Avatar>
                   <div>
