@@ -119,6 +119,12 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 25, 2025. Fixed action buttons and header navigation issues
+  • Fixed project card action buttons (Edit/Delete) to prevent selection and navigation
+  • Added stopPropagation to dropdown menu items to prevent triggering parent card clicks
+  • Modified header to hide project breadcrumb when in organization context
+  • Header now shows "ORGANIZATION > Page" in organization context instead of "ORGANIZATION > PROJECT > Page"
+  • Action buttons across all pages now consistently aligned to left with proper event handling
 - June 18, 2025. Initial setup - Complete SPA base structure implemented
   • React + Vite + TypeScript frontend with shadcn/ui components
   • Supabase authentication (email + Google OAuth)
