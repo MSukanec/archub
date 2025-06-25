@@ -66,12 +66,17 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
   const { data: projectTypes = [] } = useProjectTypes();
   const { data: projectModalities = [] } = useProjectModalities();
 
+  // Encontrar el member_id del usuario actual
+  const currentUserMember = organizationMembers.find(member => 
+    member.user_id === userData?.user?.id
+  );
+
   const form = useForm<CreateProjectForm>({
     resolver: zodResolver(createProjectSchema),
     defaultValues: {
       name: editingProject?.name || "",
       created_at: editingProject ? new Date(editingProject.created_at) : new Date(),
-      created_by: editingProject?.created_by || userData?.user?.id || "",
+      created_by: editingProject?.created_by || currentUserMember?.id || "",
       project_type_id: editingProject?.project_data?.project_type_id || "none",
       modality_id: editingProject?.project_data?.modality_id || "none",
       status: editingProject?.status || "planning",
@@ -261,16 +266,23 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {organizationMembers.map((member) => (
-                            <SelectItem key={member.id} value={member.id}>
-                              <div className="flex items-center gap-2">
-                                <div className="h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center text-xs">
-                                  {creator.initials}
+                          {organizationMembers.map((member) => {
+                            const memberName = member.user_data?.first_name && member.user_data?.last_name 
+                              ? `${member.user_data.first_name} ${member.user_data.last_name}`
+                              : member.user?.email || 'Usuario';
+                            const memberInitials = memberName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+                            
+                            return (
+                              <SelectItem key={member.id} value={member.id}>
+                                <div className="flex items-center gap-2">
+                                  <div className="h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center text-xs">
+                                    {memberInitials}
+                                  </div>
+                                  {memberName}
                                 </div>
-                                {creator.name}
-                              </div>
-                            </SelectItem>
-                          ))}
+                              </SelectItem>
+                            );
+                          })}
                         </SelectContent>
                       </Select>
                       <FormMessage />

@@ -131,6 +131,13 @@ Changelog:
   • Applied restrictions both in OrganizationProjects page header and Header dropdown menu
   • Buttons now respect organization plan limits and show upgrade prompts when limits are reached
   • Current project count is compared against plan's max_projects limit for proper restriction enforcement
+
+- June 25, 2025. Fixed multiple project management and modal issues
+  • Fixed project deletion functionality - now properly deletes from Supabase with confirmation
+  • Corrected modal "creador" field to show current user member and load organization members properly
+  • Fixed typology and modality dropdowns to load data from Supabase with proper fallback options
+  • Enhanced Profile page layout: Mail field inline with Nombre Completo, both read-only
+  • Reorganized Profile form: Fecha de nacimiento now inline with País for better visual balance
 - June 18, 2025. Initial setup - Complete SPA base structure implemented
   • React + Vite + TypeScript frontend with shadcn/ui components
   • Supabase authentication (email + Google OAuth)

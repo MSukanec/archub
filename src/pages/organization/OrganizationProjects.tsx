@@ -371,8 +371,31 @@ export default function OrganizationProjects() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => {
-                // TODO: Implementar eliminación
+              onClick={async () => {
+                if (projectToDelete) {
+                  try {
+                    const { error } = await supabase
+                      .from('projects')
+                      .delete()
+                      .eq('id', projectToDelete.id)
+                    
+                    if (error) throw error
+                    
+                    queryClient.invalidateQueries({ queryKey: ['projects'] })
+                    queryClient.invalidateQueries({ queryKey: ['current-user'] })
+                    
+                    toast({
+                      title: "Proyecto eliminado",
+                      description: "El proyecto se ha eliminado correctamente"
+                    })
+                  } catch (error: any) {
+                    toast({
+                      title: "Error",
+                      description: error.message || "No se pudo eliminar el proyecto",
+                      variant: "destructive"
+                    })
+                  }
+                }
                 setDeleteDialogOpen(false)
                 setProjectToDelete(null)
               }}
