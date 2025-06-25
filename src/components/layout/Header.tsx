@@ -123,7 +123,7 @@ export function Header({
                 navigate('/organization/dashboard');
               }}
             >
-              {currentOrganization?.name || 'Sin organización'}
+              {userData?.organizations?.find(org => org.id === userData?.preferences?.last_organization_id)?.name || 'Sin organización'}
             </Button>
           
             <DropdownMenu>
@@ -148,7 +148,7 @@ export function Header({
                     className="flex items-center justify-between text-sm"
                   >
                     <span className="truncate">{org.name}</span>
-                    {org.id === currentOrganization?.id && (
+                    {org.id === userData?.preferences?.last_organization_id && (
                       <div className="h-2 w-2 rounded-full bg-green-500 flex-shrink-0" />
                     )}
                   </DropdownMenuItem>

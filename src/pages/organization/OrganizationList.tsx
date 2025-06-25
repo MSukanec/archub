@@ -84,7 +84,7 @@ function OrganizationCard({ organization, isSelected, onSelect, onEdit, onDelete
               {members.slice(0, 3).map((member, index) => (
                 <Avatar key={member.id} className="w-6 h-6 avatar-border" style={{border: '3px solid var(--card-border)'}}>
                   <AvatarFallback className="text-xs">
-                    {(member.user?.full_name || member.user?.email || 'U').substring(0, 2).toUpperCase()}
+                    {(member.users?.[0]?.full_name || member.users?.[0]?.email || 'U').substring(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
               ))}
@@ -199,12 +199,39 @@ export default function OrganizationManagement() {
   // Mutación para seleccionar organización
   const selectOrganizationMutation = useMutation({
     mutationFn: async (organizationId: string) => {
-      const { error } = await supabase
-        .from('user_preferences')
-        .update({ last_organization_id: organizationId })
-        .eq('user_id', userData?.user.id)
+      if (!supabase) {
+        throw new Error('Supabase client not initialized');
+      }
       
-      if (error) throw error
+      // Primero verificar si existe una fila de preferencias
+      const { data: existingPrefs } = await supabase
+        .from('user_preferences')
+        .select('id')
+        .eq('user_id', userData?.user.id)
+        .single()
+      
+      if (existingPrefs) {
+        // Actualizar preferencias existentes
+        const { error } = await supabase
+          .from('user_preferences')
+          .update({ last_organization_id: organizationId })
+          .eq('user_id', userData?.user.id)
+        
+        if (error) throw error
+      } else {
+        // Crear nuevas preferencias
+        const { error } = await supabase
+          .from('user_preferences')
+          .insert({
+            user_id: userData?.user.id,
+            last_organization_id: organizationId,
+            theme: 'light',
+            sidebar_docked: false,
+            onboarding_completed: false
+          })
+        
+        if (error) throw error
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['current-user'] })
@@ -360,7 +387,7 @@ export default function OrganizationManagement() {
         {/* Lista de organizaciones */}
         <div className="space-y-2">
           {filteredOrganizations.map((organization) => {
-            const isSelected = userData?.organization?.id === organization.id
+            const isSelected = userData?.preferences?.last_organization_id === organization.id
             
             return (
               <OrganizationCard 
