@@ -235,7 +235,7 @@ export default function OrganizationContacts() {
                     </div>
 
                     {/* Acciones */}
-                    <div className="col-span-1 flex justify-end">
+                    <div className="col-span-1 flex justify-start">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
@@ -246,7 +246,7 @@ export default function OrganizationContacts() {
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
+                        <DropdownMenuContent align="start">
                           <DropdownMenuItem onClick={() => handleEdit(contact)}>
                             <Edit className="mr-2 h-4 w-4" />
                             Editar

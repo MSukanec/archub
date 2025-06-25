@@ -108,7 +108,7 @@ export default function OrganizationProjects() {
 
   const handleEdit = (project: any) => {
     setEditingProject(project)
-    // TODO: Abrir modal de edición
+    setShowNewProjectModal(true)
   }
 
   const handleDeleteClick = (project: any) => {
@@ -288,7 +288,7 @@ export default function OrganizationProjects() {
                     </div>
 
                     {/* Acciones */}
-                    <div className="col-span-1 flex justify-end">
+                    <div className="col-span-1 flex justify-start">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
@@ -300,7 +300,7 @@ export default function OrganizationProjects() {
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
+                        <DropdownMenuContent align="start">
                           <DropdownMenuItem onClick={() => handleEdit(project)}>
                             <Edit className="mr-2 h-4 w-4" />
                             Editar
@@ -340,7 +340,11 @@ export default function OrganizationProjects() {
       {showNewProjectModal && (
         <NewProjectModal
           open={showNewProjectModal}
-          onClose={() => setShowNewProjectModal(false)}
+          onClose={() => {
+            setShowNewProjectModal(false)
+            setEditingProject(null)
+          }}
+          editingProject={editingProject}
         />
       )}
 

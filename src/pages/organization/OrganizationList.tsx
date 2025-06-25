@@ -116,7 +116,7 @@ function OrganizationCard({ organization, isSelected, onSelect, onEdit, onDelete
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="start">
                 <DropdownMenuItem 
                   onClick={(e) => {
                     e.stopPropagation()
