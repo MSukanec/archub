@@ -78,6 +78,10 @@ export default function OrganizationProjects() {
   // Mutación para seleccionar proyecto
   const selectProjectMutation = useMutation({
     mutationFn: async (projectId: string) => {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized');
+      }
+      
       const { error } = await supabase
         .from('user_preferences')
         .update({ last_project_id: projectId })
@@ -180,7 +184,7 @@ export default function OrganizationProjects() {
   )
 
   const actions = [
-    <CustomRestricted key="new-project" feature="max_projects" current={projects?.length || 0}>
+    <CustomRestricted key="new-project" feature="max_projects" current={filteredProjects?.length || 0}>
       <Button 
         className="h-8 px-3 text-sm"
         onClick={() => setShowNewProjectModal(true)}
@@ -374,6 +378,13 @@ export default function OrganizationProjects() {
               onClick={async () => {
                 if (projectToDelete && supabase) {
                   try {
+                    // Primero eliminar project_data si existe
+                    await supabase
+                      .from('project_data')
+                      .delete()
+                      .eq('project_id', projectToDelete.id)
+                    
+                    // Luego eliminar el proyecto
                     const { error } = await supabase
                       .from('projects')
                       .delete()
@@ -381,7 +392,8 @@ export default function OrganizationProjects() {
                     
                     if (error) throw error
                     
-                    queryClient.invalidateQueries({ queryKey: ['projects'] })
+                    // Invalidar cachés específicas
+                    queryClient.invalidateQueries({ queryKey: ['projects', userData?.organization?.id] })
                     queryClient.invalidateQueries({ queryKey: ['current-user'] })
                     
                     toast({

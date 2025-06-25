@@ -43,12 +43,15 @@ export function CustomRestricted({
     // Verificar límites si se proporcionó current
     if (current !== undefined) {
       const featureLimit = limit(feature);
-      // Verificar límite alcanzado
+      
+      console.log(`Feature: ${feature}, Current: ${current}, Limit: ${featureLimit}`);
       
       // Restringir si se alcanzó o superó el límite
-      if (featureLimit !== Infinity && current >= featureLimit) {
+      // Solo restringir si el límite es válido (no 0 ni negativo)
+      if (featureLimit > 0 && current >= featureLimit) {
         isRestricted = true;
         restrictionKey = feature;
+        console.log(`Restricted: ${feature} - ${current} >= ${featureLimit}`);
       }
     } else {
       // Si no hay current, verificar si la feature está permitida (para features booleanas)
