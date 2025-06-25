@@ -66,10 +66,23 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
   const { data: projectTypes = [] } = useProjectTypes();
   const { data: projectModalities = [] } = useProjectModalities();
 
+  // Verificar que hay una organización activa
+  if (!organizationId) {
+    return <div className="p-6 text-center text-muted-foreground">No hay una organización activa seleccionada.</div>;
+  }
+
   // Encontrar el member_id del usuario actual
   const currentUserMember = organizationMembers.find(member => 
     member.user_id === userData?.user?.id
   );
+
+  // Helper para mostrar el nombre del miembro
+  const getMemberLabel = (id: string) => {
+    const member = organizationMembers.find(m => m.id === id);
+    if (!member) return "Seleccionar creador";
+    const memberUser = member.users?.[0]; // Acceder al primer usuario del array
+    return memberUser?.full_name || memberUser?.email || 'Usuario';
+  };
 
   const form = useForm<CreateProjectForm>({
     resolver: zodResolver(createProjectSchema),
@@ -82,6 +95,12 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
       status: editingProject?.status || "planning",
     },
   });
+
+  // Helper para cerrar el modal y limpiar el formulario
+  const handleClose = () => {
+    onClose();
+    form.reset();
+  };
 
   const mutation = useMutation({
     mutationFn: async (formData: CreateProjectForm) => {
@@ -274,15 +293,14 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar creador" />
+                            <SelectValue>{getMemberLabel(field.value)}</SelectValue>
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           {organizationMembers.map((member) => {
-                            const memberName = member.user_data?.first_name && member.user_data?.last_name 
-                              ? `${member.user_data.first_name} ${member.user_data.last_name}`
-                              : member.user?.email || 'Usuario';
-                            const memberInitials = memberName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+                            const memberUser = member.users?.[0]; // Acceder al primer usuario del array
+                            const memberName = memberUser?.full_name || memberUser?.email || 'Usuario';
+                            const memberInitials = memberName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
                             
                             return (
                               <SelectItem key={member.id} value={member.id}>
