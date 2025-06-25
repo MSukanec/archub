@@ -392,9 +392,9 @@ export default function OrganizationProjects() {
                     
                     if (error) throw error
                     
-                    // Invalidar cachés específicas
-                    queryClient.invalidateQueries({ queryKey: ['projects', userData?.organization?.id] })
-                    queryClient.invalidateQueries({ queryKey: ['current-user'] })
+                    // Invalidar cachés específicas con refetch forzado
+                    await queryClient.invalidateQueries({ queryKey: ['projects', userData?.organization?.id] })
+                    await queryClient.invalidateQueries({ queryKey: ['current-user'] })
                     
                     toast({
                       title: "Proyecto eliminado",

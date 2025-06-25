@@ -65,6 +65,20 @@ export function usePlanFeatures(): PlanFeatures {
       return 1;
     }
     
+    if (feature === 'max_projects') {
+      if (planName === 'Teams') {
+        return 10;
+      }
+      if (planName === 'Pro') {
+        return Infinity;
+      }
+      if (planName === 'Free') {
+        return 3;
+      }
+      // Si no hay plan definido, asumir Free por defecto
+      return 3;
+    }
+    
     // Si es false o no existe, límite por defecto
     return 0;
   };
