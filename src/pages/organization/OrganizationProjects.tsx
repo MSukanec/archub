@@ -217,9 +217,58 @@ export default function OrganizationProjects() {
     )
   }
 
+  // Obtener el proyecto seleccionado para mostrar información
+  const selectedProject = projects?.find(p => p.id === userData?.preferences?.last_project_id);
+
   return (
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
+        {/* Card de información del proyecto seleccionado */}
+        {selectedProject && (
+          <div className="bg-card border rounded-lg p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Folder className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg">{selectedProject.name}</h3>
+                <p className="text-sm text-muted-foreground">Proyecto activo seleccionado</p>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+              <div>
+                <span className="text-muted-foreground">Creado:</span>
+                <p className="font-medium">{format(new Date(selectedProject.created_at), 'dd/MM/yyyy')}</p>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Tipología:</span>
+                <p className="font-medium">{selectedProject.project_data?.project_types?.name || 'Sin especificar'}</p>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Modalidad:</span>
+                <p className="font-medium">{selectedProject.project_data?.project_modalities?.name || 'Sin especificar'}</p>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Estado:</span>
+                <p className="font-medium">
+                  <Badge 
+                    variant={
+                      selectedProject.status === 'active' ? 'default' :
+                      selectedProject.status === 'planning' ? 'secondary' :
+                      selectedProject.status === 'completed' ? 'outline' : 'destructive'
+                    }
+                  >
+                    {selectedProject.status === 'planning' ? 'Planificación' :
+                     selectedProject.status === 'active' ? 'Activo' :
+                     selectedProject.status === 'on-hold' ? 'En pausa' : 'Completado'}
+                  </Badge>
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Headers de columnas */}
         <div className="grid grid-cols-12 gap-4 px-4 py-2 text-xs font-medium text-muted-foreground border-b">
           <div className="col-span-2">Fecha</div>
@@ -268,7 +317,7 @@ export default function OrganizationProjects() {
                     </div>
 
                     {/* Proyecto */}
-                    <div className="col-span-3 flex items-center gap-2">
+                    <div className="col-span-2 flex items-center gap-2">
                       <Folder className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                       <div>
                         <div className="font-medium flex items-center gap-2">
@@ -284,13 +333,27 @@ export default function OrganizationProjects() {
 
                     {/* Tipología */}
                     <div className="col-span-2 text-xs text-muted-foreground">
-                      {project.project_data?.project_type?.name || 'Sin especificar'}
+                      {project.project_data?.project_types?.name || 'Sin especificar'}
+                    </div>
+
+                    {/* Modalidad */}
+                    <div className="col-span-2 text-xs text-muted-foreground">
+                      {project.project_data?.project_modalities?.name || 'Sin especificar'}
                     </div>
 
                     {/* Estado */}
-                    <div className="col-span-2">
-                      <Badge variant={getStatusBadgeVariant(project.status)} className="text-xs">
-                        {getStatusLabel(project.status)}
+                    <div className="col-span-1">
+                      <Badge 
+                        variant={
+                          project.status === 'active' ? 'default' :
+                          project.status === 'planning' ? 'secondary' :
+                          project.status === 'completed' ? 'outline' : 'destructive'
+                        }
+                        className="text-xs"
+                      >
+                        {project.status === 'planning' ? 'Planificación' :
+                         project.status === 'active' ? 'Activo' :
+                         project.status === 'on-hold' ? 'En pausa' : 'Completado'}
                       </Badge>
                     </div>
 

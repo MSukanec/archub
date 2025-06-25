@@ -76,12 +76,12 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
     member.user_id === userData?.user?.id
   );
 
-  // Helper para mostrar el nombre del miembro - EXACTAMENTE igual que en la tabla
+  // Helper para mostrar el nombre del miembro - CORREGIDO: users es objeto, no array
   const getMemberLabel = (id: string) => {
     if (!id) return "";
     const member = organizationMembers.find(m => m.id === id);
     if (!member) return "";
-    const memberUser = member.users?.[0]; // Acceder al primer usuario del array
+    const memberUser = member.users; // Es un objeto, no array
     return memberUser?.full_name || memberUser?.email || 'Usuario';
   };
 
@@ -311,7 +311,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
                         </FormControl>
                         <SelectContent>
                           {organizationMembers.map((member) => {
-                            const memberUser = member.users?.[0]; // Acceder al primer usuario del array
+                            const memberUser = member.users; // Es un objeto, no array
                             const memberName = memberUser?.full_name || memberUser?.email || 'Usuario';
                             const memberInitials = memberName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
                             
