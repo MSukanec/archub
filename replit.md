@@ -119,6 +119,13 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 26, 2025. Site logs enum system completely fixed and operational
+  • Fixed critical weather enum validation errors by switching to standard English values (sunny, cloudy, rainy, stormy, windy, snowy, hot, cold)
+  • Updated all 9 entry types from database schema: avance_de_obra, visita_tecnica, problema_detectado, pedido_material, nota_climatica, decision, inspeccion, foto_diaria, registro_general
+  • Corrected helper functions and filter options in SiteLogs.tsx to match database enum values exactly
+  • Modal now saves entries without database enum constraint violations
+  • Entry type icons and labels properly mapped for all enum values with visual consistency
+
 - June 26, 2025. Complete movement modal data loading and save functionality fix
   • Fixed currency display issue - now shows "Peso Argentino" and "Dólar Estadounidense" instead of "Sin nombre (N/A)"
   • Updated useCurrencies hook with proper JOIN query structure to fetch nested currency details correctly
