@@ -209,8 +209,8 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
         body: (
           <CustomModalBody padding="md">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4" id="contact-form">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-2" id="contact-form">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <FormField
                     control={form.control}
                     name="first_name"
@@ -240,7 +240,7 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <FormField
                     control={form.control}
                     name="email"
@@ -299,7 +299,7 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
                   )}
                 />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <FormField
                     control={form.control}
                     name="company_name"
@@ -351,7 +351,7 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
           </CustomModalBody>
         ),
         footer: (
-          <div className="p-3 border-t border-[var(--card-border)] mt-auto">
+          <div className="p-2 border-t border-[var(--card-border)] mt-auto">
             <div className="flex gap-2 w-full">
               <Button
                 type="button"
