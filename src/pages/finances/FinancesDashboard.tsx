@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { DollarSign, TrendingUp, TrendingDown, CreditCard, PieChart, BarChart3, Calendar, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { DollarSign, TrendingUp, TrendingDown, CreditCard, PieChart, BarChart3, Calendar, ArrowUpRight, ArrowDownRight, LineChart } from "lucide-react";
 
 import { Layout } from "@/components/layout/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +10,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useNavigationStore } from "@/stores/navigationStore";
 import { supabase } from "@/lib/supabase";
+import { WalletBalanceChart } from "@/components/graphics/WalletBalanceChart";
+import { MonthlyFlowChart } from "@/components/graphics/MonthlyFlowChart";
+import { BudgetProgressChart } from "@/components/graphics/BudgetProgressChart";
 
 interface FinancialSummary {
   totalIncome: number;
@@ -33,8 +37,14 @@ interface RecentMovement {
 export default function FinancesDashboard() {
   const [searchValue, setSearchValue] = useState("");
   const { data: userData } = useCurrentUser();
+  const { setSidebarContext } = useNavigationStore();
   const organizationId = userData?.preferences?.last_organization_id;
   const projectId = userData?.preferences?.last_project_id;
+
+  // Set sidebar context to finance when component mounts
+  useEffect(() => {
+    setSidebarContext('finance');
+  }, [setSidebarContext]);
 
   // Fetch financial summary
   const { data: financialSummary, isLoading: loadingSummary } = useQuery({
