@@ -226,7 +226,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                 <Accordion type="single" defaultValue="informacion-basica" collapsible>
                   {/* Sección 1: Información Básica */}
                   <AccordionItem value="informacion-basica">
-                    <AccordionTrigger className="text-base font-medium">
+                    <AccordionTrigger>
                       Información Básica
                     </AccordionTrigger>
                     <AccordionContent className="space-y-4 pt-4">
@@ -385,7 +385,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
 
                   {/* Sección 2: Configuración de Entrada */}
                   <AccordionItem value="configuracion-entrada">
-                    <AccordionTrigger className="text-base font-medium">
+                    <AccordionTrigger>
                       Configuración de Entrada
                     </AccordionTrigger>
                     <AccordionContent className="space-y-4 pt-4">

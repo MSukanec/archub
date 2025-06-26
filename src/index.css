@@ -26,9 +26,9 @@
   --card-hover-bg: hsl(240, 3%, 98%);
 
   /* Secondary Cards */
-  --secondary-card-bg: hsl(0, 0%, 50%);
-  --secondary-card-fg: hsl(0, 50%, 40%);
-  --secondary-card-border: hsl(0, 0%, 2%);
+  --secondary-card-bg: hsl(0, 0%, 90%);
+  --secondary-card-fg: hsl(0, 0%, 35%);
+  --secondary-card-border: hsl(0, 0%, 35%);
 
   /* Buttons - Primary */
   --button-primary-bg: hsl(90, 50%, 50%);
