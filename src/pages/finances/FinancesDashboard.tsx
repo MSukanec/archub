@@ -99,6 +99,98 @@ export default function FinancesDashboard() {
     enabled: !!organizationId && !!projectId
   });
 
+  // Fetch wallet balance data for pie chart
+  const { data: walletBalanceData = [], isLoading: loadingWallets } = useQuery({
+    queryKey: ['wallet-balance', organizationId, projectId],
+    queryFn: async () => {
+      if (!organizationId || !projectId) return [];
+
+      const { data: wallets, error } = await supabase
+        .from('organization_wallets')
+        .select(`
+          wallets (
+            id,
+            name
+          ),
+          is_active
+        `)
+        .eq('organization_id', organizationId)
+        .eq('is_active', true);
+
+      if (error || !wallets) return [];
+
+      // Mock data for demonstration - in real app would get actual balances
+      const colors = ['#3b82f6', '#ef4444', '#22c55e', '#f59e0b', '#8b5cf6'];
+      return wallets.map((wallet, index) => ({
+        wallet: wallet.wallets?.name || 'Billetera',
+        balance: Math.floor(Math.random() * 500000) + 50000,
+        color: colors[index % colors.length]
+      }));
+    },
+    enabled: !!organizationId && !!projectId
+  });
+
+  // Fetch monthly flow data for line chart
+  const { data: monthlyFlowData = [], isLoading: loadingFlow } = useQuery({
+    queryKey: ['monthly-flow', organizationId, projectId],
+    queryFn: async () => {
+      if (!organizationId || !projectId) return [];
+
+      // Generate last 6 months of data
+      const months = [];
+      for (let i = 5; i >= 0; i--) {
+        const date = new Date();
+        date.setMonth(date.getMonth() - i);
+        const monthName = date.toLocaleDateString('es-AR', { month: 'short' });
+        
+        // Mock data - in real app would aggregate actual movements by month
+        const income = Math.floor(Math.random() * 200000) + 100000;
+        const expenses = Math.floor(Math.random() * 150000) + 50000;
+        
+        months.push({
+          month: monthName,
+          income,
+          expenses,
+          net: income - expenses
+        });
+      }
+      return months;
+    },
+    enabled: !!organizationId && !!projectId
+  });
+
+  // Fetch budget progress data for bar chart
+  const { data: budgetProgressData = [], isLoading: loadingBudget } = useQuery({
+    queryKey: ['budget-progress', organizationId, projectId],
+    queryFn: async () => {
+      if (!organizationId || !projectId) return [];
+
+      // Mock budget categories - in real app would come from budget table
+      const categories = [
+        'Materiales',
+        'Mano de obra',
+        'Equipos',
+        'Servicios',
+        'Varios'
+      ];
+
+      return categories.map(category => {
+        const budget = Math.floor(Math.random() * 300000) + 100000;
+        const spent = Math.floor(Math.random() * budget * 0.9);
+        const percentage = (spent / budget) * 100;
+        
+        return {
+          category,
+          budget,
+          spent,
+          remaining: budget - spent,
+          percentage
+        };
+      });
+    },
+    enabled: !!organizationId && !!projectId
+  });
+
   // Fetch recent movements
   const { data: recentMovements = [], isLoading: loadingMovements } = useQuery({
     queryKey: ['recent-movements', organizationId, projectId],
@@ -144,27 +236,25 @@ export default function FinancesDashboard() {
   });
 
   const headerProps = {
-    title: "Dashboard Financiero",
-    icon: <DollarSign className="h-5 w-5" />,
+    title: "Resumen de Finanzas",
+    icon: DollarSign,
     showSearch: true,
     searchValue,
     onSearchChange: setSearchValue,
     onClearFilters: () => setSearchValue(""),
-    actions: (
-      <div className="flex gap-2">
-        <Button variant="outline" size="sm">
-          <BarChart3 className="mr-2 h-4 w-4" />
-          Reportes
-        </Button>
-        <Button size="sm">
-          <DollarSign className="mr-2 h-4 w-4" />
-          Nuevo movimiento
-        </Button>
-      </div>
-    )
+    actions: [
+      <Button key="reportes" variant="outline" size="sm">
+        <BarChart3 className="mr-2 h-4 w-4" />
+        Reportes
+      </Button>,
+      <Button key="nuevo" size="sm">
+        <DollarSign className="mr-2 h-4 w-4" />
+        Nuevo movimiento
+      </Button>
+    ]
   };
 
-  const isLoading = loadingSummary || loadingMovements;
+  const isLoading = loadingSummary || loadingMovements || loadingWallets || loadingFlow || loadingBudget;
 
   if (isLoading) {
     return (
@@ -185,8 +275,17 @@ export default function FinancesDashboard() {
     pendingPayments: 0
   };
 
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+      minimumFractionDigits: 0
+    }).format(amount);
+  };
+
   return (
     <Layout headerProps={headerProps}>
+      <div className="space-y-6">
         {/* Financial Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Total Income */}
@@ -197,7 +296,7 @@ export default function FinancesDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">
-                ${summary.totalIncome.toLocaleString()}
+                {formatCurrency(summary.totalIncome)}
               </div>
               <p className="text-xs text-muted-foreground">
                 +12% desde el mes pasado
@@ -213,7 +312,7 @@ export default function FinancesDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-red-600">
-                ${summary.totalExpenses.toLocaleString()}
+                {formatCurrency(summary.totalExpenses)}
               </div>
               <p className="text-xs text-muted-foreground">
                 +8% desde el mes pasado
@@ -380,6 +479,58 @@ export default function FinancesDashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Financial Graphics Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Wallet Balance Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <PieChart className="h-5 w-5" />
+                Balance por Billetera
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <WalletBalanceChart 
+                data={walletBalanceData} 
+                isLoading={loadingWallets} 
+              />
+            </CardContent>
+          </Card>
+
+          {/* Monthly Flow Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                Flujo Mensual
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <MonthlyFlowChart 
+                data={monthlyFlowData} 
+                isLoading={loadingFlow} 
+              />
+            </CardContent>
+          </Card>
+
+          {/* Budget Progress Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5" />
+                Progreso del Presupuesto
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <BudgetProgressChart 
+                data={budgetProgressData} 
+                isLoading={loadingBudget} 
+              />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </Layout>
   );
 }
