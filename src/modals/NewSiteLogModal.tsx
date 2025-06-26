@@ -119,11 +119,8 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
   useEffect(() => {
     if (open && userData && members.length > 0) {
       // Establecer usuario actual como creador por defecto
-      const currentUserMembership = members.find(member => 
-        member.users?.id === userData.user?.id
-      )
-      if (currentUserMembership) {
-        form.setValue('created_by', userData.user.id) // Usar user_id, no membership_id
+      if (userData.user?.id) {
+        form.setValue('created_by', userData.user.id) // Usar user_id directamente
       }
 
       // Si es edición, cargar datos
@@ -148,7 +145,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
         log_date: data.log_date.toISOString().split('T')[0], // Solo fecha, sin hora
         created_by: data.created_by,
         entry_type: data.entry_type,
-        weather: (!data.weather || data.weather === "none" || data.weather === "") ? null : data.weather,
+        weather: (!data.weather || data.weather === "none") ? null : data.weather,
         comments: data.comments,
         is_public: data.is_public,
         is_favorite: data.is_favorite
@@ -262,7 +259,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                           </FormControl>
                           <SelectContent>
                             {members.map((member) => (
-                              <SelectItem key={member.id} value={member.id}>
+                              <SelectItem key={member.id} value={member.users?.id || member.id}>
                                 <div className="flex items-center gap-2">
                                   <Avatar className="w-6 h-6">
                                     <AvatarImage src={member.users?.avatar_url} />
@@ -328,7 +325,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="">Sin especificar</SelectItem>
+                            <SelectItem value="none">Sin especificar</SelectItem>
                             {weatherOptions.map((weather) => (
                               <SelectItem key={weather.value} value={weather.value}>
                                 <span>{weather.label}</span>
