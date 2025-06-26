@@ -1,8 +1,11 @@
-import React from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import React, { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
+import { Calendar, User } from "lucide-react";
 
 import { CustomModalLayout } from "@/components/ui-custom/modal/CustomModalLayout";
 import { CustomModalHeader } from "@/components/ui-custom/modal/CustomModalHeader";
@@ -14,11 +17,15 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useContactTypes } from "@/hooks/use-contact-types";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
-import { CustomPhoneInput } from "@/components/ui-custom/misc/CustomPhoneInput";
+import { queryClient } from "@/lib/queryClient";
+import { PhoneInput } from "@/components/ui-custom/misc/PhoneInput";
 
 const createContactSchema = z.object({
   first_name: z.string().min(1, "El nombre es requerido"),
@@ -45,56 +52,51 @@ interface Contact {
   notes: string;
   contact_type_id: string;
   created_at: string;
+  contact_type?: {
+    id: string;
+    name: string;
+  };
 }
 
 interface NewContactModalProps {
   open: boolean;
   onClose: () => void;
-  contact?: Contact | null;
-  onSuccess?: () => void;
+  editingContact?: Contact | null;
 }
 
-export function NewContactModal({ open, onClose, contact, onSuccess }: NewContactModalProps) {
+export function NewContactModal({ open, onClose, editingContact }: NewContactModalProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
-  const queryClient = useQueryClient();
+  const { data: contactTypes = [] } = useContactTypes();
 
   const organizationId = userData?.preferences?.last_organization_id;
-
-  const contactTypes = [
-    { id: 'arquitecto', name: 'Arquitecto' },
-    { id: 'ingeniero', name: 'Ingeniero' },
-    { id: 'constructor', name: 'Constructor' },
-    { id: 'proveedor', name: 'Proveedor' },
-    { id: 'cliente', name: 'Cliente' }
-  ];
 
   const form = useForm<CreateContactForm>({
     resolver: zodResolver(createContactSchema),
     defaultValues: {
-      first_name: contact?.first_name || "",
-      last_name: contact?.last_name || "",
-      email: contact?.email || "",
-      phone: contact?.phone || "",
-      contact_type_id: contact?.contact_type_id || "",
-      company_name: contact?.company_name || "",
-      location: contact?.location || "",
-      notes: contact?.notes || "",
+      first_name: "",
+      last_name: "",
+      email: "",
+      phone: "",
+      contact_type_id: "",
+      company_name: "",
+      location: "",
+      notes: "",
     },
   });
 
-  // Reset form when contact changes
+  // Reset form when editingContact changes
   React.useEffect(() => {
-    if (contact) {
+    if (editingContact) {
       form.reset({
-        first_name: contact.first_name || "",
-        last_name: contact.last_name || "",
-        email: contact.email || "",
-        phone: contact.phone || "",
-        contact_type_id: contact.contact_type_id || "",
-        company_name: contact.company_name || "",
-        location: contact.location || "",
-        notes: contact.notes || "",
+        first_name: editingContact.first_name || "",
+        last_name: editingContact.last_name || "",
+        email: editingContact.email || "",
+        phone: editingContact.phone || "",
+        contact_type_id: editingContact.contact_type_id || "",
+        company_name: editingContact.company_name || "",
+        location: editingContact.location || "",
+        notes: editingContact.notes || "",
       });
     } else {
       form.reset({
@@ -108,7 +110,7 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
         notes: "",
       });
     }
-  }, [contact, form]);
+  }, [editingContact, form]);
 
   const createContactMutation = useMutation({
     mutationFn: async (formData: CreateContactForm) => {
@@ -120,96 +122,99 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
         throw new Error('No organization selected');
       }
 
-      if (contact) {
+      if (editingContact) {
         // Update existing contact
         const { error } = await supabase
           .from('contacts')
           .update({
             first_name: formData.first_name,
-            last_name: formData.last_name || '',
-            email: formData.email || '',
-            phone: formData.phone || '',
-            contact_type_id: formData.contact_type_id || '',
+            last_name: formData.last_name || null,
+            email: formData.email || null,
+            phone: formData.phone || null,
+            contact_type_id: formData.contact_type_id || null,
             company_name: formData.company_name || '',
             location: formData.location || '',
             notes: formData.notes || '',
           })
-          .eq('id', contact.id);
+          .eq('id', editingContact.id);
 
         if (error) {
           throw new Error(`Error al actualizar contacto: ${error.message}`);
         }
-
-        return { message: 'Contacto actualizado exitosamente' };
       } else {
         // Create new contact
-        const { error } = await supabase
+
+        const { data: contactData, error } = await supabase
           .from('contacts')
           .insert({
             organization_id: organizationId,
             first_name: formData.first_name,
-            last_name: formData.last_name || '',
-            email: formData.email || '',
-            phone: formData.phone || '',
-            contact_type_id: formData.contact_type_id || '',
+            last_name: formData.last_name || null,
+            email: formData.email || null,
+            phone: formData.phone || null,
+            contact_type_id: formData.contact_type_id || null,
             company_name: formData.company_name || '',
             location: formData.location || '',
             notes: formData.notes || '',
-          });
+          })
+          .select()
+          .single();
 
         if (error) {
           throw new Error(`Error al crear contacto: ${error.message}`);
         }
-
-        return { message: 'Contacto creado exitosamente' };
       }
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast({
-        title: contact ? "Contacto actualizado" : "Contacto creado",
-        description: data.message,
+        title: "Éxito",
+        description: editingContact 
+          ? "Contacto actualizado correctamente"
+          : "Contacto creado correctamente"
       });
       queryClient.invalidateQueries({ queryKey: ['contacts'] });
-      onSuccess?.();
       onClose();
+      form.reset();
     },
-    onError: (error: Error) => {
+    onError: (error: any) => {
       toast({
-        variant: "destructive",
         title: "Error",
-        description: error.message,
+        description: error.message || "No se pudo guardar el contacto",
+        variant: "destructive"
       });
-    },
+    }
   });
 
-  const onSubmit = async (data: CreateContactForm) => {
+  const handleSubmit = (data: CreateContactForm) => {
     createContactMutation.mutate(data);
   };
 
-  if (!open) return null;
+  const handleClose = () => {
+    onClose();
+    form.reset();
+  };
 
   return (
-    <CustomModalLayout open={open} onOpenChange={onClose}>
+    <CustomModalLayout open={open} onClose={handleClose}>
       {{
         header: (
           <CustomModalHeader
-            title={contact ? "Editar contacto" : "Nuevo contacto"}
-            description={contact ? "Modifica la información del contacto" : "Agrega un nuevo contacto a tu organización"}
-            onClose={onClose}
+            title={editingContact ? "Editar contacto" : "Nuevo contacto"}
+            description={editingContact ? "Modifica la información del contacto" : "Agrega un nuevo contacto a tu organización"}
+            onClose={handleClose}
           />
         ),
         body: (
           <CustomModalBody padding="md">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4" id="contact-form">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Nombre */}
                   <FormField
                     control={form.control}
                     name="first_name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="required-asterisk">Nombre</FormLabel>
+                        <FormLabel className="text-sm font-medium required-asterisk">Nombre</FormLabel>
                         <FormControl>
                           <Input placeholder="Ingresa el nombre" {...field} />
                         </FormControl>
@@ -218,13 +223,12 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
                     )}
                   />
 
-                  {/* Apellido */}
                   <FormField
                     control={form.control}
                     name="last_name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Apellido</FormLabel>
+                        <FormLabel className="text-sm font-medium">Apellido</FormLabel>
                         <FormControl>
                           <Input placeholder="Ingresa el apellido" {...field} />
                         </FormControl>
@@ -235,35 +239,29 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Email */}
                   <FormField
                     control={form.control}
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email</FormLabel>
+                        <FormLabel className="text-sm font-medium">Email</FormLabel>
                         <FormControl>
-                          <Input 
-                            type="email" 
-                            placeholder="ejemplo@correo.com" 
-                            {...field} 
-                          />
+                          <Input placeholder="ejemplo@correo.com" type="email" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
 
-                  {/* Teléfono */}
                   <FormField
                     control={form.control}
                     name="phone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Teléfono</FormLabel>
+                        <FormLabel className="text-sm font-medium">Teléfono</FormLabel>
                         <FormControl>
-                          <CustomPhoneInput
-                            value={field.value}
+                          <PhoneInput 
+                            value={field.value || ''}
                             onChange={field.onChange}
                             placeholder="Número de teléfono"
                           />
@@ -274,13 +272,12 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
                   />
                 </div>
 
-                {/* Tipo de contacto */}
                 <FormField
                   control={form.control}
                   name="contact_type_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Tipo de contacto</FormLabel>
+                      <FormLabel className="text-sm font-medium">Tipo de contacto</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -301,13 +298,12 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
                 />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Empresa */}
                   <FormField
                     control={form.control}
                     name="company_name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Empresa</FormLabel>
+                        <FormLabel className="text-sm font-medium">Empresa</FormLabel>
                         <FormControl>
                           <Input placeholder="Nombre de la empresa" {...field} />
                         </FormControl>
@@ -316,13 +312,12 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
                     )}
                   />
 
-                  {/* Ubicación */}
                   <FormField
                     control={form.control}
                     name="location"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Ubicación</FormLabel>
+                        <FormLabel className="text-sm font-medium">Ubicación</FormLabel>
                         <FormControl>
                           <Input placeholder="Ciudad, País" {...field} />
                         </FormControl>
@@ -332,18 +327,17 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
                   />
                 </div>
 
-                {/* Notas */}
                 <FormField
                   control={form.control}
                   name="notes"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Notas</FormLabel>
+                      <FormLabel className="text-sm font-medium">Notas</FormLabel>
                       <FormControl>
                         <Textarea 
-                          placeholder="Notas adicionales sobre el contacto..." 
-                          rows={3}
-                          {...field} 
+                          placeholder="Notas adicionales sobre el contacto..."
+                          className="min-h-[80px]"
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
@@ -355,13 +349,27 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
           </CustomModalBody>
         ),
         footer: (
-          <CustomModalFooter
-            onCancel={onClose}
-            onSave={form.handleSubmit(onSubmit)}
-            saveText={contact ? "Actualizar contacto" : "Crear contacto"}
-            isLoading={createContactMutation.isPending}
-          />
-        ),
+          <div className="p-3 border-t border-[var(--card-border)] mt-auto">
+            <div className="flex gap-2 w-full">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={handleClose}
+                className="w-1/4"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                form="contact-form"
+                className="w-3/4"
+                disabled={createContactMutation.isPending}
+              >
+                {createContactMutation.isPending ? 'Guardando...' : (editingContact ? "Actualizar" : "Crear contacto")}
+              </Button>
+            </div>
+          </div>
+        )
       }}
     </CustomModalLayout>
   );
