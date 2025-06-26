@@ -72,10 +72,20 @@ export default function SiteLogs() {
         throw new Error('Supabase client not initialized')
       }
 
+      console.log('Fetching site logs for project:', projectId, 'in organization:', organizationId)
+      
       const { data, error } = await supabase
         .from('site_logs')
-        .select('*')
+        .select(`
+          *,
+          projects!inner (
+            id,
+            name,
+            organization_id
+          )
+        `)
         .eq('project_id', projectId)
+        .eq('projects.organization_id', organizationId)
         .order('log_date', { ascending: false })
 
       if (error) {
