@@ -326,7 +326,6 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="none">Sin especificar</SelectItem>
                             {weatherOptions.map((weather) => (
                               <SelectItem key={weather.value} value={weather.value}>
                                 <span>{weather.label}</span>
