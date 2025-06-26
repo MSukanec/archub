@@ -23,12 +23,10 @@ import { Calendar, User, FileText, Cloud, MessageSquare, Star, Eye } from 'lucid
 const siteLogSchema = z.object({
   log_date: z.date(),
   created_by: z.string().min(1, 'Creador es requerido'),
-  entry_type: z.enum(['avance_de_obra', 'incidente', 'reunion', 'inspeccion', 'entrega', 'otro'], {
+  entry_type: z.enum(['avance', 'incidente', 'entrega', 'nota'], {
     required_error: 'Tipo de entrada es requerido'
   }),
-  weather_enum: z.enum(['sunny', 'partly_cloudy', 'cloudy', 'rainy', 'stormy', 'snowy', 'foggy', 'windy'], {
-    required_error: 'Clima es requerido'
-  }),
+  weather: z.enum(['soleado', 'nublado', 'lluvioso', 'tormenta', 'ventoso', 'nevado', 'caluroso', 'frio']).optional(),
   comments: z.string().min(1, 'Comentarios son requeridos'),
   is_public: z.boolean().default(false),
   is_favorite: z.boolean().default(false)
@@ -41,7 +39,7 @@ interface SiteLog {
   log_date: string
   created_by: string
   entry_type: string
-  weather_enum: string
+  weather: string | null
   comments: string
   is_public: boolean
   is_favorite: boolean
@@ -55,24 +53,22 @@ interface NewSiteLogModalProps {
 
 // Mapeo de tipos de entrada con iconos
 const entryTypes = [
-  { value: 'avance_de_obra', label: '📝 Avance de obra', icon: '📝' },
-  { value: 'incidente', label: '⚠️ Incidente', icon: '⚠️' },
-  { value: 'reunion', label: '🤝 Reunión', icon: '🤝' },
-  { value: 'inspeccion', label: '🔍 Inspección', icon: '🔍' },
+  { value: 'avance', label: '🟩 Avance', icon: '🟩' },
+  { value: 'incidente', label: '🔥 Incidente', icon: '🔥' },
   { value: 'entrega', label: '📦 Entrega', icon: '📦' },
-  { value: 'otro', label: '📋 Otro', icon: '📋' }
+  { value: 'nota', label: '📝 Nota', icon: '📝' }
 ]
 
 // Mapeo de clima con iconos
 const weatherOptions = [
-  { value: 'sunny', label: '☀️ Soleado', icon: '☀️' },
-  { value: 'partly_cloudy', label: '🌤️ Parcialmente nublado', icon: '🌤️' },
-  { value: 'cloudy', label: '☁️ Nublado', icon: '☁️' },
-  { value: 'rainy', label: '🌧️ Lluvioso', icon: '🌧️' },
-  { value: 'stormy', label: '⛈️ Tormenta', icon: '⛈️' },
-  { value: 'snowy', label: '❄️ Nieve', icon: '❄️' },
-  { value: 'foggy', label: '🌫️ Niebla', icon: '🌫️' },
-  { value: 'windy', label: '💨 Viento', icon: '💨' }
+  { value: 'soleado', label: '☀️ Soleado', icon: '☀️' },
+  { value: 'nublado', label: '☁️ Nublado', icon: '☁️' },
+  { value: 'lluvioso', label: '🌧️ Lluvioso', icon: '🌧️' },
+  { value: 'tormenta', label: '⛈️ Tormenta', icon: '⛈️' },
+  { value: 'ventoso', label: '💨 Ventoso', icon: '💨' },
+  { value: 'nevado', label: '❄️ Nevado', icon: '❄️' },
+  { value: 'caluroso', label: '🔥 Caluroso', icon: '🔥' },
+  { value: 'frio', label: '🧊 Frío', icon: '🧊' }
 ]
 
 export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogModalProps) {
@@ -90,8 +86,8 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
     defaultValues: {
       log_date: new Date(),
       created_by: '',
-      entry_type: 'avance_de_obra',
-      weather_enum: 'sunny',
+      entry_type: 'avance',
+      weather: undefined,
       comments: '',
       is_public: false,
       is_favorite: false
@@ -114,7 +110,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
         form.setValue('log_date', new Date(editingSiteLog.log_date))
         form.setValue('created_by', editingSiteLog.created_by)
         form.setValue('entry_type', editingSiteLog.entry_type as any)
-        form.setValue('weather_enum', editingSiteLog.weather_enum as any)
+        form.setValue('weather', editingSiteLog.weather as any)
         form.setValue('comments', editingSiteLog.comments)
         form.setValue('is_public', editingSiteLog.is_public)
         form.setValue('is_favorite', editingSiteLog.is_favorite)
@@ -131,7 +127,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
         log_date: data.log_date.toISOString().split('T')[0], // Solo fecha, sin hora
         created_by: data.created_by,
         entry_type: data.entry_type,
-        weather_enum: data.weather_enum,
+        weather: data.weather === "none" ? null : data.weather,
         comments: data.comments,
         is_public: data.is_public,
         is_favorite: data.is_favorite
@@ -297,20 +293,21 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
 
                   <FormField
                     control={form.control}
-                    name="weather_enum"
+                    name="weather"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">
                           <Cloud className="w-4 h-4" />
-                          Clima
+                          Clima (opcional)
                         </FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value || ""}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Seleccionar clima" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
+                            <SelectItem value="none">Sin especificar</SelectItem>
                             {weatherOptions.map((weather) => (
                               <SelectItem key={weather.value} value={weather.value}>
                                 <span>{weather.label}</span>
