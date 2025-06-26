@@ -58,10 +58,8 @@ export function Sidebar() {
       { icon: ArrowLeft, label: 'Volver al Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
     ],
     finance: [
-      { icon: Home, label: 'Dashboard', href: '/finance/dashboard' },
+      { icon: Home, label: 'Resumen de Finanzas', href: '/finance/dashboard' },
       { icon: DollarSign, label: 'Movimientos', href: '/movimientos' },
-      { icon: FileText, label: 'Gráficos avanzados', href: '/finance/graficos' },
-      { icon: Users, label: 'Plan de pagos', href: '/finance/pagos' },
       { icon: ArrowLeft, label: 'Volver al Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
     ],
     commercialization: [

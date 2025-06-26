@@ -196,7 +196,7 @@ export default function OrganizationContacts() {
         ),
         onClearFilters: handleClearFilters,
         actions: [
-          <Button key="new" onClick={() => setShowCreateModal(true)}>
+          <Button key="new" size="sm" onClick={() => setShowCreateModal(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Nuevo Contacto
           </Button>

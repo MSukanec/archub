@@ -114,7 +114,7 @@
   --menues-active-fg: hsl(0, 0%, 98%);
 
   /* Cards */
-  --card-bg: hsl(220, 4%, 16%);
+  --card-bg: hsl(220, 4%, 18%);
   --card-text: hsl(0, 0%, 90%);
   --card-border: hsl(240, 8%, 15%);
   --card-hover-bg: hsl(0, 0%, 16%);
