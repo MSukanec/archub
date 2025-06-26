@@ -584,10 +584,10 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         footer: (
           <CustomModalFooter
             cancelText="Cancelar"
-            confirmText={editingMovement ? "Actualizar movimiento" : "Crear movimiento"}
+            saveText={editingMovement ? "Actualizar movimiento" : "Crear movimiento"}
             onCancel={onClose}
-            onConfirm={form.handleSubmit(onSubmit)}
-            isLoading={isPending}
+            onSave={form.handleSubmit(onSubmit)}
+            saveLoading={isPending}
           />
         )
       }}

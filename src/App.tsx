@@ -44,6 +44,12 @@ function Router() {
         </ProtectedRoute>
       </Route>
 
+      <Route path="/finanzas/movimientos">
+        <ProtectedRoute>
+          <Movements />
+        </ProtectedRoute>
+      </Route>
+
       <Route path="/bitacora">
         <ProtectedRoute>
           <SiteLogs />
