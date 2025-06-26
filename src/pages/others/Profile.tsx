@@ -25,6 +25,7 @@ export default function Profile() {
   const { data: userData, isLoading } = useCurrentUser()
   const { toast } = useToast()
   const { isDocked, setDocked } = useSidebarStore()
+  const { signOut } = useAuthStore()
 
   // Form states
   const [firstName, setFirstName] = useState('')
@@ -166,6 +167,26 @@ export default function Profile() {
     }
   })
 
+  // Sign out mutation
+  const signOutMutation = useMutation({
+    mutationFn: async () => {
+      await signOut()
+    },
+    onSuccess: () => {
+      toast({
+        title: "Sesión cerrada",
+        description: "Has cerrado sesión correctamente"
+      })
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "No se pudo cerrar la sesión",
+        variant: "destructive"
+      })
+    }
+  })
+
   const handleSaveProfile = () => {
     updateProfileMutation.mutate({
       firstName,
@@ -238,6 +259,7 @@ export default function Profile() {
 
   return (
     <Layout headerProps={headerProps}>
+      <div className="max-w-2xl mx-auto space-y-6">
         {/* Avatar Section */}
         <Card>
           <CardHeader className="flex flex-row items-center gap-4">
@@ -384,7 +406,80 @@ export default function Profile() {
           </CardContent>
         </Card>
 
+        {/* Card de Preferencias */}
+        <Card>
+          <CardHeader className="flex flex-row items-center gap-4">
+            <Settings className="w-5 h-5" />
+            <CardTitle>Preferencias</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Tema */}
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label className="text-base">Tema</Label>
+                <div className="text-sm text-muted-foreground">
+                  Elige entre tema claro u oscuro
+                </div>
+              </div>
+              <Switch
+                checked={userData?.preferences?.theme === 'dark'}
+                onCheckedChange={toggleThemeMutation.mutate}
+                disabled={toggleThemeMutation.isPending}
+              />
+            </div>
 
+            {/* Sidebar fijo */}
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label className="text-base">Sidebar Fijo</Label>
+                <div className="text-sm text-muted-foreground">
+                  Mantener el sidebar siempre visible
+                </div>
+              </div>
+              <Switch
+                checked={sidebarDocked}
+                onCheckedChange={setSidebarDocked}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Card de Cerrar Sesión */}
+        <Card>
+          <CardHeader className="flex flex-row items-center gap-4">
+            <LogOut className="w-5 h-5" />
+            <CardTitle>Cerrar Sesión</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Al cerrar sesión, serás redirigido a la página de inicio de sesión.
+            </p>
+            
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" className="w-full">
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Cerrar Sesión
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>¿Cerrar sesión?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Estás a punto de cerrar tu sesión. Tendrás que volver a iniciar sesión para acceder a tu cuenta.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={signOutMutation.mutate}>
+                    Cerrar Sesión
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </CardContent>
+        </Card>
+      </div>
     </Layout>
   )
 }
