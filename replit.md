@@ -119,6 +119,17 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 26, 2025. Complete modal system refinement with ultra-compact Lemon Squeezy aesthetic
+  • Applied padding: 3 to all CustomModal components (Header, Body, Footer) for consistent spacing
+  • Updated Button primary variant to use --button-primary-text CSS variable for proper text color
+  • Enhanced Accordion titles to use text-sm font-medium matching modal title typography
+  • Fixed dropdown backgrounds with proper --popover-bg and --card-border CSS variables 
+  • Changed modal cancel button from ghost to secondary variant using proper button styling
+  • Added Secondary Cards CSS variables (--secondary-card-bg, --secondary-card-fg) for accordion backgrounds
+  • Applied Secondary Cards styling to Accordion components with background and text variables
+  • All changes apply globally to modal system - no hardcoded individual modal modifications
+  • Enhanced both light and dark mode support for all new CSS variables
+
 - June 26, 2025. Complete UI refinement with Lemon Squeezy professional aesthetic
   • Refined Input.tsx: compact sizing (text-sm, py-2 px-3), ring-1 ring-accent focus, transition-all duration-150
   • Enhanced Label.tsx: text-xs, muted-foreground coloring, mb-1 spacing for vertical forms
