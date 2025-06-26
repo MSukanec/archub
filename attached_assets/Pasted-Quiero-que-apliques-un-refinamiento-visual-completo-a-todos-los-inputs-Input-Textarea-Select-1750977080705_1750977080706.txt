@@ -1,0 +1,48 @@
+Quiero que apliques un refinamiento visual completo a todos los inputs (`Input`, `Textarea`, `Select`, `Button`) y `Accordion` en toda la plataforma para lograr una estética profesional, comprimida y clara como en Lemon Squeezy.
+
+---
+
+🔶 **INPUTS / SELECT / TEXTAREA**
+Usar:
+- `text-sm`, `leading-tight`, `py-2 px-3`
+- Borde refinado: `border-border`, `rounded-md`
+- Transición suave: `transition-all duration-150`
+- Foco limpio: `ring-1 ring-accent ring-offset-0`
+- Ancho completo: `w-full`
+- Color de texto: `text-foreground`, placeholder con `text-muted-foreground`
+
+Para `Textarea`: agregar `resize-none min-h-[120px]`
+
+---
+
+🔷 **BUTTONS**
+Aplicar:
+- Estilo comprimido pero claro: `text-sm`, `font-medium`, `px-4 py-2`, `rounded-md`
+- Fondo: `bg-accent` y `hover:bg-accent/80`
+- Color de texto: `text-accent-foreground`
+- Transiciones suaves: `transition-colors duration-150`
+
+---
+
+🟣 **ACCORDION**
+Para los componentes `Accordion`, `AccordionTrigger`, y `AccordionContent`:
+
+- `AccordionTrigger`:
+  - Padding vertical reducido: `py-2`
+  - Tamaño de fuente: `text-sm font-medium`
+  - Icono al lado derecho (`chevron-down`) con transición y rotación suave
+  - Border inferior con `border-border`
+
+- `AccordionContent`:
+  - `pt-3`, `pb-4`, `text-sm`, `text-muted-foreground`
+  - Ocupa poco espacio visual y se integra perfectamente con los inputs anteriores
+  - De ser posible, integrar `grid gap-4` o `space-y-3` para que todo quede ajustado
+
+---
+
+🧩 **Aplicación Global**
+Este estilo debe aplicarse automáticamente a todos los modales (`CustomModalBody`, `CustomModalHeader`, `CustomModalFooter`) y también a las páginas que usen estos componentes.
+
+Referencia visual clara: la app de carga de productos de **Lemon Squeezy**.
+
+Objetivo: lograr una interfaz profesional, moderna, comprimida y visualmente consistente con el diseño que mostramos en las capturas anteriores. Debe optimizar el espacio y permitir que entre más contenido sin parecer abrumador.
