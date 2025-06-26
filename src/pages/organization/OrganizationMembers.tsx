@@ -324,11 +324,9 @@ export default function OrganizationMembers() {
 
   if (isLoading) {
     return (
-      <Layout headerProps={headerProps}>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-sm text-muted-foreground">Cargando miembros...</div>
-        </div>
-      </Layout>
+      <div className="flex items-center justify-center h-64">
+        <div className="text-sm text-muted-foreground">Cargando miembros...</div>
+      </div>
     );
   }
 

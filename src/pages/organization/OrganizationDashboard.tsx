@@ -192,13 +192,11 @@ export default function OrganizationDashboard() {
 
   if (!currentOrganization) {
     return (
-      <Layout headerProps={headerProps}>
-        <div className="text-center py-12 text-muted-foreground">
-          <Building className="h-12 w-12 mx-auto mb-4 opacity-20" />
-          <p className="text-sm">No hay organización seleccionada.</p>
-          <p className="text-xs">Selecciona una organización para ver el dashboard.</p>
-        </div>
-      </Layout>
+      <div className="text-center py-12 text-muted-foreground">
+        <Building className="h-12 w-12 mx-auto mb-4 opacity-20" />
+        <p className="text-sm">No hay organización seleccionada.</p>
+        <p className="text-xs">Selecciona una organización para ver el dashboard.</p>
+      </div>
     );
   }
 
