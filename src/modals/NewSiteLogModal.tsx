@@ -118,13 +118,10 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
 
   // Inicializar formulario cuando el modal se abre
   useEffect(() => {
-    if (open && userData && members.length > 0) {
-      // Establecer usuario actual como creador por defecto
-      const currentUserMembership = members.find(member => 
-        member.user_id === userData.user?.id
-      )
-      if (currentUserMembership) {
-        form.setValue('created_by', currentUserMembership.id)
+    if (open && userData) {
+      // Establecer usuario actual como creador por defecto usando user_id directamente
+      if (userData.user?.id) {
+        form.setValue('created_by', userData.user.id)
       }
 
       // Si es edición, cargar datos
@@ -193,7 +190,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
     createSiteLogMutation.mutate(data)
   }
 
-  const selectedCreator = members.find(m => m.id === form.watch('created_by'))
+  const selectedCreator = members.find(m => m.user_id === form.watch('created_by'))
 
   if (!open) return null
 
@@ -263,7 +260,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                           </FormControl>
                           <SelectContent>
                             {members.map((member) => (
-                              <SelectItem key={member.id} value={member.id}>
+                              <SelectItem key={member.user_id} value={member.user_id}>
                                 <div className="flex items-center gap-2">
                                   <Avatar className="w-6 h-6">
                                     <AvatarImage src={member.users?.avatar_url} />
