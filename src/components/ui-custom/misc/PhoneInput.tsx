@@ -89,7 +89,7 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
                 aria-expanded={open}
                 disabled={disabled}
                 className={cn(
-                  "flex h-10 items-center justify-between rounded-l-md rounded-r-none border-r-0 px-3 py-2 text-sm",
+                  "flex h-10 items-center justify-center rounded-l-md rounded-r-none border-r-0 px-2 py-2 text-sm min-w-[80px]",
                   "bg-[var(--input-bg)] border-[var(--input-border)] text-[var(--input-fg)]",
                   "hover:bg-[var(--input-hover-bg)] hover:border-[var(--input-hover-border)]",
                   "focus:bg-[var(--input-focus-bg)] focus:border-[var(--input-focus-border)] focus:ring-2 focus:ring-[var(--input-focus-ring)]",
@@ -97,11 +97,11 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
                   "transition-colors"
                 )}
               >
-                <div className="flex items-center gap-2">
-                  <span className="text-base">{selectedCountry.flag}</span>
+                <div className="flex items-center gap-1">
+                  <span className="text-sm">{selectedCountry.flag}</span>
+                  <span className="text-xs font-medium">{selectedCountry.code}</span>
                   <span className="text-xs text-[var(--muted-foreground)]">{selectedCountry.dialCode}</span>
                 </div>
-                <ChevronDown className="ml-1 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[300px] p-0" align="start">
