@@ -109,35 +109,36 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
       amount: 0,
       description: '',
       file_url: '',
-      is_conversion: false,
-      created_by: '',
-      currency_id: '',
-      wallet_id: '',
-      type_id: '',
-      category_id: '',
-      subcategory_id: ''
+      is_conversion: false
     }
   })
 
   // Initialize form with current user and defaults
   useEffect(() => {
-    if (userData?.memberships?.[0]?.id && !editingMovement && open) {
-      console.log('Create form initialized with defaults')
-      form.setValue('created_by', userData.memberships[0].id)
+    if (!editingMovement && open && !isDataLoading) {
+      console.log('Setting form defaults...')
       
-      // Set default currency if available
-      const defaultCurrency = currencies.find(c => (c as any).is_default)
-      if (defaultCurrency) {
-        form.setValue('currency_id', defaultCurrency.id)
+      // Set creator
+      if (userData?.memberships?.[0]?.id) {
+        form.setValue('created_by', userData.memberships[0].id)
+        console.log('Creator set to:', userData.memberships[0].id)
       }
       
-      // Set default wallet if available  
-      const defaultWallet = wallets.find(w => (w as any).is_default)
-      if (defaultWallet) {
+      // Set default currency (first available or default)
+      if (currencies.length > 0) {
+        const defaultCurrency = currencies.find(c => (c as any).is_default) || currencies[0]
+        form.setValue('currency_id', defaultCurrency.currency_id)
+        console.log('Currency set to:', defaultCurrency.currency_id, defaultCurrency.currencies?.name)
+      }
+      
+      // Set default wallet (first available or default)
+      if (wallets.length > 0) {
+        const defaultWallet = wallets.find(w => (w as any).is_default) || wallets[0]
         form.setValue('wallet_id', defaultWallet.wallet_id)
+        console.log('Wallet set to:', defaultWallet.wallet_id, defaultWallet.wallets.name)
       }
     }
-  }, [userData, currencies, wallets, editingMovement, form, open])
+  }, [userData, currencies, wallets, editingMovement, form, open, isDataLoading])
 
   // Initialize form for editing
   useEffect(() => {
@@ -183,6 +184,10 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         throw new Error('Supabase client not initialized')
       }
 
+      // Find the actual currency and wallet IDs from the relationship data
+      const selectedCurrency = currencies.find(c => c.id === data.currency_id)
+      const selectedWallet = wallets.find(w => w.wallet_id === data.wallet_id)
+      
       const movementData = {
         description: data.description || null,
         amount: data.amount,
@@ -193,11 +198,13 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         type_id: data.type_id || null,
         category_id: data.category_id || null,
         subcategory_id: data.subcategory_id || null,
-        currency_id: data.currency_id,
+        currency_id: selectedCurrency?.currency_id || data.currency_id,
         wallet_id: data.wallet_id,
         file_url: data.file_url || null,
         is_conversion: data.is_conversion || false
       }
+      
+      console.log('Movement data to insert:', movementData)
 
       const { error } = await supabase
         .from('movements')
@@ -461,7 +468,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                           </FormControl>
                           <SelectContent>
                             {currencies.map((currency) => (
-                              <SelectItem key={currency.id} value={currency.id}>
+                              <SelectItem key={currency.id} value={currency.currency_id}>
                                 {(currency as any).currencies?.name} ({(currency as any).currencies?.code})
                               </SelectItem>
                             ))}
