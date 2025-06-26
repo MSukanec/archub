@@ -50,10 +50,8 @@ export function Sidebar() {
       { icon: FolderOpen, label: 'Documentación técnica', href: '/design/documentacion' },
     ],
     construction: [
-      { icon: Home, label: 'Dashboard', href: '/construction/dashboard' },
-      { icon: FileText, label: 'Bitácora de obra', href: '/bitacora' },
-      { icon: DollarSign, label: 'Cómputo y presupuesto', href: '/construction/presupuesto' },
-      { icon: Building, label: 'Avance físico', href: '/construction/avance' },
+      { icon: Home, label: 'Resumen', href: '/construction/dashboard' },
+      { icon: FileText, label: 'Bitácora', href: '/bitacora' },
     ],
     finance: [
       { icon: Home, label: 'Dashboard', href: '/finance/dashboard' },

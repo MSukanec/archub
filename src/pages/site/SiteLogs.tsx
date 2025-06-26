@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { FileText, Plus, Star, Globe, Lock, ChevronDown, ChevronRight, Edit, Trash2, MoreHorizontal } from "lucide-react";
 
+import { Layout } from '@/components/layout/Layout';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
