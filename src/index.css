@@ -28,7 +28,7 @@
   /* Secondary Cards */
   --secondary-card-bg: hsl(0, 0%, 95%);
   --secondary-card-fg: hsl(0, 0%, 40%);
-  --secondary-card-border: hsl(0, 0%, 80%);
+  --secondary-card-border: hsl(0, 0%, 20%);
 
   /* Buttons - Primary */
   --button-primary-bg: hsl(90, 50%, 50%);
@@ -43,8 +43,8 @@
   /* Buttons - Secondary */
   --button-secondary-bg: hsl(0, 0%, 100%);
   --button-secondary-text: hsl(240, 10%, 4%);
-  --button-secondary-border: hsl(240, 6%, 90%);
-  --button-secondary-hover-bg: hsl(240, 5%, 96%);
+  --button-secondary-border: hsl(240, 6%, 50%);
+  --button-secondary-hover-bg: hsl(0, 0%, 50%);
   --button-secondary-hover-text: hsl(240, 10%, 4%);
   --button-secondary-hover-border: hsl(240, 8%, 80%);
 
