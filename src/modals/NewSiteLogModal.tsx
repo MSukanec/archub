@@ -66,14 +66,14 @@ const entryTypes = [
 
 // Mapeo de clima con iconos
 const weatherOptions = [
-  { value: 'sunny', label: '☀️ Soleado', icon: '☀️' },
-  { value: 'cloudy', label: '☁️ Nublado', icon: '☁️' },
-  { value: 'rainy', label: '🌧️ Lluvioso', icon: '🌧️' },
-  { value: 'stormy', label: '⛈️ Tormenta', icon: '⛈️' },
-  { value: 'windy', label: '💨 Ventoso', icon: '💨' },
-  { value: 'snowy', label: '❄️ Nevado', icon: '❄️' },
-  { value: 'hot', label: '🔥 Caluroso', icon: '🔥' },
-  { value: 'cold', label: '🧊 Frío', icon: '🧊' }
+  { value: 'soleado', label: '☀️ Soleado', icon: '☀️' },
+  { value: 'nublado', label: '☁️ Nublado', icon: '☁️' },
+  { value: 'lluvioso', label: '🌧️ Lluvioso', icon: '🌧️' },
+  { value: 'tormenta', label: '⛈️ Tormenta', icon: '⛈️' },
+  { value: 'ventoso', label: '💨 Ventoso', icon: '💨' },
+  { value: 'nevado', label: '❄️ Nevado', icon: '❄️' },
+  { value: 'caluroso', label: '🔥 Caluroso', icon: '🔥' },
+  { value: 'frio', label: '🧊 Frío', icon: '🧊' }
 ]
 
 export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogModalProps) {

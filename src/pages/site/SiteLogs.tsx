@@ -91,21 +91,21 @@ const getWeatherIcon = (weather?: string) => {
   if (!weather) return null;
   
   switch (weather) {
-    case 'sunny':
+    case 'soleado':
       return <Sun className="w-4 h-4 text-yellow-500" />;
-    case 'cloudy':
+    case 'nublado':
       return <Cloud className="w-4 h-4 text-gray-500" />;
-    case 'rainy':
+    case 'lluvioso':
       return <CloudRain className="w-4 h-4 text-blue-500" />;
-    case 'stormy':
+    case 'tormenta':
       return <CloudLightning className="w-4 h-4 text-purple-500" />;
-    case 'windy':
+    case 'ventoso':
       return <Wind className="w-4 h-4 text-cyan-500" />;
-    case 'snowy':
+    case 'nevado':
       return <CloudSnow className="w-4 h-4 text-blue-300" />;
-    case 'hot':
+    case 'caluroso':
       return <Thermometer className="w-4 h-4 text-red-500" />;
-    case 'cold':
+    case 'frio':
       return <Thermometer className="w-4 h-4 text-blue-600" />;
     default:
       return <Cloud className="w-4 h-4 text-gray-400" />;
@@ -116,21 +116,21 @@ const getWeatherLabel = (weather?: string) => {
   if (!weather) return 'Sin especificar';
   
   switch (weather) {
-    case 'sunny':
+    case 'soleado':
       return 'Soleado';
-    case 'cloudy':
+    case 'nublado':
       return 'Nublado';
-    case 'rainy':
+    case 'lluvioso':
       return 'Lluvioso';
-    case 'stormy':
+    case 'tormenta':
       return 'Tormenta';
-    case 'windy':
+    case 'ventoso':
       return 'Ventoso';
-    case 'snowy':
+    case 'nevado':
       return 'Nevado';
-    case 'hot':
+    case 'caluroso':
       return 'Caluroso';
-    case 'cold':
+    case 'frio':
       return 'Frío';
     default:
       return weather;
@@ -265,9 +265,14 @@ export default function SiteLogs() {
           <SelectContent>
             <SelectItem value="all">Todos los tipos</SelectItem>
             <SelectItem value="avance_de_obra">Avance de obra</SelectItem>
-            <SelectItem value="incidente">Incidente</SelectItem>
-            <SelectItem value="entrega">Entrega</SelectItem>
-            <SelectItem value="nota">Nota</SelectItem>
+            <SelectItem value="visita_tecnica">Visita técnica</SelectItem>
+            <SelectItem value="problema_detectado">Problema detectado</SelectItem>
+            <SelectItem value="pedido_material">Pedido material</SelectItem>
+            <SelectItem value="nota_climatica">Nota climática</SelectItem>
+            <SelectItem value="decision">Decisión</SelectItem>
+            <SelectItem value="inspeccion">Inspección</SelectItem>
+            <SelectItem value="foto_diaria">Foto diaria</SelectItem>
+            <SelectItem value="registro_general">Registro general</SelectItem>
           </SelectContent>
         </Select>
       </div>
