@@ -29,7 +29,7 @@ import { queryClient } from "@/lib/queryClient";
 const createContactSchema = z.object({
   first_name: z.string().min(1, "El nombre es requerido"),
   last_name: z.string().min(1, "El apellido es requerido"),
-  email: z.string().email("Email inválido").optional().or(z.literal("")),
+  email: z.union([z.string().email("Email inválido"), z.literal("")]).optional(),
   phone: z.string().optional(),
   contact_type_id: z.string().min(1, "El tipo de contacto es requerido"),
   company_name: z.string().optional(),
@@ -213,7 +213,7 @@ export function NewContactModal({ open, onClose, editingContact }: NewContactMod
                     name="first_name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium">Nombre</FormLabel>
+                        <FormLabel className="text-sm font-medium required-asterisk">Nombre</FormLabel>
                         <FormControl>
                           <Input placeholder="Ingresa el nombre" {...field} />
                         </FormControl>
@@ -227,7 +227,7 @@ export function NewContactModal({ open, onClose, editingContact }: NewContactMod
                     name="last_name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium">Apellido</FormLabel>
+                        <FormLabel className="text-sm font-medium required-asterisk">Apellido</FormLabel>
                         <FormControl>
                           <Input placeholder="Ingresa el apellido" {...field} />
                         </FormControl>
@@ -272,7 +272,7 @@ export function NewContactModal({ open, onClose, editingContact }: NewContactMod
                   name="contact_type_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Tipo de contacto</FormLabel>
+                      <FormLabel className="text-sm font-medium required-asterisk">Tipo de contacto</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>

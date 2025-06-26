@@ -119,6 +119,13 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 26, 2025. Contact modal validation fixes and global required field styling
+  • Made email and phone fields optional in NewContactModal - only name fields are required
+  • Fixed contact schema validation to properly handle empty/optional email and phone values
+  • Added global CSS styling for required field asterisks using --accent color
+  • Updated contact creation and editing to save null values for empty optional fields
+  • Applied required-asterisk class to form labels for visual consistency across application
+
 - June 26, 2025. Complete CustomEmptyState visual enhancement and bitácora filtering fixes
   • Enhanced CustomEmptyState component with advanced floating particle animations
   • Improved dimensions: full width, min-height 300px, perfect centering with flexbox
