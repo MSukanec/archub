@@ -209,11 +209,9 @@ export default function OrganizationProjects() {
 
   if (isLoading || projectsLoading) {
     return (
-      <Layout headerProps={headerProps}>
-        <div className="p-8 text-center text-muted-foreground">
-          Cargando proyectos...
-        </div>
-      </Layout>
+      <div className="p-8 text-center text-muted-foreground">
+        Cargando proyectos...
+      </div>
     )
   }
 
@@ -221,8 +219,7 @@ export default function OrganizationProjects() {
   const selectedProject = projects?.find(p => p.id === userData?.preferences?.last_project_id);
 
   return (
-    <Layout headerProps={headerProps}>
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Card de información del proyecto seleccionado */}
         {selectedProject && (
           <div className="bg-card border rounded-lg p-6">
@@ -410,7 +407,6 @@ export default function OrganizationProjects() {
             </div>
           )}
         </div>
-      </div>
 
       {/* New Project Modal */}
       {showNewProjectModal && (
@@ -494,6 +490,6 @@ export default function OrganizationProjects() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </Layout>
-  )
+    </div>
+  );
 }
