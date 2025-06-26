@@ -148,9 +148,16 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
       return result.data
     },
     onSuccess: () => {
-      // Invalidación más agresiva de cache
-      queryClient.invalidateQueries({ queryKey: ['site-logs'], refetchType: 'all' })
+      // Invalidación inmediata y forzada del cache
+      queryClient.invalidateQueries({ queryKey: ['site-logs'] })
+      queryClient.removeQueries({ queryKey: ['site-logs'] })
       queryClient.refetchQueries({ queryKey: ['site-logs'] })
+      
+      // Actualizar el estado local inmediatamente
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['site-logs'] })
+      }, 100)
+      
       toast({
         title: editingSiteLog ? 'Entrada actualizada' : 'Entrada creada',
         description: editingSiteLog ? 
@@ -325,14 +332,17 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                                 <Cloud className="w-4 h-4" />
                                 Clima (opcional)
                               </FormLabel>
-                              <Select onValueChange={field.onChange} value={field.value || ''}>
+                              <Select 
+                                onValueChange={(value) => field.onChange(value === 'none' ? null : value)} 
+                                value={field.value || 'none'}
+                              >
                                 <FormControl>
                                   <SelectTrigger>
                                     <SelectValue placeholder="Seleccionar clima" />
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  <SelectItem value="">Sin especificar</SelectItem>
+                                  <SelectItem value="none">Sin especificar</SelectItem>
                                   {weatherOptions.map((weather) => (
                                     <SelectItem key={weather.value} value={weather.value}>
                                       <div className="flex items-center gap-2">

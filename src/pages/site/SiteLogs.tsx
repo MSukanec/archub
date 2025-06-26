@@ -500,8 +500,8 @@ export default function SiteLogs() {
                         </div>
                         <div className="col-span-2 text-muted-foreground text-xs">
                           <div className="flex items-center gap-2">
-                            {getWeatherIcon(log.weather)}
-                            <span>{getWeatherLabel(log.weather)}</span>
+                            {getWeatherIcon(log.weather || undefined)}
+                            <span>{getWeatherLabel(log.weather || undefined)}</span>
                           </div>
                         </div>
                         <div className="col-span-3 text-muted-foreground truncate">
@@ -583,7 +583,7 @@ export default function SiteLogs() {
       <NewSiteLogModal
         open={openModal}
         onClose={handleCloseModal}
-        editingSiteLog={editingSiteLog}
+        editingSiteLog={editingSiteLog as any}
       />
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
