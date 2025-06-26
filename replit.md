@@ -119,6 +119,13 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 26, 2025. Input and Label components redesigned with Lemon Squeezy aesthetic
+  • Updated Input.tsx with compact sizing (text-sm, py-2 px-3) and refined focus states (ring-1 ring-accent)
+  • Enhanced Label.tsx with text-xs sizing and muted-foreground coloring for professional appearance
+  • Implemented smooth transitions (transition-all duration-150) and proper disabled states
+  • Components now follow modern SaaS design patterns with reduced visual footprint
+  • Changes apply automatically across all modals and pages using these components
+
 - June 26, 2025. Site logs enum system completely fixed and operational
   • Fixed critical weather enum validation errors by correcting to exact database enum values (sunny, cloudy, rainy, stormy, windy, snowy, hot, cold)
   • Updated all 9 entry types from database schema: avance_de_obra, visita_tecnica, problema_detectado, pedido_material, nota_climatica, decision, inspeccion, foto_diaria, registro_general
