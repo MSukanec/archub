@@ -89,7 +89,7 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
                 aria-expanded={open}
                 disabled={disabled}
                 className={cn(
-                  "flex h-10 items-center justify-center rounded-l-md rounded-r-none border-r-0 px-2 py-2 text-sm min-w-[80px]",
+                  "flex h-10 items-center justify-center rounded-l-md rounded-r-none border-r-0 px-2 py-2 text-sm min-w-[90px]",
                   "bg-[var(--input-bg)] border-[var(--input-border)] text-[var(--input-fg)]",
                   "hover:bg-[var(--input-hover-bg)] hover:border-[var(--input-hover-border)]",
                   "focus:bg-[var(--input-focus-bg)] focus:border-[var(--input-focus-border)] focus:ring-2 focus:ring-[var(--input-focus-ring)]",
