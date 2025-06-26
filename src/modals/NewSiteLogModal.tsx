@@ -149,7 +149,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
         log_date: data.log_date.toISOString().split('T')[0], // Solo fecha, sin hora
         created_by: data.created_by,
         entry_type: data.entry_type,
-        weather: data.weather === "none" ? null : data.weather,
+        weather: (!data.weather || data.weather === "none") ? null : data.weather,
         comments: data.comments,
         is_public: data.is_public,
         is_favorite: data.is_favorite
