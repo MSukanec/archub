@@ -14,10 +14,10 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 
-import { CustomModalLayout } from '@/components/ui-custom/CustomModalLayout'
-import { CustomModalHeader } from '@/components/ui-custom/CustomModalHeader'
-import { CustomModalBody } from '@/components/ui-custom/CustomModalBody'
-import { CustomModalFooter } from '@/components/ui-custom/CustomModalFooter'
+import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout'
+import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader'
+import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody'
+import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter'
 
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { supabase } from '@/lib/supabase'

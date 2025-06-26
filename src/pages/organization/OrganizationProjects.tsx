@@ -243,27 +243,25 @@ export default function OrganizationProjects() {
               </div>
               <div>
                 <span className="text-muted-foreground">Tipología:</span>
-                <p className="font-medium">{selectedProject.project_data?.project_types?.name || 'Sin especificar'}</p>
+                <p className="font-medium">{selectedProject.project_data?.project_type?.name || 'Sin especificar'}</p>
               </div>
               <div>
                 <span className="text-muted-foreground">Modalidad:</span>
-                <p className="font-medium">{selectedProject.project_data?.project_modalities?.name || 'Sin especificar'}</p>
+                <p className="font-medium">{selectedProject.project_data?.modality?.name || 'Sin especificar'}</p>
               </div>
               <div>
                 <span className="text-muted-foreground">Estado:</span>
-                <p className="font-medium">
-                  <Badge 
-                    variant={
-                      selectedProject.status === 'active' ? 'default' :
-                      selectedProject.status === 'planning' ? 'secondary' :
-                      selectedProject.status === 'completed' ? 'outline' : 'destructive'
-                    }
-                  >
-                    {selectedProject.status === 'planning' ? 'Planificación' :
-                     selectedProject.status === 'active' ? 'Activo' :
-                     selectedProject.status === 'on-hold' ? 'En pausa' : 'Completado'}
-                  </Badge>
-                </p>
+                <Badge 
+                  variant={
+                    selectedProject.status === 'active' ? 'default' :
+                    selectedProject.status === 'planning' ? 'secondary' :
+                    selectedProject.status === 'completed' ? 'outline' : 'destructive'
+                  }
+                >
+                  {selectedProject.status === 'planning' ? 'Planificación' :
+                   selectedProject.status === 'active' ? 'Activo' :
+                   selectedProject.status === 'on-hold' ? 'En pausa' : 'Completado'}
+                </Badge>
               </div>
             </div>
           </div>
@@ -442,19 +440,33 @@ export default function OrganizationProjects() {
               onClick={async () => {
                 if (projectToDelete && supabase) {
                   try {
-                    // Primero eliminar project_data si existe
-                    await supabase
-                      .from('project_data')
-                      .delete()
-                      .eq('project_id', projectToDelete.id)
+                    // CORREGIDO: Solo eliminar el proyecto específico usando transaction
+                    const { error } = await supabase.rpc('delete_project_safely', {
+                      project_id: projectToDelete.id
+                    })
                     
-                    // Luego eliminar el proyecto
-                    const { error } = await supabase
-                      .from('projects')
-                      .delete()
-                      .eq('id', projectToDelete.id)
-                    
-                    if (error) throw error
+                    if (error) {
+                      // Fallback: eliminar manualmente pero con más cuidado
+                      console.log('RPC failed, using manual deletion:', error)
+                      
+                      // Primero eliminar project_data específico
+                      const { error: projectDataError } = await supabase
+                        .from('project_data')
+                        .delete()
+                        .eq('project_id', projectToDelete.id)
+                        .eq('organization_id', userData?.organization?.id) // SEGURIDAD EXTRA
+                      
+                      if (projectDataError) console.log('Project data deletion error:', projectDataError)
+                      
+                      // Luego eliminar solo el proyecto específico
+                      const { error: projectError } = await supabase
+                        .from('projects')
+                        .delete()
+                        .eq('id', projectToDelete.id)
+                        .eq('organization_id', userData?.organization?.id) // SEGURIDAD EXTRA
+                      
+                      if (projectError) throw projectError
+                    }
                     
                     // Invalidar cachés específicas con refetch forzado
                     await queryClient.invalidateQueries({ queryKey: ['projects', userData?.organization?.id] })

@@ -13,7 +13,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { CustomTable } from '@/components/ui-custom/CustomTable';
+import { CustomTable } from '@/components/ui-custom/misc/CustomTable';
 
 import { NewMovementModal } from '@/modals/NewMovementModal';
 import { useCurrentUser } from '@/hooks/use-current-user';

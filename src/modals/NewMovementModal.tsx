@@ -33,10 +33,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { CustomModalLayout } from '@/components/ui-custom/CustomModalLayout'
-import { CustomModalHeader } from '@/components/ui-custom/CustomModalHeader'
-import { CustomModalBody } from '@/components/ui-custom/CustomModalBody'
-import { CustomModalFooter } from '@/components/ui-custom/CustomModalFooter'
+import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout'
+import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader'
+import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody'
+import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useMovementConcepts } from '@/hooks/use-movement-concepts'
 import { useCurrencies } from '@/hooks/use-currencies'
