@@ -11,7 +11,7 @@ import { useState } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useContacts } from '@/hooks/use-contacts'
 import { useContactTypes } from '@/hooks/use-contact-types'
-import { Users, Plus, Mail, Phone, Building, MapPin, MoreHorizontal, Edit, Trash2 } from 'lucide-react'
+import { Users, Plus, Mail, Phone, Building, MapPin, MoreHorizontal, Edit, Trash2, MessageCircle } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
@@ -28,6 +28,8 @@ export default function OrganizationContacts() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [contactToDelete, setContactToDelete] = useState<any>(null)
   const [newContactModalOpen, setNewContactModalOpen] = useState(false)
+  const [contactModalOpen, setContactModalOpen] = useState(false)
+  const [selectedContact, setSelectedContact] = useState<any>(null)
   
   const { data: userData, isLoading } = useCurrentUser()
   const { data: contacts = [], isLoading: contactsLoading } = useContacts(userData?.organization?.id)
@@ -69,6 +71,11 @@ export default function OrganizationContacts() {
   const handleEdit = (contact: any) => {
     setEditingContact(contact)
     setNewContactModalOpen(true)
+  }
+
+  const handleContact = (contact: any) => {
+    setSelectedContact(contact)
+    setContactModalOpen(true)
   }
 
   const handleDeleteClick = (contact: any) => {
@@ -248,6 +255,12 @@ export default function OrganizationContacts() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="start">
+                          {(contact.email || contact.phone) && (
+                            <DropdownMenuItem onClick={() => handleContact(contact)}>
+                              <MessageCircle className="mr-2 h-4 w-4" />
+                              Contactar
+                            </DropdownMenuItem>
+                          )}
                           <DropdownMenuItem onClick={() => handleEdit(contact)}>
                             <Edit className="mr-2 h-4 w-4" />
                             Editar

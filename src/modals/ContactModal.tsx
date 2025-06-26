@@ -1,8 +1,8 @@
 import React from 'react';
-import { CustomModalLayout } from '@/components/ui-custom/CustomModalLayout';
-import { CustomModalHeader } from '@/components/ui-custom/CustomModalHeader';
-import { CustomModalBody } from '@/components/ui-custom/CustomModalBody';
-import { CustomModalFooter } from '@/components/ui-custom/CustomModalFooter';
+import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout';
+import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader';
+import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
+import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -166,7 +166,13 @@ export function ContactModal({ contact, open, onClose }: ContactModalProps) {
           </CustomModalBody>
         ),
         footer: (
-          <CustomModalFooter onCancel={onClose} />
+          <CustomModalFooter 
+            onCancel={onClose} 
+            onSave={() => {}} 
+            cancelText="Cerrar"
+            saveText=""
+            saveLoading={false}
+          />
         ),
       }}
     </CustomModalLayout>
