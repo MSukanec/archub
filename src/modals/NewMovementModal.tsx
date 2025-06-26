@@ -7,7 +7,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useMovementConcepts } from '@/hooks/use-movement-concepts'
 import { useCurrencies } from '@/hooks/use-currencies'
-import { useWallets } from '@/hooks/use-wallets'
+import { useOrganizationWallets } from '@/hooks/use-organization-wallets'
 import { supabase } from '@/lib/supabase'
 import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout'
 import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader'
@@ -69,7 +69,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
   const { data: members = [] } = useOrganizationMembers(organizationId)
   const { data: types = [] } = useMovementConcepts('parent')
   const { data: currencies = [] } = useCurrencies(organizationId)
-  const { data: wallets = [] } = useWallets(organizationId)
+  const { data: wallets = [] } = useOrganizationWallets(organizationId)
 
   // Debug logging
   console.log('NewMovementModal Debug:', {
@@ -420,7 +420,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                           <SelectContent>
                             {wallets.map((wallet) => (
                               <SelectItem key={wallet.id} value={wallet.wallet_id}>
-                                {wallet.wallets?.name || wallet.name || 'Principal'}
+                                {wallet.wallets?.name || 'Billetera'}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -448,7 +448,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                           <SelectContent>
                             {currencies.map((currency) => (
                               <SelectItem key={currency.id} value={currency.currency_id}>
-                                {currency.currencies?.name} ({currency.currencies?.code})
+                                {currency.currencies?.name || 'Sin nombre'} ({currency.currencies?.code || 'N/A'})
                               </SelectItem>
                             ))}
                           </SelectContent>
