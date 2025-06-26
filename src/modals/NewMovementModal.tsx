@@ -76,7 +76,9 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
     organizationId,
     currencies: currencies.length > 0 ? currencies : 'No currencies loaded',
     wallets: wallets.length > 0 ? wallets : 'No wallets loaded',
-    currenciesData: currencies
+    currenciesData: currencies,
+    firstCurrency: currencies[0],
+    firstCurrencyData: currencies[0]?.currencies
   })
 
   const [selectedTypeId, setSelectedTypeId] = useState<string>('')
@@ -117,7 +119,9 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         // Set default currency (the one marked as is_default)
         if (currencies.length > 0) {
           const defaultCurrency = currencies.find(c => c.is_default) || currencies[0]
-          form.setValue('currency_id', defaultCurrency.currency_id)
+          if (defaultCurrency) {
+            form.setValue('currency_id', defaultCurrency.currency_id)
+          }
         }
         
         // Set default wallet (the one marked as is_default)
