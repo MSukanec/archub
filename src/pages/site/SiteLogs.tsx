@@ -28,7 +28,7 @@ interface SiteLogItem {
   log_date: string;
   entry_type: string;
   comments: string;
-  weather?: string;
+  weather?: string | null;
   is_public: boolean;
   is_favorite: boolean;
   created_by: string;
@@ -166,9 +166,12 @@ export default function SiteLogs() {
   const { data: organizationMembers = [] } = useOrganizationMembers(organizationId);
 
   const getCreator = (userId: string) => {
-    const member = organizationMembers.find((m) => m.user_id === userId);
+    if (!organizationMembers || !Array.isArray(organizationMembers)) {
+      return { name: "Usuario desconocido", initials: "U" };
+    }
+    const member = organizationMembers.find((m: any) => m.user_id === userId);
     const name = member?.users?.full_name || member?.users?.email || "Usuario";
-    const initials = name?.charAt(0).toUpperCase();
+    const initials = name?.charAt(0).toUpperCase() || "U";
     return { name, initials };
   };
 

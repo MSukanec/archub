@@ -95,8 +95,8 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
       })
     } else {
       // Seleccionar usuario actual por defecto en modo creación
-      if (userData?.membership?.id) {
-        form.setValue('created_by', userData.membership.id)
+      if (userData?.memberships?.[0]?.id) {
+        form.setValue('created_by', userData.memberships[0].id)
       }
     }
   }, [editingSiteLog, userData, form])
@@ -118,6 +118,10 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
         is_favorite: data.is_favorite,
         project_id: userData.preferences.last_project_id,
         organization_id: userData.preferences.last_organization_id
+      }
+
+      if (!supabase) {
+        throw new Error('Error de conexión con la base de datos')
       }
 
       let result
