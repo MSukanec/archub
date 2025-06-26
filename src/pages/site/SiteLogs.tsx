@@ -1,5 +1,5 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { FileText, Plus, Star, Globe, Lock, ChevronDown, ChevronRight, Edit, Trash2, MoreHorizontal, Flame, Package, StickyNote, Sun, Cloud, CloudRain, CloudSnow, Wind, CloudDrizzle, CloudLightning, Thermometer, TrendingUp, Users, AlertTriangle, CloudSun, CheckCircle, Search, Camera } from "lucide-react";
@@ -151,7 +151,7 @@ export default function SiteLogs() {
   const [openModal, setOpenModal] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [editingSiteLog, setEditingSiteLog] = useState<SiteLogItem | null>(null);
-  const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [siteLogToDelete, setSiteLogToDelete] = useState<SiteLogItem | null>(null);
   
@@ -240,6 +240,14 @@ export default function SiteLogs() {
     }
   });
 
+  // Auto-expandir la última entrada (más reciente) cuando cambian los datos
+  useEffect(() => {
+    if (filteredSiteLogs.length > 0 && !expandedCard) {
+      const mostRecent = filteredSiteLogs[0]; // Ya está ordenado por fecha descendente
+      setExpandedCard(mostRecent.id);
+    }
+  }, [filteredSiteLogs.length, siteLogs.length]);
+
   const handleClearFilters = () => {
     setSearchValue('');
     setSortBy('date_desc');
@@ -324,13 +332,8 @@ export default function SiteLogs() {
   }
 
   const toggleCardExpansion = (logId: string) => {
-    const newExpanded = new Set(expandedCards)
-    if (newExpanded.has(logId)) {
-      newExpanded.delete(logId)
-    } else {
-      newExpanded.add(logId)
-    }
-    setExpandedCards(newExpanded)
+    // Solo permitir un acordeón abierto a la vez
+    setExpandedCard(expandedCard === logId ? null : logId)
   }
 
   const handleEdit = (siteLog: SiteLogItem) => {
@@ -455,7 +458,7 @@ export default function SiteLogs() {
 
             {/* Site Log Cards */}
             {filteredSiteLogs.map((log) => {
-              const isExpanded = expandedCards.has(log.id)
+              const isExpanded = expandedCard === log.id
               const creator = getCreator(log.created_by)
               
               return (
