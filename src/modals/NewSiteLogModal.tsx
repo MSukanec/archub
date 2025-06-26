@@ -67,15 +67,13 @@ const entryTypes = [
 // Mapeo de clima con iconos
 const weatherOptions = [
   { value: 'sunny', label: '☀️ Soleado', icon: '☀️' },
-  { value: 'partly_cloudy', label: '⛅ Parcialmente nublado', icon: '⛅' },
   { value: 'cloudy', label: '☁️ Nublado', icon: '☁️' },
-  { value: 'rain', label: '🌧️ Lluvia', icon: '🌧️' },
-  { value: 'storm', label: '⛈️ Tormenta', icon: '⛈️' },
-  { value: 'snow', label: '❄️ Nieve', icon: '❄️' },
-  { value: 'fog', label: '🌫️ Niebla', icon: '🌫️' },
+  { value: 'rainy', label: '🌧️ Lluvioso', icon: '🌧️' },
+  { value: 'stormy', label: '⛈️ Tormenta', icon: '⛈️' },
   { value: 'windy', label: '💨 Ventoso', icon: '💨' },
-  { value: 'hail', label: '🧊 Granizo', icon: '🧊' },
-  { value: 'none', label: '❓ Sin especificar', icon: '❓' }
+  { value: 'snowy', label: '❄️ Nevado', icon: '❄️' },
+  { value: 'hot', label: '🔥 Caluroso', icon: '🔥' },
+  { value: 'cold', label: '🧊 Frío', icon: '🧊' }
 ]
 
 export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogModalProps) {
@@ -149,7 +147,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
         log_date: data.log_date.toISOString().split('T')[0], // Solo fecha, sin hora
         created_by: data.created_by,
         entry_type: data.entry_type,
-        weather: (!data.weather || data.weather === "none") ? null : data.weather,
+        weather: data.weather || null,
         comments: data.comments,
         is_public: data.is_public,
         is_favorite: data.is_favorite
