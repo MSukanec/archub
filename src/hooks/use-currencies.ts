@@ -8,6 +8,15 @@ interface OrganizationCurrency {
   is_active: boolean
   is_default: boolean
   created_at: string
+  currencies: {
+    id: string
+    name: string
+    code: string
+    symbol: string
+    country: string
+    is_default: boolean
+    created_at: string
+  }
 }
 
 export function useCurrencies(organizationId: string | undefined) {
@@ -18,38 +27,36 @@ export function useCurrencies(organizationId: string | undefined) {
         throw new Error('Supabase client not initialized')
       }
 
-      // First get organization currencies
-      const { data: orgCurrencies, error: orgError } = await supabase
+      console.log('Fetching currencies for organization:', organizationId)
+
+      const { data, error } = await supabase
         .from('organization_currencies')
-        .select('*')
+        .select(`
+          *,
+          currencies:currency_id (
+            id,
+            name,
+            code,
+            symbol,
+            country,
+            is_default,
+            created_at
+          )
+        `)
         .eq('organization_id', organizationId)
         .eq('is_active', true)
         .order('is_default', { ascending: false })
+        .order('created_at', { ascending: true })
 
-      if (orgError) throw orgError
-
-      if (!orgCurrencies || orgCurrencies.length === 0) {
-        return []
+      if (error) {
+        console.error('Error fetching currencies:', error)
+        throw error
       }
 
-      // Get currency details for each organization currency
-      const currencyIds = orgCurrencies.map(oc => oc.currency_id)
-      const { data: currencyDetails, error: currencyError } = await supabase
-        .from('currencies')
-        .select('*')
-        .in('id', currencyIds)
-
-      if (currencyError) throw currencyError
-
-      // Combine the data
-      const data = orgCurrencies.map(orgCurrency => ({
-        ...orgCurrency,
-        currencies: currencyDetails?.find(c => c.id === orgCurrency.currency_id)
-      }))
-
-      console.log('Currency hook debug:', { orgCurrencies, currencyDetails, data })
+      console.log('Currencies fetched:', data)
+      console.log('First currency structure:', data?.[0])
       
-      return data || []
+      return data as OrganizationCurrency[] || []
     },
     enabled: !!organizationId
   })

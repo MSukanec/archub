@@ -71,6 +71,13 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
   const { data: currencies = [] } = useCurrencies(organizationId)
   const { data: wallets = [] } = useOrganizationWallets(organizationId)
 
+  // Force refetch currencies when organizationId changes
+  useEffect(() => {
+    if (organizationId) {
+      queryClient.invalidateQueries({ queryKey: ['organization-currencies', organizationId] })
+    }
+  }, [organizationId, queryClient])
+
   // Debug logging
   console.log('NewMovementModal Debug:', {
     organizationId,
@@ -182,6 +189,8 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
     mutationFn: async (data: MovementForm) => {
       if (!supabase) throw new Error('Supabase no disponible')
       
+      console.log('Form data received:', data)
+      
       const movementData = {
         organization_id: organizationId,
         project_id: projectId,
@@ -197,19 +206,36 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         is_conversion: data.is_conversion
       }
 
-      if (editingMovement) {
-        const { error } = await supabase
-          .from('financial_movements')
-          .update(movementData)
-          .eq('id', editingMovement.id)
-        
-        if (error) throw error
-      } else {
-        const { error } = await supabase
-          .from('financial_movements')
-          .insert([movementData])
-        
-        if (error) throw error
+      console.log('Movement data to save:', movementData)
+
+      try {
+        if (editingMovement) {
+          const { data: result, error } = await supabase
+            .from('financial_movements')
+            .update(movementData)
+            .eq('id', editingMovement.id)
+            .select()
+          
+          if (error) {
+            console.error('Update error:', error)
+            throw error
+          }
+          console.log('Update result:', result)
+        } else {
+          const { data: result, error } = await supabase
+            .from('financial_movements')
+            .insert([movementData])
+            .select()
+          
+          if (error) {
+            console.error('Insert error:', error)
+            throw error
+          }
+          console.log('Insert result:', result)
+        }
+      } catch (err) {
+        console.error('Mutation error:', err)
+        throw err
       }
     },
     onSuccess: () => {
