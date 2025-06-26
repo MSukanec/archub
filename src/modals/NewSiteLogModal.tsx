@@ -23,7 +23,7 @@ import { Calendar, User, FileText, Cloud, MessageSquare, Star, Eye } from 'lucid
 const siteLogSchema = z.object({
   log_date: z.date(),
   created_by: z.string().min(1, 'Creador es requerido'),
-  entry_type: z.enum(['avance', 'incidente', 'entrega', 'nota'], {
+  entry_type: z.enum(['avance_de_obra', 'incidente', 'entrega', 'nota'], {
     required_error: 'Tipo de entrada es requerido'
   }),
   weather: z.enum(['soleado', 'nublado', 'lluvioso', 'tormenta', 'ventoso', 'nevado', 'caluroso', 'frio']).optional(),
@@ -53,7 +53,7 @@ interface NewSiteLogModalProps {
 
 // Mapeo de tipos de entrada con iconos
 const entryTypes = [
-  { value: 'avance', label: '🟩 Avance', icon: '🟩' },
+  { value: 'avance_de_obra', label: '🟩 Avance de obra', icon: '🟩' },
   { value: 'incidente', label: '🔥 Incidente', icon: '🔥' },
   { value: 'entrega', label: '📦 Entrega', icon: '📦' },
   { value: 'nota', label: '📝 Nota', icon: '📝' }
@@ -86,13 +86,28 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
     defaultValues: {
       log_date: new Date(),
       created_by: '',
-      entry_type: 'avance',
+      entry_type: 'avance_de_obra',
       weather: undefined,
       comments: '',
       is_public: false,
       is_favorite: false
     }
   })
+
+  // Resetear formulario cuando el modal se cierra
+  useEffect(() => {
+    if (!open) {
+      form.reset({
+        log_date: new Date(),
+        created_by: '',
+        entry_type: 'avance_de_obra',
+        weather: undefined,
+        comments: '',
+        is_public: false,
+        is_favorite: false
+      })
+    }
+  }, [open, form])
 
   // Inicializar formulario cuando el modal se abre
   useEffect(() => {

@@ -39,7 +39,7 @@ interface SiteLogItem {
 // Helper functions for displaying entry types and weather with icons
 const getEntryTypeIcon = (entryType: string) => {
   switch (entryType) {
-    case 'avance':
+    case 'avance_de_obra':
       return <div className="w-4 h-4 bg-green-500 rounded-sm flex items-center justify-center text-white text-xs">🟩</div>;
     case 'incidente':
       return <Flame className="w-4 h-4 text-red-500" />;
