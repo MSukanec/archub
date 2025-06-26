@@ -208,6 +208,17 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
 
       console.log('Movement data to save:', movementData)
 
+      // First check if table exists and its structure
+      const { data: existingMovements, error: queryError } = await supabase
+        .from('financial_movements')
+        .select('*')
+        .limit(1)
+      
+      if (queryError) {
+        console.error('Table query error:', queryError)
+        throw new Error(`Table access error: ${queryError.message}`)
+      }
+
       try {
         if (editingMovement) {
           const { data: result, error } = await supabase
@@ -218,7 +229,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
           
           if (error) {
             console.error('Update error:', error)
-            throw error
+            throw new Error(`Update failed: ${error.message}`)
           }
           console.log('Update result:', result)
         } else {
@@ -229,7 +240,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
           
           if (error) {
             console.error('Insert error:', error)
-            throw error
+            throw new Error(`Insert failed: ${error.message}`)
           }
           console.log('Insert result:', result)
         }
