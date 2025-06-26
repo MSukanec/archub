@@ -53,7 +53,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       // Set up auth state change listener
       supabase.auth.onAuthStateChange((event, session) => {
-        set({ user: session?.user ?? null });
+        console.log('Auth state changed:', event, session?.user?.email);
+        set({ user: session?.user ?? null, loading: false });
       });
     } catch (err) {
       console.error("Initialize error:", err);
@@ -118,7 +119,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`,
+          redirectTo: `${window.location.origin}/organization/dashboard`,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
