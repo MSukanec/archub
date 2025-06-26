@@ -26,7 +26,7 @@ const siteLogSchema = z.object({
   entry_type: z.enum(['avance_de_obra', 'visita_tecnica', 'problema_detectado', 'pedido_material', 'nota_climatica', 'decision', 'inspeccion', 'foto_diaria', 'registro_general'], {
     required_error: 'Tipo de entrada es requerido'
   }),
-  weather: z.enum(['sunny', 'cloudy', 'rainy', 'stormy', 'windy', 'snowy', 'hot', 'cold']).optional(),
+  weather: z.enum(['sunny', 'partly_cloudy', 'cloudy', 'rain', 'storm', 'snow', 'fog', 'windy', 'hail', 'none']).optional(),
   comments: z.string().min(1, 'Comentarios son requeridos'),
   is_public: z.boolean().default(false),
   is_favorite: z.boolean().default(false)
@@ -168,7 +168,11 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
       }
     },
     onSuccess: () => {
+      // Invalidar múltiples claves de cache relacionadas
       queryClient.invalidateQueries({ queryKey: ['site-logs'] })
+      queryClient.invalidateQueries({ queryKey: ['organization-members'] })
+      queryClient.refetchQueries({ queryKey: ['site-logs'] })
+      
       toast({
         title: editingSiteLog ? 'Entrada actualizada' : 'Entrada creada',
         description: 'La entrada de bitácora se guardó exitosamente'
