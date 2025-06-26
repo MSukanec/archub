@@ -119,6 +119,14 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 26, 2025. Complete CustomEmptyState visual enhancement and bitácora filtering fixes
+  • Enhanced CustomEmptyState component with advanced floating particle animations
+  • Improved dimensions: full width, min-height 300px, perfect centering with flexbox
+  • Added sophisticated particle system: floating circles, geometric shapes, pulse effects
+  • Fixed bitácora filtering by adding JOIN with projects table to validate organization membership
+  • Added PROJECT button to header breadcrumb - now always visible between ORGANIZATION and STAGE
+  • Bitácora now correctly filters by both project_id and organization_id preventing cross-organization data leakage
+
 - June 25, 2025. Fixed action buttons and header navigation issues
   • Fixed project card action buttons (Edit/Delete) to prevent selection and navigation
   • Added stopPropagation to dropdown menu items to prevent triggering parent card clicks
