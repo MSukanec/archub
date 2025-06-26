@@ -8,7 +8,9 @@ interface OrganizationWallet {
   is_active: boolean;
   is_default: boolean;
   created_at: string;
-  wallets: {
+  name?: string;
+  wallet_name?: string;
+  wallets?: {
     id: string;
     name: string;
     created_at: string;
@@ -47,7 +49,15 @@ export function useWallets(organizationId: string | undefined) {
         throw error
       }
       
-      return data as OrganizationWallet[]
+      // Transform data to include wallet name at top level for easier access
+      const transformedData = data?.map(item => ({
+        ...item,
+        name: item.wallets?.name || 'Billetera sin nombre',
+        wallet_name: item.wallets?.name || 'Billetera sin nombre'
+      })) || []
+
+      console.log('Transformed wallets data:', transformedData)
+      return transformedData as OrganizationWallet[]
     },
     enabled: !!organizationId
   })

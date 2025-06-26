@@ -145,9 +145,12 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
     }
   }, [userData, members, currencies, wallets, editingMovement, form, open])
 
-  // Initialize form for editing
+  // Initialize form for editing - wait for all data to load first
   useEffect(() => {
-    if (editingMovement && open) {
+    if (editingMovement && open && !isDataLoading && types.length > 0) {
+      console.log('Setting edit values for movement:', editingMovement)
+      
+      // Set form values
       form.setValue('created_at', new Date(editingMovement.created_at))
       form.setValue('created_by', editingMovement.created_by)
       form.setValue('description', editingMovement.description || '')
@@ -160,10 +163,13 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
       form.setValue('file_url', editingMovement.file_url || '')
       form.setValue('is_conversion', editingMovement.is_conversion || false)
       
+      // Set selected values for dependent dropdowns
       setSelectedTypeId(editingMovement.type_id || '')
       setSelectedCategoryId(editingMovement.category_id || '')
+      
+      console.log('Edit form values set successfully')
     }
-  }, [editingMovement, open, form])
+  }, [editingMovement, open, form, isDataLoading, types.length])
 
   // Handle type selection change
   const handleTypeChange = (value: string) => {
@@ -515,7 +521,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                           <SelectContent>
                             {wallets.map((wallet) => (
                               <SelectItem key={wallet.id} value={wallet.wallet_id}>
-                                {(wallet as any).wallets?.name || 'Billetera'}
+                                {(wallet as any).name || (wallet as any).wallets?.name || 'Billetera'}
                               </SelectItem>
                             ))}
                           </SelectContent>
