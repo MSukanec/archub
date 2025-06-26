@@ -23,7 +23,7 @@ import { Calendar, User, FileText, Cloud, MessageSquare, Star, Eye } from 'lucid
 const siteLogSchema = z.object({
   log_date: z.date(),
   created_by: z.string().min(1, 'Creador es requerido'),
-  entry_type: z.enum(['avance_de_obra', 'incidente', 'entrega', 'nota'], {
+  entry_type: z.enum(['avance_de_obra', 'visita_tecnica', 'problema_detectado', 'pedido_material', 'nota_climatica', 'decision', 'inspeccion', 'foto_diaria', 'registro_general'], {
     required_error: 'Tipo de entrada es requerido'
   }),
   weather: z.enum(['sunny', 'cloudy', 'rainy', 'stormy', 'windy', 'snowy', 'hot', 'cold']).optional(),
@@ -53,10 +53,15 @@ interface NewSiteLogModalProps {
 
 // Mapeo de tipos de entrada con iconos
 const entryTypes = [
-  { value: 'avance_de_obra', label: '🟩 Avance de obra', icon: '🟩' },
-  { value: 'incidente', label: '🔥 Incidente', icon: '🔥' },
-  { value: 'entrega', label: '📦 Entrega', icon: '📦' },
-  { value: 'nota', label: '📝 Nota', icon: '📝' }
+  { value: 'avance_de_obra', label: '🏗️ Avance de obra', icon: '🏗️' },
+  { value: 'visita_tecnica', label: '👷 Visita técnica', icon: '👷' },
+  { value: 'problema_detectado', label: '⚠️ Problema detectado', icon: '⚠️' },
+  { value: 'pedido_material', label: '📦 Pedido material', icon: '📦' },
+  { value: 'nota_climatica', label: '🌤️ Nota climática', icon: '🌤️' },
+  { value: 'decision', label: '✅ Decisión', icon: '✅' },
+  { value: 'inspeccion', label: '🔍 Inspección', icon: '🔍' },
+  { value: 'foto_diaria', label: '📸 Foto diaria', icon: '📸' },
+  { value: 'registro_general', label: '📝 Registro general', icon: '📝' }
 ]
 
 // Mapeo de clima con iconos

@@ -2,7 +2,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { FileText, Plus, Star, Globe, Lock, ChevronDown, ChevronRight, Edit, Trash2, MoreHorizontal, Flame, Package, StickyNote, Sun, Cloud, CloudRain, CloudSnow, Wind, CloudDrizzle, CloudLightning, Thermometer } from "lucide-react";
+import { FileText, Plus, Star, Globe, Lock, ChevronDown, ChevronRight, Edit, Trash2, MoreHorizontal, Flame, Package, StickyNote, Sun, Cloud, CloudRain, CloudSnow, Wind, CloudDrizzle, CloudLightning, Thermometer, TrendingUp, Users, AlertTriangle, CloudSun, CheckCircle, Search, Camera } from "lucide-react";
 
 import { Layout } from '@/components/layout/Layout';
 import { Button } from "@/components/ui/button";
@@ -40,13 +40,23 @@ interface SiteLogItem {
 const getEntryTypeIcon = (entryType: string) => {
   switch (entryType) {
     case 'avance_de_obra':
-      return <div className="w-4 h-4 bg-green-500 rounded-sm flex items-center justify-center text-white text-xs">🟩</div>;
-    case 'incidente':
-      return <Flame className="w-4 h-4 text-red-500" />;
-    case 'entrega':
-      return <Package className="w-4 h-4 text-blue-500" />;
-    case 'nota':
-      return <StickyNote className="w-4 h-4 text-yellow-500" />;
+      return <TrendingUp className="w-4 h-4 text-green-600" />;
+    case 'visita_tecnica':
+      return <Users className="w-4 h-4 text-blue-600" />;
+    case 'problema_detectado':
+      return <AlertTriangle className="w-4 h-4 text-red-500" />;
+    case 'pedido_material':
+      return <Package className="w-4 h-4 text-orange-500" />;
+    case 'nota_climatica':
+      return <CloudSun className="w-4 h-4 text-yellow-500" />;
+    case 'decision':
+      return <CheckCircle className="w-4 h-4 text-green-500" />;
+    case 'inspeccion':
+      return <Search className="w-4 h-4 text-purple-500" />;
+    case 'foto_diaria':
+      return <Camera className="w-4 h-4 text-indigo-500" />;
+    case 'registro_general':
+      return <FileText className="w-4 h-4 text-gray-500" />;
     default:
       return <FileText className="w-4 h-4 text-gray-500" />;
   }
@@ -56,12 +66,22 @@ const getEntryTypeLabel = (entryType: string) => {
   switch (entryType) {
     case 'avance_de_obra':
       return 'Avance de obra';
-    case 'incidente':
-      return 'Incidente';
-    case 'entrega':
-      return 'Entrega';
-    case 'nota':
-      return 'Nota';
+    case 'visita_tecnica':
+      return 'Visita técnica';
+    case 'problema_detectado':
+      return 'Problema detectado';
+    case 'pedido_material':
+      return 'Pedido material';
+    case 'nota_climatica':
+      return 'Nota climática';
+    case 'decision':
+      return 'Decisión';
+    case 'inspeccion':
+      return 'Inspección';
+    case 'foto_diaria':
+      return 'Foto diaria';
+    case 'registro_general':
+      return 'Registro general';
     default:
       return entryType;
   }
