@@ -47,9 +47,9 @@ export default function SiteLogs() {
   
   // Filter states
   const [sortBy, setSortBy] = useState('date_desc');
+  const [filterType, setFilterType] = useState('all');
   const [onlyFavorites, setOnlyFavorites] = useState(false);
   const [onlyPublic, setOnlyPublic] = useState(false);
-  const [filterByType, setFilterByType] = useState('all');
 
   const projectId = userData?.preferences?.last_project_id;
   const organizationId = userData?.preferences?.last_organization_id;
@@ -101,7 +101,7 @@ export default function SiteLogs() {
     const matchesPublic = !onlyPublic || log.is_public;
     
     // Type filter
-    const matchesType = filterByType === 'all' || log.entry_type === filterByType;
+    const matchesType = filterType === 'all' || log.entry_type === filterType;
     
     return matchesSearch && matchesFavorites && matchesPublic && matchesType;
   });
@@ -121,11 +121,11 @@ export default function SiteLogs() {
   });
 
   const handleClearFilters = () => {
+    setSearchValue('');
     setSortBy('date_desc');
+    setFilterType('all');
     setOnlyFavorites(false);
     setOnlyPublic(false);
-    setFilterByType('all');
-    setSearchValue('');
   };
 
   const customFilters = (
@@ -146,7 +146,7 @@ export default function SiteLogs() {
       
       <div>
         <Label className="text-xs font-medium text-muted-foreground">Tipo de entrada</Label>
-        <Select value={filterByType} onValueChange={setFilterByType}>
+        <Select value={filterType} onValueChange={setFilterType}>
           <SelectTrigger className="mt-1">
             <SelectValue placeholder="Todos los tipos" />
           </SelectTrigger>
@@ -174,12 +174,7 @@ export default function SiteLogs() {
     </div>
   );
 
-  const actions = (
-    <Button variant="default" onClick={() => setOpenModal(true)}>
-      <Plus className="mr-2 h-4 w-4" />
-      Nueva entrada
-    </Button>
-  )
+
 
   const getEntryTypeBadge = (type: string) => {
     const variants = {
@@ -265,14 +260,19 @@ export default function SiteLogs() {
   };
 
   const headerProps = {
-    title: "Bitácora de Obra",
+    title: "Bitácora",
     showSearch: true,
     searchValue,
     onSearchChange: setSearchValue,
     showFilters: true,
     customFilters,
     onClearFilters: handleClearFilters,
-    actions
+    actions: [
+      <Button key="new" onClick={() => setOpenModal(true)}>
+        <Plus className="mr-2 h-4 w-4" />
+        Nueva entrada
+      </Button>
+    ]
   };
 
   if (isLoading) {

@@ -21,6 +21,7 @@ import Profile from "@/pages/others/Profile";
 import Movements from "@/pages/finances/FinancesMovements";
 import SiteLogs from "@/pages/site/SiteLogs";
 import OrganizationPreferences from "@/pages/organization/OrganizationPreferences";
+import ConstructionDashboard from "@/pages/construction/ConstructionDashboard";
 
 function Router() {
   return (
@@ -46,6 +47,12 @@ function Router() {
       <Route path="/bitacora">
         <ProtectedRoute>
           <SiteLogs />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/construction/dashboard">
+        <ProtectedRoute>
+          <ConstructionDashboard />
         </ProtectedRoute>
       </Route>
 
