@@ -329,11 +329,9 @@ export default function OrganizationManagement() {
 
   if (isLoading) {
     return (
-      <Layout headerProps={headerProps}>
-        <div className="p-8 text-center text-muted-foreground">
-          Cargando organizaciones...
-        </div>
-      </Layout>
+      <div className="p-8 text-center text-muted-foreground">
+        Cargando organizaciones...
+      </div>
     )
   }
 

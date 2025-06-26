@@ -201,7 +201,7 @@ export default function OrganizationDashboard() {
   }
 
   return (
-    <Layout headerProps={headerProps}>
+    <div>
         {/* Organization Overview */}
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6 mb-6">
           <div className="flex items-start justify-between">
@@ -461,6 +461,6 @@ export default function OrganizationDashboard() {
           onClose={() => setShowNewOrganizationModal(false)}
         />
       )}
-    </Layout>
+    </div>
   );
 }
