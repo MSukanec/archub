@@ -120,16 +120,16 @@
   --menues-active-fg: hsl(0, 0%, 98%);
 
   /* Cards */
-  --card-bg: hsl(220, 4%, 18%);
+  --card-bg: hsl(250, 8%, 16%);
   --card-fg: hsl(0, 0%, 90%);
   --card-text: hsl(0, 0%, 90%);
   --card-border: hsl(240, 8%, 15%);
   --card-hover-bg: hsl(0, 0%, 16%);
 
   /* Secondary Cards */
-  --secondary-card-bg: hsl(220, 4%, 15%);
+  --secondary-card-bg: hsl(250, 6%, 19%);
   --secondary-card-fg: hsl(0, 0%, 85%);
-  --secondary-card-border: hsl(240, 8%, 10%);
+  --secondary-card-border: hsl(250, 6%, 19%);
 
   /* Buttons - Primary */
   --button-primary-bg: hsl(90, 50%, 50%);
@@ -142,9 +142,9 @@
   --button-primary-disabled-text: hsl(240, 5%, 50%);
 
   /* Buttons - Secondary */
-  --button-secondary-bg: hsl(240, 10%, 8%);
+  --button-secondary-bg: hsl(250, 6%, 19%);
   --button-secondary-text: hsl(0, 0%, 98%);
-  --button-secondary-border: hsl(240, 8%, 15%);
+  --button-secondary-border: hsl(250, 6%, 19%);
   --button-secondary-hover-bg: hsl(240, 8%, 12%);
   --button-secondary-hover-text: hsl(0, 0%, 98%);
   --button-secondary-hover-border: hsl(240, 8%, 25%);
@@ -160,7 +160,7 @@
   /* Inputs */
   --input-bg: hsl(0, 0%, 12%);
   --input-text: hsl(0, 0%, 98%);
-  --input-border: hsl(0, 0%, 25%);
+  --input-border: hsl(0, 0%, 20%);
   --input-placeholder: hsl(0, 0%, 50%);
   --input-focus-ring: hsl(90, 50 50%);
   --input-focus-border: hsl(90, 50%, 50%);
