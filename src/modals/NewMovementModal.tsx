@@ -121,7 +121,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
 
   // Initialize form with current user and defaults
   useEffect(() => {
-    if (userData?.memberships?.[0]?.id && !editingMovement) {
+    if (userData?.memberships?.[0]?.id && !editingMovement && open) {
       console.log('Create form initialized with defaults')
       form.setValue('created_by', userData.memberships[0].id)
       
@@ -134,10 +134,10 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
       // Set default wallet if available  
       const defaultWallet = wallets.find(w => (w as any).is_default)
       if (defaultWallet) {
-        form.setValue('wallet_id', defaultWallet.id)
+        form.setValue('wallet_id', defaultWallet.wallet_id)
       }
     }
-  }, [userData, currencies, wallets, editingMovement, form])
+  }, [userData, currencies, wallets, editingMovement, form, open])
 
   // Initialize form for editing
   useEffect(() => {
@@ -489,8 +489,8 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                           </FormControl>
                           <SelectContent>
                             {wallets.map((wallet) => (
-                              <SelectItem key={wallet.id} value={wallet.id}>
-                                {wallet.name}
+                              <SelectItem key={wallet.id} value={wallet.wallet_id}>
+                                {(wallet as any).wallets?.name || 'Billetera'}
                               </SelectItem>
                             ))}
                           </SelectContent>

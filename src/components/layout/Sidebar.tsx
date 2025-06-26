@@ -13,7 +13,8 @@ import {
   DollarSign,
   FolderOpen,
   Mail,
-  Activity
+  Activity,
+  ArrowLeft
 } from "lucide-react";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
@@ -43,27 +44,32 @@ export function Sidebar() {
       { icon: Building, label: 'Obra', href: '#', onClick: () => { setSidebarContext('construction'); navigate('/construction/dashboard'); } },
       { icon: DollarSign, label: 'Finanzas', href: '#', onClick: () => { setSidebarContext('finance'); navigate('/finance/dashboard'); } },
       { icon: Users, label: 'Comercialización', href: '#', onClick: () => { setSidebarContext('commercialization'); navigate('/commercialization/dashboard'); } },
+      { icon: ArrowLeft, label: 'Volver a Organización', href: '#', onClick: () => { setSidebarContext('organization'); navigate('/organization/dashboard'); } },
     ],
     design: [
       { icon: Home, label: 'Dashboard', href: '/design/dashboard' },
       { icon: FileText, label: 'Moodboard', href: '/design/moodboard' },
       { icon: FolderOpen, label: 'Documentación técnica', href: '/design/documentacion' },
+      { icon: ArrowLeft, label: 'Volver al Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
     ],
     construction: [
       { icon: Home, label: 'Resumen', href: '/construction/dashboard' },
       { icon: FileText, label: 'Bitácora', href: '/bitacora' },
+      { icon: ArrowLeft, label: 'Volver al Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
     ],
     finance: [
       { icon: Home, label: 'Dashboard', href: '/finance/dashboard' },
       { icon: DollarSign, label: 'Movimientos', href: '/movimientos' },
       { icon: FileText, label: 'Gráficos avanzados', href: '/finance/graficos' },
       { icon: Users, label: 'Plan de pagos', href: '/finance/pagos' },
+      { icon: ArrowLeft, label: 'Volver al Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
     ],
     commercialization: [
       { icon: Home, label: 'Dashboard', href: '/commercialization/dashboard' },
       { icon: Building, label: 'Listado de unidades', href: '/commercialization/unidades' },
       { icon: Users, label: 'Clientes interesados', href: '/commercialization/clientes' },
       { icon: FileText, label: 'Estadísticas de venta', href: '/commercialization/estadisticas' },
+      { icon: ArrowLeft, label: 'Volver al Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
     ]
   };
 
