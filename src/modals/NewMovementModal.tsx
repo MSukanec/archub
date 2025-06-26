@@ -71,6 +71,14 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
   const { data: currencies = [] } = useCurrencies(organizationId)
   const { data: wallets = [] } = useWallets(organizationId)
 
+  // Debug logging
+  console.log('NewMovementModal Debug:', {
+    organizationId,
+    currencies: currencies.length > 0 ? currencies : 'No currencies loaded',
+    wallets: wallets.length > 0 ? wallets : 'No wallets loaded',
+    currenciesData: currencies
+  })
+
   const [selectedTypeId, setSelectedTypeId] = useState<string>('')
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('')
 
@@ -106,14 +114,29 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
 
       // Set defaults for new movement
       if (!editingMovement) {
+        // Set default currency (the one marked as is_default)
         if (currencies.length > 0) {
-          const defaultCurrency = currencies.find(c => (c as any).is_default) || currencies[0]
+          const defaultCurrency = currencies.find(c => c.is_default) || currencies[0]
           form.setValue('currency_id', defaultCurrency.currency_id)
         }
+        
+        // Set default wallet (the one marked as is_default)
         if (wallets.length > 0) {
-          const defaultWallet = wallets.find(w => (w as any).is_default) || wallets[0]
+          const defaultWallet = wallets.find(w => w.is_default) || wallets[0]
           form.setValue('wallet_id', defaultWallet.wallet_id)
         }
+      } else {
+        // Load editing data
+        form.setValue('created_at', new Date(editingMovement.created_at))
+        form.setValue('amount', editingMovement.amount)
+        form.setValue('description', editingMovement.description || '')
+        form.setValue('is_conversion', editingMovement.is_conversion || false)
+        form.setValue('created_by', editingMovement.created_by)
+        form.setValue('type_id', editingMovement.type_id || '')
+        form.setValue('category_id', editingMovement.category_id || '')
+        form.setValue('subcategory_id', editingMovement.subcategory_id || '')
+        form.setValue('currency_id', editingMovement.currency_id)
+        form.setValue('wallet_id', editingMovement.wallet_id)
       }
     }
   }, [open, userData, members, currencies, wallets, editingMovement, form])
@@ -421,7 +444,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                           <SelectContent>
                             {currencies.map((currency) => (
                               <SelectItem key={currency.id} value={currency.currency_id}>
-                                {(currency as any).currencies?.name} ({(currency as any).currencies?.code})
+                                {currency.currencies?.name} ({currency.currencies?.code})
                               </SelectItem>
                             ))}
                           </SelectContent>

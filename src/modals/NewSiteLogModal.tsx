@@ -127,7 +127,6 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
       if (!supabase) throw new Error('Supabase no disponible')
       
       const siteLogData = {
-        organization_id: organizationId,
         project_id: projectId,
         log_date: data.log_date.toISOString().split('T')[0], // Solo fecha, sin hora
         created_by: data.created_by,
