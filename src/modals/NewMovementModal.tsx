@@ -116,30 +116,34 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
 
   // Initialize form with current user and defaults
   useEffect(() => {
-    if (!editingMovement && open && !isDataLoading) {
-      console.log('Setting form defaults...')
+    if (!editingMovement && open && userData && members.length > 0 && currencies.length > 0 && wallets.length > 0) {
+      console.log('Setting form defaults for new movement...')
       
-      // Set creator
-      if (userData?.memberships?.[0]?.id) {
-        form.setValue('created_by', userData.memberships[0].id)
-        console.log('Creator set to:', userData.memberships[0].id)
+      // Set creator to current user's membership
+      const currentUserMembership = members.find(member => 
+        member.users?.id === userData.user?.id
+      );
+      
+      if (currentUserMembership) {
+        form.setValue('created_by', currentUserMembership.id)
+        console.log('Creator set to current user:', currentUserMembership.id, currentUserMembership.users?.full_name)
       }
       
       // Set default currency (first available or default)
-      if (currencies.length > 0) {
-        const defaultCurrency = currencies.find(c => (c as any).is_default) || currencies[0]
+      const defaultCurrency = currencies.find(c => (c as any).is_default) || currencies[0]
+      if (defaultCurrency) {
         form.setValue('currency_id', defaultCurrency.currency_id)
-        console.log('Currency set to:', defaultCurrency.currency_id, defaultCurrency.currencies?.name)
+        console.log('Currency set to:', defaultCurrency.currency_id)
       }
       
       // Set default wallet (first available or default)
-      if (wallets.length > 0) {
-        const defaultWallet = wallets.find(w => (w as any).is_default) || wallets[0]
+      const defaultWallet = wallets.find(w => (w as any).is_default) || wallets[0]
+      if (defaultWallet) {
         form.setValue('wallet_id', defaultWallet.wallet_id)
-        console.log('Wallet set to:', defaultWallet.wallet_id, defaultWallet.wallets.name)
+        console.log('Wallet set to:', defaultWallet.wallet_id)
       }
     }
-  }, [userData, currencies, wallets, editingMovement, form, open, isDataLoading])
+  }, [userData, members, currencies, wallets, editingMovement, form, open])
 
   // Initialize form for editing
   useEffect(() => {

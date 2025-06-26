@@ -65,8 +65,11 @@ export function useMovements(organizationId: string | undefined, projectId: stri
           project_id,
           type_id,
           category_id,
+          subcategory_id,
           currency_id,
-          wallet_id
+          wallet_id,
+          file_url,
+          is_conversion
         `)
         .eq('organization_id', organizationId)
         .order('created_at', { ascending: false });
@@ -91,7 +94,7 @@ export function useMovements(organizationId: string | undefined, projectId: stri
       console.log('Found movements:', data.length)
 
       // Get related data in parallel
-      const [membersResult, typesResult, categoriesResult, currenciesResult, walletsResult] = await Promise.all([
+      const [membersResult, typesResult, categoriesResult, subcategoriesResult, currenciesResult, walletsResult] = await Promise.all([
         // Get creators data
         supabase
           .from('organization_members')
@@ -117,6 +120,12 @@ export function useMovements(organizationId: string | undefined, projectId: stri
           .from('movement_concepts')
           .select('id, name')
           .in('id', [...new Set(data.map(m => m.category_id).filter(Boolean))]),
+        
+        // Get movement subcategories
+        supabase
+          .from('movement_concepts')
+          .select('id, name')
+          .in('id', [...new Set(data.map(m => m.subcategory_id).filter(Boolean))]),
         
         // Get currencies
         supabase
@@ -159,6 +168,11 @@ export function useMovements(organizationId: string | undefined, projectId: stri
         categoriesMap.set(category.id, category);
       });
 
+      const subcategoriesMap = new Map();
+      subcategoriesResult.data?.forEach(subcategory => {
+        subcategoriesMap.set(subcategory.id, subcategory);
+      });
+
       const currenciesMap = new Map();
       currenciesResult.data?.forEach(orgCurrency => {
         currenciesMap.set(orgCurrency.id, orgCurrency.currencies);
@@ -174,6 +188,7 @@ export function useMovements(organizationId: string | undefined, projectId: stri
         const creator = membersMap.get(movement.created_by);
         const type = typesMap.get(movement.type_id);
         const category = categoriesMap.get(movement.category_id);
+        const subcategory = subcategoriesMap.get(movement.subcategory_id);
         const currency = currenciesMap.get(movement.currency_id);
         const wallet = walletsMap.get(movement.wallet_id);
 
@@ -183,6 +198,7 @@ export function useMovements(organizationId: string | undefined, projectId: stri
           movement_data: {
             type,
             category,
+            subcategory,
             currency,
             wallet
           }
