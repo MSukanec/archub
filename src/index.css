@@ -221,3 +221,10 @@
     scrollbar-color: hsl(var(--muted-foreground)) transparent;
   }
 }
+
+/* Global styling for required field asterisks */
+label[data-required="true"]::after,
+.required-asterisk::after {
+  content: " *";
+  color: var(--accent);
+}
