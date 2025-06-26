@@ -7,7 +7,7 @@ interface MovementConcept {
   parent_id?: string
 }
 
-export function useMovementConcepts(type: 'types' | 'categories', parentId?: string) {
+export function useMovementConcepts(type: 'types' | 'categories' | 'parent', parentId?: string) {
   return useQuery({
     queryKey: ['movement-concepts', type, parentId],
     queryFn: async () => {
@@ -20,7 +20,7 @@ export function useMovementConcepts(type: 'types' | 'categories', parentId?: str
         .select('id, name, parent_id')
         .order('name')
 
-      if (type === 'types') {
+      if (type === 'types' || type === 'parent') {
         // Get parent concepts (types) - those with null parent_id
         query = query.is('parent_id', null)
       } else if (type === 'categories' && parentId) {
@@ -39,6 +39,6 @@ export function useMovementConcepts(type: 'types' | 'categories', parentId?: str
 
       return data || []
     },
-    enabled: type === 'types' || (type === 'categories' && !!parentId)
+    enabled: type === 'types' || type === 'parent' || (type === 'categories' && !!parentId)
   })
 }
