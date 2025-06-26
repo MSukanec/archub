@@ -408,7 +408,7 @@ export default function OrganizationProjects() {
           )}
         </div>
 
-      {/* New Project Modal */}
+        {/* New Project Modal */}
       {showNewProjectModal && (
         <NewProjectModal
           open={showNewProjectModal}

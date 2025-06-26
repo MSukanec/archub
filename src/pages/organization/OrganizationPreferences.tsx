@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Settings, Save } from 'lucide-react';
 
-import { Layout } from '@/components/layout/Layout';
+
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -332,17 +332,14 @@ export default function OrganizationPreferences() {
 
   if (!organizationId) {
     return (
-      <Layout headerProps={headerProps}>
-        <div className="flex items-center justify-center h-64">
-          <p className="text-[var(--menues-fg)] opacity-70">No hay organización seleccionada</p>
-        </div>
-      </Layout>
+      <div className="flex items-center justify-center h-64">
+        <p className="text-[var(--menues-fg)] opacity-70">No hay organización seleccionada</p>
+      </div>
     );
   }
 
   return (
-    <Layout headerProps={headerProps}>
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Monedas */}
         <Card>
           <CardHeader>
@@ -522,6 +519,5 @@ export default function OrganizationPreferences() {
           </CardContent>
         </Card>
       </div>
-    </Layout>
   );
 }
