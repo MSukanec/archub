@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Users, Plus, MoreHorizontal, UserCheck, UserX, Clock, Mail } from "lucide-react";
 
-import { Layout } from "@/components/layout/Layout";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -331,8 +331,7 @@ export default function OrganizationMembers() {
   }
 
   return (
-    <Layout headerProps={headerProps}>
-      <div className="grid grid-cols-12 gap-8">
+    <div className="grid grid-cols-12 gap-8">
           {/* Left Sidebar - Section Navigation */}
           <div className="col-span-3">
             <div className="space-y-1">
@@ -582,11 +581,11 @@ export default function OrganizationMembers() {
           </div>
         </div>
 
-      {/* Member Invitation Modal */}
-      <NewMemberModal 
-        open={showInviteModal}
-        onClose={() => setShowInviteModal(false)}
-      />
-    </Layout>
+        {/* Member Invitation Modal */}
+        <NewMemberModal 
+          open={showInviteModal}
+          onClose={() => setShowInviteModal(false)}
+        />
+    </div>
   );
 }

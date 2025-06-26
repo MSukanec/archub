@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -28,89 +27,44 @@ export default function OrganizationContacts() {
   const [contactToDelete, setContactToDelete] = useState<any>(null)
   
   const { data: userData, isLoading } = useCurrentUser()
-  const { data: contacts = [], isLoading: contactsLoading } = useContacts(userData?.organization?.id)
+  const organizationId = userData?.preferences?.last_organization_id
+
+  const { data: contactsData, isLoading: contactsLoading } = useContacts(organizationId)
+  const contacts = contactsData?.contacts || []
+  const contactTypes = contactsData?.contactTypes || []
+
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
-  // Lista hardcoded de tipos de contacto
-  const contactTypes = [
-    { id: 'arquitecto', name: 'Arquitecto' },
-    { id: 'ingeniero', name: 'Ingeniero' },
-    { id: 'constructor', name: 'Constructor' },
-    { id: 'proveedor', name: 'Proveedor' },
-    { id: 'cliente', name: 'Cliente' }
-  ]
-
-  // Limpiar estado cuando cambia la organización
-  React.useEffect(() => {
-    setSelectedContact(null)
-    setSearchValue("")
-    setFilterByType('all')
-    setSortBy('name_asc')
-  }, [userData?.preferences?.last_organization_id])
-
-  // Seleccionar el primer contacto si no hay uno seleccionado
-  React.useEffect(() => {
-    if (contacts.length > 0 && !selectedContact) {
-      setSelectedContact(contacts[0])
-    }
-  }, [contacts, selectedContact])
-
-  // Filtrar y ordenar contactos
-  const filteredContacts = React.useMemo(() => {
-    let filtered = contacts.filter((contact: any) => {
-      const fullName = `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
-      const matchesSearch = !searchValue || 
-        (fullName.toLowerCase().includes(searchValue.toLowerCase()) ||
-         contact.first_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
-         contact.last_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
-         contact.email?.toLowerCase().includes(searchValue.toLowerCase()))
-      
-      const matchesType = filterByType === 'all' || contact.contact_type_id === filterByType
-      
-      return matchesSearch && matchesType
-    })
-
-    // Ordenar
-    if (sortBy === 'name_asc') {
-      filtered.sort((a: any, b: any) => {
-        const nameA = `${a.first_name || ''} ${a.last_name || ''}`.trim()
-        const nameB = `${b.first_name || ''} ${b.last_name || ''}`.trim()
-        return nameA.localeCompare(nameB)
-      })
-    } else if (sortBy === 'name_desc') {
-      filtered.sort((a: any, b: any) => {
-        const nameA = `${a.first_name || ''} ${a.last_name || ''}`.trim()
-        const nameB = `${b.first_name || ''} ${b.last_name || ''}`.trim()
-        return nameB.localeCompare(nameA)
-      })
-    } else if (sortBy === 'date_desc') {
-      filtered.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-    }
-
-    return filtered
-  }, [contacts, searchValue, sortBy, filterByType])
-
-  const handleSelectContact = (contact: any) => {
-    setSelectedContact(contact)
-  }
-
+  // Función para limpiar filtros
   const handleClearFilters = () => {
     setSearchValue("")
-    setFilterByType('all')
     setSortBy('name_asc')
+    setFilterByType('all')
   }
 
-  const handleEditContact = () => {
-    setShowEditModal(true)
-  }
+  // Filtros aplicados
+  const filteredContacts = contacts
+    .filter(contact => {
+      const matchesSearch = contact.full_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
+                           contact.email?.toLowerCase().includes(searchValue.toLowerCase()) ||
+                           contact.company?.toLowerCase().includes(searchValue.toLowerCase())
+      const matchesType = filterByType === 'all' || contact.contact_type_id === filterByType
+      return matchesSearch && matchesType
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'name_desc':
+          return (b.full_name || '').localeCompare(a.full_name || '')
+        case 'date_desc':
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        default: // name_asc
+          return (a.full_name || '').localeCompare(b.full_name || '')
+      }
+    })
 
-  const handleDeleteContact = () => {
-    setContactToDelete(selectedContact)
-    setShowDeleteDialog(true)
-  }
-
-  const deleteMutation = useMutation({
+  // Mutación para eliminar contacto
+  const deleteContactMutation = useMutation({
     mutationFn: async (contactId: string) => {
       if (!supabase) throw new Error('Supabase no está disponible')
       
@@ -118,24 +72,26 @@ export default function OrganizationContacts() {
         .from('contacts')
         .delete()
         .eq('id', contactId)
-
+      
       if (error) throw error
     },
     onSuccess: () => {
       toast({
         title: "Contacto eliminado",
-        description: "El contacto ha sido eliminado correctamente."
+        description: "El contacto ha sido eliminado correctamente.",
       })
       queryClient.invalidateQueries({ queryKey: ['contacts'] })
-      setSelectedContact(null)
       setShowDeleteDialog(false)
       setContactToDelete(null)
+      if (selectedContact?.id === contactToDelete?.id) {
+        setSelectedContact(null)
+      }
     },
-    onError: (error: any) => {
+    onError: (error) => {
       toast({
-        variant: "destructive",
         title: "Error",
-        description: "No se pudo eliminar el contacto. " + error.message
+        description: "No se pudo eliminar el contacto. Inténtalo de nuevo.",
+        variant: "destructive",
       })
     }
   })
@@ -156,61 +112,13 @@ export default function OrganizationContacts() {
   // Mostrar CustomEmptyState si no hay contactos
   if (filteredContacts.length === 0 && !isLoading && !contactsLoading) {
     return (
-      <Layout wide={true} headerProps={{
-        title: "Contactos",
-        showSearch: true,
-        searchValue,
-        onSearchChange: setSearchValue,
-        customFilters: (
-          <div className="flex flex-col gap-3 p-3 w-72">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="sort" className="text-xs font-medium">Ordenar por</Label>
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="h-8">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="name_asc">Nombre A-Z</SelectItem>
-                  <SelectItem value="name_desc">Nombre Z-A</SelectItem>
-                  <SelectItem value="date_desc">Más recientes</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="type" className="text-xs font-medium">Filtrar por tipo</Label>
-              <Select value={filterByType} onValueChange={setFilterByType}>
-                <SelectTrigger className="h-8">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los tipos</SelectItem>
-                  {contactTypes.map((type) => (
-                    <SelectItem key={type.id} value={type.id}>
-                      {type.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        ),
-        onClearFilters: handleClearFilters,
-        actions: [
-          <Button key="new" size="sm" onClick={() => setShowCreateModal(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Nuevo Contacto
-          </Button>
-        ]
-      }}>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <CustomEmptyState
-            icon={Users}
-            title="No hay contactos"
-            description="Comienza agregando tu primer contacto a la organización"
-            actionText="Nuevo Contacto"
-            onAction={() => setShowCreateModal(true)}
-          />
-        </div>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <CustomEmptyState
+          title="No hay contactos"
+          description="Comienza agregando tu primer contacto a la organización"
+          actionText="Nuevo contacto"
+          onAction={() => setShowCreateModal(true)}
+        />
         
         {showCreateModal && (
           <NewContactModal
@@ -222,218 +130,201 @@ export default function OrganizationContacts() {
             }}
           />
         )}
-      </Layout>
-    )
+      </div>
+    );
   }
 
   return (
-    <Layout wide={true} headerProps={{
-      title: "Contactos",
-      showSearch: true,
-      searchValue,
-      onSearchChange: setSearchValue,
-      customFilters: (
-        <div className="flex flex-col gap-3 p-3 w-72">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="sort" className="text-xs font-medium">Ordenar por</Label>
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="h-8">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="name_asc">Nombre A-Z</SelectItem>
-                <SelectItem value="name_desc">Nombre Z-A</SelectItem>
-                <SelectItem value="date_desc">Más recientes</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="type" className="text-xs font-medium">Filtrar por tipo</Label>
-            <Select value={filterByType} onValueChange={setFilterByType}>
-              <SelectTrigger className="h-8">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos los tipos</SelectItem>
-                {contactTypes.map((type) => (
-                  <SelectItem key={type.id} value={type.id}>
-                    {type.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      ),
-      onClearFilters: handleClearFilters,
-      actions: [
-        <Button key="new" onClick={() => setShowCreateModal(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Nuevo Contacto
-        </Button>
-      ]
-    }}>
-      <div className="flex gap-6 h-full">
-        {/* Columna izquierda - Lista de contactos (33%) */}
-        <div className="w-1/3 border-r border-border pr-6">
-          <div className="space-y-2">
-            {filteredContacts.map((contact: any) => (
-              <div
-                key={contact.id}
-                className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                  selectedContact?.id === contact.id ? 'bg-accent border-accent-foreground' : 'hover:bg-muted'
-                }`}
-                onClick={() => handleSelectContact(contact)}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center text-sm font-medium">
-                      {contact.first_name?.charAt(0) || 'C'}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm truncate">
-                        {`${contact.first_name || ''} ${contact.last_name || ''}`.trim()}
-                      </div>
+    <div className="grid grid-cols-12 gap-6 h-full">
+      {/* Lista de contactos - 33% */}
+      <div className="col-span-4 border-r pr-4">
+        <div className="space-y-3">
+          {filteredContacts.map((contact) => (
+            <Card 
+              key={contact.id}
+              className={`cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 ${
+                selectedContact?.id === contact.id ? 'ring-2 ring-blue-500' : ''
+              }`}
+              onClick={() => setSelectedContact(contact)}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 font-medium">
+                    {contact.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'C'}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-sm truncate">{contact.full_name}</h3>
+                    {contact.email && (
+                      <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{contact.email}</p>
+                    )}
+                    {contact.company && (
+                      <p className="text-xs text-gray-500 truncate">{contact.company}</p>
+                    )}
+                    <div className="flex items-center gap-2 mt-2">
+                      {contact.contact_types?.name && (
+                        <Badge variant="secondary" className="text-xs">
+                          {contact.contact_types.name}
+                        </Badge>
+                      )}
                     </div>
                   </div>
-                  <Badge variant="secondary" className="text-xs">
-                    {contactTypes.find(t => t.id === contact.contact_type_id)?.name || 'Sin tipo'}
-                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      {/* Detalles del contacto - 67% */}
+      <div className="col-span-8">
+        {selectedContact ? (
+          <Card>
+            <CardHeader className="border-b">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 font-medium text-lg">
+                    {selectedContact.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'C'}
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl">{selectedContact.full_name}</CardTitle>
+                    {selectedContact.contact_types?.name && (
+                      <Badge variant="secondary" className="mt-1">
+                        {selectedContact.contact_types.name}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedContact(selectedContact)
+                      setShowEditModal(true)
+                    }}
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    Editar
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setContactToDelete(selectedContact)
+                      setShowDeleteDialog(true)
+                    }}
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Eliminar
+                  </Button>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Columna derecha - Detalles del contacto (67%) */}
-        <div className="flex-1">
-          {selectedContact ? (
-            <div className="space-y-6">
-              {/* Card superior con información general y botones de acción */}
-              <Card>
-                <CardHeader className="pb-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-accent text-accent-foreground border border-border flex items-center justify-center text-lg font-medium">
-                        {selectedContact.first_name?.charAt(0) || 'C'}
-                      </div>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <h3 className="font-medium text-base">Información de contacto</h3>
+                  
+                  {selectedContact.email && (
+                    <div className="flex items-center gap-3">
+                      <Mail className="w-4 h-4 text-gray-500" />
                       <div>
-                        <CardTitle className="text-xl">
-                          {`${selectedContact.first_name || ''} ${selectedContact.last_name || ''}`.trim()}
-                        </CardTitle>
-                        <p className="text-muted-foreground">
-                          {contactTypes.find(t => t.id === selectedContact.contact_type_id)?.name || 'Sin tipo'}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={handleEditContact}
-                        className="h-8 w-8"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={handleDeleteContact}
-                        className="h-8 w-8 text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-sm text-muted-foreground">
-                    Creado el {format(new Date(selectedContact.created_at), 'dd/MM/yyyy', { locale: es })}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Card de métodos de contacto */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Métodos de Contacto</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {selectedContact.email || selectedContact.phone ? (
-                    <div className="space-y-3">
-                      {selectedContact.email && (
-                        <div className="flex items-center gap-3">
-                          <Mail className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-sm">{selectedContact.email}</span>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Email</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">{selectedContact.email}</p>
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => handleEmail(selectedContact.email)}
-                            className="ml-auto h-7 px-2 text-xs"
+                            className="h-6 px-2"
                           >
-                            Enviar email
+                            Enviar
                           </Button>
                         </div>
-                      )}
-                      {selectedContact.phone && (
-                        <div className="flex items-center gap-3">
-                          <Phone className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-sm">{selectedContact.phone}</span>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {selectedContact.phone && (
+                    <div className="flex items-center gap-3">
+                      <Phone className="w-4 h-4 text-gray-500" />
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Teléfono</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">{selectedContact.phone}</p>
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => handleWhatsApp(selectedContact.phone)}
-                            className="ml-auto h-7 px-2 text-xs"
+                            className="h-6 px-2"
                           >
                             <MessageCircle className="w-3 h-3 mr-1" />
                             WhatsApp
                           </Button>
                         </div>
-                      )}
+                      </div>
                     </div>
-                  ) : (
-                    <p className="text-muted-foreground text-sm">No hay métodos de contacto disponibles</p>
                   )}
-                </CardContent>
-              </Card>
+                </div>
 
-              {/* Card de información de empresa */}
-              {(selectedContact.company || selectedContact.location || selectedContact.notes) && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Información de Empresa</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {selectedContact.company && (
-                        <div className="flex items-center gap-3">
-                          <Building className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-sm">{selectedContact.company}</span>
-                        </div>
-                      )}
-                      {selectedContact.location && (
-                        <div className="flex items-center gap-3">
-                          <MapPin className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-sm">{selectedContact.location}</span>
-                        </div>
-                      )}
-                      {selectedContact.notes && (
-                        <div className="space-y-2">
-                          <h4 className="text-sm font-medium">Notas</h4>
-                          <p className="text-sm text-muted-foreground">{selectedContact.notes}</p>
-                        </div>
-                      )}
+                <div className="space-y-4">
+                  <h3 className="font-medium text-base">Información adicional</h3>
+                  
+                  {selectedContact.company && (
+                    <div className="flex items-center gap-3">
+                      <Building className="w-4 h-4 text-gray-500" />
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Empresa</p>
+                        <p className="font-medium">{selectedContact.company}</p>
+                      </div>
                     </div>
-                  </CardContent>
-                </Card>
+                  )}
+                  
+                  {selectedContact.location && (
+                    <div className="flex items-center gap-3">
+                      <MapPin className="w-4 h-4 text-gray-500" />
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Ubicación</p>
+                        <p className="font-medium">{selectedContact.location}</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="flex items-center gap-3">
+                    <Users className="w-4 h-4 text-gray-500" />
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Agregado el</p>
+                      <p className="font-medium">
+                        {format(new Date(selectedContact.created_at), 'dd MMM yyyy', { locale: es })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {selectedContact.notes && (
+                <div className="mt-6 pt-6 border-t">
+                  <h3 className="font-medium text-base mb-3">Notas</h3>
+                  <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                    {selectedContact.notes}
+                  </p>
+                </div>
               )}
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                Selecciona un contacto
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Elige un contacto de la lista para ver sus detalles
+              </p>
             </div>
-          ) : (
-            <div className="flex items-center justify-center h-64">
-              <p className="text-muted-foreground">Selecciona un contacto para ver los detalles</p>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Modales */}
@@ -448,41 +339,37 @@ export default function OrganizationContacts() {
         />
       )}
 
-      {showEditModal && selectedContact && (
+      {showEditModal && (
         <NewContactModal
           open={showEditModal}
           onClose={() => setShowEditModal(false)}
-          contact={selectedContact}
+          editingContact={selectedContact}
           onSuccess={() => {
             queryClient.invalidateQueries({ queryKey: ['contacts'] })
             setShowEditModal(false)
-            setSelectedContact(null)
           }}
         />
       )}
 
-      {/* Diálogo de confirmación de eliminación */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+            <AlertDialogTitle>¿Eliminar contacto?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción no se puede deshacer. Se eliminará permanentemente el contacto
-              {contactToDelete && ` "${contactToDelete.first_name} ${contactToDelete.last_name}"`}
-              de la base de datos.
+              Esta acción no se puede deshacer. El contacto será eliminado permanentemente.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => contactToDelete && deleteMutation.mutate(contactToDelete.id)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => contactToDelete && deleteContactMutation.mutate(contactToDelete.id)}
+              disabled={deleteContactMutation.isPending}
             >
-              Eliminar
+              {deleteContactMutation.isPending ? 'Eliminando...' : 'Eliminar'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </Layout>
+    </div>
   )
 }
