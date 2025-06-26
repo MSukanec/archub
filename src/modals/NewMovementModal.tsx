@@ -99,6 +99,15 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
   const { data: categories = [] } = useMovementConcepts('categories', selectedTypeId || undefined)
   const { data: subcategories = [] } = useMovementConcepts('categories', selectedCategoryId || undefined)
 
+  // Debug logs
+  console.log('Modal state:', { 
+    selectedTypeId, 
+    selectedCategoryId, 
+    categoriesCount: categories.length, 
+    subcategoriesCount: subcategories.length,
+    editingMovement: editingMovement?.id 
+  })
+
   // Check if all data is loaded
   const isDataLoading = userLoading || membersLoading || typesLoading || currenciesLoading || walletsLoading
 
@@ -145,6 +154,17 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
     }
   }, [userData, members, currencies, wallets, editingMovement, form, open])
 
+  // Update states when editingMovement changes
+  useEffect(() => {
+    if (editingMovement) {
+      setSelectedTypeId(editingMovement.type_id || '')
+      setSelectedCategoryId(editingMovement.category_id || '')
+    } else {
+      setSelectedTypeId('')
+      setSelectedCategoryId('')
+    }
+  }, [editingMovement])
+
   // Initialize form for editing - wait for all data to load first
   useEffect(() => {
     if (editingMovement && open && !isDataLoading && types.length > 0) {
@@ -162,10 +182,6 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
       form.setValue('wallet_id', editingMovement.wallet_id)
       form.setValue('file_url', editingMovement.file_url || '')
       form.setValue('is_conversion', editingMovement.is_conversion || false)
-      
-      // Set selected values for dependent dropdowns
-      setSelectedTypeId(editingMovement.type_id || '')
-      setSelectedCategoryId(editingMovement.category_id || '')
       
       console.log('Edit form values set successfully')
     }
