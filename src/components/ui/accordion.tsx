@@ -7,7 +7,17 @@ import { cn } from "@/lib/utils";
 
 const Accordion = AccordionPrimitive.Root;
 
-const AccordionItem = AccordionPrimitive.Item;
+const AccordionItem = React.forwardRef<
+  React.ElementRef<typeof AccordionPrimitive.Item>,
+  React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Item>
+>(({ className, ...props }, ref) => (
+  <AccordionPrimitive.Item
+    ref={ref}
+    className={cn("mb-2", className)}
+    {...props}
+  />
+));
+AccordionItem.displayName = "AccordionItem";
 
 const AccordionTrigger = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Trigger>,
@@ -17,8 +27,8 @@ const AccordionTrigger = React.forwardRef<
     <AccordionPrimitive.Trigger
       ref={ref}
       className={cn(
-        "flex flex-1 items-center justify-between py-1 text-base font-medium bg-[var(--secondary-card-bg)] text-[var(--secondary-card-fg)] border border-[var(--secondary-card-border)] rounded-md px-3 transition-colors duration-150 [&[data-state=open]>svg]:rotate-180",
-        className
+        "flex flex-1 items-center justify-between py-1 text-sm font-medium bg-[var(--secondary-card-bg)] text-[var(--secondary-card-fg)] border border-[var(--secondary-card-border)] rounded-md px-3 transition-colors duration-150 [&[data-state=open]>svg]:rotate-180",
+        className,
       )}
       {...props}
     >
@@ -36,7 +46,7 @@ const AccordionContent = React.forwardRef<
   <AccordionPrimitive.Content
     ref={ref}
     className={cn(
-      "overflow-hidden transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down px-3 py-2",
+      "overflow-hidden transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down px-2 py-3",
       className,
     )}
     {...props}
