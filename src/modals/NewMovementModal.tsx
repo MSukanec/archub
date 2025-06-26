@@ -208,21 +208,10 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
 
       console.log('Movement data to save:', movementData)
 
-      // First check if table exists and its structure
-      const { data: existingMovements, error: queryError } = await supabase
-        .from('financial_movements')
-        .select('*')
-        .limit(1)
-      
-      if (queryError) {
-        console.error('Table query error:', queryError)
-        throw new Error(`Table access error: ${queryError.message}`)
-      }
-
       try {
         if (editingMovement) {
           const { data: result, error } = await supabase
-            .from('financial_movements')
+            .from('movements')
             .update(movementData)
             .eq('id', editingMovement.id)
             .select()
@@ -234,7 +223,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
           console.log('Update result:', result)
         } else {
           const { data: result, error } = await supabase
-            .from('financial_movements')
+            .from('movements')
             .insert([movementData])
             .select()
           
@@ -251,6 +240,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['movements'] })
+      queryClient.invalidateQueries({ queryKey: ['movements', organizationId, projectId] })
       toast({
         title: editingMovement ? 'Movimiento actualizado' : 'Movimiento creado',
         description: 'La operación se completó exitosamente'
