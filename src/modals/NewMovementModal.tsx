@@ -184,10 +184,6 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         throw new Error('Supabase client not initialized')
       }
 
-      // Find the actual currency and wallet IDs from the relationship data
-      const selectedCurrency = currencies.find(c => c.id === data.currency_id)
-      const selectedWallet = wallets.find(w => w.wallet_id === data.wallet_id)
-      
       const movementData = {
         description: data.description || null,
         amount: data.amount,
@@ -198,7 +194,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         type_id: data.type_id || null,
         category_id: data.category_id || null,
         subcategory_id: data.subcategory_id || null,
-        currency_id: selectedCurrency?.currency_id || data.currency_id,
+        currency_id: data.currency_id,
         wallet_id: data.wallet_id,
         file_url: data.file_url || null,
         is_conversion: data.is_conversion || false
