@@ -149,7 +149,7 @@ export function NewContactModal({ open, onClose, editingContact }: NewContactMod
           .insert({
             organization_id: organizationId,
             first_name: formData.first_name,
-            last_name: formData.last_name,
+            last_name: formData.last_name || null,
             email: formData.email || null,
             phone: formData.phone || null,
             contact_type_id: formData.contact_type_id || null,
