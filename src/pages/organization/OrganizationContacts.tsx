@@ -1,4 +1,4 @@
-import Layout from '@/components/layout/Layout'
+import { Layout } from '@/components/layout/Layout'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -16,7 +16,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import NewContactModal from '@/modals/NewContactModal'
+import { NewContactModal } from '@/modals/NewContactModal'
 
 export default function OrganizationContacts() {
   const [searchValue, setSearchValue] = useState("")
@@ -44,8 +44,9 @@ export default function OrganizationContacts() {
   // Filtrar y ordenar contactos
   const filteredContacts = React.useMemo(() => {
     let filtered = contacts.filter((contact: any) => {
+      const fullName = `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
       const matchesSearch = !searchValue || 
-        (contact.full_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
+        (fullName.toLowerCase().includes(searchValue.toLowerCase()) ||
          contact.first_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
          contact.last_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
          contact.email?.toLowerCase().includes(searchValue.toLowerCase()))
@@ -58,14 +59,14 @@ export default function OrganizationContacts() {
     // Ordenar
     if (sortBy === 'name_asc') {
       filtered.sort((a: any, b: any) => {
-        const nameA = a.full_name || `${a.first_name} ${a.last_name}`
-        const nameB = b.full_name || `${b.first_name} ${b.last_name}`
+        const nameA = `${a.first_name || ''} ${a.last_name || ''}`.trim()
+        const nameB = `${b.first_name || ''} ${b.last_name || ''}`.trim()
         return nameA.localeCompare(nameB)
       })
     } else if (sortBy === 'name_desc') {
       filtered.sort((a: any, b: any) => {
-        const nameA = a.full_name || `${a.first_name} ${a.last_name}`
-        const nameB = b.full_name || `${b.first_name} ${b.last_name}`
+        const nameA = `${a.first_name || ''} ${a.last_name || ''}`.trim()
+        const nameB = `${b.first_name || ''} ${b.last_name || ''}`.trim()
         return nameB.localeCompare(nameA)
       })
     } else if (sortBy === 'date_desc') {
@@ -230,14 +231,14 @@ export default function OrganizationContacts() {
               >
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm font-medium">
-                    {contact.full_name?.charAt(0) || contact.first_name?.charAt(0) || 'C'}
+                    {contact.first_name?.charAt(0) || 'C'}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-sm truncate">
-                      {contact.full_name || `${contact.first_name} ${contact.last_name}`}
+                      {`${contact.first_name || ''} ${contact.last_name || ''}`.trim()}
                     </div>
                     <div className="text-xs text-muted-foreground truncate">
-                      {contact.contact_types?.name || 'Sin tipo'}
+                      {contact.contact_type?.name || 'Sin tipo'}
                     </div>
                   </div>
                 </div>
@@ -263,14 +264,14 @@ export default function OrganizationContacts() {
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-lg font-medium">
-                        {selectedContact.full_name?.charAt(0) || selectedContact.first_name?.charAt(0) || 'C'}
+                        {selectedContact.first_name?.charAt(0) || 'C'}
                       </div>
                       <div>
                         <CardTitle className="text-xl">
-                          {selectedContact.full_name || `${selectedContact.first_name} ${selectedContact.last_name}`}
+                          {`${selectedContact.first_name || ''} ${selectedContact.last_name || ''}`.trim()}
                         </CardTitle>
                         <p className="text-muted-foreground">
-                          {selectedContact.contact_types?.name || 'Sin tipo'}
+                          {selectedContact.contact_type?.name || 'Sin tipo'}
                         </p>
                       </div>
                     </div>
