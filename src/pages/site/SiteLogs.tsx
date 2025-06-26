@@ -54,7 +54,7 @@ const getEntryTypeIcon = (entryType: string) => {
 
 const getEntryTypeLabel = (entryType: string) => {
   switch (entryType) {
-    case 'avance':
+    case 'avance_de_obra':
       return 'Avance de obra';
     case 'incidente':
       return 'Incidente';
@@ -71,21 +71,21 @@ const getWeatherIcon = (weather?: string) => {
   if (!weather) return null;
   
   switch (weather) {
-    case 'soleado':
+    case 'sunny':
       return <Sun className="w-4 h-4 text-yellow-500" />;
-    case 'nublado':
+    case 'cloudy':
       return <Cloud className="w-4 h-4 text-gray-500" />;
-    case 'lluvioso':
+    case 'rainy':
       return <CloudRain className="w-4 h-4 text-blue-500" />;
-    case 'tormenta':
+    case 'stormy':
       return <CloudLightning className="w-4 h-4 text-purple-500" />;
-    case 'ventoso':
+    case 'windy':
       return <Wind className="w-4 h-4 text-cyan-500" />;
-    case 'nevado':
+    case 'snowy':
       return <CloudSnow className="w-4 h-4 text-blue-300" />;
-    case 'caluroso':
+    case 'hot':
       return <Thermometer className="w-4 h-4 text-red-500" />;
-    case 'frio':
+    case 'cold':
       return <Thermometer className="w-4 h-4 text-blue-600" />;
     default:
       return <Cloud className="w-4 h-4 text-gray-400" />;
@@ -96,21 +96,21 @@ const getWeatherLabel = (weather?: string) => {
   if (!weather) return 'Sin especificar';
   
   switch (weather) {
-    case 'soleado':
+    case 'sunny':
       return 'Soleado';
-    case 'nublado':
+    case 'cloudy':
       return 'Nublado';
-    case 'lluvioso':
+    case 'rainy':
       return 'Lluvioso';
-    case 'tormenta':
+    case 'stormy':
       return 'Tormenta';
-    case 'ventoso':
+    case 'windy':
       return 'Ventoso';
-    case 'nevado':
+    case 'snowy':
       return 'Nevado';
-    case 'caluroso':
+    case 'hot':
       return 'Caluroso';
-    case 'frio':
+    case 'cold':
       return 'Frío';
     default:
       return weather;
@@ -244,7 +244,7 @@ export default function SiteLogs() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos los tipos</SelectItem>
-            <SelectItem value="avance">Avance</SelectItem>
+            <SelectItem value="avance_de_obra">Avance de obra</SelectItem>
             <SelectItem value="incidente">Incidente</SelectItem>
             <SelectItem value="entrega">Entrega</SelectItem>
             <SelectItem value="nota">Nota</SelectItem>
@@ -270,7 +270,7 @@ export default function SiteLogs() {
 
   const getEntryTypeBadge = (type: string) => {
     const variants = {
-      'avance': 'default',
+      'avance_de_obra': 'default',
       'incidente': 'destructive', 
       'entrega': 'secondary',
       'nota': 'outline'
