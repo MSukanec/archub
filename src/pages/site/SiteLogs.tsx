@@ -169,7 +169,7 @@ export default function SiteLogs() {
     if (!organizationMembers || !Array.isArray(organizationMembers)) {
       return { name: "Usuario desconocido", initials: "U" };
     }
-    const member = organizationMembers.find((m: any) => m.user_id === userId);
+    const member = organizationMembers?.find((m: any) => m.user_id === userId);
     const name = member?.users?.full_name || member?.users?.email || "Usuario";
     const initials = name?.charAt(0).toUpperCase() || "U";
     return { name, initials };

@@ -61,10 +61,11 @@ interface Contact {
 interface NewContactModalProps {
   open: boolean;
   onClose: () => void;
-  editingContact?: Contact | null;
+  contact?: Contact | null;
+  onSuccess?: () => void;
 }
 
-export function NewContactModal({ open, onClose, editingContact }: NewContactModalProps) {
+export function NewContactModal({ open, onClose, contact, onSuccess }: NewContactModalProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const { data: contactTypes = [] } = useContactTypes();
@@ -85,18 +86,18 @@ export function NewContactModal({ open, onClose, editingContact }: NewContactMod
     },
   });
 
-  // Reset form when editingContact changes
+  // Reset form when contact changes
   React.useEffect(() => {
-    if (editingContact) {
+    if (contact) {
       form.reset({
-        first_name: editingContact.first_name || "",
-        last_name: editingContact.last_name || "",
-        email: editingContact.email || "",
-        phone: editingContact.phone || "",
-        contact_type_id: editingContact.contact_type_id || "",
-        company_name: editingContact.company_name || "",
-        location: editingContact.location || "",
-        notes: editingContact.notes || "",
+        first_name: contact.first_name || "",
+        last_name: contact.last_name || "",
+        email: contact.email || "",
+        phone: contact.phone || "",
+        contact_type_id: contact.contact_type_id || "",
+        company_name: contact.company_name || "",
+        location: contact.location || "",
+        notes: contact.notes || "",
       });
     } else {
       form.reset({
@@ -110,7 +111,7 @@ export function NewContactModal({ open, onClose, editingContact }: NewContactMod
         notes: "",
       });
     }
-  }, [editingContact, form]);
+  }, [contact, form]);
 
   const createContactMutation = useMutation({
     mutationFn: async (formData: CreateContactForm) => {
@@ -122,7 +123,7 @@ export function NewContactModal({ open, onClose, editingContact }: NewContactMod
         throw new Error('No organization selected');
       }
 
-      if (editingContact) {
+      if (contact) {
         // Update existing contact
         const { error } = await supabase
           .from('contacts')
@@ -136,7 +137,7 @@ export function NewContactModal({ open, onClose, editingContact }: NewContactMod
             location: formData.location || '',
             notes: formData.notes || '',
           })
-          .eq('id', editingContact.id);
+          .eq('id', contact.id);
 
         if (error) {
           throw new Error(`Error al actualizar contacto: ${error.message}`);
