@@ -169,11 +169,12 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
     onSuccess: () => {
       toast({
         title: "Éxito",
-        description: editingContact 
+        description: contact 
           ? "Contacto actualizado correctamente"
           : "Contacto creado correctamente"
       });
       queryClient.invalidateQueries({ queryKey: ['contacts'] });
+      if (onSuccess) onSuccess();
       onClose();
       form.reset();
     },
@@ -200,8 +201,8 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
       {{
         header: (
           <CustomModalHeader
-            title={editingContact ? "Editar contacto" : "Nuevo contacto"}
-            description={editingContact ? "Modifica la información del contacto" : "Agrega un nuevo contacto a tu organización"}
+            title={contact ? "Editar contacto" : "Nuevo contacto"}
+            description={contact ? "Modifica la información del contacto" : "Agrega un nuevo contacto a tu organización"}
             onClose={handleClose}
           />
         ),
@@ -366,7 +367,7 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
                 className="w-3/4"
                 disabled={createContactMutation.isPending}
               >
-                {createContactMutation.isPending ? 'Guardando...' : (editingContact ? "Actualizar" : "Crear contacto")}
+                {createContactMutation.isPending ? 'Guardando...' : (contact ? "Actualizar" : "Crear contacto")}
               </Button>
             </div>
           </div>
