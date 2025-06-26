@@ -25,39 +25,38 @@ export function useWallets(organizationId: string | undefined) {
         throw new Error('Supabase client not initialized')
       }
 
-      const { data, error } = await supabase
+      // First get organization wallets
+      const { data: orgWallets, error: orgError } = await supabase
         .from('organization_wallets')
-        .select(`
-          id,
-          organization_id,
-          wallet_id,
-          is_active,
-          is_default,
-          created_at,
-          wallets (
-            id,
-            name,
-            created_at
-          )
-        `)
+        .select('*')
         .eq('organization_id', organizationId)
         .eq('is_active', true)
         .order('is_default', { ascending: false })
-      
-      if (error) {
-        console.error('Error fetching organization wallets:', error)
-        throw error
-      }
-      
-      // Transform data to include wallet name at top level for easier access
-      const transformedData = data?.map(item => ({
-        ...item,
-        name: item.wallets?.name || 'Billetera sin nombre',
-        wallet_name: item.wallets?.name || 'Billetera sin nombre'
-      })) || []
 
-      console.log('Transformed wallets data:', transformedData)
-      return transformedData as OrganizationWallet[]
+      if (orgError) throw orgError
+
+      if (!orgWallets || orgWallets.length === 0) {
+        return []
+      }
+
+      // Get wallet details for each organization wallet
+      const walletIds = orgWallets.map(ow => ow.wallet_id)
+      const { data: walletDetails, error: walletError } = await supabase
+        .from('wallets')
+        .select('*')
+        .in('id', walletIds)
+
+      if (walletError) throw walletError
+
+      // Combine the data
+      const data = orgWallets.map(orgWallet => ({
+        ...orgWallet,
+        wallets: walletDetails?.find(w => w.id === orgWallet.wallet_id)
+      }))
+
+      console.log('Wallet hook debug:', { orgWallets, walletDetails, data })
+      
+      return data || []
     },
     enabled: !!organizationId
   })

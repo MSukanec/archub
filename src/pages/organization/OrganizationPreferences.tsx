@@ -97,8 +97,25 @@ export default function OrganizationPreferences() {
     },
   });
 
-  // Fetch all wallets (not organization-specific based on schema)
-  const { data: allWallets = [] } = useWallets(organizationId);
+  // Fetch all wallets (global list, not organization-specific)
+  const { data: allWallets = [] } = useQuery({
+    queryKey: ['wallets'],
+    queryFn: async () => {
+      console.log('Fetching all wallets...');
+      const { data, error } = await supabase
+        .from('wallets')
+        .select('*')
+        .order('name');
+      
+      if (error) {
+        console.error('Error fetching wallets:', error);
+        throw error;
+      }
+      
+      console.log('Wallets fetched:', data);
+      return data as Wallet[];
+    },
+  });
 
   // Fetch organization preferences
   const { data: orgPreferences } = useQuery({
@@ -136,23 +153,8 @@ export default function OrganizationPreferences() {
     enabled: !!organizationId,
   });
 
-  // Fetch organization wallets
-  const { data: orgWallets = [] } = useQuery({
-    queryKey: ['organization-wallets', organizationId],
-    queryFn: async () => {
-      if (!organizationId) return [];
-      
-      const { data, error } = await supabase
-        .from('organization_wallets')
-        .select('*')
-        .eq('organization_id', organizationId)
-        .eq('is_active', true);
-      
-      if (error) throw error;
-      return data as OrganizationWallet[];
-    },
-    enabled: !!organizationId,
-  });
+  // Fetch organization wallets (using our new hook that matches currencies structure)
+  const { data: orgWallets = [] } = useWallets(organizationId);
 
   // Load current preferences when data is available
   useEffect(() => {
