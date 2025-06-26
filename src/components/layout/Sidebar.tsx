@@ -2,12 +2,9 @@ import { useLocation } from "wouter";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
-import { useMutation } from "@tanstack/react-query";
-import { queryClient } from "@/lib/queryClient";
+
 import { 
   Settings, 
-  Moon, 
-  Sun, 
   UserCircle,
   Home,
   Users,
@@ -21,7 +18,7 @@ import {
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
 import SidebarButton from "./SidebarButton";
-import { useToast } from "@/hooks/use-toast";
+
 
 export function Sidebar() {
   const [location, navigate] = useLocation();
@@ -76,38 +73,7 @@ export function Sidebar() {
 
   const navigationItems = sidebarContexts[currentSidebarContext] || sidebarContexts.organization;
 
-  // Theme toggle mutation
-  const toggleThemeMutation = useMutation({
-    mutationFn: async () => {
-      const currentTheme = userData?.preferences?.theme || 'light';
-      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-      
-      if (!supabase || !userData?.preferences?.id) {
-        throw new Error('Missing required data');
-      }
-      
-      const { error } = await supabase
-        .from('user_preferences')
-        .update({ theme: newTheme })
-        .eq('id', userData.preferences.id);
-      
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      toast({
-        title: "Tema actualizado",
-        description: "El tema se ha cambiado correctamente"
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Error", 
-        description: "No se pudo cambiar el tema",
-        variant: "destructive"
-      });
-    }
-  });
+
 
   return (
     <aside 
@@ -146,17 +112,7 @@ export function Sidebar() {
             onClick={() => navigate('/configuracion')}
           />
 
-          {/* Theme Toggle */}
-          <SidebarButton
-            icon={userData?.preferences?.theme === 'dark' ? 
-              <Sun className="w-[18px] h-[18px]" /> : 
-              <Moon className="w-[18px] h-[18px]" />
-            }
-            label="Cambiar tema"
-            isActive={false}
-            isExpanded={isExpanded}
-            onClick={() => toggleThemeMutation.mutate()}
-          />
+
 
           {/* Profile */}
           <SidebarButton

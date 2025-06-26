@@ -473,8 +473,11 @@ export default function Profile() {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction onClick={signOutMutation.mutate}>
-                    Cerrar Sesión
+                  <AlertDialogAction 
+                    onClick={() => signOutMutation.mutate()}
+                    disabled={signOutMutation.isPending}
+                  >
+                    {signOutMutation.isPending ? 'Cerrando...' : 'Cerrar Sesión'}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
