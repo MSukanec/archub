@@ -1,24 +1,22 @@
-import { Layout } from '@/components/layout/Layout'
+import Layout from '@/components/layout/Layout'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useContacts } from '@/hooks/use-contacts'
 import { useContactTypes } from '@/hooks/use-contact-types'
-import { Users, Plus, Mail, Phone, Building, MapPin, MoreHorizontal, Edit, Trash2, MessageCircle } from 'lucide-react'
+import { Users, Plus, Mail, Phone, Building, MapPin, Edit, Trash2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { NewContactModal } from '@/modals/NewContactModal'
-import { ContactModal } from '@/modals/ContactModal'
+import NewContactModal from '@/modals/NewContactModal'
 
 export default function OrganizationContacts() {
   const [searchValue, setSearchValue] = useState("")
@@ -28,7 +26,6 @@ export default function OrganizationContacts() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [contactToDelete, setContactToDelete] = useState<any>(null)
   const [newContactModalOpen, setNewContactModalOpen] = useState(false)
-  const [contactModalOpen, setContactModalOpen] = useState(false)
   const [selectedContact, setSelectedContact] = useState<any>(null)
   
   const { data: userData, isLoading } = useCurrentUser()
@@ -37,50 +34,100 @@ export default function OrganizationContacts() {
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
-  // Filtrar y ordenar contactos
-  let filteredContacts = contacts?.filter(contact => {
-    const fullName = `${contact.first_name} ${contact.last_name}`.toLowerCase()
-    const matchesSearch = fullName.includes(searchValue.toLowerCase()) || 
-                         contact.email.toLowerCase().includes(searchValue.toLowerCase()) ||
-                         contact.company_name?.toLowerCase().includes(searchValue.toLowerCase()) || ''
-    
-    if (filterByType === "all") return matchesSearch
-    return matchesSearch && contact.contact_type_id === filterByType
-  }) || []
-
-  // Aplicar ordenamiento
-  filteredContacts = [...filteredContacts].sort((a, b) => {
-    switch (sortBy) {
-      case 'name_asc':
-        return `${a.first_name} ${a.last_name}`.localeCompare(`${b.first_name} ${b.last_name}`)
-      case 'name_desc':
-        return `${b.first_name} ${b.last_name}`.localeCompare(`${a.first_name} ${a.last_name}`)
-      case 'date_recent':
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      case 'date_oldest':
-        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-      case 'company_asc':
-        return (a.company_name || '').localeCompare(b.company_name || '')
-      case 'company_desc':
-        return (b.company_name || '').localeCompare(a.company_name || '')
-      default:
-        return 0
+  // Seleccionar el primer contacto si no hay uno seleccionado
+  React.useEffect(() => {
+    if (contacts.length > 0 && !selectedContact) {
+      setSelectedContact(contacts[0])
     }
-  })
+  }, [contacts, selectedContact])
 
-  const handleEdit = (contact: any) => {
-    setEditingContact(contact)
-    setNewContactModalOpen(true)
+  // Filtrar y ordenar contactos
+  const filteredContacts = React.useMemo(() => {
+    let filtered = contacts.filter((contact: any) => {
+      const matchesSearch = !searchValue || 
+        (contact.full_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
+         contact.first_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
+         contact.last_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
+         contact.email?.toLowerCase().includes(searchValue.toLowerCase()))
+      
+      const matchesType = filterByType === 'all' || contact.contact_type_id === filterByType
+      
+      return matchesSearch && matchesType
+    })
+
+    // Ordenar
+    if (sortBy === 'name_asc') {
+      filtered.sort((a: any, b: any) => {
+        const nameA = a.full_name || `${a.first_name} ${a.last_name}`
+        const nameB = b.full_name || `${b.first_name} ${b.last_name}`
+        return nameA.localeCompare(nameB)
+      })
+    } else if (sortBy === 'name_desc') {
+      filtered.sort((a: any, b: any) => {
+        const nameA = a.full_name || `${a.first_name} ${a.last_name}`
+        const nameB = b.full_name || `${b.first_name} ${b.last_name}`
+        return nameB.localeCompare(nameA)
+      })
+    } else if (sortBy === 'date_desc') {
+      filtered.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    }
+
+    return filtered
+  }, [contacts, searchValue, filterByType, sortBy])
+
+  const handleSelectContact = (contact: any) => {
+    setSelectedContact(contact)
   }
 
-  const handleContact = (contact: any) => {
-    setSelectedContact(contact)
-    setContactModalOpen(true)
+  const handleEditClick = (contact: any) => {
+    setEditingContact(contact)
+    setNewContactModalOpen(true)
   }
 
   const handleDeleteClick = (contact: any) => {
     setContactToDelete(contact)
     setDeleteDialogOpen(true)
+  }
+
+  const deleteMutation = useMutation({
+    mutationFn: async (contactId: string) => {
+      if (!supabase) throw new Error('Supabase no disponible')
+      
+      const { error } = await supabase
+        .from('contacts')
+        .delete()
+        .eq('id', contactId)
+      
+      if (error) throw error
+    },
+    onSuccess: () => {
+      toast({
+        title: "Contacto eliminado",
+        description: "El contacto ha sido eliminado correctamente."
+      })
+      queryClient.invalidateQueries({ queryKey: ['contacts'] })
+      
+      // Si el contacto eliminado estaba seleccionado, limpiar la selección
+      if (selectedContact?.id === contactToDelete?.id) {
+        setSelectedContact(null)
+      }
+      
+      setContactToDelete(null)
+      setDeleteDialogOpen(false)
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo eliminar el contacto.",
+        variant: "destructive"
+      })
+    }
+  })
+
+  const handleDeleteConfirm = () => {
+    if (contactToDelete) {
+      deleteMutation.mutate(contactToDelete.id)
+    }
   }
 
   const clearFilters = () => {
@@ -89,35 +136,36 @@ export default function OrganizationContacts() {
     setFilterByType('all')
   }
 
-  const getContactTypeLabel = (typeId: string) => {
-    const type = contactTypes.find(t => t.id === typeId)
-    return type?.name || 'Sin especificar'
+  const handleWhatsApp = (phone: string) => {
+    const cleanPhone = phone.replace(/\D/g, '')
+    window.open(`https://wa.me/${cleanPhone}`, '_blank')
   }
 
-  // Filtros personalizados
+  const handleEmail = (email: string) => {
+    window.open(`mailto:${email}`, '_blank')
+  }
+
+  // Filtros personalizados para el header
   const customFilters = (
-    <div className="w-64 p-3 space-y-3">
-      <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-[var(--menues-fg)] opacity-70">Ordenar por</Label>
+    <div className="space-y-4 w-72">
+      <div className="space-y-2">
+        <Label className="text-xs font-medium">Ordenar por</Label>
         <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="h-8">
+          <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="name_asc">Nombre (A-Z)</SelectItem>
             <SelectItem value="name_desc">Nombre (Z-A)</SelectItem>
-            <SelectItem value="company_asc">Empresa (A-Z)</SelectItem>
-            <SelectItem value="company_desc">Empresa (Z-A)</SelectItem>
-            <SelectItem value="date_recent">Fecha (Más reciente)</SelectItem>
-            <SelectItem value="date_oldest">Fecha (Más antigua)</SelectItem>
+            <SelectItem value="date_desc">Más recientes</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-[var(--menues-fg)] opacity-70">Filtrar por tipo</Label>
+      <div className="space-y-2">
+        <Label className="text-xs font-medium">Filtrar por tipo</Label>
         <Select value={filterByType} onValueChange={setFilterByType}>
-          <SelectTrigger className="h-8">
+          <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -168,152 +216,188 @@ export default function OrganizationContacts() {
 
   return (
     <Layout headerProps={headerProps}>
-      <div className="space-y-6">
-        {/* Headers de columnas */}
-        <div className="grid grid-cols-12 gap-4 px-4 py-2 text-xs font-medium text-muted-foreground border-b">
-          <div className="col-span-3">Contacto</div>
-          <div className="col-span-2">Email</div>
-          <div className="col-span-2">Teléfono</div>
-          <div className="col-span-2">Tipo</div>
-          <div className="col-span-2">Empresa</div>
-          <div className="col-span-1">Acciones</div>
-        </div>
-
-        {/* Lista de contactos */}
-        <div className="space-y-2">
-          {filteredContacts.map((contact) => {
-            return (
-              <Card 
-                key={contact.id} 
-                className="w-full transition-all hover:shadow-sm border"
+      <div className="flex h-full">
+        {/* Columna izquierda - Lista de contactos (33%) */}
+        <div className="w-1/3 border-r">
+          <div className="space-y-1 p-2">
+            {filteredContacts.map((contact) => (
+              <div 
+                key={contact.id}
+                className={`p-3 rounded-lg cursor-pointer transition-colors hover:bg-muted/50 ${
+                  selectedContact?.id === contact.id ? 'bg-accent' : ''
+                }`}
+                onClick={() => handleSelectContact(contact)}
               >
-                <CardContent className="p-4">
-                  <div className="grid grid-cols-12 gap-4 items-center">
-                    {/* Contacto */}
-                    <div className="col-span-3 flex items-center gap-3">
-                      <Avatar className="w-8 h-8">
-                        <AvatarFallback className="text-xs">
-                          {(contact.first_name.charAt(0) + contact.last_name.charAt(0)).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="font-medium">
-                          {contact.first_name} {contact.last_name}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {contact.location && (
-                            <span className="flex items-center gap-1">
-                              <MapPin className="w-3 h-3" />
-                              {contact.location}
-                            </span>
-                          )}
-                        </div>
-                      </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm font-medium">
+                    {contact.full_name?.charAt(0) || contact.first_name?.charAt(0) || 'C'}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-sm truncate">
+                      {contact.full_name || `${contact.first_name} ${contact.last_name}`}
                     </div>
-
-                    {/* Email */}
-                    <div className="col-span-2 flex items-center gap-2">
-                      <Mail className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                      <span className="text-xs text-muted-foreground truncate">
-                        {contact.email}
-                      </span>
-                    </div>
-
-                    {/* Teléfono */}
-                    <div className="col-span-2 flex items-center gap-2">
-                      <Phone className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                      <span className="text-xs text-muted-foreground">
-                        {contact.phone || 'Sin especificar'}
-                      </span>
-                    </div>
-
-                    {/* Tipo */}
-                    <div className="col-span-2">
-                      <Badge variant="outline" className="text-xs">
-                        {getContactTypeLabel(contact.contact_type_id)}
-                      </Badge>
-                    </div>
-
-                    {/* Empresa */}
-                    <div className="col-span-2 flex items-center gap-2">
-                      <Building className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                      <span className="text-xs text-muted-foreground truncate">
-                        {contact.company_name || 'Sin especificar'}
-                      </span>
-                    </div>
-
-                    {/* Acciones */}
-                    <div className="col-span-1 flex justify-start">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0"
-                          >
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start">
-                          {(contact.email || contact.phone) && (
-                            <DropdownMenuItem onClick={() => handleContact(contact)}>
-                              <MessageCircle className="mr-2 h-4 w-4" />
-                              Contactar
-                            </DropdownMenuItem>
-                          )}
-                          <DropdownMenuItem onClick={() => handleEdit(contact)}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Editar
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={() => handleDeleteClick(contact)}
-                            className="text-destructive"
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Eliminar
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                    <div className="text-xs text-muted-foreground truncate">
+                      {contact.contact_types?.name || 'Sin tipo'}
                     </div>
                   </div>
+                </div>
+              </div>
+            ))}
+            
+            {filteredContacts.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                <Users className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">No hay contactos</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Columna derecha - Detalles del contacto (67%) */}
+        <div className="flex-1 p-6">
+          {selectedContact ? (
+            <div className="space-y-6">
+              {/* Card superior con información general y botones de acción */}
+              <Card>
+                <CardHeader className="pb-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-lg font-medium">
+                        {selectedContact.full_name?.charAt(0) || selectedContact.first_name?.charAt(0) || 'C'}
+                      </div>
+                      <div>
+                        <CardTitle className="text-xl">
+                          {selectedContact.full_name || `${selectedContact.first_name} ${selectedContact.last_name}`}
+                        </CardTitle>
+                        <p className="text-muted-foreground">
+                          {selectedContact.contact_types?.name || 'Sin tipo'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleEditClick(selectedContact)}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleDeleteClick(selectedContact)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+              </Card>
+
+              {/* Card de métodos de contacto */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Métodos de Contacto</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {selectedContact.email && (
+                    <div 
+                      className="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors"
+                      onClick={() => handleEmail(selectedContact.email)}
+                    >
+                      <Mail className="w-5 h-5 text-blue-600" />
+                      <div>
+                        <div className="font-medium">Email</div>
+                        <div className="text-sm text-muted-foreground">{selectedContact.email}</div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {selectedContact.phone && (
+                    <div 
+                      className="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors"
+                      onClick={() => handleWhatsApp(selectedContact.phone)}
+                    >
+                      <Phone className="w-5 h-5 text-green-600" />
+                      <div>
+                        <div className="font-medium">WhatsApp</div>
+                        <div className="text-sm text-muted-foreground">{selectedContact.phone}</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {!selectedContact.email && !selectedContact.phone && (
+                    <p className="text-sm text-muted-foreground">No hay métodos de contacto disponibles</p>
+                  )}
                 </CardContent>
               </Card>
-            )
-          })}
 
-          {filteredContacts.length === 0 && (
-            <div className="text-center py-12 text-muted-foreground">
-              <Users className="mx-auto h-12 w-12 mb-4 opacity-50" />
-              <h3 className="text-sm font-medium mb-1">No se encontraron contactos</h3>
-              <p className="text-xs">
-                {searchValue || filterByType !== 'all' 
-                  ? 'Prueba ajustando los filtros de búsqueda' 
-                  : 'Comienza agregando tu primer contacto'
-                }
-              </p>
+              {/* Card de información de la empresa */}
+              {(selectedContact.company || selectedContact.location) && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Información de la Empresa</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {selectedContact.company && (
+                      <div className="flex items-center gap-3">
+                        <Building className="w-5 h-5 text-muted-foreground" />
+                        <div>
+                          <div className="font-medium">Empresa</div>
+                          <div className="text-sm text-muted-foreground">{selectedContact.company}</div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {selectedContact.location && (
+                      <div className="flex items-center gap-3">
+                        <MapPin className="w-5 h-5 text-muted-foreground" />
+                        <div>
+                          <div className="font-medium">Ubicación</div>
+                          <div className="text-sm text-muted-foreground">{selectedContact.location}</div>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Card de notas */}
+              {selectedContact.notes && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Notas</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm whitespace-pre-wrap">{selectedContact.notes}</p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-full text-muted-foreground">
+              <div className="text-center">
+                <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p>Selecciona un contacto para ver sus detalles</p>
+              </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Dialog de confirmación para eliminar */}
+      {/* Alert Dialog para eliminar */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar contacto?</AlertDialogTitle>
+            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción eliminará permanentemente el contacto "{contactToDelete?.first_name} {contactToDelete?.last_name}". 
-              Esta acción no se puede deshacer.
+              Esta acción no se puede deshacer. Se eliminará el contacto permanentemente.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => {
-                // TODO: Implementar eliminación
-                setDeleteDialogOpen(false)
-                setContactToDelete(null)
-              }}
+              onClick={handleDeleteConfirm}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Eliminar
@@ -330,15 +414,6 @@ export default function OrganizationContacts() {
           setEditingContact(null)
         }}
         editingContact={editingContact}
-      />
-
-      <ContactModal
-        contact={selectedContact}
-        open={contactModalOpen}
-        onClose={() => {
-          setContactModalOpen(false)
-          setSelectedContact(null)
-        }}
       />
     </Layout>
   )
