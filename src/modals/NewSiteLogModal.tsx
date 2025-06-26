@@ -26,7 +26,7 @@ const siteLogSchema = z.object({
   entry_type: z.enum(['avance_de_obra', 'visita_tecnica', 'problema_detectado', 'pedido_material', 'nota_climatica', 'decision', 'inspeccion', 'foto_diaria', 'registro_general'], {
     required_error: 'Tipo de entrada es requerido'
   }),
-  weather: z.enum(['sunny', 'cloudy', 'rainy', 'stormy', 'windy', 'snowy', 'hot', 'cold']).optional(),
+  weather: z.enum(['sunny', 'partly_cloudy', 'cloudy', 'rain', 'storm', 'snow', 'fog', 'windy', 'hail', 'none']).optional(),
   comments: z.string().min(1, 'Comentarios son requeridos'),
   is_public: z.boolean().default(false),
   is_favorite: z.boolean().default(false)
@@ -74,8 +74,7 @@ const weatherOptions = [
   { value: 'snow', label: '❄️ Nieve', icon: '❄️' },
   { value: 'fog', label: '🌫️ Niebla', icon: '🌫️' },
   { value: 'windy', label: '💨 Ventoso', icon: '💨' },
-  { value: 'hail', label: '🧊 Granizo', icon: '🧊' },
-  { value: 'none', label: '❓ Sin especificar', icon: '❓' }
+  { value: 'hail', label: '🧊 Granizo', icon: '🧊' }
 ]
 
 export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogModalProps) {
@@ -124,7 +123,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
         member.users?.id === userData.user?.id
       )
       if (currentUserMembership) {
-        form.setValue('created_by', currentUserMembership.id)
+        form.setValue('created_by', userData.user.id) // Usar user_id, no membership_id
       }
 
       // Si es edición, cargar datos
@@ -149,7 +148,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
         log_date: data.log_date.toISOString().split('T')[0], // Solo fecha, sin hora
         created_by: data.created_by,
         entry_type: data.entry_type,
-        weather: (!data.weather || data.weather === "none") ? null : data.weather,
+        weather: (!data.weather || data.weather === "none" || data.weather === "") ? null : data.weather,
         comments: data.comments,
         is_public: data.is_public,
         is_favorite: data.is_favorite
@@ -329,7 +328,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="none">Sin especificar</SelectItem>
+                            <SelectItem value="">Sin especificar</SelectItem>
                             {weatherOptions.map((weather) => (
                               <SelectItem key={weather.value} value={weather.value}>
                                 <span>{weather.label}</span>
