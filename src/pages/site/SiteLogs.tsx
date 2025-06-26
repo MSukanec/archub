@@ -259,6 +259,7 @@ export default function SiteLogs() {
     setEditingSiteLog(null);
   };
 
+  // Header configuration following ai-page-template.md
   const headerProps = {
     title: "Bitácora",
     showSearch: true,

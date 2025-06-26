@@ -56,6 +56,12 @@ function Router() {
         </ProtectedRoute>
       </Route>
 
+      <Route path="/construction/site-logs">
+        <ProtectedRoute>
+          <SiteLogs />
+        </ProtectedRoute>
+      </Route>
+
       <Route path="/preferencias">
         <ProtectedRoute>
           <OrganizationPreferences />
