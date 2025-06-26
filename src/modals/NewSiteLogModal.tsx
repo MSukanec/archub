@@ -67,13 +67,15 @@ const entryTypes = [
 // Mapeo de clima con iconos
 const weatherOptions = [
   { value: 'sunny', label: '☀️ Soleado', icon: '☀️' },
+  { value: 'partly_cloudy', label: '⛅ Parcialmente nublado', icon: '⛅' },
   { value: 'cloudy', label: '☁️ Nublado', icon: '☁️' },
-  { value: 'rainy', label: '🌧️ Lluvioso', icon: '🌧️' },
-  { value: 'stormy', label: '⛈️ Tormenta', icon: '⛈️' },
+  { value: 'rain', label: '🌧️ Lluvia', icon: '🌧️' },
+  { value: 'storm', label: '⛈️ Tormenta', icon: '⛈️' },
+  { value: 'snow', label: '❄️ Nieve', icon: '❄️' },
+  { value: 'fog', label: '🌫️ Niebla', icon: '🌫️' },
   { value: 'windy', label: '💨 Ventoso', icon: '💨' },
-  { value: 'snowy', label: '❄️ Nevado', icon: '❄️' },
-  { value: 'hot', label: '🔥 Caluroso', icon: '🔥' },
-  { value: 'cold', label: '🧊 Frío', icon: '🧊' }
+  { value: 'hail', label: '🧊 Granizo', icon: '🧊' },
+  { value: 'none', label: '❓ Sin especificar', icon: '❓' }
 ]
 
 export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogModalProps) {
@@ -119,7 +121,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
     if (open && userData && members.length > 0) {
       // Establecer usuario actual como creador por defecto
       const currentUserMembership = members.find(member => 
-        member.users?.id === userData.user?.id
+        member.user_id === userData.user?.id
       )
       if (currentUserMembership) {
         form.setValue('created_by', currentUserMembership.id)

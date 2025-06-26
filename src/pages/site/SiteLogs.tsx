@@ -93,20 +93,24 @@ const getWeatherIcon = (weather?: string) => {
   switch (weather) {
     case 'sunny':
       return <Sun className="w-4 h-4 text-yellow-500" />;
+    case 'partly_cloudy':
+      return <Cloud className="w-4 h-4 text-gray-400" />;
     case 'cloudy':
       return <Cloud className="w-4 h-4 text-gray-500" />;
-    case 'rainy':
+    case 'rain':
       return <CloudRain className="w-4 h-4 text-blue-500" />;
-    case 'stormy':
+    case 'storm':
       return <CloudLightning className="w-4 h-4 text-purple-500" />;
+    case 'snow':
+      return <CloudSnow className="w-4 h-4 text-blue-300" />;
+    case 'fog':
+      return <Cloud className="w-4 h-4 text-gray-300" />;
     case 'windy':
       return <Wind className="w-4 h-4 text-cyan-500" />;
-    case 'snowy':
-      return <CloudSnow className="w-4 h-4 text-blue-300" />;
-    case 'hot':
-      return <Thermometer className="w-4 h-4 text-red-500" />;
-    case 'cold':
-      return <Thermometer className="w-4 h-4 text-blue-600" />;
+    case 'hail':
+      return <CloudRain className="w-4 h-4 text-blue-600" />;
+    case 'none':
+      return <Cloud className="w-4 h-4 text-gray-400" />;
     default:
       return <Cloud className="w-4 h-4 text-gray-400" />;
   }
@@ -118,20 +122,24 @@ const getWeatherLabel = (weather?: string) => {
   switch (weather) {
     case 'sunny':
       return 'Soleado';
+    case 'partly_cloudy':
+      return 'Parcialmente nublado';
     case 'cloudy':
       return 'Nublado';
-    case 'rainy':
-      return 'Lluvioso';
-    case 'stormy':
+    case 'rain':
+      return 'Lluvia';
+    case 'storm':
       return 'Tormenta';
+    case 'snow':
+      return 'Nieve';
+    case 'fog':
+      return 'Niebla';
     case 'windy':
       return 'Ventoso';
-    case 'snowy':
-      return 'Nevado';
-    case 'hot':
-      return 'Caluroso';
-    case 'cold':
-      return 'Frío';
+    case 'hail':
+      return 'Granizo';
+    case 'none':
+      return 'Sin especificar';
     default:
       return weather;
   }
