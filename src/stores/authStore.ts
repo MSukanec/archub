@@ -114,19 +114,31 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     set({ loading: true });
 
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin
-      }
-    });
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
+        }
+      });
 
-    if (error) {
+      if (error) {
+        console.error('Google OAuth error:', error);
+        set({ loading: false });
+        throw error;
+      }
+
+      // The redirect will happen automatically
+      console.log('Google OAuth initiated successfully');
+    } catch (error) {
+      console.error('Google sign-in error:', error);
       set({ loading: false });
       throw error;
     }
-
-    // OAuth redirect will handle the state change
   },
 
   logout: async () => {

@@ -93,12 +93,13 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
         title: "Éxito",
         description: "Cuenta creada correctamente. Revisa tu email para confirmar tu cuenta.",
       })
-      setActiveTab('login')
-      // Clear registration form
+      // Close modal and clear form after successful registration
+      onOpenChange(false)
       setRegisterEmail('')
       setRegisterPassword('')
       setConfirmPassword('')
       setFullName('')
+      setActiveTab('login')
     } catch (error: any) {
       toast({
         title: "Error",
