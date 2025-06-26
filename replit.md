@@ -119,6 +119,14 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 26, 2025. CustomPhoneInput integration and two-column contact layout completion
+  • Created professional CustomPhoneInput.tsx component with country selector and Unicode flag emojis
+  • Replaced PhoneInput with CustomPhoneInput in NewContactModal.tsx for professional phone number input
+  • Component shows only dial codes (+54, +1) without country abbreviations as requested
+  • Applied clean design with CSS variables and no hover effects for consistent styling
+  • Completed two-column layout in OrganizationContacts.tsx (33% left list, 67% right details)
+  • Integrated CustomEmptyState when no contacts exist with proper action button
+
 - June 26, 2025. Contact modal validation fixes and global required field styling
   • Made email and phone fields optional in NewContactModal - only name fields are required
   • Fixed contact schema validation to properly handle empty/optional email and phone values

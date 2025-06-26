@@ -25,7 +25,7 @@ import { useContactTypes } from "@/hooks/use-contact-types";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
-import { PhoneInput } from "@/components/ui-custom/misc/PhoneInput";
+import { CustomPhoneInput } from "@/components/ui-custom/misc/CustomPhoneInput";
 
 const createContactSchema = z.object({
   first_name: z.string().min(1, "El nombre es requerido"),
@@ -260,7 +260,7 @@ export function NewContactModal({ open, onClose, editingContact }: NewContactMod
                       <FormItem>
                         <FormLabel className="text-sm font-medium">Teléfono</FormLabel>
                         <FormControl>
-                          <PhoneInput 
+                          <CustomPhoneInput 
                             value={field.value || ''}
                             onChange={field.onChange}
                             placeholder="Número de teléfono"
