@@ -7,7 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
-import { Camera, User, Settings, Upload, Link as LinkIcon } from 'lucide-react'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
+import { Camera, User, Settings, Upload, Link as LinkIcon, LogOut } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { supabase } from '@/lib/supabase'
@@ -15,6 +16,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
 import { useSidebarStore } from '@/stores/sidebarStore'
+import { useAuthStore } from '@/stores/authStore'
 
 interface Country {
   id: string
@@ -423,7 +425,7 @@ export default function Profile() {
               </div>
               <Switch
                 checked={userData?.preferences?.theme === 'dark'}
-                onCheckedChange={toggleThemeMutation.mutate}
+                onCheckedChange={() => toggleThemeMutation.mutate()}
                 disabled={toggleThemeMutation.isPending}
               />
             </div>
