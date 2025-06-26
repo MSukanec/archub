@@ -5,10 +5,10 @@ import { z } from 'zod';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Mail, User } from 'lucide-react';
 
-import { CustomModalLayout } from '@/components/ui-custom/CustomModalLayout';
-import { CustomModalHeader } from '@/components/ui-custom/CustomModalHeader';
-import { CustomModalBody } from '@/components/ui-custom/CustomModalBody';
-import { CustomModalFooter } from '@/components/ui-custom/CustomModalFooter';
+import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout';
+import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader';
+import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
+import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';

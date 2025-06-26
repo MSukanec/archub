@@ -331,12 +331,12 @@ export default function OrganizationProjects() {
 
                     {/* Tipología */}
                     <div className="col-span-2 text-xs text-muted-foreground">
-                      {project.project_data?.project_types?.name || 'Sin especificar'}
+                      {project.project_data?.project_type?.name || 'Sin especificar'}
                     </div>
 
                     {/* Modalidad */}
                     <div className="col-span-2 text-xs text-muted-foreground">
-                      {project.project_data?.project_modalities?.name || 'Sin especificar'}
+                      {project.project_data?.modality?.name || 'Sin especificar'}
                     </div>
 
                     {/* Estado */}
