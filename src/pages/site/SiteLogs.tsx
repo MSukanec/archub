@@ -14,6 +14,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { CustomEmptyState } from "@/components/ui-custom/misc/CustomEmptyState";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/hooks/use-organization-members";
@@ -63,9 +64,9 @@ export default function SiteLogs() {
   };
 
   const { data: siteLogs = [], isLoading, error } = useQuery<SiteLogItem[]>({
-    queryKey: ['bitacora', projectId],
+    queryKey: ['bitacora', projectId, organizationId],
     queryFn: async () => {
-      if (!projectId) return []
+      if (!projectId || !organizationId) return []
       
       if (!supabase) {
         throw new Error('Supabase client not initialized')
@@ -84,7 +85,7 @@ export default function SiteLogs() {
 
       return data || []
     },
-    enabled: !!projectId
+    enabled: !!projectId && !!organizationId
   })
 
   let filteredSiteLogs = siteLogs.filter(log => {
@@ -235,7 +236,7 @@ export default function SiteLogs() {
         title: "Éxito",
         description: "Entrada de bitácora eliminada correctamente"
       })
-      queryClient.invalidateQueries({ queryKey: ['bitacora', projectId] })
+      queryClient.invalidateQueries({ queryKey: ['bitacora', projectId, organizationId] })
       setDeleteDialogOpen(false)
       setSiteLogToDelete(null)
     },
@@ -299,12 +300,20 @@ export default function SiteLogs() {
   return (
     <Layout headerProps={headerProps}>
         {filteredSiteLogs.length === 0 ? (
-          <div className="p-8 text-center text-muted-foreground">
-            {siteLogs.length === 0 
-              ? "No hay entradas en la bitácora. Crea la primera entrada del proyecto."
-              : "No se encontraron entradas que coincidan con tu búsqueda."
+          <CustomEmptyState
+            icon={<FileText className="h-8 w-8 text-[var(--accent)]" />}
+            title={siteLogs.length === 0 ? "No hay entradas en la bitácora" : "No se encontraron resultados"}
+            description={siteLogs.length === 0 
+              ? "Comienza a documentar el progreso de tu proyecto creando la primera entrada de bitácora."
+              : "No se encontraron entradas que coincidan con tu búsqueda. Intenta ajustar los filtros."
             }
-          </div>
+            action={siteLogs.length === 0 ? (
+              <Button onClick={() => setOpenModal(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Nueva entrada
+              </Button>
+            ) : undefined}
+          />
         ) : (
           <div className="space-y-0">
             {/* Column Headers */}
