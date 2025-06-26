@@ -13,13 +13,13 @@ export function CustomModalHeader({
   onClose
 }: CustomModalHeaderProps) {
   return (
-    <div className="flex items-start justify-between p-3 border-b border-[var(--card-border)]">
-      <div className="flex-1 pr-4">
-        <h2 className="text-lg font-semibold text-[var(--card-fg)]">
+    <div className="flex items-center justify-between p-2 border-b border-[var(--card-border)]">
+      <div className="flex-1 pr-2">
+        <h2 className="text-sm font-medium text-[var(--card-fg)]">
           {title}
         </h2>
         {description && (
-          <p className="mt-1 text-sm text-[var(--text-muted)]">
+          <p className="text-xs text-[var(--text-muted)] leading-tight">
             {description}
           </p>
         )}
@@ -29,9 +29,9 @@ export function CustomModalHeader({
         variant="ghost"
         size="icon"
         onClick={onClose}
-        className="h-8 w-8 rounded-full"
+        className="h-6 w-6 rounded-full"
       >
-        <X className="h-4 w-4" />
+        <X className="h-3 w-3" />
       </Button>
     </div>
   )
