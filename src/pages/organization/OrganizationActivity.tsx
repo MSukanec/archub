@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { CustomTable } from '@/components/ui-custom/CustomTable';
+import { CustomTable } from '@/components/ui-custom/misc/CustomTable';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { supabase } from '@/lib/supabase';
