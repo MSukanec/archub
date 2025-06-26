@@ -55,7 +55,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
         className="transition-all duration-300 ease-in-out flex-1 overflow-auto p-3"
         style={{
           marginLeft: isExpanded ? "240px" : "40px",
-          marginTop: "36px",
+          marginTop: "4px",
         }}
       >
         <div className={wide ? "" : "max-w-[1440px] mx-auto"}>{children}</div>
