@@ -36,6 +36,87 @@ interface SiteLogItem {
   created_at: string;
 }
 
+// Helper functions for displaying entry types and weather with icons
+const getEntryTypeIcon = (entryType: string) => {
+  switch (entryType) {
+    case 'avance':
+      return <div className="w-4 h-4 bg-green-500 rounded-sm flex items-center justify-center text-white text-xs">🟩</div>;
+    case 'incidente':
+      return <Flame className="w-4 h-4 text-red-500" />;
+    case 'entrega':
+      return <Package className="w-4 h-4 text-blue-500" />;
+    case 'nota':
+      return <StickyNote className="w-4 h-4 text-yellow-500" />;
+    default:
+      return <FileText className="w-4 h-4 text-gray-500" />;
+  }
+};
+
+const getEntryTypeLabel = (entryType: string) => {
+  switch (entryType) {
+    case 'avance':
+      return 'Avance de obra';
+    case 'incidente':
+      return 'Incidente';
+    case 'entrega':
+      return 'Entrega';
+    case 'nota':
+      return 'Nota';
+    default:
+      return entryType;
+  }
+};
+
+const getWeatherIcon = (weather?: string) => {
+  if (!weather) return null;
+  
+  switch (weather) {
+    case 'soleado':
+      return <Sun className="w-4 h-4 text-yellow-500" />;
+    case 'nublado':
+      return <Cloud className="w-4 h-4 text-gray-500" />;
+    case 'lluvioso':
+      return <CloudRain className="w-4 h-4 text-blue-500" />;
+    case 'tormenta':
+      return <CloudLightning className="w-4 h-4 text-purple-500" />;
+    case 'ventoso':
+      return <Wind className="w-4 h-4 text-cyan-500" />;
+    case 'nevado':
+      return <CloudSnow className="w-4 h-4 text-blue-300" />;
+    case 'caluroso':
+      return <Thermometer className="w-4 h-4 text-red-500" />;
+    case 'frio':
+      return <Thermometer className="w-4 h-4 text-blue-600" />;
+    default:
+      return <Cloud className="w-4 h-4 text-gray-400" />;
+  }
+};
+
+const getWeatherLabel = (weather?: string) => {
+  if (!weather) return 'Sin especificar';
+  
+  switch (weather) {
+    case 'soleado':
+      return 'Soleado';
+    case 'nublado':
+      return 'Nublado';
+    case 'lluvioso':
+      return 'Lluvioso';
+    case 'tormenta':
+      return 'Tormenta';
+    case 'ventoso':
+      return 'Ventoso';
+    case 'nevado':
+      return 'Nevado';
+    case 'caluroso':
+      return 'Caluroso';
+    case 'frio':
+      return 'Frío';
+    default:
+      return weather;
+  }
+};
+
 export default function SiteLogs() {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
@@ -190,15 +271,18 @@ export default function SiteLogs() {
   const getEntryTypeBadge = (type: string) => {
     const variants = {
       'avance': 'default',
-      'incidente': 'destructive',
+      'incidente': 'destructive', 
       'entrega': 'secondary',
       'nota': 'outline'
     } as const
 
     return (
-      <Badge variant={variants[type as keyof typeof variants] || 'outline'}>
-        {type.charAt(0).toUpperCase() + type.slice(1)}
-      </Badge>
+      <div className="flex items-center gap-2">
+        {getEntryTypeIcon(type)}
+        <Badge variant={variants[type as keyof typeof variants] || 'outline'}>
+          {getEntryTypeLabel(type)}
+        </Badge>
+      </div>
     )
   }
 
@@ -376,7 +460,10 @@ export default function SiteLogs() {
                           </div>
                         </div>
                         <div className="col-span-2 text-muted-foreground text-xs">
-                          {log.weather || '-'}
+                          <div className="flex items-center gap-2">
+                            {getWeatherIcon(log.weather)}
+                            <span>{getWeatherLabel(log.weather)}</span>
+                          </div>
                         </div>
                         <div className="col-span-3 text-muted-foreground truncate">
                           {log.comments}
