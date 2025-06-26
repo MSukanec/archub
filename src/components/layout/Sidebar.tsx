@@ -19,13 +19,11 @@ import { useSidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
 import SidebarButton from "./SidebarButton";
 
-
 export function Sidebar() {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const { isDocked, isHovered, setHovered } = useSidebarStore();
   const { currentSidebarContext, setSidebarContext } = useNavigationStore();
-  const { toast } = useToast();
   
   const isExpanded = isDocked || isHovered;
 

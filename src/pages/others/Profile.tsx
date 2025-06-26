@@ -27,7 +27,6 @@ export default function Profile() {
   const { data: userData, isLoading } = useCurrentUser()
   const { toast } = useToast()
   const { isDocked, setDocked } = useSidebarStore()
-  const { signOut } = useAuthStore()
 
   // Form states
   const [firstName, setFirstName] = useState('')
@@ -172,18 +171,20 @@ export default function Profile() {
   // Sign out mutation
   const signOutMutation = useMutation({
     mutationFn: async () => {
-      await signOut()
+      if (!supabase) throw new Error('Supabase no disponible')
+      
+      const { error } = await supabase.auth.signOut()
+      if (error) throw error
     },
     onSuccess: () => {
-      toast({
-        title: "Sesión cerrada",
-        description: "Has cerrado sesión correctamente"
-      })
+      // Redirigir inmediatamente sin mostrar toast
+      window.location.href = '/'
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Error cerrando sesión:', error)
       toast({
         title: "Error",
-        description: "No se pudo cerrar la sesión",
+        description: "Hubo un problema al cerrar la sesión",
         variant: "destructive"
       })
     }
