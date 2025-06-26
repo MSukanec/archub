@@ -105,7 +105,9 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
     selectedCategoryId, 
     categoriesCount: categories.length, 
     subcategoriesCount: subcategories.length,
-    editingMovement: editingMovement?.id 
+    editingMovement: editingMovement?.id,
+    formSubcategoryValue: form.watch('subcategory_id'),
+    availableSubcategories: subcategories.map(s => ({ id: s.id, name: s.name }))
   })
 
   // Check if all data is loaded
@@ -467,7 +469,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                   />
                 </div>
 
-                {/* Tercera fila: Subcategoría y Moneda */}
+                {/* Tercera fila: Subcategoría y Billetera */}
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -496,6 +498,34 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
 
                   <FormField
                     control={form.control}
+                    name="wallet_id"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Billetera</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Seleccionar billetera" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {wallets.map((wallet) => (
+                              <SelectItem key={wallet.id} value={wallet.wallet_id}>
+                                {wallet.wallets?.name || wallet.wallet_name || wallet.name || 'Billetera'}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Cuarta fila: Moneda y Cantidad */}
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
                     name="currency_id"
                     render={({ field }) => (
                       <FormItem>
@@ -510,34 +540,6 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                             {currencies.map((currency) => (
                               <SelectItem key={currency.id} value={currency.currency_id}>
                                 {(currency as any).currencies?.name} ({(currency as any).currencies?.code})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* Cuarta fila: Billetera y Cantidad */}
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="wallet_id"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Billetera</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Seleccionar billetera" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {wallets.map((wallet) => (
-                              <SelectItem key={wallet.id} value={wallet.wallet_id}>
-                                {(wallet as any).name || (wallet as any).wallets?.name || 'Billetera'}
                               </SelectItem>
                             ))}
                           </SelectContent>
