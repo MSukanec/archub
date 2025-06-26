@@ -1,11 +1,11 @@
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useMutation } from '@tanstack/react-query'
-import { Calendar } from 'lucide-react'
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
-
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useCurrentUser } from '@/hooks/use-current-user'
+import { useOrganizationMembers } from '@/hooks/use-organization-members'
+import { supabase } from '@/lib/supabase'
 import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout'
 import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader'
 import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody'
@@ -13,359 +13,403 @@ import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFoote
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Button } from '@/components/ui/button'
-import { Calendar as CalendarComponent } from '@/components/ui/calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Checkbox } from '@/components/ui/checkbox'
-import { cn } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
-import { queryClient } from '@/lib/queryClient'
-import { supabase } from '@/lib/supabase'
-import { useCurrentUser } from '@/hooks/use-current-user'
-import { useOrganizationMembers } from '@/hooks/use-organization-members'
+import { Calendar, User, FileText, Cloud, MessageSquare, Star, Eye } from 'lucide-react'
 
-const createSiteLogSchema = z.object({
-  log_date: z.date({
-    required_error: "La fecha es requerida",
+// Schema con enums exactos de Supabase
+const siteLogSchema = z.object({
+  log_date: z.date(),
+  created_by: z.string().min(1, 'Creador es requerido'),
+  entry_type: z.enum(['avance_de_obra', 'incidente', 'reunion', 'inspeccion', 'entrega', 'otro'], {
+    required_error: 'Tipo de entrada es requerido'
   }),
-  created_by: z.string().min(1, 'El creador es requerido'),
-  entry_type: z.string().min(1, 'El tipo de entrada es requerido'),
-  weather: z.string().optional(),
-  comments: z.string().min(1, 'Los comentarios son requeridos'),
+  weather_enum: z.enum(['sunny', 'partly_cloudy', 'cloudy', 'rainy', 'stormy', 'snowy', 'foggy', 'windy'], {
+    required_error: 'Clima es requerido'
+  }),
+  comments: z.string().min(1, 'Comentarios son requeridos'),
   is_public: z.boolean().default(false),
   is_favorite: z.boolean().default(false)
 })
 
-type CreateSiteLogForm = z.infer<typeof createSiteLogSchema>
+type SiteLogForm = z.infer<typeof siteLogSchema>
+
+interface SiteLog {
+  id: string
+  log_date: string
+  created_by: string
+  entry_type: string
+  weather_enum: string
+  comments: string
+  is_public: boolean
+  is_favorite: boolean
+}
 
 interface NewSiteLogModalProps {
   open: boolean
   onClose: () => void
-  editingSiteLog?: any | null
+  editingSiteLog?: SiteLog | null
 }
 
+// Mapeo de tipos de entrada con iconos
+const entryTypes = [
+  { value: 'avance_de_obra', label: '📝 Avance de obra', icon: '📝' },
+  { value: 'incidente', label: '⚠️ Incidente', icon: '⚠️' },
+  { value: 'reunion', label: '🤝 Reunión', icon: '🤝' },
+  { value: 'inspeccion', label: '🔍 Inspección', icon: '🔍' },
+  { value: 'entrega', label: '📦 Entrega', icon: '📦' },
+  { value: 'otro', label: '📋 Otro', icon: '📋' }
+]
+
+// Mapeo de clima con iconos
+const weatherOptions = [
+  { value: 'sunny', label: '☀️ Soleado', icon: '☀️' },
+  { value: 'partly_cloudy', label: '🌤️ Parcialmente nublado', icon: '🌤️' },
+  { value: 'cloudy', label: '☁️ Nublado', icon: '☁️' },
+  { value: 'rainy', label: '🌧️ Lluvioso', icon: '🌧️' },
+  { value: 'stormy', label: '⛈️ Tormenta', icon: '⛈️' },
+  { value: 'snowy', label: '❄️ Nieve', icon: '❄️' },
+  { value: 'foggy', label: '🌫️ Niebla', icon: '🌫️' },
+  { value: 'windy', label: '💨 Viento', icon: '💨' }
+]
+
 export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogModalProps) {
-  const { toast } = useToast()
   const { data: userData } = useCurrentUser()
-  const projectId = userData?.preferences?.last_project_id
-  const organizationId = userData?.preferences?.last_organization_id
-  const { data: organizationMembers = [] } = useOrganizationMembers(organizationId)
+  const { toast } = useToast()
+  const queryClient = useQueryClient()
   
-  const form = useForm<CreateSiteLogForm>({
-    resolver: zodResolver(createSiteLogSchema),
+  const organizationId = userData?.preferences?.last_organization_id
+  const projectId = userData?.preferences?.last_project_id
+
+  const { data: members = [] } = useOrganizationMembers(organizationId)
+
+  const form = useForm<SiteLogForm>({
+    resolver: zodResolver(siteLogSchema),
     defaultValues: {
-      log_date: editingSiteLog ? new Date(editingSiteLog.log_date) : new Date(),
-      created_by: editingSiteLog?.created_by || userData?.user?.id || '',
-      entry_type: editingSiteLog?.entry_type || '',
-      weather: editingSiteLog?.weather || '',
-      comments: editingSiteLog?.comments || '',
-      is_public: editingSiteLog?.is_public || false,
-      is_favorite: editingSiteLog?.is_favorite || false
+      log_date: new Date(),
+      created_by: '',
+      entry_type: 'avance_de_obra',
+      weather_enum: 'sunny',
+      comments: '',
+      is_public: false,
+      is_favorite: false
     }
   })
 
-  const createSiteLogMutation = useMutation({
-    mutationFn: async (formData: CreateSiteLogForm) => {
-      if (!supabase) {
-        throw new Error('Supabase client not initialized')
+  // Inicializar formulario cuando el modal se abre
+  useEffect(() => {
+    if (open && userData && members.length > 0) {
+      // Establecer usuario actual como creador por defecto
+      const currentUserMembership = members.find(member => 
+        member.users?.id === userData.user?.id
+      )
+      if (currentUserMembership) {
+        form.setValue('created_by', currentUserMembership.id)
       }
 
-      if (!projectId) {
-        throw new Error('Project ID not available')
-      }
-
-      const siteLogData = {
-        log_date: formData.log_date.toISOString().split('T')[0], // Format as date string
-        entry_type: formData.entry_type,
-        comments: formData.comments,
-        weather: formData.weather || null,
-        is_public: formData.is_public,
-        is_favorite: formData.is_favorite,
-        project_id: projectId,
-        created_by: formData.created_by,
-        ...(!editingSiteLog && { created_at: new Date().toISOString() })
-      }
-
-      console.log(editingSiteLog ? 'Updating site log with data:' : 'Creating site log with data:', siteLogData)
-
-      let data, error
-      
+      // Si es edición, cargar datos
       if (editingSiteLog) {
-        const result = await supabase
+        form.setValue('log_date', new Date(editingSiteLog.log_date))
+        form.setValue('created_by', editingSiteLog.created_by)
+        form.setValue('entry_type', editingSiteLog.entry_type as any)
+        form.setValue('weather_enum', editingSiteLog.weather_enum as any)
+        form.setValue('comments', editingSiteLog.comments)
+        form.setValue('is_public', editingSiteLog.is_public)
+        form.setValue('is_favorite', editingSiteLog.is_favorite)
+      }
+    }
+  }, [open, userData, members, editingSiteLog, form])
+
+  const createSiteLogMutation = useMutation({
+    mutationFn: async (data: SiteLogForm) => {
+      if (!supabase) throw new Error('Supabase no disponible')
+      
+      const siteLogData = {
+        organization_id: organizationId,
+        project_id: projectId,
+        log_date: data.log_date.toISOString().split('T')[0], // Solo fecha, sin hora
+        created_by: data.created_by,
+        entry_type: data.entry_type,
+        weather_enum: data.weather_enum,
+        comments: data.comments,
+        is_public: data.is_public,
+        is_favorite: data.is_favorite
+      }
+
+      if (editingSiteLog) {
+        const { error } = await supabase
           .from('site_logs')
           .update(siteLogData)
           .eq('id', editingSiteLog.id)
-          .select()
-        data = result.data
-        error = result.error
+        
+        if (error) throw error
       } else {
-        const result = await supabase
+        const { error } = await supabase
           .from('site_logs')
           .insert([siteLogData])
-          .select()
-        data = result.data
-        error = result.error
+        
+        if (error) throw error
       }
-
-      if (error) {
-        console.error('Supabase error with site log:', error)
-        throw new Error(`Error al ${editingSiteLog ? 'actualizar' : 'crear'} bitácora: ${error.message}`)
-      }
-
-      console.log('Site log saved successfully:', data[0])
-      return data[0]
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['site-logs'] })
       toast({
-        title: "Éxito",
-        description: `Entrada de bitácora ${editingSiteLog ? 'actualizada' : 'creada'} correctamente`
+        title: editingSiteLog ? 'Entrada actualizada' : 'Entrada creada',
+        description: 'La entrada de bitácora se guardó exitosamente'
       })
-      queryClient.invalidateQueries({ queryKey: ['bitacora', projectId] })
-      form.reset()
       onClose()
+      form.reset()
     },
-    onError: (error: any) => {
-      console.error(`Error ${editingSiteLog ? 'updating' : 'creating'} site log:`, error)
+    onError: (error) => {
+      console.error('Error al guardar entrada de bitácora:', error)
       toast({
-        title: "Error",
-        description: error.message || `No se pudo ${editingSiteLog ? 'actualizar' : 'crear'} la entrada de bitácora`,
-        variant: "destructive"
+        title: 'Error',
+        description: 'No se pudo guardar la entrada de bitácora',
+        variant: 'destructive'
       })
     }
   })
 
-  const handleSubmit = (data: CreateSiteLogForm) => {
+  const onSubmit = (data: SiteLogForm) => {
     createSiteLogMutation.mutate(data)
   }
 
-  const entryTypeOptions = [
-    { value: 'avance', label: 'Avance' },
-    { value: 'incidente', label: 'Incidente' },
-    { value: 'entrega', label: 'Entrega' },
-    { value: 'nota', label: 'Nota' }
-  ]
+  const selectedCreator = members.find(m => m.id === form.watch('created_by'))
 
-  const header = (
-    <CustomModalHeader
-      title={editingSiteLog ? "Editar Entrada de Bitácora" : "Nueva Entrada de Bitácora"}
-      description={editingSiteLog ? "Modifica la entrada de bitácora" : "Registra una nueva entrada en la bitácora del proyecto"}
-      onClose={onClose}
-    />
-  )
-
-  const body = (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-0" id="site-log-form">
-        <CustomModalBody padding="md">
-          <div className="space-y-4">
-            {/* 1. Fecha del Log */}
-            <FormField
-              control={form.control}
-              name="log_date"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel className="text-sm font-medium">Fecha del log</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "PPP", { locale: es })
-                          ) : (
-                            <span>Seleccionar fecha</span>
-                          )}
-                          <Calendar className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <CalendarComponent
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) =>
-                          date > new Date() || date < new Date("1900-01-01")
-                        }
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* 2. Creador */}
-            <FormField
-              control={form.control}
-              name="created_by"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium">Creador</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar creador" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {organizationMembers.map((member) => (
-                        <SelectItem key={member.user_id} value={member.user_id}>
-                          <div className="flex items-center gap-2">
-                            <div className="h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center text-xs">
-                              {member.users?.full_name?.charAt(0) || member.users?.email?.charAt(0)}
-                            </div>
-                            <span>{member.users?.full_name || member.users?.email}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* 3. Tipo de Entrada */}
-            <FormField
-              control={form.control}
-              name="entry_type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium">Tipo de entrada</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar tipo de entrada" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {entryTypeOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* 4. Clima */}
-            <FormField
-              control={form.control}
-              name="weather"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium">Clima</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Condiciones climáticas (opcional)..."
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* 5. Comentarios */}
-            <FormField
-              control={form.control}
-              name="comments"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium">Comentarios</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Describe los detalles de esta entrada..."
-                      className="min-h-[100px]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* 6. Es Público */}
-            <FormField
-              control={form.control}
-              name="is_public"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel className="text-sm font-medium">
-                      Entrada pública
-                    </FormLabel>
-                    <div className="text-xs text-muted-foreground">
-                      Esta entrada será visible para todos los miembros del proyecto
-                    </div>
-                  </div>
-                </FormItem>
-              )}
-            />
-
-            {/* 7. Es Favorito */}
-            <FormField
-              control={form.control}
-              name="is_favorite"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel className="text-sm font-medium">
-                      Marcar como favorito
-                    </FormLabel>
-                    <div className="text-xs text-muted-foreground">
-                      Esta entrada aparecerá destacada en la bitácora
-                    </div>
-                  </div>
-                </FormItem>
-              )}
-            />
-          </div>
-        </CustomModalBody>
-      </form>
-    </Form>
-  )
-
-  const footer = (
-    <CustomModalFooter
-      onCancel={onClose}
-      onSubmit={() => {
-        const formElement = document.getElementById('site-log-form') as HTMLFormElement
-        if (formElement) {
-          formElement.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }))
-        }
-      }}
-      submitLabel={editingSiteLog ? "Actualizar" : "Guardar"}
-      disabled={createSiteLogMutation.isPending}
-    />
-  )
+  if (!open) return null
 
   return (
     <CustomModalLayout open={open} onClose={onClose}>
-      {{ header, body, footer }}
+      {{
+        header: (
+          <CustomModalHeader
+            title={editingSiteLog ? 'Editar Entrada de Bitácora' : 'Nueva Entrada de Bitácora'}
+            description="Registra el progreso y eventos del proyecto"
+            onClose={onClose}
+          />
+        ),
+        body: (
+          <CustomModalBody padding="md">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                {/* Primera fila: Fecha y Creador */}
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="log_date"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4" />
+                          Fecha del log
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="date"
+                            value={field.value ? field.value.toISOString().split('T')[0] : ''}
+                            onChange={(e) => field.onChange(new Date(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="created_by"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2">
+                          <User className="w-4 h-4" />
+                          Creador
+                        </FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Seleccionar creador">
+                                {selectedCreator && (
+                                  <div className="flex items-center gap-2">
+                                    <Avatar className="w-6 h-6">
+                                      <AvatarImage src={selectedCreator.users?.avatar_url} />
+                                      <AvatarFallback>
+                                        {selectedCreator.users?.full_name?.charAt(0) || 'U'}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <span>{selectedCreator.users?.full_name || selectedCreator.users?.email}</span>
+                                  </div>
+                                )}
+                              </SelectValue>
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {members.map((member) => (
+                              <SelectItem key={member.id} value={member.id}>
+                                <div className="flex items-center gap-2">
+                                  <Avatar className="w-6 h-6">
+                                    <AvatarImage src={member.users?.avatar_url} />
+                                    <AvatarFallback>
+                                      {member.users?.full_name?.charAt(0) || 'U'}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <span>{member.users?.full_name || member.users?.email}</span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Segunda fila: Tipo de entrada y Clima */}
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="entry_type"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2">
+                          <FileText className="w-4 h-4" />
+                          Tipo de entrada
+                        </FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Seleccionar tipo" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {entryTypes.map((type) => (
+                              <SelectItem key={type.value} value={type.value}>
+                                <span>{type.label}</span>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="weather_enum"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2">
+                          <Cloud className="w-4 h-4" />
+                          Clima
+                        </FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Seleccionar clima" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {weatherOptions.map((weather) => (
+                              <SelectItem key={weather.value} value={weather.value}>
+                                <span>{weather.label}</span>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Tercera fila: Comentarios */}
+                <FormField
+                  control={form.control}
+                  name="comments"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        <MessageSquare className="w-4 h-4" />
+                        Comentarios
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Describe el avance, incidente o evento..."
+                          className="min-h-[100px]"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Cuarta fila: Checkboxes */}
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="is_public"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                        <div className="space-y-0.5">
+                          <FormLabel className="flex items-center gap-2">
+                            <Eye className="w-4 h-4" />
+                            Entrada pública
+                          </FormLabel>
+                          <div className="text-sm text-muted-foreground">
+                            Visible para todos los miembros
+                          </div>
+                        </div>
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="is_favorite"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                        <div className="space-y-0.5">
+                          <FormLabel className="flex items-center gap-2">
+                            <Star className="w-4 h-4" />
+                            Marcar como favorito
+                          </FormLabel>
+                          <div className="text-sm text-muted-foreground">
+                            Destacar esta entrada
+                          </div>
+                        </div>
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </form>
+            </Form>
+          </CustomModalBody>
+        ),
+        footer: (
+          <CustomModalFooter
+            onCancel={onClose}
+            onSave={form.handleSubmit(onSubmit)}
+            saveText={editingSiteLog ? 'Actualizar' : 'Guardar'}
+            disabled={createSiteLogMutation.isPending}
+          />
+        )
+      }}
     </CustomModalLayout>
   )
 }

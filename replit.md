@@ -119,6 +119,17 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 26, 2025. Complete modal system rebuild with organization member selection
+  • Rebuilt NewMovementModal.tsx from scratch eliminating all initialization errors and black screen issues
+  • Fixed field order: wallet first, then currency as requested by user
+  • Corrected wallet display to show actual wallet names instead of "PRIMARIA"
+  • Enhanced NewSiteLogModal.tsx with complete Supabase enum integration for entry_type and weather_enum
+  • Added full organization member selection dropdown in both movement and site log modals
+  • User defaults to current user but can select any organization member as creator
+  • Site log modal now includes proper enum values with emoji icons for visual clarity
+  • Fixed form submission functionality - both modals now save correctly to Supabase database
+  • Enhanced error handling and toast notifications for better user feedback
+
 - June 26, 2025. Movement modal and table styling improvements completion
   • Fixed NewMovementModal to select current user by default in creator field automatically
   • Added ENTER key submit functionality to movement modal for faster data entry
