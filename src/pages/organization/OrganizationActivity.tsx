@@ -5,7 +5,7 @@ import { es } from 'date-fns/locale';
 import { Activity, Folder, DollarSign, Users, FileText, Building, Eye } from 'lucide-react';
 import { useLocation } from 'wouter';
 
-
+import { Layout } from '@/components/layout/Layout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -272,11 +272,13 @@ export default function OrganizationActivity() {
 
   if (!currentOrganization) {
     return (
-      <div className="text-center py-12 text-muted-foreground">
-        <Building className="h-12 w-12 mx-auto mb-4 opacity-20" />
-        <p className="text-sm">No hay organización seleccionada.</p>
-        <p className="text-xs">Selecciona una organización para ver la actividad.</p>
-      </div>
+      <Layout headerProps={headerProps}>
+        <div className="text-center py-12 text-muted-foreground">
+          <Building className="h-12 w-12 mx-auto mb-4 opacity-20" />
+          <p className="text-sm">No hay organización seleccionada.</p>
+          <p className="text-xs">Selecciona una organización para ver la actividad.</p>
+        </div>
+      </Layout>
     );
   }
 
@@ -369,17 +371,19 @@ export default function OrganizationActivity() {
   ];
 
   return (
-    <CustomTable
-      columns={columns}
-      data={filteredActivities}
-      isLoading={isLoading}
-      emptyState={
-        <div className="text-center py-12 text-muted-foreground">
-          <Activity className="h-12 w-12 mx-auto mb-4 opacity-20" />
-          <p className="text-sm">No hay actividad reciente en esta organización.</p>
-          <p className="text-xs">La actividad aparecerá aquí cuando se creen proyectos, movimientos o contactos.</p>
-        </div>
-      }
-    />
+    <Layout headerProps={headerProps}>
+        <CustomTable
+          columns={columns}
+          data={filteredActivities}
+          isLoading={isLoading}
+          emptyState={
+            <div className="text-center py-12 text-muted-foreground">
+              <Activity className="h-12 w-12 mx-auto mb-4 opacity-20" />
+              <p className="text-sm">No hay actividad reciente en esta organización.</p>
+              <p className="text-xs">La actividad aparecerá aquí cuando se creen proyectos, movimientos o contactos.</p>
+            </div>
+          }
+        />
+    </Layout>
   );
 }

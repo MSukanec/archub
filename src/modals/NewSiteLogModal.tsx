@@ -26,7 +26,7 @@ const siteLogSchema = z.object({
   entry_type: z.enum(['avance_de_obra', 'visita_tecnica', 'problema_detectado', 'pedido_material', 'nota_climatica', 'decision', 'inspeccion', 'foto_diaria', 'registro_general'], {
     required_error: 'Tipo de entrada es requerido'
   }),
-  weather: z.enum(['sunny', 'partly_cloudy', 'cloudy', 'rain', 'storm', 'snow', 'fog', 'windy', 'hail', 'none']).optional(),
+  weather: z.enum(['sunny', 'cloudy', 'rainy', 'stormy', 'windy', 'snowy', 'hot', 'cold']).optional(),
   comments: z.string().min(1, 'Comentarios son requeridos'),
   is_public: z.boolean().default(false),
   is_favorite: z.boolean().default(false)
@@ -74,7 +74,8 @@ const weatherOptions = [
   { value: 'snow', label: '❄️ Nieve', icon: '❄️' },
   { value: 'fog', label: '🌫️ Niebla', icon: '🌫️' },
   { value: 'windy', label: '💨 Ventoso', icon: '💨' },
-  { value: 'hail', label: '🧊 Granizo', icon: '🧊' }
+  { value: 'hail', label: '🧊 Granizo', icon: '🧊' },
+  { value: 'none', label: '❓ Sin especificar', icon: '❓' }
 ]
 
 export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogModalProps) {
@@ -119,8 +120,11 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
   useEffect(() => {
     if (open && userData && members.length > 0) {
       // Establecer usuario actual como creador por defecto
-      if (userData.user?.id) {
-        form.setValue('created_by', userData.user.id) // Usar user_id directamente
+      const currentUserMembership = members.find(member => 
+        member.users?.id === userData.user?.id
+      )
+      if (currentUserMembership) {
+        form.setValue('created_by', currentUserMembership.id)
       }
 
       // Si es edición, cargar datos
@@ -259,7 +263,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                           </FormControl>
                           <SelectContent>
                             {members.map((member) => (
-                              <SelectItem key={member.id} value={member.users?.id || member.id}>
+                              <SelectItem key={member.id} value={member.id}>
                                 <div className="flex items-center gap-2">
                                   <Avatar className="w-6 h-6">
                                     <AvatarImage src={member.users?.avatar_url} />

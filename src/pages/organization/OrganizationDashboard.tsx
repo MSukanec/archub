@@ -5,7 +5,7 @@ import { es } from 'date-fns/locale';
 import { Building, Users, DollarSign, Folder, Activity, Calendar, Crown, CheckCircle, StickyNote, ExternalLink, ArrowRight, Plus } from 'lucide-react';
 import { useLocation } from 'wouter';
 
-
+import { Layout } from '@/components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -192,16 +192,18 @@ export default function OrganizationDashboard() {
 
   if (!currentOrganization) {
     return (
-      <div className="text-center py-12 text-muted-foreground">
-        <Building className="h-12 w-12 mx-auto mb-4 opacity-20" />
-        <p className="text-sm">No hay organización seleccionada.</p>
-        <p className="text-xs">Selecciona una organización para ver el dashboard.</p>
-      </div>
+      <Layout headerProps={headerProps}>
+        <div className="text-center py-12 text-muted-foreground">
+          <Building className="h-12 w-12 mx-auto mb-4 opacity-20" />
+          <p className="text-sm">No hay organización seleccionada.</p>
+          <p className="text-xs">Selecciona una organización para ver el dashboard.</p>
+        </div>
+      </Layout>
     );
   }
 
   return (
-    <div>
+    <Layout headerProps={headerProps}>
         {/* Organization Overview */}
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6 mb-6">
           <div className="flex items-start justify-between">
@@ -461,6 +463,6 @@ export default function OrganizationDashboard() {
           onClose={() => setShowNewOrganizationModal(false)}
         />
       )}
-    </div>
+    </Layout>
   );
 }
