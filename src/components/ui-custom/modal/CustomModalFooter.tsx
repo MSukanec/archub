@@ -17,7 +17,7 @@ export function CustomModalFooter({
   saveLoading = false,
 }: CustomModalFooterProps) {
   return (
-    <div className="p-2 border-t border-[var(--card-border)] mt-auto">
+    <div className="p-3 border-t border-[var(--card-border)] mt-auto">
       <div className="flex gap-2 w-full">
         <Button
           type="button"

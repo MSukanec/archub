@@ -24,6 +24,12 @@
   --card-border: hsl(0, 0%, 85%);
   --card-hover-bg: hsl(240, 3%, 98%);
 
+  /* Secondary Cards */
+  --secondary-card-bg: hsl(0, 0%, 97%);
+  --secondary-card-fg: hsl(0, 0%, 35%);
+  --secondary-card-border: hsl(0, 0%, 85%);
+  --secondary-card-hover-bg: hsl(240, 3%, 98%);
+
   /* Buttons - Primary */
   --button-primary-bg: hsl(90, 50%, 50%);
   --button-primary-text: hsl(0, 0%, 100%);
@@ -118,6 +124,12 @@
   --card-text: hsl(0, 0%, 90%);
   --card-border: hsl(240, 8%, 15%);
   --card-hover-bg: hsl(0, 0%, 16%);
+
+  /* Secondary Cards */
+  --secondary-card-bg: hsl(220, 4%, 18%);
+  --secondary-card-fg: hsl(0, 0%, 90%);
+  --secondary-card-border: hsl(240, 8%, 15%);
+  --secondary-card-hover-bg: hsl(0, 0%, 16%);
 
   /* Buttons - Primary */
   --button-primary-bg: hsl(90, 50%, 50%);
