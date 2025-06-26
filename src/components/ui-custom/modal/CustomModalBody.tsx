@@ -14,8 +14,8 @@ export function CustomModalBody({
 }: CustomModalBodyProps) {
   const paddingClasses = {
     none: "",
-    sm: "p-3",
-    md: "p-3",
+    sm: "p-2",
+    md: "p-2",
     lg: "p-3",
   };
 
