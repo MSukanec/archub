@@ -166,13 +166,17 @@ export function ContactModal({ contact, open, onClose }: ContactModalProps) {
           </CustomModalBody>
         ),
         footer: (
-          <CustomModalFooter 
-            onCancel={onClose} 
-            onSave={() => {}} 
-            cancelText="Cerrar"
-            saveText=""
-            saveLoading={false}
-          />
+          <div className="p-3 border-t border-[var(--card-border)] mt-auto">
+            <div className="flex gap-2 w-full">
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-full bg-[var(--accent)] text-[var(--accent-fg)] px-4 py-2 rounded-md hover:bg-[var(--accent)]/90 transition-colors"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
         ),
       }}
     </CustomModalLayout>

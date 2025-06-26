@@ -331,6 +331,15 @@ export default function OrganizationContacts() {
         }}
         editingContact={editingContact}
       />
+
+      <ContactModal
+        contact={selectedContact}
+        open={contactModalOpen}
+        onClose={() => {
+          setContactModalOpen(false)
+          setSelectedContact(null)
+        }}
+      />
     </Layout>
   )
 }
