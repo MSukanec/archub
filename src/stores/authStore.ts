@@ -8,6 +8,7 @@ interface AuthState {
   initialized: boolean;
   initialize: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, fullName: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -78,6 +79,32 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
 
     set({ user: data.user, loading: false });
+  },
+
+  signUp: async (email: string, password: string, fullName: string) => {
+    if (!supabase) {
+      throw new Error("Supabase client not initialized");
+    }
+
+    set({ loading: true });
+
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName,
+        }
+      }
+    });
+
+    if (error) {
+      set({ loading: false });
+      throw error;
+    }
+
+    // Don't set user immediately as email confirmation is required
+    set({ loading: false });
   },
 
   signInWithGoogle: async () => {
