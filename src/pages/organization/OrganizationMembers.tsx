@@ -586,6 +586,6 @@ export default function OrganizationMembers() {
           open={showInviteModal}
           onClose={() => setShowInviteModal(false)}
         />
-    </div>
-  );
+      </div>
+    );
 }

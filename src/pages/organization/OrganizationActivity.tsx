@@ -5,7 +5,7 @@ import { es } from 'date-fns/locale';
 import { Activity, Folder, DollarSign, Users, FileText, Building, Eye } from 'lucide-react';
 import { useLocation } from 'wouter';
 
-import { Layout } from '@/components/layout/Layout';
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
