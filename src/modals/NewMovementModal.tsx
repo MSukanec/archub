@@ -109,7 +109,8 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
       amount: 0,
       description: '',
       file_url: '',
-      is_conversion: false
+      is_conversion: false,
+      created_by: userData?.memberships?.[0]?.id || ''
     }
   })
 
@@ -300,7 +301,16 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         body: (
           <CustomModalBody padding="md">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <form 
+                onSubmit={form.handleSubmit(onSubmit)} 
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault()
+                    form.handleSubmit(onSubmit)()
+                  }
+                }}
+                className="space-y-6"
+              >
                 {/* Primera fila: Fecha y Creador */}
                 <div className="grid grid-cols-2 gap-4">
                   <FormField

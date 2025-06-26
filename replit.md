@@ -119,6 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 26, 2025. Movement modal and table styling improvements completion
+  • Fixed NewMovementModal to select current user by default in creator field automatically
+  • Added ENTER key submit functionality to movement modal for faster data entry
+  • Enhanced CustomTable styling to match reference design with sidebar-colored headers and card-styled rows
+  • Updated table headers to use --menues-bg, --menues-fg, and --menues-border CSS variables
+  • Applied --card-bg, --card-border, and --card-hover-bg variables to table rows for consistent theming
+  • Marked FinancesMovements page as wide layout for optimal table display across full viewport
+  • Table now provides professional invoice-style appearance matching provided visual reference
+
 - June 26, 2025. CustomPhoneInput integration and two-column contact layout completion
   • Created professional CustomPhoneInput.tsx component with country selector and Unicode flag emojis
   • Replaced PhoneInput with CustomPhoneInput in NewContactModal.tsx for professional phone number input

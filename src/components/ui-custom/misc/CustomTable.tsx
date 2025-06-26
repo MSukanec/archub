@@ -194,7 +194,7 @@ export function CustomTable<T = any>({
       {/* Desktop Table View */}
       <div className="hidden md:block">
         {/* Column Headers */}
-        <div className="grid gap-4 p-4 bg-muted/50 rounded-lg text-xs font-medium text-muted-foreground" style={{ gridTemplateColumns: getGridTemplateColumns() }}>
+        <div className="grid gap-4 p-4 bg-[var(--menues-bg)] rounded-lg text-xs font-medium text-[var(--menues-fg)] border border-[var(--menues-border)]" style={{ gridTemplateColumns: getGridTemplateColumns() }}>
           {selectable && (
             <div className="flex items-center justify-center">
               <Checkbox
@@ -236,8 +236,8 @@ export function CustomTable<T = any>({
             <div
               key={index}
               className={cn(
-                "grid gap-4 p-4 border rounded-lg hover:bg-muted/40 transition-colors",
-                selectable && isItemSelected(item) && "bg-muted/60 border-primary"
+                "grid gap-4 p-4 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg hover:bg-[var(--card-hover-bg)] transition-colors",
+                selectable && isItemSelected(item) && "bg-[var(--card-selected-bg)] border-[var(--accent)]"
               )}
               style={{ gridTemplateColumns: getGridTemplateColumns() }}
             >

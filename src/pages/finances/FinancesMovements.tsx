@@ -437,7 +437,7 @@ export default function Movements() {
   };
 
   return (
-    <Layout headerProps={headerProps}>
+    <Layout headerProps={headerProps} wide={true}>
       <CustomTable
         columns={tableColumns}
         data={filteredMovements}
