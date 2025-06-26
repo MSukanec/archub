@@ -288,6 +288,14 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
     }
   }
 
+  // Handle ENTER key submission
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      form.handleSubmit(onSubmit)()
+    }
+  }
+
   const isPending = createMovementMutation.isPending || updateMovementMutation.isPending
 
   if (!open) return null
