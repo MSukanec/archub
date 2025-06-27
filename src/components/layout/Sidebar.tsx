@@ -344,7 +344,7 @@ export function Sidebar() {
           </div>
 
           {/* Plan Button - Above Divider */}
-          <div className="mt-auto pb-2">
+          <div className="mt-auto pb-2 flex justify-center">
             {isExpanded ? (
               <div className={cn(
                 "w-full border rounded-lg p-3",
@@ -396,24 +396,16 @@ export function Sidebar() {
                 )}
               </div>
             ) : (
-              <SidebarButton
-                icon={
-                  <div className={cn(
-                    "w-[18px] h-[18px] rounded-full flex items-center justify-center",
-                    (!userData?.plan || userData.plan.name === 'free') && "bg-orange-500",
-                    userData?.plan?.name === 'pro' && "bg-blue-500",
-                    userData?.plan?.name === 'teams' && "bg-purple-500"
-                  )}>
-                    {(!userData?.plan || userData.plan.name === 'free') && <Star className="w-3 h-3 text-white" />}
-                    {userData?.plan?.name === 'pro' && <Crown className="w-3 h-3 text-white" />}
-                    {userData?.plan?.name === 'teams' && <Zap className="w-3 h-3 text-white" />}
-                  </div>
-                }
-                label="Plan"
-                isActive={false}
-                isExpanded={isExpanded}
-                onClick={() => {}}
-              />
+              <div className={cn(
+                "w-9 h-9 rounded-full flex items-center justify-center cursor-pointer",
+                (!userData?.plan || userData.plan.name === 'free') && "bg-orange-500",
+                userData?.plan?.name === 'pro' && "bg-blue-500",
+                userData?.plan?.name === 'teams' && "bg-purple-500"
+              )}>
+                {(!userData?.plan || userData.plan.name === 'free') && <Star className="w-4 h-4 text-white" />}
+                {userData?.plan?.name === 'pro' && <Crown className="w-4 h-4 text-white" />}
+                {userData?.plan?.name === 'teams' && <Zap className="w-4 h-4 text-white" />}
+              </div>
             )}
           </div>
         </div>
@@ -435,58 +427,34 @@ export function Sidebar() {
           />
 
           {/* Profile */}
-          {isExpanded ? (
-            <div 
-              className="w-full p-3 rounded-lg cursor-pointer hover:bg-[var(--menues-hover-bg)] transition-all"
-              onClick={() => navigate("/perfil")}
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
-                  {userData?.user?.avatar_url ? (
-                    <img 
-                      src={userData.user.avatar_url} 
-                      alt="Avatar" 
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-medium">
-                      {userData?.user?.full_name?.substring(0, 2).toUpperCase() || "US"}
-                    </div>
-                  )}
+          <div 
+            className="flex items-center gap-3 cursor-pointer p-1"
+            onClick={() => navigate("/perfil")}
+          >
+            <div className="w-[39px] h-[39px] rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+              {userData?.user?.avatar_url ? (
+                <img 
+                  src={userData.user.avatar_url} 
+                  alt="Avatar" 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-medium">
+                  {userData?.user?.full_name?.substring(0, 2).toUpperCase() || "US"}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-[var(--menues-fg)] truncate">
-                    {userData?.user?.full_name || "Usuario"}
-                  </div>
-                  <div className="text-xs text-gray-500 truncate">
-                    {userData?.organization?.name || "Sin organización"}
-                  </div>
+              )}
+            </div>
+            {isExpanded && (
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-medium text-[var(--menues-fg)] truncate">
+                  {userData?.user?.full_name || "Usuario"}
+                </div>
+                <div className="text-xs text-gray-500 truncate">
+                  {userData?.organization?.name || "Sin organización"}
                 </div>
               </div>
-            </div>
-          ) : (
-            <SidebarButton
-              icon={
-                <div className="w-[18px] h-[18px] rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
-                  {userData?.user?.avatar_url ? (
-                    <img 
-                      src={userData.user.avatar_url} 
-                      alt="Avatar" 
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-medium">
-                      {userData?.user?.full_name?.substring(0, 2).toUpperCase() || "US"}
-                    </div>
-                  )}
-                </div>
-              }
-              label="Mi Perfil"
-              isActive={location === "/perfil"}
-              isExpanded={isExpanded}
-              onClick={() => navigate("/perfil")}
-            />
-          )}
+            )}
+          </div>
         </div>
       </div>
     </aside>
