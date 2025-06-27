@@ -53,37 +53,23 @@ function useAllOrganizations() {
         throw error;
       }
 
-      // Obtener los planes por separado
-      const planIds = data.map(org => org.plan_id).filter(Boolean);
-      const uniquePlanIds = Array.from(new Set(planIds));
-      
-      const { data: plansData } = await supabase
-        .from('plans')
-        .select('id, name, project_limit, member_limit')
-        .in('id', uniquePlanIds);
-
-      // Mapear organizaciones con sus planes
+      // Por ahora simplificar y no obtener datos de planes hasta que se resuelva el problema de columnas
       const organizationsWithPlans = data.map(org => ({
         ...org,
-        plan: plansData?.find(plan => plan.id === org.plan_id) || null
+        plan: null // Temporalmente null hasta resolver el problema de consulta
       }));
 
-      if (error) {
-        console.error('Error fetching organizations:', error);
-        throw error;
-      }
-
-      console.log('Organizations raw data:', organizationsWithPlans);
+      console.log('Organizations with plans:', organizationsWithPlans);
 
       // Obtener conteos de miembros y proyectos para cada organización
       const organizationsWithCounts = await Promise.all(
         organizationsWithPlans.map(async (org) => {
           const [membersResult, projectsResult] = await Promise.all([
-            supabase
+            supabase!
               .from('organization_members')
               .select('id', { count: 'exact' })
               .eq('organization_id', org.id),
-            supabase
+            supabase!
               .from('projects')
               .select('id', { count: 'exact' })
               .eq('organization_id', org.id)
@@ -91,7 +77,6 @@ function useAllOrganizations() {
 
           return {
             ...org,
-            plan: org.plan && org.plan.length > 0 ? org.plan[0] : null,
             members_count: membersResult.count || 0,
             projects_count: projectsResult.count || 0
           };
