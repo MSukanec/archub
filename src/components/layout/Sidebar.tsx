@@ -21,7 +21,8 @@ import {
   ChevronDown,
   ChevronRight,
   Search,
-  Crown
+  Crown,
+  Package
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -164,8 +165,9 @@ export function Sidebar() {
     ],
     admin: [
       { icon: Home, label: 'Resumen de Administración', href: '/admin/dashboard' },
-      { icon: Building, label: 'Gestión de Organizaciones', href: '/admin/organizations' },
-      { icon: Users, label: 'Gestión de Usuarios', href: '/admin/users' },
+      { icon: Building, label: 'Organizaciones', href: '/admin/organizations' },
+      { icon: Users, label: 'Usuarios', href: '/admin/users' },
+      { icon: Package, label: 'Materiales', href: '/admin/materials' },
     ]
   };
 
