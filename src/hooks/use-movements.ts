@@ -134,20 +134,13 @@ export function useMovements(organizationId: string | undefined, projectId: stri
         
         // Get currencies
         supabase
-          .from('organization_currencies')
-          .select(`
-            id,
-            currencies (
-              id,
-              name,
-              code
-            )
-          `)
+          .from('currencies')
+          .select('id, name, code, symbol')
           .in('id', [...new Set(data.map(m => m.currency_id).filter(Boolean))]),
         
         // Get wallets
         supabase
-          .from('organization_wallets')
+          .from('wallets')
           .select('id, name')
           .in('id', [...new Set(data.map(m => m.wallet_id).filter(Boolean))])
       ]);
@@ -179,8 +172,8 @@ export function useMovements(organizationId: string | undefined, projectId: stri
       });
 
       const currenciesMap = new Map();
-      currenciesResult.data?.forEach(orgCurrency => {
-        currenciesMap.set(orgCurrency.id, orgCurrency.currencies);
+      currenciesResult.data?.forEach(currency => {
+        currenciesMap.set(currency.id, currency);
       });
 
       const walletsMap = new Map();
