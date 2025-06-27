@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useLocation } from "wouter";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { cn } from "@/lib/utils";
@@ -14,7 +15,9 @@ import {
   FolderOpen,
   Mail,
   Activity,
-  ArrowLeft
+  ArrowLeft,
+  ChevronDown,
+  ChevronRight
 } from "lucide-react";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
@@ -26,7 +29,20 @@ export function Sidebar() {
   const { isDocked, isHovered, setHovered } = useSidebarStore();
   const { currentSidebarContext, setSidebarContext } = useNavigationStore();
   
+  // Estado para acordeones
+  const [expandedAccordions, setExpandedAccordions] = useState<{ [key: string]: boolean }>({
+    obra: false,
+    finanzas: false
+  });
+  
   const isExpanded = isDocked || isHovered;
+  
+  const toggleAccordion = (key: string) => {
+    setExpandedAccordions(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
 
   // Different navigation items based on context
   const sidebarContexts = {
@@ -39,10 +55,32 @@ export function Sidebar() {
       { icon: Settings, label: 'Preferencias', href: '/preferencias' },
     ],
     project: [
-      { icon: Home, label: 'Dashboard', href: '/project/dashboard' },
-      { icon: FolderOpen, label: 'Proyecto', href: '#', onClick: () => { setSidebarContext('design'); navigate('/design/dashboard'); } },
-      { icon: Building, label: 'Obra', href: '#', onClick: () => { setSidebarContext('construction'); navigate('/construction/dashboard'); } },
-      { icon: DollarSign, label: 'Finanzas', href: '#', onClick: () => { setSidebarContext('finance'); navigate('/finance/dashboard'); } },
+      { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },
+      { icon: FolderOpen, label: 'Diseño', href: '#', onClick: () => { setSidebarContext('design'); navigate('/design/dashboard'); } },
+      { 
+        icon: Building, 
+        label: 'Obra', 
+        href: '#', 
+        isAccordion: true,
+        expanded: expandedAccordions.obra,
+        onToggle: () => toggleAccordion('obra'),
+        children: [
+          { icon: Home, label: 'Resumen de Obra', href: '/construction/dashboard' },
+          { icon: FileText, label: 'Bitácora', href: '/bitacora' }
+        ]
+      },
+      { 
+        icon: DollarSign, 
+        label: 'Finanzas', 
+        href: '#', 
+        isAccordion: true,
+        expanded: expandedAccordions.finanzas,
+        onToggle: () => toggleAccordion('finanzas'),
+        children: [
+          { icon: Home, label: 'Resumen de Finanzas', href: '/finance/dashboard' },
+          { icon: DollarSign, label: 'Movimientos', href: '/movimientos' }
+        ]
+      },
       { icon: Users, label: 'Comercialización', href: '#', onClick: () => { setSidebarContext('commercialization'); navigate('/commercialization/dashboard'); } },
       { icon: ArrowLeft, label: 'Volver a Organización', href: '#', onClick: () => { setSidebarContext('organization'); navigate('/organization/dashboard'); } },
     ],
@@ -87,15 +125,37 @@ export function Sidebar() {
       {/* Navigation Items */}
       <div className="flex-1 p-1">
         <div className="flex flex-col gap-[2px]">
-          {navigationItems.map((item, index) => (
-            <SidebarButton
-              key={`${item.label}-${index}`}
-              icon={<item.icon className="w-[18px] h-[18px]" />}
-              label={item.label}
-              isActive={location === item.href}
-              isExpanded={isExpanded}
-              onClick={item.onClick || (() => navigate(item.href))}
-            />
+          {navigationItems.map((item: any, index) => (
+            <div key={`${item.label}-${index}`}>
+              {/* Main Button */}
+              <SidebarButton
+                icon={<item.icon className="w-[18px] h-[18px]" />}
+                label={item.label}
+                isActive={location === item.href}
+                isExpanded={isExpanded}
+                onClick={item.isAccordion ? item.onToggle : (item.onClick || (() => navigate(item.href)))}
+                rightIcon={item.isAccordion && isExpanded ? (
+                  item.expanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />
+                ) : undefined}
+              />
+              
+              {/* Accordion Children */}
+              {item.isAccordion && item.expanded && isExpanded && (
+                <div className="ml-6 mt-1 flex flex-col gap-[2px]">
+                  {item.children?.map((child: any, childIndex: number) => (
+                    <SidebarButton
+                      key={`${child.label}-${childIndex}`}
+                      icon={<child.icon className="w-[18px] h-[18px]" />}
+                      label={child.label}
+                      isActive={location === child.href}
+                      isExpanded={isExpanded}
+                      onClick={() => navigate(child.href)}
+                      isChild={true}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           ))}
         </div>
       </div>

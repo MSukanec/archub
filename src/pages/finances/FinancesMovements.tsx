@@ -515,13 +515,17 @@ export default function Movements() {
           <CustomEmptyState 
             title="No hay movimientos registrados"
             description="Crea el primer movimiento del proyecto"
-            action={{
-              label: "Nuevo movimiento",
-              onClick: () => {
-                setEditingMovement(null);
-                setShowNewMovementModal(true);
-              }
-            }}
+            action={
+              <Button
+                onClick={() => {
+                  setEditingMovement(null);
+                  setShowNewMovementModal(true);
+                }}
+                className="mt-4"
+              >
+                Nuevo movimiento
+              </Button>
+            }
           />
         }
       />

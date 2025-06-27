@@ -41,12 +41,12 @@
   --button-primary-disabled-text: hsl(240, 5%, 65%);
 
   /* Buttons - Secondary */
-  --button-secondary-bg: hsl(0, 0%, 92%);
+  --button-secondary-bg: hsl(0, 0%, 97%);
   --button-secondary-text: hsl(0, 0%, 50%);
-  --button-secondary-border: hsl(0, 0%, 90%);
+  --button-secondary-border: hsl(0, 0%, 70%);
   --button-secondary-hover-bg: hsl(0, 0%, 93%);
   --button-secondary-hover-text: hsl(0, 0%, 50%);
-  --button-secondary-hover-border: hsl(0, 0%, 50%);
+  --button-secondary-hover-border: hsl(0, 0%, 70%);
 
   /* Buttons - Ghost */
   --button-ghost-bg: transparent;
