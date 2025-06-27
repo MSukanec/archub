@@ -22,8 +22,8 @@ interface Organization {
   plan: {
     id: string;
     name: string;
-    max_projects: number;
-    max_members: number;
+    project_limit: number;
+    member_limit: number;
   } | null;
   members_count: number;
   projects_count: number;
@@ -44,12 +44,7 @@ function useAllOrganizations() {
           created_at,
           is_active,
           is_system,
-          plan:plans(
-            id,
-            name,
-            max_projects,
-            max_members
-          )
+          plan_id
         `)
         .order('created_at', { ascending: false });
 
@@ -58,11 +53,31 @@ function useAllOrganizations() {
         throw error;
       }
 
-      console.log('Organizations raw data:', data);
+      // Obtener los planes por separado
+      const planIds = data.map(org => org.plan_id).filter(Boolean);
+      const uniquePlanIds = Array.from(new Set(planIds));
+      
+      const { data: plansData } = await supabase
+        .from('plans')
+        .select('id, name, project_limit, member_limit')
+        .in('id', uniquePlanIds);
+
+      // Mapear organizaciones con sus planes
+      const organizationsWithPlans = data.map(org => ({
+        ...org,
+        plan: plansData?.find(plan => plan.id === org.plan_id) || null
+      }));
+
+      if (error) {
+        console.error('Error fetching organizations:', error);
+        throw error;
+      }
+
+      console.log('Organizations raw data:', organizationsWithPlans);
 
       // Obtener conteos de miembros y proyectos para cada organización
       const organizationsWithCounts = await Promise.all(
-        data.map(async (org) => {
+        organizationsWithPlans.map(async (org) => {
           const [membersResult, projectsResult] = await Promise.all([
             supabase
               .from('organization_members')
@@ -209,7 +224,7 @@ export default function AdminOrganizations() {
           <div>
             <div className="font-medium text-sm">{org.plan?.name || 'Sin plan'}</div>
             <div className="text-xs text-muted-foreground">
-              {org.plan?.max_projects} proyectos, {org.plan?.max_members} miembros
+              {org.plan?.project_limit} proyectos, {org.plan?.member_limit} miembros
             </div>
           </div>
         </div>
