@@ -274,8 +274,22 @@ export function CustomTable<T = any>({
         {sortedData.map((item, index) => (
           <div
             key={index}
-            className="p-4 border rounded-lg mb-2 bg-background hover:bg-muted/40 transition-colors"
+            className={cn(
+              "p-4 border rounded-lg mb-2 bg-background hover:bg-muted/40 transition-colors",
+              getRowClassName?.(item)
+            )}
           >
+            {selectable && (
+              <div className="flex items-center justify-between mb-3 pb-3 border-b">
+                <span className="text-xs font-semibold text-muted-foreground">Seleccionar</span>
+                <Checkbox
+                  checked={isItemSelected(item)}
+                  onCheckedChange={(checked) => handleItemSelection(item, checked)}
+                  aria-label="Seleccionar elemento"
+                  className="h-4 w-4"
+                />
+              </div>
+            )}
             <div className="space-y-3">
               {columns.map((column) => {
                 const value = column.render 
