@@ -344,7 +344,7 @@ export function Sidebar() {
           </div>
 
           {/* Plan Button - Above Divider */}
-          <div className="mt-auto pb-2 flex justify-center">
+          <div className="mt-auto pb-2">
             {isExpanded ? (
               <div className={cn(
                 "w-full border rounded-lg p-3",
@@ -396,16 +396,24 @@ export function Sidebar() {
                 )}
               </div>
             ) : (
-              <div className={cn(
-                "w-8 h-8 rounded-full flex items-center justify-center cursor-pointer",
-                (!userData?.plan || userData.plan.name === 'free') && "bg-orange-500",
-                userData?.plan?.name === 'pro' && "bg-blue-500",
-                userData?.plan?.name === 'teams' && "bg-purple-500"
-              )}>
-                {(!userData?.plan || userData.plan.name === 'free') && <Star className="w-4 h-4 text-white" />}
-                {userData?.plan?.name === 'pro' && <Crown className="w-4 h-4 text-white" />}
-                {userData?.plan?.name === 'teams' && <Zap className="w-4 h-4 text-white" />}
-              </div>
+              <SidebarButton
+                icon={
+                  <div className={cn(
+                    "w-[18px] h-[18px] rounded-full flex items-center justify-center",
+                    (!userData?.plan || userData.plan.name === 'free') && "bg-orange-500",
+                    userData?.plan?.name === 'pro' && "bg-blue-500",
+                    userData?.plan?.name === 'teams' && "bg-purple-500"
+                  )}>
+                    {(!userData?.plan || userData.plan.name === 'free') && <Star className="w-3 h-3 text-white" />}
+                    {userData?.plan?.name === 'pro' && <Crown className="w-3 h-3 text-white" />}
+                    {userData?.plan?.name === 'teams' && <Zap className="w-3 h-3 text-white" />}
+                  </div>
+                }
+                label="Plan"
+                isActive={false}
+                isExpanded={isExpanded}
+                onClick={() => {}}
+              />
             )}
           </div>
         </div>
@@ -429,7 +437,7 @@ export function Sidebar() {
           {/* Profile */}
           {isExpanded ? (
             <div 
-              className="flex items-center gap-2 p-1 rounded-lg cursor-pointer hover:bg-[var(--menues-hover-bg)] transition-all"
+              className="flex items-center gap-2 p-1 rounded-lg cursor-pointer"
               onClick={() => navigate("/perfil")}
             >
               <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
