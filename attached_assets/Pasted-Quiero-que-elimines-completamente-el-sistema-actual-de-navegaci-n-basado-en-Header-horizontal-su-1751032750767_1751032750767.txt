@@ -1,0 +1,61 @@
+Quiero que elimines completamente el sistema actual de navegación basado en:
+- Header horizontal superior
+- Sidebar dividido por etapas (Organización, Diseño, Obra, Finanzas, etc.)
+
+Vamos a reemplazar todo por un **sidebar único con acordeones**. Todo el código anterior relacionado al layout de navegación, headers, headers duplicados por sección, menús laterales múltiples o estados de navegación por etapa DEBE SER ELIMINADO. Esto incluye:
+- Archivos innecesarios de layout
+- Componentes de header actuales
+- Hooks o stores relacionados a headers o múltiples sidebars
+- Estilos que ya no apliquen
+
+---
+
+### Estructura nueva del sidebar
+
+Implementá un nuevo `Sidebar.tsx` con acordeones para cada grupo de navegación:
+
+#### ORDEN:
+
+**ADMINISTRACIÓN** (futuro acordeón, solo dejar botón placeholder)
+
+**PERFIL** (futuro acordeón, solo dejar botón placeholder)
+
+---
+
+**GENERAL** (Acordeones principales activos)
+
+#### ORGANIZACIÓN (acordeón con las siguientes páginas):
+- Resumen
+- Proyectos
+- Contactos
+- Actividad
+- Miembros
+- Preferencias
+
+#### PROYECTO (acordeón con las siguientes páginas):
+- Dashboard
+- Diseño
+- Obra
+  - Resumen de Obra
+  - Bitácora
+- Finanzas
+  - Resumen de Finanzas
+  - Movimientos
+- Comercialización
+
+---
+
+### REQUISITOS VISUALES
+
+- Usá diseño similar al sidebar del ejemplo adjunto (imagen), con íconos, fuente compacta y botones agrupados.
+- Sidebar debe colapsarse y mostrar solo íconos.
+- El sidebar debe permitir cambiar entre "estado" o "contexto" general, como Administración, Perfil, General, de forma futura (por ahora solo dejá el botón funcional arriba de todo para cambiar de "contexto").
+
+---
+
+### EXTRA
+
+- Reestructurá el layout principal (`Layout.tsx`) para que use **solo este sidebar**, sin header.
+- Asegurate de que cada botón o ítem en el acordeón redirija correctamente a su página actual (si ya existen esas páginas).
+- Eliminá todo el código muerto, duplicado o que haya quedado obsoleto.
+- Usá un store simple para mantener el estado del acordeón abierto (si es necesario).

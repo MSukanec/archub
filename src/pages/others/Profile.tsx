@@ -26,7 +26,7 @@ interface Country {
 export default function Profile() {
   const { data: userData, isLoading } = useCurrentUser()
   const { toast } = useToast()
-  const { isDocked, setDocked } = useSidebarStore()
+  const { isExpanded, setExpanded } = useSidebarStore()
 
   // Form states
   const [firstName, setFirstName] = useState('')
