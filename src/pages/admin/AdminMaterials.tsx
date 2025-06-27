@@ -255,8 +255,9 @@ export default function AdminMaterials() {
     onSearchChange: setSearchValue,
     customFilters,
     onClearFilters: clearFilters,
-    actions: (
+    actions: [
       <Button 
+        key="new-material"
         onClick={() => {
           setEditingMaterial(null)
           setNewMaterialModalOpen(true)
@@ -267,7 +268,7 @@ export default function AdminMaterials() {
         <Plus className="h-4 w-4" />
         Nuevo Material
       </Button>
-    )
+    ]
   }
 
   return (

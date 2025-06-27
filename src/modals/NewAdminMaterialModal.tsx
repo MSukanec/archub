@@ -239,10 +239,11 @@ export function NewAdminMaterialModal({ open, onClose, material }: NewAdminMater
         ),
         footer: (
           <CustomModalFooter
-            onClose={handleClose}
-            isSubmitting={saveMaterialMutation.isPending}
-            submitForm="material-form"
-            submitLabel={material ? 'Actualizar' : 'Crear'}
+            onCancel={handleClose}
+            onSave={form.handleSubmit(onSubmit)}
+            cancelText="Cancelar"
+            saveText={material ? 'Actualizar' : 'Crear'}
+            saveLoading={saveMaterialMutation.isPending}
           />
         )
       }}
