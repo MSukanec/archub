@@ -335,52 +335,44 @@ export default function AdminOrganizations() {
       <div className="space-y-6">
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Total Organizaciones</p>
-                  <p className="text-2xl font-bold">{stats.total}</p>
-                </div>
-                <Building className="h-8 w-8 text-[var(--accent)]" />
+          <Card className="p-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">Total Organizaciones</p>
+                <p className="text-lg font-semibold">{stats.total}</p>
               </div>
-            </CardContent>
+              <Building className="h-4 w-4 text-muted-foreground" />
+            </div>
           </Card>
           
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Plan Free</p>
-                  <p className="text-2xl font-bold">{stats.free}</p>
-                </div>
-                <Crown className="h-8 w-8 text-green-600" />
+          <Card className="p-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">Plan Free</p>
+                <p className="text-lg font-semibold">{stats.free}</p>
               </div>
-            </CardContent>
+              <Crown className="h-4 w-4 text-muted-foreground" />
+            </div>
           </Card>
           
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Plan Pro</p>
-                  <p className="text-2xl font-bold">{stats.pro}</p>
-                </div>
-                <Crown className="h-8 w-8 text-blue-600" />
+          <Card className="p-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">Plan Pro</p>
+                <p className="text-lg font-semibold">{stats.pro}</p>
               </div>
-            </CardContent>
+              <Crown className="h-4 w-4 text-muted-foreground" />
+            </div>
           </Card>
           
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Plan Teams</p>
-                  <p className="text-2xl font-bold">{stats.teams}</p>
-                </div>
-                <Crown className="h-8 w-8 text-purple-600" />
+          <Card className="p-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">Plan Teams</p>
+                <p className="text-lg font-semibold">{stats.teams}</p>
               </div>
-            </CardContent>
+              <Crown className="h-4 w-4 text-muted-foreground" />
+            </div>
           </Card>
         </div>
 

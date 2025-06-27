@@ -1,39 +1,18 @@
 import { useState } from 'react';
-import { useMaterialCategories, useDeleteMaterialCategory, MaterialCategory } from '@/hooks/use-material-categories';
-import { Layout } from '@/components/layout/Layout';
+import { Plus, Edit, Trash2, Calendar, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Search, X, Edit, Trash2, Filter, Tag, Calendar } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card } from '@/components/ui/card';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { CustomTable } from '@/components/ui-custom/misc/CustomTable';
+import { Layout } from '@/components/layout/Layout';
+import { useMaterialCategories, useDeleteMaterialCategory, MaterialCategory } from '@/hooks/use-material-categories';
+import { NewAdminMaterialCategoryModal } from '@/modals/NewAdminMaterialCategoryModal';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { NewAdminMaterialCategoryModal } from '@/modals/NewAdminMaterialCategoryModal';
-import { CustomTable } from '@/components/ui-custom/misc/CustomTable';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 
 export default function AdminMaterialCategories() {
   const [showModal, setShowModal] = useState(false);
@@ -82,7 +61,7 @@ export default function AdminMaterialCategories() {
     }
   };
 
-  const handleClearFilters = () => {
+  const clearFilters = () => {
     setSearchValue('');
     setSortBy('date');
   };
@@ -99,36 +78,26 @@ export default function AdminMaterialCategories() {
   // Table columns configuration
   const columns = [
     {
-      key: 'created_at' as keyof MaterialCategory,
-      title: 'Fecha de Creación',
+      key: 'created_at',
+      label: 'Fecha de Creación',
       width: '5%',
       render: (category: MaterialCategory) => (
-        <div className="flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-[var(--menues-fg)]" />
-          <span className="text-xs">
-            {format(new Date(category.created_at), 'dd/MM/yyyy', { locale: es })}
-          </span>
-        </div>
+        <span className="text-xs">
+          {format(new Date(category.created_at), 'dd/MM/yyyy', { locale: es })}
+        </span>
       )
     },
     {
-      key: 'name' as keyof MaterialCategory,
-      title: 'Categoría',
+      key: 'name',
+      label: 'Categoría',
       width: '90%',
       render: (category: MaterialCategory) => (
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-[var(--accent)] flex items-center justify-center">
-            <Tag className="w-4 h-4 text-white" />
-          </div>
-          <div>
-            <div className="font-medium text-sm">{category.name}</div>
-          </div>
-        </div>
+        <span className="text-sm font-medium">{category.name}</span>
       )
     },
     {
-      key: 'actions' as keyof MaterialCategory,
-      title: 'Acciones',
+      key: 'actions',
+      label: 'Acciones',
       width: '5%',
       render: (category: MaterialCategory) => (
         <div className="flex items-center gap-1">
@@ -170,88 +139,98 @@ export default function AdminMaterialCategories() {
     </div>
   );
 
+  const headerProps = {
+    title: 'Categorías de Materiales',
+    showSearch: true,
+    searchValue,
+    onSearchChange: setSearchValue,
+    customFilters,
+    onClearFilters: clearFilters,
+    actions: [
+      <Button 
+        key="new-category"
+        onClick={() => {
+          setEditingCategory(undefined);
+          setShowModal(true);
+        }}
+        size="sm"
+        className="gap-2"
+      >
+        <Plus className="h-4 w-4" />
+        Nueva Categoría
+      </Button>
+    ]
+  };
+
   return (
-    <Layout
-      wide
-      headerProps={{
-        title: "Categorías de Materiales",
-        showSearch: true,
-        searchValue,
-        onSearchChange: setSearchValue,
-        customFilters,
-        onClearFilters: handleClearFilters,
-        actions: [
-          <Button key="new" onClick={() => setShowModal(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Nueva Categoría
-          </Button>
-        ]
-      }}
-    >
+    <Layout headerProps={headerProps}>
       <div className="space-y-6">
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Categorías</CardTitle>
-              <Tag className="h-4 w-4 text-[var(--menues-fg)]" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalCategories}</div>
-            </CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="p-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">Total Categorías</p>
+                <p className="text-lg font-semibold">{totalCategories}</p>
+              </div>
+              <Tag className="h-4 w-4 text-muted-foreground" />
+            </div>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Nuevas (30 días)</CardTitle>
-              <Calendar className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{recentCategories}</div>
-            </CardContent>
+          <Card className="p-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">Nuevas (30 días)</p>
+                <p className="text-lg font-semibold">{recentCategories}</p>
+              </div>
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+            </div>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Categorías Activas</CardTitle>
-              <Tag className="h-4 w-4 text-blue-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalCategories}</div>
-            </CardContent>
+          <Card className="p-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">Categorías Activas</p>
+                <p className="text-lg font-semibold">{totalCategories}</p>
+              </div>
+              <Tag className="h-4 w-4 text-muted-foreground" />
+            </div>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Más Utilizadas</CardTitle>
-              <Tag className="h-4 w-4 text-purple-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{Math.ceil(totalCategories * 0.3)}</div>
-            </CardContent>
+          <Card className="p-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">Más Utilizadas</p>
+                <p className="text-lg font-semibold">{Math.ceil(totalCategories * 0.3)}</p>
+              </div>
+              <Tag className="h-4 w-4 text-muted-foreground" />
+            </div>
           </Card>
         </div>
 
-        {/* Table */}
+        {/* Categories Table */}
         <CustomTable
           data={filteredCategories}
           columns={columns}
           isLoading={isLoading}
-          emptyMessage="No se encontraron categorías de materiales"
+          emptyState={
+            <div className="text-center py-8">
+              <h3 className="text-lg font-medium text-muted-foreground">No hay categorías</h3>
+              <p className="text-sm text-muted-foreground mt-1">No hay categorías de materiales que coincidan con los filtros seleccionados.</p>
+            </div>
+          }
         />
       </div>
 
-      {/* Modals */}
-      {showModal && (
-        <NewAdminMaterialCategoryModal
-          open={showModal}
-          onClose={() => {
-            setShowModal(false);
-            setEditingCategory(undefined);
-          }}
-          editingCategory={editingCategory}
-        />
-      )}
+      {/* Category Modal */}
+      <NewAdminMaterialCategoryModal
+        open={showModal}
+        onClose={() => {
+          setShowModal(false);
+          setEditingCategory(undefined);
+        }}
+        category={editingCategory}
+      />
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!deleteCategory} onOpenChange={() => setDeleteCategory(null)}>
@@ -259,7 +238,7 @@ export default function AdminMaterialCategories() {
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar categoría?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción no se puede deshacer. Se eliminará permanentemente la categoría "{deleteCategory?.name}".
+              Esta acción no se puede deshacer. La categoría "{deleteCategory?.name}" será eliminada permanentemente.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
