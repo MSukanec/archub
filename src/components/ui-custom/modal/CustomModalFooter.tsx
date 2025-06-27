@@ -7,6 +7,8 @@ interface CustomModalFooterProps {
   cancelText?: string;
   saveText?: string;
   saveLoading?: boolean;
+  saveDisabled?: boolean;
+  isLoading?: boolean;
 }
 
 export function CustomModalFooter({
@@ -15,6 +17,8 @@ export function CustomModalFooter({
   cancelText = "Cancelar",
   saveText = "Guardar",
   saveLoading = false,
+  saveDisabled = false,
+  isLoading = false,
 }: CustomModalFooterProps) {
   return (
     <div className="p-2 border-t border-[var(--card-border)] mt-auto">
@@ -31,9 +35,9 @@ export function CustomModalFooter({
           type="button"
           onClick={onSave}
           className="w-3/4"
-          disabled={saveLoading}
+          disabled={saveLoading || saveDisabled || isLoading}
         >
-          {saveLoading ? "Guardando..." : saveText}
+          {(saveLoading || isLoading) ? "Guardando..." : saveText}
         </Button>
       </div>
     </div>

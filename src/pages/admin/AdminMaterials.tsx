@@ -99,7 +99,7 @@ export default function AdminMaterials() {
     {
       key: 'created_at',
       label: 'Fecha de Creación',
-      width: '5%',
+      width: '15%',
       render: (material: Material) => (
         <span className="text-xs text-muted-foreground">
           {format(new Date(material.created_at), 'dd/MM/yy', { locale: es })}
@@ -109,7 +109,6 @@ export default function AdminMaterials() {
     {
       key: 'name',
       label: 'Material',
-      width: '50%',
       render: (material: Material) => (
         <div className="flex items-center gap-2">
           <Package className="h-4 w-4 text-muted-foreground" />
@@ -118,29 +117,9 @@ export default function AdminMaterials() {
       )
     },
     {
-      key: 'category_id',
-      label: 'Categoría',
-      width: '50%',
-      render: (material: Material) => (
-        <span className="text-xs text-muted-foreground">
-          {material.category?.name || 'N/A'}
-        </span>
-      )
-    },
-    {
-      key: 'unit_id',
-      label: 'Unidad',
-      width: '5%',
-      render: (material: Material) => (
-        <span className="text-xs text-muted-foreground">
-          {material.unit?.name || 'N/A'}
-        </span>
-      )
-    },
-    {
       key: 'cost',
       label: 'Costo',
-      width: '5%',
+      width: '15%',
       render: (material: Material) => (
         <Badge variant="outline" className="text-xs">
           ${material.cost?.toLocaleString() || '0'}
@@ -148,9 +127,29 @@ export default function AdminMaterials() {
       )
     },
     {
+      key: 'unit_id',
+      label: 'Unidad',
+      width: '15%',
+      render: (material: Material) => (
+        <span className="text-xs text-muted-foreground">
+          {material.unit?.name || 'N/A'}
+        </span>
+      )
+    },
+    {
+      key: 'category_id',
+      label: 'Categoría',
+      width: '15%',
+      render: (material: Material) => (
+        <span className="text-xs text-muted-foreground">
+          {material.category?.name || 'N/A'}
+        </span>
+      )
+    },
+    {
       key: 'actions',
       label: 'Acciones',
-      width: '5%',
+      width: '10%',
       render: (material: Material) => (
         <div className="flex items-center gap-1">
           <Button
