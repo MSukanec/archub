@@ -268,6 +268,7 @@ export default function Movements() {
     {
       key: 'created_at',
       label: 'Fecha',
+      width: '100px',
       sortable: true,
       sortType: 'date' as const,
       render: (movement: Movement) => (
@@ -282,6 +283,7 @@ export default function Movements() {
     {
       key: 'creator',
       label: 'Creador',
+      width: '120px',
       sortable: true,
       sortType: 'string' as const,
       render: (movement: Movement) => (
@@ -301,6 +303,7 @@ export default function Movements() {
     {
       key: 'type',
       label: 'Tipo',
+      width: '100px',
       sortable: true,
       sortType: 'string' as const,
       render: (movement: Movement) => (
@@ -312,6 +315,7 @@ export default function Movements() {
     {
       key: 'category',
       label: 'Categoría',
+      width: '110px',
       sortable: true,
       sortType: 'string' as const,
       render: (movement: Movement) => (
