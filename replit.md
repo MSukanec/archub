@@ -126,9 +126,11 @@ Changelog:
   • Implemented complete CRUD operations: create, edit, delete with confirmation dialogs and error handling
   • Enhanced filtering system with sort options and search functionality for category management
   • Updated Administration button icon from Settings to Shield for better visual identification
-  • Added plan-aware button above sidebar divider showing organization plan information with conditional styling
-  • Plan button displays different colors: FREE (--accent), PRO (blue), TEAMS (violet) with appropriate icons
-  • Plan button shows upgrade card when expanded and icon-only button when collapsed
+  • Fixed plan button to read actual organization plan data from userData.plan instead of hardcoded values
+  • Plan button now always visible above divider with circular design matching reference aesthetic
+  • Collapsed: circular button with colored background and white icon for clear visibility
+  • Expanded: professional card with light blue background, circular icon badge, and proper typography
+  • Plan button correctly displays FREE/PRO/TEAMS plans with appropriate styling and upgrade prompts
   • All material categories data sourced from authentic Supabase database with proper error handling
 
 - June 27, 2025. Enhanced table action buttons and materials table layout improvements
