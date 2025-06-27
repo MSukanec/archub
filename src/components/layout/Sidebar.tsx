@@ -310,68 +310,32 @@ export function Sidebar() {
       </div>
 
       {/* Plan Section - Above Divider */}
-      <div className="p-1 mb-2">
+      <div className="p-1 mb-2" style={{ backgroundColor: 'rgba(255,0,0,0.1)' }}>
         <div className="flex justify-center w-full">
           {isExpanded ? (
-            <div className={cn(
-              "w-full border rounded-lg p-3",
-              (!userData?.plan || userData.plan.name === 'free') && "bg-orange-50 border-orange-200",
-              userData?.plan?.name === 'pro' && "bg-blue-50 border-blue-200",
-              userData?.plan?.name === 'teams' && "bg-purple-50 border-purple-200"
-            )}>
+            <div className="w-full bg-blue-50 border border-blue-200 rounded-lg p-3">
               <div className="flex items-center gap-2 mb-2">
-                <div className={cn(
-                  "w-5 h-5 rounded-full flex items-center justify-center",
-                  (!userData?.plan || userData.plan.name === 'free') && "bg-orange-500",
-                  userData?.plan?.name === 'pro' && "bg-blue-500",
-                  userData?.plan?.name === 'teams' && "bg-purple-500"
-                )}>
-                  {(!userData?.plan || userData.plan.name === 'free') && <Star className="w-3 h-3 text-white" />}
-                  {userData?.plan?.name === 'pro' && <Crown className="w-3 h-3 text-white" />}
-                  {userData?.plan?.name === 'teams' && <Zap className="w-3 h-3 text-white" />}
+                <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
+                  <Crown className="w-3 h-3 text-white" />
                 </div>
                 <span className="text-xs font-medium text-gray-600">Plan actual:</span>
               </div>
               <div className="mb-2">
-                <span className={cn(
-                  "text-sm font-semibold",
-                  (!userData?.plan || userData.plan.name === 'free') && "text-orange-600",
-                  userData?.plan?.name === 'pro' && "text-blue-600",
-                  userData?.plan?.name === 'teams' && "text-purple-600"
-                )}>
-                  {(!userData?.plan || userData.plan.name === 'free') && 'Free'}
-                  {userData?.plan?.name === 'pro' && 'Pro'}
-                  {userData?.plan?.name === 'teams' && 'Teams'}
+                <span className="text-sm font-semibold text-blue-600">
+                  {userData?.plan?.name || 'Pro'}
                 </span>
               </div>
               <p className="text-xs text-gray-500 mb-3">
-                {(!userData?.plan || userData.plan.name === 'free') && "Actualiza para obtener funcionalidades profesionales"}
-                {userData?.plan?.name === 'pro' && "Actualiza para obtener funcionalidades empresariales"}
-                {userData?.plan?.name === 'teams' && "Máximo rendimiento para equipos"}
+                Actualiza para obtener funcionalidades empresariales
               </p>
-              {(!userData?.plan || userData.plan.name === 'free') && (
-                <button className="w-full py-2 px-3 rounded-lg text-xs font-medium bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center gap-1 transition-colors">
-                  <Crown className="w-3 h-3" />
-                  Actualizar a PRO
-                </button>
-              )}
-              {userData?.plan?.name === 'pro' && (
-                <button className="w-full py-2 px-3 rounded-lg text-xs font-medium bg-purple-600 text-white hover:bg-purple-700 flex items-center justify-center gap-1 transition-colors">
-                  <Zap className="w-3 h-3" />
-                  Actualizar a TEAMS
-                </button>
-              )}
+              <button className="w-full py-2 px-3 rounded-lg text-xs font-medium bg-purple-600 text-white hover:bg-purple-700 flex items-center justify-center gap-1 transition-colors">
+                <Zap className="w-3 h-3" />
+                Actualizar a TEAMS
+              </button>
             </div>
           ) : (
-            <div className={cn(
-              "w-9 h-9 max-w-[38px] max-h-[38px] rounded-full flex items-center justify-center cursor-pointer shadow-sm",
-              (!userData?.plan || userData.plan.name === 'free') && "bg-orange-500",
-              userData?.plan?.name === 'pro' && "bg-blue-500",
-              userData?.plan?.name === 'teams' && "bg-purple-500"
-            )}>
-              {(!userData?.plan || userData.plan.name === 'free') && <Star className="w-4 h-4 text-white" />}
-              {userData?.plan?.name === 'pro' && <Crown className="w-4 h-4 text-white" />}
-              {userData?.plan?.name === 'teams' && <Zap className="w-4 h-4 text-white" />}
+            <div className="w-9 h-9 max-w-[38px] max-h-[38px] rounded-full bg-blue-500 flex items-center justify-center cursor-pointer shadow-sm">
+              <Crown className="w-4 h-4 text-white" />
             </div>
           )}
         </div>
