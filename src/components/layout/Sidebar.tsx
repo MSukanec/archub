@@ -165,6 +165,7 @@ export function Sidebar() {
     admin: [
       { icon: Home, label: 'Resumen de Administración', href: '/admin/dashboard' },
       { icon: Building, label: 'Gestión de Organizaciones', href: '/admin/organizations' },
+      { icon: Users, label: 'Gestión de Usuarios', href: '/admin/users' },
     ]
   };
 

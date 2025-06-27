@@ -393,22 +393,24 @@ export default function AdminUsers() {
           data={users}
           columns={columns}
           isLoading={isLoading}
-          emptyState={{
-            title: "No hay usuarios",
-            description: "No hay usuarios que coincidan con los filtros seleccionados."
-          }}
+          emptyState={
+            <div className="text-center py-8">
+              <h3 className="text-lg font-medium text-muted-foreground">No hay usuarios</h3>
+              <p className="text-sm text-muted-foreground mt-1">No hay usuarios que coincidan con los filtros seleccionados.</p>
+            </div>
+          }
         />
       </div>
 
-      {/* Modals */}
-      <NewAdminUserModal
+      {/* Modal temporalmente deshabilitado */}
+      {/* <NewAdminUserModal
         open={newUserModalOpen}
         onClose={() => {
           setNewUserModalOpen(false)
           setEditingUser(null)
         }}
         user={editingUser}
-      />
+      /> */}
 
       <AlertDialog open={!!deletingUser} onOpenChange={() => setDeletingUser(null)}>
         <AlertDialogContent>
