@@ -323,6 +323,7 @@ export default function Movements() {
     {
       key: "created_at",
       label: "Fecha",
+      width: "10%",
       sortable: true,
       sortType: "date" as const,
       render: (movement: Movement) => (
@@ -341,6 +342,7 @@ export default function Movements() {
     {
       key: "creator",
       label: "Creador",
+      width: "10%",
       sortable: true,
       sortType: "string" as const,
       render: (movement: Movement) => (
@@ -364,13 +366,14 @@ export default function Movements() {
     {
       key: "type",
       label: "Tipo",
+      width: "10%",
       sortable: true,
       sortType: "string" as const,
       render: (movement: Movement) => (
         <div className="space-y-1">
-          <Badge variant="outline" className="text-xs">
+          <div className="text-xs font-bold">
             {movement.movement_data?.type?.name || "Sin tipo"}
-          </Badge>
+          </div>
           <div className="text-xs text-muted-foreground">
             {movement.movement_data?.category?.name || "Sin categoría"}
           </div>
@@ -394,6 +397,7 @@ export default function Movements() {
     {
       key: "currency",
       label: "Moneda",
+      width: "10%",
       sortable: true,
       sortType: "string" as const,
       render: (movement: Movement) => (
