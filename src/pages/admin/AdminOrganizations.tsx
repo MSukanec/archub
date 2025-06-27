@@ -19,11 +19,16 @@ interface Organization {
   created_at: string;
   is_active: boolean;
   is_system: boolean;
+  plan_id: string;
+  created_by: string;
   plan: {
     id: string;
     name: string;
-    project_limit: number;
-    member_limit: number;
+  } | null;
+  creator: {
+    id: string;
+    full_name: string;
+    email: string;
   } | null;
   members_count: number;
   projects_count: number;
@@ -44,7 +49,8 @@ function useAllOrganizations() {
           created_at,
           is_active,
           is_system,
-          plan_id
+          plan_id,
+          created_by
         `)
         .order('created_at', { ascending: false });
 
@@ -53,10 +59,26 @@ function useAllOrganizations() {
         throw error;
       }
 
-      // Por ahora simplificar y no obtener datos de planes hasta que se resuelva el problema de columnas
+      // Obtener los planes y usuarios creadores
+      const planIds = Array.from(new Set(data.map(org => org.plan_id).filter(Boolean)));
+      const creatorIds = Array.from(new Set(data.map(org => org.created_by).filter(Boolean)));
+      
+      const [plansResult, usersResult] = await Promise.all([
+        planIds.length > 0 ? supabase!
+          .from('plans')
+          .select('id, name')
+          .in('id', planIds) : { data: [], error: null },
+        creatorIds.length > 0 ? supabase!
+          .from('users')
+          .select('id, full_name, email')
+          .in('id', creatorIds) : { data: [], error: null }
+      ]);
+
+      // Mapear organizaciones con sus relaciones
       const organizationsWithPlans = data.map(org => ({
         ...org,
-        plan: null // Temporalmente null hasta resolver el problema de consulta
+        plan: plansResult.data?.find(plan => plan.id === org.plan_id) || null,
+        creator: usersResult.data?.find(user => user.id === org.created_by) || null
       }));
 
       console.log('Organizations with plans:', organizationsWithPlans);
@@ -201,17 +223,26 @@ export default function AdminOrganizations() {
       )
     },
     {
+      key: 'creator' as keyof Organization,
+      label: 'Creador',
+      render: (org: Organization) => (
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 bg-[var(--accent-bg)] rounded-full flex items-center justify-center text-xs">
+            {org.creator?.full_name?.charAt(0) || org.creator?.email?.charAt(0) || '?'}
+          </div>
+          <div className="text-sm">
+            {org.creator?.full_name || org.creator?.email || 'Sin asignar'}
+          </div>
+        </div>
+      )
+    },
+    {
       key: 'plan' as keyof Organization,
       label: 'Plan',
       render: (org: Organization) => (
         <div className="flex items-center gap-2">
           <Crown className="w-4 h-4 text-[var(--accent)]" />
-          <div>
-            <div className="font-medium text-sm">{org.plan?.name || 'Sin plan'}</div>
-            <div className="text-xs text-muted-foreground">
-              {org.plan?.project_limit} proyectos, {org.plan?.member_limit} miembros
-            </div>
-          </div>
+          <div className="text-sm font-medium">{org.plan?.name || 'Sin plan'}</div>
         </div>
       )
     },
@@ -249,20 +280,11 @@ export default function AdminOrganizations() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => console.log('Ver detalles', org.id)}>
-              Ver detalles
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => console.log('Editar', org.id)}>
+            <DropdownMenuItem onClick={() => handleEdit(org.id)}>
               Editar
             </DropdownMenuItem>
             <DropdownMenuItem 
-              onClick={() => console.log('Cambiar estado', org.id)}
-              className="text-orange-600"
-            >
-              {org.is_active ? 'Desactivar' : 'Activar'}
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={() => console.log('Eliminar', org.id)}
+              onClick={() => handleDelete(org.id)}
               className="text-red-600"
             >
               Eliminar
