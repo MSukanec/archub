@@ -119,6 +119,18 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 27, 2025. Complete material categories admin system and enhanced sidebar functionality
+  • Created AdminMaterialCategories.tsx page with comprehensive table interface and statistics cards
+  • Built NewAdminMaterialCategoryModal.tsx for creating and editing categories with proper form validation
+  • Added "Categorías de Materiales" navigation button to admin sidebar positioned above "Materiales"
+  • Implemented complete CRUD operations: create, edit, delete with confirmation dialogs and error handling
+  • Enhanced filtering system with sort options and search functionality for category management
+  • Updated Administration button icon from Settings to Shield for better visual identification
+  • Added plan-aware button above sidebar divider showing organization plan information with conditional styling
+  • Plan button displays different colors: FREE (--accent), PRO (blue), TEAMS (violet) with appropriate icons
+  • Plan button shows upgrade card when expanded and icon-only button when collapsed
+  • All material categories data sourced from authentic Supabase database with proper error handling
+
 - June 27, 2025. Enhanced table action buttons and materials table layout improvements
   • Fixed button hover effects across all tables to use --button-ghost-hover-bg CSS variable for consistent styling
   • Updated materials table column order to: Fecha de Creación, Material, Categoría, Unidad, Costo, Acciones
