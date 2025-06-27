@@ -94,9 +94,9 @@ export default function Movements() {
 
   const { setSidebarContext } = useNavigationStore();
 
-  // Set sidebar context to finance when component mounts
+  // Set sidebar context to project when component mounts
   useEffect(() => {
-    setSidebarContext("finance");
+    setSidebarContext("project");
   }, [setSidebarContext]);
 
   // Filter states

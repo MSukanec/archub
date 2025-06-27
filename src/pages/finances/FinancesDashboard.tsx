@@ -41,9 +41,9 @@ export default function FinancesDashboard() {
   const organizationId = userData?.preferences?.last_organization_id;
   const projectId = userData?.preferences?.last_project_id;
 
-  // Set sidebar context to finance when component mounts
+  // Set sidebar context to project when component mounts
   useEffect(() => {
-    setSidebarContext('finance');
+    setSidebarContext('project');
   }, [setSidebarContext]);
 
   // Fetch financial summary

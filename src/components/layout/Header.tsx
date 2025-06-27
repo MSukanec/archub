@@ -233,7 +233,7 @@ export function Header({
           )}
 
           {/* Stage Breadcrumb - Show ONLY if in stage context (not project context) */}
-          {['design', 'construction', 'finance', 'commercialization'].includes(currentSidebarContext) && (
+          {['design', 'construction', 'commercialization'].includes(currentSidebarContext) && (
             <>
               <span className="text-[var(--menues-fg)] opacity-70">/</span>
               

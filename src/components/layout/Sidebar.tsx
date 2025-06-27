@@ -38,10 +38,12 @@ export function Sidebar() {
   const isExpanded = isDocked || isHovered;
   
   const toggleAccordion = (key: string) => {
-    setExpandedAccordions(prev => ({
-      ...prev,
-      [key]: !prev[key]
-    }));
+    setExpandedAccordions(prev => {
+      // Solo uno abierto a la vez
+      const newState = { obra: false, finanzas: false };
+      newState[key as keyof typeof newState] = !prev[key];
+      return newState;
+    });
   };
 
   // Different navigation items based on context
@@ -95,11 +97,7 @@ export function Sidebar() {
       { icon: FileText, label: 'Bitácora', href: '/bitacora' },
       { icon: ArrowLeft, label: 'Volver al Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
     ],
-    finance: [
-      { icon: Home, label: 'Resumen de Finanzas', href: '/finance/dashboard' },
-      { icon: DollarSign, label: 'Movimientos', href: '/movimientos' },
-      { icon: ArrowLeft, label: 'Volver al Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
-    ],
+
     commercialization: [
       { icon: Home, label: 'Dashboard', href: '/commercialization/dashboard' },
       { icon: Building, label: 'Listado de unidades', href: '/commercialization/unidades' },

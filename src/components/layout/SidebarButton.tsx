@@ -37,26 +37,30 @@ export default function SidebarButton({
       title={!isExpanded ? label : undefined}
       style={{ borderRadius: '4px' }}
     >
-      {/* Contenedor del icono - SIEMPRE centrado en 32x32px */}
-      <div className="absolute left-0 top-0 w-8 h-8 flex items-center justify-center flex-shrink-0">
-        {avatarUrl ? (
-          <img 
-            src={avatarUrl} 
-            alt="Avatar"
-            className="w-[18px] h-[18px] rounded-full"
-          />
-        ) : (
-          icon
-        )}
-      </div>
+      {/* Contenedor del icono - SIEMPRE centrado en 32x32px, no mostrar para hijos */}
+      {!isChild && (
+        <div className="absolute left-0 top-0 w-8 h-8 flex items-center justify-center flex-shrink-0">
+          {avatarUrl ? (
+            <img 
+              src={avatarUrl} 
+              alt="Avatar"
+              className="w-[18px] h-[18px] rounded-full"
+            />
+          ) : (
+            icon
+          )}
+        </div>
+      )}
       
-      {/* Texto - solo cuando expandido, empieza después del icono */}
+      {/* Texto - solo cuando expandido */}
       {isExpanded && (
-        <div className="ml-8 flex items-center justify-between w-full">
-          <span className={cn(
-            "text-sm font-medium whitespace-nowrap text-left transition-opacity duration-300 delay-100",
-            isChild && "text-xs" // Texto más pequeño para elementos hijos
-          )}>{label}</span>
+        <div className={cn(
+          "flex items-center justify-between w-full",
+          isChild ? "ml-2" : "ml-8" // Menos margen para elementos hijos
+        )}>
+          <span className="text-sm font-medium whitespace-nowrap text-left transition-opacity duration-300 delay-100">
+            {label}
+          </span>
           {rightIcon && (
             <div className="flex-shrink-0 ml-2">
               {rightIcon}
