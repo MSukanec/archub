@@ -211,6 +211,12 @@
   --table-row-border: hsl(0, 0%, 22%);
   --table-row-hover-bg: hsl(0, 0%, 18%);
 
+  /* Movement Row Gradients */
+  --movement-income-bg: linear-gradient(to right, hsl(142, 70%, 35%), hsl(142, 20%, 20%));
+  --movement-expense-bg: linear-gradient(to right, hsl(0, 70%, 40%), hsl(0, 20%, 20%));
+  --movement-income-border: hsl(142, 70%, 35%);
+  --movement-expense-border: hsl(0, 70%, 40%);
+
   /* Text */
   --text-default: hsl(0, 0%, 98%);
   --text-muted: hsl(240, 5%, 65%);
