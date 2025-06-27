@@ -345,9 +345,12 @@ export function Sidebar() {
             }}
           />
 
-          {/* Profile - FIXED: Avatar stays in same position */}
-          <SidebarButton
-            icon={
+          {/* Profile */}
+          {isExpanded ? (
+            <div 
+              className="flex items-center gap-2 rounded-lg cursor-pointer min-h-[32px] px-2"
+              onClick={() => navigate("/perfil")}
+            >
               <div className="w-[30px] h-[30px] rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
                 {userData?.user?.avatar_url ? (
                   <img 
@@ -361,25 +364,38 @@ export function Sidebar() {
                   </div>
                 )}
               </div>
-            }
-            label={
-              isExpanded ? (
-                <div className="flex flex-col flex-1 min-w-0">
-                  <div className="text-xs font-medium text-[var(--menues-fg)] truncate leading-tight">
-                    {userData?.user?.full_name || "Usuario"}
-                  </div>
-                  <div className="text-[10px] text-gray-500 truncate leading-tight">
-                    {userData?.organization?.name || "Sin organización"}
-                  </div>
+              <div className="flex flex-col flex-1 min-w-0">
+                <div className="text-xs font-medium text-[var(--menues-fg)] truncate leading-tight">
+                  {userData?.user?.full_name || "Usuario"}
                 </div>
-              ) : (
-                "Mi Perfil"
-              )
-            }
-            isActive={location === "/perfil"}
-            isExpanded={isExpanded}
-            onClick={() => navigate("/perfil")}
-          />
+                <div className="text-[10px] text-gray-500 truncate leading-tight">
+                  {userData?.organization?.name || "Sin organización"}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <SidebarButton
+              icon={
+                <div className="w-[30px] h-[30px] rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+                  {userData?.user?.avatar_url ? (
+                    <img 
+                      src={userData.user.avatar_url} 
+                      alt="Avatar" 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-[var(--accent)] flex items-center justify-center text-white text-xs font-medium">
+                      {userData?.user?.full_name?.substring(0, 2).toUpperCase() || "US"}
+                    </div>
+                  )}
+                </div>
+              }
+              label="Mi Perfil"
+              isActive={location === "/perfil"}
+              isExpanded={isExpanded}
+              onClick={() => navigate("/perfil")}
+            />
+          )}
         </div>
       </div>
     </div>

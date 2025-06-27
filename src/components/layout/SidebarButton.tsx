@@ -2,15 +2,13 @@ import { cn } from "@/lib/utils";
 
 interface SidebarButtonProps {
   icon: React.ReactNode;
-  label: string | React.ReactNode;
+  label: string;
   isActive: boolean;
   isExpanded: boolean;
   onClick: () => void;
   avatarUrl?: string;
   rightIcon?: React.ReactNode;
   isChild?: boolean;
-  showChevron?: boolean;
-  isAccordionExpanded?: boolean;
 }
 
 export default function SidebarButton({ 
