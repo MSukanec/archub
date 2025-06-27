@@ -167,6 +167,7 @@ export function Sidebar() {
       { icon: Home, label: 'Resumen de Administración', href: '/admin/dashboard' },
       { icon: Building, label: 'Organizaciones', href: '/admin/organizations' },
       { icon: Users, label: 'Usuarios', href: '/admin/users' },
+      { icon: Tag, label: 'Categorías de Materiales', href: '/admin/material-categories' },
       { icon: Package, label: 'Materiales', href: '/admin/materials' },
     ]
   };

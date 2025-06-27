@@ -114,7 +114,7 @@ export function NewAdminMaterialCategoryModal({
   const isLoading = createCategory.isPending || updateCategory.isPending;
 
   return (
-    <CustomModalLayout onClose={handleClose}>
+    <CustomModalLayout open={open} onClose={handleClose}>
       {{
         header: (
           <CustomModalHeader
@@ -229,8 +229,8 @@ export function NewAdminMaterialCategoryModal({
             onSave={() => form.handleSubmit(onSubmit)()}
             saveText={isEditing ? "Actualizar" : "Crear categoría"}
             cancelText="Cancelar"
-            isSaving={isLoading}
-            disabled={isLoading}
+            saveLoading={isLoading}
+            saveDisabled={isLoading}
           />
         ),
       }}
