@@ -25,6 +25,8 @@ interface CustomTableProps<T = any> {
   getItemId?: (item: T) => string | number
   // Nueva prop para personalizar el estilo de las filas
   getRowClassName?: (item: T) => string
+  // Nueva prop para click-to-edit en cards
+  onCardClick?: (item: T) => void
 }
 
 export function CustomTable<T = any>({ 
@@ -37,7 +39,8 @@ export function CustomTable<T = any>({
   selectedItems = [],
   onSelectionChange,
   getItemId = (item: T) => (item as any).id,
-  getRowClassName
+  getRowClassName,
+  onCardClick
 }: CustomTableProps<T>) {
   const [sortKey, setSortKey] = useState<string | null>(null)
   const [sortDirection, setSortDirection] = useState<SortDirection>(null)
@@ -68,6 +71,10 @@ export function CustomTable<T = any>({
   const isItemSelected = (item: T) => {
     const itemId = getItemId(item)
     return selectedItems.some(selected => getItemId(selected) === itemId)
+  }
+
+  const handleItemSelection = (item: T, checked: boolean) => {
+    handleSelectItem(item, checked)
   }
 
   // Calculate grid template columns based on widths and selection
@@ -150,7 +157,7 @@ export function CustomTable<T = any>({
     return (
       <div className={cn("space-y-3", className)}>
         {/* Desktop loading skeleton */}
-        <div className="hidden md:block">
+        <div className="hidden lg:block">
           <div className="grid gap-4 p-4 bg-muted/50 rounded-lg" style={{ gridTemplateColumns: getGridTemplateColumns() }}>
             {columns.map((_, index) => (
               <div key={index} className="h-4 bg-muted rounded animate-pulse" />
@@ -166,7 +173,7 @@ export function CustomTable<T = any>({
         </div>
 
         {/* Mobile loading skeleton */}
-        <div className="md:hidden">
+        <div className="lg:hidden">
           {Array.from({ length: 3 }).map((_, index) => (
             <div key={index} className="p-4 border rounded-lg mb-2">
               <div className="space-y-3">
@@ -195,7 +202,7 @@ export function CustomTable<T = any>({
   return (
     <div className={cn("space-y-3", className)}>
       {/* Desktop Table View */}
-      <div className="hidden md:block overflow-hidden rounded-t-lg border border-[var(--table-header-border)]">
+      <div className="hidden lg:block overflow-hidden rounded-t-lg border border-[var(--table-header-border)]">
         {/* Column Headers */}
         <div className="grid gap-4 px-4 py-3 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border-b border-[var(--table-header-border)]" style={{ gridTemplateColumns: getGridTemplateColumns() }}>
           {selectable && (
@@ -270,44 +277,70 @@ export function CustomTable<T = any>({
       </div>
 
       {/* Mobile Card View */}
-      <div className="md:hidden">
+      <div className="lg:hidden">
         {sortedData.map((item, index) => (
           <div
             key={index}
             className={cn(
-              "p-4 border rounded-lg mb-2 bg-background hover:bg-muted/40 transition-colors",
+              "p-3 border rounded-lg mb-2 bg-background hover:bg-muted/40 transition-colors cursor-pointer",
               getRowClassName?.(item)
             )}
+            onClick={() => onCardClick?.(item)}
           >
             {selectable && (
-              <div className="flex items-center justify-between mb-3 pb-3 border-b">
-                <span className="text-xs font-semibold text-muted-foreground">Seleccionar</span>
+              <div className="flex items-center justify-between mb-2 pb-2 border-b">
+                <span className="text-xs font-medium text-muted-foreground">Seleccionar</span>
                 <Checkbox
                   checked={isItemSelected(item)}
-                  onCheckedChange={(checked) => handleItemSelection(item, checked)}
+                  onCheckedChange={(checked) => {
+                    handleItemSelection(item, checked === true)
+                  }}
                   aria-label="Seleccionar elemento"
                   className="h-4 w-4"
+                  onClick={(e) => e.stopPropagation()}
                 />
               </div>
             )}
-            <div className="space-y-3">
-              {columns.map((column) => {
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+              {columns.filter((_, idx) => idx < 6).map((column) => {
                 const value = column.render 
                   ? column.render(item)
                   : String(item[column.key as keyof T] || '-')
                 
                 return (
-                  <div key={String(column.key)} className="flex flex-col">
-                    <span className="text-xs font-semibold text-muted-foreground mb-1">
+                  <div key={String(column.key)} className="flex flex-col min-w-0">
+                    <span className="text-xs font-medium text-muted-foreground truncate">
                       {column.label}
                     </span>
-                    <div className="text-sm">
+                    <div className="text-sm font-medium truncate">
                       {value}
                     </div>
                   </div>
                 )
               })}
             </div>
+            {columns.length > 6 && (
+              <div className="mt-2 pt-2 border-t">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                  {columns.slice(6).map((column) => {
+                    const value = column.render 
+                      ? column.render(item)
+                      : String(item[column.key as keyof T] || '-')
+                    
+                    return (
+                      <div key={String(column.key)} className="flex flex-col min-w-0">
+                        <span className="text-xs font-medium text-muted-foreground truncate">
+                          {column.label}
+                        </span>
+                        <div className="text-sm font-medium truncate">
+                          {value}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </div>
