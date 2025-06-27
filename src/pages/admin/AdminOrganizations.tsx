@@ -227,7 +227,7 @@ export default function AdminOrganizations() {
     {
       key: 'created_at' as keyof Organization,
       label: 'Fecha',
-      width: '10%',
+      width: '5%',
       render: (org: Organization) => (
         <div className="text-sm">
           {format(new Date(org.created_at), 'dd MMM yyyy', { locale: es })}
@@ -237,7 +237,7 @@ export default function AdminOrganizations() {
     {
       key: 'name' as keyof Organization,
       label: 'Organización',
-      width: '30%',
+      width: '35%',
       render: (org: Organization) => (
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-[var(--accent-bg)] rounded-lg flex items-center justify-center">
@@ -255,7 +255,7 @@ export default function AdminOrganizations() {
     {
       key: 'creator' as keyof Organization,
       label: 'Creador',
-      width: '25%',
+      width: '30%',
       render: (org: Organization) => (
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 bg-[var(--accent-bg)] rounded-full flex items-center justify-center text-xs">
@@ -270,7 +270,7 @@ export default function AdminOrganizations() {
     {
       key: 'plan' as keyof Organization,
       label: 'Plan',
-      width: '8%',
+      width: '5%',
       render: (org: Organization) => (
         <Badge variant="outline" className="text-xs">
           {org.plan?.name || 'Sin plan'}
@@ -280,7 +280,7 @@ export default function AdminOrganizations() {
     {
       key: 'members_count' as keyof Organization,
       label: 'Miembros',
-      width: '7%',
+      width: '5%',
       render: (org: Organization) => (
         <div className="text-sm">{org.members_count || 0}</div>
       )
@@ -288,7 +288,7 @@ export default function AdminOrganizations() {
     {
       key: 'projects_count' as keyof Organization,
       label: 'Proyectos',
-      width: '7%',
+      width: '5%',
       render: (org: Organization) => (
         <div className="text-sm">{org.projects_count || 0}</div>
       )
@@ -296,7 +296,7 @@ export default function AdminOrganizations() {
     {
       key: 'is_active' as keyof Organization,
       label: 'Estado',
-      width: '8%',
+      width: '5%',
       render: (org: Organization) => (
         <Badge variant={org.is_active ? 'default' : 'secondary'} className="text-xs">
           {org.is_active ? 'Activa' : 'Inactiva'}
