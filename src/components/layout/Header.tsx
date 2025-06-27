@@ -173,7 +173,11 @@ export function Header({
                 {userData?.organizations?.map((org) => (
                   <DropdownMenuItem
                     key={org.id}
-                    onClick={() => selectOrganizationMutation.mutate(org.id)}
+                    onClick={() => {
+                      selectOrganizationMutation.mutate(org.id);
+                      setSidebarContext('organization');
+                      navigate('/organization/dashboard');
+                    }}
                     className="flex items-center justify-between text-sm"
                   >
                     <span className="truncate">{org.name}</span>

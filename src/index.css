@@ -120,12 +120,12 @@
 
 .dark {
   /* Layout */
-  --layout-bg: hsl(220, 4%, 14%);
+  --layout-bg: hsl(0, 0%, 16%);
   --layout-text: hsl(0, 0%, 90%);
   --layout-border: hsl(240, 8%, 15%);
 
   /* Menus/Sidebar */
-  --menues-bg: hsl(0, 0%, 10%);
+  --menues-bg: hsl(0, 0%, 14%);
   --menues-fg: hsl(0, 0%, 70%);
   --menues-secondary-fg: hsl(0, 0%, 60%);
   --menues-border: hsl(240, 8%, 20%);
@@ -135,14 +135,14 @@
   --menues-active-fg: hsl(0, 0%, 98%);
 
   /* Cards */
-  --card-bg: hsl(250, 8%, 16%);
+  --card-bg: hsl(0, 0% 50%);
   --card-fg: hsl(0, 0%, 90%);
   --card-text: hsl(0, 0%, 90%);
   --card-border: hsl(240, 8%, 15%);
   --card-hover-bg: hsl(0, 0%, 16%);
 
   /* Secondary Cards */
-  --secondary-card-bg: hsl(250, 6%, 19%);
+  --secondary-card-bg: hsl(0, 0%, 50%);
   --secondary-card-fg: hsl(0, 0%, 85%);
   --secondary-card-border: hsl(250, 6%, 19%);
 
@@ -203,18 +203,18 @@
   --chart-5: hsl(27, 87%, 70%);
 
   /* Tables */
-  --table-header-bg: hsl(0, 0%, 10%);
+  --table-header-bg: hsl(0, 0%, 14%);
   --table-header-fg: hsl(0, 0%, 60%);
   --table-header-border: hsl(0, 0%, 22%);
   --table-row-bg: hsl(0, 0%, 16%);
   --table-row-fg: hsl(0, 0%, 90%);
   --table-row-border: hsl(0, 0%, 22%);
-  --table-row-hover-bg: hsl(0, 0%, 18%);
+  --table-row-hover-bg: hsl(0, 0%, 15%);
 
   /* Movement Row Gradients */
-  --movement-income-bg: linear-gradient(to right, hsl(142, 70%, 35%), hsl(142, 20%, 20%));
-  --movement-expense-bg: linear-gradient(to right, hsl(0, 70%, 40%), hsl(0, 20%, 20%));
-  --movement-income-border: hsl(142, 70%, 35%);
+  --movement-income-bg: linear-gradient(to right, hsl(90, 50%, 50%), hsl(90, 50%, 50%));
+  --movement-expense-bg: linear-gradient(to right, hsl(0, 70%, 40%), hsl(0, 70%, 40%));
+  --movement-income-border: hsl(90, 50%, 50%);
   --movement-expense-border: hsl(0, 70%, 40%);
 
   /* Text */

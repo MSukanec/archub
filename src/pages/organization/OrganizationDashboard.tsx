@@ -355,7 +355,7 @@ export default function OrganizationDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <div className="p-3 border rounded-lg bg-yellow-50 border-yellow-200">
+                <div className="p-3 border rounded-lg bg-[var(--secondary-card-bg)] border-yellow-200">
                   <div className="flex items-start gap-3">
                     <div className="p-2 bg-yellow-100 text-yellow-600 rounded-lg">
                       <StickyNote className="h-4 w-4" />
@@ -370,7 +370,7 @@ export default function OrganizationDashboard() {
                   </div>
                 </div>
 
-                <div className="p-3 border rounded-lg bg-blue-50 border-blue-200">
+                <div className="p-3 border rounded-lg bg-[var(--secondary-card-bg)] border-blue-200">
                   <div className="flex items-start gap-3">
                     <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
                       <StickyNote className="h-4 w-4" />
@@ -385,7 +385,7 @@ export default function OrganizationDashboard() {
                   </div>
                 </div>
 
-                <div className="p-3 border rounded-lg bg-green-50 border-green-200">
+                <div className="p-3 border rounded-lg bg-[var(--secondary-card-bg)] border-green-200">
                   <div className="flex items-start gap-3">
                     <div className="p-2 bg-green-100 text-green-600 rounded-lg">
                       <StickyNote className="h-4 w-4" />

@@ -119,6 +119,13 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 27, 2025. Complete card backgrounds standardization and organization navigation improvements
+  • Replaced all hardcoded card backgrounds (bg-white, bg-gray-50) with --card-bg CSS variable in CustomRestricted and OrganizationDashboard
+  • Fixed organization switching navigation to properly redirect to organization sidebar context and OrganizationDashboard.tsx
+  • Enhanced dropdown organization selection to set sidebar context and navigate automatically
+  • All cards now consistently use CSS variable system for backgrounds instead of hardcoded Tailwind classes
+  • Organization selection workflow: select organization → switch to organization sidebar → navigate to dashboard
+
 - June 27, 2025. Fixed sidebar context switching and movements table layout improvements
   • Fixed project navigation from Organization Dashboard - now properly switches to project sidebar context
   • Added useEffect in ProjectDashboard.tsx to ensure correct sidebar context on page load
