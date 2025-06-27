@@ -70,13 +70,7 @@ export function CustomTable<T = any>({
   // Calculate grid template columns based on widths and selection
   const getGridTemplateColumns = () => {
     const selectableColumn = selectable ? ['32px'] : []
-    const columnsWithWidths = columns.map(col => {
-      // Special handling for specific columns
-      if (col.key === 'description') {
-        return '1fr' // Description takes remaining space
-      }
-      return col.width || 'auto' // Other columns auto-size to content
-    })
+    const columnsWithWidths = columns.map(col => col.width || '1fr')
     return [...selectableColumn, ...columnsWithWidths].join(' ')
   }
 
