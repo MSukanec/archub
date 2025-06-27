@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout';
 import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader';
 import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, Search, User } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -49,22 +49,56 @@ function usePlans() {
   });
 }
 
+// Hook para buscar usuarios
+function useUsersSearch(searchTerm: string) {
+  return useQuery({
+    queryKey: ['users-search', searchTerm],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase not initialized');
+      if (searchTerm.length < 3) return [];
+
+      const { data, error } = await supabase
+        .from('users')
+        .select('id, full_name, email, avatar_url')
+        .or(`full_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`)
+        .limit(10);
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: searchTerm.length >= 3
+  });
+}
+
 export function NewAdminOrganizationModal({ open, onClose, organization }: NewAdminOrganizationModalProps) {
   const [name, setName] = useState(organization?.name || '');
   const [selectedDate, setSelectedDate] = useState<Date>(organization ? new Date(organization.created_at) : new Date());
   const [planId, setPlanId] = useState<string>(organization?.plan_id || '');
+  const [createdBy, setCreatedBy] = useState<string>(organization?.created_by || '');
   const [isActive, setIsActive] = useState<string>(organization ? organization.is_active.toString() : 'true');
   const [isSystem, setIsSystem] = useState<string>(organization ? organization.is_system.toString() : 'false');
+  const [userSearchTerm, setUserSearchTerm] = useState('');
+  const [selectedUser, setSelectedUser] = useState<{ id: string; full_name: string; email: string } | null>(null);
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: plans } = usePlans();
+  const { data: searchedUsers = [] } = useUsersSearch(userSearchTerm);
+
+  // Set initial creator when organization is provided
+  useEffect(() => {
+    if (organization?.created_by && !selectedUser) {
+      // Find creator info from organization data if available
+      setCreatedBy(organization.created_by);
+    }
+  }, [organization, selectedUser]);
 
   const saveOrganizationMutation = useMutation({
     mutationFn: async (organizationData: {
       name: string;
       created_at: string;
       plan_id: string;
+      created_by: string;
       is_active: boolean;
       is_system: boolean;
     }) => {
@@ -116,7 +150,7 @@ export function NewAdminOrganizationModal({ open, onClose, organization }: NewAd
   });
 
   const handleSubmit = () => {
-    if (!name.trim() || !planId) {
+    if (!name.trim() || !planId || !createdBy) {
       toast({
         title: "Campos requeridos",
         description: "Por favor completa todos los campos obligatorios.",
@@ -129,6 +163,7 @@ export function NewAdminOrganizationModal({ open, onClose, organization }: NewAd
       name: name.trim(),
       created_at: selectedDate.toISOString(),
       plan_id: planId,
+      created_by: createdBy,
       is_active: isActive === 'true',
       is_system: isSystem === 'true'
     });
@@ -138,6 +173,9 @@ export function NewAdminOrganizationModal({ open, onClose, organization }: NewAd
     setName('');
     setSelectedDate(new Date());
     setPlanId('');
+    setCreatedBy('');
+    setSelectedUser(null);
+    setUserSearchTerm('');
     setIsActive('true');
     setIsSystem('false');
     onClose();
@@ -185,6 +223,52 @@ export function NewAdminOrganizationModal({ open, onClose, organization }: NewAd
               />
             </PopoverContent>
           </Popover>
+        </div>
+
+        {/* Creador */}
+        <div className="space-y-2">
+          <Label className="required-asterisk">Creador</Label>
+          <div className="relative">
+            <Input
+              value={userSearchTerm}
+              onChange={(e) => setUserSearchTerm(e.target.value)}
+              placeholder="Buscar usuario (mínimo 3 caracteres)..."
+              className="pr-8"
+            />
+            <Search className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          </div>
+          
+          {userSearchTerm.length >= 3 && searchedUsers.length > 0 && (
+            <div className="border rounded-md max-h-40 overflow-y-auto">
+              {searchedUsers.map((user) => (
+                <div
+                  key={user.id}
+                  onClick={() => {
+                    setSelectedUser(user);
+                    setCreatedBy(user.id);
+                    setUserSearchTerm(user.full_name || user.email);
+                  }}
+                  className="p-2 hover:bg-accent cursor-pointer flex items-center gap-2"
+                >
+                  <div className="w-6 h-6 bg-[var(--accent-bg)] rounded-full flex items-center justify-center text-xs">
+                    <User className="w-3 h-3" />
+                  </div>
+                  <div className="text-sm">
+                    {user.full_name || user.email}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {selectedUser && (
+            <div className="flex items-center gap-2 p-2 bg-accent/10 rounded-md">
+              <div className="w-6 h-6 bg-[var(--accent-bg)] rounded-full flex items-center justify-center text-xs">
+                <User className="w-3 h-3" />
+              </div>
+              <span className="text-sm">{selectedUser.full_name || selectedUser.email}</span>
+            </div>
+          )}
         </div>
 
         {/* Nombre de la organización */}
