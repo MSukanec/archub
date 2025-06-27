@@ -145,8 +145,8 @@ export function NewAdminOrganizationModal({ open, onClose, organization }: NewAd
 
   const header = (
     <CustomModalHeader
-      title="Nueva Organización"
-      description="Crear una nueva organización en el sistema"
+      title={organization ? "Editar Organización" : "Nueva Organización"}
+      description={organization ? "Modificar los datos de la organización" : "Crear una nueva organización en el sistema"}
       onClose={handleClose}
     />
   );
@@ -252,8 +252,7 @@ export function NewAdminOrganizationModal({ open, onClose, organization }: NewAd
     <CustomModalFooter
       onCancel={handleClose}
       onSave={handleSubmit}
-      saveText="Crear Organización"
-      isLoading={createOrganizationMutation.isPending}
+      saveText={organization ? "Actualizar Organización" : "Crear Organización"}
     />
   );
 
