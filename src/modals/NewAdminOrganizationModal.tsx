@@ -70,6 +70,26 @@ function useUsersSearch(searchTerm: string) {
   });
 }
 
+// Hook para obtener información de un usuario específico
+function useUserById(userId: string) {
+  return useQuery({
+    queryKey: ['user-by-id', userId],
+    queryFn: async () => {
+      if (!supabase || !userId) throw new Error('Supabase not initialized or no user ID');
+      
+      const { data, error } = await supabase
+        .from('users')
+        .select('id, full_name, email')
+        .eq('id', userId)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!userId
+  });
+}
+
 export function NewAdminOrganizationModal({ open, onClose, organization }: NewAdminOrganizationModalProps) {
   const [name, setName] = useState(organization?.name || '');
   const [selectedDate, setSelectedDate] = useState<Date>(organization ? new Date(organization.created_at) : new Date());
@@ -84,14 +104,27 @@ export function NewAdminOrganizationModal({ open, onClose, organization }: NewAd
   const queryClient = useQueryClient();
   const { data: plans } = usePlans();
   const { data: searchedUsers = [] } = useUsersSearch(userSearchTerm);
+  const { data: currentCreator } = useUserById(organization?.created_by || '');
 
-  // Set initial creator when organization is provided
+  // Set initial values when organization is provided
   useEffect(() => {
-    if (organization?.created_by && !selectedUser) {
-      // Find creator info from organization data if available
-      setCreatedBy(organization.created_by);
+    if (organization) {
+      setName(organization.name || '');
+      setSelectedDate(new Date(organization.created_at));
+      setPlanId(organization.plan_id || '');
+      setCreatedBy(organization.created_by || '');
+      setIsActive(organization.is_active.toString());
+      setIsSystem(organization.is_system.toString());
     }
-  }, [organization, selectedUser]);
+  }, [organization]);
+
+  // Set creator information when currentCreator data is loaded
+  useEffect(() => {
+    if (currentCreator && organization?.created_by) {
+      setSelectedUser(currentCreator);
+      setUserSearchTerm(currentCreator.full_name || currentCreator.email);
+    }
+  }, [currentCreator, organization?.created_by]);
 
   const saveOrganizationMutation = useMutation({
     mutationFn: async (organizationData: {
@@ -170,14 +203,17 @@ export function NewAdminOrganizationModal({ open, onClose, organization }: NewAd
   };
 
   const handleClose = () => {
-    setName('');
-    setSelectedDate(new Date());
-    setPlanId('');
-    setCreatedBy('');
-    setSelectedUser(null);
-    setUserSearchTerm('');
-    setIsActive('true');
-    setIsSystem('false');
+    // Only reset if not editing an organization
+    if (!organization) {
+      setName('');
+      setSelectedDate(new Date());
+      setPlanId('');
+      setCreatedBy('');
+      setSelectedUser(null);
+      setUserSearchTerm('');
+      setIsActive('true');
+      setIsSystem('false');
+    }
     onClose();
   };
 
