@@ -368,9 +368,9 @@ export default function Movements() {
       sortType: "string" as const,
       render: (movement: Movement) => (
         <div className="space-y-1">
-          <Badge variant="outline" className="text-xs">
+          <div className="text-xs font-bold">
             {movement.movement_data?.type?.name || "Sin tipo"}
-          </Badge>
+          </div>
           <div className="text-xs text-muted-foreground">
             {movement.movement_data?.category?.name || "Sin categoría"}
           </div>
