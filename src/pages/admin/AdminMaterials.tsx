@@ -79,6 +79,16 @@ export default function AdminMaterials() {
     setDeletingMaterial(material)
   }
 
+  const handleConfirmDelete = () => {
+    if (deletingMaterial) {
+      deleteMaterialMutation.mutate(deletingMaterial.id, {
+        onSuccess: () => {
+          setDeletingMaterial(null)
+        }
+      })
+    }
+  }
+
   const clearFilters = () => {
     setSearchValue('')
     setSortBy('name')
@@ -271,7 +281,7 @@ export default function AdminMaterials() {
 
         {/* Materials Table */}
         <CustomTable
-          data={materials}
+          data={sortedMaterials}
           columns={columns}
           isLoading={isLoading}
           emptyState={
@@ -304,7 +314,7 @@ export default function AdminMaterials() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction 
-              onClick={() => deletingMaterial && deleteMaterialMutation.mutate(deletingMaterial.id)}
+              onClick={handleConfirmDelete}
               className="bg-red-600 hover:bg-red-700"
             >
               Eliminar
