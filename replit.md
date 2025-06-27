@@ -119,9 +119,22 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 27, 2025. Complete materials management system implementation with professional admin interface
+  • Created AdminMaterials.tsx page with comprehensive materials management functionality and statistics cards
+  • Built NewAdminMaterialModal.tsx for creating and editing materials with proper form validation
+  • Added "Materiales" navigation button to admin sidebar with Package icon for materials administration
+  • Implemented materials table with custom column specifications: 5% width for all columns except "Material" (remaining width)
+  • Applied specific column ordering: Fecha de Creación, Material, Costo, Unidad, Categoría, Acciones
+  • Statistics cards show Total Materials, Average Cost, High Value Materials, and Recent Materials counts
+  • Added complete CRUD operations: create, edit, delete with confirmation dialogs and proper error handling
+  • Enhanced filtering system with sort options (name, cost, date), category filters, and search functionality
+  • Modal includes fields: name (required), cost, unit selection, and category selection with predefined options
+  • All data sourced from authentic Supabase database with proper error handling and loading states
+  • Fixed Package icon import and added materials route to App.tsx with proper routing configuration
+
 - June 27, 2025. Complete user management system implementation with professional table interface
   • Created AdminUsers.tsx page with comprehensive user management functionality and statistics cards
-  • Added "Gestión de Usuarios" navigation button to admin sidebar for full user administration
+  • Added "Usuarios" navigation button to admin sidebar for full user administration (renamed from "Gestión de Usuarios")
   • Implemented user table with custom column specifications: 5% width for all columns except "Usuario" (remaining width)
   • Applied specific column ordering: Fecha de Registro, Última Actividad, Usuario, Organizaciones, Estado, Acciones
   • Removed "Sistema" column and "Nuevo usuario" button as requested, cleaned interface for viewing only
