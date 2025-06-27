@@ -99,6 +99,35 @@ export function Header({
 
   const currentOrganization = userData?.organization;
   const currentProject = projects.find(p => p.id === userData?.preferences?.last_project_id);
+
+  // Function to get accordion parent name based on current route
+  const getAccordionParent = (path: string) => {
+    // Map routes to their accordion parent names
+    const routeParentMap: { [key: string]: string } = {
+      // Finanzas accordion
+      '/finance/dashboard': 'Finanzas',
+      '/movimientos': 'Finanzas',
+      
+      // Obra accordion  
+      '/construction/dashboard': 'Obra',
+      '/bitacora': 'Obra',
+      
+      // Proyecto accordion (Design)
+      '/design/dashboard': 'Proyecto',
+      '/design/moodboard': 'Proyecto',
+      '/design/documentacion': 'Proyecto',
+      
+      // Comercialización accordion
+      '/commercialization/dashboard': 'Comercialización',
+      '/commercialization/unidades': 'Comercialización',
+      '/commercialization/clientes': 'Comercialización',
+      '/commercialization/estadisticas': 'Comercialización'
+    };
+    
+    return routeParentMap[path] || null;
+  };
+
+  const accordionParent = getAccordionParent(location);
   const hasFilters = filters.length > 0 || customFilters;
 
   return (
@@ -296,6 +325,14 @@ export function Header({
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
+            </>
+          )}
+
+          {/* Accordion Parent - Show if page is under an accordion */}
+          {accordionParent && (
+            <>
+              <span className="text-[var(--menues-fg)] opacity-70">/</span>
+              <span className="text-sm font-medium text-[var(--menues-fg)]">{accordionParent}</span>
             </>
           )}
 
