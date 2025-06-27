@@ -1,12 +1,27 @@
-import { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { toast } from '@/hooks/use-toast'
+import { useToast } from '@/hooks/use-toast'
 
-import { Button } from '@/components/ui/button'
+import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout'
+import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader'
+import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody'
+import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+
+const materialSchema = z.object({
+  name: z.string().min(1, 'El nombre del material es requerido'),
+  unit_id: z.string().optional(),
+  cost: z.number().min(0, 'El costo debe ser mayor o igual a 0'),
+  category_id: z.string().optional()
+})
+
+type MaterialForm = z.infer<typeof materialSchema>
 
 interface Material {
   id: string
@@ -24,52 +39,52 @@ interface NewAdminMaterialModalProps {
 }
 
 export function NewAdminMaterialModal({ open, onClose, material }: NewAdminMaterialModalProps) {
-  const [formData, setFormData] = useState({
-    name: '',
-    unit_id: '',
-    cost: '',
-    category_id: ''
-  })
-
+  const { toast } = useToast()
   const queryClient = useQueryClient()
 
-  // Reset form when modal opens/closes or material changes
+  const form = useForm<MaterialForm>({
+    resolver: zodResolver(materialSchema),
+    defaultValues: {
+      name: '',
+      unit_id: '',
+      cost: 0,
+      category_id: ''
+    }
+  })
+
+  // Reset form when modal opens or material changes
   useEffect(() => {
     if (open) {
       if (material) {
-        // Editing existing material
-        setFormData({
-          name: material.name || '',
+        form.reset({
+          name: material.name,
           unit_id: material.unit_id || '',
-          cost: material.cost?.toString() || '',
+          cost: material.cost || 0,
           category_id: material.category_id || ''
         })
       } else {
-        // Creating new material
-        setFormData({
+        form.reset({
           name: '',
           unit_id: '',
-          cost: '',
+          cost: 0,
           category_id: ''
         })
       }
     }
-  }, [open, material])
+  }, [open, material, form])
 
-  // Create/update material mutation
   const saveMaterialMutation = useMutation({
-    mutationFn: async (data: typeof formData) => {
+    mutationFn: async (data: MaterialForm) => {
       if (!supabase) throw new Error('Supabase not initialized')
 
       const materialData = {
         name: data.name,
         unit_id: data.unit_id || null,
-        cost: parseFloat(data.cost) || 0,
+        cost: data.cost || 0,
         category_id: data.category_id || null
       }
 
       if (material) {
-        // Update existing material
         const { error } = await supabase
           .from('materials')
           .update(materialData)
@@ -77,7 +92,6 @@ export function NewAdminMaterialModal({ open, onClose, material }: NewAdminMater
         
         if (error) throw error
       } else {
-        // Create new material
         const { error } = await supabase
           .from('materials')
           .insert([materialData])
@@ -93,7 +107,7 @@ export function NewAdminMaterialModal({ open, onClose, material }: NewAdminMater
       })
       onClose()
     },
-    onError: (error: any) => {
+    onError: () => {
       toast({
         title: "Error",
         description: material ? "No se pudo actualizar el material." : "No se pudo crear el material.",
@@ -102,137 +116,136 @@ export function NewAdminMaterialModal({ open, onClose, material }: NewAdminMater
     }
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    if (!formData.name.trim()) {
-      toast({
-        title: "Error",
-        description: "El nombre del material es requerido.",
-        variant: "destructive"
-      })
-      return
-    }
-
-    saveMaterialMutation.mutate(formData)
+  const onSubmit = (data: MaterialForm) => {
+    saveMaterialMutation.mutate(data)
   }
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }))
+  const handleClose = () => {
+    form.reset()
+    onClose()
   }
-
-  if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg w-full max-w-md mx-4">
-        {/* Header */}
-        <div className="p-3 border-b border-[var(--card-border)]">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-medium">
-              {material ? 'Editar Material' : 'Nuevo Material'}
-            </h2>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="h-6 w-6 p-0"
-            >
-              ×
-            </Button>
-          </div>
-        </div>
+    <CustomModalLayout open={open} onClose={handleClose}>
+      {{
+        header: (
+          <CustomModalHeader
+            title={material ? 'Editar Material' : 'Nuevo Material'}
+            onClose={handleClose}
+          />
+        ),
+        body: (
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} id="material-form">
+              <CustomModalBody>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="col-span-2">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="required-asterisk">Nombre del Material</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Ingresa el nombre del material" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
-        {/* Body */}
-        <form onSubmit={handleSubmit} className="p-3 space-y-3">
-          <div className="space-y-2">
-            <Label htmlFor="name" className="text-xs font-medium required-asterisk">
-              Nombre del Material
-            </Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) => handleInputChange('name', e.target.value)}
-              placeholder="Ingresa el nombre del material"
-              required
-            />
-          </div>
+                  <div className="col-span-1">
+                    <FormField
+                      control={form.control}
+                      name="cost"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Costo</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              placeholder="0.00"
+                              {...field}
+                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="cost" className="text-xs font-medium">
-              Costo
-            </Label>
-            <Input
-              id="cost"
-              type="number"
-              step="0.01"
-              value={formData.cost}
-              onChange={(e) => handleInputChange('cost', e.target.value)}
-              placeholder="0.00"
-            />
-          </div>
+                  <div className="col-span-1">
+                    <FormField
+                      control={form.control}
+                      name="unit_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Unidad</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Seleccionar unidad" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="m2">Metro cuadrado (m²)</SelectItem>
+                              <SelectItem value="m3">Metro cúbico (m³)</SelectItem>
+                              <SelectItem value="kg">Kilogramo (kg)</SelectItem>
+                              <SelectItem value="un">Unidad (un)</SelectItem>
+                              <SelectItem value="m">Metro (m)</SelectItem>
+                              <SelectItem value="lt">Litro (lt)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="unit_id" className="text-xs font-medium">
-              Unidad
-            </Label>
-            <Select value={formData.unit_id} onValueChange={(value) => handleInputChange('unit_id', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Seleccionar unidad" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="m2">Metro cuadrado (m²)</SelectItem>
-                <SelectItem value="m3">Metro cúbico (m³)</SelectItem>
-                <SelectItem value="kg">Kilogramo (kg)</SelectItem>
-                <SelectItem value="un">Unidad (un)</SelectItem>
-                <SelectItem value="m">Metro (m)</SelectItem>
-                <SelectItem value="lt">Litro (lt)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="category_id" className="text-xs font-medium">
-              Categoría
-            </Label>
-            <Select value={formData.category_id} onValueChange={(value) => handleInputChange('category_id', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Seleccionar categoría" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="construction">Construcción</SelectItem>
-                <SelectItem value="electrical">Eléctrico</SelectItem>
-                <SelectItem value="plumbing">Plomería</SelectItem>
-                <SelectItem value="painting">Pintura</SelectItem>
-                <SelectItem value="flooring">Pisos</SelectItem>
-                <SelectItem value="roofing">Techos</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </form>
-
-        {/* Footer */}
-        <div className="p-3 border-t border-[var(--card-border)]">
-          <div className="flex justify-end gap-2">
-            <Button
-              variant="secondary"
-              onClick={onClose}
-              disabled={saveMaterialMutation.isPending}
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              disabled={saveMaterialMutation.isPending}
-            >
-              {saveMaterialMutation.isPending ? 'Guardando...' : material ? 'Actualizar' : 'Crear'}
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
+                  <div className="col-span-2">
+                    <FormField
+                      control={form.control}
+                      name="category_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Categoría</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Seleccionar categoría" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="construction">Construcción</SelectItem>
+                              <SelectItem value="electrical">Eléctrico</SelectItem>
+                              <SelectItem value="plumbing">Plomería</SelectItem>
+                              <SelectItem value="painting">Pintura</SelectItem>
+                              <SelectItem value="flooring">Pisos</SelectItem>
+                              <SelectItem value="roofing">Techos</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+              </CustomModalBody>
+            </form>
+          </Form>
+        ),
+        footer: (
+          <CustomModalFooter
+            onClose={handleClose}
+            isSubmitting={saveMaterialMutation.isPending}
+            submitForm="material-form"
+            submitLabel={material ? 'Actualizar' : 'Crear'}
+          />
+        )
+      }}
+    </CustomModalLayout>
   )
 }

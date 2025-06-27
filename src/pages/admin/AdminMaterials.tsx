@@ -26,6 +26,8 @@ interface Material {
   cost: number
   category_id: string
   created_at: string
+  unit?: { name: string }
+  category?: { name: string }
 }
 
 export default function AdminMaterials() {
@@ -46,7 +48,11 @@ export default function AdminMaterials() {
       
       let query = supabase
         .from('materials')
-        .select('*')
+        .select(`
+          *,
+          unit:units(name),
+          category:material_categories(name)
+        `)
       
       // Apply filters
       if (searchValue) {
@@ -151,13 +157,13 @@ export default function AdminMaterials() {
       )
     },
     {
-      key: 'cost',
-      label: 'Costo',
+      key: 'category_id',
+      label: 'Categoría',
       width: '5%',
       render: (material: Material) => (
-        <Badge variant="outline" className="text-xs">
-          ${material.cost?.toLocaleString() || '0'}
-        </Badge>
+        <span className="text-xs text-muted-foreground">
+          {material.category?.name || 'N/A'}
+        </span>
       )
     },
     {
@@ -166,18 +172,18 @@ export default function AdminMaterials() {
       width: '5%',
       render: (material: Material) => (
         <span className="text-xs text-muted-foreground">
-          {material.unit_id || 'N/A'}
+          {material.unit?.name || 'N/A'}
         </span>
       )
     },
     {
-      key: 'category_id',
-      label: 'Categoría',
+      key: 'cost',
+      label: 'Costo',
       width: '5%',
       render: (material: Material) => (
-        <span className="text-xs text-muted-foreground">
-          {material.category_id || 'N/A'}
-        </span>
+        <Badge variant="outline" className="text-xs">
+          ${material.cost?.toLocaleString() || '0'}
+        </Badge>
       )
     },
     {
@@ -207,22 +213,23 @@ export default function AdminMaterials() {
   ]
 
   const customFilters = (
-    <div className="flex items-center gap-2">
-      <div className="flex items-center gap-2">
-        <Label htmlFor="sort" className="text-xs">Ordenar:</Label>
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label className="text-xs font-medium">Ordenar por</Label>
         <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="h-8 w-32">
+          <SelectTrigger className="h-8">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="name">Nombre</SelectItem>
             <SelectItem value="cost">Costo</SelectItem>
-            <SelectItem value="created_at">Fecha</SelectItem>
+            <SelectItem value="created_at">Fecha de creación</SelectItem>
           </SelectContent>
         </Select>
       </div>
-      <div className="flex items-center gap-2">
-        <Label htmlFor="category" className="text-xs">Categoría:</Label>
+      
+      <div className="space-y-2">
+        <Label className="text-xs font-medium">Categoría</Label>
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
           <SelectTrigger className="h-8">
             <SelectValue />
@@ -232,6 +239,9 @@ export default function AdminMaterials() {
             <SelectItem value="construction">Construcción</SelectItem>
             <SelectItem value="electrical">Eléctrico</SelectItem>
             <SelectItem value="plumbing">Plomería</SelectItem>
+            <SelectItem value="painting">Pintura</SelectItem>
+            <SelectItem value="flooring">Pisos</SelectItem>
+            <SelectItem value="roofing">Techos</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -245,9 +255,8 @@ export default function AdminMaterials() {
     onSearchChange: setSearchValue,
     customFilters,
     onClearFilters: clearFilters,
-    actions: [
+    actions: (
       <Button 
-        key="new-material"
         onClick={() => {
           setEditingMaterial(null)
           setNewMaterialModalOpen(true)
@@ -258,7 +267,7 @@ export default function AdminMaterials() {
         <Plus className="h-4 w-4" />
         Nuevo Material
       </Button>
-    ]
+    )
   }
 
   return (
