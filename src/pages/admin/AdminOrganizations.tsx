@@ -3,6 +3,7 @@ import { Layout } from '@/components/layout/Layout';
 import { CustomTable } from '@/components/ui-custom/misc/CustomTable';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
@@ -118,6 +119,14 @@ export default function AdminOrganizations() {
   const [editingOrganization, setEditingOrganization] = useState<Organization | null>(null);
 
   const { data: organizations, isLoading } = useAllOrganizations();
+
+  // Calculate statistics
+  const stats = {
+    total: organizations?.length || 0,
+    free: organizations?.filter(org => org.plan?.name === 'Free').length || 0,
+    pro: organizations?.filter(org => org.plan?.name === 'Pro').length || 0,
+    teams: organizations?.filter(org => org.plan?.name === 'Teams').length || 0
+  };
 
   const handleEdit = (organizationId: string) => {
     const org = organizations?.find(o => o.id === organizationId);
@@ -315,8 +324,59 @@ export default function AdminOrganizations() {
   ];
 
   return (
-    <Layout headerProps={headerProps}>
+    <Layout wide headerProps={headerProps}>
       <div className="space-y-6">
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Organizaciones</p>
+                  <p className="text-2xl font-bold">{stats.total}</p>
+                </div>
+                <Building className="h-8 w-8 text-[var(--accent)]" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Plan Free</p>
+                  <p className="text-2xl font-bold">{stats.free}</p>
+                </div>
+                <Crown className="h-8 w-8 text-green-600" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Plan Pro</p>
+                  <p className="text-2xl font-bold">{stats.pro}</p>
+                </div>
+                <Crown className="h-8 w-8 text-blue-600" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Plan Teams</p>
+                  <p className="text-2xl font-bold">{stats.teams}</p>
+                </div>
+                <Crown className="h-8 w-8 text-purple-600" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         <CustomTable
           data={filteredOrganizations}
           columns={columns}
