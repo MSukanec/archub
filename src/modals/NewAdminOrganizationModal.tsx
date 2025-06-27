@@ -109,18 +109,22 @@ export function NewAdminOrganizationModal({ open, onClose, organization }: NewAd
   // Set initial values when organization is provided
   useEffect(() => {
     if (organization) {
+      console.log('Setting initial organization values:', organization);
       setName(organization.name || '');
       setSelectedDate(new Date(organization.created_at));
       setPlanId(organization.plan_id || '');
       setCreatedBy(organization.created_by || '');
       setIsActive(organization.is_active.toString());
       setIsSystem(organization.is_system.toString());
+      console.log('Plan ID set to:', organization.plan_id);
+      console.log('Created by set to:', organization.created_by);
     }
   }, [organization]);
 
   // Set creator information when currentCreator data is loaded
   useEffect(() => {
     if (currentCreator && organization?.created_by) {
+      console.log('Setting creator info:', currentCreator);
       setSelectedUser(currentCreator);
       setUserSearchTerm(currentCreator.full_name || currentCreator.email);
     }
