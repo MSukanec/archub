@@ -38,7 +38,7 @@ import { CustomEmptyState } from "@/components/ui-custom/misc/CustomEmptyState";
 
 import { NewMovementModal } from "@/modals/NewMovementModal";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useMovements } from "@/hooks/use-movements";
+import { useMovements, useToggleMovementFavorite } from "@/hooks/use-movements";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
@@ -57,6 +57,7 @@ interface Movement {
   subcategory_id?: string;
   currency_id: string;
   wallet_id: string;
+  is_favorite?: boolean;
   movement_data?: {
     type?: {
       id: string;
@@ -120,6 +121,9 @@ export default function Movements() {
     projectId,
   );
 
+  // Toggle favorite mutation
+  const toggleFavoriteMutation = useToggleMovementFavorite();
+
   // Delete movement mutation
   const deleteMovementMutation = useMutation({
     mutationFn: async (movementId: string) => {
@@ -181,6 +185,26 @@ export default function Movements() {
 
   const handleDelete = (movement: Movement) => {
     setDeletingMovement(movement);
+  };
+
+  const handleToggleFavorite = async (movement: Movement) => {
+    try {
+      await toggleFavoriteMutation.mutateAsync({
+        movementId: movement.id,
+        isFavorite: !movement.is_favorite
+      });
+      toast({
+        title: movement.is_favorite ? "Eliminado de favoritos" : "Agregado a favoritos",
+        description: "El movimiento se ha actualizado correctamente.",
+      });
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar el estado de favorito.",
+        variant: "destructive",
+      });
+    }
   };
 
   const confirmDelete = () => {
@@ -482,29 +506,35 @@ export default function Movements() {
     {
       key: "actions",
       label: "Acciones",
-      width: "5%",
+      width: "10%",
       sortable: false,
       render: (movement: Movement) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => handleEdit(movement)}>
-              <Edit className="mr-2 h-4 w-4" />
-              Editar
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className="text-red-600"
-              onClick={() => handleDelete(movement)}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Eliminar
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            className={`h-6 w-6 p-0 ${movement.is_favorite ? 'text-red-500' : 'text-muted-foreground'}`}
+            onClick={() => handleToggleFavorite(movement)}
+          >
+            <Heart className={`h-3 w-3 ${movement.is_favorite ? 'fill-current' : ''}`} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 w-6 p-0"
+            onClick={() => handleEdit(movement)}
+          >
+            <Edit className="h-3 w-3" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
+            onClick={() => handleDelete(movement)}
+          >
+            <Trash2 className="h-3 w-3" />
+          </Button>
+        </div>
       ),
     },
   ];
