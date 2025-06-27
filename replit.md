@@ -119,6 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 27, 2025. Fixed sidebar plan button positioning and enhanced profile display with avatar integration
+  • Moved plan button ABOVE the bottom divider as requested, positioned in main navigation area before bottom section
+  • Completely removed project selector dropdown component from sidebar - no longer needed per user request
+  • Enhanced profile button to show user avatar (or gradient initials fallback) when collapsed
+  • Profile button expands to show full_name and active organization name when sidebar is open
+  • Plan button maintains proper circular design with colored background and white icons (Star/Crown/Zap)
+  • Plan button uses SidebarButton component for consistent dimensions and styling with other sidebar elements
+  • Profile section shows 32x32px avatar in expanded state with proper user information display
+  • All changes follow reference images provided by user for exact visual matching
 - June 27, 2025. Complete material categories admin system and enhanced sidebar functionality
   • Created AdminMaterialCategories.tsx page with comprehensive table interface and statistics cards
   • Built NewAdminMaterialCategoryModal.tsx for creating and editing categories with proper form validation

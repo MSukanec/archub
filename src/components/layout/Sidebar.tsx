@@ -343,169 +343,84 @@ export function Sidebar() {
             ))}
           </div>
 
-          {/* Project Selector - Bottom of navigation area, only in project context */}
-          {currentSidebarContext === "project" && (
-            <div className="mt-auto">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  {isExpanded ? (
-                    <div className="w-full h-9 px-3 py-2 bg-[var(--menues-bg)] rounded-lg border border-[var(--menues-border)] flex items-center justify-between cursor-pointer">
-                      <div className="flex items-center gap-2 min-w-0">
-                        {activeProject && (
-                          <Crown className="w-4 h-4 text-[var(--accent)] flex-shrink-0" />
-                        )}
-                        <span className="text-sm text-[var(--menues-fg)] truncate">
-                          {activeProject?.name || "Seleccionar proyecto"}
-                        </span>
-                      </div>
-                      <ChevronDown className="w-4 h-4 text-[var(--menues-fg)] flex-shrink-0" />
-                    </div>
-                  ) : (
-                    <div className="w-9 h-9 bg-[var(--menues-bg)] rounded-lg border border-[var(--menues-border)] flex items-center justify-center cursor-pointer mx-auto">
-                      <span className="text-xs font-medium text-[var(--accent)]">
-                        {activeProject?.name
-                          ? activeProject.name.substring(0, 2).toUpperCase()
-                          : "PR"}
-                      </span>
-                    </div>
-                  )}
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  className="w-[220px] z-[100]"
-                  align="start"
-                  side="top"
-                  sideOffset={5}
-                >
-                  {/* Search Input */}
-                  <div className="p-2">
-                    <div className="relative">
-                      <Search className="w-4 h-4 absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-                      <Input
-                        placeholder="Buscar proyectos..."
-                        value={projectSearchValue}
-                        onChange={(e) => setProjectSearchValue(e.target.value)}
-                        className="pl-8 h-8"
-                      />
-                    </div>
+          {/* Plan Button - Above Divider */}
+          <div className="mt-auto pb-2">
+            {isExpanded ? (
+              <div className={cn(
+                "w-full border rounded-lg p-3",
+                (!userData?.plan || userData.plan.name === 'free') && "bg-orange-50 border-orange-200",
+                userData?.plan?.name === 'pro' && "bg-blue-50 border-blue-200",
+                userData?.plan?.name === 'teams' && "bg-purple-50 border-purple-200"
+              )}>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className={cn(
+                    "w-5 h-5 rounded-full flex items-center justify-center",
+                    (!userData?.plan || userData.plan.name === 'free') && "bg-orange-500",
+                    userData?.plan?.name === 'pro' && "bg-blue-500",
+                    userData?.plan?.name === 'teams' && "bg-purple-500"
+                  )}>
+                    {(!userData?.plan || userData.plan.name === 'free') && <Star className="w-3 h-3 text-white" />}
+                    {userData?.plan?.name === 'pro' && <Crown className="w-3 h-3 text-white" />}
+                    {userData?.plan?.name === 'teams' && <Zap className="w-3 h-3 text-white" />}
                   </div>
-
-                  {/* Project List */}
-                  <div className="max-h-48 overflow-y-auto">
-                    {filteredProjects.map((project) => (
-                      <DropdownMenuItem
-                        key={project.id}
-                        onClick={() => {
-                          selectProjectMutation.mutate(project.id);
-                          setProjectSearchValue("");
-                        }}
-                        className="flex items-center gap-2"
-                      >
-                        {project.id === activeProject?.id && (
-                          <Crown className="w-4 h-4 text-[var(--accent)]" />
-                        )}
-                        <span className="truncate">{project.name}</span>
-                      </DropdownMenuItem>
-                    ))}
+                  <span className="text-xs font-medium text-gray-600">Plan actual:</span>
+                </div>
+                <div className="mb-2">
+                  <span className={cn(
+                    "text-sm font-semibold",
+                    (!userData?.plan || userData.plan.name === 'free') && "text-orange-600",
+                    userData?.plan?.name === 'pro' && "text-blue-600",
+                    userData?.plan?.name === 'teams' && "text-purple-600"
+                  )}>
+                    {(!userData?.plan || userData.plan.name === 'free') && 'Free'}
+                    {userData?.plan?.name === 'pro' && 'Pro'}
+                    {userData?.plan?.name === 'teams' && 'Teams'}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500 mb-3">
+                  {(!userData?.plan || userData.plan.name === 'free') && "Actualiza para obtener funcionalidades profesionales"}
+                  {userData?.plan?.name === 'pro' && "Actualiza para obtener funcionalidades empresariales"}
+                  {userData?.plan?.name === 'teams' && "Ya estás disfrutando de las mejores funcionalidades de Archub!"}
+                </p>
+                {(!userData?.plan || userData.plan.name === 'free') && (
+                  <button className="w-full py-2 px-3 rounded-lg text-xs font-medium bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center gap-1 transition-colors">
+                    <Crown className="w-3 h-3" />
+                    Actualizar a PRO
+                  </button>
+                )}
+                {userData?.plan?.name === 'pro' && (
+                  <button className="w-full py-2 px-3 rounded-lg text-xs font-medium bg-purple-600 text-white hover:bg-purple-700 flex items-center justify-center gap-1 transition-colors">
+                    <Zap className="w-3 h-3" />
+                    Actualizar a TEAMS
+                  </button>
+                )}
+              </div>
+            ) : (
+              <SidebarButton
+                icon={
+                  <div className={cn(
+                    "w-[18px] h-[18px] rounded-full flex items-center justify-center",
+                    (!userData?.plan || userData.plan.name === 'free') && "bg-orange-500",
+                    userData?.plan?.name === 'pro' && "bg-blue-500",
+                    userData?.plan?.name === 'teams' && "bg-purple-500"
+                  )}>
+                    {(!userData?.plan || userData.plan.name === 'free') && <Star className="w-3 h-3 text-white" />}
+                    {userData?.plan?.name === 'pro' && <Crown className="w-3 h-3 text-white" />}
+                    {userData?.plan?.name === 'teams' && <Zap className="w-3 h-3 text-white" />}
                   </div>
-
-                  {/* No projects found */}
-                  {filteredProjects.length === 0 && projectSearchValue && (
-                    <div className="p-2 text-sm text-muted-foreground text-center">
-                      No se encontraron proyectos
-                    </div>
-                  )}
-
-                  <DropdownMenuSeparator />
-
-                  {/* Manage Projects Link */}
-                  <DropdownMenuItem
-                    onClick={() => navigate("/organization/proyectos")}
-                  >
-                    <FolderOpen className="w-4 h-4 mr-2" />
-                    Gestión de Proyectos
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          )}
+                }
+                label="Plan"
+                isActive={false}
+                isExpanded={isExpanded}
+                onClick={() => {}}
+              />
+            )}
+          </div>
         </div>
       </div>
 
       {/* Bottom Section - Fixed Buttons */}
       <div className="border-t border-[var(--menues-border)] p-1">
-        {/* Plan Button */}
-        <div className="mb-1">
-          {isExpanded ? (
-            <div className={cn(
-              "w-full border rounded-lg p-3 mb-2",
-              (!userData?.plan || userData.plan.name === 'free') && "bg-orange-50 border-orange-200",
-              userData?.plan?.name === 'pro' && "bg-blue-50 border-blue-200",
-              userData?.plan?.name === 'teams' && "bg-purple-50 border-purple-200"
-            )}>
-              <div className="flex items-center gap-2 mb-2">
-                <div className={cn(
-                  "w-5 h-5 rounded-full flex items-center justify-center",
-                  (!userData?.plan || userData.plan.name === 'free') && "bg-orange-500",
-                  userData?.plan?.name === 'pro' && "bg-blue-500",
-                  userData?.plan?.name === 'teams' && "bg-purple-500"
-                )}>
-                  {(!userData?.plan || userData.plan.name === 'free') && <Star className="w-3 h-3 text-white" />}
-                  {userData?.plan?.name === 'pro' && <Crown className="w-3 h-3 text-white" />}
-                  {userData?.plan?.name === 'teams' && <Zap className="w-3 h-3 text-white" />}
-                </div>
-                <span className="text-xs font-medium text-gray-600">Plan actual:</span>
-              </div>
-              <div className="mb-2">
-                <span className={cn(
-                  "text-sm font-semibold",
-                  (!userData?.plan || userData.plan.name === 'free') && "text-orange-600",
-                  userData?.plan?.name === 'pro' && "text-blue-600",
-                  userData?.plan?.name === 'teams' && "text-purple-600"
-                )}>
-                  {(!userData?.plan || userData.plan.name === 'free') && 'Free'}
-                  {userData?.plan?.name === 'pro' && 'Pro'}
-                  {userData?.plan?.name === 'teams' && 'Teams'}
-                </span>
-              </div>
-              <p className="text-xs text-gray-500 mb-3">
-                {(!userData?.plan || userData.plan.name === 'free') && "Actualiza para obtener funcionalidades profesionales"}
-                {userData?.plan?.name === 'pro' && "Actualiza para obtener funcionalidades empresariales"}
-                {userData?.plan?.name === 'teams' && "Ya estás disfrutando de las mejores funcionalidades de Archub!"}
-              </p>
-              {(!userData?.plan || userData.plan.name === 'free') && (
-                <button className="w-full py-2 px-3 rounded-lg text-xs font-medium bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center gap-1 transition-colors">
-                  <Crown className="w-3 h-3" />
-                  Actualizar a PRO
-                </button>
-              )}
-              {userData?.plan?.name === 'pro' && (
-                <button className="w-full py-2 px-3 rounded-lg text-xs font-medium bg-purple-600 text-white hover:bg-purple-700 flex items-center justify-center gap-1 transition-colors">
-                  <Zap className="w-3 h-3" />
-                  Actualizar a TEAMS
-                </button>
-              )}
-            </div>
-          ) : (
-            <SidebarButton
-              icon={
-                <div className={cn(
-                  "w-[18px] h-[18px] rounded-full flex items-center justify-center",
-                  (!userData?.plan || userData.plan.name === 'free') && "bg-orange-500",
-                  userData?.plan?.name === 'pro' && "bg-blue-500",
-                  userData?.plan?.name === 'teams' && "bg-purple-500"
-                )}>
-                  {(!userData?.plan || userData.plan.name === 'free') && <Star className="w-3 h-3 text-white" />}
-                  {userData?.plan?.name === 'pro' && <Crown className="w-3 h-3 text-white" />}
-                  {userData?.plan?.name === 'teams' && <Zap className="w-3 h-3 text-white" />}
-                </div>
-              }
-              label="Plan"
-              isActive={false}
-              isExpanded={isExpanded}
-              onClick={() => {}}
-            />
-          )}
-        </div>
         <div className="flex flex-col gap-[2px]">
           {/* Administration */}
           <SidebarButton
@@ -520,14 +435,58 @@ export function Sidebar() {
           />
 
           {/* Profile */}
-          <SidebarButton
-            icon={<UserCircle className="w-[18px] h-[18px]" />}
-            label="Mi Perfil"
-            isActive={location === "/perfil"}
-            isExpanded={isExpanded}
-            onClick={() => navigate("/perfil")}
-            avatarUrl={userData?.user?.avatar_url}
-          />
+          {isExpanded ? (
+            <div 
+              className="w-full p-3 rounded-lg cursor-pointer hover:bg-[var(--menues-hover-bg)] transition-all"
+              onClick={() => navigate("/perfil")}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+                  {userData?.user?.avatar_url ? (
+                    <img 
+                      src={userData.user.avatar_url} 
+                      alt="Avatar" 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-medium">
+                      {userData?.user?.full_name?.substring(0, 2).toUpperCase() || "US"}
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium text-[var(--menues-fg)] truncate">
+                    {userData?.user?.full_name || "Usuario"}
+                  </div>
+                  <div className="text-xs text-gray-500 truncate">
+                    {userData?.organization?.name || "Sin organización"}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <SidebarButton
+              icon={
+                <div className="w-[18px] h-[18px] rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+                  {userData?.user?.avatar_url ? (
+                    <img 
+                      src={userData.user.avatar_url} 
+                      alt="Avatar" 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-medium">
+                      {userData?.user?.full_name?.substring(0, 2).toUpperCase() || "US"}
+                    </div>
+                  )}
+                </div>
+              }
+              label="Mi Perfil"
+              isActive={location === "/perfil"}
+              isExpanded={isExpanded}
+              onClick={() => navigate("/perfil")}
+            />
+          )}
         </div>
       </div>
     </aside>
