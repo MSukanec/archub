@@ -104,10 +104,20 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
     }
   }, [members, currentUser, currencies, wallets, form])
 
-  // Load editing data
+  // Load editing data - set state variables first
   useEffect(() => {
     if (editingMovement) {
-      // Reset form first to clear any previous state
+      setSelectedTypeId(editingMovement.type_id)
+      setSelectedCategoryId(editingMovement.category_id || '')
+    } else {
+      setSelectedTypeId('')
+      setSelectedCategoryId('')
+    }
+  }, [editingMovement])
+
+  // Populate form after dependent data is loaded
+  useEffect(() => {
+    if (editingMovement && types && currencies && wallets) {
       form.reset({
         created_at: new Date(editingMovement.created_at),
         created_by: editingMovement.created_by,
@@ -119,16 +129,20 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         currency_id: editingMovement.currency_id,
         wallet_id: editingMovement.wallet_id
       })
-      
-      // Set state variables for dependent dropdowns
-      setSelectedTypeId(editingMovement.type_id)
-      setSelectedCategoryId(editingMovement.category_id || '')
-    } else {
-      // Reset state when not editing
-      setSelectedTypeId('')
-      setSelectedCategoryId('')
+    } else if (!editingMovement) {
+      form.reset({
+        created_at: new Date(),
+        amount: 0,
+        description: '',
+        created_by: '',
+        type_id: '',
+        category_id: '',
+        subcategory_id: '',
+        currency_id: '',
+        wallet_id: ''
+      })
     }
-  }, [editingMovement, form])
+  }, [editingMovement, types, currencies, wallets, categories, subcategories, form])
 
   const createMovementMutation = useMutation({
     mutationFn: async (data: MovementForm) => {
