@@ -37,11 +37,14 @@ export function useMaterialCategories() {
           description,
           created_at,
           created_by,
-          creator:users!created_by (
+          creator:organization_members!created_by (
             id,
-            full_name,
-            email,
-            avatar_url
+            user:users (
+              id,
+              full_name,
+              email,
+              avatar_url
+            )
           )
         `)
         .order('created_at', { ascending: false });
@@ -53,7 +56,12 @@ export function useMaterialCategories() {
 
       return (data || []).map(item => ({
         ...item,
-        creator: item.creator?.[0] || undefined
+        creator: item.creator?.user ? {
+          id: item.creator.user.id,
+          full_name: item.creator.user.full_name,
+          email: item.creator.user.email,
+          avatar_url: item.creator.user.avatar_url
+        } : undefined
       })) as MaterialCategory[];
     },
   });
