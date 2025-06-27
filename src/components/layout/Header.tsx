@@ -304,7 +304,7 @@ export function Header({
           )}
 
           {/* Actions */}
-          {actions.map((action, index) => (
+          {Array.isArray(actions) && actions.map((action, index) => (
             <div key={index}>{action}</div>
           ))}
         </div>

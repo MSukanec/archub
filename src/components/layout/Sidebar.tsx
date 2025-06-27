@@ -161,6 +161,14 @@ export function Sidebar() {
       { icon: Users, label: 'Clientes interesados', href: '/commercialization/clientes' },
       { icon: FileText, label: 'Estadísticas de venta', href: '/commercialization/estadisticas' },
       { icon: ArrowLeft, label: 'Volver al Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
+    ],
+
+    finance: [
+      { icon: Home, label: 'Dashboard', href: '/finance/dashboard' },
+      { icon: TrendingUp, label: 'Movimientos', href: '/finance/movements' },
+      { icon: CreditCard, label: 'Billeteras', href: '/finance/wallets' },
+      { icon: PieChart, label: 'Reportes', href: '/finance/reports' },
+      { icon: ArrowLeft, label: 'Volver al Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
     ]
   };
 
