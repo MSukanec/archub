@@ -18,6 +18,7 @@ import {
   Mail,
   Activity,
   ArrowLeft,
+  Tag,
   ChevronDown,
   ChevronRight,
   Search,

@@ -16,7 +16,7 @@ import { NewAdminMaterialCategoryModal } from '@/modals/NewAdminMaterialCategory
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 
-export function AdminMaterialCategories() {
+export default function AdminMaterialCategories() {
   const [showModal, setShowModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState<MaterialCategory | undefined>();
   const [deleteCategory, setDeleteCategory] = useState<MaterialCategory | null>(null);
@@ -62,8 +62,8 @@ export function AdminMaterialCategories() {
 
   const columns = [
     {
-      key: 'created_at' as keyof MaterialCategory,
-      title: 'Fecha de Creación',
+      key: 'created_at',
+      label: 'Fecha de Creación',
       width: '5%',
       render: (category: MaterialCategory) => (
         <div className="flex items-center gap-2">
@@ -75,8 +75,8 @@ export function AdminMaterialCategories() {
       ),
     },
     {
-      key: 'name' as keyof MaterialCategory,
-      title: 'Categoría',
+      key: 'name',
+      label: 'Categoría',
       width: 'flex-1',
       render: (category: MaterialCategory) => (
         <div className="flex items-center gap-2">
@@ -93,8 +93,8 @@ export function AdminMaterialCategories() {
       ),
     },
     {
-      key: 'creator' as keyof MaterialCategory,
-      title: 'Creador',
+      key: 'creator',
+      label: 'Creador',
       width: '5%',
       render: (category: MaterialCategory) => (
         <div className="flex items-center gap-2">
@@ -113,8 +113,8 @@ export function AdminMaterialCategories() {
       ),
     },
     {
-      key: 'actions' as keyof MaterialCategory,
-      title: 'Acciones',
+      key: 'actions',
+      label: 'Acciones',
       width: '5%',
       render: (category: MaterialCategory) => (
         <div className="flex items-center gap-1">
@@ -238,7 +238,6 @@ export function AdminMaterialCategories() {
               data={filteredCategories}
               columns={columns}
               isLoading={isLoading}
-              emptyMessage="No se encontraron categorías de materiales"
             />
           </CardContent>
         </Card>

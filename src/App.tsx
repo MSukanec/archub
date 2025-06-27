@@ -26,6 +26,7 @@ import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminOrganizations from "@/pages/admin/AdminOrganizations";
 import AdminUsers from "@/pages/admin/AdminUsers";
 import AdminMaterials from "@/pages/admin/AdminMaterials";
+import AdminMaterialCategories from "@/pages/admin/AdminMaterialCategories";
 
 function Router() {
   return (
@@ -148,6 +149,12 @@ function Router() {
       <Route path="/admin/users">
         <ProtectedRoute>
           <AdminUsers />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/admin/material-categories">
+        <ProtectedRoute>
+          <AdminMaterialCategories />
         </ProtectedRoute>
       </Route>
 
