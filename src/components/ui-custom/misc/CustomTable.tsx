@@ -260,13 +260,13 @@ export function CustomTable<T = any>({
 
         {/* Data Rows */}
         <div>
-          {sortedData.map((item, index) => (
+          {paginatedData.map((item, index) => (
             <div
               key={index}
               className={cn(
                 "grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] border-b border-[var(--table-row-border)] hover:bg-[var(--table-row-hover-bg)] transition-colors",
                 selectable && isItemSelected(item) && "bg-[var(--accent-bg)] border-[var(--accent)]",
-                index === sortedData.length - 1 && "border-b-0",
+                index === paginatedData.length - 1 && "border-b-0",
                 getRowClassName?.(item)
               )}
               style={{ gridTemplateColumns: getGridTemplateColumns() }}
@@ -296,7 +296,7 @@ export function CustomTable<T = any>({
 
       {/* Mobile Card View */}
       <div className="lg:hidden">
-        {sortedData.map((item, index) => (
+        {paginatedData.map((item, index) => (
           <div
             key={index}
             className={cn(
@@ -362,6 +362,63 @@ export function CustomTable<T = any>({
           </div>
         ))}
       </div>
+
+      {/* Pagination Controls */}
+      {showPagination && (
+        <div className="flex items-center justify-center gap-2 mt-4 pt-4 border-t">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+            className="h-8 w-8 p-0"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          
+          <div className="flex items-center gap-1">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+              // Show first, last, current, and pages around current
+              const isFirstOrLast = page === 1 || page === totalPages
+              const isAroundCurrent = Math.abs(page - currentPage) <= 1
+              const shouldShow = isFirstOrLast || isAroundCurrent
+
+              if (!shouldShow) {
+                // Show ellipsis if needed
+                if (page === 2 && currentPage > 4) {
+                  return <span key={page} className="px-2 text-sm text-muted-foreground">...</span>
+                }
+                if (page === totalPages - 1 && currentPage < totalPages - 3) {
+                  return <span key={page} className="px-2 text-sm text-muted-foreground">...</span>
+                }
+                return null
+              }
+
+              return (
+                <Button
+                  key={page}
+                  variant={currentPage === page ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setCurrentPage(page)}
+                  className="h-8 w-8 p-0"
+                >
+                  {page}
+                </Button>
+              )
+            })}
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+            disabled={currentPage === totalPages}
+            className="h-8 w-8 p-0"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        </div>
+      )}
     </div>
   )
 }

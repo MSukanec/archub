@@ -1,27 +1,26 @@
-import React, { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useState, useEffect } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from '@/hooks/use-toast'
 
 import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout'
 import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader'
 import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody'
 import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-const materialSchema = z.object({
-  name: z.string().min(1, 'El nombre del material es requerido'),
-  unit_id: z.string().optional(),
-  cost: z.number().min(0, 'El costo debe ser mayor o igual a 0'),
-  category_id: z.string().optional()
-})
+interface Unit {
+  id: string
+  name: string
+}
 
-type MaterialForm = z.infer<typeof materialSchema>
+interface MaterialCategory {
+  id: string
+  name: string
+}
 
 interface Material {
   id: string
@@ -30,6 +29,8 @@ interface Material {
   cost: number
   category_id: string
   created_at: string
+  unit?: { name: string }
+  category?: { name: string }
 }
 
 interface NewAdminMaterialModalProps {
@@ -39,214 +40,245 @@ interface NewAdminMaterialModalProps {
 }
 
 export function NewAdminMaterialModal({ open, onClose, material }: NewAdminMaterialModalProps) {
-  const { toast } = useToast()
+  const [name, setName] = useState('')
+  const [cost, setCost] = useState('')
+  const [unitId, setUnitId] = useState('')
+  const [categoryId, setCategoryId] = useState('')
   const queryClient = useQueryClient()
 
-  const form = useForm<MaterialForm>({
-    resolver: zodResolver(materialSchema),
-    defaultValues: {
-      name: '',
-      unit_id: '',
-      cost: 0,
-      category_id: ''
+  // Load units
+  const { data: units = [] } = useQuery({
+    queryKey: ['units'],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase not initialized')
+      
+      const { data, error } = await supabase
+        .from('units')
+        .select('id, name')
+        .order('name')
+      
+      if (error) throw error
+      return data as Unit[]
     }
   })
 
-  // Reset form when modal opens or material changes
-  useEffect(() => {
-    if (open) {
-      if (material) {
-        form.reset({
-          name: material.name,
-          unit_id: material.unit_id || '',
-          cost: material.cost || 0,
-          category_id: material.category_id || ''
-        })
-      } else {
-        form.reset({
-          name: '',
-          unit_id: '',
-          cost: 0,
-          category_id: ''
-        })
-      }
+  // Load material categories
+  const { data: categories = [] } = useQuery({
+    queryKey: ['material-categories'],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase not initialized')
+      
+      const { data, error } = await supabase
+        .from('material_categories')
+        .select('id, name')
+        .order('name')
+      
+      if (error) throw error
+      return data as MaterialCategory[]
     }
-  }, [open, material, form])
+  })
 
+  // Create/Update material mutation
   const saveMaterialMutation = useMutation({
-    mutationFn: async (data: MaterialForm) => {
+    mutationFn: async (materialData: { name: string; cost: number; unit_id: string; category_id: string }) => {
       if (!supabase) throw new Error('Supabase not initialized')
 
-      const materialData = {
-        name: data.name,
-        unit_id: data.unit_id || null,
-        cost: data.cost || 0,
-        category_id: data.category_id || null
-      }
-
       if (material) {
-        const { error } = await supabase
+        // Update existing material
+        const { data, error } = await supabase
           .from('materials')
           .update(materialData)
           .eq('id', material.id)
+          .select()
+          .single()
         
         if (error) throw error
+        return data
       } else {
-        const { error } = await supabase
+        // Create new material
+        const { data, error } = await supabase
           .from('materials')
-          .insert([materialData])
+          .insert(materialData)
+          .select()
+          .single()
         
         if (error) throw error
+        return data
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-materials'] })
+      queryClient.invalidateQueries({ queryKey: ['materials'] })
       toast({
-        title: material ? "Material actualizado" : "Material creado",
-        description: material ? "El material ha sido actualizado correctamente." : "El material ha sido creado correctamente."
+        title: material ? 'Material actualizado' : 'Material creado',
+        description: material 
+          ? 'El material ha sido actualizado correctamente.'
+          : 'El nuevo material ha sido creado correctamente.'
       })
-      onClose()
+      handleClose()
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Error saving material:', error)
       toast({
-        title: "Error",
-        description: material ? "No se pudo actualizar el material." : "No se pudo crear el material.",
-        variant: "destructive"
+        title: 'Error',
+        description: 'Hubo un problema al guardar el material.',
+        variant: 'destructive'
       })
     }
   })
 
-  const onSubmit = (data: MaterialForm) => {
-    saveMaterialMutation.mutate(data)
-  }
+  // Load material data when editing
+  useEffect(() => {
+    if (material) {
+      setName(material.name || '')
+      setCost(material.cost?.toString() || '')
+      setUnitId(material.unit_id || '')
+      setCategoryId(material.category_id || '')
+    } else {
+      // Reset form for new material
+      setName('')
+      setCost('')
+      setUnitId('')
+      setCategoryId('')
+    }
+  }, [material, open])
 
   const handleClose = () => {
-    form.reset()
+    setName('')
+    setCost('')
+    setUnitId('')
+    setCategoryId('')
     onClose()
   }
 
+  const handleSubmit = () => {
+    if (!name.trim()) {
+      toast({
+        title: 'Error',
+        description: 'El nombre del material es requerido.',
+        variant: 'destructive'
+      })
+      return
+    }
+
+    if (!unitId) {
+      toast({
+        title: 'Error',
+        description: 'La unidad es requerida.',
+        variant: 'destructive'
+      })
+      return
+    }
+
+    if (!categoryId) {
+      toast({
+        title: 'Error',
+        description: 'La categoría es requerida.',
+        variant: 'destructive'
+      })
+      return
+    }
+
+    const costValue = parseFloat(cost) || 0
+
+    saveMaterialMutation.mutate({
+      name: name.trim(),
+      cost: costValue,
+      unit_id: unitId,
+      category_id: categoryId
+    })
+  }
+
   return (
-    <CustomModalLayout open={open} onClose={handleClose}>
+    <CustomModal open={open} onClose={handleClose}>
       {{
-        header: (
-          <CustomModalHeader
-            title={material ? 'Editar Material' : 'Nuevo Material'}
-            onClose={handleClose}
-          />
-        ),
+        header: {
+          title: material ? 'Editar Material' : 'Nuevo Material',
+          description: material 
+            ? 'Actualiza la información del material.'
+            : 'Crea un nuevo material para el sistema.'
+        },
         body: (
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} id="material-form">
-              <CustomModalBody>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="col-span-2">
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="required-asterisk">Nombre del Material</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Ingresa el nombre del material" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name" className="text-xs font-medium required-asterisk">
+                Nombre del Material
+              </Label>
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Ej: Cemento Portland"
+                className="text-sm"
+              />
+            </div>
 
-                  <div className="col-span-1">
-                    <FormField
-                      control={form.control}
-                      name="cost"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Costo</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              placeholder="0.00"
-                              {...field}
-                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+            <div className="space-y-2">
+              <Label htmlFor="cost" className="text-xs font-medium">
+                Costo
+              </Label>
+              <Input
+                id="cost"
+                type="number"
+                step="0.01"
+                min="0"
+                value={cost}
+                onChange={(e) => setCost(e.target.value)}
+                placeholder="0.00"
+                className="text-sm"
+              />
+            </div>
 
-                  <div className="col-span-1">
-                    <FormField
-                      control={form.control}
-                      name="unit_id"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Unidad</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Seleccionar unidad" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="m2">Metro cuadrado (m²)</SelectItem>
-                              <SelectItem value="m3">Metro cúbico (m³)</SelectItem>
-                              <SelectItem value="kg">Kilogramo (kg)</SelectItem>
-                              <SelectItem value="un">Unidad (un)</SelectItem>
-                              <SelectItem value="m">Metro (m)</SelectItem>
-                              <SelectItem value="lt">Litro (lt)</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+            <div className="space-y-2">
+              <Label htmlFor="unit" className="text-xs font-medium required-asterisk">
+                Unidad
+              </Label>
+              <Select value={unitId} onValueChange={setUnitId}>
+                <SelectTrigger className="text-sm">
+                  <SelectValue placeholder="Selecciona una unidad" />
+                </SelectTrigger>
+                <SelectContent>
+                  {units.map((unit) => (
+                    <SelectItem key={unit.id} value={unit.id}>
+                      {unit.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-                  <div className="col-span-2">
-                    <FormField
-                      control={form.control}
-                      name="category_id"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Categoría</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Seleccionar categoría" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="construction">Construcción</SelectItem>
-                              <SelectItem value="electrical">Eléctrico</SelectItem>
-                              <SelectItem value="plumbing">Plomería</SelectItem>
-                              <SelectItem value="painting">Pintura</SelectItem>
-                              <SelectItem value="flooring">Pisos</SelectItem>
-                              <SelectItem value="roofing">Techos</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-              </CustomModalBody>
-            </form>
-          </Form>
+            <div className="space-y-2">
+              <Label htmlFor="category" className="text-xs font-medium required-asterisk">
+                Categoría
+              </Label>
+              <Select value={categoryId} onValueChange={setCategoryId}>
+                <SelectTrigger className="text-sm">
+                  <SelectValue placeholder="Selecciona una categoría" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         ),
         footer: (
-          <CustomModalFooter
-            onCancel={handleClose}
-            onSave={form.handleSubmit(onSubmit)}
-            cancelText="Cancelar"
-            saveText={material ? 'Actualizar' : 'Crear'}
-            saveLoading={saveMaterialMutation.isPending}
-          />
+          <div className="flex justify-end gap-3">
+            <Button variant="secondary" onClick={handleClose}>
+              Cancelar
+            </Button>
+            <Button 
+              onClick={handleSubmit}
+              disabled={saveMaterialMutation.isPending}
+            >
+              {saveMaterialMutation.isPending ? 'Guardando...' : (material ? 'Actualizar' : 'Crear')}
+            </Button>
+          </div>
         )
       }}
-    </CustomModalLayout>
+    </CustomModal>
   )
 }
