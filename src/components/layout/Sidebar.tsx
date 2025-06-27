@@ -1,219 +1,130 @@
-import { useState } from "react";
-import { Link, useLocation } from "wouter";
-import { 
-  Home, 
-  Building2, 
-  FolderOpen, 
-  Users, 
-  Activity, 
-  UserCheck, 
-  Settings, 
-  LayoutDashboard,
-  Palette,
-  HardHat,
-  DollarSign,
-  ShoppingCart,
-  ArrowLeft,
-  ChevronDown,
-  ChevronRight,
-  FileText
-} from "lucide-react";
-
-import { useSidebarStore } from "@/stores/sidebarStore";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useLocation } from "wouter";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { cn } from "@/lib/utils";
+import { supabase } from "@/lib/supabase";
 
-interface MenuItem {
-  label: string;
-  icon: React.ComponentType<{ className?: string }>;
-  path?: string;
-  action?: () => void;
-  children?: MenuItem[];
-}
+import { 
+  Settings, 
+  UserCircle,
+  Home,
+  Users,
+  Building,
+  FileText,
+  DollarSign,
+  FolderOpen,
+  Mail,
+  Activity,
+  ArrowLeft
+} from "lucide-react";
+import { useSidebarStore } from "@/stores/sidebarStore";
+import { useNavigationStore } from "@/stores/navigationStore";
+import SidebarButton from "./SidebarButton";
 
 export function Sidebar() {
-  const [location] = useLocation();
-  const { isExpanded, setExpanded, context, setContext, openAccordions, toggleAccordion } = useSidebarStore();
+  const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
+  const { isDocked, isHovered, setHovered } = useSidebarStore();
+  const { currentSidebarContext, setSidebarContext } = useNavigationStore();
+  
+  const isExpanded = isDocked || isHovered;
 
-  // Organization sidebar menu
-  const organizationMenu: MenuItem[] = [
-    { label: "Resumen", icon: Home, path: "/organization/dashboard" },
-    { label: "Proyectos", icon: FolderOpen, path: "/organization/projects" },
-    { label: "Contactos", icon: Users, path: "/organization/contacts" },
-    { label: "Actividad", icon: Activity, path: "/organization/activity" },
-    { label: "Miembros", icon: UserCheck, path: "/organization/members" },
-    { label: "Preferencias", icon: Settings, path: "/organization/preferences" },
-  ];
-
-  // Project sidebar menu
-  const projectMenu: MenuItem[] = [
-    { label: "Dashboard", icon: LayoutDashboard, path: "/project/dashboard" },
-    { label: "Diseño", icon: Palette, path: "/project/design" },
-    { 
-      label: "Obra", 
-      icon: HardHat, 
-      children: [
-        { label: "Resumen de Obra", icon: Home, path: "/obra/dashboard" },
-        { label: "Bitácora", icon: FileText, path: "/obra/site-logs" },
-      ]
-    },
-    { 
-      label: "Finanzas", 
-      icon: DollarSign, 
-      children: [
-        { label: "Resumen de Finanzas", icon: Home, path: "/finanzas/dashboard" },
-        { label: "Movimientos", icon: FileText, path: "/finanzas/movimientos" },
-      ]
-    },
-    { label: "Comercialización", icon: ShoppingCart, path: "/project/commercialization" },
-    { 
-      label: "Volver", 
-      icon: ArrowLeft, 
-      action: () => setContext('organization')
-    },
-  ];
-
-  // Admin sidebar menu (empty for now)
-  const adminMenu: MenuItem[] = [];
-
-  const getCurrentMenu = () => {
-    switch (context) {
-      case 'organization': return organizationMenu;
-      case 'project': return projectMenu;
-      case 'admin': return adminMenu;
-      default: return organizationMenu;
-    }
+  // Different navigation items based on context
+  const sidebarContexts = {
+    organization: [
+      { icon: Home, label: 'Resumen', href: '/organization/dashboard' },
+      { icon: FolderOpen, label: 'Proyectos', href: '/proyectos' },
+      { icon: Mail, label: 'Contactos', href: '/organization/contactos' },
+      { icon: Activity, label: 'Actividad', href: '/organization/activity' },
+      { icon: Users, label: 'Miembros', href: '/organization/members' },
+      { icon: Settings, label: 'Preferencias', href: '/preferencias' },
+    ],
+    project: [
+      { icon: Home, label: 'Dashboard', href: '/project/dashboard' },
+      { icon: FolderOpen, label: 'Proyecto', href: '#', onClick: () => { setSidebarContext('design'); navigate('/design/dashboard'); } },
+      { icon: Building, label: 'Obra', href: '#', onClick: () => { setSidebarContext('construction'); navigate('/construction/dashboard'); } },
+      { icon: DollarSign, label: 'Finanzas', href: '#', onClick: () => { setSidebarContext('finance'); navigate('/finance/dashboard'); } },
+      { icon: Users, label: 'Comercialización', href: '#', onClick: () => { setSidebarContext('commercialization'); navigate('/commercialization/dashboard'); } },
+      { icon: ArrowLeft, label: 'Volver a Organización', href: '#', onClick: () => { setSidebarContext('organization'); navigate('/organization/dashboard'); } },
+    ],
+    design: [
+      { icon: Home, label: 'Dashboard', href: '/design/dashboard' },
+      { icon: FileText, label: 'Moodboard', href: '/design/moodboard' },
+      { icon: FolderOpen, label: 'Documentación técnica', href: '/design/documentacion' },
+      { icon: ArrowLeft, label: 'Volver al Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
+    ],
+    construction: [
+      { icon: Home, label: 'Resumen', href: '/construction/dashboard' },
+      { icon: FileText, label: 'Bitácora', href: '/bitacora' },
+      { icon: ArrowLeft, label: 'Volver al Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
+    ],
+    finance: [
+      { icon: Home, label: 'Resumen de Finanzas', href: '/finance/dashboard' },
+      { icon: DollarSign, label: 'Movimientos', href: '/movimientos' },
+      { icon: ArrowLeft, label: 'Volver al Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
+    ],
+    commercialization: [
+      { icon: Home, label: 'Dashboard', href: '/commercialization/dashboard' },
+      { icon: Building, label: 'Listado de unidades', href: '/commercialization/unidades' },
+      { icon: Users, label: 'Clientes interesados', href: '/commercialization/clientes' },
+      { icon: FileText, label: 'Estadísticas de venta', href: '/commercialization/estadisticas' },
+      { icon: ArrowLeft, label: 'Volver al Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
+    ]
   };
 
-  const handleMouseEnter = () => setExpanded(true);
-  const handleMouseLeave = () => setExpanded(false);
+  const navigationItems = sidebarContexts[currentSidebarContext] || sidebarContexts.organization;
 
-  const renderMenuItem = (item: MenuItem, isChild = false) => {
-    const isActive = item.path && location === item.path;
-    const hasChildren = item.children && item.children.length > 0;
-    const isAccordionOpen = hasChildren && openAccordions.includes(item.label.toLowerCase());
 
-    const handleClick = () => {
-      if (item.action) {
-        item.action();
-      } else if (hasChildren) {
-        toggleAccordion(item.label.toLowerCase());
-      }
-    };
-
-    const content = (
-      <div 
-        className={`
-          flex items-center w-full h-10 rounded-lg transition-all duration-200
-          ${isActive ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]' : 'text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]'}
-          ${isChild ? 'ml-4' : ''}
-          ${!isExpanded ? 'justify-center' : 'px-2'}
-        `}
-        onClick={handleClick}
-      >
-        <item.icon className="w-4 h-4 flex-shrink-0" />
-        {isExpanded && (
-          <>
-            <span className="ml-2 text-sm font-medium flex-1">{item.label}</span>
-            {hasChildren && (
-              <span className="ml-auto">
-                {isAccordionOpen ? (
-                  <ChevronDown className="w-4 h-4" />
-                ) : (
-                  <ChevronRight className="w-4 h-4" />
-                )}
-              </span>
-            )}
-          </>
-        )}
-      </div>
-    );
-
-    if (item.path) {
-      return (
-        <Link key={item.label} href={item.path}>
-          {content}
-        </Link>
-      );
-    }
-
-    return (
-      <button key={item.label} className="w-full">
-        {content}
-      </button>
-    );
-  };
 
   return (
-    <div
-      className="fixed left-0 top-0 z-50 h-full bg-[var(--menues-bg)] border-r border-[var(--menues-border)] flex flex-col transition-all duration-300 ease-in-out"
-      style={{ width: isExpanded ? '240px' : '40px' }}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+    <aside 
+      className={cn(
+        "fixed top-9 left-0 h-[calc(100vh-36px)] border-r bg-[var(--menues-bg)] border-[var(--menues-border)] transition-all duration-300 z-40 flex flex-col",
+        isExpanded ? "w-[240px]" : "w-[40px]"
+      )}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
-      {/* Logo */}
-      <div className="flex items-center justify-center h-10 mt-2 mb-2">
-        <Link href="/organization/dashboard">
-          <div className="w-10 h-10 bg-[var(--accent)] text-[var(--accent-foreground)] rounded-lg flex items-center justify-center font-bold text-lg hover:opacity-80 transition-opacity">
-            A
-          </div>
-        </Link>
+      {/* Navigation Items */}
+      <div className="flex-1 p-1">
+        <div className="flex flex-col gap-[2px]">
+          {navigationItems.map((item, index) => (
+            <SidebarButton
+              key={`${item.label}-${index}`}
+              icon={<item.icon className="w-[18px] h-[18px]" />}
+              label={item.label}
+              isActive={location === item.href}
+              isExpanded={isExpanded}
+              onClick={item.onClick || (() => navigate(item.href))}
+            />
+          ))}
+        </div>
       </div>
 
-      {/* Divider */}
-      <div className="h-px bg-[var(--menues-border)] mx-2 mb-2" />
+      {/* Bottom Section - Fixed Buttons */}
+      <div className="border-t border-[var(--menues-border)] p-1">
+        <div className="flex flex-col gap-[2px]">
+          {/* Settings */}
+          <SidebarButton
+            icon={<Settings className="w-[18px] h-[18px]" />}
+            label="Configuración"
+            isActive={location === '/configuracion'}
+            isExpanded={isExpanded}
+            onClick={() => navigate('/configuracion')}
+          />
 
-      {/* Navigation Menu */}
-      <nav className="flex-1 p-1 space-y-1">
-        {getCurrentMenu().map(item => (
-          <div key={item.label}>
-            {renderMenuItem(item)}
-            {item.children && openAccordions.includes(item.label.toLowerCase()) && isExpanded && (
-              <div className="mt-1 space-y-1">
-                {item.children.map(child => renderMenuItem(child, true))}
-              </div>
-            )}
-          </div>
-        ))}
-      </nav>
 
-      {/* Footer */}
-      <div className="p-1 space-y-1 border-t border-[var(--menues-border)] pt-2">
-        {/* Settings Button */}
-        <Link href="/settings">
-          <div className={`
-            flex items-center w-full h-10 rounded-lg transition-all duration-200
-            text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]
-            ${!isExpanded ? 'justify-center' : 'px-2'}
-          `}>
-            <Settings className="w-4 h-4 flex-shrink-0" />
-            {isExpanded && (
-              <span className="ml-2 text-sm font-medium">Configuración</span>
-            )}
-          </div>
-        </Link>
 
-        {/* Profile Button */}
-        <Link href="/profile">
-          <div className={`
-            flex items-center w-full h-10 rounded-lg transition-all duration-200
-            text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]
-            ${!isExpanded ? 'justify-center' : 'px-2'}
-          `}>
-            <Avatar className="w-4 h-4 flex-shrink-0">
-              <AvatarImage src={userData?.user?.avatar_url} />
-              <AvatarFallback className="text-xs bg-[var(--accent)] text-[var(--accent-foreground)]">
-                {userData?.user?.full_name?.charAt(0) || userData?.user?.email?.charAt(0) || "U"}
-              </AvatarFallback>
-            </Avatar>
-            {isExpanded && (
-              <span className="ml-2 text-sm font-medium">Mi Perfil</span>
-            )}
-          </div>
-        </Link>
+          {/* Profile */}
+          <SidebarButton
+            icon={<UserCircle className="w-[18px] h-[18px]" />}
+            label="Mi Perfil"
+            isActive={location === '/perfil'}
+            isExpanded={isExpanded}
+            onClick={() => navigate('/perfil')}
+            avatarUrl={userData?.user?.avatar_url}
+          />
+        </div>
       </div>
-    </div>
+    </aside>
   );
 }

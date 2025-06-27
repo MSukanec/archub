@@ -412,7 +412,7 @@ export default function SiteLogs() {
 
   if (isLoading) {
     return (
-      <Layout >
+      <Layout headerProps={headerProps}>
         <div className="p-8 text-center text-muted-foreground">
           Cargando bitácora...
         </div>
@@ -422,7 +422,7 @@ export default function SiteLogs() {
 
   if (error) {
     return (
-      <Layout >
+      <Layout headerProps={headerProps}>
         <div className="p-8 text-center text-muted-foreground">
           Error al cargar la bitácora: {(error as Error).message}
         </div>
@@ -431,7 +431,7 @@ export default function SiteLogs() {
   }
 
   return (
-    <Layout >
+    <Layout headerProps={headerProps}>
         {filteredSiteLogs.length === 0 ? (
           <CustomEmptyState
             icon={<FileText className="h-8 w-8 text-[var(--accent)]" />}
