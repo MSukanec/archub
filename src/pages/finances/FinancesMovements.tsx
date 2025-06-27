@@ -512,11 +512,17 @@ export default function Movements() {
         onSelectionChange={setSelectedMovements}
         getItemId={(movement) => movement.id}
         emptyState={
-          <div className="text-center py-8 text-muted-foreground">
-            <DollarSign className="h-12 w-12 mx-auto mb-4 opacity-20" />
-            <p className="text-sm">No hay movimientos registrados.</p>
-            <p className="text-xs">Crea el primer movimiento del proyecto.</p>
-          </div>
+          <CustomEmptyState 
+            title="No hay movimientos registrados"
+            description="Crea el primer movimiento del proyecto"
+            action={{
+              label: "Nuevo movimiento",
+              onClick: () => {
+                setEditingMovement(null);
+                setShowNewMovementModal(true);
+              }
+            }}
+          />
         }
       />
 
