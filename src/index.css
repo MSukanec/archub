@@ -102,9 +102,9 @@
   --table-row-hover-bg: hsl(0, 0%, 98%);
 
   /* Movement Row Gradients */
-  --movement-income-bg: linear-gradient(to right, hsl(142, 70%, 45%), hsl(142, 20%, 96%));
+  --movement-income-bg: linear-gradient(to right, hsl(90, 50%, 50%), hsl(90, 50%, 50%));
   --movement-expense-bg: linear-gradient(to right, hsl(0, 70%, 50%), hsl(0, 20%, 96%));
-  --movement-income-border: hsl(142, 70%, 45%);
+  --movement-income-border: hsl(90, 50%, 50%);
   --movement-expense-border: hsl(0, 70%, 50%);
 
   /* Borders and Rings */
@@ -232,6 +232,17 @@
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 8px;
+}
+
+/* Movement row gradient classes */
+.movement-row-income {
+  background: var(--movement-income-bg);
+  border-left: 4px solid var(--movement-income-border);
+}
+
+.movement-row-expense {
+  background: var(--movement-expense-bg);
+  border-left: 4px solid var(--movement-expense-border);
 }
 
 /* Avatar styles - aplicar borde de 3px a todos los avatares */

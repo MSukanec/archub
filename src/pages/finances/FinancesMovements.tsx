@@ -521,13 +521,13 @@ export default function Movements() {
         getRowClassName={(movement: Movement) => {
           // Determine if it's income or expense based on movement type
           const typeName = movement.movement_data?.type?.name?.toLowerCase() || '';
-          const isIncome = typeName.includes('ingreso') || typeName.includes('entrada') || typeName.includes('cobro');
-          const isExpense = typeName.includes('egreso') || typeName.includes('gasto') || typeName.includes('pago');
+          const isIncome = typeName.includes('ingreso');
+          const isExpense = typeName.includes('egreso');
           
           if (isIncome) {
-            return 'bg-[var(--movement-income-bg)] border-l-4 border-l-[var(--movement-income-border)]';
+            return 'movement-row-income';
           } else if (isExpense) {
-            return 'bg-[var(--movement-expense-bg)] border-l-4 border-l-[var(--movement-expense-border)]';
+            return 'movement-row-expense';
           }
           return '';
         }}
