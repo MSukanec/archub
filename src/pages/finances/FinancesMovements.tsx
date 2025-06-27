@@ -268,7 +268,6 @@ export default function Movements() {
     {
       key: 'created_at',
       label: 'Fecha',
-      width: '100px',
       sortable: true,
       sortType: 'date' as const,
       render: (movement: Movement) => (
@@ -283,7 +282,6 @@ export default function Movements() {
     {
       key: 'creator',
       label: 'Creador',
-      width: '120px',
       sortable: true,
       sortType: 'string' as const,
       render: (movement: Movement) => (
@@ -303,7 +301,6 @@ export default function Movements() {
     {
       key: 'type',
       label: 'Tipo',
-      width: '100px',
       sortable: true,
       sortType: 'string' as const,
       render: (movement: Movement) => (
@@ -315,7 +312,6 @@ export default function Movements() {
     {
       key: 'category',
       label: 'Categoría',
-      width: '110px',
       sortable: true,
       sortType: 'string' as const,
       render: (movement: Movement) => (
@@ -327,7 +323,6 @@ export default function Movements() {
     {
       key: 'subcategory',
       label: 'Subcategoría',
-      width: '120px',
       sortable: false,
       render: (movement: Movement) => (
         <span className="text-xs text-muted-foreground">-</span>
@@ -336,7 +331,6 @@ export default function Movements() {
     {
       key: 'description',
       label: 'Descripción',
-      width: '1fr',
       sortable: true,
       sortType: 'string' as const,
       render: (movement: Movement) => (
@@ -348,7 +342,6 @@ export default function Movements() {
     {
       key: 'currency',
       label: 'Moneda',
-      width: '80px',
       sortable: true,
       sortType: 'string' as const,
       render: (movement: Movement) => (
@@ -360,7 +353,6 @@ export default function Movements() {
     {
       key: 'wallet',
       label: 'Billetera',
-      width: '100px',
       sortable: true,
       sortType: 'string' as const,
       render: (movement: Movement) => (
@@ -372,7 +364,6 @@ export default function Movements() {
     {
       key: 'amount',
       label: 'Cantidad',
-      width: '120px',
       sortable: true,
       sortType: 'number' as const,
       render: (movement: Movement) => (
@@ -384,7 +375,6 @@ export default function Movements() {
     {
       key: 'actions',
       label: 'Acciones',
-      width: '80px',
       sortable: false,
       render: (movement: Movement) => (
         <DropdownMenu>

@@ -28,145 +28,103 @@ function Router() {
     <Switch>
       <Route path="/organizations">
         <ProtectedRoute>
-          <Layout>
-            <OrganizationManagement />
-          </Layout>
+          <OrganizationManagement />
         </ProtectedRoute>
       </Route>
 
       <Route path="/organizaciones">
         <ProtectedRoute>
-          <Layout>
-            <OrganizationManagement />
-          </Layout>
+          <OrganizationManagement />
         </ProtectedRoute>
       </Route>
 
       <Route path="/movimientos">
         <ProtectedRoute>
-          <Layout>
-            <Movements />
-          </Layout>
+          <Movements />
         </ProtectedRoute>
       </Route>
 
       <Route path="/finanzas/movimientos">
         <ProtectedRoute>
-          <Layout>
-            <Movements />
-          </Layout>
-        </ProtectedRoute>
-      </Route>
-
-      <Route path="/finances/movements">
-        <ProtectedRoute>
-          <Layout>
-            <Movements />
-          </Layout>
+          <Movements />
         </ProtectedRoute>
       </Route>
 
       <Route path="/bitacora">
         <ProtectedRoute>
-          <Layout>
-            <SiteLogs />
-          </Layout>
+          <SiteLogs />
         </ProtectedRoute>
       </Route>
 
       <Route path="/construction/dashboard">
         <ProtectedRoute>
-          <Layout>
-            <ConstructionDashboard />
-          </Layout>
+          <ConstructionDashboard />
         </ProtectedRoute>
       </Route>
 
       <Route path="/obra/bitacora">
         <ProtectedRoute>
-          <Layout>
-            <SiteLogs />
-          </Layout>
+          <SiteLogs />
         </ProtectedRoute>
       </Route>
 
       <Route path="/construction/site-logs">
         <ProtectedRoute>
-          <Layout>
-            <SiteLogs />
-          </Layout>
+          <SiteLogs />
         </ProtectedRoute>
       </Route>
 
       <Route path="/preferencias">
         <ProtectedRoute>
-          <Layout>
-            <OrganizationPreferences />
-          </Layout>
+          <OrganizationPreferences />
         </ProtectedRoute>
       </Route>
 
       <Route path="/proyectos">
         <ProtectedRoute>
-          <Layout>
-            <OrganizationProjects />
-          </Layout>
+          <OrganizationProjects />
         </ProtectedRoute>
       </Route>
 
       <Route path="/organization/contactos">
         <ProtectedRoute>
-          <Layout>
-            <OrganizationContacts />
-          </Layout>
+          <OrganizationContacts />
         </ProtectedRoute>
       </Route>
 
       <Route path="/organization/dashboard">
         <ProtectedRoute>
-          <Layout>
-            <OrganizationDashboard />
-          </Layout>
+          <OrganizationDashboard />
         </ProtectedRoute>
       </Route>
 
       <Route path="/organization/members">
         <ProtectedRoute>
-          <Layout>
-            <OrganizationMembers />
-          </Layout>
+          <OrganizationMembers />
         </ProtectedRoute>
       </Route>
 
       <Route path="/organization/activity">
         <ProtectedRoute>
-          <Layout>
-            <OrganizationActivity />
-          </Layout>
+          <OrganizationActivity />
         </ProtectedRoute>
       </Route>
 
       <Route path="/project/dashboard">
         <ProtectedRoute>
-          <Layout>
-            <ProjectDashboard />
-          </Layout>
+          <ProjectDashboard />
         </ProtectedRoute>
       </Route>
 
       <Route path="/finance/dashboard">
         <ProtectedRoute>
-          <Layout>
-            <FinancesDashboard />
-          </Layout>
+          <FinancesDashboard />
         </ProtectedRoute>
       </Route>
 
       <Route path="/perfil">
         <ProtectedRoute>
-          <Layout>
-            <Profile />
-          </Layout>
+          <Profile />
         </ProtectedRoute>
       </Route>
 
