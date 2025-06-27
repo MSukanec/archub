@@ -24,6 +24,7 @@ import OrganizationPreferences from "@/pages/organization/OrganizationPreference
 import ConstructionDashboard from "@/pages/construction/ConstructionDashboard";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminOrganizations from "@/pages/admin/AdminOrganizations";
+import AdminUsers from "@/pages/admin/AdminUsers";
 
 function Router() {
   return (
@@ -140,6 +141,12 @@ function Router() {
       <Route path="/admin/organizations">
         <ProtectedRoute>
           <AdminOrganizations />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/admin/users">
+        <ProtectedRoute>
+          <AdminUsers />
         </ProtectedRoute>
       </Route>
 
