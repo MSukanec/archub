@@ -20,7 +20,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { useToast } from '@/hooks/use-toast'
-import { Calendar, User, DollarSign } from 'lucide-react'
 
 const movementSchema = z.object({
   created_at: z.date(),
@@ -61,7 +60,12 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
   const { data: currentUser } = useCurrentUser()
   const organizationId = currentUser?.organization?.id
   const { data: members } = useOrganizationMembers(organizationId)
-  const { data: concepts } = useMovementConcepts(organizationId)
+  const [selectedTypeId, setSelectedTypeId] = useState('')
+  const [selectedCategoryId, setSelectedCategoryId] = useState('')
+  
+  const { data: types } = useMovementConcepts('types')
+  const { data: categories } = useMovementConcepts('categories', selectedTypeId)
+  const { data: subcategories } = useMovementConcepts('categories', selectedCategoryId)
   const { data: currencies } = useCurrencies(organizationId)
   const { data: wallets } = useOrganizationWallets(organizationId)
   const { toast } = useToast()
@@ -169,12 +173,9 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
   }
 
   // Get filtered concepts
-  const selectedType = form.watch('type_id')
-  const selectedCategory = form.watch('category_id')
-  
-  const typeOptions = concepts?.filter(c => !c.parent_id) || []
-  const categoryOptions = concepts?.filter(c => c.parent_id === selectedType) || []
-  const subcategoryOptions = concepts?.filter(c => c.parent_id === selectedCategory) || []
+  const typeOptions = types || []
+  const categoryOptions = categories || []
+  const subcategoryOptions = subcategories || []
 
   const selectedCreator = members?.find(m => m.id === form.watch('created_by'))
 
@@ -268,8 +269,10 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                               <FormLabel>Tipo</FormLabel>
                               <Select onValueChange={(value) => {
                                 field.onChange(value)
+                                setSelectedTypeId(value)
                                 form.setValue('category_id', '')
                                 form.setValue('subcategory_id', '')
+                                setSelectedCategoryId('')
                               }} value={field.value}>
                                 <FormControl>
                                   <SelectTrigger>
@@ -297,6 +300,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                               <FormLabel>Categoría</FormLabel>
                               <Select onValueChange={(value) => {
                                 field.onChange(value)
+                                setSelectedCategoryId(value)
                                 form.setValue('subcategory_id', '')
                               }} value={field.value}>
                                 <FormControl>
@@ -403,18 +407,23 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                           name="amount"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="flex items-center gap-2">
-                                <DollarSign className="w-4 h-4" />
+                              <FormLabel>
                                 Cantidad
                               </FormLabel>
                               <FormControl>
-                                <Input
-                                  type="number"
-                                  step="0.01"
-                                  min="0"
-                                  value={field.value || ''}
-                                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                                />
+                                <div className="relative">
+                                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                                    $
+                                  </span>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    value={field.value || ''}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                    className="pl-8"
+                                  />
+                                </div>
                               </FormControl>
                               <FormMessage />
                             </FormItem>
