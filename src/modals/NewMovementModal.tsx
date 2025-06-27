@@ -118,9 +118,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
   // Populate form after dependent data is loaded
   useEffect(() => {
     if (editingMovement && types && currencies && wallets) {
-      console.log('Editing movement data:', editingMovement)
-      console.log('Available currencies:', currencies)
-      console.log('Available wallets:', wallets)
+
       
       // Map currency_id to the correct organization-currency ID
       const matchingCurrency = currencies.find(c => 
@@ -136,6 +134,10 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
       
       console.log('Mapped currency ID:', currencyId)
       console.log('Mapped wallet ID:', walletId)
+      
+      // Set parent selections first to enable dependent dropdowns
+      setSelectedTypeId(editingMovement.type_id)
+      setSelectedCategoryId(editingMovement.category_id || '')
       
       form.reset({
         created_at: new Date(editingMovement.created_at),
@@ -241,7 +243,11 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         body: (
           <CustomModalBody padding="md">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form 
+                key={editingMovement?.id || 'new'} 
+                onSubmit={form.handleSubmit(onSubmit)} 
+                className="space-y-4"
+              >
                 <Accordion type="single" defaultValue="informacion-basica" collapsible>
                   <AccordionItem value="informacion-basica">
                     <AccordionTrigger>
@@ -416,7 +422,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                                 </FormControl>
                                 <SelectContent>
                                   {wallets?.map((wallet: any) => (
-                                    <SelectItem key={wallet.wallets?.id || wallet.id} value={wallet.wallets?.id || wallet.id}>
+                                    <SelectItem key={wallet.id} value={wallet.id}>
                                       {wallet.wallets?.name || wallet.name || 'Sin nombre'}
                                     </SelectItem>
                                   ))}
@@ -444,7 +450,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                                 </FormControl>
                                 <SelectContent>
                                   {currencies?.map((currency: any) => (
-                                    <SelectItem key={currency.currencies?.id || currency.id} value={currency.currencies?.id || currency.id}>
+                                    <SelectItem key={currency.id} value={currency.id}>
                                       {currency.currencies?.name || currency.name || 'Sin nombre'} ({currency.currencies?.symbol || currency.symbol || '$'})
                                     </SelectItem>
                                   ))}
