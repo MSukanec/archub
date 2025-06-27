@@ -20,6 +20,15 @@ import { useToast } from '@/hooks/use-toast';
 interface NewAdminOrganizationModalProps {
   open: boolean;
   onClose: () => void;
+  organization?: {
+    id: string;
+    name: string;
+    created_at: string;
+    is_active: boolean;
+    is_system: boolean;
+    plan_id: string;
+    created_by: string;
+  } | null;
 }
 
 // Hook para obtener planes disponibles
@@ -40,18 +49,18 @@ function usePlans() {
   });
 }
 
-export function NewAdminOrganizationModal({ open, onClose }: NewAdminOrganizationModalProps) {
-  const [name, setName] = useState('');
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [planId, setPlanId] = useState<string>('');
-  const [isActive, setIsActive] = useState<string>('true');
-  const [isSystem, setIsSystem] = useState<string>('false');
+export function NewAdminOrganizationModal({ open, onClose, organization }: NewAdminOrganizationModalProps) {
+  const [name, setName] = useState(organization?.name || '');
+  const [selectedDate, setSelectedDate] = useState<Date>(organization ? new Date(organization.created_at) : new Date());
+  const [planId, setPlanId] = useState<string>(organization?.plan_id || '');
+  const [isActive, setIsActive] = useState<string>(organization ? organization.is_active.toString() : 'true');
+  const [isSystem, setIsSystem] = useState<string>(organization ? organization.is_system.toString() : 'false');
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: plans } = usePlans();
 
-  const createOrganizationMutation = useMutation({
+  const saveOrganizationMutation = useMutation({
     mutationFn: async (organizationData: {
       name: string;
       created_at: string;
@@ -61,28 +70,46 @@ export function NewAdminOrganizationModal({ open, onClose }: NewAdminOrganizatio
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
 
-      const { data, error } = await supabase
-        .from('organizations')
-        .insert([organizationData])
-        .select()
-        .single();
+      if (organization) {
+        // Update existing organization
+        const { data, error } = await supabase
+          .from('organizations')
+          .update(organizationData)
+          .eq('id', organization.id)
+          .select()
+          .single();
 
-      if (error) throw error;
-      return data;
+        if (error) throw error;
+        return data;
+      } else {
+        // Create new organization
+        const { data, error } = await supabase
+          .from('organizations')
+          .insert([organizationData])
+          .select()
+          .single();
+
+        if (error) throw error;
+        return data;
+      }
     },
     onSuccess: () => {
       toast({
-        title: "Organización creada",
-        description: "La organización se ha creado exitosamente.",
+        title: organization ? "Organización actualizada" : "Organización creada",
+        description: organization 
+          ? "La organización se ha actualizado exitosamente."
+          : "La organización se ha creado exitosamente.",
       });
       queryClient.invalidateQueries({ queryKey: ['admin-organizations'] });
       handleClose();
     },
     onError: (error) => {
-      console.error('Error creating organization:', error);
+      console.error('Error saving organization:', error);
       toast({
         title: "Error",
-        description: "No se pudo crear la organización. Inténtalo de nuevo.",
+        description: organization 
+          ? "No se pudo actualizar la organización. Inténtalo de nuevo."
+          : "No se pudo crear la organización. Inténtalo de nuevo.",
         variant: "destructive",
       });
     }
@@ -98,7 +125,7 @@ export function NewAdminOrganizationModal({ open, onClose }: NewAdminOrganizatio
       return;
     }
 
-    createOrganizationMutation.mutate({
+    saveOrganizationMutation.mutate({
       name: name.trim(),
       created_at: selectedDate.toISOString(),
       plan_id: planId,

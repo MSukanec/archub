@@ -115,8 +115,27 @@ export default function AdminOrganizations() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [showModal, setShowModal] = useState(false);
+  const [editingOrganization, setEditingOrganization] = useState<Organization | null>(null);
 
   const { data: organizations, isLoading } = useAllOrganizations();
+
+  const handleEdit = (organizationId: string) => {
+    const org = organizations?.find(o => o.id === organizationId);
+    if (org) {
+      setEditingOrganization(org);
+      setShowModal(true);
+    }
+  };
+
+  const handleDelete = (organizationId: string) => {
+    console.log('Delete organization:', organizationId);
+    // TODO: Implement delete functionality
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setEditingOrganization(null);
+  };
 
   // Filtrar organizaciones
   const filteredOrganizations = organizations?.filter(org => {
@@ -310,7 +329,8 @@ export default function AdminOrganizations() {
       {showModal && (
         <NewAdminOrganizationModal
           open={showModal}
-          onClose={() => setShowModal(false)}
+          onClose={handleCloseModal}
+          organization={editingOrganization}
         />
       )}
     </Layout>
