@@ -245,13 +245,11 @@ export function Header({
                     // Navigate to current stage dashboard
                     if (currentSidebarContext === 'design') navigate('/design/dashboard');
                     else if (currentSidebarContext === 'construction') navigate('/construction/dashboard');
-                    else if (currentSidebarContext === 'finance') navigate('/finance/dashboard');
                     else if (currentSidebarContext === 'commercialization') navigate('/commercialization/dashboard');
                   }}
                 >
                   {currentSidebarContext === 'design' && 'Proyecto'}
                   {currentSidebarContext === 'construction' && 'Obra'}
-                  {currentSidebarContext === 'finance' && 'Finanzas'}
                   {currentSidebarContext === 'commercialization' && 'Comercialización'}
                 </Button>
                 
@@ -286,14 +284,7 @@ export function Header({
                     >
                       Obra
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => {
-                        setSidebarContext('finance');
-                        navigate('/finance/dashboard');
-                      }}
-                    >
-                      Finanzas
-                    </DropdownMenuItem>
+
                     <DropdownMenuItem
                       onClick={() => {
                         setSidebarContext('commercialization');
