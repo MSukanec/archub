@@ -66,10 +66,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
   const { data: projectTypes = [] } = useProjectTypes();
   const { data: projectModalities = [] } = useProjectModalities();
 
-  // Verificar que hay una organización activa
-  if (!organizationId) {
-    return <div className="p-6 text-center text-muted-foreground">No hay una organización activa seleccionada.</div>;
-  }
+
 
   // Encontrar el member_id del usuario actual
   const currentUserMember = organizationMembers.find(member => 
