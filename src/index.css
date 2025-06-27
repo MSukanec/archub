@@ -92,6 +92,15 @@
   --text-subtle: hsl(240, 5%, 65%);
   --text-inverted: hsl(0, 0%, 100%);
 
+  /* Tables */
+  --table-header-bg: hsl(0, 0%, 95%);
+  --table-header-fg: hsl(0, 0%, 35%);
+  --table-header-border: hsl(0, 0%, 85%);
+  --table-row-bg: hsl(0, 0%, 100%);
+  --table-row-fg: hsl(0, 0%, 35%);
+  --table-row-border: hsl(0, 0%, 90%);
+  --table-row-hover-bg: hsl(0, 0%, 98%);
+
   /* Borders and Rings */
   --border-default: hsl(240, 6%, 90%);
   --border-strong: hsl(240, 8%, 80%);
@@ -186,6 +195,15 @@
   --chart-3: hsl(197, 37%, 35%);
   --chart-4: hsl(43, 74%, 70%);
   --chart-5: hsl(27, 87%, 70%);
+
+  /* Tables */
+  --table-header-bg: hsl(240, 8%, 15%);
+  --table-header-fg: hsl(0, 0%, 85%);
+  --table-header-border: hsl(240, 8%, 20%);
+  --table-row-bg: hsl(250, 8%, 16%);
+  --table-row-fg: hsl(0, 0%, 90%);
+  --table-row-border: hsl(240, 8%, 18%);
+  --table-row-hover-bg: hsl(240, 8%, 18%);
 
   /* Text */
   --text-default: hsl(0, 0%, 98%);

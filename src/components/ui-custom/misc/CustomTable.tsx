@@ -192,9 +192,9 @@ export function CustomTable<T = any>({
   return (
     <div className={cn("space-y-3", className)}>
       {/* Desktop Table View */}
-      <div className="hidden md:block">
+      <div className="hidden md:block overflow-hidden rounded-t-lg border border-[var(--table-header-border)]">
         {/* Column Headers */}
-        <div className="grid gap-4 p-4 bg-[var(--menues-bg)] rounded-lg text-xs font-medium text-[var(--menues-fg)] border border-[var(--menues-border)]" style={{ gridTemplateColumns: getGridTemplateColumns() }}>
+        <div className="grid gap-4 px-4 py-3 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border-b border-[var(--table-header-border)]" style={{ gridTemplateColumns: getGridTemplateColumns() }}>
           {selectable && (
             <div className="flex items-center justify-center">
               <Checkbox
@@ -212,7 +212,7 @@ export function CustomTable<T = any>({
               {column.sortable !== false && (
                 <button
                   onClick={() => handleSort(String(column.key), column.sortType)}
-                  className="flex items-center justify-center w-4 h-4 rounded hover:bg-muted-foreground/20 transition-colors"
+                  className="flex items-center justify-center w-4 h-4 rounded hover:bg-black/10 transition-colors"
                   type="button"
                 >
                   {sortKey === column.key ? (
@@ -231,13 +231,14 @@ export function CustomTable<T = any>({
         </div>
 
         {/* Data Rows */}
-        <div className="space-y-2">
+        <div>
           {sortedData.map((item, index) => (
             <div
               key={index}
               className={cn(
-                "grid gap-4 p-4 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg hover:bg-[var(--card-hover-bg)] transition-colors",
-                selectable && isItemSelected(item) && "bg-[var(--card-selected-bg)] border-[var(--accent)]"
+                "grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] border-b border-[var(--table-row-border)] hover:bg-[var(--table-row-hover-bg)] transition-colors",
+                selectable && isItemSelected(item) && "bg-[var(--accent-bg)] border-[var(--accent)]",
+                index === sortedData.length - 1 && "border-b-0"
               )}
               style={{ gridTemplateColumns: getGridTemplateColumns() }}
             >
