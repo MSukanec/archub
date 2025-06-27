@@ -88,8 +88,11 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
 
   // Auto-select current user and defaults
   useEffect(() => {
-    if (currentUser?.role?.id) {
-      form.setValue('created_by', currentUser.role.id)
+    if (members && currentUser?.user?.id) {
+      const currentMember = members.find(m => m.user_id === currentUser.user.id)
+      if (currentMember) {
+        form.setValue('created_by', currentMember.id)
+      }
     }
     if (currencies && currencies.length > 0) {
       const defaultCurrency = currencies.find(c => c.is_default) || currencies[0]
@@ -99,7 +102,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
       const defaultWallet = wallets.find(w => w.is_default) || wallets[0]
       form.setValue('wallet_id', defaultWallet.id)
     }
-  }, [currentUser, currencies, wallets, form])
+  }, [members, currentUser, currencies, wallets, form])
 
   // Load editing data
   useEffect(() => {
@@ -392,7 +395,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                                 <SelectContent>
                                   {currencies?.map((currency: any) => (
                                     <SelectItem key={currency.id} value={currency.id}>
-                                      {currency.currencies?.name || 'Sin nombre'} ({currency.currencies?.symbol})
+                                      {currency.currencies?.name || currency.name || 'Sin nombre'} ({currency.currencies?.symbol || currency.symbol || '$'})
                                     </SelectItem>
                                   ))}
                                 </SelectContent>

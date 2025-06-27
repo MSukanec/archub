@@ -41,7 +41,7 @@
   --button-primary-disabled-text: hsl(240, 5%, 65%);
 
   /* Buttons - Secondary */
-  --button-secondary-bg: hsl(0, 0%, 90%);
+  --button-secondary-bg: hsl(0, 0%, 92%);
   --button-secondary-text: hsl(0, 0%, 50%);
   --button-secondary-border: hsl(0, 0%, 90%);
   --button-secondary-hover-bg: hsl(0, 0%, 93%);
@@ -57,10 +57,10 @@
   --button-ghost-hover-border: transparent;
 
   /* Inputs */
-  --input-bg: hsl(0, 0%, 100%);
-  --input-text: hsl(240, 10%, 4%);
-  --input-border: hsl(240, 6%, 90%);
-  --input-placeholder: hsl(240, 5%, 65%);
+  --input-bg: transparent;
+  --input-text: hsl(0, 0%, 0%);
+  --input-border: hsl(0, 0%, 70%);
+  --input-placeholder: hsl(0, 0%, 70%);
   --input-focus-ring: hsl(90, 50%, 50%);
   --input-focus-border: hsl(90, 50%, 50%);
 

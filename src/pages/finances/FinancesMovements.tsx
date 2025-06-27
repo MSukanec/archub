@@ -34,6 +34,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { CustomTable } from "@/components/ui-custom/misc/CustomTable";
+import { CustomEmptyState } from "@/components/ui-custom/misc/CustomEmptyState";
 
 import { NewMovementModal } from "@/modals/NewMovementModal";
 import { useCurrentUser } from "@/hooks/use-current-user";
