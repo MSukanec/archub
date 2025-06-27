@@ -15,11 +15,13 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigationStore } from '@/stores/navigationStore';
 
 export default function OrganizationDashboard() {
   const { data: userData } = useCurrentUser();
   const { toast } = useToast();
   const [, navigate] = useLocation();
+  const { setSidebarContext } = useNavigationStore();
   const currentOrganization = userData?.organization;
 
   // Fetch recent projects
@@ -152,7 +154,12 @@ export default function OrganizationDashboard() {
   });
 
   const handleProjectSelect = (projectId: string) => {
-    selectProjectMutation.mutate(projectId);
+    selectProjectMutation.mutate(projectId, {
+      onSuccess: () => {
+        setSidebarContext('project');
+        navigate('/project/dashboard');
+      }
+    });
   };
 
   // Sort projects to put active project first
