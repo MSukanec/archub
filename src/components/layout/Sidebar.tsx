@@ -44,8 +44,22 @@ export function Sidebar() {
   
   // Estado para búsqueda de proyectos
   const [projectSearchValue, setProjectSearchValue] = useState('');
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const prevContextRef = useRef(currentSidebarContext);
   
   const isExpanded = isDocked || isHovered;
+
+  // Handle fade animation when context changes
+  useEffect(() => {
+    if (prevContextRef.current !== currentSidebarContext) {
+      setIsTransitioning(true);
+      const timer = setTimeout(() => {
+        setIsTransitioning(false);
+        prevContextRef.current = currentSidebarContext;
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [currentSidebarContext]);
   
   // Obtener proyectos de la organización actual
   const { data: projects, isLoading: isLoadingProjects } = useProjects(userData?.organization?.id);
@@ -166,7 +180,7 @@ export function Sidebar() {
       {/* Navigation Items */}
       <div className="flex-1 p-1">
         <div className="flex flex-col gap-[2px] h-full">
-          <div className="flex-1">
+          <div className={`flex-1 transition-opacity duration-150 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
             {navigationItems.map((item: any, index) => (
               <div key={`${item.label}-${index}`} className="mb-[2px]">
                 {/* Main Button */}
