@@ -1,369 +1,238 @@
-import { useState, useEffect } from 'react'
-import { useMutation, useQuery } from '@tanstack/react-query'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { Calendar } from 'lucide-react'
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Calendar as CalendarComponent } from '@/components/ui/calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
-import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout'
-import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader'
-import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody'
-import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter'
-import { cn } from '@/lib/utils'
-import { useToast } from '@/hooks/use-toast'
-import { queryClient } from '@/lib/queryClient'
-import { supabase } from '@/lib/supabase'
-
-const createOrganizationSchema = z.object({
-  created_at: z.date(),
-  created_by: z.string().min(1, "Creador es requerido"),
-  name: z.string().min(1, "El nombre es requerido"),
-  plan_id: z.string().optional(),
-  is_active: z.boolean(),
-})
-
-type CreateOrganizationForm = z.infer<typeof createOrganizationSchema>
-
-interface Organization {
-  id: string
-  name: string
-  created_at: string
-  is_active: boolean
-  created_by: string
-  plan_id?: string
-  plan?: {
-    name: string
-  }
-  creator?: {
-    full_name?: string
-    email: string
-  }
-}
+import { useState } from 'react';
+import { CustomModalLayout } from '@/components/ui-custom/misc/CustomModalLayout';
+import { CustomModalHeader } from '@/components/ui-custom/misc/CustomModalHeader';
+import { CustomModalBody } from '@/components/ui-custom/misc/CustomModalBody';
+import { CustomModalFooter } from '@/components/ui-custom/misc/CustomModalFooter';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase';
+import { useToast } from '@/hooks/use-toast';
 
 interface NewAdminOrganizationModalProps {
-  open: boolean
-  onClose: () => void
-  editingOrganization?: Organization | null
+  open: boolean;
+  onClose: () => void;
 }
 
-export function NewAdminOrganizationModal({ open, onClose, editingOrganization }: NewAdminOrganizationModalProps) {
-  const { toast } = useToast()
-
-  // Fetch users for creator dropdown
-  const { data: users = [] } = useQuery({
-    queryKey: ['users'],
-    queryFn: async () => {
-      if (!supabase) {
-        throw new Error('Supabase client not initialized')
-      }
-
-      const { data, error } = await supabase
-        .from('users')
-        .select('id, full_name, email, avatar_url')
-        .order('full_name', { ascending: true })
-
-      if (error) throw error
-      return data || []
-    },
-    enabled: open
-  })
-
-  // Fetch plans for plan dropdown
-  const { data: plans = [] } = useQuery({
+// Hook para obtener planes disponibles
+function usePlans() {
+  return useQuery({
     queryKey: ['plans'],
     queryFn: async () => {
-      if (!supabase) {
-        throw new Error('Supabase client not initialized')
-      }
+      if (!supabase) throw new Error('Supabase not initialized');
 
       const { data, error } = await supabase
         .from('plans')
-        .select('id, name, description')
-        .order('name', { ascending: true })
+        .select('id, name, max_projects, max_members')
+        .order('name');
 
-      if (error) throw error
-      return data || []
-    },
-    enabled: open
-  })
-
-  const form = useForm<CreateOrganizationForm>({
-    resolver: zodResolver(createOrganizationSchema),
-    defaultValues: {
-      created_at: new Date(),
-      created_by: '',
-      name: '',
-      plan_id: '',
-      is_active: true,
+      if (error) throw error;
+      return data;
     }
-  })
+  });
+}
 
-  // Reset form when editing organization changes
-  useEffect(() => {
-    if (editingOrganization) {
-      form.reset({
-        created_at: new Date(editingOrganization.created_at),
-        created_by: editingOrganization.created_by || '',
-        name: editingOrganization.name || '',
-        plan_id: editingOrganization.plan_id || '',
-        is_active: editingOrganization.is_active ?? true,
-      })
-    } else {
-      form.reset({
-        created_at: new Date(),
-        created_by: '',
-        name: '',
-        plan_id: '',
-        is_active: true,
-      })
-    }
-  }, [editingOrganization, form])
+export function NewAdminOrganizationModal({ open, onClose }: NewAdminOrganizationModalProps) {
+  const [name, setName] = useState('');
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [planId, setPlanId] = useState<string>('');
+  const [isActive, setIsActive] = useState<string>('true');
+  const [isSystem, setIsSystem] = useState<string>('false');
+
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { data: plans } = usePlans();
 
   const createOrganizationMutation = useMutation({
-    mutationFn: async (formData: CreateOrganizationForm) => {
-      if (!supabase) {
-        throw new Error('Supabase client not initialized')
-      }
+    mutationFn: async (organizationData: {
+      name: string;
+      created_at: string;
+      plan_id: string;
+      is_active: boolean;
+      is_system: boolean;
+    }) => {
+      if (!supabase) throw new Error('Supabase not initialized');
 
-      const organizationData = {
-        name: formData.name,
-        created_at: formData.created_at.toISOString(),
-        created_by: formData.created_by,
-        plan_id: formData.plan_id || null,
-        is_active: formData.is_active,
-      }
+      const { data, error } = await supabase
+        .from('organizations')
+        .insert([organizationData])
+        .select()
+        .single();
 
-      if (editingOrganization) {
-        const { data, error } = await supabase
-          .from('organizations')
-          .update(organizationData)
-          .eq('id', editingOrganization.id)
-          .select()
-          .single()
-
-        if (error) throw error
-        return data
-      } else {
-        const { data, error } = await supabase
-          .from('organizations')
-          .insert([organizationData])
-          .select()
-          .single()
-
-        if (error) throw error
-        return data
-      }
+      if (error) throw error;
+      return data;
     },
     onSuccess: () => {
       toast({
-        title: editingOrganization ? "Organización actualizada" : "Organización creada",
-        description: editingOrganization 
-          ? "La organización ha sido actualizada exitosamente." 
-          : "La nueva organización ha sido creada exitosamente.",
-      })
-      queryClient.invalidateQueries({ queryKey: ['admin-organizations'] })
-      onClose()
+        title: "Organización creada",
+        description: "La organización se ha creado exitosamente.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['admin-organizations'] });
+      handleClose();
     },
     onError: (error) => {
-      console.error('Error:', error)
+      console.error('Error creating organization:', error);
       toast({
         title: "Error",
-        description: `Error al ${editingOrganization ? 'actualizar' : 'crear'} la organización: ${error.message}`,
+        description: "No se pudo crear la organización. Inténtalo de nuevo.",
         variant: "destructive",
-      })
-    },
-  })
+      });
+    }
+  });
 
-  const handleSubmit = (data: CreateOrganizationForm) => {
-    createOrganizationMutation.mutate(data)
-  }
+  const handleSubmit = () => {
+    if (!name.trim() || !planId) {
+      toast({
+        title: "Campos requeridos",
+        description: "Por favor completa todos los campos obligatorios.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-  const selectedUser = users.find(user => user.id === form.watch('created_by'))
+    createOrganizationMutation.mutate({
+      name: name.trim(),
+      created_at: selectedDate.toISOString(),
+      plan_id: planId,
+      is_active: isActive === 'true',
+      is_system: isSystem === 'true'
+    });
+  };
+
+  const handleClose = () => {
+    setName('');
+    setSelectedDate(new Date());
+    setPlanId('');
+    setIsActive('true');
+    setIsSystem('false');
+    onClose();
+  };
 
   const header = (
     <CustomModalHeader
-      title={editingOrganization ? "Editar organización" : "Nueva organización"}
-      description={editingOrganization ? "Actualiza la información de la organización" : "Crea una nueva organización en el sistema"}
-      onClose={onClose}
+      title="Nueva Organización"
+      description="Crear una nueva organización en el sistema"
+      onClose={handleClose}
     />
-  )
+  );
 
   const body = (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-0" id="organization-form">
-        <CustomModalBody padding="md">
-          {/* 1. Fecha de creación */}
-          <FormField
-            control={form.control}
-            name="created_at"
-            render={({ field }) => (
-              <FormItem className="col-span-1">
-                <FormLabel className="text-sm font-medium">Fecha de creación</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP", { locale: es })
-                        ) : (
-                          <span>Seleccionar fecha</span>
-                        )}
-                        <Calendar className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <CalendarComponent
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) =>
-                        date > new Date() || date < new Date("1900-01-01")
-                      }
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    <CustomModalBody padding="md">
+      <div className="space-y-4">
+        {/* Fecha de creación */}
+        <div className="space-y-2">
+          <Label htmlFor="created_at" className="required-asterisk">
+            Fecha de creación
+          </Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-full justify-start text-left font-normal",
+                  !selectedDate && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {selectedDate ? (
+                  format(selectedDate, "PPP", { locale: es })
+                ) : (
+                  <span>Seleccionar fecha</span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={(date) => date && setSelectedDate(date)}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
 
-          {/* 2. Creador */}
-          <FormField
-            control={form.control}
-            name="created_by"
-            render={({ field }) => (
-              <FormItem className="col-span-1">
-                <FormLabel className="text-sm font-medium">Creador</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar creador" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {users.map((user: any) => (
-                      <SelectItem key={user.id} value={user.id}>
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-6 w-6">
-                            <AvatarImage src={user.avatar_url} />
-                            <AvatarFallback className="text-xs">
-                              {user.full_name?.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) || 
-                               user.email?.slice(0, 2).toUpperCase() || 'U'}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span>{user.full_name || user.email || 'Usuario'}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
+        {/* Nombre de la organización */}
+        <div className="space-y-2">
+          <Label htmlFor="name" className="required-asterisk">
+            Nombre de la organización
+          </Label>
+          <Input
+            id="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Ingresa el nombre de la organización"
           />
+        </div>
 
-          {/* 3. Nombre de la organización */}
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem className="col-span-2">
-                <FormLabel className="text-sm font-medium">Nombre de la organización</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Ingresa el nombre de la organización"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        {/* Plan */}
+        <div className="space-y-2">
+          <Label className="required-asterisk">Plan</Label>
+          <Select value={planId} onValueChange={setPlanId}>
+            <SelectTrigger>
+              <SelectValue placeholder="Seleccionar plan" />
+            </SelectTrigger>
+            <SelectContent>
+              {plans?.map((plan) => (
+                <SelectItem key={plan.id} value={plan.id}>
+                  {plan.name} ({plan.max_projects} proyectos, {plan.max_members} miembros)
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-          {/* 4. Plan */}
-          <FormField
-            control={form.control}
-            name="plan_id"
-            render={({ field }) => (
-              <FormItem className="col-span-1">
-                <FormLabel className="text-sm font-medium">Plan</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar plan" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="none">Sin plan</SelectItem>
-                    {plans.map((plan: any) => (
-                      <SelectItem key={plan.id} value={plan.id}>
-                        {plan.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        {/* Estado */}
+        <div className="space-y-2">
+          <Label>Estado</Label>
+          <Select value={isActive} onValueChange={setIsActive}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="true">Activa</SelectItem>
+              <SelectItem value="false">Inactiva</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-          {/* 5. Estado activo */}
-          <FormField
-            control={form.control}
-            name="is_active"
-            render={({ field }) => (
-              <FormItem className="col-span-1 flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                <div className="space-y-0.5">
-                  <FormLabel className="text-sm font-medium">Estado activo</FormLabel>
-                  <div className="text-xs text-muted-foreground">
-                    Marca si la organización está activa
-                  </div>
-                </div>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        </CustomModalBody>
-      </form>
-    </Form>
-  )
+        {/* Tipo */}
+        <div className="space-y-2">
+          <Label>Tipo</Label>
+          <Select value={isSystem} onValueChange={setIsSystem}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="false">Regular</SelectItem>
+              <SelectItem value="true">Sistema</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    </CustomModalBody>
+  );
 
   const footer = (
     <CustomModalFooter
-      cancelText="Cancelar"
-      confirmText={editingOrganization ? "Actualizar" : "Crear"}
-      onCancel={onClose}
-      onConfirm={() => form.handleSubmit(handleSubmit)()}
+      onCancel={handleClose}
+      onSave={handleSubmit}
+      saveText="Crear Organización"
       isLoading={createOrganizationMutation.isPending}
-      formId="organization-form"
     />
-  )
+  );
 
   return (
-    <CustomModalLayout open={open} onClose={onClose}>
+    <CustomModalLayout open={open} onClose={handleClose}>
       {{ header, body, footer }}
     </CustomModalLayout>
-  )
+  );
 }

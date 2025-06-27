@@ -7,6 +7,8 @@ Todas las nuevas páginas deben:
 1. Estar ubicadas en `src/pages/`.
 2. Utilizar el componente `Layout` como wrapper general.
 3. Usar la prop `headerProps` para configurar el `Header`.
+4. En el caso de usar una tabla, usar src/components/ui-custom/misc/CustomTable.tsx.
+5. En el caso de usuar un modal, usar la guia de src/prompts/ai-modal-template.md.
 
 ## Ejemplo base de una página
 
@@ -44,7 +46,6 @@ export default function Ejemplo() {
   )
 }
 Notas importantes:
-NO se debe usar ningún otro componente de layout como CustomPageLayout, CustomPageHeader, ni CustomPageBody.
 
 El contenido no necesita tener padding adicional, ya que el <main> lo incluye automáticamente (px-4 py-6).
 

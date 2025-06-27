@@ -161,6 +161,10 @@ export function Sidebar() {
       { icon: Users, label: 'Clientes interesados', href: '/commercialization/clientes' },
       { icon: FileText, label: 'Estadísticas de venta', href: '/commercialization/estadisticas' },
       { icon: ArrowLeft, label: 'Volver al Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
+    ],
+    admin: [
+      { icon: Home, label: 'Resumen de Administración', href: '/admin/dashboard' },
+      { icon: Building, label: 'Gestión de Organizaciones', href: '/admin/organizaciones' },
     ]
   };
 
@@ -300,13 +304,16 @@ export function Sidebar() {
       {/* Bottom Section - Fixed Buttons */}
       <div className="border-t border-[var(--menues-border)] p-1">
         <div className="flex flex-col gap-[2px]">
-          {/* Settings */}
+          {/* Administration */}
           <SidebarButton
             icon={<Settings className="w-[18px] h-[18px]" />}
             label="Administración"
-            isActive={location === '/configuracion'}
+            isActive={currentSidebarContext === 'admin'}
             isExpanded={isExpanded}
-            onClick={() => navigate('/configuracion')}
+            onClick={() => {
+              setSidebarContext('admin');
+              navigate('/admin/dashboard');
+            }}
           />
 
           {/* Profile */}
