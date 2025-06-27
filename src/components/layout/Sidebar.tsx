@@ -427,34 +427,38 @@ export function Sidebar() {
           />
 
           {/* Profile */}
-          <div 
-            className="flex items-center gap-3 cursor-pointer p-1"
-            onClick={() => navigate("/perfil")}
-          >
-            <div className="w-[39px] h-[39px] rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
-              {userData?.user?.avatar_url ? (
-                <img 
-                  src={userData.user.avatar_url} 
-                  alt="Avatar" 
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-medium">
-                  {userData?.user?.full_name?.substring(0, 2).toUpperCase() || "US"}
-                </div>
-              )}
-            </div>
-            {isExpanded && (
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium text-[var(--menues-fg)] truncate">
-                  {userData?.user?.full_name || "Usuario"}
-                </div>
-                <div className="text-xs text-gray-500 truncate">
-                  {userData?.organization?.name || "Sin organización"}
-                </div>
+          <SidebarButton
+            icon={
+              <div className="w-[18px] h-[18px] rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+                {userData?.user?.avatar_url ? (
+                  <img 
+                    src={userData.user.avatar_url} 
+                    alt="Avatar" 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-[10px] font-medium">
+                    {userData?.user?.full_name?.substring(0, 2).toUpperCase() || "US"}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            }
+            label={
+              isExpanded ? (
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-medium text-[var(--menues-fg)] truncate leading-tight">
+                    {userData?.user?.full_name || "Usuario"}
+                  </div>
+                  <div className="text-[10px] text-gray-500 truncate leading-tight">
+                    {userData?.organization?.name || "Sin organización"}
+                  </div>
+                </div>
+              ) : "Mi Perfil"
+            }
+            isActive={location === "/perfil"}
+            isExpanded={isExpanded}
+            onClick={() => navigate("/perfil")}
+          />
         </div>
       </div>
     </aside>
