@@ -7,6 +7,8 @@ interface SidebarButtonProps {
   isExpanded: boolean;
   onClick: () => void;
   avatarUrl?: string;
+  rightIcon?: React.ReactNode;
+  isChild?: boolean;
 }
 
 export default function SidebarButton({ 
@@ -15,7 +17,9 @@ export default function SidebarButton({
   isActive, 
   isExpanded, 
   onClick,
-  avatarUrl 
+  avatarUrl,
+  rightIcon,
+  isChild = false
 }: SidebarButtonProps) {
   return (
     <button
@@ -48,7 +52,17 @@ export default function SidebarButton({
       
       {/* Texto - solo cuando expandido, empieza después del icono */}
       {isExpanded && (
-        <span className="ml-8 text-sm font-medium whitespace-nowrap text-left transition-opacity duration-300 delay-100">{label}</span>
+        <div className="ml-8 flex items-center justify-between w-full">
+          <span className={cn(
+            "text-sm font-medium whitespace-nowrap text-left transition-opacity duration-300 delay-100",
+            isChild && "text-xs" // Texto más pequeño para elementos hijos
+          )}>{label}</span>
+          {rightIcon && (
+            <div className="flex-shrink-0 ml-2">
+              {rightIcon}
+            </div>
+          )}
+        </div>
       )}
     </button>
   );
