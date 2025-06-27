@@ -407,76 +407,91 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                         )}
                       />
 
-                      {/* Cuarta fila: Moneda y Cantidad - misma altura */}
-                      <div className="grid grid-cols-2 gap-4">
-                        <FormField
-                          control={form.control}
-                          name="currency_id"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Moneda</FormLabel>
-                              <Select onValueChange={field.onChange} value={field.value}>
+                      {/* Moneda */}
+                      <FormField
+                        control={form.control}
+                        name="currency_id"
+                        render={({ field }) => (
+                          <FormItem>
+                            <div className="grid grid-cols-3 gap-4 items-start">
+                              <div>
+                                <FormLabel>Moneda</FormLabel>
+                              </div>
+                              <div className="col-span-2">
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Seleccionar moneda" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {currencies?.map((currency: any) => (
+                                      <SelectItem key={currency.id} value={currency.id}>
+                                        {currency.currencies?.name || 'Sin nombre'} ({currency.currencies?.symbol})
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </div>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Cantidad */}
+                      <FormField
+                        control={form.control}
+                        name="amount"
+                        render={({ field }) => (
+                          <FormItem>
+                            <div className="grid grid-cols-3 gap-4 items-start">
+                              <div>
+                                <FormLabel>Cantidad</FormLabel>
+                              </div>
+                              <div className="col-span-2">
                                 <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Seleccionar moneda" />
-                                  </SelectTrigger>
+                                  <div className="relative">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                                      $
+                                    </span>
+                                    <Input
+                                      type="number"
+                                      step="0.01"
+                                      min="0"
+                                      value={field.value || ''}
+                                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                      className="pl-8"
+                                    />
+                                  </div>
                                 </FormControl>
-                                <SelectContent>
-                                  {currencies?.map((currency: any) => (
-                                    <SelectItem key={currency.id} value={currency.id}>
-                                      {currency.currencies?.name || 'Sin nombre'} ({currency.currencies?.symbol})
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                                <FormMessage />
+                              </div>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
 
-                        <FormField
-                          control={form.control}
-                          name="amount"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>
-                                Cantidad
-                              </FormLabel>
-                              <FormControl>
-                                <div className="relative">
-                                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                                    $
-                                  </span>
-                                  <Input
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    value={field.value || ''}
-                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                                    className="pl-8"
-                                  />
-                                </div>
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-
-                      {/* Quinta fila: Descripción */}
+                      {/* Descripción */}
                       <FormField
                         control={form.control}
                         name="description"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Descripción (opcional)</FormLabel>
-                            <FormControl>
-                              <Textarea
-                                placeholder="Descripción del movimiento..."
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
+                            <div className="grid grid-cols-3 gap-4 items-start">
+                              <div>
+                                <FormLabel>Descripción (opcional)</FormLabel>
+                              </div>
+                              <div className="col-span-2">
+                                <FormControl>
+                                  <Textarea
+                                    placeholder="Descripción del movimiento..."
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </div>
+                            </div>
                           </FormItem>
                         )}
                       />
