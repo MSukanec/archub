@@ -41,7 +41,14 @@ import SidebarButton from "./SidebarButton";
 export function Sidebar() {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
-  const { isDocked, isHovered, setHovered } = useSidebarStore();
+  const { isDocked, isHovered, setHovered, setDocked } = useSidebarStore();
+  
+  // Sync sidebar state with user preferences
+  useEffect(() => {
+    if (userData?.preferences?.sidebar_docked !== undefined) {
+      setDocked(userData.preferences.sidebar_docked);
+    }
+  }, [userData?.preferences?.sidebar_docked, setDocked]);
   const { currentSidebarContext, setSidebarContext } = useNavigationStore();
   const queryClient = useQueryClient();
   
@@ -94,7 +101,9 @@ export function Sidebar() {
       if (error) throw error;
       return newDockedState;
     },
-    onSuccess: () => {
+    onSuccess: (newDockedState) => {
+      // Update local sidebar store immediately
+      useSidebarStore.getState().setDocked(newDockedState);
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
     }
   });

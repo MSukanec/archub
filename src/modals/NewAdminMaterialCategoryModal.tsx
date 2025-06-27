@@ -66,16 +66,12 @@ export function NewAdminMaterialCategoryModal({
     if (category && isEditing) {
       form.reset({
         name: category.name || '',
-        description: category.description || '',
         created_at: new Date(category.created_at),
-        created_by: category.created_by,
       });
     } else if (!isEditing) {
       form.reset({
         name: '',
-        description: '',
         created_at: new Date(),
-        created_by: currentUser?.user?.id || '',
       });
     }
   }, [category, isEditing, form, currentUser]);
