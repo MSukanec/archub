@@ -397,7 +397,7 @@ export function Sidebar() {
               </div>
             ) : (
               <div className={cn(
-                "w-9 h-9 rounded-full flex items-center justify-center cursor-pointer",
+                "w-8 h-8 rounded-full flex items-center justify-center cursor-pointer",
                 (!userData?.plan || userData.plan.name === 'free') && "bg-orange-500",
                 userData?.plan?.name === 'pro' && "bg-blue-500",
                 userData?.plan?.name === 'teams' && "bg-purple-500"
@@ -427,9 +427,12 @@ export function Sidebar() {
           />
 
           {/* Profile */}
-          <SidebarButton
-            icon={
-              <div className="w-[18px] h-[18px] rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+          {isExpanded ? (
+            <div 
+              className="flex items-center gap-2 p-1 rounded-lg cursor-pointer hover:bg-[var(--menues-hover-bg)] transition-all"
+              onClick={() => navigate("/perfil")}
+            >
+              <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
                 {userData?.user?.avatar_url ? (
                   <img 
                     src={userData.user.avatar_url} 
@@ -437,28 +440,43 @@ export function Sidebar() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-[10px] font-medium">
+                  <div className="w-full h-full bg-[var(--accent)] flex items-center justify-center text-white text-sm font-medium">
                     {userData?.user?.full_name?.substring(0, 2).toUpperCase() || "US"}
                   </div>
                 )}
               </div>
-            }
-            label={
-              isExpanded ? (
-                <div className="flex-1 min-w-0">
-                  <div className="text-xs font-medium text-[var(--menues-fg)] truncate leading-tight">
-                    {userData?.user?.full_name || "Usuario"}
-                  </div>
-                  <div className="text-[10px] text-gray-500 truncate leading-tight">
-                    {userData?.organization?.name || "Sin organización"}
-                  </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs font-medium text-[var(--menues-fg)] truncate leading-tight">
+                  {userData?.user?.full_name || "Usuario"}
                 </div>
-              ) : "Mi Perfil"
-            }
-            isActive={location === "/perfil"}
-            isExpanded={isExpanded}
-            onClick={() => navigate("/perfil")}
-          />
+                <div className="text-[10px] text-gray-500 truncate leading-tight">
+                  {userData?.organization?.name || "Sin organización"}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <SidebarButton
+              icon={
+                <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+                  {userData?.user?.avatar_url ? (
+                    <img 
+                      src={userData.user.avatar_url} 
+                      alt="Avatar" 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-[var(--accent)] flex items-center justify-center text-white text-sm font-medium">
+                      {userData?.user?.full_name?.substring(0, 2).toUpperCase() || "US"}
+                    </div>
+                  )}
+                </div>
+              }
+              label="Mi Perfil"
+              isActive={location === "/perfil"}
+              isExpanded={isExpanded}
+              onClick={() => navigate("/perfil")}
+            />
+          )}
         </div>
       </div>
     </aside>
