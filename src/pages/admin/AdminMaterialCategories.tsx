@@ -80,7 +80,7 @@ export default function AdminMaterialCategories() {
     {
       key: 'created_at',
       label: 'Fecha de Creación',
-      width: '5%',
+      width: '15%',
       render: (category: MaterialCategory) => (
         <span className="text-xs">
           {format(new Date(category.created_at), 'dd/MM/yyyy', { locale: es })}
@@ -90,7 +90,7 @@ export default function AdminMaterialCategories() {
     {
       key: 'name',
       label: 'Categoría',
-      width: '90%',
+      width: '70%',
       render: (category: MaterialCategory) => (
         <span className="text-sm font-medium">{category.name}</span>
       )
@@ -98,7 +98,7 @@ export default function AdminMaterialCategories() {
     {
       key: 'actions',
       label: 'Acciones',
-      width: '5%',
+      width: '15%',
       render: (category: MaterialCategory) => (
         <div className="flex items-center gap-1">
           <Button
@@ -163,7 +163,7 @@ export default function AdminMaterialCategories() {
   };
 
   return (
-    <Layout headerProps={headerProps}>
+    <Layout wide headerProps={headerProps}>
       <div className="space-y-6">
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

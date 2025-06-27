@@ -83,7 +83,7 @@ export default function AdminDashboard() {
   };
 
   return (
-    <Layout headerProps={headerProps}>
+    <Layout wide headerProps={headerProps}>
       <div className="space-y-6">
         {/* Estadísticas del sistema */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
