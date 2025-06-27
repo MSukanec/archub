@@ -18,7 +18,7 @@ import OrganizationActivity from "@/pages/organization/OrganizationActivity";
 import ProjectDashboard from "@/pages/project/ProjectDashboard";
 import FinancesDashboard from "@/pages/finances/FinancesDashboard";
 import Profile from "@/pages/others/Profile";
-import Movements from "@/pages/finances/FinancesMovements";
+import FinancesMovements from "@/pages/finances/FinancesMovements";
 import SiteLogs from "@/pages/site/SiteLogs";
 import OrganizationPreferences from "@/pages/organization/OrganizationPreferences";
 import ConstructionDashboard from "@/pages/construction/ConstructionDashboard";
@@ -98,7 +98,7 @@ function Router() {
 
       <Route path="/movimientos">
         <ProtectedRoute>
-          <Movements />
+          <FinancesMovements />
         </ProtectedRoute>
       </Route>
 
