@@ -1,8 +1,10 @@
+import { useEffect } from 'react'
 import { Layout } from '@/components/layout/Layout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects } from '@/hooks/use-projects'
+import { useNavigationStore } from '@/stores/navigationStore'
 import { Folder, Calendar, User, Building } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -10,8 +12,14 @@ import { es } from 'date-fns/locale'
 export default function ProjectDashboard() {
   const { data: userData, isLoading } = useCurrentUser()
   const { data: projects = [], isLoading: projectsLoading } = useProjects(userData?.organization?.id)
+  const { setSidebarContext } = useNavigationStore()
 
   const currentProject = projects.find(p => p.id === userData?.preferences?.last_project_id)
+
+  // Ensure we're in project sidebar context when this page loads
+  useEffect(() => {
+    setSidebarContext('project')
+  }, [])
 
   const headerProps = {
     title: "Dashboard",

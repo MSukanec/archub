@@ -119,6 +119,14 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 27, 2025. Fixed sidebar context switching and movements table layout improvements
+  • Fixed project navigation from Organization Dashboard - now properly switches to project sidebar context
+  • Added useEffect in ProjectDashboard.tsx to ensure correct sidebar context on page load
+  • Merged Type, Category, and Subcategory columns in movements table into single stacked "Tipo" column
+  • Enhanced project selection flow: click recent project → select project → switch to project sidebar → navigate to project dashboard
+  • Added fade animations for sidebar navigation button transitions during context changes
+  • All sidebar context switching now works correctly across organization and project navigation
+
 - June 26, 2025. Complete modal system refinement with ultra-compact Lemon Squeezy aesthetic
   • Applied padding: 3 to all CustomModal components (Header, Body, Footer) for consistent spacing
   • Updated Button primary variant to use --button-primary-text CSS variable for proper text color
