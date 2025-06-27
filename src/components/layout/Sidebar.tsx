@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjects } from "@/hooks/use-projects";
@@ -88,7 +88,7 @@ export function Sidebar() {
   // Different navigation items based on context
   const sidebarContexts = {
     organization: [
-      { icon: Home, label: 'Resumen', href: '/organization/dashboard' },
+      { icon: Home, label: 'Resumen de la Organización', href: '/organization/dashboard' },
       { icon: FolderOpen, label: 'Proyectos', href: '/proyectos' },
       { icon: Mail, label: 'Contactos', href: '/organization/contactos' },
       { icon: Activity, label: 'Actividad', href: '/organization/activity' },
@@ -217,12 +217,10 @@ export function Sidebar() {
                       <ChevronDown className="w-4 h-4 text-[var(--menues-fg)] flex-shrink-0" />
                     </div>
                   ) : (
-                    <div className="w-9 h-9 bg-[var(--menues-bg)] rounded-lg border border-[var(--menues-border)] flex items-center justify-center cursor-pointer">
-                      <div className="w-6 h-6 bg-[var(--accent)] rounded-md flex items-center justify-center">
-                        <span className="text-xs font-medium text-white">
-                          {activeProject?.name ? activeProject.name.substring(0, 2).toUpperCase() : 'PR'}
-                        </span>
-                      </div>
+                    <div className="w-9 h-9 bg-[var(--menues-bg)] rounded-lg border border-[var(--menues-border)] flex items-center justify-center cursor-pointer mx-auto">
+                      <span className="text-xs font-medium text-[var(--accent)]">
+                        {activeProject?.name ? activeProject.name.substring(0, 2).toUpperCase() : 'PR'}
+                      </span>
                     </div>
                   )}
                 </DropdownMenuTrigger>

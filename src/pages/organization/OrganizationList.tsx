@@ -16,6 +16,7 @@ import { useToast } from '@/hooks/use-toast'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useNavigationStore } from '@/stores/navigationStore'
+import { useLocation } from 'wouter'
 import { NewOrganizationModal } from '@/modals/NewOrganizationModal'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 
@@ -158,6 +159,7 @@ export default function OrganizationManagement() {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { setSidebarContext } = useNavigationStore()
+  const [, navigate] = useLocation()
 
   // Set sidebar context to 'organizations' when page loads
   useEffect(() => {
@@ -241,6 +243,7 @@ export default function OrganizationManagement() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['current-user'] })
       setSidebarContext('organization')
+      navigate('/organization/dashboard')
       toast({
         title: "Organización seleccionada",
         description: "La organización se ha seleccionado correctamente"
