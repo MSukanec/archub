@@ -24,7 +24,7 @@ interface Organization {
     name: string;
     max_projects: number;
     max_members: number;
-  };
+  } | null;
   members_count: number;
   projects_count: number;
 }
@@ -53,7 +53,12 @@ function useAllOrganizations() {
         `)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching organizations:', error);
+        throw error;
+      }
+
+      console.log('Organizations raw data:', data);
 
       // Obtener conteos de miembros y proyectos para cada organización
       const organizationsWithCounts = await Promise.all(
@@ -71,6 +76,7 @@ function useAllOrganizations() {
 
           return {
             ...org,
+            plan: org.plan && org.plan.length > 0 ? org.plan[0] : null,
             members_count: membersResult.count || 0,
             projects_count: projectsResult.count || 0
           };
@@ -164,15 +170,7 @@ export default function AdminOrganizations() {
     onSearchChange: setSearchValue,
     customFilters,
     onClearFilters: handleClearFilters,
-    actions: [
-      <Button 
-        key="new-organization" 
-        onClick={() => setShowModal(true)}
-        className="h-8 px-3 text-sm"
-      >
-        Nueva Organización
-      </Button>
-    ]
+    actions: []
   };
 
   const columns = [
@@ -282,7 +280,7 @@ export default function AdminOrganizations() {
           data={filteredOrganizations}
           columns={columns}
           isLoading={isLoading}
-          emptyMessage="No se encontraron organizaciones"
+          emptyState={<div className="text-center py-8 text-muted-foreground">No se encontraron organizaciones</div>}
           className="min-h-[400px]"
         />
       </div>
