@@ -94,6 +94,10 @@ export function Sidebar() {
       { icon: Activity, label: 'Actividad', href: '/organization/activity' },
       { icon: Users, label: 'Miembros', href: '/organization/members' },
       { icon: Settings, label: 'Preferencias', href: '/preferencias' },
+      { icon: Building, label: 'Gestión de Organizaciones', href: '#', onClick: () => { setSidebarContext('organizations'); navigate('/organizations'); } },
+    ],
+    organizations: [
+      // Minimal sidebar - only bottom section buttons
     ],
     project: [
       { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },

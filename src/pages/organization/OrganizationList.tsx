@@ -7,7 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { Building, Crown, Plus, Calendar, Shield, MoreHorizontal, Edit, Trash2, Users } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
@@ -158,6 +158,11 @@ export default function OrganizationManagement() {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { setSidebarContext } = useNavigationStore()
+
+  // Set sidebar context to 'organizations' when page loads
+  useEffect(() => {
+    setSidebarContext('organizations')
+  }, [])
 
   // Filtrar y ordenar organizaciones
   let filteredOrganizations = userData?.organizations?.filter(org => {
