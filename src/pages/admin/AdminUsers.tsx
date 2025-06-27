@@ -185,7 +185,7 @@ export default function AdminUsers() {
   const columns = [
     {
       key: 'created_at',
-      label: 'Fecha',
+      label: 'Fecha de Registro',
       width: '5%',
       render: (user: User) => (
         <span className="text-xs text-muted-foreground">
@@ -194,9 +194,18 @@ export default function AdminUsers() {
       )
     },
     {
+      key: 'last_activity_at',
+      label: 'Última Actividad',
+      width: '5%',
+      render: (user: User) => (
+        <span className="text-xs text-muted-foreground">
+          {format(new Date(user.last_activity_at), 'dd/MM/yy', { locale: es })}
+        </span>
+      )
+    },
+    {
       key: 'full_name',
       label: 'Usuario',
-      width: '35%',
       render: (user: User) => (
         <div className="flex items-center gap-2">
           <Avatar className="h-6 w-6">
@@ -213,16 +222,6 @@ export default function AdminUsers() {
       )
     },
     {
-      key: 'is_active',
-      label: 'Estado',
-      width: '5%',
-      render: (user: User) => (
-        <Badge variant={user.is_active ? 'default' : 'secondary'} className="text-xs">
-          {user.is_active ? 'Activo' : 'Inactivo'}
-        </Badge>
-      )
-    },
-    {
       key: 'organizations_count',
       label: 'Organizaciones',
       width: '5%',
@@ -234,31 +233,13 @@ export default function AdminUsers() {
       )
     },
     {
-      key: 'last_activity_at',
-      label: 'Última Actividad',
+      key: 'is_active',
+      label: 'Estado',
       width: '5%',
       render: (user: User) => (
-        <span className="text-xs text-muted-foreground">
-          {format(new Date(user.last_activity_at), 'dd/MM/yy', { locale: es })}
-        </span>
-      )
-    },
-    {
-      key: 'created_by',
-      label: 'Creador',
-      width: '30%',
-      render: (user: User) => (
-        <div className="flex items-center gap-2">
-          <Avatar className="h-6 w-6">
-            <AvatarFallback className="text-xs">
-              SY
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col">
-            <span className="font-medium text-sm">Sistema</span>
-            <span className="text-xs text-muted-foreground">Registro automático</span>
-          </div>
-        </div>
+        <Badge variant={user.is_active ? 'default' : 'secondary'} className="text-xs">
+          {user.is_active ? 'Activo' : 'Inactivo'}
+        </Badge>
       )
     },
     {
@@ -326,20 +307,7 @@ export default function AdminUsers() {
     onSearchChange: setSearchValue,
     customFilters,
     onClearFilters: clearFilters,
-    actions: [
-      <Button 
-        key="new-user"
-        onClick={() => {
-          setEditingUser(null)
-          setNewUserModalOpen(true)
-        }}
-        size="sm"
-        className="gap-2"
-      >
-        <Plus className="h-4 w-4" />
-        Nuevo Usuario
-      </Button>
-    ]
+    actions: []
   }
 
   return (
@@ -402,15 +370,53 @@ export default function AdminUsers() {
         />
       </div>
 
-      {/* Modal temporalmente deshabilitado */}
-      {/* <NewAdminUserModal
-        open={newUserModalOpen}
-        onClose={() => {
-          setNewUserModalOpen(false)
-          setEditingUser(null)
-        }}
-        user={editingUser}
-      /> */}
+      {/* Simple Edit Modal */}
+      {newUserModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-6 w-full max-w-md mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">Editar Usuario</h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setNewUserModalOpen(false)
+                  setEditingUser(null)
+                }}
+              >
+                ×
+              </Button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Nombre:</label>
+                <p className="text-sm text-muted-foreground">{editingUser?.full_name || 'Sin nombre'}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Email:</label>
+                <p className="text-sm text-muted-foreground">{editingUser?.email}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Estado:</label>
+                <p className="text-sm text-muted-foreground">
+                  {editingUser?.is_active ? 'Activo' : 'Inactivo'}
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-6">
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setNewUserModalOpen(false)
+                  setEditingUser(null)
+                }}
+              >
+                Cerrar
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <AlertDialog open={!!deletingUser} onOpenChange={() => setDeletingUser(null)}>
         <AlertDialogContent>

@@ -119,6 +119,17 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 27, 2025. Complete user management system implementation with professional table interface
+  • Created AdminUsers.tsx page with comprehensive user management functionality and statistics cards
+  • Added "Gestión de Usuarios" navigation button to admin sidebar for full user administration
+  • Implemented user table with custom column specifications: 5% width for all columns except "Usuario" (remaining width)
+  • Applied specific column ordering: Fecha de Registro, Última Actividad, Usuario, Organizaciones, Estado, Acciones
+  • Removed "Sistema" column and "Nuevo usuario" button as requested, cleaned interface for viewing only
+  • Fixed edit button functionality with simple modal displaying user information for review
+  • Enhanced filtering system with sort options, status filters, and search functionality for user management
+  • Statistics cards show Total Users, Active Users, Inactive Users, and Recent Registrations counts
+  • All data sourced from authentic Supabase database with proper error handling and loading states
+
 - June 27, 2025. Fixed critical modal issues after 15-day movement modal debugging session
   • FIXED: Admin organization modal Plan field timing issue - now waits for plans data before setting values
   • FIXED: Movement modal creator field now defaults to current user automatically on modal open
