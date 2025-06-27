@@ -23,6 +23,8 @@ interface CustomTableProps<T = any> {
   selectedItems?: T[]
   onSelectionChange?: (selectedItems: T[]) => void
   getItemId?: (item: T) => string | number
+  // Nueva prop para personalizar el estilo de las filas
+  getRowClassName?: (item: T) => string
 }
 
 export function CustomTable<T = any>({ 
@@ -34,7 +36,8 @@ export function CustomTable<T = any>({
   selectable = false,
   selectedItems = [],
   onSelectionChange,
-  getItemId = (item: T) => (item as any).id
+  getItemId = (item: T) => (item as any).id,
+  getRowClassName
 }: CustomTableProps<T>) {
   const [sortKey, setSortKey] = useState<string | null>(null)
   const [sortDirection, setSortDirection] = useState<SortDirection>(null)
@@ -238,7 +241,8 @@ export function CustomTable<T = any>({
               className={cn(
                 "grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] border-b border-[var(--table-row-border)] hover:bg-[var(--table-row-hover-bg)] transition-colors",
                 selectable && isItemSelected(item) && "bg-[var(--accent-bg)] border-[var(--accent)]",
-                index === sortedData.length - 1 && "border-b-0"
+                index === sortedData.length - 1 && "border-b-0",
+                getRowClassName?.(item)
               )}
               style={{ gridTemplateColumns: getGridTemplateColumns() }}
             >

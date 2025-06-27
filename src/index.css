@@ -101,6 +101,12 @@
   --table-row-border: hsl(0, 0%, 90%);
   --table-row-hover-bg: hsl(0, 0%, 98%);
 
+  /* Movement Row Gradients */
+  --movement-income-bg: linear-gradient(to right, hsl(142, 70%, 45%), hsl(142, 20%, 96%));
+  --movement-expense-bg: linear-gradient(to right, hsl(0, 70%, 50%), hsl(0, 20%, 96%));
+  --movement-income-border: hsl(142, 70%, 45%);
+  --movement-expense-border: hsl(0, 70%, 50%);
+
   /* Borders and Rings */
   --border-default: hsl(240, 6%, 90%);
   --border-strong: hsl(240, 8%, 80%);

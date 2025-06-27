@@ -387,7 +387,7 @@ export default function Movements() {
       sortable: true,
       sortType: "string" as const,
       render: (movement: Movement) => (
-        <div className="space-y-1">
+        <div>
           <div className="text-xs font-medium">
             {movement.movement_data?.category?.name || "Sin categoría"}
           </div>
