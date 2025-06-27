@@ -197,6 +197,31 @@ export default function Movements() {
     }
   };
 
+  // Get unique types, categories, and subcategories from actual data
+  const availableTypes = Array.from(
+    new Set(
+      movements
+        .map((m) => m.movement_data?.type?.name)
+        .filter(Boolean)
+    )
+  );
+
+  const availableCategories = Array.from(
+    new Set(
+      movements
+        .map((m) => m.movement_data?.category?.name)
+        .filter(Boolean)
+    )
+  );
+
+  const availableSubcategories = Array.from(
+    new Set(
+      movements
+        .map((m) => m.movement_data?.subcategory?.name)
+        .filter(Boolean)
+    )
+  );
+
   // Filter movements
   const filteredMovements = movements
     .filter((movement) => {
@@ -208,6 +233,9 @@ export default function Movements() {
           ?.toLowerCase()
           .includes(searchValue.toLowerCase()) ||
         movement.movement_data?.category?.name
+          ?.toLowerCase()
+          .includes(searchValue.toLowerCase()) ||
+        movement.movement_data?.subcategory?.name
           ?.toLowerCase()
           .includes(searchValue.toLowerCase());
 
@@ -279,8 +307,11 @@ export default function Movements() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos los tipos</SelectItem>
-            <SelectItem value="ingreso">Ingresos</SelectItem>
-            <SelectItem value="gasto">Gastos</SelectItem>
+            {availableTypes.map((type) => (
+              <SelectItem key={type} value={type!}>
+                {type}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
@@ -295,9 +326,11 @@ export default function Movements() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todas las categorías</SelectItem>
-            <SelectItem value="materiales">Materiales</SelectItem>
-            <SelectItem value="mano_obra">Mano de obra</SelectItem>
-            <SelectItem value="equipos">Equipos</SelectItem>
+            {availableCategories.map((category) => (
+              <SelectItem key={category} value={category!}>
+                {category}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
@@ -534,6 +567,7 @@ export default function Movements() {
         selectedItems={selectedMovements}
         onSelectionChange={setSelectedMovements}
         getItemId={(movement) => movement.id}
+        onCardClick={(movement: Movement) => handleEdit(movement)}
         emptyState={
           <CustomEmptyState 
             title="No hay movimientos registrados"
