@@ -119,6 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 27, 2025. Enhanced table action buttons and materials table layout improvements
+  • Fixed button hover effects across all tables to use --button-ghost-hover-bg CSS variable for consistent styling
+  • Updated materials table column order to: Fecha de Creación, Material, Categoría, Unidad, Costo, Acciones
+  • Applied proper column width distribution: 5% for Fecha de Creación, Unidad, Costo, and Acciones; remaining width split between Material and Categoría
+  • Replaced dropdown action menus with individual action buttons (edit, delete, favorite) displayed side by side
+  • Enhanced favorite functionality with Heart icon that toggles is_favorite column in movements table
+  • Improved CustomModalFooter component to support disabled states and loading indicators with proper prop handling
+  • All action buttons now use consistent hover styling with --button-ghost-hover-bg CSS variable
+
 - June 27, 2025. Complete materials management system implementation with professional admin interface
   • Created AdminMaterials.tsx page with comprehensive materials management functionality and statistics cards
   • Built NewAdminMaterialModal.tsx for creating and editing materials with proper form validation

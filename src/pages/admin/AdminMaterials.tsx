@@ -99,7 +99,7 @@ export default function AdminMaterials() {
     {
       key: 'created_at',
       label: 'Fecha de Creación',
-      width: '15%',
+      width: '5%',
       render: (material: Material) => (
         <span className="text-xs text-muted-foreground">
           {format(new Date(material.created_at), 'dd/MM/yy', { locale: es })}
@@ -117,29 +117,8 @@ export default function AdminMaterials() {
       )
     },
     {
-      key: 'cost',
-      label: 'Costo',
-      width: '15%',
-      render: (material: Material) => (
-        <Badge variant="outline" className="text-xs">
-          ${material.cost?.toLocaleString() || '0'}
-        </Badge>
-      )
-    },
-    {
-      key: 'unit_id',
-      label: 'Unidad',
-      width: '15%',
-      render: (material: Material) => (
-        <span className="text-xs text-muted-foreground">
-          {material.unit?.name || 'N/A'}
-        </span>
-      )
-    },
-    {
       key: 'category_id',
       label: 'Categoría',
-      width: '15%',
       render: (material: Material) => (
         <span className="text-xs text-muted-foreground">
           {material.category?.name || 'N/A'}
@@ -147,15 +126,35 @@ export default function AdminMaterials() {
       )
     },
     {
+      key: 'unit_id',
+      label: 'Unidad',
+      width: '5%',
+      render: (material: Material) => (
+        <span className="text-xs text-muted-foreground">
+          {material.unit?.name || 'N/A'}
+        </span>
+      )
+    },
+    {
+      key: 'cost',
+      label: 'Costo',
+      width: '5%',
+      render: (material: Material) => (
+        <Badge variant="outline" className="text-xs">
+          ${material.cost?.toLocaleString() || '0'}
+        </Badge>
+      )
+    },
+    {
       key: 'actions',
       label: 'Acciones',
-      width: '10%',
+      width: '5%',
       render: (material: Material) => (
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="sm"
-            className="h-6 w-6 p-0"
+            className="h-6 w-6 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
             onClick={() => handleEdit(material)}
           >
             <Edit className="h-3 w-3" />
@@ -163,7 +162,7 @@ export default function AdminMaterials() {
           <Button
             variant="ghost"
             size="sm"
-            className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
+            className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-[var(--button-ghost-hover-bg)]"
             onClick={() => handleDelete(material)}
           >
             <Trash2 className="h-3 w-3" />

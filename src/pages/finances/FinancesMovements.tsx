@@ -513,7 +513,7 @@ export default function Movements() {
           <Button
             variant="ghost"
             size="sm"
-            className={`h-6 w-6 p-0 ${movement.is_favorite ? 'text-red-500' : 'text-muted-foreground'}`}
+            className={`h-6 w-6 p-0 hover:bg-[var(--button-ghost-hover-bg)] ${movement.is_favorite ? 'text-red-500' : 'text-muted-foreground'}`}
             onClick={() => handleToggleFavorite(movement)}
           >
             <Heart className={`h-3 w-3 ${movement.is_favorite ? 'fill-current' : ''}`} />
@@ -521,7 +521,7 @@ export default function Movements() {
           <Button
             variant="ghost"
             size="sm"
-            className="h-6 w-6 p-0"
+            className="h-6 w-6 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
             onClick={() => handleEdit(movement)}
           >
             <Edit className="h-3 w-3" />
@@ -529,7 +529,7 @@ export default function Movements() {
           <Button
             variant="ghost"
             size="sm"
-            className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
+            className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-[var(--button-ghost-hover-bg)]"
             onClick={() => handleDelete(movement)}
           >
             <Trash2 className="h-3 w-3" />
