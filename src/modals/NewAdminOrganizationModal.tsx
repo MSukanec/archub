@@ -118,9 +118,14 @@ export function NewAdminOrganizationModal({ open, onClose, organization }: NewAd
 
   // Set initial values when organization is provided
   useEffect(() => {
-    if (organization && plans) {
+    if (organization && plans && plans.length > 0) {
       console.log('Setting initial organization values:', organization);
       console.log('Plans available:', plans);
+      
+      // Verify the plan exists in the plans array
+      const planExists = plans.find(p => p.id === organization.plan_id);
+      console.log('Plan exists in array:', planExists);
+      
       setName(organization.name || '');
       setSelectedDate(new Date(organization.created_at));
       setPlanId(organization.plan_id || '');

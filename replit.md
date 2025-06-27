@@ -119,14 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- June 27, 2025. Complete admin organization modal with creator search and plan field fixes
-  • Fixed Plan field in NewAdminOrganizationModal to properly display and select available plans
-  • Added Creator field in second position with advanced user search functionality
-  • User search activates after 3+ characters, searches both full_name and email in users table
-  • Creator field shows selected user with avatar styling and proper visual feedback
-  • Modal now includes created_by field in database saves for complete organization tracking
-  • Enhanced modal with proper form validation requiring name, plan, and creator fields
-  • All CRUD operations now work correctly with authentic Supabase data integration
+- June 27, 2025. Fixed critical modal issues after 15-day movement modal debugging session
+  • FIXED: Admin organization modal Plan field timing issue - now waits for plans data before setting values
+  • FIXED: Movement modal creator field now defaults to current user automatically on modal open
+  • FIXED: Movement modal field clearing issue - removed aggressive form resets that caused data loss
+  • Enhanced data loading sequence: currency/wallet fields now access correct nested properties
+  • Added proper form state management with shouldValidate: false to prevent field conflicts
+  • Movement modal successfully pre-populates all fields: creator, currency, wallet without clearing
+  • Admin modal Plan field now displays selected plan correctly with proper database column names
+  • Both modals now work completely with authentic Supabase data and proper error handling
 
 - June 27, 2025. Complete admin functionality with statistics cards and optimized table layout
   • Enhanced AdminOrganizations.tsx with statistics cards showing Total Organizations, Free Plan, Pro Plan, and Teams Plan counts

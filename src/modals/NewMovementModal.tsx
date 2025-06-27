@@ -88,26 +88,28 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
 
   // Auto-select current user and defaults
   useEffect(() => {
-    if (!editingMovement) {
-      if (members && currentUser?.user?.id) {
+    if (!editingMovement && open) {
+      const currentValues = form.getValues();
+      
+      if (members && currentUser?.user?.id && !currentValues.created_by) {
         const currentMember = members.find(m => m.user_id === currentUser.user.id)
         if (currentMember) {
           console.log('Setting default creator:', currentMember);
-          form.setValue('created_by', currentMember.id)
+          form.setValue('created_by', currentMember.id, { shouldValidate: false, shouldDirty: false })
         }
       }
-      if (currencies && currencies.length > 0) {
+      if (currencies && currencies.length > 0 && !currentValues.currency_id) {
         const defaultCurrency = currencies.find(c => c.is_default) || currencies[0]
         console.log('Setting default currency:', defaultCurrency);
-        form.setValue('currency_id', defaultCurrency.id)
+        form.setValue('currency_id', defaultCurrency.id, { shouldValidate: false, shouldDirty: false })
       }
-      if (wallets && wallets.length > 0) {
+      if (wallets && wallets.length > 0 && !currentValues.wallet_id) {
         const defaultWallet = wallets.find(w => w.is_default) || wallets[0]
         console.log('Setting default wallet:', defaultWallet);
-        form.setValue('wallet_id', defaultWallet.id)
+        form.setValue('wallet_id', defaultWallet.id, { shouldValidate: false, shouldDirty: false })
       }
     }
-  }, [members, currentUser, currencies, wallets, form, editingMovement])
+  }, [members, currentUser, currencies, wallets, form, editingMovement, open])
 
   // Load editing data - set state variables first
   useEffect(() => {
@@ -210,7 +212,20 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         description: `El movimiento ha sido ${editingMovement ? 'actualizado' : 'creado'} exitosamente.`,
       })
       onClose()
-      form.reset()
+      // Don't reset immediately, let the modal close first
+      setTimeout(() => {
+        form.reset({
+          created_at: new Date(),
+          amount: 0,
+          description: '',
+          created_by: '',
+          type_id: '',
+          category_id: '',
+          subcategory_id: '',
+          currency_id: '',
+          wallet_id: ''
+        })
+      }, 100)
     },
     onError: (error) => {
       console.error('Error saving movement:', error)
@@ -223,6 +238,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
   })
 
   const onSubmit = (data: MovementForm) => {
+    console.log('Submitting movement data:', data);
     createMovementMutation.mutate(data)
   }
 
