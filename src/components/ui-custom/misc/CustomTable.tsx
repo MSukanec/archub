@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react'
-import { ChevronUp, ChevronDown, ArrowUpDown } from 'lucide-react'
+import { ChevronUp, ChevronDown, ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 type SortDirection = 'asc' | 'desc' | null
@@ -44,6 +45,10 @@ export function CustomTable<T = any>({
 }: CustomTableProps<T>) {
   const [sortKey, setSortKey] = useState<string | null>(null)
   const [sortDirection, setSortDirection] = useState<SortDirection>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  
+  const itemsPerPage = 10
+  const showPagination = data.length > itemsPerPage
 
   // Selection logic
   const isAllSelected = selectable && data.length > 0 && selectedItems.length === data.length
@@ -152,6 +157,19 @@ export function CustomTable<T = any>({
       return 0
     })
   }, [data, sortKey, sortDirection, columns])
+
+  // Pagination calculations
+  const totalPages = Math.ceil(sortedData.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const paginatedData = showPagination ? sortedData.slice(startIndex, endIndex) : sortedData
+
+  // Reset page when data changes
+  useMemo(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(1)
+    }
+  }, [sortedData.length, currentPage, totalPages])
   
   if (isLoading) {
     return (

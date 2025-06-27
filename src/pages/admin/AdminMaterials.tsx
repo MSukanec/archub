@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+
 import { Layout } from '@/components/layout/Layout'
 import { CustomTable } from '@/components/ui-custom/misc/CustomTable'
 import { NewAdminMaterialModal } from '@/modals/NewAdminMaterialModal'
@@ -149,6 +149,7 @@ export default function AdminMaterials() {
     {
       key: 'name',
       label: 'Material',
+      width: '50%',
       render: (material: Material) => (
         <div className="flex items-center gap-2">
           <Package className="h-4 w-4 text-muted-foreground" />
@@ -159,7 +160,7 @@ export default function AdminMaterials() {
     {
       key: 'category_id',
       label: 'Categoría',
-      width: '5%',
+      width: '50%',
       render: (material: Material) => (
         <span className="text-xs text-muted-foreground">
           {material.category?.name || 'N/A'}
@@ -191,23 +192,24 @@ export default function AdminMaterials() {
       label: 'Acciones',
       width: '5%',
       render: (material: Material) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-              <MoreHorizontal className="h-3 w-3" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => handleEdit(material)}>
-              <Edit className="mr-2 h-3 w-3" />
-              Editar
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleDelete(material)} className="text-red-600">
-              <Trash2 className="mr-2 h-3 w-3" />
-              Eliminar
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 w-6 p-0"
+            onClick={() => handleEdit(material)}
+          >
+            <Edit className="h-3 w-3" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
+            onClick={() => handleDelete(material)}
+          >
+            <Trash2 className="h-3 w-3" />
+          </Button>
+        </div>
       )
     }
   ]
