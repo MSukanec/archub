@@ -54,6 +54,7 @@ interface Movement {
   project_id: string;
   type_id: string;
   category_id: string;
+  subcategory_id?: string;
   currency_id: string;
   wallet_id: string;
   movement_data?: {
@@ -62,6 +63,10 @@ interface Movement {
       name: string;
     };
     category?: {
+      id: string;
+      name: string;
+    };
+    subcategory?: {
       id: string;
       name: string;
     };
@@ -323,7 +328,7 @@ export default function Movements() {
     {
       key: "created_at",
       label: "Fecha",
-      width: "10%",
+      width: "7.5%",
       sortable: true,
       sortType: "date" as const,
       render: (movement: Movement) => (
@@ -342,7 +347,7 @@ export default function Movements() {
     {
       key: "creator",
       label: "Creador",
-      width: "10%",
+      width: "7.5%",
       sortable: true,
       sortType: "string" as const,
       render: (movement: Movement) => (
@@ -366,7 +371,7 @@ export default function Movements() {
     {
       key: "type",
       label: "Tipo",
-      width: "10%",
+      width: "7.5%",
       sortable: true,
       sortType: "string" as const,
       render: (movement: Movement) => (
@@ -376,6 +381,9 @@ export default function Movements() {
           </div>
           <div className="text-xs text-muted-foreground">
             {movement.movement_data?.category?.name || "Sin categoría"}
+            {movement.movement_data?.subcategory?.name && 
+              ` / ${movement.movement_data.subcategory.name}`
+            }
           </div>
         </div>
       ),
@@ -394,7 +402,7 @@ export default function Movements() {
     {
       key: "currency",
       label: "Moneda",
-      width: "10%",
+      width: "7.5%",
       sortable: true,
       sortType: "string" as const,
       render: (movement: Movement) => (
@@ -406,7 +414,7 @@ export default function Movements() {
     {
       key: "wallet",
       label: "Billetera",
-      width: "10%",
+      width: "7.5%",
       sortable: true,
       sortType: "string" as const,
       render: (movement: Movement) => (
@@ -418,7 +426,7 @@ export default function Movements() {
     {
       key: "amount",
       label: "Cantidad",
-      width: "10%",
+      width: "7.5%",
       sortable: true,
       sortType: "number" as const,
       render: (movement: Movement) => (
@@ -430,7 +438,7 @@ export default function Movements() {
     {
       key: "actions",
       label: "Acciones",
-      width: "10%",
+      width: "7.5%",
       sortable: false,
       render: (movement: Movement) => (
         <DropdownMenu>

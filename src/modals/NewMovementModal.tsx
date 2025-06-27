@@ -107,19 +107,26 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
   // Load editing data
   useEffect(() => {
     if (editingMovement) {
-      form.setValue('created_at', new Date(editingMovement.created_at))
-      form.setValue('created_by', editingMovement.created_by)
-      form.setValue('description', editingMovement.description || '')
-      form.setValue('amount', editingMovement.amount)
-      form.setValue('type_id', editingMovement.type_id)
-      form.setValue('category_id', editingMovement.category_id || '')
-      form.setValue('subcategory_id', editingMovement.subcategory_id || '')
-      form.setValue('currency_id', editingMovement.currency_id)
-      form.setValue('wallet_id', editingMovement.wallet_id)
+      // Reset form first to clear any previous state
+      form.reset({
+        created_at: new Date(editingMovement.created_at),
+        created_by: editingMovement.created_by,
+        description: editingMovement.description || '',
+        amount: editingMovement.amount,
+        type_id: editingMovement.type_id,
+        category_id: editingMovement.category_id || '',
+        subcategory_id: editingMovement.subcategory_id || '',
+        currency_id: editingMovement.currency_id,
+        wallet_id: editingMovement.wallet_id
+      })
       
       // Set state variables for dependent dropdowns
       setSelectedTypeId(editingMovement.type_id)
       setSelectedCategoryId(editingMovement.category_id || '')
+    } else {
+      // Reset state when not editing
+      setSelectedTypeId('')
+      setSelectedCategoryId('')
     }
   }, [editingMovement, form])
 

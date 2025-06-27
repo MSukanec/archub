@@ -11,6 +11,7 @@ interface Movement {
   project_id: string
   type_id: string
   category_id: string
+  subcategory_id?: string
   currency_id: string
   wallet_id: string
   movement_data?: {
@@ -19,6 +20,10 @@ interface Movement {
       name: string
     }
     category?: {
+      id: string
+      name: string
+    }
+    subcategory?: {
       id: string
       name: string
     }
