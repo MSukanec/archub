@@ -119,6 +119,14 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 27, 2025. Complete admin functionality with statistics cards and optimized table layout
+  • Enhanced AdminOrganizations.tsx with statistics cards showing Total Organizations, Free Plan, Pro Plan, and Teams Plan counts
+  • Implemented wide layout setting for better table display across full viewport width
+  • Updated table column widths: Fecha (10%), Organización (30%), Creador (25%), Plan (8%), Miembros (7%), Proyectos (7%), Estado (8%), Acciones (5%)
+  • Added Crown icons with color coding for different plan types in statistics cards
+  • Statistics cards automatically calculate organization counts by plan type from real Supabase data
+  • Table now provides optimal viewing experience with proper column proportions for data display
+
 - June 27, 2025. Complete admin functionality implementation with sidebar navigation and organization management
   • Created AdminDashboard.tsx with system statistics and recent organizations overview
   • Built AdminOrganizations.tsx with complete table interface following ai-page-template.md structure
