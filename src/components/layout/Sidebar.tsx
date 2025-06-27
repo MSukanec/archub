@@ -311,61 +311,66 @@ export function Sidebar() {
 
       {/* Plan Section - Above Divider */}
       <div className="p-1">
-        <div className="flex justify-center w-full">
-          {isExpanded ? (
-            <div className={cn(
-              "w-full border rounded-lg p-3",
-              (!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "bg-gray-50 border-gray-200",
-              userData?.plan?.name?.toLowerCase() === 'pro' && "bg-blue-50 border-blue-200",
-              userData?.plan?.name?.toLowerCase() === 'teams' && "bg-purple-50 border-purple-200"
-            )}>
-              <div className="flex items-center gap-2 mb-2">
-                <div className={cn(
-                  "w-5 h-5 rounded-full flex items-center justify-center",
-                  (!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "bg-[var(--accent)]",
-                  userData?.plan?.name?.toLowerCase() === 'pro' && "bg-blue-500",
-                  userData?.plan?.name?.toLowerCase() === 'teams' && "bg-purple-500"
-                )}>
-                  {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && <Star className="w-3 h-3 text-white" />}
-                  {userData?.plan?.name?.toLowerCase() === 'pro' && <Crown className="w-3 h-3 text-white" />}
-                  {userData?.plan?.name?.toLowerCase() === 'teams' && <Zap className="w-3 h-3 text-white" />}
+        <div className="flex justify-center w-full transition-all duration-300 ease-in-out">
+          <div className={cn(
+            "transition-all duration-300 ease-in-out",
+            isExpanded ? "w-full opacity-100" : "w-8 h-8 opacity-100"
+          )}>
+            {isExpanded ? (
+              <div className={cn(
+                "w-full border rounded-lg p-3 transition-all duration-300 ease-in-out transform",
+                (!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "bg-gray-50 border-gray-200",
+                userData?.plan?.name?.toLowerCase() === 'pro' && "bg-blue-50 border-blue-200",
+                userData?.plan?.name?.toLowerCase() === 'teams' && "bg-purple-50 border-purple-200"
+              )}>
+                <div className="flex items-center gap-2 mb-2 transition-opacity duration-200 delay-100">
+                  <div className={cn(
+                    "w-5 h-5 rounded-full flex items-center justify-center transition-all duration-200",
+                    (!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "bg-[var(--accent)]",
+                    userData?.plan?.name?.toLowerCase() === 'pro' && "bg-blue-500",
+                    userData?.plan?.name?.toLowerCase() === 'teams' && "bg-purple-500"
+                  )}>
+                    {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && <Star className="w-3 h-3 text-white" />}
+                    {userData?.plan?.name?.toLowerCase() === 'pro' && <Crown className="w-3 h-3 text-white" />}
+                    {userData?.plan?.name?.toLowerCase() === 'teams' && <Zap className="w-3 h-3 text-white" />}
+                  </div>
+                  <span className="text-xs font-medium text-gray-600">Plan actual:</span>
                 </div>
-                <span className="text-xs font-medium text-gray-600">Plan actual:</span>
+                <div className="mb-2 transition-opacity duration-200 delay-150">
+                  <span className={cn(
+                    "text-sm font-semibold capitalize",
+                    (!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "text-[var(--accent)]",
+                    userData?.plan?.name?.toLowerCase() === 'pro' && "text-blue-600",
+                    userData?.plan?.name?.toLowerCase() === 'teams' && "text-purple-600"
+                  )}>
+                    {userData?.plan?.name || 'Free'}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500 mb-3 transition-opacity duration-200 delay-200">
+                  {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "Actualiza para obtener las últimas y exclusivas funcionalidades"}
+                  {userData?.plan?.name?.toLowerCase() === 'pro' && "Todas las funcionalidades profesionales"}
+                  {userData?.plan?.name?.toLowerCase() === 'teams' && "Máximo rendimiento para equipos"}
+                </p>
+                {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && (
+                  <button className="w-full py-2 px-3 rounded-lg text-xs font-medium bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center gap-1 transition-all duration-200 delay-250">
+                    <Zap className="w-3 h-3" />
+                    Upgrade to Pro
+                  </button>
+                )}
               </div>
-              <div className="mb-2">
-                <span className={cn(
-                  "text-sm font-semibold capitalize",
-                  (!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "text-[var(--accent)]",
-                  userData?.plan?.name?.toLowerCase() === 'pro' && "text-blue-600",
-                  userData?.plan?.name?.toLowerCase() === 'teams' && "text-purple-600"
-                )}>
-                  {userData?.plan?.name || 'Free'}
-                </span>
+            ) : (
+              <div className={cn(
+                "w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 ease-in-out",
+                (!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "bg-[var(--accent)]",
+                userData?.plan?.name?.toLowerCase() === 'pro' && "bg-blue-500",
+                userData?.plan?.name?.toLowerCase() === 'teams' && "bg-purple-500"
+              )}>
+                {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && <Star className="w-4 h-4 text-white transition-all duration-200" />}
+                {userData?.plan?.name?.toLowerCase() === 'pro' && <Crown className="w-4 h-4 text-white transition-all duration-200" />}
+                {userData?.plan?.name?.toLowerCase() === 'teams' && <Zap className="w-4 h-4 text-white transition-all duration-200" />}
               </div>
-              <p className="text-xs text-gray-500 mb-3">
-                {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "Actualiza para obtener las últimas y exclusivas funcionalidades"}
-                {userData?.plan?.name?.toLowerCase() === 'pro' && "Todas las funcionalidades profesionales"}
-                {userData?.plan?.name?.toLowerCase() === 'teams' && "Máximo rendimiento para equipos"}
-              </p>
-              {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && (
-                <button className="w-full py-2 px-3 rounded-lg text-xs font-medium bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center gap-1 transition-colors">
-                  <Zap className="w-3 h-3" />
-                  Upgrade to Pro
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className={cn(
-              "w-8 h-8 rounded-full flex items-center justify-center cursor-pointer",
-              (!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "bg-[var(--accent)]",
-              userData?.plan?.name?.toLowerCase() === 'pro' && "bg-blue-500",
-              userData?.plan?.name?.toLowerCase() === 'teams' && "bg-purple-500"
-            )}>
-              {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && <Star className="w-4 h-4 text-white" />}
-              {userData?.plan?.name?.toLowerCase() === 'pro' && <Crown className="w-4 h-4 text-white" />}
-              {userData?.plan?.name?.toLowerCase() === 'teams' && <Zap className="w-4 h-4 text-white" />}
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
