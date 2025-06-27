@@ -370,14 +370,14 @@ export function Sidebar() {
               </div>
             ) : (
               <div className={cn(
-                "w-8 h-8 rounded-full border-2 bg-white flex items-center justify-center cursor-pointer transition-all duration-500 ease-out hover:scale-105",
+                "w-8 h-8 rounded-full border-2 bg-white flex items-center justify-center cursor-pointer transition-all duration-150 ease-out hover:scale-105",
                 (!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "border-[var(--accent)]",
                 userData?.plan?.name?.toLowerCase() === 'pro' && "border-blue-500",
                 userData?.plan?.name?.toLowerCase() === 'teams' && "border-purple-500"
               )}>
-                {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && <Star className="w-4 h-4 text-[var(--accent)] transition-all duration-300" />}
-                {userData?.plan?.name?.toLowerCase() === 'pro' && <Crown className="w-4 h-4 text-blue-500 transition-all duration-300" />}
-                {userData?.plan?.name?.toLowerCase() === 'teams' && <Zap className="w-4 h-4 text-purple-500 transition-all duration-300" />}
+                {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && <Star className="w-4 h-4 text-[var(--accent)] transition-all duration-150" />}
+                {userData?.plan?.name?.toLowerCase() === 'pro' && <Crown className="w-4 h-4 text-blue-500 transition-all duration-150" />}
+                {userData?.plan?.name?.toLowerCase() === 'teams' && <Zap className="w-4 h-4 text-purple-500 transition-all duration-150" />}
               </div>
             )}
           </div>

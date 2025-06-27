@@ -56,11 +56,11 @@ export function useMaterialCategories() {
 
       return (data || []).map(item => ({
         ...item,
-        creator: item.creator?.user ? {
-          id: item.creator.user.id,
-          full_name: item.creator.user.full_name,
-          email: item.creator.user.email,
-          avatar_url: item.creator.user.avatar_url
+        creator: item.creator?.user?.[0] ? {
+          id: item.creator.user[0].id,
+          full_name: item.creator.user[0].full_name,
+          email: item.creator.user[0].email,
+          avatar_url: item.creator.user[0].avatar_url
         } : undefined
       })) as MaterialCategory[];
     },
