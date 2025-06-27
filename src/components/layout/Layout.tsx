@@ -36,7 +36,7 @@ export function Layout({ children }: LayoutProps) {
       <main
         className="transition-all duration-300 ease-in-out p-6"
         style={{
-          marginLeft: isExpanded ? "240px" : "64px",
+          marginLeft: isExpanded ? "240px" : "40px",
         }}
       >
         {children}

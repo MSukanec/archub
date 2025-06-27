@@ -4,18 +4,18 @@ import { persist } from 'zustand/middleware'
 interface SidebarState {
   isExpanded: boolean
   openAccordions: string[]
-  context: 'general' | 'admin' | 'profile'
+  context: 'organization' | 'project' | 'admin'
   setExpanded: (expanded: boolean) => void
   toggleAccordion: (accordionId: string) => void
-  setContext: (context: 'general' | 'admin' | 'profile') => void
+  setContext: (context: 'organization' | 'project' | 'admin') => void
 }
 
 export const useSidebarStore = create<SidebarState>()(
   persist(
     (set, get) => ({
       isExpanded: false,
-      openAccordions: ['organizacion'], // Organización abierto por defecto
-      context: 'general',
+      openAccordions: [],
+      context: 'organization',
       setExpanded: (expanded: boolean) => set({ isExpanded: expanded }),
       toggleAccordion: (accordionId: string) => {
         const { openAccordions } = get()
@@ -25,7 +25,7 @@ export const useSidebarStore = create<SidebarState>()(
             : [...openAccordions, accordionId]
         })
       },
-      setContext: (context: 'general' | 'admin' | 'profile') => set({ context }),
+      setContext: (context: 'organization' | 'project' | 'admin') => set({ context }),
     }),
     {
       name: 'sidebar-store',

@@ -1,278 +1,219 @@
-import { useLocation } from "wouter";
-import { useCurrentUser } from "@/hooks/use-current-user";
-import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { Link, useLocation } from "wouter";
 import { 
-  Home, Users, Building, FileText, DollarSign, FolderOpen, Mail, Activity, 
-  Settings, UserCircle, ChevronDown, ChevronRight, Shield, User
+  Home, 
+  Building2, 
+  FolderOpen, 
+  Users, 
+  Activity, 
+  UserCheck, 
+  Settings, 
+  LayoutDashboard,
+  Palette,
+  HardHat,
+  DollarSign,
+  ShoppingCart,
+  ArrowLeft,
+  ChevronDown,
+  ChevronRight,
+  FileText
 } from "lucide-react";
+
 import { useSidebarStore } from "@/stores/sidebarStore";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useCurrentUser } from "@/hooks/use-current-user";
+
+interface MenuItem {
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  path?: string;
+  action?: () => void;
+  children?: MenuItem[];
+}
 
 export function Sidebar() {
-  const [location, navigate] = useLocation();
+  const [location] = useLocation();
+  const { isExpanded, setExpanded, context, setContext, openAccordions, toggleAccordion } = useSidebarStore();
   const { data: userData } = useCurrentUser();
-  const { isExpanded, openAccordions, setExpanded, toggleAccordion } = useSidebarStore();
 
-  const organizacionItems = [
-    { icon: Home, label: 'Resumen', href: '/organization/dashboard' },
-    { icon: FolderOpen, label: 'Proyectos', href: '/proyectos' },
-    { icon: Mail, label: 'Contactos', href: '/organization/contactos' },
-    { icon: Activity, label: 'Actividad', href: '/organization/activity' },
-    { icon: Users, label: 'Miembros', href: '/organization/members' },
-    { icon: Settings, label: 'Preferencias', href: '/preferencias' },
+  // Organization sidebar menu
+  const organizationMenu: MenuItem[] = [
+    { label: "Resumen", icon: Home, path: "/organization/dashboard" },
+    { label: "Proyectos", icon: FolderOpen, path: "/organization/projects" },
+    { label: "Contactos", icon: Users, path: "/organization/contacts" },
+    { label: "Actividad", icon: Activity, path: "/organization/activity" },
+    { label: "Miembros", icon: UserCheck, path: "/organization/members" },
+    { label: "Preferencias", icon: Settings, path: "/organization/preferences" },
   ];
 
-  const proyectoItems = [
-    { icon: Home, label: 'Dashboard', href: '/project/dashboard' },
-    { icon: FileText, label: 'Diseño', href: '/design/dashboard' },
+  // Project sidebar menu
+  const projectMenu: MenuItem[] = [
+    { label: "Dashboard", icon: LayoutDashboard, path: "/project/dashboard" },
+    { label: "Diseño", icon: Palette, path: "/project/design" },
+    { 
+      label: "Obra", 
+      icon: HardHat, 
+      children: [
+        { label: "Resumen de Obra", icon: Home, path: "/obra/dashboard" },
+        { label: "Bitácora", icon: FileText, path: "/obra/site-logs" },
+      ]
+    },
+    { 
+      label: "Finanzas", 
+      icon: DollarSign, 
+      children: [
+        { label: "Resumen de Finanzas", icon: Home, path: "/finanzas/dashboard" },
+        { label: "Movimientos", icon: FileText, path: "/finanzas/movimientos" },
+      ]
+    },
+    { label: "Comercialización", icon: ShoppingCart, path: "/project/commercialization" },
+    { 
+      label: "Volver", 
+      icon: ArrowLeft, 
+      action: () => setContext('organization')
+    },
   ];
 
-  const obraItems = [
-    { label: 'Resumen de Obra', href: '/construction/dashboard' },
-    { label: 'Bitácora', href: '/bitacora' },
-  ];
+  // Admin sidebar menu (empty for now)
+  const adminMenu: MenuItem[] = [];
 
-  const finanzasItems = [
-    { label: 'Resumen de Finanzas', href: '/finance/dashboard' },
-    { label: 'Movimientos', href: '/movimientos' },
-  ];
+  const getCurrentMenu = () => {
+    switch (context) {
+      case 'organization': return organizationMenu;
+      case 'project': return projectMenu;
+      case 'admin': return adminMenu;
+      default: return organizationMenu;
+    }
+  };
 
-  const isOrganizacionOpen = openAccordions.includes('organizacion');
-  const isProyectoOpen = openAccordions.includes('proyecto');
+  const handleMouseEnter = () => setExpanded(true);
+  const handleMouseLeave = () => setExpanded(false);
+
+  const renderMenuItem = (item: MenuItem, isChild = false) => {
+    const isActive = item.path && location === item.path;
+    const hasChildren = item.children && item.children.length > 0;
+    const isAccordionOpen = hasChildren && openAccordions.includes(item.label.toLowerCase());
+
+    const handleClick = () => {
+      if (item.action) {
+        item.action();
+      } else if (hasChildren) {
+        toggleAccordion(item.label.toLowerCase());
+      }
+    };
+
+    const content = (
+      <div 
+        className={`
+          flex items-center w-full h-10 rounded-lg transition-all duration-200
+          ${isActive ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]' : 'text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]'}
+          ${isChild ? 'ml-4' : ''}
+          ${!isExpanded ? 'justify-center' : 'px-2'}
+        `}
+        onClick={handleClick}
+      >
+        <item.icon className="w-4 h-4 flex-shrink-0" />
+        {isExpanded && (
+          <>
+            <span className="ml-2 text-sm font-medium flex-1">{item.label}</span>
+            {hasChildren && (
+              <span className="ml-auto">
+                {isAccordionOpen ? (
+                  <ChevronDown className="w-4 h-4" />
+                ) : (
+                  <ChevronRight className="w-4 h-4" />
+                )}
+              </span>
+            )}
+          </>
+        )}
+      </div>
+    );
+
+    if (item.path) {
+      return (
+        <Link key={item.label} href={item.path}>
+          {content}
+        </Link>
+      );
+    }
+
+    return (
+      <button key={item.label} className="w-full">
+        {content}
+      </button>
+    );
+  };
 
   return (
-    <aside 
-      className={cn(
-        "fixed top-0 left-0 h-screen bg-[var(--menues-bg)] border-r border-[var(--menues-border)] transition-all duration-300 z-50 flex flex-col",
-        isExpanded ? "w-[240px]" : "w-[64px]"
-      )}
-      onMouseEnter={() => setExpanded(true)}
-      onMouseLeave={() => setExpanded(false)}
+    <div
+      className="fixed left-0 top-0 z-50 h-full bg-[var(--menues-bg)] border-r border-[var(--menues-border)] flex flex-col transition-all duration-300 ease-in-out"
+      style={{ width: isExpanded ? '240px' : '40px' }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
-      {/* Context Switcher */}
-      <div className="p-3 border-b border-[var(--menues-border)]">
-        <button
-          disabled
-          className={cn(
-            "w-full flex items-center gap-3 p-2 rounded-lg text-xs font-medium transition-colors text-[var(--menues-fg)] opacity-50 cursor-not-allowed",
-            !isExpanded && "justify-center"
-          )}
-        >
-          <Shield className="w-4 h-4 flex-shrink-0" />
-          {isExpanded && <span>ADMINISTRACIÓN</span>}
-        </button>
-        <button
-          disabled
-          className={cn(
-            "w-full flex items-center gap-3 p-2 rounded-lg text-xs font-medium transition-colors text-[var(--menues-fg)] opacity-50 cursor-not-allowed mt-1",
-            !isExpanded && "justify-center"
-          )}
-        >
-          <User className="w-4 h-4 flex-shrink-0" />
-          {isExpanded && <span>PERFIL</span>}
-        </button>
+      {/* Logo */}
+      <div className="flex items-center justify-center h-10 mt-2 mb-2">
+        <Link href="/organization/dashboard">
+          <div className="w-10 h-10 bg-[var(--accent)] text-[var(--accent-foreground)] rounded-lg flex items-center justify-center font-bold text-lg hover:opacity-80 transition-opacity">
+            A
+          </div>
+        </Link>
       </div>
 
-      {/* GENERAL Section */}
-      <div className="p-3 border-b border-[var(--menues-border)]">
-        <div className="text-xs font-semibold text-[var(--menues-fg)] opacity-60">
-          {isExpanded ? 'GENERAL' : ''}
-        </div>
-      </div>
+      {/* Divider */}
+      <div className="h-px bg-[var(--menues-border)] mx-2 mb-2" />
 
-      {/* Accordion Sections */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="p-2 space-y-1">
-          {/* ORGANIZACIÓN Accordion */}
-          <div>
-            <button
-              className={cn(
-                "w-full flex items-center gap-3 p-2 rounded-lg text-xs font-medium transition-colors text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)]",
-                !isExpanded && "justify-center"
-              )}
-              onClick={() => toggleAccordion('organizacion')}
-            >
-              <Building className="w-4 h-4 flex-shrink-0" />
-              {isExpanded && (
-                <>
-                  <span className="flex-1 text-left">ORGANIZACIÓN</span>
-                  {isOrganizacionOpen ? (
-                    <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                  ) : (
-                    <ChevronRight className="w-3 h-3 flex-shrink-0" />
-                  )}
-                </>
-              )}
-            </button>
-
-            {isOrganizacionOpen && isExpanded && (
-              <div className="ml-6 mt-1 space-y-1">
-                {organizacionItems.map((item, index) => (
-                  <button
-                    key={index}
-                    className={cn(
-                      "w-full flex items-center gap-2 p-2 rounded-md text-xs transition-colors",
-                      location === item.href
-                        ? "bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]"
-                        : "text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)]"
-                    )}
-                    onClick={() => navigate(item.href)}
-                  >
-                    <item.icon className="w-3 h-3 flex-shrink-0" />
-                    <span className="flex-1 text-left">{item.label}</span>
-                  </button>
-                ))}
+      {/* Navigation Menu */}
+      <nav className="flex-1 p-1 space-y-1">
+        {getCurrentMenu().map(item => (
+          <div key={item.label}>
+            {renderMenuItem(item)}
+            {item.children && openAccordions.includes(item.label.toLowerCase()) && isExpanded && (
+              <div className="mt-1 space-y-1">
+                {item.children.map(child => renderMenuItem(child, true))}
               </div>
             )}
           </div>
+        ))}
+      </nav>
 
-          {/* PROYECTO Accordion */}
-          <div>
-            <button
-              className={cn(
-                "w-full flex items-center gap-3 p-2 rounded-lg text-xs font-medium transition-colors text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)]",
-                !isExpanded && "justify-center"
-              )}
-              onClick={() => toggleAccordion('proyecto')}
-            >
-              <FolderOpen className="w-4 h-4 flex-shrink-0" />
-              {isExpanded && (
-                <>
-                  <span className="flex-1 text-left">PROYECTO</span>
-                  {isProyectoOpen ? (
-                    <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                  ) : (
-                    <ChevronRight className="w-3 h-3 flex-shrink-0" />
-                  )}
-                </>
-              )}
-            </button>
-
-            {isProyectoOpen && isExpanded && (
-              <div className="ml-6 mt-1 space-y-1">
-                {/* Dashboard y Diseño */}
-                {proyectoItems.map((item, index) => (
-                  <button
-                    key={index}
-                    className={cn(
-                      "w-full flex items-center gap-2 p-2 rounded-md text-xs transition-colors",
-                      location === item.href
-                        ? "bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]"
-                        : "text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)]"
-                    )}
-                    onClick={() => navigate(item.href)}
-                  >
-                    <item.icon className="w-3 h-3 flex-shrink-0" />
-                    <span className="flex-1 text-left">{item.label}</span>
-                  </button>
-                ))}
-
-                {/* Obra Group */}
-                <div className="ml-2">
-                  <div className="flex items-center gap-2 p-2 text-xs font-medium text-[var(--menues-fg)] opacity-80">
-                    <Building className="w-3 h-3 flex-shrink-0" />
-                    <span>Obra</span>
-                  </div>
-                  <div className="ml-4 space-y-1">
-                    {obraItems.map((item, index) => (
-                      <button
-                        key={index}
-                        className={cn(
-                          "w-full flex items-center p-2 rounded-md text-xs transition-colors",
-                          location === item.href
-                            ? "bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]"
-                            : "text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)]"
-                        )}
-                        onClick={() => navigate(item.href)}
-                      >
-                        <span className="text-left">{item.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Finanzas Group */}
-                <div className="ml-2">
-                  <div className="flex items-center gap-2 p-2 text-xs font-medium text-[var(--menues-fg)] opacity-80">
-                    <DollarSign className="w-3 h-3 flex-shrink-0" />
-                    <span>Finanzas</span>
-                  </div>
-                  <div className="ml-4 space-y-1">
-                    {finanzasItems.map((item, index) => (
-                      <button
-                        key={index}
-                        className={cn(
-                          "w-full flex items-center p-2 rounded-md text-xs transition-colors",
-                          location === item.href
-                            ? "bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]"
-                            : "text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)]"
-                        )}
-                        onClick={() => navigate(item.href)}
-                      >
-                        <span className="text-left">{item.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Comercialización */}
-                <button
-                  className={cn(
-                    "w-full flex items-center gap-2 p-2 rounded-md text-xs transition-colors",
-                    location === '/commercialization/dashboard'
-                      ? "bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]"
-                      : "text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)]"
-                  )}
-                  onClick={() => navigate('/commercialization/dashboard')}
-                >
-                  <Users className="w-3 h-3 flex-shrink-0" />
-                  <span className="flex-1 text-left">Comercialización</span>
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom Section */}
-      <div className="border-t border-[var(--menues-border)] p-2">
-        <div className="space-y-1">
-          <button
-            className={cn(
-              "w-full flex items-center gap-3 p-2 rounded-lg text-xs transition-colors",
-              location === '/configuracion'
-                ? "bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]"
-                : "text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)]",
-              !isExpanded && "justify-center"
-            )}
-            onClick={() => navigate('/configuracion')}
-          >
+      {/* Footer */}
+      <div className="p-1 space-y-1 border-t border-[var(--menues-border)] pt-2">
+        {/* Settings Button */}
+        <Link href="/settings">
+          <div className={`
+            flex items-center w-full h-10 rounded-lg transition-all duration-200
+            text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]
+            ${!isExpanded ? 'justify-center' : 'px-2'}
+          `}>
             <Settings className="w-4 h-4 flex-shrink-0" />
-            {isExpanded && <span>Configuración</span>}
-          </button>
+            {isExpanded && (
+              <span className="ml-2 text-sm font-medium">Configuración</span>
+            )}
+          </div>
+        </Link>
 
-          <button
-            className={cn(
-              "w-full flex items-center gap-3 p-2 rounded-lg text-xs transition-colors",
-              location === '/perfil'
-                ? "bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]"
-                : "text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)]",
-              !isExpanded && "justify-center"
+        {/* Profile Button */}
+        <Link href="/profile">
+          <div className={`
+            flex items-center w-full h-10 rounded-lg transition-all duration-200
+            text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]
+            ${!isExpanded ? 'justify-center' : 'px-2'}
+          `}>
+            <Avatar className="w-4 h-4 flex-shrink-0">
+              <AvatarImage src={userData?.user?.avatar_url} />
+              <AvatarFallback className="text-xs bg-[var(--accent)] text-[var(--accent-foreground)]">
+                {userData?.user?.full_name?.charAt(0) || userData?.user?.email?.charAt(0) || "U"}
+              </AvatarFallback>
+            </Avatar>
+            {isExpanded && (
+              <span className="ml-2 text-sm font-medium">Mi Perfil</span>
             )}
-            onClick={() => navigate('/perfil')}
-          >
-            {userData?.user?.avatar_url ? (
-              <img 
-                src={userData.user.avatar_url} 
-                alt="Avatar" 
-                className="w-4 h-4 rounded-full flex-shrink-0"
-              />
-            ) : (
-              <UserCircle className="w-4 h-4 flex-shrink-0" />
-            )}
-            {isExpanded && <span>Mi Perfil</span>}
-          </button>
-        </div>
+          </div>
+        </Link>
       </div>
-    </aside>
+    </div>
   );
 }
