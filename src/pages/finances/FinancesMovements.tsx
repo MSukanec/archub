@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { DollarSign, Plus, Edit, Trash2, MoreHorizontal } from "lucide-react";
+import { DollarSign, Plus, Edit, Trash2, Heart } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 

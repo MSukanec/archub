@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 
 interface Movement {
@@ -14,6 +14,7 @@ interface Movement {
   subcategory_id?: string
   currency_id: string
   wallet_id: string
+  is_favorite?: boolean
   movement_data?: {
     type?: {
       id: string
@@ -74,7 +75,8 @@ export function useMovements(organizationId: string | undefined, projectId: stri
           currency_id,
           wallet_id,
           file_url,
-          is_conversion
+          is_conversion,
+          is_favorite
         `)
         .eq('organization_id', organizationId)
         .order('created_at', { ascending: false });
@@ -207,5 +209,31 @@ export function useMovements(organizationId: string | undefined, projectId: stri
       return transformedData as Movement[];
     },
     enabled: !!organizationId
+  })
+}
+
+export function useToggleMovementFavorite() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ movementId, isFavorite }: { movementId: string, isFavorite: boolean }) => {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized')
+      }
+
+      const { error } = await supabase
+        .from('movements')
+        .update({ is_favorite: isFavorite })
+        .eq('id', movementId)
+
+      if (error) {
+        throw error
+      }
+
+      return { movementId, isFavorite }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['movements'] })
+    }
   })
 }

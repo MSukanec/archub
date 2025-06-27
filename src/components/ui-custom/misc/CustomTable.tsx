@@ -227,7 +227,7 @@ export function CustomTable<T = any>({
             <div className="flex items-center justify-center">
               <Checkbox
                 checked={isAllSelected}
-                indeterminate={isIndeterminate}
+                {...(isIndeterminate ? { 'data-indeterminate': true } : {})}
                 onCheckedChange={handleSelectAll}
                 aria-label="Seleccionar todos"
                 className="h-3 w-3"
