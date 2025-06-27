@@ -106,10 +106,21 @@ export function NewAdminOrganizationModal({ open, onClose, organization }: NewAd
   const { data: searchedUsers = [] } = useUsersSearch(userSearchTerm);
   const { data: currentCreator } = useUserById(organization?.created_by || '');
 
+  // Debug plans data
+  useEffect(() => {
+    if (plans) {
+      console.log('Plans loaded:', plans);
+      console.log('Current planId:', planId);
+      const foundPlan = plans.find(p => p.id === planId);
+      console.log('Found plan for current planId:', foundPlan);
+    }
+  }, [plans, planId]);
+
   // Set initial values when organization is provided
   useEffect(() => {
-    if (organization) {
+    if (organization && plans) {
       console.log('Setting initial organization values:', organization);
+      console.log('Plans available:', plans);
       setName(organization.name || '');
       setSelectedDate(new Date(organization.created_at));
       setPlanId(organization.plan_id || '');
@@ -119,7 +130,7 @@ export function NewAdminOrganizationModal({ open, onClose, organization }: NewAd
       console.log('Plan ID set to:', organization.plan_id);
       console.log('Created by set to:', organization.created_by);
     }
-  }, [organization]);
+  }, [organization, plans]);
 
   // Set creator information when currentCreator data is loaded
   useEffect(() => {
@@ -327,16 +338,22 @@ export function NewAdminOrganizationModal({ open, onClose, organization }: NewAd
         {/* Plan */}
         <div className="space-y-2">
           <Label className="required-asterisk">Plan</Label>
-          <Select value={planId} onValueChange={setPlanId}>
+          <Select value={planId} onValueChange={(value) => {
+            console.log('Plan selection changed to:', value);
+            setPlanId(value);
+          }}>
             <SelectTrigger>
               <SelectValue placeholder="Seleccionar plan" />
             </SelectTrigger>
             <SelectContent>
-              {plans?.map((plan) => (
-                <SelectItem key={plan.id} value={plan.id}>
-                  {plan.name} ({plan.max_projects} proyectos, {plan.max_members} miembros)
-                </SelectItem>
-              ))}
+              {plans?.map((plan) => {
+                console.log('Rendering plan option:', plan.id, plan.name, 'Current planId:', planId);
+                return (
+                  <SelectItem key={plan.id} value={plan.id}>
+                    {plan.name} ({plan.max_projects} proyectos, {plan.max_members} miembros)
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
         </div>

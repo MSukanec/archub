@@ -88,21 +88,26 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
 
   // Auto-select current user and defaults
   useEffect(() => {
-    if (members && currentUser?.user?.id) {
-      const currentMember = members.find(m => m.user_id === currentUser.user.id)
-      if (currentMember) {
-        form.setValue('created_by', currentMember.id)
+    if (!editingMovement) {
+      if (members && currentUser?.user?.id) {
+        const currentMember = members.find(m => m.user_id === currentUser.user.id)
+        if (currentMember) {
+          console.log('Setting default creator:', currentMember);
+          form.setValue('created_by', currentMember.id)
+        }
+      }
+      if (currencies && currencies.length > 0) {
+        const defaultCurrency = currencies.find(c => c.is_default) || currencies[0]
+        console.log('Setting default currency:', defaultCurrency);
+        form.setValue('currency_id', defaultCurrency.id)
+      }
+      if (wallets && wallets.length > 0) {
+        const defaultWallet = wallets.find(w => w.is_default) || wallets[0]
+        console.log('Setting default wallet:', defaultWallet);
+        form.setValue('wallet_id', defaultWallet.id)
       }
     }
-    if (currencies && currencies.length > 0) {
-      const defaultCurrency = currencies.find(c => c.is_default) || currencies[0]
-      form.setValue('currency_id', defaultCurrency.id)
-    }
-    if (wallets && wallets.length > 0) {
-      const defaultWallet = wallets.find(w => w.is_default) || wallets[0]
-      form.setValue('wallet_id', defaultWallet.id)
-    }
-  }, [members, currentUser, currencies, wallets, form])
+  }, [members, currentUser, currencies, wallets, form, editingMovement])
 
   // Load editing data - set state variables first
   useEffect(() => {
@@ -423,7 +428,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                                 <SelectContent>
                                   {wallets?.map((wallet: any) => (
                                     <SelectItem key={wallet.id} value={wallet.id}>
-                                      {wallet.wallets?.name || wallet.name || 'Sin nombre'}
+                                      {wallet.name || 'Sin nombre'}
                                     </SelectItem>
                                   ))}
                                 </SelectContent>
@@ -451,7 +456,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                                 <SelectContent>
                                   {currencies?.map((currency: any) => (
                                     <SelectItem key={currency.id} value={currency.id}>
-                                      {currency.currencies?.name || currency.name || 'Sin nombre'} ({currency.currencies?.symbol || currency.symbol || '$'})
+                                      {currency.name || 'Sin nombre'} ({currency.symbol || '$'})
                                     </SelectItem>
                                   ))}
                                 </SelectContent>
