@@ -359,7 +359,7 @@ export function Header({
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsSearchOpen(true)}
-                className="h-8 w-8"
+                className="h-8 w-8 hover:bg-[var(--button-ghost-hover-bg)]"
               >
                 <Search className="h-3 w-3" />
               </Button>
@@ -386,7 +386,7 @@ export function Header({
                     onSearchChange?.("")
                     setIsSearchOpen(false)
                   }}
-                  className="absolute right-1 h-6 w-6 p-0"
+                  className="absolute right-1 h-6 w-6 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
                 >
                   <X className="h-3 w-3" />
                 </Button>
@@ -401,7 +401,7 @@ export function Header({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8"
+                className="h-8 w-8 hover:bg-[var(--button-ghost-hover-bg)]"
               >
                 <Filter className="h-3 w-3" />
               </Button>
@@ -429,7 +429,7 @@ export function Header({
             variant="ghost"
             size="icon"
             onClick={onClearFilters}
-            className="h-8 w-8"
+            className="h-8 w-8 hover:bg-[var(--button-ghost-hover-bg)]"
           >
             <X className="h-3 w-3" />
           </Button>
