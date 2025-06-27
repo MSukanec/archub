@@ -367,30 +367,17 @@ export default function Movements() {
       sortable: true,
       sortType: "string" as const,
       render: (movement: Movement) => (
-        <Badge variant="outline" className="text-xs">
-          {movement.movement_data?.type?.name || "Sin tipo"}
-        </Badge>
-      ),
-    },
-    {
-      key: "category",
-      label: "Categoría",
-      sortable: true,
-      sortType: "string" as const,
-      render: (movement: Movement) => (
-        <span className="text-xs">
-          {movement.movement_data?.category?.name || "Sin categoría"}
-        </span>
-      ),
-    },
-    {
-      key: "subcategory",
-      label: "Subcategoría",
-      sortable: false,
-      render: (movement: Movement) => (
-        <span className="text-xs">
-          {movement.movement_data?.subcategory?.name || "Sin subcategoría"}
-        </span>
+        <div className="space-y-1">
+          <Badge variant="outline" className="text-xs">
+            {movement.movement_data?.type?.name || "Sin tipo"}
+          </Badge>
+          <div className="text-xs text-muted-foreground">
+            {movement.movement_data?.category?.name || "Sin categoría"}
+          </div>
+          <div className="text-xs text-muted-foreground">
+            {movement.movement_data?.subcategory?.name || "Sin subcategoría"}
+          </div>
+        </div>
       ),
     },
     {
