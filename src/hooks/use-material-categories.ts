@@ -6,21 +6,11 @@ import { toast } from '@/hooks/use-toast';
 export interface MaterialCategory {
   id: string;
   name: string;
-  description?: string;
   created_at: string;
-  created_by: string;
-  creator?: {
-    id: string;
-    full_name: string;
-    email: string;
-    avatar_url?: string;
-  };
 }
 
 export interface NewMaterialCategoryData {
   name: string;
-  description?: string;
-  created_by: string;
 }
 
 export function useMaterialCategories() {
@@ -34,18 +24,7 @@ export function useMaterialCategories() {
         .select(`
           id,
           name,
-          description,
-          created_at,
-          created_by,
-          creator:organization_members!created_by (
-            id,
-            user:users (
-              id,
-              full_name,
-              email,
-              avatar_url
-            )
-          )
+          created_at
         `)
         .order('created_at', { ascending: false });
 
@@ -54,15 +33,7 @@ export function useMaterialCategories() {
         throw error;
       }
 
-      return (data || []).map(item => ({
-        ...item,
-        creator: item.creator?.user?.[0] ? {
-          id: item.creator.user[0].id,
-          full_name: item.creator.user[0].full_name,
-          email: item.creator.user[0].email,
-          avatar_url: item.creator.user[0].avatar_url
-        } : undefined
-      })) as MaterialCategory[];
+      return (data || []) as MaterialCategory[];
     },
   });
 }
