@@ -119,19 +119,22 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- June 27, 2025. Complete navigation system overhaul with unified sidebar accordion architecture
+- June 27, 2025. Complete three-sidebar navigation system implementation with contextual switching
   • Eliminated entire Header-based horizontal navigation system completely
   • Removed CustomPageHeader, CustomPageLayout, CustomPageBody components and all header logic
-  • Rebuilt Sidebar.tsx with accordion-based navigation matching user's reference design
-  • Created unified sidebar with ADMINISTRACIÓN, PERFIL (disabled), and GENERAL sections
-  • Implemented ORGANIZACIÓN accordion (Resumen, Proyectos, Contactos, Actividad, Miembros, Preferencias)
-  • Added PROYECTO accordion with nested sub-groups: Dashboard, Diseño, Obra (Resumen/Bitácora), Finanzas (Resumen/Movimientos), Comercialización
-  • Updated sidebarStore to handle accordion states and context switching
-  • Sidebar collapses to 64px icons-only, expands to 240px on hover with smooth transitions
-  • Cleaned up App.tsx routes, removing duplicates and organizing by section
-  • Simplified Layout.tsx to use only sidebar without header complexity
-  • All pages now use simple Layout wrapper without headerProps
-  • Profile.tsx completely rebuilt with simplified form and direct header integration
+  • Implemented three distinct sidebar contexts: ORGANIZATION, PROJECT, and ADMIN
+  • ORGANIZATION sidebar: Resumen, Proyectos, Contactos, Actividad, Miembros, Preferencias
+  • PROJECT sidebar: Dashboard, Diseño, Obra (accordion with Resumen/Bitácora), Finanzas (accordion with Resumen/Movimientos), Comercialización, Volver button
+  • ADMIN sidebar: Empty for future administration features
+  • Restored exact 40px sidebar width with 40x40px buttons matching original aesthetics
+  • Added "A" logo at top (40x40px) with divider before navigation menu
+  • Sidebar expands to 240px on hover with smooth transitions and proper icon centering
+  • Created OrganizationDashboard.tsx as default landing page with organization overview
+  • Built ProjectDashboard.tsx with project context switching and comprehensive project metrics
+  • Added ConstructionDashboard.tsx for construction site management
+  • Updated sidebarStore with organization/project/admin context management
+  • Layout.tsx uses correct 40px margin-left for optimal content positioning
+  • All pages automatically set appropriate sidebar context on mount using useEffect
 
 - June 26, 2025. Complete modal system refinement with ultra-compact Lemon Squeezy aesthetic
   • Applied padding: 3 to all CustomModal components (Header, Body, Footer) for consistent spacing

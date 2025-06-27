@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { FolderOpen, Calendar, DollarSign, HardHat } from 'lucide-react';
+import { FolderOpen, Calendar, DollarSign, HardHat, Palette, FileText } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -15,7 +15,16 @@ export default function ProjectDashboard() {
     setContext('project');
   }, [setContext]);
 
-  const project = userData?.project;
+  // For now, we'll use placeholder project data until the project data structure is available
+  const project = {
+    name: 'Proyecto Actual',
+    created_at: new Date().toISOString(),
+    status: 'En Progreso',
+    project_data: {
+      typology: { name: 'Residencial' },
+      modality: { name: 'Llave en Mano' }
+    }
+  };
 
   return (
     <Layout>

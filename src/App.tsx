@@ -70,6 +70,12 @@ function Router() {
         </ProtectedRoute>
       </Route>
 
+      <Route path="/project/dashboard">
+        <ProtectedRoute>
+          <ProjectDashboard />
+        </ProtectedRoute>
+      </Route>
+
       <Route path="/design/dashboard">
         <ProtectedRoute>
           <ProjectDashboard />
