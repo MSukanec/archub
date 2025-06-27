@@ -280,7 +280,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  {typeOptions.map((type) => (
+                                  {typeOptions.map((type: any) => (
                                     <SelectItem key={type.id} value={type.id}>
                                       {type.name}
                                     </SelectItem>
@@ -309,7 +309,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  {categoryOptions.map((category) => (
+                                  {categoryOptions.map((category: any) => (
                                     <SelectItem key={category.id} value={category.id}>
                                       {category.name}
                                     </SelectItem>
@@ -337,7 +337,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  {subcategoryOptions.map((subcategory) => (
+                                  {subcategoryOptions.map((subcategory: any) => (
                                     <SelectItem key={subcategory.id} value={subcategory.id}>
                                       {subcategory.name}
                                     </SelectItem>
