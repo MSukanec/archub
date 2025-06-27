@@ -68,79 +68,105 @@ function Router() {
 
       <Route path="/bitacora">
         <ProtectedRoute>
-          <SiteLogs />
+          <Layout>
+            <SiteLogs />
+          </Layout>
         </ProtectedRoute>
       </Route>
 
       <Route path="/construction/dashboard">
         <ProtectedRoute>
-          <ConstructionDashboard />
+          <Layout>
+            <ConstructionDashboard />
+          </Layout>
         </ProtectedRoute>
       </Route>
 
       <Route path="/obra/bitacora">
         <ProtectedRoute>
-          <SiteLogs />
+          <Layout>
+            <SiteLogs />
+          </Layout>
         </ProtectedRoute>
       </Route>
 
       <Route path="/construction/site-logs">
         <ProtectedRoute>
-          <SiteLogs />
+          <Layout>
+            <SiteLogs />
+          </Layout>
         </ProtectedRoute>
       </Route>
 
       <Route path="/preferencias">
         <ProtectedRoute>
-          <OrganizationPreferences />
+          <Layout>
+            <OrganizationPreferences />
+          </Layout>
         </ProtectedRoute>
       </Route>
 
       <Route path="/proyectos">
         <ProtectedRoute>
-          <OrganizationProjects />
+          <Layout>
+            <OrganizationProjects />
+          </Layout>
         </ProtectedRoute>
       </Route>
 
       <Route path="/organization/contactos">
         <ProtectedRoute>
-          <OrganizationContacts />
+          <Layout>
+            <OrganizationContacts />
+          </Layout>
         </ProtectedRoute>
       </Route>
 
       <Route path="/organization/dashboard">
         <ProtectedRoute>
-          <OrganizationDashboard />
+          <Layout>
+            <OrganizationDashboard />
+          </Layout>
         </ProtectedRoute>
       </Route>
 
       <Route path="/organization/members">
         <ProtectedRoute>
-          <OrganizationMembers />
+          <Layout>
+            <OrganizationMembers />
+          </Layout>
         </ProtectedRoute>
       </Route>
 
       <Route path="/organization/activity">
         <ProtectedRoute>
-          <OrganizationActivity />
+          <Layout>
+            <OrganizationActivity />
+          </Layout>
         </ProtectedRoute>
       </Route>
 
       <Route path="/project/dashboard">
         <ProtectedRoute>
-          <ProjectDashboard />
+          <Layout>
+            <ProjectDashboard />
+          </Layout>
         </ProtectedRoute>
       </Route>
 
       <Route path="/finance/dashboard">
         <ProtectedRoute>
-          <FinancesDashboard />
+          <Layout>
+            <FinancesDashboard />
+          </Layout>
         </ProtectedRoute>
       </Route>
 
       <Route path="/perfil">
         <ProtectedRoute>
-          <Profile />
+          <Layout>
+            <Profile />
+          </Layout>
         </ProtectedRoute>
       </Route>
 
