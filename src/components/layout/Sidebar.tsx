@@ -161,64 +161,69 @@ export function Sidebar() {
     >
       {/* Navigation Items */}
       <div className="flex-1 p-1">
-        <div className="flex flex-col gap-[2px]">
-          {navigationItems.map((item: any, index) => (
-            <div key={`${item.label}-${index}`}>
-              {/* Main Button */}
-              <SidebarButton
-                icon={<item.icon className="w-[18px] h-[18px]" />}
-                label={item.label}
-                isActive={location === item.href}
-                isExpanded={isExpanded}
-                onClick={item.isAccordion ? item.onToggle : (item.onClick || (() => navigate(item.href)))}
-                rightIcon={item.isAccordion && isExpanded ? (
-                  item.expanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />
-                ) : undefined}
-              />
-              
+        <div className="flex flex-col gap-[2px] h-full">
+          <div className="flex-1">
+            {navigationItems.map((item: any, index) => (
+              <div key={`${item.label}-${index}`} className="mb-[2px]">
+                {/* Main Button */}
+                <SidebarButton
+                  icon={<item.icon className="w-[18px] h-[18px]" />}
+                  label={item.label}
+                  isActive={location === item.href}
+                  isExpanded={isExpanded}
+                  onClick={item.isAccordion ? item.onToggle : (item.onClick || (() => navigate(item.href)))}
+                  rightIcon={item.isAccordion && isExpanded ? (
+                    item.expanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />
+                  ) : undefined}
+                />
+                
+                {/* Accordion Children */}
+                {item.isAccordion && item.expanded && isExpanded && (
+                  <div className="ml-6 mt-1 flex flex-col gap-[2px]">
+                    {item.children?.map((child: any, childIndex: number) => (
+                      <SidebarButton
+                        key={`${child.label}-${childIndex}`}
+                        icon={<child.icon className="w-[18px] h-[18px]" />}
+                        label={child.label}
+                        isActive={location === child.href}
+                        isExpanded={isExpanded}
+                        onClick={() => navigate(child.href)}
+                        isChild={true}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
 
-              
-              {/* Accordion Children */}
-              {item.isAccordion && item.expanded && isExpanded && (
-                <div className="ml-6 mt-1 flex flex-col gap-[2px]">
-                  {item.children?.map((child: any, childIndex: number) => (
-                    <SidebarButton
-                      key={`${child.label}-${childIndex}`}
-                      icon={<child.icon className="w-[18px] h-[18px]" />}
-                      label={child.label}
-                      isActive={location === child.href}
-                      isExpanded={isExpanded}
-                      onClick={() => navigate(child.href)}
-                      isChild={true}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Bottom Section - Fixed Buttons */}
-      <div className="border-t border-[var(--menues-border)] p-1">
-        <div className="flex flex-col gap-[2px]">
-          {/* Project Selector - Only in project context and when expanded */}
-          {currentSidebarContext === 'project' && isExpanded && (
-            <div className="mb-2">
+          {/* Project Selector - Bottom of navigation area, only in project context */}
+          {currentSidebarContext === 'project' && (
+            <div className="mt-auto">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <div className="w-full h-9 px-3 py-2 bg-[var(--menues-bg)] rounded-lg border border-[var(--menues-border)] flex items-center justify-between cursor-pointer">
-                    <div className="flex items-center gap-2 min-w-0">
-                      {activeProject && <Crown className="w-4 h-4 text-[var(--accent)] flex-shrink-0" />}
-                      <span className="text-sm text-[var(--menues-fg)] truncate">
-                        {activeProject?.name || 'Seleccionar proyecto'}
-                      </span>
+                  {isExpanded ? (
+                    <div className="w-full h-9 px-3 py-2 bg-[var(--menues-bg)] rounded-lg border border-[var(--menues-border)] flex items-center justify-between cursor-pointer">
+                      <div className="flex items-center gap-2 min-w-0">
+                        {activeProject && <Crown className="w-4 h-4 text-[var(--accent)] flex-shrink-0" />}
+                        <span className="text-sm text-[var(--menues-fg)] truncate">
+                          {activeProject?.name || 'Seleccionar proyecto'}
+                        </span>
+                      </div>
+                      <ChevronDown className="w-4 h-4 text-[var(--menues-fg)] flex-shrink-0" />
                     </div>
-                    <ChevronDown className="w-4 h-4 text-[var(--menues-fg)] flex-shrink-0" />
-                  </div>
+                  ) : (
+                    <div className="w-9 h-9 bg-[var(--menues-bg)] rounded-lg border border-[var(--menues-border)] flex items-center justify-center cursor-pointer">
+                      <div className="w-6 h-6 bg-[var(--accent)] rounded-md flex items-center justify-center">
+                        <span className="text-xs font-medium text-white">
+                          {activeProject?.name ? activeProject.name.substring(0, 2).toUpperCase() : 'PR'}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </DropdownMenuTrigger>
                 <DropdownMenuContent 
-                  className="w-[220px] z-50" 
+                  className="w-[220px] z-[100]" 
                   align="start" 
                   side="top"
                   sideOffset={5}
@@ -273,11 +278,16 @@ export function Sidebar() {
               </DropdownMenu>
             </div>
           )}
+        </div>
+      </div>
 
+      {/* Bottom Section - Fixed Buttons */}
+      <div className="border-t border-[var(--menues-border)] p-1">
+        <div className="flex flex-col gap-[2px]">
           {/* Settings */}
           <SidebarButton
             icon={<Settings className="w-[18px] h-[18px]" />}
-            label="Configuración"
+            label="Administración"
             isActive={location === '/configuracion'}
             isExpanded={isExpanded}
             onClick={() => navigate('/configuracion')}
