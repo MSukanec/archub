@@ -309,63 +309,34 @@ export function Sidebar() {
         </div>
       </div>
 
-      {/* Plan Section - Above Divider */}
-      <div className="px-1 pb-2">
-        {isExpanded ? (
-          <div className="bg-blue-50/50 border border-blue-200/50 rounded-lg p-3">
-            <div className="flex items-center gap-2 mb-2">
-              <div className={cn(
-                "w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0",
-                (!userData?.plan || userData.plan.name === 'free') && "bg-[var(--accent)]",
-                userData?.plan?.name === 'pro' && "bg-blue-500",
-                userData?.plan?.name === 'teams' && "bg-purple-500"
-              )}>
-                {(!userData?.plan || userData.plan.name === 'free') && <Star className="w-3 h-3 text-white" />}
-                {userData?.plan?.name === 'pro' && <Crown className="w-3 h-3 text-white" />}
-                {userData?.plan?.name === 'teams' && <Zap className="w-3 h-3 text-white" />}
+      {/* Plan Section - Above Divider - FORCE UPDATE */}
+      <div className="p-1 mb-2">
+        <div className="flex justify-center w-full">
+          {isExpanded ? (
+            <div className="w-full bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
+                  <Crown className="w-3 h-3 text-white fill-white" />
+                </div>
+                <span className="text-xs font-medium text-gray-600">Plan actual:</span>
               </div>
-              <span className="text-xs font-medium text-gray-600">
-                Plan actual:
-              </span>
-            </div>
-            <div className="mb-2">
-              <span className={cn(
-                "text-sm font-semibold",
-                (!userData?.plan || userData.plan.name === 'free') && "text-[var(--accent)]",
-                userData?.plan?.name === 'pro' && "text-blue-600",
-                userData?.plan?.name === 'teams' && "text-purple-600"
-              )}>
-                {userData?.plan?.name === 'pro' && 'Pro trial'}
-                {userData?.plan?.name === 'teams' && 'Teams'}
-                {(!userData?.plan || userData.plan.name === 'free') && 'Free'}
-              </span>
-            </div>
-            <p className="text-xs text-gray-500 mb-3">
-              {(!userData?.plan || userData.plan.name === 'free') && "Actualiza para obtener las últimas y exclusivas funcionalidades"}
-              {userData?.plan?.name === 'pro' && "Actualiza para obtener las últimas y exclusivas funcionalidades"}
-              {userData?.plan?.name === 'teams' && "Máximo rendimiento para equipos"}
-            </p>
-            {(!userData?.plan || userData.plan.name === 'free' || userData?.plan?.name === 'pro') && (
-              <button className="w-full py-2 px-3 rounded-lg text-xs font-medium transition-colors flex items-center justify-center gap-1 bg-blue-600 text-white hover:bg-blue-700">
-                <Zap className="w-3 h-3" />
+              <div className="mb-2">
+                <span className="text-sm font-semibold text-blue-600">Pro trial</span>
+              </div>
+              <p className="text-xs text-gray-500 mb-3">
+                Actualiza para obtener las últimas y exclusivas funcionalidades
+              </p>
+              <button className="w-full py-2 px-3 rounded-lg text-xs font-medium bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center gap-1 transition-colors">
+                <Zap className="w-3 h-3 fill-white" />
                 Upgrade to Pro
               </button>
-            )}
-          </div>
-        ) : (
-          <div className="flex justify-center">
-            <div className={cn(
-              "w-9 h-9 rounded-full flex items-center justify-center cursor-pointer transition-all duration-200",
-              (!userData?.plan || userData.plan.name === 'free') && "bg-[var(--accent)]",
-              userData?.plan?.name === 'pro' && "bg-blue-500",
-              userData?.plan?.name === 'teams' && "bg-purple-500"
-            )}>
-              {(!userData?.plan || userData.plan.name === 'free') && <Star className="w-4 h-4 text-white" />}
-              {userData?.plan?.name === 'pro' && <Crown className="w-4 h-4 text-white" />}
-              {userData?.plan?.name === 'teams' && <Zap className="w-4 h-4 text-white" />}
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center cursor-pointer shadow-sm">
+              <Crown className="w-4 h-4 text-white fill-white" />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Bottom Section - Fixed Buttons */}
