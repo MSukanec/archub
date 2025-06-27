@@ -1,0 +1,203 @@
+import { Layout } from '@/components/layout/Layout';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase';
+import { Building, Users, Crown, Activity } from 'lucide-react';
+
+// Hook para obtener estadísticas del sistema
+function useSystemStats() {
+  return useQuery({
+    queryKey: ['system-stats'],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase not initialized');
+
+      // Obtener conteos de organizaciones, usuarios, proyectos
+      const [orgsResult, usersResult, projectsResult, plansResult] = await Promise.all([
+        supabase
+          .from('organizations')
+          .select('id, is_active, is_system', { count: 'exact' }),
+        supabase
+          .from('users')
+          .select('id', { count: 'exact' }),
+        supabase
+          .from('projects')
+          .select('id, is_active', { count: 'exact' }),
+        supabase
+          .from('plans')
+          .select('id, name', { count: 'exact' })
+      ]);
+
+      const organizations = orgsResult.data || [];
+      const projects = projectsResult.data || [];
+
+      return {
+        totalOrganizations: orgsResult.count || 0,
+        activeOrganizations: organizations.filter(org => org.is_active).length,
+        systemOrganizations: organizations.filter(org => org.is_system).length,
+        totalUsers: usersResult.count || 0,
+        totalProjects: projectsResult.count || 0,
+        activeProjects: projects.filter(project => project.is_active).length,
+        totalPlans: plansResult.count || 0
+      };
+    }
+  });
+}
+
+// Hook para obtener organizaciones recientes
+function useRecentOrganizations() {
+  return useQuery({
+    queryKey: ['recent-organizations'],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase not initialized');
+
+      const { data, error } = await supabase
+        .from('organizations')
+        .select(`
+          id,
+          name,
+          created_at,
+          is_active,
+          is_system,
+          plan:plans(name)
+        `)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (error) throw error;
+      return data;
+    }
+  });
+}
+
+export default function AdminDashboard() {
+  const { data: stats, isLoading: statsLoading } = useSystemStats();
+  const { data: recentOrganizations, isLoading: orgsLoading } = useRecentOrganizations();
+
+  const headerProps = {
+    title: "Resumen de Administración",
+    icon: Activity,
+    showSearch: false,
+    showFilters: false,
+    actions: []
+  };
+
+  return (
+    <Layout headerProps={headerProps}>
+      <div className="space-y-6">
+        {/* Estadísticas del sistema */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Organizaciones</CardTitle>
+              <Building className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {statsLoading ? '...' : stats?.totalOrganizations || 0}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {statsLoading ? '...' : stats?.activeOrganizations || 0} activas
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Usuarios</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {statsLoading ? '...' : stats?.totalUsers || 0}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Total registrados
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Proyectos</CardTitle>
+              <Activity className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {statsLoading ? '...' : stats?.totalProjects || 0}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {statsLoading ? '...' : stats?.activeProjects || 0} activos
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Planes</CardTitle>
+              <Crown className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {statsLoading ? '...' : stats?.totalPlans || 0}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Disponibles
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Organizaciones recientes */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Building className="h-5 w-5" />
+              Organizaciones Recientes
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {orgsLoading ? (
+              <div className="text-center py-8 text-muted-foreground">
+                Cargando organizaciones...
+              </div>
+            ) : recentOrganizations && recentOrganizations.length > 0 ? (
+              <div className="space-y-4">
+                {recentOrganizations.map((org) => (
+                  <div key={org.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-[var(--accent-bg)] rounded-lg flex items-center justify-center">
+                        <Building className="w-5 h-5 text-[var(--accent)]" />
+                      </div>
+                      <div>
+                        <div className="font-medium">{org.name}</div>
+                        <div className="text-sm text-muted-foreground">
+                          Plan: {org.plan?.[0]?.name || 'Sin plan'}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {org.is_system && (
+                        <Badge variant="secondary" className="text-xs">
+                          Sistema
+                        </Badge>
+                      )}
+                      <Badge variant={org.is_active ? 'default' : 'secondary'}>
+                        {org.is_active ? 'Activa' : 'Inactiva'}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <Building className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                <p className="text-sm">No hay organizaciones recientes.</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </Layout>
+  );
+}

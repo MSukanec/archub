@@ -22,6 +22,8 @@ import Movements from "@/pages/finances/FinancesMovements";
 import SiteLogs from "@/pages/site/SiteLogs";
 import OrganizationPreferences from "@/pages/organization/OrganizationPreferences";
 import ConstructionDashboard from "@/pages/construction/ConstructionDashboard";
+import AdminDashboard from "@/pages/admin/AdminDashboard";
+import AdminOrganizations from "@/pages/admin/AdminOrganizations";
 
 function Router() {
   return (
@@ -125,6 +127,19 @@ function Router() {
       <Route path="/perfil">
         <ProtectedRoute>
           <Profile />
+        </ProtectedRoute>
+      </Route>
+
+      {/* Rutas de administración */}
+      <Route path="/admin/dashboard">
+        <ProtectedRoute>
+          <AdminDashboard />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/admin/organizations">
+        <ProtectedRoute>
+          <AdminOrganizations />
         </ProtectedRoute>
       </Route>
 

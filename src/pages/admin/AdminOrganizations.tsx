@@ -164,7 +164,15 @@ export default function AdminOrganizations() {
     onSearchChange: setSearchValue,
     customFilters,
     onClearFilters: handleClearFilters,
-    actions: []
+    actions: [
+      <Button 
+        key="new-organization" 
+        onClick={() => setShowModal(true)}
+        className="h-8 px-3 text-sm"
+      >
+        Nueva Organización
+      </Button>
+    ]
   };
 
   const columns = [

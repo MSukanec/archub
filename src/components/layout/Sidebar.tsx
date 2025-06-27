@@ -164,7 +164,7 @@ export function Sidebar() {
     ],
     admin: [
       { icon: Home, label: 'Resumen de Administración', href: '/admin/dashboard' },
-      { icon: Building, label: 'Gestión de Organizaciones', href: '/admin/organizaciones' },
+      { icon: Building, label: 'Gestión de Organizaciones', href: '/admin/organizations' },
     ]
   };
 
