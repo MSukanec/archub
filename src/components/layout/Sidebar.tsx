@@ -26,7 +26,11 @@ import {
   Package,
   Shield,
   Star,
-  Zap
+  Zap,
+  Sun,
+  Moon,
+  PanelLeftOpen,
+  PanelLeftClose
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -45,6 +49,54 @@ export function Sidebar() {
   const [expandedAccordions, setExpandedAccordions] = useState<{ [key: string]: boolean }>({
     obra: false,
     finanzas: false
+  });
+
+  // Theme toggle mutation
+  const themeToggleMutation = useMutation({
+    mutationFn: async (newTheme: 'light' | 'dark') => {
+      if (!supabase || !userData?.preferences?.id) {
+        throw new Error('No user preferences available');
+      }
+
+      const { error } = await supabase
+        .from('user_preferences')
+        .update({ theme: newTheme })
+        .eq('id', userData.preferences.id);
+
+      if (error) throw error;
+      return newTheme;
+    },
+    onSuccess: (newTheme) => {
+      // Apply theme to document
+      if (newTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      
+      // Invalidate current user cache
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+    }
+  });
+
+  // Sidebar toggle mutation
+  const sidebarToggleMutation = useMutation({
+    mutationFn: async (newDockedState: boolean) => {
+      if (!supabase || !userData?.preferences?.id) {
+        throw new Error('No user preferences available');
+      }
+
+      const { error } = await supabase
+        .from('user_preferences')
+        .update({ sidebar_docked: newDockedState })
+        .eq('id', userData.preferences.id);
+
+      if (error) throw error;
+      return newDockedState;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+    }
   });
   
   // Estado para búsqueda de proyectos
@@ -396,6 +448,30 @@ export function Sidebar() {
             onClick={() => {
               setSidebarContext('admin');
               navigate('/admin/dashboard');
+            }}
+          />
+
+          {/* Theme Toggle */}
+          <SidebarButton
+            icon={userData?.preferences?.theme === 'dark' ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
+            label={userData?.preferences?.theme === 'dark' ? "Día" : "Noche"}
+            isActive={false}
+            isExpanded={isExpanded}
+            onClick={() => {
+              const newTheme = userData?.preferences?.theme === 'dark' ? 'light' : 'dark';
+              themeToggleMutation.mutate(newTheme);
+            }}
+          />
+
+          {/* Sidebar Toggle */}
+          <SidebarButton
+            icon={userData?.preferences?.sidebar_docked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
+            label={userData?.preferences?.sidebar_docked ? "Cerrar Panel" : "Abrir Panel"}
+            isActive={false}
+            isExpanded={isExpanded}
+            onClick={() => {
+              const newDockedState = !userData?.preferences?.sidebar_docked;
+              sidebarToggleMutation.mutate(newDockedState);
             }}
           />
 
