@@ -174,11 +174,10 @@ export default function OrganizationDashboard() {
 
   const headerProps = {
     title: "Resumen de la Organización",
-    icon: Building,
+    icon: <Building className="h-5 w-5" />,
     showSearch: false,
-    actions: [
+    actions: (
       <Button 
-        key="nueva-org"
         onClick={() => setShowNewOrganizationModal(true)}
         className="h-8"
         size="sm"
@@ -186,7 +185,7 @@ export default function OrganizationDashboard() {
         <Plus className="h-4 w-4 mr-2" />
         Nueva Organización
       </Button>
-    ]
+    )
   };
 
   const [showNewOrganizationModal, setShowNewOrganizationModal] = useState(false);

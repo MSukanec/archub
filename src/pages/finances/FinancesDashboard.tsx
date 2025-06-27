@@ -237,9 +237,21 @@ export default function FinancesDashboard() {
 
   const headerProps = {
     title: "Resumen de Finanzas",
-    showSearch: false,
-    showFilters: false,
-    actions: []
+    icon: DollarSign,
+    showSearch: true,
+    searchValue,
+    onSearchChange: setSearchValue,
+    onClearFilters: () => setSearchValue(""),
+    actions: [
+      <Button key="reportes" variant="outline" size="sm">
+        <BarChart3 className="mr-2 h-4 w-4" />
+        Reportes
+      </Button>,
+      <Button key="nuevo" size="sm">
+        <DollarSign className="mr-2 h-4 w-4" />
+        Nuevo movimiento
+      </Button>
+    ]
   };
 
   const isLoading = loadingSummary || loadingMovements || loadingWallets || loadingFlow || loadingBudget;
