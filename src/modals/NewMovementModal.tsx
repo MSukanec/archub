@@ -88,8 +88,11 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
 
   // Auto-select current user and defaults
   useEffect(() => {
-    if (currentUser?.role?.id) {
-      form.setValue('created_by', currentUser.role.id)
+    if (members && members.length > 0 && currentUser?.user?.id) {
+      const currentMember = members.find(m => m.user_id === currentUser.user.id)
+      if (currentMember) {
+        form.setValue('created_by', currentMember.id)
+      }
     }
     if (currencies && currencies.length > 0) {
       const defaultCurrency = currencies.find(c => c.is_default) || currencies[0]
@@ -99,7 +102,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
       const defaultWallet = wallets.find(w => w.is_default) || wallets[0]
       form.setValue('wallet_id', defaultWallet.id)
     }
-  }, [currentUser, currencies, wallets, form])
+  }, [currentUser, currencies, wallets, members, form])
 
   // Load editing data
   useEffect(() => {
@@ -200,180 +203,209 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                     <AccordionTrigger>
                       Información Básica
                     </AccordionTrigger>
-                    <AccordionContent className="space-y-3 pt-3">
-                      {/* Primera fila: Fecha y Creador */}
-                      <div className="grid grid-cols-2 gap-4">
-                        <FormField
-                          control={form.control}
-                          name="created_at"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>
-                                Fecha
-                              </FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="date"
-                                  value={field.value ? field.value.toISOString().split('T')[0] : ''}
-                                  onChange={(e) => field.onChange(new Date(e.target.value))}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={form.control}
-                          name="created_by"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>
-                                Creador
-                              </FormLabel>
-                              <Select onValueChange={field.onChange} value={field.value}>
+                    <AccordionContent className="space-y-4 pt-3">
+                      {/* Fecha */}
+                      <FormField
+                        control={form.control}
+                        name="created_at"
+                        render={({ field }) => (
+                          <FormItem>
+                            <div className="grid grid-cols-3 gap-4 items-start">
+                              <div>
+                                <FormLabel>Fecha</FormLabel>
+                              </div>
+                              <div className="col-span-2">
                                 <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Seleccionar creador" />
-                                  </SelectTrigger>
+                                  <Input
+                                    type="date"
+                                    value={field.value ? field.value.toISOString().split('T')[0] : ''}
+                                    onChange={(e) => field.onChange(new Date(e.target.value))}
+                                  />
                                 </FormControl>
-                                <SelectContent>
-                                  {members?.map((member: any) => (
-                                    <SelectItem key={member.id} value={member.id}>
-                                      <div className="flex items-center gap-2">
-                                        <Avatar className="h-6 w-6">
-                                          <AvatarImage src={member.avatar_url} />
-                                          <AvatarFallback>
-                                            {member.full_name?.charAt(0) || member.email?.charAt(0) || '?'}
-                                          </AvatarFallback>
-                                        </Avatar>
-                                        <span>{member.full_name || member.email}</span>
-                                      </div>
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
+                                <FormMessage />
+                              </div>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
 
-                      {/* Segunda fila: Tipo y Categoría */}
-                      <div className="grid grid-cols-2 gap-4">
-                        <FormField
-                          control={form.control}
-                          name="type_id"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Tipo</FormLabel>
-                              <Select onValueChange={(value) => {
-                                field.onChange(value)
-                                setSelectedTypeId(value)
-                                form.setValue('category_id', '')
-                                form.setValue('subcategory_id', '')
-                                setSelectedCategoryId('')
-                              }} value={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Seleccionar tipo" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {typeOptions.map((type: any) => (
-                                    <SelectItem key={type.id} value={type.id}>
-                                      {type.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                      {/* Creador */}
+                      <FormField
+                        control={form.control}
+                        name="created_by"
+                        render={({ field }) => (
+                          <FormItem>
+                            <div className="grid grid-cols-3 gap-4 items-start">
+                              <div>
+                                <FormLabel>Creador</FormLabel>
+                              </div>
+                              <div className="col-span-2">
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Seleccionar creador" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {members?.map((member: any) => (
+                                      <SelectItem key={member.id} value={member.id}>
+                                        <div className="flex items-center gap-2">
+                                          <Avatar className="h-6 w-6">
+                                            <AvatarImage src={member.avatar_url} />
+                                            <AvatarFallback>
+                                              {member.full_name?.charAt(0) || member.email?.charAt(0) || '?'}
+                                            </AvatarFallback>
+                                          </Avatar>
+                                          <span>{member.full_name || member.email}</span>
+                                        </div>
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </div>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
 
-                        <FormField
-                          control={form.control}
-                          name="category_id"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Categoría</FormLabel>
-                              <Select onValueChange={(value) => {
-                                field.onChange(value)
-                                setSelectedCategoryId(value)
-                                form.setValue('subcategory_id', '')
-                              }} value={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Seleccionar categoría" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {categoryOptions.map((category: any) => (
-                                    <SelectItem key={category.id} value={category.id}>
-                                      {category.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
+                      {/* Tipo */}
+                      <FormField
+                        control={form.control}
+                        name="type_id"
+                        render={({ field }) => (
+                          <FormItem>
+                            <div className="grid grid-cols-3 gap-4 items-start">
+                              <div>
+                                <FormLabel>Tipo</FormLabel>
+                              </div>
+                              <div className="col-span-2">
+                                <Select onValueChange={(value) => {
+                                  field.onChange(value)
+                                  setSelectedTypeId(value)
+                                  form.setValue('category_id', '')
+                                  form.setValue('subcategory_id', '')
+                                  setSelectedCategoryId('')
+                                }} value={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Seleccionar tipo" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {typeOptions.map((type: any) => (
+                                      <SelectItem key={type.id} value={type.id}>
+                                        {type.name}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </div>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
 
-                      {/* Tercera fila: Subcategoría y Billetera */}
-                      <div className="grid grid-cols-2 gap-4">
-                        <FormField
-                          control={form.control}
-                          name="subcategory_id"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Subcategoría</FormLabel>
-                              <Select onValueChange={field.onChange} value={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Seleccionar subcategoría" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {subcategoryOptions.map((subcategory: any) => (
-                                    <SelectItem key={subcategory.id} value={subcategory.id}>
-                                      {subcategory.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                      {/* Categoría */}
+                      <FormField
+                        control={form.control}
+                        name="category_id"
+                        render={({ field }) => (
+                          <FormItem>
+                            <div className="grid grid-cols-3 gap-4 items-start">
+                              <div>
+                                <FormLabel>Categoría</FormLabel>
+                              </div>
+                              <div className="col-span-2">
+                                <Select onValueChange={(value) => {
+                                  field.onChange(value)
+                                  setSelectedCategoryId(value)
+                                  form.setValue('subcategory_id', '')
+                                }} value={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Seleccionar categoría" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {categoryOptions.map((category: any) => (
+                                      <SelectItem key={category.id} value={category.id}>
+                                        {category.name}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </div>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
 
-                        <FormField
-                          control={form.control}
-                          name="wallet_id"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Billetera</FormLabel>
-                              <Select onValueChange={field.onChange} value={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Seleccionar billetera" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {wallets?.map((wallet: any) => (
-                                    <SelectItem key={wallet.id} value={wallet.id}>
-                                      {wallet.wallets?.name || 'Sin nombre'}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
+                      {/* Subcategoría */}
+                      <FormField
+                        control={form.control}
+                        name="subcategory_id"
+                        render={({ field }) => (
+                          <FormItem>
+                            <div className="grid grid-cols-3 gap-4 items-start">
+                              <div>
+                                <FormLabel>Subcategoría</FormLabel>
+                              </div>
+                              <div className="col-span-2">
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Seleccionar subcategoría" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {subcategoryOptions.map((subcategory: any) => (
+                                      <SelectItem key={subcategory.id} value={subcategory.id}>
+                                        {subcategory.name}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </div>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Billetera */}
+                      <FormField
+                        control={form.control}
+                        name="wallet_id"
+                        render={({ field }) => (
+                          <FormItem>
+                            <div className="grid grid-cols-3 gap-4 items-start">
+                              <div>
+                                <FormLabel>Billetera</FormLabel>
+                              </div>
+                              <div className="col-span-2">
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Seleccionar billetera" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {wallets?.map((wallet: any) => (
+                                      <SelectItem key={wallet.id} value={wallet.id}>
+                                        {wallet.wallets?.name || 'Sin nombre'}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </div>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
 
                       {/* Cuarta fila: Moneda y Cantidad - misma altura */}
                       <div className="grid grid-cols-2 gap-4">
