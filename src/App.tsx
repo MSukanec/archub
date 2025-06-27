@@ -28,25 +28,41 @@ function Router() {
     <Switch>
       <Route path="/organizations">
         <ProtectedRoute>
-          <OrganizationManagement />
+          <Layout>
+            <OrganizationManagement />
+          </Layout>
         </ProtectedRoute>
       </Route>
 
       <Route path="/organizaciones">
         <ProtectedRoute>
-          <OrganizationManagement />
+          <Layout>
+            <OrganizationManagement />
+          </Layout>
         </ProtectedRoute>
       </Route>
 
       <Route path="/movimientos">
         <ProtectedRoute>
-          <Movements />
+          <Layout>
+            <Movements />
+          </Layout>
         </ProtectedRoute>
       </Route>
 
       <Route path="/finanzas/movimientos">
         <ProtectedRoute>
-          <Movements />
+          <Layout>
+            <Movements />
+          </Layout>
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/finances/movements">
+        <ProtectedRoute>
+          <Layout>
+            <Movements />
+          </Layout>
         </ProtectedRoute>
       </Route>
 
