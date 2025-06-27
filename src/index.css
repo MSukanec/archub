@@ -236,12 +236,12 @@
 
 /* Movement row gradient classes */
 .movement-row-income {
-  background: var(--movement-income-bg);
+  background: linear-gradient(to right, var(--movement-income-border) 0px, var(--movement-income-border) 4px, rgba(34, 197, 94, 0.1) 15px, transparent 15px);
   border-left: 4px solid var(--movement-income-border);
 }
 
 .movement-row-expense {
-  background: var(--movement-expense-bg);
+  background: linear-gradient(to right, var(--movement-expense-border) 0px, var(--movement-expense-border) 4px, rgba(239, 68, 68, 0.1) 15px, transparent 15px);
   border-left: 4px solid var(--movement-expense-border);
 }
 
