@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useProjects } from "@/hooks/use-projects";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 
@@ -17,8 +19,12 @@ import {
   Activity,
   ArrowLeft,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Search,
+  Crown
 } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
 import SidebarButton from "./SidebarButton";
@@ -28,6 +34,7 @@ export function Sidebar() {
   const { data: userData } = useCurrentUser();
   const { isDocked, isHovered, setHovered } = useSidebarStore();
   const { currentSidebarContext, setSidebarContext } = useNavigationStore();
+  const queryClient = useQueryClient();
   
   // Estado para acordeones
   const [expandedAccordions, setExpandedAccordions] = useState<{ [key: string]: boolean }>({
@@ -35,7 +42,39 @@ export function Sidebar() {
     finanzas: false
   });
   
+  // Estado para búsqueda de proyectos
+  const [projectSearchValue, setProjectSearchValue] = useState('');
+  
   const isExpanded = isDocked || isHovered;
+  
+  // Obtener proyectos de la organización actual
+  const { data: projects, isLoading: isLoadingProjects } = useProjects(userData?.organization?.id);
+  
+  // Proyecto activo
+  const activeProject = projects?.find(p => p.id === userData?.preferences?.last_project_id);
+  
+  // Filtrar proyectos por búsqueda
+  const filteredProjects = projects?.filter(project =>
+    project.name.toLowerCase().includes(projectSearchValue.toLowerCase())
+  ) || [];
+  
+  // Mutación para seleccionar proyecto
+  const selectProjectMutation = useMutation({
+    mutationFn: async (projectId: string) => {
+      if (!supabase) throw new Error('Supabase client not initialized');
+      
+      const { error } = await supabase
+        .from('user_preferences')
+        .update({ last_project_id: projectId })
+        .eq('user_id', userData?.user?.id);
+      
+      if (error) throw error;
+      return projectId;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+    }
+  });
   
   const toggleAccordion = (key: string) => {
     setExpandedAccordions(prev => {
@@ -136,6 +175,73 @@ export function Sidebar() {
                   item.expanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />
                 ) : undefined}
               />
+              
+              {/* Project Selector - Show after "Volver a Organización" button in project context */}
+              {currentSidebarContext === 'project' && item.label === 'Volver a Organización' && isExpanded && (
+                <div className="mt-1 px-1">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <div className="w-full h-9 px-3 py-2 bg-[var(--menues-bg)] hover:bg-[var(--menues-hover-bg)] rounded-lg border border-[var(--menues-border)] flex items-center justify-between cursor-pointer transition-colors">
+                        <div className="flex items-center gap-2 min-w-0">
+                          {activeProject && <Crown className="w-4 h-4 text-[var(--accent)] flex-shrink-0" />}
+                          <span className="text-sm text-[var(--menues-fg)] truncate">
+                            {activeProject?.name || 'Seleccionar proyecto'}
+                          </span>
+                        </div>
+                        <ChevronDown className="w-4 h-4 text-[var(--menues-fg)] flex-shrink-0" />
+                      </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-[200px]" align="start">
+                      {/* Search Input */}
+                      <div className="p-2">
+                        <div className="relative">
+                          <Search className="w-4 h-4 absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+                          <Input
+                            placeholder="Buscar proyectos..."
+                            value={projectSearchValue}
+                            onChange={(e) => setProjectSearchValue(e.target.value)}
+                            className="pl-8 h-8"
+                          />
+                        </div>
+                      </div>
+                      
+                      {/* Project List */}
+                      <div className="max-h-48 overflow-y-auto">
+                        {filteredProjects.map((project) => (
+                          <DropdownMenuItem
+                            key={project.id}
+                            onClick={() => {
+                              selectProjectMutation.mutate(project.id);
+                              setProjectSearchValue('');
+                            }}
+                            className="flex items-center gap-2"
+                          >
+                            {project.id === activeProject?.id && (
+                              <Crown className="w-4 h-4 text-[var(--accent)]" />
+                            )}
+                            <span className="truncate">{project.name}</span>
+                          </DropdownMenuItem>
+                        ))}
+                      </div>
+                      
+                      {/* No projects found */}
+                      {filteredProjects.length === 0 && projectSearchValue && (
+                        <div className="p-2 text-sm text-muted-foreground text-center">
+                          No se encontraron proyectos
+                        </div>
+                      )}
+                      
+                      <DropdownMenuSeparator />
+                      
+                      {/* Manage Projects Link */}
+                      <DropdownMenuItem onClick={() => navigate('/organization/proyectos')}>
+                        <FolderOpen className="w-4 h-4 mr-2" />
+                        Gestión de Proyectos
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
               
               {/* Accordion Children */}
               {item.isAccordion && item.expanded && isExpanded && (
