@@ -309,8 +309,8 @@ export function Sidebar() {
         </div>
       </div>
 
-      {/* Plan Section - Above Divider - FORCE UPDATE */}
-      <div className="p-1 mb-2">
+      {/* Plan Section - Above Divider */}
+      <div className="p-1">
         <div className="flex justify-center w-full">
           {isExpanded ? (
             <div className="w-full bg-blue-50 border border-blue-200 rounded-lg p-3">
@@ -332,7 +332,7 @@ export function Sidebar() {
               </button>
             </div>
           ) : (
-            <div className="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center cursor-pointer shadow-sm">
+            <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center cursor-pointer">
               <Crown className="w-4 h-4 text-white fill-white" />
             </div>
           )}
