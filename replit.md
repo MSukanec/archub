@@ -119,6 +119,14 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 27, 2025. Complete admin system standardization and material categories table fixes
+  • Fixed AdminMaterialCategories table layout issue - adjusted column widths to 15%, 70%, 15% to prevent action column overflow
+  • Standardized ALL 5 admin pages to use wide layout: AdminDashboard, AdminOrganizations, AdminUsers, AdminMaterials, AdminMaterialCategories
+  • Removed all hardcoded card styling from admin pages - now use consistent p-3, text-xs, text-lg font-semibold structure
+  • Eliminated all colored icon variations in statistics cards - all icons now use text-muted-foreground
+  • Material categories table now displays correctly with proper headers, columns, and inline action buttons
+  • All admin pages now have identical card styling following Lemon Squeezy aesthetic with ultra-compact spacing
+
 - June 27, 2025. Complete material categories admin system and enhanced sidebar functionality
   • Created AdminMaterialCategories.tsx page with comprehensive table interface and statistics cards
   • Built NewAdminMaterialCategoryModal.tsx for creating and editing categories with proper form validation

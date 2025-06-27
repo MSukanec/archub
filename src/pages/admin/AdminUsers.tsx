@@ -315,44 +315,44 @@ export default function AdminUsers() {
       <div className="space-y-6">
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Usuarios</CardTitle>
+          <Card className="p-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">Total Usuarios</p>
+                <p className="text-lg font-semibold">{stats?.total || 0}</p>
+              </div>
               <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats?.total || 0}</div>
-            </CardContent>
+            </div>
           </Card>
           
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Usuarios Activos</CardTitle>
-              <UserCheck className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">{stats?.active || 0}</div>
-            </CardContent>
+          <Card className="p-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">Usuarios Activos</p>
+                <p className="text-lg font-semibold">{stats?.active || 0}</p>
+              </div>
+              <UserCheck className="h-4 w-4 text-muted-foreground" />
+            </div>
           </Card>
           
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Usuarios Inactivos</CardTitle>
-              <UserX className="h-4 w-4 text-red-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">{stats?.inactive || 0}</div>
-            </CardContent>
+          <Card className="p-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">Usuarios Inactivos</p>
+                <p className="text-lg font-semibold">{stats?.inactive || 0}</p>
+              </div>
+              <UserX className="h-4 w-4 text-muted-foreground" />
+            </div>
           </Card>
           
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Con Organizaciones</CardTitle>
-              <Building className="h-4 w-4 text-blue-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-600">{stats?.withOrganizations || 0}</div>
-            </CardContent>
+          <Card className="p-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">Con Organizaciones</p>
+                <p className="text-lg font-semibold">{stats?.withOrganizations || 0}</p>
+              </div>
+              <Building className="h-4 w-4 text-muted-foreground" />
+            </div>
           </Card>
         </div>
 

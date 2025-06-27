@@ -232,7 +232,7 @@ export default function AdminMaterials() {
   }
 
   return (
-    <Layout headerProps={headerProps}>
+    <Layout wide headerProps={headerProps}>
       <div className="space-y-6">
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -252,7 +252,7 @@ export default function AdminMaterials() {
                 <p className="text-xs text-muted-foreground">Costo Promedio</p>
                 <p className="text-lg font-semibold">${averageCost.toLocaleString()}</p>
               </div>
-              <Crown className="h-4 w-4 text-blue-500" />
+              <Crown className="h-4 w-4 text-muted-foreground" />
             </div>
           </Card>
           
@@ -262,7 +262,7 @@ export default function AdminMaterials() {
                 <p className="text-xs text-muted-foreground">Alto Valor</p>
                 <p className="text-lg font-semibold">{highValueMaterials}</p>
               </div>
-              <Crown className="h-4 w-4 text-yellow-500" />
+              <Crown className="h-4 w-4 text-muted-foreground" />
             </div>
           </Card>
           
@@ -272,7 +272,7 @@ export default function AdminMaterials() {
                 <p className="text-xs text-muted-foreground">Nuevos (7 días)</p>
                 <p className="text-lg font-semibold">{recentMaterials}</p>
               </div>
-              <Crown className="h-4 w-4 text-green-500" />
+              <Crown className="h-4 w-4 text-muted-foreground" />
             </div>
           </Card>
         </div>
