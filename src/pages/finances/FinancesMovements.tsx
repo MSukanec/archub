@@ -377,9 +377,6 @@ export default function Movements() {
           <div className="text-xs text-muted-foreground">
             {movement.movement_data?.category?.name || "Sin categoría"}
           </div>
-          <div className="text-xs text-muted-foreground">
-            {movement.movement_data?.subcategory?.name || "Sin subcategoría"}
-          </div>
         </div>
       ),
     },
@@ -409,6 +406,7 @@ export default function Movements() {
     {
       key: "wallet",
       label: "Billetera",
+      width: "10%",
       sortable: true,
       sortType: "string" as const,
       render: (movement: Movement) => (
@@ -420,6 +418,7 @@ export default function Movements() {
     {
       key: "amount",
       label: "Cantidad",
+      width: "10%",
       sortable: true,
       sortType: "number" as const,
       render: (movement: Movement) => (
@@ -431,6 +430,7 @@ export default function Movements() {
     {
       key: "actions",
       label: "Acciones",
+      width: "10%",
       sortable: false,
       render: (movement: Movement) => (
         <DropdownMenu>

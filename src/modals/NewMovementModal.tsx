@@ -116,6 +116,10 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
       form.setValue('subcategory_id', editingMovement.subcategory_id || '')
       form.setValue('currency_id', editingMovement.currency_id)
       form.setValue('wallet_id', editingMovement.wallet_id)
+      
+      // Set state variables for dependent dropdowns
+      setSelectedTypeId(editingMovement.type_id)
+      setSelectedCategoryId(editingMovement.category_id || '')
     }
   }, [editingMovement, form])
 
