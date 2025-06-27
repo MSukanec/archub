@@ -7,8 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
-import { Camera, User, Settings, Upload, Link as LinkIcon, LogOut } from 'lucide-react'
+import { Camera, User, Settings } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { supabase } from '@/lib/supabase'
@@ -36,15 +35,11 @@ export default function Profile() {
   const [avatarUrl, setAvatarUrl] = useState('')
   const [sidebarDocked, setSidebarDocked] = useState(false)
 
-  // Avatar upload states
-  const [showAvatarUpload, setShowAvatarUpload] = useState(false)
-  const [avatarUrlInput, setAvatarUrlInput] = useState('')
-  const [avatarFile, setAvatarFile] = useState<File | null>(null)
-
   // Load countries
   const { data: countries = [] } = useQuery({
     queryKey: ['countries'],
     queryFn: async () => {
+      if (!supabase) return []
       const { data, error } = await supabase
         .from('countries')
         .select('id, name')
@@ -55,7 +50,67 @@ export default function Profile() {
     }
   })
 
-  // Load user data into form when available
+  // Update profile mutation
+  const updateProfileMutation = useMutation({
+    mutationFn: async () => {
+      if (!userData || !supabase) throw new Error('No user data')
+
+      const profileData = {
+        firstName: firstName.trim() || null,
+        lastName: lastName.trim() || null,
+        country: country || null,
+        birthdate: birthdate || null,
+        avatarUrl: avatarUrl.trim() || null,
+        sidebarDocked
+      }
+
+      // Update user data
+      const { error: userDataError } = await supabase
+        .from('user_data')
+        .update({
+          first_name: profileData.firstName,
+          last_name: profileData.lastName,
+          country: profileData.country,
+          birthdate: profileData.birthdate
+        })
+        .eq('user_id', userData.user.id)
+
+      if (userDataError) throw userDataError
+
+      // Update user avatar
+      const { error: userError } = await supabase
+        .from('users')
+        .update({ avatar_url: profileData.avatarUrl })
+        .eq('id', userData.user.id)
+
+      if (userError) throw userError
+
+      // Update preferences
+      const { error: prefsError } = await supabase
+        .from('user_preferences')
+        .update({ sidebar_docked: profileData.sidebarDocked })
+        .eq('id', userData.preferences.id)
+
+      if (prefsError) throw prefsError
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['current-user'] })
+      setExpanded(sidebarDocked)
+      toast({
+        title: "Perfil actualizado",
+        description: "Los cambios se han guardado correctamente"
+      })
+    },
+    onError: (error) => {
+      toast({
+        title: "Error al actualizar perfil",
+        description: "No se pudieron guardar los cambios",
+        variant: "destructive"
+      })
+    }
+  })
+
+  // Load user data into form
   useEffect(() => {
     if (userData) {
       setFirstName(userData.user_data?.first_name || '')
@@ -67,192 +122,9 @@ export default function Profile() {
     }
   }, [userData])
 
-  // Profile update mutation
-  const updateProfileMutation = useMutation({
-    mutationFn: async (profileData: {
-      firstName: string
-      lastName: string
-      country: string
-      birthdate: string
-      avatarUrl: string
-      sidebarDocked: boolean
-    }) => {
-      if (!userData?.user?.id || !userData?.preferences?.id) {
-        throw new Error('Missing user data')
-      }
-
-      // Update user avatar
-      if (profileData.avatarUrl !== userData.user.avatar_url) {
-        const { error: userError } = await supabase
-          .from('users')
-          .update({ 
-            avatar_url: profileData.avatarUrl,
-            avatar_source: 'url'
-          })
-          .eq('id', userData.user.id)
-
-        if (userError) throw userError
-      }
-
-      // Update user_data (personal information)
-      const userDataUpdate: any = {}
-      if (profileData.firstName.trim()) userDataUpdate.first_name = profileData.firstName.trim()
-      if (profileData.lastName.trim()) userDataUpdate.last_name = profileData.lastName.trim()
-      if (profileData.country) userDataUpdate.country = profileData.country
-      if (profileData.birthdate) userDataUpdate.birthdate = profileData.birthdate
-
-      if (Object.keys(userDataUpdate).length > 0) {
-        const { error: dataError } = await supabase
-          .from('user_data')
-          .update(userDataUpdate)
-          .eq('user_id', userData.user.id)
-
-        if (dataError) throw dataError
-      }
-
-      // Update user preferences
-      const { error: prefsError } = await supabase
-        .from('user_preferences')
-        .update({ sidebar_docked: profileData.sidebarDocked })
-        .eq('id', userData.preferences.id)
-
-      if (prefsError) throw prefsError
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['current-user'] })
-      setDocked(sidebarDocked)
-      toast({
-        title: "Perfil actualizado",
-        description: "Los cambios se han guardado correctamente"
-      })
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: `No se pudo actualizar el perfil: ${error.message}`,
-        variant: "destructive"
-      })
-    }
-  })
-
-  // Theme toggle mutation
-  const toggleThemeMutation = useMutation({
-    mutationFn: async () => {
-      const currentTheme = userData?.preferences?.theme || 'light'
-      const newTheme = currentTheme === 'light' ? 'dark' : 'light'
-      
-      if (!userData?.preferences?.id) {
-        throw new Error('Missing preferences data')
-      }
-      
-      const { error } = await supabase
-        .from('user_preferences')
-        .update({ theme: newTheme })
-        .eq('id', userData.preferences.id)
-      
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['current-user'] })
-      toast({
-        title: "Tema actualizado",
-        description: "El tema se ha cambiado correctamente"
-      })
-    },
-    onError: () => {
-      toast({
-        title: "Error", 
-        description: "No se pudo cambiar el tema",
-        variant: "destructive"
-      })
-    }
-  })
-
-  // Sign out mutation
-  const signOutMutation = useMutation({
-    mutationFn: async () => {
-      if (!supabase) throw new Error('Supabase no disponible')
-      
-      const { error } = await supabase.auth.signOut()
-      if (error) throw error
-    },
-    onSuccess: () => {
-      // Redirigir inmediatamente sin mostrar toast
-      window.location.href = '/'
-    },
-    onError: (error) => {
-      console.error('Error cerrando sesión:', error)
-      toast({
-        title: "Error",
-        description: "Hubo un problema al cerrar la sesión",
-        variant: "destructive"
-      })
-    }
-  })
-
-  const handleSaveProfile = () => {
-    updateProfileMutation.mutate({
-      firstName,
-      lastName,
-      country,
-      birthdate,
-      avatarUrl,
-      sidebarDocked
-    })
-  }
-
-  const handleAvatarFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file) {
-      setAvatarFile(file)
-      // Create preview URL
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        setAvatarUrl(e.target?.result as string)
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
-  const handleAvatarUrlSubmit = () => {
-    if (avatarUrlInput.trim()) {
-      setAvatarUrl(avatarUrlInput.trim())
-      setAvatarUrlInput('')
-      setShowAvatarUpload(false)
-    }
-  }
-
-  const getInitials = () => {
-    if (firstName && lastName) {
-      return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
-    }
-    if (userData?.user?.full_name) {
-      const names = userData.user.full_name.split(' ')
-      return names.length >= 2 
-        ? `${names[0].charAt(0)}${names[1].charAt(0)}`.toUpperCase()
-        : names[0].charAt(0).toUpperCase()
-    }
-    return userData?.user?.email?.charAt(0).toUpperCase() || 'U'
-  }
-
-  const headerProps = {
-    title: "Perfil",
-    showSearch: false,
-    showFilters: false,
-    actions: (
-      <Button 
-        onClick={handleSaveProfile}
-        disabled={updateProfileMutation.isPending}
-        className="h-8 px-3 text-sm"
-      >
-        {updateProfileMutation.isPending ? 'Guardando...' : 'Guardar'}
-      </Button>
-    )
-  }
-
   if (isLoading) {
     return (
-      <Layout headerProps={headerProps}>
+      <Layout>
         <div className="text-center text-muted-foreground">
           Cargando perfil...
         </div>
@@ -261,72 +133,45 @@ export default function Profile() {
   }
 
   return (
-    <Layout headerProps={headerProps}>
+    <Layout>
       <div className="max-w-2xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold">Mi Perfil</h1>
+          <Button 
+            onClick={() => updateProfileMutation.mutate()}
+            disabled={updateProfileMutation.isPending}
+            className="gap-2"
+          >
+            {updateProfileMutation.isPending ? 'Guardando...' : 'Guardar'}
+          </Button>
+        </div>
+
         {/* Avatar Section */}
         <Card>
           <CardHeader className="flex flex-row items-center gap-4">
             <Camera className="w-5 h-5" />
             <CardTitle>Foto de perfil</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent>
             <div className="flex items-center gap-4">
-              <Avatar className="w-20 h-20">
+              <Avatar className="w-16 h-16">
                 <AvatarImage src={avatarUrl} />
-                <AvatarFallback className="text-lg font-medium">
-                  {getInitials()}
+                <AvatarFallback>
+                  {userData?.user?.full_name?.split(' ').map(n => n[0]).join('') || 'U'}
                 </AvatarFallback>
               </Avatar>
-              <div className="space-y-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowAvatarUpload(!showAvatarUpload)}
-                >
-                  <Camera className="w-4 h-4 mr-2" />
-                  Cambiar foto
-                </Button>
-                <p className="text-xs text-muted-foreground">
-                  Sube una imagen o proporciona una URL
-                </p>
+              <div className="flex-1">
+                <Label htmlFor="avatar-url">URL de imagen</Label>
+                <Input
+                  id="avatar-url"
+                  type="url"
+                  placeholder="https://ejemplo.com/avatar.jpg"
+                  value={avatarUrl}
+                  onChange={(e) => setAvatarUrl(e.target.value)}
+                />
               </div>
             </div>
-
-            {showAvatarUpload && (
-              <div className="space-y-3 border rounded-lg p-4">
-                <div>
-                  <Label className="text-sm font-medium flex items-center gap-2">
-                    <Upload className="w-4 h-4" />
-                    Subir archivo
-                  </Label>
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleAvatarFileChange}
-                    className="mt-1"
-                  />
-                </div>
-                
-                <Separator />
-                
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium flex items-center gap-2">
-                    <LinkIcon className="w-4 h-4" />
-                    URL de imagen
-                  </Label>
-                  <div className="flex gap-2">
-                    <Input
-                      value={avatarUrlInput}
-                      onChange={(e) => setAvatarUrlInput(e.target.value)}
-                      placeholder="https://ejemplo.com/imagen.jpg"
-                    />
-                    <Button size="sm" onClick={handleAvatarUrlSubmit}>
-                      Aplicar
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
           </CardContent>
         </Card>
 
@@ -339,51 +184,35 @@ export default function Profile() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Nombre completo</Label>
+                <Label htmlFor="first-name">Nombre</Label>
                 <Input
-                  value={userData?.user?.full_name || ''}
-                  disabled
-                  className="bg-muted"
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Este campo no se puede editar
-                </p>
-              </div>
-              <div>
-                <Label>Mail</Label>
-                <Input
-                  value={userData?.user?.email || ''}
-                  disabled
-                  className="bg-muted"
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Este campo no se puede editar
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Nombre</Label>
-                <Input
+                  id="first-name"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="Tu nombre"
                 />
               </div>
               <div>
-                <Label>Apellido</Label>
+                <Label htmlFor="last-name">Apellido</Label>
                 <Input
+                  id="last-name"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  placeholder="Tu apellido"
                 />
               </div>
             </div>
-
+            
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>País</Label>
+                <Label htmlFor="birthdate">Fecha de nacimiento</Label>
+                <Input
+                  id="birthdate"
+                  type="date"
+                  value={birthdate}
+                  onChange={(e) => setBirthdate(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="country">País</Label>
                 <Select value={country} onValueChange={setCountry}>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar país" />
@@ -397,92 +226,29 @@ export default function Profile() {
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <Label>Fecha de nacimiento</Label>
-                <Input
-                  type="date"
-                  value={birthdate}
-                  onChange={(e) => setBirthdate(e.target.value)}
-                />
-              </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Card de Preferencias */}
+        {/* Preferences */}
         <Card>
           <CardHeader className="flex flex-row items-center gap-4">
             <Settings className="w-5 h-5" />
             <CardTitle>Preferencias</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Tema */}
+          <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label className="text-base">Tema</Label>
-                <div className="text-sm text-muted-foreground">
-                  Elige entre tema claro u oscuro
-                </div>
-              </div>
-              <Switch
-                checked={userData?.preferences?.theme === 'dark'}
-                onCheckedChange={() => toggleThemeMutation.mutate()}
-                disabled={toggleThemeMutation.isPending}
-              />
-            </div>
-
-            {/* Sidebar fijo */}
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label className="text-base">Sidebar Fijo</Label>
-                <div className="text-sm text-muted-foreground">
-                  Mantener el sidebar siempre visible
-                </div>
+              <div>
+                <Label>Sidebar fijo</Label>
+                <p className="text-sm text-muted-foreground">
+                  Mantener el sidebar siempre expandido
+                </p>
               </div>
               <Switch
                 checked={sidebarDocked}
                 onCheckedChange={setSidebarDocked}
               />
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Card de Cerrar Sesión */}
-        <Card>
-          <CardHeader className="flex flex-row items-center gap-4">
-            <LogOut className="w-5 h-5" />
-            <CardTitle>Cerrar Sesión</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Al cerrar sesión, serás redirigido a la página de inicio de sesión.
-            </p>
-            
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" className="w-full">
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Cerrar Sesión
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>¿Cerrar sesión?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Estás a punto de cerrar tu sesión. Tendrás que volver a iniciar sesión para acceder a tu cuenta.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction 
-                    onClick={() => signOutMutation.mutate()}
-                    disabled={signOutMutation.isPending}
-                  >
-                    {signOutMutation.isPending ? 'Cerrando...' : 'Cerrar Sesión'}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
           </CardContent>
         </Card>
       </div>

@@ -26,57 +26,10 @@ import ConstructionDashboard from "@/pages/construction/ConstructionDashboard";
 function Router() {
   return (
     <Switch>
-      <Route path="/organizations">
+      {/* ORGANIZACIÓN ROUTES */}
+      <Route path="/organization/dashboard">
         <ProtectedRoute>
-          <OrganizationManagement />
-        </ProtectedRoute>
-      </Route>
-
-      <Route path="/organizaciones">
-        <ProtectedRoute>
-          <OrganizationManagement />
-        </ProtectedRoute>
-      </Route>
-
-      <Route path="/movimientos">
-        <ProtectedRoute>
-          <Movements />
-        </ProtectedRoute>
-      </Route>
-
-      <Route path="/finanzas/movimientos">
-        <ProtectedRoute>
-          <Movements />
-        </ProtectedRoute>
-      </Route>
-
-      <Route path="/bitacora">
-        <ProtectedRoute>
-          <SiteLogs />
-        </ProtectedRoute>
-      </Route>
-
-      <Route path="/construction/dashboard">
-        <ProtectedRoute>
-          <ConstructionDashboard />
-        </ProtectedRoute>
-      </Route>
-
-      <Route path="/obra/bitacora">
-        <ProtectedRoute>
-          <SiteLogs />
-        </ProtectedRoute>
-      </Route>
-
-      <Route path="/construction/site-logs">
-        <ProtectedRoute>
-          <SiteLogs />
-        </ProtectedRoute>
-      </Route>
-
-      <Route path="/preferencias">
-        <ProtectedRoute>
-          <OrganizationPreferences />
+          <OrganizationDashboard />
         </ProtectedRoute>
       </Route>
 
@@ -92,9 +45,9 @@ function Router() {
         </ProtectedRoute>
       </Route>
 
-      <Route path="/organization/dashboard">
+      <Route path="/organization/activity">
         <ProtectedRoute>
-          <OrganizationDashboard />
+          <OrganizationActivity />
         </ProtectedRoute>
       </Route>
 
@@ -104,36 +57,77 @@ function Router() {
         </ProtectedRoute>
       </Route>
 
-      <Route path="/organization/activity">
+      <Route path="/preferencias">
         <ProtectedRoute>
-          <OrganizationActivity />
+          <OrganizationPreferences />
         </ProtectedRoute>
       </Route>
 
+      {/* PROYECTO ROUTES */}
       <Route path="/project/dashboard">
         <ProtectedRoute>
           <ProjectDashboard />
         </ProtectedRoute>
       </Route>
 
+      <Route path="/design/dashboard">
+        <ProtectedRoute>
+          <ProjectDashboard />
+        </ProtectedRoute>
+      </Route>
+
+      {/* OBRA ROUTES */}
+      <Route path="/construction/dashboard">
+        <ProtectedRoute>
+          <ConstructionDashboard />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/bitacora">
+        <ProtectedRoute>
+          <SiteLogs />
+        </ProtectedRoute>
+      </Route>
+
+      {/* FINANZAS ROUTES */}
       <Route path="/finance/dashboard">
         <ProtectedRoute>
           <FinancesDashboard />
         </ProtectedRoute>
       </Route>
 
+      <Route path="/movimientos">
+        <ProtectedRoute>
+          <Movements />
+        </ProtectedRoute>
+      </Route>
+
+      {/* COMERCIALIZACIÓN ROUTES */}
+      <Route path="/commercialization/dashboard">
+        <ProtectedRoute>
+          <OrganizationDashboard />
+        </ProtectedRoute>
+      </Route>
+
+      {/* PERFIL */}
       <Route path="/perfil">
         <ProtectedRoute>
           <Profile />
         </ProtectedRoute>
       </Route>
 
-      {/* Redirección de /dashboard por compatibilidad */}
+      {/* CONFIGURACIÓN */}
+      <Route path="/configuracion">
+        <ProtectedRoute>
+          <Profile />
+        </ProtectedRoute>
+      </Route>
+
+      {/* REDIRECTS */}
       <Route path="/dashboard">
         <Redirect to="/organization/dashboard" />
       </Route>
 
-      {/* Redirección principal */}
       <Route path="/">
         <Redirect to="/organization/dashboard" />
       </Route>
