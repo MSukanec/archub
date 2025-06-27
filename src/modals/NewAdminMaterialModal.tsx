@@ -189,96 +189,97 @@ export function NewAdminMaterialModal({ open, onClose, material }: NewAdminMater
   }
 
   return (
-    <CustomModal open={open} onClose={handleClose}>
+    <CustomModalLayout open={open} onClose={handleClose}>
       {{
-        header: {
-          title: material ? 'Editar Material' : 'Nuevo Material',
-          description: material 
-            ? 'Actualiza la información del material.'
-            : 'Crea un nuevo material para el sistema.'
-        },
+        header: (
+          <CustomModalHeader
+            title={material ? 'Editar Material' : 'Nuevo Material'}
+            description={material 
+              ? 'Actualiza la información del material.'
+              : 'Crea un nuevo material para el sistema.'}
+            onClose={handleClose}
+          />
+        ),
         body: (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name" className="text-xs font-medium required-asterisk">
-                Nombre del Material
-              </Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Ej: Cemento Portland"
-                className="text-sm"
-              />
-            </div>
+          <CustomModalBody>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-xs font-medium required-asterisk">
+                  Nombre del Material
+                </Label>
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Ej: Cemento Portland"
+                  className="text-sm"
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="cost" className="text-xs font-medium">
-                Costo
-              </Label>
-              <Input
-                id="cost"
-                type="number"
-                step="0.01"
-                min="0"
-                value={cost}
-                onChange={(e) => setCost(e.target.value)}
-                placeholder="0.00"
-                className="text-sm"
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="cost" className="text-xs font-medium">
+                  Costo
+                </Label>
+                <Input
+                  id="cost"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={cost}
+                  onChange={(e) => setCost(e.target.value)}
+                  placeholder="0.00"
+                  className="text-sm"
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="unit" className="text-xs font-medium required-asterisk">
-                Unidad
-              </Label>
-              <Select value={unitId} onValueChange={setUnitId}>
-                <SelectTrigger className="text-sm">
-                  <SelectValue placeholder="Selecciona una unidad" />
-                </SelectTrigger>
-                <SelectContent>
-                  {units.map((unit) => (
-                    <SelectItem key={unit.id} value={unit.id}>
-                      {unit.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="unit" className="text-xs font-medium required-asterisk">
+                  Unidad
+                </Label>
+                <Select value={unitId} onValueChange={setUnitId}>
+                  <SelectTrigger className="text-sm">
+                    <SelectValue placeholder="Selecciona una unidad" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {units.map((unit) => (
+                      <SelectItem key={unit.id} value={unit.id}>
+                        {unit.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="category" className="text-xs font-medium required-asterisk">
-                Categoría
-              </Label>
-              <Select value={categoryId} onValueChange={setCategoryId}>
-                <SelectTrigger className="text-sm">
-                  <SelectValue placeholder="Selecciona una categoría" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="space-y-2">
+                <Label htmlFor="category" className="text-xs font-medium required-asterisk">
+                  Categoría
+                </Label>
+                <Select value={categoryId} onValueChange={setCategoryId}>
+                  <SelectTrigger className="text-sm">
+                    <SelectValue placeholder="Selecciona una categoría" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-          </div>
+          </CustomModalBody>
         ),
         footer: (
-          <div className="flex justify-end gap-3">
-            <Button variant="secondary" onClick={handleClose}>
-              Cancelar
-            </Button>
-            <Button 
-              onClick={handleSubmit}
-              disabled={saveMaterialMutation.isPending}
-            >
-              {saveMaterialMutation.isPending ? 'Guardando...' : (material ? 'Actualizar' : 'Crear')}
-            </Button>
-          </div>
+          <CustomModalFooter
+            onCancel={handleClose}
+            onSave={handleSubmit}
+            cancelText="Cancelar"
+            saveText={material ? 'Actualizar' : 'Crear'}
+            saveLoading={saveMaterialMutation.isPending}
+          />
         )
       }}
-    </CustomModal>
+    </CustomModalLayout>
   )
 }

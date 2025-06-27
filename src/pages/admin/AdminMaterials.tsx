@@ -1,9 +1,8 @@
 import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { supabase } from '@/lib/supabase'
 import { toast } from '@/hooks/use-toast'
+import { useMaterials, useDeleteMaterial } from '@/hooks/use-materials'
 
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -38,46 +37,9 @@ export default function AdminMaterials() {
   const [editingMaterial, setEditingMaterial] = useState<Material | null>(null)
   const [deletingMaterial, setDeletingMaterial] = useState<Material | null>(null)
 
-  const queryClient = useQueryClient()
-
-  // Fetch materials with statistics
-  const { data: materials = [], isLoading } = useQuery({
-    queryKey: ['admin-materials', searchValue, sortBy, categoryFilter],
-    queryFn: async () => {
-      if (!supabase) throw new Error('Supabase not initialized')
-      
-      let query = supabase
-        .from('materials')
-        .select(`
-          *,
-          unit:units(name),
-          category:material_categories(name)
-        `)
-      
-      // Apply filters
-      if (searchValue) {
-        query = query.ilike('name', `%${searchValue}%`)
-      }
-      
-      if (categoryFilter !== 'all') {
-        query = query.eq('category_id', categoryFilter)
-      }
-      
-      // Apply sorting
-      if (sortBy === 'name') {
-        query = query.order('name', { ascending: true })
-      } else if (sortBy === 'cost') {
-        query = query.order('cost', { ascending: false })
-      } else {
-        query = query.order('created_at', { ascending: false })
-      }
-      
-      const { data, error } = await query
-      if (error) throw error
-      
-      return data || []
-    }
-  })
+  // Fetch materials using the hook
+  const { data: materials = [], isLoading } = useMaterials()
+  const deleteMaterialMutation = useDeleteMaterial()
 
   // Statistics calculations
   const totalMaterials = materials.length
@@ -90,33 +52,21 @@ export default function AdminMaterials() {
     return createdDate > weekAgo
   }).length
 
-  // Delete material mutation
-  const deleteMaterialMutation = useMutation({
-    mutationFn: async (materialId: string) => {
-      if (!supabase) throw new Error('Supabase not initialized')
-      
-      const { error } = await supabase
-        .from('materials')
-        .delete()
-        .eq('id', materialId)
-      
-      if (error) throw error
-      return materialId
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-materials'] })
-      toast({
-        title: "Material eliminado",
-        description: "El material ha sido eliminado correctamente."
-      })
-      setDeletingMaterial(null)
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "No se pudo eliminar el material.",
-        variant: "destructive"
-      })
+  // Apply client-side filtering
+  const filteredMaterials = materials.filter(material => {
+    const matchesSearch = searchValue === '' || material.name.toLowerCase().includes(searchValue.toLowerCase())
+    const matchesCategory = categoryFilter === 'all' || material.category?.name?.toLowerCase() === categoryFilter
+    return matchesSearch && matchesCategory
+  })
+
+  // Apply client-side sorting
+  const sortedMaterials = [...filteredMaterials].sort((a, b) => {
+    if (sortBy === 'name') {
+      return a.name.localeCompare(b.name)
+    } else if (sortBy === 'cost') {
+      return (b.cost || 0) - (a.cost || 0)
+    } else {
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     }
   })
 
