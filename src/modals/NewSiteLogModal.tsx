@@ -222,14 +222,14 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
         body: (
           <CustomModalBody padding="md">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" id="site-log-form">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id="site-log-form">
                 <Accordion type="single" defaultValue="informacion-basica" collapsible>
                   {/* Sección 1: Información Básica */}
                   <AccordionItem value="informacion-basica">
                     <AccordionTrigger>
                       Información Básica
                     </AccordionTrigger>
-                    <AccordionContent className="space-y-4 pt-4">
+                    <AccordionContent className="space-y-3 pt-3">
                       {/* Primera fila: Fecha y Creador */}
                       <div className="grid grid-cols-2 gap-4">
                         <FormField
@@ -388,7 +388,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                     <AccordionTrigger>
                       Configuración de Entrada
                     </AccordionTrigger>
-                    <AccordionContent className="space-y-4 pt-4">
+                    <AccordionContent className="space-y-3 pt-3">
                       <div className="grid grid-cols-2 gap-4">
                         <FormField
                           control={form.control}

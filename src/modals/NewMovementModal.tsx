@@ -279,7 +279,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         body: (
           <CustomModalBody padding="md">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 {/* Primera fila: Fecha y Creador */}
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
