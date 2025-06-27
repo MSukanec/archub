@@ -176,72 +176,7 @@ export function Sidebar() {
                 ) : undefined}
               />
               
-              {/* Project Selector - Show after "Volver a Organización" button in project context */}
-              {currentSidebarContext === 'project' && item.label === 'Volver a Organización' && isExpanded && (
-                <div className="mt-1 px-1">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <div className="w-full h-9 px-3 py-2 bg-[var(--menues-bg)] hover:bg-[var(--menues-hover-bg)] rounded-lg border border-[var(--menues-border)] flex items-center justify-between cursor-pointer transition-colors">
-                        <div className="flex items-center gap-2 min-w-0">
-                          {activeProject && <Crown className="w-4 h-4 text-[var(--accent)] flex-shrink-0" />}
-                          <span className="text-sm text-[var(--menues-fg)] truncate">
-                            {activeProject?.name || 'Seleccionar proyecto'}
-                          </span>
-                        </div>
-                        <ChevronDown className="w-4 h-4 text-[var(--menues-fg)] flex-shrink-0" />
-                      </div>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-[200px]" align="start">
-                      {/* Search Input */}
-                      <div className="p-2">
-                        <div className="relative">
-                          <Search className="w-4 h-4 absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-                          <Input
-                            placeholder="Buscar proyectos..."
-                            value={projectSearchValue}
-                            onChange={(e) => setProjectSearchValue(e.target.value)}
-                            className="pl-8 h-8"
-                          />
-                        </div>
-                      </div>
-                      
-                      {/* Project List */}
-                      <div className="max-h-48 overflow-y-auto">
-                        {filteredProjects.map((project) => (
-                          <DropdownMenuItem
-                            key={project.id}
-                            onClick={() => {
-                              selectProjectMutation.mutate(project.id);
-                              setProjectSearchValue('');
-                            }}
-                            className="flex items-center gap-2"
-                          >
-                            {project.id === activeProject?.id && (
-                              <Crown className="w-4 h-4 text-[var(--accent)]" />
-                            )}
-                            <span className="truncate">{project.name}</span>
-                          </DropdownMenuItem>
-                        ))}
-                      </div>
-                      
-                      {/* No projects found */}
-                      {filteredProjects.length === 0 && projectSearchValue && (
-                        <div className="p-2 text-sm text-muted-foreground text-center">
-                          No se encontraron proyectos
-                        </div>
-                      )}
-                      
-                      <DropdownMenuSeparator />
-                      
-                      {/* Manage Projects Link */}
-                      <DropdownMenuItem onClick={() => navigate('/organization/proyectos')}>
-                        <FolderOpen className="w-4 h-4 mr-2" />
-                        Gestión de Proyectos
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              )}
+
               
               {/* Accordion Children */}
               {item.isAccordion && item.expanded && isExpanded && (
@@ -267,6 +202,78 @@ export function Sidebar() {
       {/* Bottom Section - Fixed Buttons */}
       <div className="border-t border-[var(--menues-border)] p-1">
         <div className="flex flex-col gap-[2px]">
+          {/* Project Selector - Only in project context and when expanded */}
+          {currentSidebarContext === 'project' && isExpanded && (
+            <div className="mb-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <div className="w-full h-9 px-3 py-2 bg-[var(--menues-bg)] rounded-lg border border-[var(--menues-border)] flex items-center justify-between cursor-pointer">
+                    <div className="flex items-center gap-2 min-w-0">
+                      {activeProject && <Crown className="w-4 h-4 text-[var(--accent)] flex-shrink-0" />}
+                      <span className="text-sm text-[var(--menues-fg)] truncate">
+                        {activeProject?.name || 'Seleccionar proyecto'}
+                      </span>
+                    </div>
+                    <ChevronDown className="w-4 h-4 text-[var(--menues-fg)] flex-shrink-0" />
+                  </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent 
+                  className="w-[220px] z-50" 
+                  align="start" 
+                  side="top"
+                  sideOffset={5}
+                >
+                  {/* Search Input */}
+                  <div className="p-2">
+                    <div className="relative">
+                      <Search className="w-4 h-4 absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        placeholder="Buscar proyectos..."
+                        value={projectSearchValue}
+                        onChange={(e) => setProjectSearchValue(e.target.value)}
+                        className="pl-8 h-8"
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Project List */}
+                  <div className="max-h-48 overflow-y-auto">
+                    {filteredProjects.map((project) => (
+                      <DropdownMenuItem
+                        key={project.id}
+                        onClick={() => {
+                          selectProjectMutation.mutate(project.id);
+                          setProjectSearchValue('');
+                        }}
+                        className="flex items-center gap-2"
+                      >
+                        {project.id === activeProject?.id && (
+                          <Crown className="w-4 h-4 text-[var(--accent)]" />
+                        )}
+                        <span className="truncate">{project.name}</span>
+                      </DropdownMenuItem>
+                    ))}
+                  </div>
+                  
+                  {/* No projects found */}
+                  {filteredProjects.length === 0 && projectSearchValue && (
+                    <div className="p-2 text-sm text-muted-foreground text-center">
+                      No se encontraron proyectos
+                    </div>
+                  )}
+                  
+                  <DropdownMenuSeparator />
+                  
+                  {/* Manage Projects Link */}
+                  <DropdownMenuItem onClick={() => navigate('/organization/proyectos')}>
+                    <FolderOpen className="w-4 h-4 mr-2" />
+                    Gestión de Proyectos
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          )}
+
           {/* Settings */}
           <SidebarButton
             icon={<Settings className="w-[18px] h-[18px]" />}
@@ -275,8 +282,6 @@ export function Sidebar() {
             isExpanded={isExpanded}
             onClick={() => navigate('/configuracion')}
           />
-
-
 
           {/* Profile */}
           <SidebarButton
