@@ -316,29 +316,29 @@ export function Sidebar() {
           {isExpanded ? (
             <div className={cn(
               "p-3 rounded-lg border transition-all duration-200",
-              (!userData?.organization?.plan || userData.organization.plan.name === 'free') && "bg-[var(--accent)]/10 border-[var(--accent)]/20",
-              userData?.organization?.plan?.name === 'pro' && "bg-blue-500/10 border-blue-500/20",
-              userData?.organization?.plan?.name === 'teams' && "bg-purple-500/10 border-purple-500/20"
+              (!userData?.plan || userData.plan.name === 'free') && "bg-[var(--accent)]/10 border-[var(--accent)]/20",
+              userData?.plan?.name === 'pro' && "bg-blue-500/10 border-blue-500/20",
+              userData?.plan?.name === 'teams' && "bg-purple-500/10 border-purple-500/20"
             )}>
               <div className="flex items-center gap-2 mb-2">
-                {(!userData?.organization?.plan || userData.organization.plan.name === 'free') && <Star className="w-4 h-4 text-[var(--accent)]" />}
-                {userData?.organization?.plan?.name === 'pro' && <Crown className="w-4 h-4 text-blue-500" />}
-                {userData?.organization?.plan?.name === 'teams' && <Zap className="w-4 h-4 text-purple-500" />}
+                {(!userData?.plan || userData.plan.name === 'free') && <Star className="w-4 h-4 text-[var(--accent)]" />}
+                {userData?.plan?.name === 'pro' && <Crown className="w-4 h-4 text-blue-500" />}
+                {userData?.plan?.name === 'teams' && <Zap className="w-4 h-4 text-purple-500" />}
                 <span className={cn(
                   "text-xs font-medium capitalize",
-                  (!userData?.organization?.plan || userData.organization.plan.name === 'free') && "text-[var(--accent)]",
-                  userData?.organization?.plan?.name === 'pro' && "text-blue-500",
-                  userData?.organization?.plan?.name === 'teams' && "text-purple-500"
+                  (!userData?.plan || userData.plan.name === 'free') && "text-[var(--accent)]",
+                  userData?.plan?.name === 'pro' && "text-blue-500",
+                  userData?.plan?.name === 'teams' && "text-purple-500"
                 )}>
-                  Plan {userData?.organization?.plan?.name || 'free'}
+                  Plan {userData?.plan?.name || 'free'}
                 </span>
               </div>
               <p className="text-xs text-muted-foreground mb-3">
-                {(!userData?.organization?.plan || userData.organization.plan.name === 'free') && "Actualiza para obtener las últimas y exclusivas funcionalidades"}
-                {userData?.organization?.plan?.name === 'pro' && "Disfruta de todas las funcionalidades Pro"}
-                {userData?.organization?.plan?.name === 'teams' && "Máximo rendimiento para equipos"}
+                {(!userData?.plan || userData.plan.name === 'free') && "Actualiza para obtener las últimas y exclusivas funcionalidades"}
+                {userData?.plan?.name === 'pro' && "Disfruta de todas las funcionalidades Pro"}
+                {userData?.plan?.name === 'teams' && "Máximo rendimiento para equipos"}
               </p>
-              {(!userData?.organization?.plan || userData.organization.plan.name === 'free') && (
+              {(!userData?.plan || userData.plan.name === 'free') && (
                 <button className={cn(
                   "w-full py-2 px-3 rounded-md text-xs font-medium transition-colors",
                   "bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90"
@@ -350,13 +350,13 @@ export function Sidebar() {
           ) : (
             <div className={cn(
               "w-9 h-9 rounded-lg border flex items-center justify-center cursor-pointer mx-auto transition-all duration-200",
-              (!userData?.organization?.plan || userData.organization.plan.name === 'free') && "bg-[var(--accent)]/10 border-[var(--accent)]/20",
-              userData?.organization?.plan?.name === 'pro' && "bg-blue-500/10 border-blue-500/20",
-              userData?.organization?.plan?.name === 'teams' && "bg-purple-500/10 border-purple-500/20"
+              (!userData?.plan || userData.plan.name === 'free') && "bg-[var(--accent)]/10 border-[var(--accent)]/20",
+              userData?.plan?.name === 'pro' && "bg-blue-500/10 border-blue-500/20",
+              userData?.plan?.name === 'teams' && "bg-purple-500/10 border-purple-500/20"
             )}>
-              {(!userData?.organization?.plan || userData.organization.plan.name === 'free') && <Star className="w-4 h-4 text-[var(--accent)]" />}
-              {userData?.organization?.plan?.name === 'pro' && <Crown className="w-4 h-4 text-blue-500" />}
-              {userData?.organization?.plan?.name === 'teams' && <Zap className="w-4 h-4 text-purple-500" />}
+              {(!userData?.plan || userData.plan.name === 'free') && <Star className="w-4 h-4 text-[var(--accent)]" />}
+              {userData?.plan?.name === 'pro' && <Crown className="w-4 h-4 text-blue-500" />}
+              {userData?.plan?.name === 'teams' && <Zap className="w-4 h-4 text-purple-500" />}
             </div>
           )}
         </div>
