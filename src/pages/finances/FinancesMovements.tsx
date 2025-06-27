@@ -1,27 +1,47 @@
-import { useState, useEffect } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import { DollarSign, Plus, Edit, Trash2, MoreHorizontal } from 'lucide-react';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { useState, useEffect } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { DollarSign, Plus, Edit, Trash2, MoreHorizontal } from "lucide-react";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
 
-import { Layout } from '@/components/layout/Layout';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { CustomTable } from '@/components/ui-custom/misc/CustomTable';
+import { Layout } from "@/components/layout/Layout";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { CustomTable } from "@/components/ui-custom/misc/CustomTable";
 
-import { NewMovementModal } from '@/modals/NewMovementModal';
-import { useCurrentUser } from '@/hooks/use-current-user';
-import { useMovements } from '@/hooks/use-movements';
-import { supabase } from '@/lib/supabase';
-import { useToast } from '@/hooks/use-toast';
-import { queryClient } from '@/lib/queryClient';
-import { useNavigationStore } from '@/stores/navigationStore';
+import { NewMovementModal } from "@/modals/NewMovementModal";
+import { useCurrentUser } from "@/hooks/use-current-user";
+import { useMovements } from "@/hooks/use-movements";
+import { supabase } from "@/lib/supabase";
+import { useToast } from "@/hooks/use-toast";
+import { queryClient } from "@/lib/queryClient";
+import { useNavigationStore } from "@/stores/navigationStore";
 
 interface Movement {
   id: string;
@@ -63,84 +83,89 @@ interface Movement {
 }
 
 export default function Movements() {
-  const [searchValue, setSearchValue] = useState('');
+  const [searchValue, setSearchValue] = useState("");
   const [showNewMovementModal, setShowNewMovementModal] = useState(false);
   const [editingMovement, setEditingMovement] = useState<Movement | null>(null);
-  const [deletingMovement, setDeletingMovement] = useState<Movement | null>(null);
+  const [deletingMovement, setDeletingMovement] = useState<Movement | null>(
+    null,
+  );
   const [selectedMovements, setSelectedMovements] = useState<Movement[]>([]);
-  
+
   const { setSidebarContext } = useNavigationStore();
-  
+
   // Set sidebar context to finance when component mounts
   useEffect(() => {
-    setSidebarContext('finance');
+    setSidebarContext("finance");
   }, [setSidebarContext]);
-  
+
   // Filter states
-  const [sortBy, setSortBy] = useState('date');
-  const [filterByType, setFilterByType] = useState('all');
-  const [filterByCategory, setFilterByCategory] = useState('all');
+  const [sortBy, setSortBy] = useState("date");
+  const [filterByType, setFilterByType] = useState("all");
+  const [filterByCategory, setFilterByCategory] = useState("all");
   const [showConversions, setShowConversions] = useState(false);
 
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.preferences?.last_organization_id;
   const projectId = userData?.preferences?.last_project_id;
-  
-  const { data: movements = [], isLoading } = useMovements(organizationId, projectId);
+
+  const { data: movements = [], isLoading } = useMovements(
+    organizationId,
+    projectId,
+  );
 
   // Delete movement mutation
   const deleteMovementMutation = useMutation({
     mutationFn: async (movementId: string) => {
       const { error } = await supabase
-        .from('movements')
+        .from("movements")
         .delete()
-        .eq('id', movementId);
+        .eq("id", movementId);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['movements'] });
+      queryClient.invalidateQueries({ queryKey: ["movements"] });
       setDeletingMovement(null);
       toast({
         title: "Movimiento eliminado",
-        description: "El movimiento ha sido eliminado correctamente"
+        description: "El movimiento ha sido eliminado correctamente",
       });
     },
     onError: (error: any) => {
       toast({
         title: "Error",
         description: error.message || "No se pudo eliminar el movimiento",
-        variant: "destructive"
+        variant: "destructive",
       });
-    }
+    },
   });
 
   // Delete multiple movements mutation
   const deleteMultipleMovementsMutation = useMutation({
     mutationFn: async (movementIds: string[]) => {
       const { error } = await supabase
-        .from('movements')
+        .from("movements")
         .delete()
-        .in('id', movementIds);
+        .in("id", movementIds);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['movements'] });
+      queryClient.invalidateQueries({ queryKey: ["movements"] });
       setSelectedMovements([]);
       toast({
         title: "Movimientos eliminados",
-        description: `${selectedMovements.length} movimientos han sido eliminados correctamente`
+        description: `${selectedMovements.length} movimientos han sido eliminados correctamente`,
       });
     },
     onError: (error: any) => {
       toast({
         title: "Error",
         description: error.message || "No se pudieron eliminar los movimientos",
-        variant: "destructive"
+        variant: "destructive",
       });
-    }
+    },
   });
 
   const handleEdit = (movement: Movement) => {
@@ -160,41 +185,61 @@ export default function Movements() {
 
   const handleDeleteSelected = () => {
     if (selectedMovements.length > 0) {
-      deleteMultipleMovementsMutation.mutate(selectedMovements.map(m => m.id));
+      deleteMultipleMovementsMutation.mutate(
+        selectedMovements.map((m) => m.id),
+      );
     }
   };
 
   // Filter movements
   const filteredMovements = movements
     .filter((movement) => {
-      const matchesSearch = movement.description?.toLowerCase().includes(searchValue.toLowerCase()) ||
-                          movement.movement_data?.type?.name?.toLowerCase().includes(searchValue.toLowerCase()) ||
-                          movement.movement_data?.category?.name?.toLowerCase().includes(searchValue.toLowerCase());
-      
-      const matchesType = filterByType === 'all' || movement.movement_data?.type?.name === filterByType;
-      const matchesCategory = filterByCategory === 'all' || movement.movement_data?.category?.name === filterByCategory;
+      const matchesSearch =
+        movement.description
+          ?.toLowerCase()
+          .includes(searchValue.toLowerCase()) ||
+        movement.movement_data?.type?.name
+          ?.toLowerCase()
+          .includes(searchValue.toLowerCase()) ||
+        movement.movement_data?.category?.name
+          ?.toLowerCase()
+          .includes(searchValue.toLowerCase());
+
+      const matchesType =
+        filterByType === "all" ||
+        movement.movement_data?.type?.name === filterByType;
+      const matchesCategory =
+        filterByCategory === "all" ||
+        movement.movement_data?.category?.name === filterByCategory;
       const matchesConversion = true; // Add conversion logic if needed
-      
-      return matchesSearch && matchesType && matchesCategory && matchesConversion;
+
+      return (
+        matchesSearch && matchesType && matchesCategory && matchesConversion
+      );
     })
     .sort((a, b) => {
       let comparison = 0;
-      
+
       switch (sortBy) {
-        case 'date':
-          comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        case "date":
+          comparison =
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
           break;
-        case 'amount':
+        case "amount":
           comparison = a.amount - b.amount;
           break;
-        case 'type':
-          comparison = (a.movement_data?.type?.name || '').localeCompare(b.movement_data?.type?.name || '');
+        case "type":
+          comparison = (a.movement_data?.type?.name || "").localeCompare(
+            b.movement_data?.type?.name || "",
+          );
           break;
-        case 'category':
-          comparison = (a.movement_data?.category?.name || '').localeCompare(b.movement_data?.category?.name || '');
+        case "category":
+          comparison = (a.movement_data?.category?.name || "").localeCompare(
+            b.movement_data?.category?.name || "",
+          );
           break;
       }
-      
+
       return comparison;
     });
 
@@ -202,7 +247,9 @@ export default function Movements() {
   const customFilters = (
     <div className="space-y-4">
       <div>
-        <Label className="text-xs font-medium text-muted-foreground">Ordenar por</Label>
+        <Label className="text-xs font-medium text-muted-foreground">
+          Ordenar por
+        </Label>
         <Select value={sortBy} onValueChange={setSortBy}>
           <SelectTrigger className="mt-1">
             <SelectValue placeholder="Seleccionar orden" />
@@ -217,7 +264,9 @@ export default function Movements() {
       </div>
 
       <div>
-        <Label className="text-xs font-medium text-muted-foreground">Filtrar por tipo</Label>
+        <Label className="text-xs font-medium text-muted-foreground">
+          Filtrar por tipo
+        </Label>
         <Select value={filterByType} onValueChange={setFilterByType}>
           <SelectTrigger className="mt-1">
             <SelectValue placeholder="Todos los tipos" />
@@ -231,7 +280,9 @@ export default function Movements() {
       </div>
 
       <div>
-        <Label className="text-xs font-medium text-muted-foreground">Filtrar por categoría</Label>
+        <Label className="text-xs font-medium text-muted-foreground">
+          Filtrar por categoría
+        </Label>
         <Select value={filterByCategory} onValueChange={setFilterByCategory}>
           <SelectTrigger className="mt-1">
             <SelectValue placeholder="Todas las categorías" />
@@ -247,134 +298,147 @@ export default function Movements() {
 
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <Label className="text-xs font-medium text-muted-foreground">Mostrar conversiones</Label>
-          <Switch checked={showConversions} onCheckedChange={setShowConversions} />
+          <Label className="text-xs font-medium text-muted-foreground">
+            Mostrar conversiones
+          </Label>
+          <Switch
+            checked={showConversions}
+            onCheckedChange={setShowConversions}
+          />
         </div>
       </div>
     </div>
   );
 
   const handleClearFilters = () => {
-    setSortBy('date');
-    setFilterByType('all');
-    setFilterByCategory('all');
+    setSortBy("date");
+    setFilterByType("all");
+    setFilterByCategory("all");
     setShowConversions(false);
-    setSearchValue('');
+    setSearchValue("");
   };
-
-
 
   const tableColumns = [
     {
-      key: 'created_at',
-      label: 'Fecha',
+      key: "created_at",
+      label: "Fecha",
       sortable: true,
-      sortType: 'date' as const,
+      sortType: "date" as const,
       render: (movement: Movement) => (
         <div className="text-xs">
-          <div>{format(new Date(movement.created_at), 'dd/MM/yyyy', { locale: es })}</div>
+          <div>
+            {format(new Date(movement.created_at), "dd/MM/yyyy", {
+              locale: es,
+            })}
+          </div>
           <div className="text-muted-foreground text-xs">
-            {format(new Date(movement.created_at), 'HH:mm', { locale: es })}
+            {format(new Date(movement.created_at), "HH:mm", { locale: es })}
           </div>
         </div>
-      )
+      ),
     },
     {
-      key: 'creator',
-      label: 'Creador',
+      key: "creator",
+      label: "Creador",
       sortable: true,
-      sortType: 'string' as const,
+      sortType: "string" as const,
       render: (movement: Movement) => (
         <div className="flex items-center gap-2">
           <Avatar className="h-6 w-6">
             <AvatarImage src={movement.creator?.avatar_url} />
             <AvatarFallback className="text-xs">
-              {movement.creator?.full_name?.charAt(0) || movement.creator?.email?.charAt(0) || 'U'}
+              {movement.creator?.full_name?.charAt(0) ||
+                movement.creator?.email?.charAt(0) ||
+                "U"}
             </AvatarFallback>
           </Avatar>
           <span className="text-xs truncate">
-            {movement.creator?.full_name || movement.creator?.email || 'Usuario'}
+            {movement.creator?.full_name ||
+              movement.creator?.email ||
+              "Usuario"}
           </span>
         </div>
-      )
+      ),
     },
     {
-      key: 'type',
-      label: 'Tipo',
+      key: "type",
+      label: "Tipo",
       sortable: true,
-      sortType: 'string' as const,
+      sortType: "string" as const,
       render: (movement: Movement) => (
         <Badge variant="outline" className="text-xs">
-          {movement.movement_data?.type?.name || 'Sin tipo'}
+          {movement.movement_data?.type?.name || "Sin tipo"}
         </Badge>
-      )
+      ),
     },
     {
-      key: 'category',
-      label: 'Categoría',
+      key: "category",
+      label: "Categoría",
       sortable: true,
-      sortType: 'string' as const,
+      sortType: "string" as const,
       render: (movement: Movement) => (
         <span className="text-xs">
-          {movement.movement_data?.category?.name || 'Sin categoría'}
+          {movement.movement_data?.category?.name || "Sin categoría"}
         </span>
-      )
+      ),
     },
     {
-      key: 'subcategory',
-      label: 'Subcategoría',
+      key: "subcategory",
+      label: "Subcategoría",
       sortable: false,
       render: (movement: Movement) => (
-        <span className="text-xs text-muted-foreground">-</span>
-      )
+        <span className="text-xs">
+          {movement.movement_data?.subcategory?.name || "Sin subcategoría"}
+        </span>
+      ),
     },
     {
-      key: 'description',
-      label: 'Descripción',
+      key: "description",
+      label: "Descripción",
       sortable: true,
-      sortType: 'string' as const,
+      sortType: "string" as const,
       render: (movement: Movement) => (
         <span className="text-xs">
-          {movement.description || 'Sin descripción'}
+          {movement.description || "Sin descripción"}
         </span>
-      )
+      ),
     },
     {
-      key: 'currency',
-      label: 'Moneda',
+      key: "currency",
+      label: "Moneda",
       sortable: true,
-      sortType: 'string' as const,
+      sortType: "string" as const,
       render: (movement: Movement) => (
         <Badge variant="secondary" className="text-xs">
-          {movement.movement_data?.currency?.code || 'USD'}
+          {movement.movement_data?.currency?.code || "USD"}
         </Badge>
-      )
+      ),
     },
     {
-      key: 'wallet',
-      label: 'Billetera',
+      key: "wallet",
+      label: "Billetera",
       sortable: true,
-      sortType: 'string' as const,
+      sortType: "string" as const,
       render: (movement: Movement) => (
         <span className="text-xs">
-          {movement.movement_data?.wallet?.name || 'Principal'}
+          {movement.movement_data?.wallet?.name || "Principal"}
         </span>
-      )
+      ),
     },
     {
-      key: 'amount',
-      label: 'Cantidad',
+      key: "amount",
+      label: "Cantidad",
       sortable: true,
-      sortType: 'number' as const,
+      sortType: "number" as const,
       render: (movement: Movement) => (
         <span className="text-xs font-medium">
-          ${movement.amount?.toLocaleString() || '0'}
+          ${movement.amount?.toLocaleString() || "0"}
         </span>
-      )
+      ),
     },
     {
-      key: 'actions',
-      label: 'Acciones',
+      key: "actions",
+      label: "Acciones",
       sortable: false,
       render: (movement: Movement) => (
         <DropdownMenu>
@@ -388,7 +452,7 @@ export default function Movements() {
               <Edit className="mr-2 h-4 w-4" />
               Editar
             </DropdownMenuItem>
-            <DropdownMenuItem 
+            <DropdownMenuItem
               className="text-red-600"
               onClick={() => handleDelete(movement)}
             >
@@ -397,8 +461,8 @@ export default function Movements() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      )
-    }
+      ),
+    },
   ];
 
   const headerProps = {
@@ -422,7 +486,7 @@ export default function Movements() {
           <Trash2 className="h-4 w-4" />
         </Button>
       ),
-      <Button 
+      <Button
         key="new-movement"
         onClick={() => {
           setEditingMovement(null);
@@ -432,8 +496,8 @@ export default function Movements() {
       >
         <Plus className="mr-2 h-4 w-4" />
         Nuevo movimiento
-      </Button>
-    ].filter(Boolean)
+      </Button>,
+    ].filter(Boolean),
   };
 
   return (
@@ -468,21 +532,25 @@ export default function Movements() {
       )}
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!deletingMovement} onOpenChange={() => setDeletingMovement(null)}>
+      <AlertDialog
+        open={!!deletingMovement}
+        onOpenChange={() => setDeletingMovement(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar movimiento?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción no se puede deshacer. El movimiento será eliminado permanentemente.
+              Esta acción no se puede deshacer. El movimiento será eliminado
+              permanentemente.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={confirmDelete}
               disabled={deleteMovementMutation.isPending}
             >
-              {deleteMovementMutation.isPending ? 'Eliminando...' : 'Eliminar'}
+              {deleteMovementMutation.isPending ? "Eliminando..." : "Eliminar"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -61,7 +61,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
   const { data: currentUser } = useCurrentUser()
   const organizationId = currentUser?.organization?.id
   const { data: members } = useOrganizationMembers(organizationId)
-  const { data: concepts } = useMovementConcepts()
+  const { data: concepts } = useMovementConcepts(organizationId)
   const { data: currencies } = useCurrencies(organizationId)
   const { data: wallets } = useOrganizationWallets(organizationId)
   const { toast } = useToast()
@@ -84,14 +84,14 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
 
   // Auto-select current user and defaults
   useEffect(() => {
-    if (currentUser?.member?.id) {
-      form.setValue('created_by', currentUser.member.id)
+    if (currentUser?.role?.id) {
+      form.setValue('created_by', currentUser.role.id)
     }
-    if (currencies?.length > 0) {
+    if (currencies && currencies.length > 0) {
       const defaultCurrency = currencies.find(c => c.is_default) || currencies[0]
       form.setValue('currency_id', defaultCurrency.id)
     }
-    if (wallets?.length > 0) {
+    if (wallets && wallets.length > 0) {
       const defaultWallet = wallets.find(w => w.is_default) || wallets[0]
       form.setValue('wallet_id', defaultWallet.id)
     }
@@ -207,8 +207,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                           name="created_at"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="flex items-center gap-2">
-                                <Calendar className="w-4 h-4" />
+                              <FormLabel>
                                 Fecha
                               </FormLabel>
                               <FormControl>
@@ -228,8 +227,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                           name="created_by"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="flex items-center gap-2">
-                                <User className="w-4 h-4" />
+                              <FormLabel>
                                 Creador
                               </FormLabel>
                               <Select onValueChange={field.onChange} value={field.value}>
