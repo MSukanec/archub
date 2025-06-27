@@ -119,6 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 27, 2025. Complete admin functionality implementation with sidebar navigation and organization management
+  • Created AdminDashboard.tsx with system statistics and recent organizations overview
+  • Built AdminOrganizations.tsx with complete table interface following ai-page-template.md structure
+  • Implemented NewAdminOrganizationModal.tsx for creating new organizations with plan selection
+  • Added admin sidebar context with "Resumen de Administración" and "Gestión de Organizaciones" navigation
+  • Updated Sidebar.tsx to include admin context switching from Settings button
+  • Added admin routes in App.tsx for /admin/dashboard and /admin/organizations
+  • Admin functionality includes organization creation, filtering, and management capabilities
+
 - June 27, 2025. Complete card backgrounds standardization and organization navigation improvements
   • Replaced all hardcoded card backgrounds (bg-white, bg-gray-50) with --card-bg CSS variable in CustomRestricted and OrganizationDashboard
   • Fixed organization switching navigation to properly redirect to organization sidebar context and OrganizationDashboard.tsx
