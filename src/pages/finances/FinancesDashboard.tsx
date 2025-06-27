@@ -10,7 +10,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useNavigationStore } from "@/stores/navigationStore";
 import { supabase } from "@/lib/supabase";
 import { WalletBalanceChart } from "@/components/graphics/WalletBalanceChart";
 import { MonthlyFlowChart } from "@/components/graphics/MonthlyFlowChart";
@@ -37,14 +36,11 @@ interface RecentMovement {
 export default function FinancesDashboard() {
   const [searchValue, setSearchValue] = useState("");
   const { data: userData } = useCurrentUser();
-  const { setSidebarContext } = useNavigationStore();
   const organizationId = userData?.preferences?.last_organization_id;
   const projectId = userData?.preferences?.last_project_id;
 
   // Set sidebar context to finance when component mounts
   useEffect(() => {
-    setSidebarContext('finance');
-  }, [setSidebarContext]);
 
   // Fetch financial summary
   const { data: financialSummary, isLoading: loadingSummary } = useQuery({
@@ -258,7 +254,7 @@ export default function FinancesDashboard() {
 
   if (isLoading) {
     return (
-      <Layout headerProps={headerProps}>
+      <Layout >
         <div className="flex items-center justify-center h-64">
           <div className="text-sm text-muted-foreground">Cargando dashboard financiero...</div>
         </div>
@@ -284,7 +280,7 @@ export default function FinancesDashboard() {
   };
 
   return (
-    <Layout headerProps={headerProps}>
+    <Layout >
       <div className="space-y-6">
         {/* Financial Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

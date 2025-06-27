@@ -324,7 +324,7 @@ export default function OrganizationMembers() {
 
   if (isLoading) {
     return (
-      <Layout headerProps={headerProps}>
+      <Layout >
         <div className="flex items-center justify-center h-64">
           <div className="text-sm text-muted-foreground">Cargando miembros...</div>
         </div>
@@ -333,7 +333,7 @@ export default function OrganizationMembers() {
   }
 
   return (
-    <Layout headerProps={headerProps}>
+    <Layout >
       <div className="grid grid-cols-12 gap-8">
           {/* Left Sidebar - Section Navigation */}
           <div className="col-span-3">

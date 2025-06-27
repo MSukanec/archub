@@ -15,7 +15,6 @@ import { useWallets } from '@/hooks/use-wallets';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { queryClient } from '@/lib/queryClient';
-import { useNavigationStore } from '@/stores/navigationStore';
 
 interface Wallet {
   id: string;
@@ -66,13 +65,10 @@ export default function OrganizationPreferences() {
   const [secondaryCurrencies, setSecondaryCurrencies] = useState<string[]>([]);
   const [secondaryWallets, setSecondaryWallets] = useState<string[]>([]);
 
-  const { setSidebarContext } = useNavigationStore();
   const { toast } = useToast();
 
   // Set sidebar context to organization when component mounts
   useEffect(() => {
-    setSidebarContext('organization');
-  }, [setSidebarContext]);
 
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
@@ -332,7 +328,7 @@ export default function OrganizationPreferences() {
 
   if (!organizationId) {
     return (
-      <Layout headerProps={headerProps}>
+      <Layout >
         <div className="flex items-center justify-center h-64">
           <p className="text-[var(--menues-fg)] opacity-70">No hay organización seleccionada</p>
         </div>
@@ -341,7 +337,7 @@ export default function OrganizationPreferences() {
   }
 
   return (
-    <Layout headerProps={headerProps}>
+    <Layout >
       <div className="space-y-6">
         {/* Monedas */}
         <Card>

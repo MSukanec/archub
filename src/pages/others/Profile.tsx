@@ -86,12 +86,14 @@ export default function Profile() {
       if (userError) throw userError
 
       // Update preferences
-      const { error: prefsError } = await supabase
-        .from('user_preferences')
-        .update({ sidebar_docked: profileData.sidebarDocked })
-        .eq('id', userData.preferences.id)
-
-      if (prefsError) throw prefsError
+      if (userData.preferences) {
+        const { error: prefsError } = await supabase
+          .from('user_preferences')
+          .update({ sidebar_docked: profileData.sidebarDocked })
+          .eq('id', userData.preferences.id)
+        
+        if (prefsError) throw prefsError
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['current-user'] })

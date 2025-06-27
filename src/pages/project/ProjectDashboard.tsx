@@ -21,7 +21,7 @@ export default function ProjectDashboard() {
 
   if (isLoading || projectsLoading) {
     return (
-      <Layout headerProps={headerProps}>
+      <Layout >
         <div className="p-8 text-center text-muted-foreground">
           Cargando dashboard del proyecto...
         </div>
@@ -31,7 +31,7 @@ export default function ProjectDashboard() {
 
   if (!currentProject) {
     return (
-      <Layout headerProps={headerProps}>
+      <Layout >
         <div className="p-8 text-center text-muted-foreground">
           <Folder className="mx-auto h-12 w-12 mb-4 opacity-50" />
           <h3 className="text-sm font-medium mb-1">No hay proyecto seleccionado</h3>
@@ -42,7 +42,7 @@ export default function ProjectDashboard() {
   }
 
   return (
-    <Layout headerProps={headerProps}>
+    <Layout >
       <div className="space-y-6">
         {/* Header del proyecto */}
         <Card>

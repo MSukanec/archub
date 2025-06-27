@@ -272,7 +272,7 @@ export default function OrganizationActivity() {
 
   if (!currentOrganization) {
     return (
-      <Layout headerProps={headerProps}>
+      <Layout >
         <div className="text-center py-12 text-muted-foreground">
           <Building className="h-12 w-12 mx-auto mb-4 opacity-20" />
           <p className="text-sm">No hay organización seleccionada.</p>
@@ -371,7 +371,7 @@ export default function OrganizationActivity() {
   ];
 
   return (
-    <Layout headerProps={headerProps}>
+    <Layout >
         <CustomTable
           columns={columns}
           data={filteredActivities}

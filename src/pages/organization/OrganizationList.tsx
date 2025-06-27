@@ -15,7 +15,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { useNavigationStore } from '@/stores/navigationStore'
 import { NewOrganizationModal } from '@/modals/NewOrganizationModal'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 
@@ -157,7 +156,6 @@ export default function OrganizationManagement() {
   const { data: userData, isLoading } = useCurrentUser()
   const { toast } = useToast()
   const queryClient = useQueryClient()
-  const { setSidebarContext } = useNavigationStore()
 
   // Filtrar y ordenar organizaciones
   let filteredOrganizations = userData?.organizations?.filter(org => {
@@ -235,7 +233,6 @@ export default function OrganizationManagement() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['current-user'] })
-      setSidebarContext('organization')
       toast({
         title: "Organización seleccionada",
         description: "La organización se ha seleccionado correctamente"
@@ -329,7 +326,7 @@ export default function OrganizationManagement() {
 
   if (isLoading) {
     return (
-      <Layout headerProps={headerProps}>
+      <Layout >
         <div className="p-8 text-center text-muted-foreground">
           Cargando organizaciones...
         </div>
@@ -338,7 +335,7 @@ export default function OrganizationManagement() {
   }
 
   return (
-    <Layout headerProps={headerProps}>
+    <Layout >
       <div className="space-y-6">
         {/* Card con información de la organización seleccionada */}
         {userData?.organization && (

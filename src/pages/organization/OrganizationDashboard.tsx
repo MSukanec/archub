@@ -192,7 +192,7 @@ export default function OrganizationDashboard() {
 
   if (!currentOrganization) {
     return (
-      <Layout headerProps={headerProps}>
+      <Layout >
         <div className="text-center py-12 text-muted-foreground">
           <Building className="h-12 w-12 mx-auto mb-4 opacity-20" />
           <p className="text-sm">No hay organización seleccionada.</p>
@@ -203,7 +203,7 @@ export default function OrganizationDashboard() {
   }
 
   return (
-    <Layout headerProps={headerProps}>
+    <Layout >
         {/* Organization Overview */}
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6 mb-6">
           <div className="flex items-start justify-between">

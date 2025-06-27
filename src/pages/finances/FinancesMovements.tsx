@@ -21,7 +21,6 @@ import { useMovements } from '@/hooks/use-movements';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { queryClient } from '@/lib/queryClient';
-import { useNavigationStore } from '@/stores/navigationStore';
 
 interface Movement {
   id: string;
@@ -69,12 +68,9 @@ export default function Movements() {
   const [deletingMovement, setDeletingMovement] = useState<Movement | null>(null);
   const [selectedMovements, setSelectedMovements] = useState<Movement[]>([]);
   
-  const { setSidebarContext } = useNavigationStore();
   
   // Set sidebar context to finance when component mounts
   useEffect(() => {
-    setSidebarContext('finance');
-  }, [setSidebarContext]);
   
   // Filter states
   const [sortBy, setSortBy] = useState('date');
@@ -437,7 +433,7 @@ export default function Movements() {
   };
 
   return (
-    <Layout headerProps={headerProps} wide={true}>
+    <Layout  wide={true}>
       <CustomTable
         columns={tableColumns}
         data={filteredMovements}

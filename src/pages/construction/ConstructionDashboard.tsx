@@ -12,7 +12,7 @@ export default function ConstructionDashboard() {
   }
 
   return (
-    <Layout headerProps={headerProps}>
+    <Layout >
       <div className="space-y-6">
         {/* Estado General */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

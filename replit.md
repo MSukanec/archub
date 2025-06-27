@@ -119,6 +119,20 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 27, 2025. Complete navigation system overhaul with unified sidebar accordion architecture
+  • Eliminated entire Header-based horizontal navigation system completely
+  • Removed CustomPageHeader, CustomPageLayout, CustomPageBody components and all header logic
+  • Rebuilt Sidebar.tsx with accordion-based navigation matching user's reference design
+  • Created unified sidebar with ADMINISTRACIÓN, PERFIL (disabled), and GENERAL sections
+  • Implemented ORGANIZACIÓN accordion (Resumen, Proyectos, Contactos, Actividad, Miembros, Preferencias)
+  • Added PROYECTO accordion with nested sub-groups: Dashboard, Diseño, Obra (Resumen/Bitácora), Finanzas (Resumen/Movimientos), Comercialización
+  • Updated sidebarStore to handle accordion states and context switching
+  • Sidebar collapses to 64px icons-only, expands to 240px on hover with smooth transitions
+  • Cleaned up App.tsx routes, removing duplicates and organizing by section
+  • Simplified Layout.tsx to use only sidebar without header complexity
+  • All pages now use simple Layout wrapper without headerProps
+  • Profile.tsx completely rebuilt with simplified form and direct header integration
+
 - June 26, 2025. Complete modal system refinement with ultra-compact Lemon Squeezy aesthetic
   • Applied padding: 3 to all CustomModal components (Header, Body, Footer) for consistent spacing
   • Updated Button primary variant to use --button-primary-text CSS variable for proper text color
