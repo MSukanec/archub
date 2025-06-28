@@ -53,6 +53,7 @@ export default function ConstructionBudgets() {
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('created_at')
   const [newBudgetModalOpen, setNewBudgetModalOpen] = useState(false)
+  const [editingBudget, setEditingBudget] = useState<Budget | null>(null)
   const [deletingBudget, setDeletingBudget] = useState<Budget | null>(null)
   const [expandedAccordion, setExpandedAccordion] = useState<string>('')
   const [budgetTaskModalOpen, setBudgetTaskModalOpen] = useState(false)
@@ -377,13 +378,41 @@ export default function ConstructionBudgets() {
             }
           />
         ) : (
-          <Accordion 
-            type="single" 
-            collapsible 
-            value={expandedAccordion}
-            onValueChange={setExpandedAccordion}
-            className="space-y-4"
-          >
+          <>
+            {/* Summary Cards */}
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Total Presupuestos</p>
+                      <p className="text-2xl font-semibold">{filteredBudgets.length}</p>
+                    </div>
+                    <Calculator className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Total General</p>
+                      <p className="text-2xl font-semibold">$0</p>
+                    </div>
+                    <Building2 className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Accordion 
+              type="single" 
+              collapsible 
+              value={expandedAccordion}
+              onValueChange={setExpandedAccordion}
+              className="space-y-4"
+            >
             {filteredBudgets.map((budget: Budget) => (
               <AccordionItem 
                 key={budget.id} 
@@ -421,6 +450,19 @@ export default function ConstructionBudgets() {
                         <Button
                           variant="ghost"
                           size="sm"
+                          className="h-7 w-7 p-0"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setEditingBudget(budget)
+                            setNewBudgetModalOpen(true)
+                          }}
+                        >
+                          <Building2 className="w-3 h-3" />
+                        </Button>
+                        
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           className="h-7 w-7 p-0 text-destructive hover:text-destructive"
                           onClick={(e) => {
                             e.stopPropagation()
@@ -442,6 +484,7 @@ export default function ConstructionBudgets() {
               </AccordionItem>
             ))}
           </Accordion>
+          </>
         )}
       </div>
 
@@ -449,7 +492,11 @@ export default function ConstructionBudgets() {
       {newBudgetModalOpen && (
         <NewBudgetModal
           open={newBudgetModalOpen}
-          onClose={() => setNewBudgetModalOpen(false)}
+          onClose={() => {
+            setNewBudgetModalOpen(false)
+            setEditingBudget(null)
+          }}
+          editingBudget={editingBudget}
           onSuccess={(budgetId) => setExpandedAccordion(budgetId)}
         />
       )}
