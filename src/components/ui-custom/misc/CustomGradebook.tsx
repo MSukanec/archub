@@ -119,22 +119,23 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
   const [isDragging, setIsDragging] = React.useState(false)
   const [dragStart, setDragStart] = React.useState({ x: 0, scrollLeft: 0 })
   const timelineRef = React.useRef<HTMLDivElement>(null)
+  const [timelineElement, setTimelineElement] = React.useState<HTMLDivElement | null>(null)
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (!timelineRef.current) return
+    if (!timelineElement) return
     setIsDragging(true)
     setDragStart({
-      x: e.pageX - timelineRef.current.offsetLeft,
-      scrollLeft: timelineRef.current.scrollLeft,
+      x: e.pageX - timelineElement.offsetLeft,
+      scrollLeft: timelineElement.scrollLeft,
     })
   }
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !timelineRef.current) return
+    if (!isDragging || !timelineElement) return
     e.preventDefault()
-    const x = e.pageX - timelineRef.current.offsetLeft
+    const x = e.pageX - timelineElement.offsetLeft
     const walk = (x - dragStart.x) * 2 // Scroll speed multiplier
-    timelineRef.current.scrollLeft = dragStart.scrollLeft - walk
+    timelineElement.scrollLeft = dragStart.scrollLeft - walk
   }
 
   const handleMouseUp = () => {
@@ -337,10 +338,8 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
             {/* Scrollable Timeline - hidden scrollbar */}
             <div 
               ref={(el) => {
-                // Set timelineRef for drag functionality
-                if (timelineRef.current !== el) {
-                  (timelineRef as React.MutableRefObject<HTMLDivElement | null>).current = el
-                }
+                // Set timeline element for both auto-scroll and drag functionality
+                setTimelineElement(el)
                 
                 if (el && dateRange.length > 0) {
                   // Use setTimeout to ensure DOM is fully rendered
