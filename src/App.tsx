@@ -23,6 +23,7 @@ import ConstructionLogs from "@/pages/construction/ConstructionLogs";
 import OrganizationPreferences from "@/pages/organization/OrganizationPreferences";
 import ConstructionDashboard from "@/pages/construction/ConstructionDashboard";
 import ConstructionBudgets from "@/pages/construction/ConstructionBudgets";
+import ConstructionMaterials from "@/pages/construction/ConstructionMaterials";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminOrganizations from "@/pages/admin/AdminOrganizations";
 import AdminUsers from "@/pages/admin/AdminUsers";
@@ -72,6 +73,12 @@ function Router() {
       <Route path="/construction/budgets">
         <ProtectedRoute>
           <ConstructionBudgets />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/construction/materials">
+        <ProtectedRoute>
+          <ConstructionMaterials />
         </ProtectedRoute>
       </Route>
 

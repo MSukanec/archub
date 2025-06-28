@@ -119,6 +119,17 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 28, 2025. Materials management system and budget selector interface implementation
+  • Created ConstructionMaterials.tsx page following ai-page-template.md structure with WIDE layout and CustomTable
+  • Built useConstructionMaterials hook to aggregate materials from task_materials table based on budget tasks
+  • Added "Materiales" button to project sidebar Obra accordion positioned between "Presupuestos" and "Bitácora"
+  • Materials table displays: Categoría, Nombre, Cantidad Computada (auto-sum), Cantidad Comprada, Cantidad A Comprar
+  • Transformed budget system from accordion-based to single card with budget selector dropdown interface
+  • Auto-selects first budget when page loads, single table updates based on selected budget
+  • Implemented complete CRUD operations: edit and delete tasks work with selected budget
+  • Added /construction/materials route to App.tsx with proper routing configuration
+  • Materials data aggregated from multiple budget tasks showing computed quantities per material
+
 - June 28, 2025. Complete budget management system and project structure improvements
   • Created ConstructionBudgets.tsx page with accordion-based budget management following ai-page-template.md structure
   • Built NewBudgetModal.tsx with form fields matching Supabase budgets table: name, description, status, project_id

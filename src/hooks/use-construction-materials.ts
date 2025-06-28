@@ -22,6 +22,33 @@ export function useConstructionMaterials(projectId: string) {
       }
 
       // Get all materials from tasks that are in budgets for this project
+      // First get budget_tasks for this project, then get task_materials
+      const { data: budgetTasksData, error: budgetTasksError } = await supabase
+        .from("budget_tasks")
+        .select(`
+          id,
+          task_id,
+          budget_id,
+          budgets!inner (
+            id,
+            project_id
+          )
+        `)
+        .eq("budgets.project_id", projectId);
+
+      if (budgetTasksError) {
+        console.error("Error fetching budget tasks:", budgetTasksError);
+        throw budgetTasksError;
+      }
+
+      if (!budgetTasksData || budgetTasksData.length === 0) {
+        return [];
+      }
+
+      // Extract task IDs from budget tasks
+      const taskIds = budgetTasksData.map(bt => bt.task_id);
+
+      // Now get task_materials for these tasks
       const { data, error } = await supabase
         .from("task_materials")
         .select(`
@@ -37,17 +64,9 @@ export function useConstructionMaterials(projectId: string) {
               id,
               name
             )
-          ),
-          budget_tasks!inner (
-            id,
-            budget_id,
-            budgets!inner (
-              id,
-              project_id
-            )
           )
         `)
-        .eq("budget_tasks.budgets.project_id", projectId);
+        .in("task_id", taskIds);
 
       if (error) {
         console.error("Error fetching construction materials:", error);

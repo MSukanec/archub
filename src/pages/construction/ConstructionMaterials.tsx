@@ -62,8 +62,7 @@ export default function ConstructionMaterials() {
     onSearchChange: setSearchValue,
     showFilters: true,
     customFilters,
-    onClearFilters: handleClearFilters,
-    actions: null
+    onClearFilters: handleClearFilters
   }
 
   // Table columns configuration
