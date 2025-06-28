@@ -119,6 +119,25 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 28, 2025. Complete dashboard redesign with spectacular visual and functional improvements
+  • Completely rebuilt ProjectDashboard.tsx with real data integration and advanced visual design
+  • Added comprehensive project statistics: financial metrics (income, expenses, balance), site logs count, and progress tracking
+  • Implemented gradient-based header with project information, status badges, and progress indicator
+  • Created color-coded metric cards with gradients: green for income, red for expenses, blue for balance, purple for site logs
+  • Added quick action buttons for navigation to Presupuestos, Bitácora, Finanzas, and Personal pages
+  • Built recent activity feed showing real site log entries with proper data visualization
+  • Enhanced project summary section with detailed breakdown of budgets, movements, and progress calculation
+  • Completely redesigned OrganizationDashboard.tsx with authentic Supabase data and professional interface
+  • Added organization health score calculation based on active projects, contacts, site logs, and financial balance
+  • Implemented comprehensive organization statistics with real-time data from multiple tables
+  • Created gradient-based organization header with plan badges, activity metrics, and health progress indicator
+  • Built financial overview cards showing total income, expenses, net balance with proper color coding
+  • Added project status breakdown displaying active, planning, and completed project counts
+  • Enhanced recent activity feed with color-coded activity items and proper timestamp formatting
+  • Implemented clickable project cards for easy navigation between organization and project dashboards
+  • Both dashboards now use authentic data from Supabase with proper error handling and loading states
+  • Applied Lemon Squeezy design aesthetic with gradients, proper spacing, and professional typography
+
 - June 28, 2025. Fixed site logs modal and Personnel timeline alignment issues
   • Made "Comentarios" field optional in site logs modal - no longer required for entry creation
   • Enhanced timeline cache invalidation - Personnel attendance now updates immediately after site log modifications
