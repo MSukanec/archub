@@ -13,7 +13,6 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { MoreHorizontal, Building, Crown, Filter } from 'lucide-react';
 import { NewAdminOrganizationModal } from '@/modals/NewAdminOrganizationModal';
-import { AdminProtectedRoute } from '@/components/ui-custom/misc/AdminProtectedRoute';
 
 interface Organization {
   id: string;
@@ -333,8 +332,7 @@ export default function AdminOrganizations() {
 
   return (
     <Layout wide headerProps={headerProps}>
-      <AdminProtectedRoute>
-        <div className="space-y-6">
+      <div className="space-y-6">
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="p-3">
@@ -393,8 +391,7 @@ export default function AdminOrganizations() {
             organization={editingOrganization}
           />
         )}
-        </div>
-      </AdminProtectedRoute>
+      </div>
     </Layout>
   );
 }

@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Layout } from "@/components/layout/Layout";
 import { ProtectedRoute } from "@/components/ui-custom/misc/ProtectedRoute";
+import { AdminProtectedRoute } from "@/components/ui-custom/misc/AdminProtectedRoute";
 import { useAuthStore } from "@/stores/authStore";
 
 // Páginas
@@ -161,40 +162,52 @@ function Router() {
         </ProtectedRoute>
       </Route>
 
-      {/* Rutas de administración */}
+      {/* Rutas de administración - Solo para administradores */}
       <Route path="/admin/dashboard">
         <ProtectedRoute>
-          <AdminDashboard />
+          <AdminProtectedRoute>
+            <AdminDashboard />
+          </AdminProtectedRoute>
         </ProtectedRoute>
       </Route>
 
       <Route path="/admin/organizations">
         <ProtectedRoute>
-          <AdminOrganizations />
+          <AdminProtectedRoute>
+            <AdminOrganizations />
+          </AdminProtectedRoute>
         </ProtectedRoute>
       </Route>
 
       <Route path="/admin/users">
         <ProtectedRoute>
-          <AdminUsers />
+          <AdminProtectedRoute>
+            <AdminUsers />
+          </AdminProtectedRoute>
         </ProtectedRoute>
       </Route>
 
       <Route path="/admin/tasks">
         <ProtectedRoute>
-          <AdminTasks />
+          <AdminProtectedRoute>
+            <AdminTasks />
+          </AdminProtectedRoute>
         </ProtectedRoute>
       </Route>
 
       <Route path="/admin/material-categories">
         <ProtectedRoute>
-          <AdminMaterialCategories />
+          <AdminProtectedRoute>
+            <AdminMaterialCategories />
+          </AdminProtectedRoute>
         </ProtectedRoute>
       </Route>
 
       <Route path="/admin/materials">
         <ProtectedRoute>
-          <AdminMaterials />
+          <AdminProtectedRoute>
+            <AdminMaterials />
+          </AdminProtectedRoute>
         </ProtectedRoute>
       </Route>
 

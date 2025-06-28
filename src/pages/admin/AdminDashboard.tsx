@@ -4,7 +4,6 @@ import { Badge } from '@/components/ui/badge';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Building, Users, Crown, Activity } from 'lucide-react';
-import { AdminProtectedRoute } from '@/components/ui-custom/misc/AdminProtectedRoute';
 
 // Hook para obtener estadísticas del sistema
 function useSystemStats() {
@@ -85,8 +84,7 @@ export default function AdminDashboard() {
 
   return (
     <Layout wide headerProps={headerProps}>
-      <AdminProtectedRoute>
-        <div className="space-y-6">
+      <div className="space-y-6">
         {/* Estadísticas del sistema */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="p-3">
@@ -179,8 +177,7 @@ export default function AdminDashboard() {
             )}
           </CardContent>
         </Card>
-        </div>
-      </AdminProtectedRoute>
+      </div>
     </Layout>
   );
 }
