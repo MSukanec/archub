@@ -14,9 +14,11 @@ export function useTaskCategories() {
     queryKey: ['task-categories'],
     queryFn: async () => {
       if (!supabase) {
+        console.error('Supabase client not initialized')
         throw new Error('Supabase client not initialized')
       }
 
+      console.log('Fetching task categories...')
       const { data, error } = await supabase
         .from('task_categories')
         .select('*')
@@ -27,6 +29,7 @@ export function useTaskCategories() {
         throw error
       }
 
+      console.log('Task categories data:', data)
       return data as TaskCategory[]
     }
   })
@@ -37,6 +40,8 @@ export function useTopLevelCategories() {
   const { data: allCategories = [], ...rest } = useTaskCategories()
   
   const topLevelCategories = allCategories.filter(category => category.level === 1)
+  
+  console.log('Top level categories:', topLevelCategories)
   
   return {
     data: topLevelCategories,
@@ -72,7 +77,7 @@ export function useElementCategories(parentId: string | null) {
   }
 }
 
-// Hook to get units
+// Hook to get units - tabla no existe en la base de datos
 export function useUnits() {
   return useQuery({
     queryKey: ['units'],
@@ -81,6 +86,7 @@ export function useUnits() {
         throw new Error('Supabase client not initialized')
       }
 
+      console.log('Attempting to fetch units...')
       const { data, error } = await supabase
         .from('units')
         .select('*')
@@ -88,15 +94,16 @@ export function useUnits() {
 
       if (error) {
         console.error('Error fetching units:', error)
-        throw error
+        return [] // Retornar array vacío si la tabla no existe
       }
 
-      return data
+      console.log('Units data:', data)
+      return data || []
     }
   })
 }
 
-// Hook to get actions
+// Hook to get actions - tabla no existe en la base de datos
 export function useActions() {
   return useQuery({
     queryKey: ['actions'],
@@ -105,6 +112,7 @@ export function useActions() {
         throw new Error('Supabase client not initialized')
       }
 
+      console.log('Attempting to fetch actions...')
       const { data, error } = await supabase
         .from('actions')
         .select('*')
@@ -112,15 +120,16 @@ export function useActions() {
 
       if (error) {
         console.error('Error fetching actions:', error)
-        throw error
+        return [] // Retornar array vacío si la tabla no existe
       }
 
-      return data
+      console.log('Actions data:', data)
+      return data || []
     }
   })
 }
 
-// Hook to get elements
+// Hook to get elements - tabla no existe en la base de datos
 export function useElements() {
   return useQuery({
     queryKey: ['elements'],
@@ -129,6 +138,7 @@ export function useElements() {
         throw new Error('Supabase client not initialized')
       }
 
+      console.log('Attempting to fetch elements...')
       const { data, error } = await supabase
         .from('elements')
         .select('*')
@@ -136,10 +146,11 @@ export function useElements() {
 
       if (error) {
         console.error('Error fetching elements:', error)
-        throw error
+        return [] // Retornar array vacío si la tabla no existe
       }
 
-      return data
+      console.log('Elements data:', data)
+      return data || []
     }
   })
 }
