@@ -164,17 +164,13 @@ export default function OrganizationDashboard() {
 
   if (!currentOrganization) {
     return (
-      <>
-        <Layout headerProps={headerProps} wide>
-          <div className="h-0" />
-        </Layout>
+      <Layout headerProps={headerProps} wide>
         <CustomEmptyState
-          fullScreen={true}
           icon={<Building />}
           title="No hay organización seleccionada"
           description="Selecciona una organización desde el menú superior para ver el resumen completo de la organización"
         />
-      </>
+      </Layout>
     );
   }
 

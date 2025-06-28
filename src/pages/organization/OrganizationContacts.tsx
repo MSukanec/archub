@@ -203,12 +203,8 @@ export default function OrganizationContacts() {
     }
 
     return (
-      <>
-        <Layout wide={true} headerProps={headerProps}>
-          <div className="h-0" />
-        </Layout>
+      <Layout wide={true} headerProps={headerProps}>
         <CustomEmptyState
-          fullScreen={true}
           icon={<Users />}
           title={searchValue || filterByType !== 'all' ? "No se encontraron contactos" : "No hay contactos"}
           description={searchValue || filterByType !== 'all' 
@@ -237,7 +233,7 @@ export default function OrganizationContacts() {
             }}
           />
         )}
-      </>
+      </Layout>
     )
   }
 

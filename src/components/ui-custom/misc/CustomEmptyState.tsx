@@ -20,30 +20,62 @@ export function CustomEmptyState({
 }: CustomEmptyStateProps) {
   return (
     <div className={cn(
-      // Base classes for full screen mode with mobile centering
-      fullScreen ? "fixed inset-0 z-50 flex" : "w-full min-h-[400px] flex",
-      "flex-col justify-center items-center relative overflow-hidden",
+      // Proper centering within the available space - no fixed positioning
+      "w-full h-full min-h-[50vh] flex flex-col justify-center items-center relative overflow-hidden",
       "bg-background transition-all duration-500",
-      // Dotted border with accent color
-      "border-2 border-dashed border-[var(--accent)]/40 rounded-lg",
-      fullScreen ? "m-4" : "m-4",
+      // Dotted border with full accent color
+      "border-2 border-dashed border-[var(--accent)] rounded-lg",
+      "m-8 p-8",
       className
     )}>
-      {/* Animated diagonal hatch background */}
-      <div className="absolute inset-0 z-0 opacity-20">
+      {/* Enhanced animated diagonal hatch background with varied directions */}
+      <div className="absolute inset-0 z-0 opacity-15">
+        {/* Lines moving up-right */}
         <div 
           className="absolute inset-0"
           style={{
             backgroundImage: `repeating-linear-gradient(
               45deg,
               transparent,
-              transparent 12px,
-              var(--accent) 12px,
-              var(--accent) 13px,
-              transparent 13px,
-              transparent 25px
+              transparent 15px,
+              var(--accent) 15px,
+              var(--accent) 16px,
+              transparent 16px,
+              transparent 30px
             )`,
-            animation: 'hatchMove 10s linear infinite'
+            animation: 'hatchMoveUpRight 12s linear infinite'
+          }}
+        />
+        {/* Lines moving down-right */}
+        <div 
+          className="absolute inset-0 opacity-50"
+          style={{
+            backgroundImage: `repeating-linear-gradient(
+              -45deg,
+              transparent,
+              transparent 20px,
+              var(--accent) 20px,
+              var(--accent) 21px,
+              transparent 21px,
+              transparent 40px
+            )`,
+            animation: 'hatchMoveDownRight 15s linear infinite reverse'
+          }}
+        />
+        {/* Additional subtle lines */}
+        <div 
+          className="absolute inset-0 opacity-30"
+          style={{
+            backgroundImage: `repeating-linear-gradient(
+              60deg,
+              transparent,
+              transparent 25px,
+              var(--accent) 25px,
+              var(--accent) 26px,
+              transparent 26px,
+              transparent 50px
+            )`,
+            animation: 'hatchMoveCustom 18s linear infinite'
           }}
         />
       </div>
@@ -79,10 +111,10 @@ export function CustomEmptyState({
 
       {/* Content Container with smaller, refined styling */}
       <div className="relative z-10 flex flex-col items-center max-w-sm mx-auto px-6 text-center">
-        {/* Icon with smaller, refined styling */}
+        {/* Icon with accent border */}
         {icon && (
           <div className="mb-4 relative">
-            <div className="p-3 rounded-full bg-[var(--accent)]/10 border border-[var(--accent)]/30">
+            <div className="p-3 rounded-full bg-[var(--accent)]/10 border border-[var(--accent)]">
               <div className="text-[var(--accent)]">
                 {React.cloneElement(icon as React.ReactElement, { 
                   className: "w-6 h-6" 
@@ -92,8 +124,8 @@ export function CustomEmptyState({
           </div>
         )}
 
-        {/* Title with smaller, refined typography */}
-        <h3 className="text-base font-semibold mb-2 text-foreground leading-tight">
+        {/* Title with slightly larger typography */}
+        <h3 className="text-lg font-semibold mb-2 text-foreground leading-tight">
           {title}
         </h3>
 
