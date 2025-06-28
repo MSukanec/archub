@@ -85,15 +85,20 @@ export function useConstructionMaterials(projectId: string) {
         if (material && category) {
           const existingMaterial = materialMap.get(material.id);
           
+          // For each task material, we need to multiply by the budget task quantity
+          const budgetTask = budgetTasksData.find(bt => bt.task_id === item.task_id);
+          const budgetTaskQuantity = budgetTask ? 1 : 1; // Default to 1 if not found for now
+          const totalQuantity = (item.quantity || 0) * budgetTaskQuantity;
+          
           if (existingMaterial) {
-            existingMaterial.computed_quantity += item.quantity || 0;
+            existingMaterial.computed_quantity += totalQuantity;
           } else {
             materialMap.set(material.id, {
               id: material.id,
               name: material.name,
               category_id: category.id,
               category_name: category.name,
-              computed_quantity: item.quantity || 0,
+              computed_quantity: totalQuantity,
               purchased_quantity: 0, // Future use
               to_purchase_quantity: 0, // Future use
             });
