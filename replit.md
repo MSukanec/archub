@@ -119,22 +119,19 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- June 28, 2025. Complete budget task management system with modal integration and accordion improvements
-  • Created NewBudgetTaskModal.tsx using Dialog component with complete form for task creation and editing
-  • Built useBudgetTasks hook for complete CRUD operations on budget_tasks table with proper Supabase integration
-  • Integrated task modal with ConstructionBudgets page - "Agregar Tarea" button opens modal for each budget
-  • Fixed accordion structure to separate chevron positioning from action buttons with mr-6 spacing
-  • Removed button nesting warning by restructuring accordion trigger to avoid buttons inside buttons
-  • Task modal includes fields: fecha de creación, tarea, cantidad, fechas inicio/fin, días planificados, prioridad
-  • Added CustomTable integration for displaying budget tasks when tasks are added to budgets
+- June 28, 2025. Complete budget management system and project structure improvements
   • Created ConstructionBudgets.tsx page with accordion-based budget management following ai-page-template.md structure
   • Built NewBudgetModal.tsx with form fields matching Supabase budgets table: name, description, status, project_id
   • Added useBudgets hook for complete CRUD operations on budgets with proper Supabase integration
   • Added "Presupuestos" button to project sidebar Obra accordion positioned between "Resumen de Obra" and "Bitácora"
+  • Each budget displays in accordion with CustomTable for tasks, "+ Agregar Tarea" and delete buttons in header
   • Moved SiteLogs.tsx to ConstructionLogs.tsx in src/pages/construction/ and removed src/pages/site/ folder
   • Updated all route references from SiteLogs to ConstructionLogs in App.tsx for cleaner project structure
   • Added CustomEmptyState to OrganizationProjects.tsx - shows when no projects exist with "Crear Primer Proyecto" action button
   • Fixed AdminTasks page import error - added missing useTasks hook import to resolve white screen issue
+  • Tasks table now displays real data from Supabase tasks table with proper organization filtering
+  • Hierarchical category system with three-level cascading dropdowns: Categoría → Subcategoría → Elemento (Categoría)
+  • Accordion modal with single-section behavior - only one section can be open at a time with "Datos Básicos" expanded by default
 - June 27, 2025. Complete Tasks admin system and plan button transparency fixes
   • Fixed plan button background - removed white/colored backgrounds, now transparent in both collapsed and expanded states
   • Created complete AdminTasks.tsx page with comprehensive table interface, statistics cards, and CRUD operations

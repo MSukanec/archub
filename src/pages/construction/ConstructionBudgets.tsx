@@ -11,9 +11,7 @@ import { Calculator, Plus, Trash2, Building2 } from 'lucide-react'
 import { CustomTable } from '@/components/ui-custom/misc/CustomTable'
 import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState'
 import { NewBudgetModal } from '@/modals/NewBudgetModal'
-import { NewBudgetTaskModal } from '@/modals/NewBudgetTaskModal'
 import { useBudgets } from '@/hooks/use-budgets'
-import { useBudgetTasks } from '@/hooks/use-budget-tasks'
 import { useToast } from '@/hooks/use-toast'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
@@ -55,28 +53,9 @@ export default function ConstructionBudgets() {
   const [newBudgetModalOpen, setNewBudgetModalOpen] = useState(false)
   const [deletingBudget, setDeletingBudget] = useState<Budget | null>(null)
   const [expandedAccordion, setExpandedAccordion] = useState<string>('')
-  
-  // Task modal states
-  const [showNewTaskModal, setShowNewTaskModal] = useState(false)
-  const [selectedBudgetId, setSelectedBudgetId] = useState<string | null>(null)
-  const [editingTask, setEditingTask] = useState<any>(null)
 
   const { data: userData, isLoading } = useCurrentUser()
   const { data: budgets = [], isLoading: budgetsLoading } = useBudgets(userData?.preferences?.last_project_id)
-  
-  // Task handlers
-  const handleAddTask = (budgetId: string) => {
-    console.log('Add task to budget:', budgetId)
-    setSelectedBudgetId(budgetId)
-    setEditingTask(null)
-    setShowNewTaskModal(true)
-  }
-  
-  const handleEditTask = (task: any) => {
-    setSelectedBudgetId(task.budget_id)
-    setEditingTask(task)
-    setShowNewTaskModal(true)
-  }
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
@@ -124,6 +103,11 @@ export default function ConstructionBudgets() {
 
   const handleDeleteBudget = (budget: Budget) => {
     setDeletingBudget(budget)
+  }
+
+  const handleAddTask = (budgetId: string) => {
+    // TODO: Implement add task to budget functionality
+    console.log('Add task to budget:', budgetId)
   }
 
   // Custom filters for the header
@@ -270,8 +254,8 @@ export default function ConstructionBudgets() {
                 className="border rounded-lg overflow-hidden"
               >
                 <Card className="border-0">
-                  <div className="flex items-center justify-between w-full p-4">
-                    <AccordionTrigger className="hover:no-underline p-0 flex-1 mr-6">
+                  <AccordionTrigger className="hover:no-underline p-0">
+                    <CardContent className="flex items-center justify-between w-full p-4">
                       <div className="flex items-center gap-3">
                         <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
                           <Building2 className="h-4 w-4 text-primary" />
@@ -283,34 +267,34 @@ export default function ConstructionBudgets() {
                           )}
                         </div>
                       </div>
-                    </AccordionTrigger>
-                    
-                    <div className="flex items-center gap-2">
-                      <Button
-                        size="sm"
-                        className="h-7 px-2 text-xs"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleAddTask(budget.id)
-                        }}
-                      >
-                        <Plus className="w-3 h-3 mr-1" />
-                        Agregar Tarea
-                      </Button>
                       
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 w-7 p-0 text-destructive hover:text-destructive"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleDeleteBudget(budget)
-                        }}
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          className="h-7 px-2 text-xs"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleAddTask(budget.id)
+                          }}
+                        >
+                          <Plus className="w-3 h-3 mr-1" />
+                          Agregar Tarea
+                        </Button>
+                        
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleDeleteBudget(budget)
+                          }}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </AccordionTrigger>
                   
                   <AccordionContent className="px-4 pb-4">
                     <div className="pt-4 border-t">
@@ -333,20 +317,6 @@ export default function ConstructionBudgets() {
         <NewBudgetModal
           open={newBudgetModalOpen}
           onClose={() => setNewBudgetModalOpen(false)}
-        />
-      )}
-
-      {/* New Task Modal */}
-      {showNewTaskModal && selectedBudgetId && (
-        <NewBudgetTaskModal
-          open={showNewTaskModal}
-          onClose={() => {
-            setShowNewTaskModal(false);
-            setSelectedBudgetId(null);
-            setEditingTask(null);
-          }}
-          budgetId={selectedBudgetId}
-          editingTask={editingTask}
         />
       )}
 
