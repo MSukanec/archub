@@ -426,7 +426,9 @@ export function Header({
         {actions && actions.length > 0 && (
           <div className="flex items-center gap-2">
             {actions.map((action, index) => (
-              <div key={index}>{action}</div>
+              <div key={index} className="[&>button]:h-8 [&>button]:px-3 [&>button]:text-sm [&>button]:font-medium">
+                {action}
+              </div>
             ))}
           </div>
         )}

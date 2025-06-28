@@ -202,19 +202,17 @@ export default function OrganizationContacts() {
           </Button>
         ]
       }}>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <CustomEmptyState
-            icon={<Users className="w-8 h-8 text-muted-foreground" />}
-            title="No hay contactos"
-            description="Comienza agregando tu primer contacto a la organización"
-            action={
-              <Button onClick={() => setShowCreateModal(true)}>
-                <Plus className="w-4 h-4 mr-2" />
-                Nuevo Contacto
-              </Button>
-            }
-          />
-        </div>
+        <CustomEmptyState
+          icon={<Users className="w-8 h-8 text-muted-foreground" />}
+          title="No hay contactos"
+          description="Comienza agregando tu primer contacto a la organización"
+          action={
+            <Button onClick={() => setShowCreateModal(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Nuevo Contacto
+            </Button>
+          }
+        />
         
         {showCreateModal && (
           <NewContactModal
