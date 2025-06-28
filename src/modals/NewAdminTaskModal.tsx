@@ -123,7 +123,7 @@ export function NewAdminTaskModal({ open, onClose, task }: NewAdminTaskModalProp
         ),
         body: (
           <CustomModalBody padding="md">
-            <Accordion type="multiple" defaultValue={["datos-basicos", "costos", "materiales"]} className="space-y-2">
+            <Accordion type="single" defaultValue="datos-basicos" className="space-y-2">
               {/* Datos Básicos */}
               <AccordionItem value="datos-basicos">
                 <AccordionTrigger className="text-sm font-medium">
@@ -278,14 +278,12 @@ export function NewAdminTaskModal({ open, onClose, task }: NewAdminTaskModalProp
           </CustomModalBody>
         ),
         footer: (
-          <CustomModalFooter>
-            <Button variant="secondary" onClick={handleClose} className="w-1/4">
-              Cancelar
-            </Button>
-            <Button onClick={handleSubmit} className="w-3/4">
-              {task ? "Actualizar" : "Crear"} Tarea
-            </Button>
-          </CustomModalFooter>
+          <CustomModalFooter
+            onCancel={handleClose}
+            onSave={handleSubmit}
+            cancelText="Cancelar"
+            saveText={task ? "Actualizar Tarea" : "Crear Tarea"}
+          />
         )
       }}
     </CustomModalLayout>
