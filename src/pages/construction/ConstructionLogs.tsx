@@ -2,7 +2,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { FileText, Plus, Star, Globe, Lock, ChevronDown, ChevronRight, Edit, Trash2, MoreHorizontal, Flame, Package, StickyNote, Sun, Cloud, CloudRain, CloudSnow, Wind, CloudDrizzle, CloudLightning, Thermometer, TrendingUp, Users, AlertTriangle, CloudSun, CheckCircle, Search, Camera } from "lucide-react";
+import { FileText, Plus, Star, Globe, Lock, ChevronDown, ChevronRight, Edit, Trash2, MoreHorizontal, Flame, Package, StickyNote, Sun, Cloud, CloudRain, CloudSnow, Wind, CloudDrizzle, CloudLightning, Thermometer, TrendingUp, Users, AlertTriangle, CloudSun, CheckCircle, Search, Camera, Eye, Calendar } from "lucide-react";
 
 import { Layout } from '@/components/layout/Layout';
 import { Button } from "@/components/ui/button";
@@ -254,6 +254,52 @@ export default function ConstructionLogs() {
   return (
     <Layout wide headerProps={headerProps}>
       <div className="space-y-6">
+        {/* Tarjetas de estadísticas */}
+        <div className="grid grid-cols-4 gap-4">
+          <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-3">
+            <div className="flex items-center gap-2">
+              <FileText className="h-4 w-4 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">Total de Entradas</span>
+            </div>
+            <p className="text-lg font-semibold mt-1">{filteredSiteLogs?.length || 0}</p>
+          </div>
+          
+          <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-3">
+            <div className="flex items-center gap-2">
+              <Star className="h-4 w-4 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">Favoritos</span>
+            </div>
+            <p className="text-lg font-semibold mt-1">
+              {filteredSiteLogs?.filter(log => log.is_favorite).length || 0}
+            </p>
+          </div>
+          
+          <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-3">
+            <div className="flex items-center gap-2">
+              <Eye className="h-4 w-4 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">Entradas Públicas</span>
+            </div>
+            <p className="text-lg font-semibold mt-1">
+              {filteredSiteLogs?.filter(log => log.is_public).length || 0}
+            </p>
+          </div>
+          
+          <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-3">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">Esta Semana</span>
+            </div>
+            <p className="text-lg font-semibold mt-1">
+              {filteredSiteLogs?.filter(log => {
+                const logDate = new Date(log.log_date);
+                const weekAgo = new Date();
+                weekAgo.setDate(weekAgo.getDate() - 7);
+                return logDate >= weekAgo;
+              }).length || 0}
+            </p>
+          </div>
+        </div>
+
         {/* Headers de columnas */}
         <div className="grid grid-cols-12 gap-4 px-4 py-2 text-xs font-medium text-muted-foreground border-b">
           <div className="col-span-2">Fecha</div>
