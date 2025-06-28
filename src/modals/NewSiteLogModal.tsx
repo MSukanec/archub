@@ -18,7 +18,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { useToast } from '@/hooks/use-toast'
-import { Calendar, User, FileText, Cloud, MessageSquare, Star, Eye } from 'lucide-react'
+import { Calendar, User, FileText, Cloud, MessageSquare, Star, Eye, Calendar as CalendarIcon, Plus, X } from 'lucide-react'
 
 // Schema con enums exactos de Supabase
 const siteLogSchema = z.object({
@@ -95,11 +95,12 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
       })
     } else {
       // Seleccionar usuario actual por defecto en modo creación
-      if (userData?.memberships?.[0]?.id) {
-        form.setValue('created_by', userData.memberships[0].id)
+      const currentUserMember = members?.find((member: any) => member.users.id === userData?.user?.id);
+      if (currentUserMember?.id) {
+        form.setValue('created_by', currentUserMember.id)
       }
     }
-  }, [editingSiteLog, userData, form])
+  }, [editingSiteLog, userData, members, form])
 
   // Mutación para crear/editar site log
   const createSiteLogMutation = useMutation({
@@ -116,8 +117,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
         comments: data.comments,
         is_public: data.is_public,
         is_favorite: data.is_favorite,
-        project_id: userData.preferences.last_project_id,
-        organization_id: userData.preferences.last_organization_id
+        project_id: userData.preferences.last_project_id
       }
 
       if (!supabase) {

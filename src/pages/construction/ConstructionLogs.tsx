@@ -61,16 +61,16 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
         .from('site_logs')
         .select(`
           *,
-          created_by_member:organization_members!site_logs_created_by_fkey(
+          organization_members!created_by(
             id,
-            user:users(
+            users(
               full_name,
-              avatar_url
+              avatar_url,
+              email
             )
           )
         `)
         .eq('project_id', projectId)
-        .eq('organization_id', organizationId)
         .order('created_at', { ascending: false });
 
       if (error) {
