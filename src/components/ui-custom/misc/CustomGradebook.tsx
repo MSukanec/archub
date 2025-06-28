@@ -66,6 +66,15 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
     return groups
   }, [workers])
 
+  // Auto-center on today when component loads
+  React.useEffect(() => {
+    const today = startOfDay(new Date())
+    const newStart = subDays(today, 15)
+    const newEnd = addDays(today, 15)
+    onStartDateChange?.(newStart)
+    onEndDateChange?.(newEnd)
+  }, []) // Only run on mount
+
   // Navigate dates
   const navigateDates = (direction: 'prev' | 'next') => {
     const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
@@ -104,6 +113,36 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
     if (!isNaN(newEnd.getTime())) {
       onEndDateChange?.(newEnd)
     }
+  }
+
+  // Drag functionality for timeline scrolling
+  const [isDragging, setIsDragging] = React.useState(false)
+  const [dragStart, setDragStart] = React.useState({ x: 0, scrollLeft: 0 })
+  const timelineRef = React.useRef<HTMLDivElement>(null)
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!timelineRef.current) return
+    setIsDragging(true)
+    setDragStart({
+      x: e.pageX - timelineRef.current.offsetLeft,
+      scrollLeft: timelineRef.current.scrollLeft,
+    })
+  }
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !timelineRef.current) return
+    e.preventDefault()
+    const x = e.pageX - timelineRef.current.offsetLeft
+    const walk = (x - dragStart.x) * 2 // Scroll speed multiplier
+    timelineRef.current.scrollLeft = dragStart.scrollLeft - walk
+  }
+
+  const handleMouseUp = () => {
+    setIsDragging(false)
+  }
+
+  const handleMouseLeave = () => {
+    setIsDragging(false)
   }
 
   const getAttendanceStatus = (workerId: string, date: Date) => {
@@ -267,43 +306,42 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
             </div>
           </div>
 
-          {/* Timeline Column with Navigation */}
-          <div className="flex-1 relative min-w-0">
-            {/* Left Navigation Button - Circular - Positioned in middle of all content */}
+          {/* Timeline Column with Drag Navigation */}
+          <div className="flex-1 relative min-w-0 group">
+            {/* Left Navigation Button - Full height, appears on hover */}
             <Button
               variant="ghost"
-              size="icon"
-              className="absolute left-2 z-20 w-8 h-8 rounded-full bg-background/90 backdrop-blur-sm border border-border hover:bg-muted shadow-sm"
+              className="absolute left-0 z-20 w-[15px] h-full bg-background/80 backdrop-blur-sm border-r border-border hover:bg-muted/80 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-none flex items-center justify-center"
               style={{ 
-                top: `calc(65px + ${Object.keys(groupedWorkers).reduce((total, contactType) => {
-                  return total + 40 + (groupedWorkers[contactType].length * 65) // 40px for header + worker rows
-                }, 0) / 2}px)`,
-                transform: 'translateY(-50%)'
+                top: '65px',
+                height: `calc(100% - 65px)`
               }}
               onClick={() => navigateDates('prev')}
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-3 h-3" />
             </Button>
 
-            {/* Right Navigation Button - Circular - Positioned in middle of all content */}
+            {/* Right Navigation Button - Full height, appears on hover */}
             <Button
               variant="ghost"
-              size="icon"
-              className="absolute right-2 z-20 w-8 h-8 rounded-full bg-background/90 backdrop-blur-sm border border-border hover:bg-muted shadow-sm"
+              className="absolute right-0 z-20 w-[15px] h-full bg-background/80 backdrop-blur-sm border-l border-border hover:bg-muted/80 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-none flex items-center justify-center"
               style={{ 
-                top: `calc(65px + ${Object.keys(groupedWorkers).reduce((total, contactType) => {
-                  return total + 40 + (groupedWorkers[contactType].length * 65) // 40px for header + worker rows
-                }, 0) / 2}px)`,
-                transform: 'translateY(-50%)'
+                top: '65px',
+                height: `calc(100% - 65px)`
               }}
               onClick={() => navigateDates('next')}
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-3 h-3" />
             </Button>
 
             {/* Scrollable Timeline - hidden scrollbar */}
             <div 
               ref={(el) => {
+                // Set timelineRef for drag functionality
+                if (timelineRef.current !== el) {
+                  (timelineRef as React.MutableRefObject<HTMLDivElement | null>).current = el
+                }
+                
                 if (el && dateRange.length > 0) {
                   // Use setTimeout to ensure DOM is fully rendered
                   setTimeout(() => {
@@ -317,12 +355,17 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
                   }, 100)
                 }
               }}
-              className="overflow-x-auto" 
+              className={`overflow-x-auto ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
               style={{ 
                 scrollbarWidth: 'none', 
                 msOverflowStyle: 'none',
-                WebkitOverflowScrolling: 'touch'
+                WebkitOverflowScrolling: 'touch',
+                userSelect: isDragging ? 'none' : 'auto'
               }}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseLeave}
             >
               <table 
                 style={{ 

@@ -119,6 +119,16 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 28, 2025. Enhanced Personnel timeline with drag functionality and auto-centering
+  • Timeline now automatically centers on "today" when page loads without requiring button click
+  • Replaced circular navigation buttons with full-height hover-only buttons (15px wide, 100% height)
+  • Implemented drag functionality for timeline scrolling - users can click and drag to navigate dates
+  • Hover navigation buttons only appear when mouse hovers over timeline area with smooth opacity transitions
+  • Enhanced cursor feedback: grab cursor when idle, grabbing cursor when dragging timeline
+  • Contact type grouping headers properly aligned with timeline rows for seamless visual continuity
+  • Disabled text selection during drag operations to prevent interference with timeline navigation
+  • Auto-scroll to center today's date happens immediately on component mount for better UX
+
 - June 28, 2025. Fixed sidebar accordion behavior and enhanced Personnel page layout with today indicator
   • Fixed sidebar accordion collapse issue - accordions now stay open when clicking sub-items (Finanzas accordion stays open when clicking Movimientos)
   • Made Personnel page use wide layout for better viewing of attendance data across full viewport
