@@ -31,7 +31,6 @@ export interface BudgetTask {
     units: {
       id: string;
       name: string;
-      symbol: string;
     } | null;
   };
 }
@@ -87,8 +86,7 @@ export function useBudgetTasks(budgetId: string) {
             ),
             units(
               id,
-              name,
-              symbol
+              name
             )
           )
         `)

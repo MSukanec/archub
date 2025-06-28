@@ -79,12 +79,14 @@ export default function ConstructionBudgets() {
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     })
 
-  // Auto-select first budget when budgets load
+  // Auto-select first budget when budgets load or project changes
   useEffect(() => {
-    if (filteredBudgets.length > 0 && !selectedBudgetId) {
+    if (filteredBudgets.length > 0) {
       setSelectedBudgetId(filteredBudgets[0].id);
+    } else {
+      setSelectedBudgetId('');
     }
-  }, [filteredBudgets, selectedBudgetId]);
+  }, [userData?.preferences?.last_project_id, filteredBudgets.length]);
 
   // Get selected budget
   const selectedBudget = filteredBudgets.find(budget => budget.id === selectedBudgetId);
@@ -351,7 +353,7 @@ export default function ConstructionBudgets() {
                       )}
                     </td>
                     <td className="p-2 text-sm">
-                      {task.task?.units?.symbol || task.task?.units?.name || 'Sin unidad'}
+                      {task.task?.units?.name || 'Sin unidad'}
                     </td>
                     <td className="p-2">
                       <input
