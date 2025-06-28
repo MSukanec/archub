@@ -4,8 +4,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Calendar, ChevronLeft, ChevronRight, Download } from 'lucide-react'
-import { format, addDays, eachDayOfInterval, isWeekend } from 'date-fns'
+import { Calendar, ChevronLeft, ChevronRight, Download, CalendarDays } from 'lucide-react'
+import { format, addDays, eachDayOfInterval, isWeekend, isToday, startOfDay, subDays } from 'date-fns'
 import { es } from 'date-fns/locale'
 
 interface Worker {
@@ -35,8 +35,8 @@ interface CustomGradebookProps {
 const CustomGradebook: React.FC<CustomGradebookProps> = ({
   workers = [],
   attendance = [],
-  startDate = new Date(),
-  endDate = addDays(new Date(), 30),
+  startDate = subDays(new Date(), 15), // Default: 15 days before today
+  endDate = addDays(new Date(), 15),   // Default: 15 days after today
   hideWeekends = false,
   onStartDateChange,
   onEndDateChange,
@@ -63,6 +63,15 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
       onStartDateChange?.(newStart)
       onEndDateChange?.(newEnd)
     }
+  }
+
+  // Navigate to today
+  const navigateToToday = () => {
+    const today = startOfDay(new Date())
+    const newStart = subDays(today, 15)
+    const newEnd = addDays(today, 15)
+    onStartDateChange?.(newStart)
+    onEndDateChange?.(newEnd)
   }
 
   const getAttendanceStatus = (workerId: string, date: Date) => {
@@ -119,6 +128,10 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
               <Button variant="outline" size="sm" onClick={() => navigateDates('next')}>
                 <ChevronRight className="w-4 h-4" />
               </Button>
+              <Button variant="outline" size="sm" onClick={navigateToToday}>
+                <CalendarDays className="w-4 h-4 mr-1" />
+                Hoy
+              </Button>
             </div>
 
             {/* Weekend Toggle */}
@@ -172,9 +185,9 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
             </div>
             
             {/* Personnel List */}
-            <div className="divide-y divide-border">
-              {workers.map((worker) => (
-                <div key={worker.id} className="px-6 py-4 bg-background hover:bg-muted/50">
+            <div>
+              {workers.map((worker, index) => (
+                <div key={worker.id} className={`px-6 py-4 bg-background hover:bg-muted/50 ${index < workers.length - 1 ? 'border-b border-border' : ''}`}>
                   <div className="flex items-center">
                     <Avatar className="h-8 w-8 flex-shrink-0">
                       <AvatarImage src={worker.avatar_url} alt={worker.name} />
@@ -197,14 +210,20 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
               {/* Timeline Header */}
               <thead className="bg-muted/50 border-b">
                 <tr>
-                  {dateRange.map((date) => (
-                    <th key={date.getTime()} className="px-3 py-3 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider min-w-[40px]">
-                      <div className="flex flex-col items-center">
-                        <span>{format(date, 'dd')}</span>
-                        <span className="text-[10px]">{format(date, 'EEE', { locale: es })}</span>
-                      </div>
-                    </th>
-                  ))}
+                  {dateRange.map((date) => {
+                    const isTodayDate = isToday(date)
+                    return (
+                      <th key={date.getTime()} className={`px-3 py-3 text-center text-xs font-medium uppercase tracking-wider min-w-[40px] relative ${isTodayDate ? 'bg-blue-50 text-blue-700 border-x-2 border-blue-400' : 'text-muted-foreground'}`}>
+                        <div className="flex flex-col items-center">
+                          <span className={isTodayDate ? 'font-bold' : ''}>{format(date, 'dd')}</span>
+                          <span className={`text-[10px] ${isTodayDate ? 'font-semibold' : ''}`}>{format(date, 'EEE', { locale: es })}</span>
+                        </div>
+                        {isTodayDate && (
+                          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-0.5 h-full bg-blue-500 z-10"></div>
+                        )}
+                      </th>
+                    )
+                  })}
                 </tr>
               </thead>
               
@@ -215,8 +234,9 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
                     {dateRange.map((date) => {
                       const status = getAttendanceStatus(worker.id, date)
                       const isWeekendDay = isWeekend(date)
+                      const isTodayDate = isToday(date)
                       return (
-                        <td key={`${worker.id}-${date.getTime()}`} className="px-3 py-4 text-center">
+                        <td key={`${worker.id}-${date.getTime()}`} className={`px-3 py-4 text-center relative ${isTodayDate ? 'bg-blue-50/30 border-x-2 border-blue-400' : ''}`}>
                           <div className={`w-6 h-6 rounded-full mx-auto ${getAttendanceColor(status, isWeekendDay)}`}>
                             {isWeekendDay && !hideWeekends && (
                               <div className="w-full h-full flex items-center justify-center">
@@ -224,6 +244,9 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
                               </div>
                             )}
                           </div>
+                          {isTodayDate && (
+                            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-0.5 h-full bg-blue-500 z-10 pointer-events-none"></div>
+                          )}
                         </td>
                       )
                     })}
