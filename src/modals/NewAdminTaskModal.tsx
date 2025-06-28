@@ -8,8 +8,9 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import { Button } from '@/components/ui/button'
-import { useTopLevelCategories, useSubcategories, useElementCategories } from '@/hooks/use-task-categories'
+import { useTopLevelCategories, useSubcategories, useElementCategories, useUnits, useActions, useElements } from '@/hooks/use-task-categories'
+import { useCreateTask, useUpdateTask } from '@/hooks/use-tasks'
+import { useCurrentUser } from '@/hooks/use-current-user'
 import { toast } from '@/hooks/use-toast'
 
 interface NewAdminTaskModalProps {
@@ -19,31 +20,51 @@ interface NewAdminTaskModalProps {
 }
 
 export function NewAdminTaskModal({ open, onClose, task }: NewAdminTaskModalProps) {
+  const { data: userData } = useCurrentUser()
+  
   // Form state
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
-  const [selectedAction, setSelectedAction] = useState('')
-  const [selectedElement, setSelectedElement] = useState('')
-  const [unitLaborPrice, setUnitLaborPrice] = useState(0)
-  const [unitMaterialPrice, setUnitMaterialPrice] = useState(0)
+  const [unitLaborPrice, setUnitLaborPrice] = useState<number>(0)
+  const [unitMaterialPrice, setUnitMaterialPrice] = useState<number>(0)
   
   // Hierarchical category state
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('')
   const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<string>('')
   const [selectedElementCategoryId, setSelectedElementCategoryId] = useState<string>('')
   
-  // Data hooks with hierarchical structure
+  // Additional fields state
+  const [selectedUnitId, setSelectedUnitId] = useState<string>('')
+  const [selectedActionId, setSelectedActionId] = useState<string>('')
+  const [selectedElementId, setSelectedElementId] = useState<string>('')
+  
+  // Data hooks
   const { data: categories = [] } = useTopLevelCategories()
   const { data: subcategories = [] } = useSubcategories(selectedCategoryId || null)
   const { data: elementCategories = [] } = useElementCategories(selectedSubcategoryId || null)
+  const { data: units = [] } = useUnits()
+  const { data: actions = [] } = useActions()
+  const { data: elements = [] } = useElements()
+  
+  // Mutations
+  const createTaskMutation = useCreateTask()
+  const updateTaskMutation = useUpdateTask()
 
-  // Auto-generate task name when action and element are entered
+  // Effect to populate form when editing
   useEffect(() => {
-    if (selectedAction && selectedElement) {
-      const generatedName = `${selectedAction} de ${selectedElement}`
-      setName(generatedName)
+    if (task && open) {
+      setName(task.name || '')
+      setDescription(task.description || '')
+      setUnitLaborPrice(task.unit_labor_price || 0)
+      setUnitMaterialPrice(task.unit_material_price || 0)
+      setSelectedCategoryId(task.category_id || '')
+      setSelectedSubcategoryId(task.subcategory_id || '')
+      setSelectedElementCategoryId(task.element_category_id || '')
+      setSelectedUnitId(task.unit_id || '')
+      setSelectedActionId(task.action_id || '')
+      setSelectedElementId(task.element_id || '')
     }
-  }, [selectedAction, selectedElement])
+  }, [task, open])
 
   // Handle category selection to unlock subcategories
   const handleCategoryChange = (categoryId: string) => {
@@ -68,32 +89,44 @@ export function NewAdminTaskModal({ open, onClose, task }: NewAdminTaskModalProp
       return
     }
 
-    try {
-      // Here you would implement the actual save logic
-      console.log('Task data:', {
-        name,
-        description,
-        category_id: selectedCategoryId,
-        subcategory_id: selectedSubcategoryId,
-        element_category_id: selectedElementCategoryId,
-        action: selectedAction,
-        element: selectedElement,
-        unit_labor_price: unitLaborPrice,
-        unit_material_price: unitMaterialPrice
-      })
-      
-      toast({
-        title: "Éxito",
-        description: "Tarea guardada correctamente"
-      })
-      
-      onClose()
-    } catch (error) {
+    if (!userData?.organization?.id) {
       toast({
         title: "Error",
-        description: "Error al guardar la tarea",
+        description: "No se encontró la organización",
         variant: "destructive"
       })
+      return
+    }
+
+    const taskData = {
+      name: name.trim(),
+      description: description.trim() || undefined,
+      organization_id: userData.organization.id,
+      category_id: selectedCategoryId || undefined,
+      subcategory_id: selectedSubcategoryId || undefined,
+      element_category_id: selectedElementCategoryId || undefined,
+      unit_id: selectedUnitId || undefined,
+      action_id: selectedActionId || undefined,
+      element_id: selectedElementId || undefined,
+      unit_labor_price: unitLaborPrice || 0,
+      unit_material_price: unitMaterialPrice || 0
+    }
+
+    try {
+      if (task) {
+        // Editing existing task
+        await updateTaskMutation.mutateAsync({
+          id: task.id,
+          ...taskData
+        })
+      } else {
+        // Creating new task
+        await createTaskMutation.mutateAsync(taskData)
+      }
+      
+      handleClose()
+    } catch (error) {
+      // Error handled by mutation
     }
   }
 
@@ -101,15 +134,18 @@ export function NewAdminTaskModal({ open, onClose, task }: NewAdminTaskModalProp
     // Reset form
     setName('')
     setDescription('')
-    setSelectedAction('')
-    setSelectedElement('')
     setUnitLaborPrice(0)
     setUnitMaterialPrice(0)
     setSelectedCategoryId('')
     setSelectedSubcategoryId('')
     setSelectedElementCategoryId('')
+    setSelectedUnitId('')
+    setSelectedActionId('')
+    setSelectedElementId('')
     onClose()
   }
+
+  const isLoading = createTaskMutation.isPending || updateTaskMutation.isPending
 
   return (
     <CustomModalLayout open={open} onClose={handleClose}>
@@ -129,94 +165,18 @@ export function NewAdminTaskModal({ open, onClose, task }: NewAdminTaskModalProp
                 <AccordionTrigger className="text-sm font-medium">
                   Datos Básicos
                 </AccordionTrigger>
-                <AccordionContent className="space-y-3 pt-3">
-                  {/* Auto-generated name field */}
+                <AccordionContent className="space-y-4 pt-3">
+                  {/* Nombre de la tarea */}
                   <div>
                     <Label className="text-sm font-medium">Nombre de la Tarea</Label>
                     <Input
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      placeholder="Se genera automáticamente al completar Acción y Elemento"
-                      className="bg-muted"
+                      placeholder="Ingresa el nombre de la tarea"
                     />
                   </div>
 
-                  {/* Action and Element fields for auto-generation */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <Label className="text-sm font-medium">Acción</Label>
-                      <Input
-                        value={selectedAction}
-                        onChange={(e) => setSelectedAction(e.target.value)}
-                        placeholder="Ej: Construcción"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-sm font-medium">Elemento</Label>
-                      <Input
-                        value={selectedElement}
-                        onChange={(e) => setSelectedElement(e.target.value)}
-                        placeholder="Ej: Muro"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Hierarchical Categories */}
-                  <div className="space-y-3">
-                    <div>
-                      <Label className="text-sm font-medium">Categoría</Label>
-                      <Select value={selectedCategoryId} onValueChange={handleCategoryChange}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona una categoría" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {categories.map((category) => (
-                            <SelectItem key={category.id} value={category.id}>
-                              {category.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {selectedCategoryId && (
-                      <div>
-                        <Label className="text-sm font-medium">Subcategoría</Label>
-                        <Select value={selectedSubcategoryId} onValueChange={handleSubcategoryChange}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecciona una subcategoría" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {subcategories.map((subcategory) => (
-                              <SelectItem key={subcategory.id} value={subcategory.id}>
-                                {subcategory.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
-
-                    {selectedSubcategoryId && (
-                      <div>
-                        <Label className="text-sm font-medium">Elemento (Categoría)</Label>
-                        <Select value={selectedElementCategoryId} onValueChange={setSelectedElementCategoryId}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecciona un elemento" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {elementCategories.map((element) => (
-                              <SelectItem key={element.id} value={element.id}>
-                                {element.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Description */}
+                  {/* Descripción */}
                   <div>
                     <Label className="text-sm font-medium">Descripción</Label>
                     <Textarea
@@ -229,19 +189,143 @@ export function NewAdminTaskModal({ open, onClose, task }: NewAdminTaskModalProp
                 </AccordionContent>
               </AccordionItem>
 
+              {/* Categorización */}
+              <AccordionItem value="categorizacion">
+                <AccordionTrigger className="text-sm font-medium">
+                  Categorización
+                </AccordionTrigger>
+                <AccordionContent className="space-y-4 pt-3">
+                  {/* Categoría principal */}
+                  <div>
+                    <Label className="text-sm font-medium">Categoría</Label>
+                    <Select value={selectedCategoryId} onValueChange={handleCategoryChange}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona una categoría" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Subcategoría */}
+                  {selectedCategoryId && (
+                    <div>
+                      <Label className="text-sm font-medium">Subcategoría</Label>
+                      <Select value={selectedSubcategoryId} onValueChange={handleSubcategoryChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona una subcategoría" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {subcategories.map((subcategory) => (
+                            <SelectItem key={subcategory.id} value={subcategory.id}>
+                              {subcategory.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  {/* Elemento (Categoría de tercer nivel) */}
+                  {selectedSubcategoryId && (
+                    <div>
+                      <Label className="text-sm font-medium">Elemento (Categoría)</Label>
+                      <Select value={selectedElementCategoryId} onValueChange={setSelectedElementCategoryId}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona un elemento" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {elementCategories.map((element) => (
+                            <SelectItem key={element.id} value={element.id}>
+                              {element.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </AccordionContent>
+              </AccordionItem>
+
+              {/* Especificaciones Técnicas */}
+              <AccordionItem value="especificaciones">
+                <AccordionTrigger className="text-sm font-medium">
+                  Especificaciones Técnicas
+                </AccordionTrigger>
+                <AccordionContent className="space-y-4 pt-3">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Unidad */}
+                    <div>
+                      <Label className="text-sm font-medium">Unidad</Label>
+                      <Select value={selectedUnitId} onValueChange={setSelectedUnitId}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona unidad" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {units.map((unit) => (
+                            <SelectItem key={unit.id} value={unit.id}>
+                              {unit.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Acción */}
+                    <div>
+                      <Label className="text-sm font-medium">Acción</Label>
+                      <Select value={selectedActionId} onValueChange={setSelectedActionId}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona acción" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {actions.map((action) => (
+                            <SelectItem key={action.id} value={action.id}>
+                              {action.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Elemento */}
+                    <div>
+                      <Label className="text-sm font-medium">Elemento</Label>
+                      <Select value={selectedElementId} onValueChange={setSelectedElementId}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona elemento" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {elements.map((element) => (
+                            <SelectItem key={element.id} value={element.id}>
+                              {element.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+
               {/* Costos */}
               <AccordionItem value="costos">
                 <AccordionTrigger className="text-sm font-medium">
                   Costos
                 </AccordionTrigger>
-                <AccordionContent className="space-y-3 pt-3">
-                  <div className="grid grid-cols-2 gap-3">
+                <AccordionContent className="space-y-4 pt-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label className="text-sm font-medium">Precio Unitario Mano de Obra</Label>
                       <Input
                         type="number"
                         value={unitLaborPrice}
-                        onChange={(e) => setUnitLaborPrice(Number(e.target.value))}
+                        onChange={(e) => setUnitLaborPrice(Number(e.target.value) || 0)}
                         placeholder="0.00"
                         min="0"
                         step="0.01"
@@ -252,25 +336,12 @@ export function NewAdminTaskModal({ open, onClose, task }: NewAdminTaskModalProp
                       <Input
                         type="number"
                         value={unitMaterialPrice}
-                        onChange={(e) => setUnitMaterialPrice(Number(e.target.value))}
+                        onChange={(e) => setUnitMaterialPrice(Number(e.target.value) || 0)}
                         placeholder="0.00"
                         min="0"
                         step="0.01"
                       />
                     </div>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-
-              {/* Lista de Materiales */}
-              <AccordionItem value="materiales">
-                <AccordionTrigger className="text-sm font-medium">
-                  Lista de Materiales
-                </AccordionTrigger>
-                <AccordionContent className="space-y-3 pt-3">
-                  <div className="text-center py-8 text-muted-foreground">
-                    <p>Funcionalidad de materiales disponible próximamente</p>
-                    <p className="text-xs mt-1">Podrás asociar materiales específicos a cada tarea</p>
                   </div>
                 </AccordionContent>
               </AccordionItem>
@@ -283,6 +354,7 @@ export function NewAdminTaskModal({ open, onClose, task }: NewAdminTaskModalProp
             onSave={handleSubmit}
             cancelText="Cancelar"
             saveText={task ? "Actualizar Tarea" : "Crear Tarea"}
+            isLoading={isLoading}
           />
         )
       }}

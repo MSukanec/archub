@@ -71,3 +71,75 @@ export function useElementCategories(parentId: string | null) {
     ...rest
   }
 }
+
+// Hook to get units
+export function useUnits() {
+  return useQuery({
+    queryKey: ['units'],
+    queryFn: async () => {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized')
+      }
+
+      const { data, error } = await supabase
+        .from('units')
+        .select('*')
+        .order('name')
+
+      if (error) {
+        console.error('Error fetching units:', error)
+        throw error
+      }
+
+      return data
+    }
+  })
+}
+
+// Hook to get actions
+export function useActions() {
+  return useQuery({
+    queryKey: ['actions'],
+    queryFn: async () => {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized')
+      }
+
+      const { data, error } = await supabase
+        .from('actions')
+        .select('*')
+        .order('name')
+
+      if (error) {
+        console.error('Error fetching actions:', error)
+        throw error
+      }
+
+      return data
+    }
+  })
+}
+
+// Hook to get elements
+export function useElements() {
+  return useQuery({
+    queryKey: ['elements'],
+    queryFn: async () => {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized')
+      }
+
+      const { data, error } = await supabase
+        .from('elements')
+        .select('*')
+        .order('name')
+
+      if (error) {
+        console.error('Error fetching elements:', error)
+        throw error
+      }
+
+      return data
+    }
+  })
+}
