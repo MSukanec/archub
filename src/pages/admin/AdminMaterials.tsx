@@ -39,7 +39,7 @@ export default function AdminMaterials() {
 
   // Fetch materials using the hook
   const { data: materials = [], isLoading } = useMaterials()
-  const deleteMaterialMutation = useDeleteMaterial()
+  // Temporary placeholder until delete functionality is implemented
 
   // Statistics calculations
   const totalMaterials = materials.length
@@ -81,11 +81,13 @@ export default function AdminMaterials() {
 
   const handleConfirmDelete = () => {
     if (deletingMaterial) {
-      deleteMaterialMutation.mutate(deletingMaterial.id, {
-        onSuccess: () => {
-          setDeletingMaterial(null)
-        }
+      // Temporary placeholder for delete functionality
+      console.log('Delete material:', deletingMaterial.id)
+      toast({
+        title: "Función pendiente",
+        description: "La eliminación de materiales estará disponible próximamente"
       })
+      setDeletingMaterial(null)
     }
   }
 
