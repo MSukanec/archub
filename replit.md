@@ -119,15 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- June 28, 2025. Refined CustomButton component with compact design and accent color integration
-  • Enhanced CustomButton with smaller circular icon section using more padding for compact appearance
-  • Reduced button heights to h-6/h-7/h-8 for sm/md/lg sizes to provide more "air" in header layouts
-  • Changed icon circle background from black gradient to --accent CSS variable for brand consistency
-  • Positioned icon circle with right-1 positioning and smaller w-5/w-6/w-7 dimensions for better proportions
-  • Reduced icon size to w-2.5 h-2.5 within circles for optimal visual balance
-  • Updated CustomEmptyState in OrganizationContacts to use new CustomButton replacing standard Button
-  • Component now matches provided reference design with proper glossy effects and accent color theming
-  • Ready for wider adoption across application where modern button aesthetic is desired
+- June 28, 2025. Enhanced CustomButton with icon-only mode and header integration
+  • Added iconOnly prop support for circular icon-only buttons using forwardRef for dropdown compatibility
+  • Icon-only mode creates perfect circular buttons with aspect-square and centered icon display
+  • Enhanced size handling: icon-only uses w-6/w-7/w-8 dimensions, regular buttons maintain h-6/h-7/h-8 heights
+  • Updated Header component filter and clear filter buttons to use icon-only CustomButton instead of standard Button
+  • Improved CustomEmptyState button size from md to lg for better visual presence and usability
+  • Fixed forwardRef implementation with proper ref parameter passing and displayName for debugging
+  • All header secondary buttons now use consistent CustomButton design with glossy aesthetic
+  • Component supports both text+icon mode and pure icon-only circular mode for maximum flexibility
 - June 28, 2025. Simplified CustomEmptyState design and fixed positioning consistency
   • Removed all complex animated shapes for improved performance and cleaner aesthetic
   • Replaced complex animations with simple diagonal hatch background pattern using repeating-linear-gradient

@@ -413,14 +413,13 @@ export function Header({
         )}
 
         {onClearFilters && (
-          <Button
+          <CustomButton
             variant="ghost"
-            size="icon"
+            size="md"
+            iconOnly
+            icon={<X className="h-3 w-3" />}
             onClick={onClearFilters}
-            className="h-8 w-8 hover:bg-[var(--button-ghost-hover-bg)]"
-          >
-            <X className="h-3 w-3" />
-          </Button>
+          />
         )}
 
         {actions && actions.length > 0 && (
