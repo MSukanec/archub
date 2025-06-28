@@ -1,61 +1,34 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { toast } from '@/hooks/use-toast'
+import { useCurrentUser } from './use-current-user'
 
 export function useMaterials() {
+  const { data: userData } = useCurrentUser()
+  
   return useQuery({
-    queryKey: ['materials'],
+    queryKey: ['materials', userData?.organization?.id],
     queryFn: async () => {
-      if (!supabase) throw new Error('Supabase not initialized')
-      
+      if (!supabase || !userData?.organization?.id) {
+        return []
+      }
+
       const { data, error } = await supabase
         .from('materials')
         .select(`
-          id,
-          name,
-          cost,
-          unit_id,
-          category_id,
-          created_at,
+          *,
           unit:units(name),
           category:material_categories(name)
         `)
-        .order('created_at', { ascending: false })
-      
-      if (error) throw error
-      return data || []
-    }
-  })
-}
+        .eq('organization_id', userData.organization.id)
+        .order('name')
 
-export function useDeleteMaterial() {
-  const queryClient = useQueryClient()
-  
-  return useMutation({
-    mutationFn: async (materialId: string) => {
-      if (!supabase) throw new Error('Supabase not initialized')
-      
-      const { error } = await supabase
-        .from('materials')
-        .delete()
-        .eq('id', materialId)
-      
-      if (error) throw error
+      if (error) {
+        console.error('Error fetching materials:', error)
+        throw error
+      }
+
+      return data || []
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['materials'] })
-      toast({
-        title: 'Material eliminado',
-        description: 'El material ha sido eliminado correctamente.'
-      })
-    },
-    onError: (error) => {
-      console.error('Error deleting material:', error)
-      toast({
-        title: 'Error',
-        description: 'Hubo un problema al eliminar el material.',
-        variant: 'destructive'
-      })
-    }
+    enabled: !!userData?.organization?.id && !!supabase
   })
 }

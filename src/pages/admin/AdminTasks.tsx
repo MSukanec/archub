@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { toast } from '@/hooks/use-toast'
-import { useTasks, useDeleteTask } from '@/hooks/use-tasks'
+// Temporary placeholder until hooks are properly implemented
+// import { useTasks, useDeleteTask } from '@/hooks/use-tasks'
 
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -13,7 +14,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 import { Layout } from '@/components/layout/Layout'
 import { CustomTable } from '@/components/ui-custom/misc/CustomTable'
-import { NewAdminTaskModal } from '@/modals/NewAdminTaskModal'
+// import { NewAdminTaskModal } from '@/modals/NewAdminTaskModal'
 
 import { Plus, Edit, Trash2, CheckSquare, Clock, Target } from 'lucide-react'
 
