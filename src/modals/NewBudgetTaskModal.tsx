@@ -42,7 +42,7 @@ export default function NewBudgetTaskModal({
   editingTask
 }: NewBudgetTaskModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { data: tasks = [], isLoading: tasksLoading } = useTasks(organizationId);
+  const { data: tasks = [], isLoading: tasksLoading } = useTasks();
   const budgetTasksHook = useBudgetTasks(budgetId);
   const { createBudgetTask, updateBudgetTask } = budgetTasksHook;
 

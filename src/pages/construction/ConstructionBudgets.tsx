@@ -196,7 +196,7 @@ export default function ConstructionBudgets() {
 
     const taskColumns = [
       {
-        key: 'task' as keyof any,
+        key: 'task',
         label: 'Tarea',
         render: (task: any) => (
           <div>
@@ -208,14 +208,14 @@ export default function ConstructionBudgets() {
         )
       },
       {
-        key: 'quantity' as keyof any,
+        key: 'quantity',
         label: 'Cantidad',
         render: (task: any) => (
           <span className="text-sm">{task.quantity || 0}</span>
         )
       },
       {
-        key: 'total' as keyof any,
+        key: 'total',
         label: 'Total',
         render: (task: any) => {
           const laborPrice = task.task?.unit_labor_price || 0;
@@ -254,8 +254,7 @@ export default function ConstructionBudgets() {
       <CustomTable
         data={budgetTasks}
         columns={taskColumns}
-        loading={isLoading}
-        emptyMessage="No hay tareas en este presupuesto"
+        isLoading={isLoading}
       />
     );
   }
@@ -354,6 +353,17 @@ export default function ConstructionBudgets() {
         <NewBudgetModal
           open={newBudgetModalOpen}
           onClose={() => setNewBudgetModalOpen(false)}
+        />
+      )}
+
+      {/* Budget Task Modal */}
+      {budgetTaskModalOpen && (
+        <NewBudgetTaskModal
+          open={budgetTaskModalOpen}
+          onClose={handleCloseTaskModal}
+          budgetId={currentBudgetId}
+          organizationId={userData?.organization?.id || ''}
+          editingTask={editingBudgetTask}
         />
       )}
 
