@@ -28,7 +28,7 @@ import { toast } from "@/hooks/use-toast";
 import { Layout } from "@/components/layout/Layout";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { NewSiteLogModal } from "@/modals/NewSiteLogModal";
-import { CustomGradebook } from "@/components/ui-custom/misc/CustomGradebook";
+// import { CustomGradebook } from "@/components/ui-custom/misc/CustomGradebook";
 
 const ENTRY_TYPE_LABELS = {
   avance_de_obra: "Avance de Obra",
@@ -53,22 +53,21 @@ const WEATHER_LABELS = {
   cold: "Frío"
 };
 
-function useSiteLogs(projectId: string | undefined, organizationId: string | undefined) {
+function useSiteLogs(projectId: string | undefined) {
   const supabase = createClient(
     import.meta.env.VITE_SUPABASE_URL,
     import.meta.env.VITE_SUPABASE_ANON_KEY
   );
 
   return useQuery({
-    queryKey: ['site-logs', projectId, organizationId],
+    queryKey: ['site-logs', projectId],
     queryFn: async () => {
-      if (!supabase || !projectId || !organizationId) return [];
+      if (!supabase || !projectId) return [];
 
       const { data, error } = await supabase
         .from('site_logs')
         .select('*')
         .eq('project_id', projectId)
-        .eq('organization_id', organizationId)
         .order('log_date', { ascending: false });
 
       if (error) {
@@ -78,7 +77,7 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
 
       return data || [];
     },
-    enabled: !!supabase && !!projectId && !!organizationId
+    enabled: !!supabase && !!projectId
   });
 }
 
@@ -108,9 +107,8 @@ export default function ConstructionLogs() {
 
   const { data: userData } = useCurrentUser();
   const projectId = userData?.preferences?.last_project_id;
-  const organizationId = userData?.preferences?.last_organization_id;
 
-  const { data: logs = [], isLoading, error } = useSiteLogs(projectId, organizationId);
+  const { data: logs = [], isLoading, error } = useSiteLogs(projectId);
 
   // Auto-expand most recent log
   useEffect(() => {
@@ -207,12 +205,12 @@ export default function ConstructionLogs() {
       setFavoritesOnly(false);
       setPublicOnly(false);
     },
-    actions: (
-      <Button onClick={() => setShowModal(true)} size="sm">
+    actions: [
+      <Button key="nueva-entrada" onClick={() => setShowModal(true)} size="sm">
         <Plus className="w-4 h-4 mr-2" />
         Nueva Entrada
       </Button>
-    )
+    ]
   };
 
   if (isLoading) {
@@ -396,12 +394,12 @@ export default function ConstructionLogs() {
 
       {showModal && (
         <NewSiteLogModal 
-          isOpen={showModal}
+          open={showModal}
           onClose={() => {
             setShowModal(false);
             setEditingLog(null);
           }}
-          editingLog={editingLog}
+          editingSiteLog={editingLog}
         />
       )}
     </Layout>
