@@ -7,6 +7,7 @@ interface CustomEmptyStateProps {
   description?: string;
   action?: React.ReactNode;
   className?: string;
+  fullScreen?: boolean; // Para ocupar toda la pantalla
 }
 
 export function CustomEmptyState({
@@ -14,80 +15,172 @@ export function CustomEmptyState({
   title,
   description,
   action,
-  className
+  className,
+  fullScreen = false
 }: CustomEmptyStateProps) {
   return (
     <div className={cn(
-      "w-full min-h-[300px] h-full mx-auto py-12 px-4 text-center",
-      "border-2 border-dashed border-[var(--accent)] rounded-xl",
-      "bg-background/50 backdrop-blur-sm transition-all duration-300",
-      "hover:border-[var(--accent)]/60 hover:bg-background/70",
+      // Base classes for full screen mode
+      fullScreen ? "fixed inset-0 z-50" : "w-full min-h-[500px]",
       "flex flex-col justify-center items-center relative overflow-hidden",
+      "bg-background transition-all duration-500",
       className
     )}>
-      {/* Advanced Floating Particles Background */}
-      <div className="absolute inset-0 z-[-1]">
-        {/* Large floating circles */}
-        <div className="absolute top-8 left-8 w-3 h-3 bg-[var(--accent)]/15 rounded-full animate-bounce" 
-             style={{ animationDelay: '0s', animationDuration: '3s' }} />
-        <div className="absolute top-16 right-12 w-2 h-2 bg-[var(--accent)]/20 rounded-full animate-bounce" 
-             style={{ animationDelay: '1s', animationDuration: '2.5s' }} />
-        <div className="absolute bottom-12 left-16 w-2.5 h-2.5 bg-[var(--accent)]/10 rounded-full animate-bounce" 
-             style={{ animationDelay: '2s', animationDuration: '4s' }} />
-        <div className="absolute bottom-8 right-8 w-1.5 h-1.5 bg-[var(--accent)]/25 rounded-full animate-bounce" 
-             style={{ animationDelay: '0.5s', animationDuration: '3.5s' }} />
+      {/* Enhanced Animated Particles Background */}
+      <div className="absolute inset-0 z-0">
+        {/* Large floating circles with enhanced movement */}
+        <div className="absolute top-[10%] left-[15%] w-8 h-8 bg-[var(--accent)]/20 rounded-full animate-bounce" 
+             style={{ 
+               animationDelay: '0s', 
+               animationDuration: '3s',
+               transform: 'translateX(0px)'
+             }} />
+        <div className="absolute top-[20%] right-[20%] w-6 h-6 bg-[var(--accent)]/25 rounded-full animate-bounce" 
+             style={{ 
+               animationDelay: '1s', 
+               animationDuration: '2.5s',
+               transform: 'translateY(10px)'
+             }} />
+        <div className="absolute bottom-[20%] left-[25%] w-10 h-10 bg-[var(--accent)]/15 rounded-full animate-bounce" 
+             style={{ 
+               animationDelay: '2s', 
+               animationDuration: '4s',
+               transform: 'translateX(-20px)'
+             }} />
+        <div className="absolute bottom-[15%] right-[15%] w-5 h-5 bg-[var(--accent)]/30 rounded-full animate-bounce" 
+             style={{ 
+               animationDelay: '0.5s', 
+               animationDuration: '3.5s'
+             }} />
         
-        {/* Medium floating elements */}
-        <div className="absolute top-1/3 left-4 w-1 h-1 bg-[var(--accent)]/30 rounded-full animate-pulse" 
-             style={{ animationDelay: '1.5s', animationDuration: '2s' }} />
-        <div className="absolute top-2/3 right-6 w-1 h-1 bg-[var(--accent)]/20 rounded-full animate-pulse" 
-             style={{ animationDelay: '3s', animationDuration: '2.5s' }} />
-        <div className="absolute top-1/2 left-1/4 w-0.5 h-0.5 bg-[var(--accent)]/40 rounded-full animate-pulse" 
-             style={{ animationDelay: '2.5s', animationDuration: '1.8s' }} />
-        <div className="absolute top-1/4 right-1/3 w-0.5 h-0.5 bg-[var(--accent)]/35 rounded-full animate-pulse" 
-             style={{ animationDelay: '4s', animationDuration: '2.2s' }} />
+        {/* Medium floating elements with pulse */}
+        <div className="absolute top-[35%] left-[10%] w-4 h-4 bg-[var(--accent)]/35 rounded-full animate-pulse" 
+             style={{ 
+               animationDelay: '1.5s', 
+               animationDuration: '2s',
+               transform: 'scale(1.2)'
+             }} />
+        <div className="absolute top-[60%] right-[12%] w-3 h-3 bg-[var(--accent)]/25 rounded-full animate-pulse" 
+             style={{ 
+               animationDelay: '3s', 
+               animationDuration: '2.5s'
+             }} />
+        <div className="absolute top-[50%] left-[30%] w-2 h-2 bg-[var(--accent)]/40 rounded-full animate-pulse" 
+             style={{ 
+               animationDelay: '2.5s', 
+               animationDuration: '1.8s'
+             }} />
+        <div className="absolute top-[25%] right-[35%] w-3 h-3 bg-[var(--accent)]/35 rounded-full animate-pulse" 
+             style={{ 
+               animationDelay: '4s', 
+               animationDuration: '2.2s'
+             }} />
         
-        {/* Floating geometric shapes */}
-        <div className="absolute top-20 left-1/3 w-2 h-2 border border-[var(--accent)]/20 rotate-45 animate-spin" 
-             style={{ animationDelay: '1s', animationDuration: '8s' }} />
-        <div className="absolute bottom-20 right-1/4 w-1.5 h-1.5 border border-[var(--accent)]/15 rotate-12 animate-spin" 
-             style={{ animationDelay: '3s', animationDuration: '10s' }} />
+        {/* Enhanced floating geometric shapes */}
+        <div className="absolute top-[30%] left-[40%] w-6 h-6 border-2 border-[var(--accent)]/30 rotate-45 animate-spin" 
+             style={{ 
+               animationDelay: '1s', 
+               animationDuration: '8s'
+             }} />
+        <div className="absolute bottom-[30%] right-[30%] w-4 h-4 border-2 border-[var(--accent)]/25 rotate-12 animate-spin" 
+             style={{ 
+               animationDelay: '3s', 
+               animationDuration: '10s'
+             }} />
+        <div className="absolute top-[45%] left-[60%] w-3 h-3 border border-[var(--accent)]/20 rounded-sm animate-spin" 
+             style={{ 
+               animationDelay: '2s', 
+               animationDuration: '6s'
+             }} />
         
-        {/* Subtle background glow effect */}
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-[var(--accent)]/5 rounded-full blur-xl animate-pulse" 
-             style={{ animationDelay: '0s', animationDuration: '4s' }} />
+        {/* Enhanced background glow effects */}
+        <div className="absolute top-[30%] left-[20%] w-40 h-40 bg-[var(--accent)]/8 rounded-full blur-3xl animate-pulse" 
+             style={{ 
+               animationDelay: '0s', 
+               animationDuration: '4s'
+             }} />
+        <div className="absolute bottom-[25%] right-[25%] w-32 h-32 bg-[var(--accent)]/6 rounded-full blur-2xl animate-pulse" 
+             style={{ 
+               animationDelay: '2s', 
+               animationDuration: '5s'
+             }} />
+        
+        {/* Floating stars/dots */}
+        <div className="absolute top-[15%] left-[50%] w-1 h-1 bg-[var(--accent)]/50 rounded-full animate-ping" 
+             style={{ 
+               animationDelay: '1s', 
+               animationDuration: '3s'
+             }} />
+        <div className="absolute top-[70%] left-[45%] w-1 h-1 bg-[var(--accent)]/40 rounded-full animate-ping" 
+             style={{ 
+               animationDelay: '3s', 
+               animationDuration: '2s'
+             }} />
+        <div className="absolute top-[55%] right-[50%] w-1 h-1 bg-[var(--accent)]/45 rounded-full animate-ping" 
+             style={{ 
+               animationDelay: '2.5s', 
+               animationDuration: '2.5s'
+             }} />
+        
+        {/* Additional moving elements */}
+        <div className="absolute top-[40%] left-[70%] w-2 h-2 bg-[var(--accent)]/20 rounded-full opacity-70" 
+             style={{ 
+               animation: 'float 6s ease-in-out infinite',
+               animationDelay: '1s'
+             }} />
+        <div className="absolute bottom-[40%] left-[35%] w-3 h-3 bg-[var(--accent)]/15 rounded-full opacity-60" 
+             style={{ 
+               animation: 'float 8s ease-in-out infinite reverse',
+               animationDelay: '2s'
+             }} />
       </div>
 
-      {/* Icon container */}
+      {/* Animated Icon container */}
       {icon && (
-        <div className="relative mb-8">
-          <div className="w-20 h-20 mx-auto bg-[var(--accent)]/10 rounded-full flex items-center justify-center shadow-lg border border-[var(--accent)]/20 transition-all duration-300 hover:scale-105 hover:shadow-xl">
-            {icon}
+        <div className="relative mb-8 z-10">
+          <div className="w-32 h-32 mx-auto bg-background rounded-full flex items-center justify-center shadow-2xl border-4 border-[var(--accent)] transition-all duration-500 hover:scale-110 hover:shadow-3xl relative overflow-hidden">
+            {/* Animated background gradient */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[var(--accent)]/10 via-[var(--accent)]/5 to-[var(--accent)]/10 animate-pulse rounded-full" />
+            
+            {/* Icon with accent color and animation */}
+            <div className="relative z-10 text-[var(--accent)] animate-pulse" style={{ fontSize: '3rem' }}>
+              {icon}
+            </div>
           </div>
           
-          {/* Subtle icon glow */}
-          <div className="absolute inset-0 w-20 h-20 mx-auto bg-[var(--accent)]/5 rounded-full blur-md animate-pulse" />
+          {/* Enhanced icon glow with pulsing effect */}
+          <div className="absolute inset-0 w-32 h-32 mx-auto bg-[var(--accent)]/20 rounded-full blur-xl animate-pulse" 
+               style={{ 
+                 animationDuration: '2s'
+               }} />
+          <div className="absolute inset-0 w-40 h-40 mx-auto -m-4 bg-[var(--accent)]/10 rounded-full blur-2xl animate-pulse" 
+               style={{ 
+                 animationDelay: '1s',
+                 animationDuration: '3s'
+               }} />
         </div>
       )}
 
-      {/* Content */}
-      <div className="space-y-4 max-w-md mx-auto relative z-10">
-        <h3 className="text-xl font-semibold text-foreground leading-tight">
+      {/* Content with enhanced styling */}
+      <div className="space-y-6 max-w-lg mx-auto relative z-10 text-center px-8">
+        <h1 className="text-4xl font-bold text-foreground leading-tight tracking-tight">
           {title}
-        </h3>
+        </h1>
         
         {description && (
-          <p className="text-sm text-muted-foreground leading-relaxed">
+          <p className="text-lg text-muted-foreground leading-relaxed max-w-md mx-auto">
             {description}
           </p>
         )}
         
         {action && (
-          <div className="pt-4">
+          <div className="pt-6">
             {action}
           </div>
         )}
       </div>
+
+
     </div>
   )
 }

@@ -164,13 +164,17 @@ export default function OrganizationDashboard() {
 
   if (!currentOrganization) {
     return (
-      <Layout headerProps={headerProps} wide>
+      <>
+        <Layout headerProps={headerProps} wide>
+          <div className="h-0" />
+        </Layout>
         <CustomEmptyState
-          icon={<Building className="h-12 w-12" />}
+          fullScreen={true}
+          icon={<Building className="h-16 w-16" />}
           title="No hay organización seleccionada"
-          description="Selecciona una organización para ver el resumen"
+          description="Selecciona una organización desde el menú superior para ver el resumen completo de la organización"
         />
-      </Layout>
+      </>
     );
   }
 
@@ -226,10 +230,15 @@ export default function OrganizationDashboard() {
             </CardHeader>
             <CardContent>
               {recentProjects.length === 0 ? (
-                <div className="text-center py-8">
-                  <Folder className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="font-medium mb-2">No hay proyectos</h3>
-                  <p className="text-sm text-muted-foreground mb-4">Crea tu primer proyecto para comenzar</p>
+                <div className="text-center py-12">
+                  <div className="relative mb-6">
+                    <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center border-2 border-[var(--accent)]/20">
+                      <Folder className="h-8 w-8 text-[var(--accent)]" />
+                    </div>
+                    <div className="absolute inset-0 w-16 h-16 mx-auto bg-[var(--accent)]/10 rounded-full blur-lg animate-pulse" />
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2">No hay proyectos</h3>
+                  <p className="text-sm text-muted-foreground mb-6">Crea tu primer proyecto para comenzar a gestionar tu trabajo</p>
                   <Button onClick={() => navigate('/proyectos')}>
                     <Plus className="h-4 w-4 mr-2" />
                     Crear Proyecto

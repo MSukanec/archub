@@ -221,6 +221,40 @@ export default function OrganizationProjects() {
   // Obtener el proyecto seleccionado para mostrar información
   const selectedProject = projects?.find(p => p.id === userData?.preferences?.last_project_id);
 
+  // Si no hay proyectos, mostrar estado vacío fullscreen
+  if (filteredProjects.length === 0) {
+    return (
+      <>
+        <Layout headerProps={headerProps}>
+          <div className="h-0" /> {/* Div vacío para mantener el layout */}
+        </Layout>
+        <CustomEmptyState
+          fullScreen={true}
+          icon={<Folder className="w-16 h-16" />}
+          title={searchValue || filterByStatus !== 'all' ? "No se encontraron proyectos" : "No hay proyectos creados"}
+          description={searchValue || filterByStatus !== 'all' 
+            ? 'Prueba ajustando los filtros de búsqueda para encontrar los proyectos que buscas' 
+            : 'Comienza creando tu primer proyecto para gestionar tu trabajo y organizar tus tareas'
+          }
+          action={
+            !searchValue && filterByStatus === 'all' && (
+              <CustomRestricted feature="max_projects" current={filteredProjects?.length || 0}>
+                <Button 
+                  size="lg" 
+                  onClick={() => setShowNewProjectModal(true)}
+                  className="px-8 py-3 text-base"
+                >
+                  <Plus className="w-5 h-5 mr-2" />
+                  Crear Primer Proyecto
+                </Button>
+              </CustomRestricted>
+            )
+          }
+        />
+      </>
+    )
+  }
+
   return (
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
@@ -397,27 +431,6 @@ export default function OrganizationProjects() {
               </Card>
             )
           })}
-
-          {filteredProjects.length === 0 && (
-            <CustomEmptyState
-              icon={<Folder className="w-12 h-12 text-muted-foreground" />}
-              title={searchValue || filterByStatus !== 'all' ? "No se encontraron proyectos" : "No hay proyectos creados"}
-              description={searchValue || filterByStatus !== 'all' 
-                ? 'Prueba ajustando los filtros de búsqueda' 
-                : 'Comienza creando tu primer proyecto para gestionar tu trabajo'
-              }
-              action={
-                !searchValue && filterByStatus === 'all' && (
-                  <CustomRestricted feature="max_projects" current={filteredProjects?.length || 0}>
-                    <Button onClick={() => setShowNewProjectModal(true)}>
-                      <Plus className="w-4 h-4 mr-2" />
-                      Crear Primer Proyecto
-                    </Button>
-                  </CustomRestricted>
-                )
-              }
-            />
-          )}
         </div>
       </div>
 
