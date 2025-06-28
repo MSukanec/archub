@@ -119,6 +119,18 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 28, 2025. Complete bitácora modal UI optimization and equipment management system implementation
+  • Optimized Personnel section: combined contact type filter with contact selector for compact interface layout
+  • Enhanced Events section: removed "Fecha del evento" field and made "Tipo de evento" full width for cleaner UI
+  • Added comprehensive "Maquinarias y Equipos" section with equipment type, quantity (default 1), and description fields
+  • Reordered modal sections to: Información Básica, Eventos, Personal, Equipos for improved workflow
+  • Equipment section follows established patterns with inline layout for type and quantity, description below
+  • Removed "Configuración de Entrada" section and moved public/favorite switches to basic information
+  • Implemented complete database integration for site_log_equipment table with proper CRUD operations
+  • Added useEquipment hook to fetch equipment types from Supabase database with error handling
+  • Enhanced site log creation mutation to handle events, attendees, and equipment in unified interface
+  • All equipment data saves to site_log_equipment table with proper foreign key relationships
+
 - June 28, 2025. CustomGradebook component for visual attendance tracking and Personnel accordion completion
   • Created CustomGradebook.tsx component in src/components/ui-custom/misc/ with professional gradebook-style interface
   • Component displays workers as rows, days (01-30) as columns, with colored circles for attendance status
