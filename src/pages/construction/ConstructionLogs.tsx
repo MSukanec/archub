@@ -1,13 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { format } from "date-fns";
+import { format, isSameDay, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { FileText, Plus, Star, Globe, Lock, ChevronDown, ChevronRight, Edit, Trash2, MoreHorizontal, Flame, Package, StickyNote, Sun, Cloud, CloudRain, CloudSnow, Wind, CloudDrizzle, CloudLightning, Thermometer, TrendingUp, Users, AlertTriangle, CloudSun, CheckCircle, Search, Camera, Eye, Calendar } from "lucide-react";
 
 import { Layout } from '@/components/layout/Layout';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -51,9 +51,7 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
   return useQuery({
     queryKey: ['site-logs', projectId, organizationId],
     queryFn: async () => {
-      if (!supabase || !projectId || !organizationId) {
-        return [];
-      }
+      if (!supabase || !projectId || !organizationId) return [];
 
       console.log('Fetching site logs for project:', projectId, 'in organization:', organizationId);
 
@@ -61,21 +59,50 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
         .from('site_logs')
         .select(`
           *,
-          creator:users!created_by(
+          creator:organization_members!created_by(
             id,
-            full_name,
-            avatar_url
+            user:users(full_name, email)
+          ),
+          attendees:site_log_attendees(
+            contact_id,
+            attendance_type,
+            description,
+            contact:contacts(
+              id,
+              full_name,
+              email,
+              phone
+            )
+          ),
+          events:site_log_events(
+            event_type_id,
+            description,
+            event_type:event_types(
+              id,
+              name
+            )
           )
         `)
         .eq('project_id', projectId)
-        .order('created_at', { ascending: false });
+        .eq('organization_id', organizationId)
+        .order('log_date', { ascending: false });
 
       if (error) {
         console.error('Error fetching site logs:', error);
         throw error;
       }
 
-      return data || [];
+      // Transform the data to flatten creator information
+      const transformedData = data?.map(log => ({
+        ...log,
+        creator: {
+          id: log.creator?.id,
+          full_name: log.creator?.user?.full_name || log.creator?.user?.email,
+          email: log.creator?.user?.email
+        }
+      })) || [];
+
+      return transformedData;
     },
     enabled: !!supabase && !!projectId && !!organizationId
   });
@@ -93,60 +120,64 @@ export default function ConstructionLogs() {
   const [siteLogToDelete, setSiteLogToDelete] = useState<any>(null);
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
 
-  const { data: userData, isLoading } = useCurrentUser();
-  const { data: siteLogs = [], isLoading: siteLogsLoading } = useSiteLogs(
-    userData?.preferences?.last_project_id,
-    userData?.organization?.id
-  );
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { data: userData, isLoading } = useCurrentUser();
 
-  // Filtrar bitácoras según los criterios
-  let filteredSiteLogs = siteLogs?.filter((log: any) => {
-    const matchesSearch = log.comments?.toLowerCase().includes(searchValue.toLowerCase()) || "";
+  const projectId = userData?.preferences?.last_project_id;
+  const organizationId = userData?.preferences?.last_organization_id;
+
+  const { data: siteLogs, isLoading: siteLogsLoading } = useSiteLogs(projectId, organizationId);
+  const { data: organizationMembers } = useOrganizationMembers(organizationId);
+
+  // Filter and sort site logs
+  const filteredSiteLogs = siteLogs?.filter((log: any) => {
+    const matchesSearch = !searchValue || 
+      log.comments?.toLowerCase().includes(searchValue.toLowerCase()) ||
+      log.creator?.full_name?.toLowerCase().includes(searchValue.toLowerCase());
     
-    if (filterByType !== "all" && log.entry_type !== filterByType) return false;
-    if (favoritesOnly && !log.is_favorite) return false;
-    if (publicOnly && !log.is_public) return false;
+    const matchesType = filterByType === "all" || log.entry_type === filterByType;
+    const matchesFavorites = !favoritesOnly || log.is_favorite;
+    const matchesPublic = !publicOnly || log.is_public;
     
-    return matchesSearch;
+    return matchesSearch && matchesType && matchesFavorites && matchesPublic;
+  })?.sort((a: any, b: any) => {
+    if (sortBy === "date_recent") {
+      return new Date(b.log_date).getTime() - new Date(a.log_date).getTime();
+    } else if (sortBy === "date_old") {
+      return new Date(a.log_date).getTime() - new Date(b.log_date).getTime();
+    } else if (sortBy === "type") {
+      return a.entry_type.localeCompare(b.entry_type);
+    }
+    return 0;
   }) || [];
 
-  // Ordenar bitácoras
-  if (sortBy === "date_recent") {
-    filteredSiteLogs.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-  } else if (sortBy === "date_old") {
-    filteredSiteLogs.sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-  } else if (sortBy === "type") {
-    filteredSiteLogs.sort((a: any, b: any) => a.entry_type.localeCompare(b.entry_type));
-  }
-
-  // Mutation para eliminar bitácora
+  // Delete mutation
   const deleteSiteLogMutation = useMutation({
     mutationFn: async (siteLogId: string) => {
-      if (!supabase) throw new Error('Supabase client not available');
+      if (!supabase) throw new Error('Supabase not initialized');
       
       const { error } = await supabase
         .from('site_logs')
         .delete()
         .eq('id', siteLogId);
-
+      
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['site-logs'] });
-      toast({
-        title: "Entrada eliminada",
-        description: "La entrada de bitácora ha sido eliminada correctamente",
-      });
       setDeleteDialogOpen(false);
       setSiteLogToDelete(null);
+      toast({
+        title: "Entrada eliminada",
+        description: "La entrada de bitácora ha sido eliminada exitosamente.",
+      });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error deleting site log:', error);
       toast({
-        title: "Error",
-        description: "No se pudo eliminar la entrada de bitácora",
+        title: "Error al eliminar",
+        description: "No se pudo eliminar la entrada de bitácora.",
         variant: "destructive",
       });
     }
@@ -258,234 +289,240 @@ export default function ConstructionLogs() {
     );
   }
 
+  // Group logs by date
+  const groupLogsByDate = (logs: any[]) => {
+    const grouped: { [key: string]: any[] } = {};
+    logs.forEach(log => {
+      const dateKey = format(new Date(log.log_date), 'yyyy-MM-dd');
+      if (!grouped[dateKey]) {
+        grouped[dateKey] = [];
+      }
+      grouped[dateKey].push(log);
+    });
+    return grouped;
+  };
+
+  const groupedLogs = groupLogsByDate(filteredSiteLogs);
+  const sortedDates = Object.keys(groupedLogs).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+
+  // Auto-expand the most recent log
+  useEffect(() => {
+    if (filteredSiteLogs.length > 0 && !expandedLogId) {
+      setExpandedLogId(filteredSiteLogs[0].id);
+    }
+  }, [filteredSiteLogs, expandedLogId]);
+
   return (
     <Layout wide headerProps={headerProps}>
-      <div className="space-y-6">
-        {/* Tarjetas de estadísticas */}
-        <div className="grid grid-cols-4 gap-4">
-          <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-3">
-            <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">Total de Entradas</span>
-            </div>
-            <p className="text-lg font-semibold mt-1">{filteredSiteLogs?.length || 0}</p>
-          </div>
+      {filteredSiteLogs.length === 0 ? (
+        <CustomEmptyState
+          icon={<FileText className="w-12 h-12 text-muted-foreground" />}
+          title={searchValue || filterByType !== 'all' || favoritesOnly || publicOnly ? "No se encontraron entradas" : "No hay entradas de bitácora"}
+          description={searchValue || filterByType !== 'all' || favoritesOnly || publicOnly 
+            ? 'Prueba ajustando los filtros de búsqueda' 
+            : 'Comienza creando tu primera entrada de bitácora para documentar el progreso'
+          }
+          action={
+            !searchValue && filterByType === 'all' && !favoritesOnly && !publicOnly && (
+              <Button onClick={() => setShowNewSiteLogModal(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Crear Primera Entrada
+              </Button>
+            )
+          }
+        />
+      ) : (
+        <div className="relative">
+          {/* Vertical timeline */}
+          <div className="absolute left-8 top-0 bottom-0 w-px bg-border"></div>
           
-          <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-3">
-            <div className="flex items-center gap-2">
-              <Star className="h-4 w-4 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">Favoritos</span>
-            </div>
-            <p className="text-lg font-semibold mt-1">
-              {filteredSiteLogs?.filter(log => log.is_favorite).length || 0}
-            </p>
-          </div>
-          
-          <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-3">
-            <div className="flex items-center gap-2">
-              <Eye className="h-4 w-4 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">Entradas Públicas</span>
-            </div>
-            <p className="text-lg font-semibold mt-1">
-              {filteredSiteLogs?.filter(log => log.is_public).length || 0}
-            </p>
-          </div>
-          
-          <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-3">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">Esta Semana</span>
-            </div>
-            <p className="text-lg font-semibold mt-1">
-              {filteredSiteLogs?.filter(log => {
-                const logDate = new Date(log.log_date);
-                const weekAgo = new Date();
-                weekAgo.setDate(weekAgo.getDate() - 7);
-                return logDate >= weekAgo;
-              }).length || 0}
-            </p>
-          </div>
-        </div>
-
-        {/* Headers de columnas */}
-        <div className="grid grid-cols-12 gap-4 px-4 py-2 text-xs font-medium text-muted-foreground border-b">
-          <div className="col-span-2">Fecha</div>
-          <div className="col-span-2">Creador</div>
-          <div className="col-span-3">Tipo de Entrada</div>
-          <div className="col-span-2">Clima</div>
-          <div className="col-span-2">Comentarios</div>
-          <div className="col-span-1">Acciones</div>
-        </div>
-
-        {filteredSiteLogs.length === 0 ? (
-          <CustomEmptyState
-            icon={<FileText className="w-12 h-12 text-muted-foreground" />}
-            title={searchValue || filterByType !== 'all' || favoritesOnly || publicOnly ? "No se encontraron entradas" : "No hay entradas de bitácora"}
-            description={searchValue || filterByType !== 'all' || favoritesOnly || publicOnly 
-              ? 'Prueba ajustando los filtros de búsqueda' 
-              : 'Comienza creando tu primera entrada de bitácora para documentar el progreso'
-            }
-            action={
-              !searchValue && filterByType === 'all' && !favoritesOnly && !publicOnly && (
-                <Button onClick={() => setShowNewSiteLogModal(true)}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Crear Primera Entrada
-                </Button>
-              )
-            }
-          />
-        ) : (
-          <div className="space-y-3">
-            {filteredSiteLogs.map((siteLog: any) => {
-              const entryTypeConfig = entryTypes[siteLog.entry_type as keyof typeof entryTypes];
-              const weatherConfig = weatherTypes[siteLog.weather as keyof typeof weatherTypes];
-              const isExpanded = expandedLogId === siteLog.id;
+          <div className="space-y-8">
+            {sortedDates.map((dateKey) => {
+              const logsForDate = groupedLogs[dateKey];
+              const dateObj = new Date(dateKey);
               
               return (
-                <Collapsible 
-                  key={siteLog.id}
-                  open={isExpanded}
-                  onOpenChange={(open) => setExpandedLogId(open ? siteLog.id : null)}
-                >
-                  <Card className="w-full transition-all hover:shadow-sm">
-                    <CollapsibleTrigger asChild>
-                      <div className="w-full p-4 cursor-pointer">
-                        <div className="grid grid-cols-12 gap-4 items-center">
-                          {/* Fecha */}
-                          <div className="col-span-2 flex items-center gap-2">
-                            {isExpanded ? (
-                              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                            ) : (
-                              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                            )}
-                            <span className="text-xs text-muted-foreground">
-                              {format(new Date(siteLog.created_at), 'dd/MM/yyyy', { locale: es })}
-                            </span>
-                          </div>
+                <div key={dateKey} className="relative">
+                  {/* Timeline milestone for the day */}
+                  <div className="absolute left-8 w-3 h-3 bg-primary rounded-full transform -translate-x-1/2 border-2 border-background"></div>
+                  
+                  {/* Date header */}
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-16"></div> {/* Space for timeline */}
+                    <div className="text-sm font-medium text-muted-foreground">
+                      {format(dateObj, "EEEE, d 'de' MMMM 'de' yyyy", { locale: es })}
+                    </div>
+                  </div>
+                  
+                  {/* Logs for this date */}
+                  <div className="space-y-3 ml-16">
+                    {logsForDate.map((siteLog: any) => {
+                      const entryTypeConfig = entryTypes[siteLog.entry_type as keyof typeof entryTypes];
+                      const weatherConfig = weatherTypes[siteLog.weather as keyof typeof weatherTypes];
+                      const isExpanded = expandedLogId === siteLog.id;
+              
+                      return (
+                        <Collapsible 
+                          key={siteLog.id}
+                          open={isExpanded}
+                          onOpenChange={(open) => setExpandedLogId(open ? siteLog.id : null)}
+                        >
+                          <Card className="w-full transition-all hover:shadow-sm">
+                            <CollapsibleTrigger asChild>
+                              <div className="w-full p-4 cursor-pointer">
+                                <div className="flex items-center justify-between">
+                                  {/* Left side: Time, Creator, Entry Type, Weather */}
+                                  <div className="flex items-center gap-4">
+                                    <div className="flex items-center gap-2">
+                                      {isExpanded ? (
+                                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                      ) : (
+                                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                      )}
+                                      <div className="text-sm font-medium">
+                                        {format(new Date(siteLog.log_date), 'HH:mm', { locale: es })}
+                                      </div>
+                                    </div>
+                                    
+                                    <div className="flex items-center gap-2">
+                                      <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center">
+                                        <span className="text-xs font-medium text-primary">
+                                          {siteLog.creator?.full_name?.charAt(0) || 'U'}
+                                        </span>
+                                      </div>
+                                      <span className="text-sm font-medium">
+                                        {siteLog.creator?.full_name || 'Usuario desconocido'}
+                                      </span>
+                                    </div>
 
-                          {/* Creador */}
-                          <div className="col-span-2 flex items-center gap-2">
-                            <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center">
-                              <span className="text-xs font-medium text-primary">
-                                {siteLog.creator?.full_name?.charAt(0) || 'U'}
-                              </span>
-                            </div>
-                            <span className="text-xs font-medium truncate">
-                              {siteLog.creator?.full_name || 'Usuario desconocido'}
-                            </span>
-                          </div>
+                                    {entryTypeConfig && (
+                                      <div className="flex items-center gap-2">
+                                        <entryTypeConfig.icon className="h-4 w-4 text-muted-foreground" />
+                                        <Badge variant="secondary" className="text-xs">
+                                          {entryTypeConfig.label}
+                                        </Badge>
+                                      </div>
+                                    )}
 
-                          {/* Tipo de entrada */}
-                          <div className="col-span-3 flex items-center gap-2">
-                            {entryTypeConfig && (
-                              <>
-                                <entryTypeConfig.icon className="h-4 w-4 text-muted-foreground" />
-                                <Badge variant="secondary" className={`text-xs ${entryTypeConfig.color}`}>
-                                  {entryTypeConfig.label}
-                                </Badge>
-                              </>
-                            )}
-                            <div className="flex gap-1">
-                              {siteLog.is_favorite && <Star className="h-3 w-3 text-yellow-500" />}
-                              {siteLog.is_public ? <Globe className="h-3 w-3 text-green-500" /> : <Lock className="h-3 w-3 text-gray-400" />}
-                            </div>
-                          </div>
+                                    {weatherConfig && (
+                                      <div className="flex items-center gap-2">
+                                        <weatherConfig.icon className="h-4 w-4 text-muted-foreground" />
+                                        <span className="text-sm text-muted-foreground">
+                                          {weatherConfig.label}
+                                        </span>
+                                      </div>
+                                    )}
+                                  </div>
 
-                          {/* Clima */}
-                          <div className="col-span-2 flex items-center gap-2">
-                            {weatherConfig && (
-                              <>
-                                <weatherConfig.icon className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-xs text-muted-foreground">
-                                  {weatherConfig.label}
-                                </span>
-                              </>
-                            )}
-                          </div>
-
-                          {/* Comentarios (preview) */}
-                          <div className="col-span-2">
-                            <span className="text-xs text-muted-foreground line-clamp-1">
-                              {siteLog.comments || 'Sin comentarios'}
-                            </span>
-                          </div>
-
-                          {/* Acciones */}
-                          <div className="col-span-1">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm"
-                                  className="h-7 w-7 p-0"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleEditSiteLog(siteLog);
-                                }}>
-                                  <Edit className="h-4 w-4 mr-2" />
-                                  Editar
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDeleteSiteLog(siteLog);
-                                  }}
-                                  className="text-destructive"
-                                >
-                                  <Trash2 className="h-4 w-4 mr-2" />
-                                  Eliminar
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        </div>
-                      </div>
-                    </CollapsibleTrigger>
-
-                    <CollapsibleContent>
-                      <div className="px-4 pb-4 pt-2 border-t bg-muted/30">
-                        <div className="grid grid-cols-2 gap-4 text-sm">
-                          <div>
-                            <span className="font-medium text-muted-foreground">Estado:</span>
-                            <p>{siteLog.is_public ? "Público" : "Privado"}</p>
-                          </div>
-                          <div>
-                            <span className="font-medium text-muted-foreground">Creado:</span>
-                            <p>{format(new Date(siteLog.created_at), 'dd/MM/yyyy HH:mm', { locale: es })}</p>
-                          </div>
-                          <div className="col-span-2">
-                            <span className="font-medium text-muted-foreground">Comentarios completos:</span>
-                            <p className="mt-1 text-sm">{siteLog.comments || 'Sin comentarios adicionales'}</p>
-                          </div>
-                          {siteLog.weather && (
-                            <div className="col-span-2">
-                              <span className="font-medium text-muted-foreground">Condiciones climáticas:</span>
-                              <div className="flex items-center gap-2 mt-1">
-                                {weatherConfig && (
-                                  <>
-                                    <weatherConfig.icon className="h-4 w-4" />
-                                    <span className="text-sm">{weatherConfig.label}</span>
-                                  </>
-                                )}
+                                  {/* Right side: Action buttons */}
+                                  <div className="flex items-center gap-2">
+                                    <div className="flex gap-1">
+                                      {siteLog.is_favorite && <Star className="h-3 w-3 text-yellow-500" />}
+                                      {siteLog.is_public ? <Globe className="h-3 w-3 text-green-500" /> : <Lock className="h-3 w-3 text-gray-400" />}
+                                    </div>
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button 
+                                          variant="ghost" 
+                                          size="sm"
+                                          className="h-7 w-7 p-0"
+                                          onClick={(e) => e.stopPropagation()}
+                                        >
+                                          <MoreHorizontal className="h-4 w-4" />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent align="end">
+                                        <DropdownMenuItem onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleEditSiteLog(siteLog);
+                                        }}>
+                                          <Edit className="h-4 w-4 mr-2" />
+                                          Editar
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem 
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDeleteSiteLog(siteLog);
+                                          }}
+                                          className="text-destructive"
+                                        >
+                                          <Trash2 className="h-4 w-4 mr-2" />
+                                          Eliminar
+                                        </DropdownMenuItem>
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  </div>
+                                </div>
                               </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </CollapsibleContent>
-                  </Card>
-                </Collapsible>
+                            </CollapsibleTrigger>
+
+                            <CollapsibleContent>
+                              <div className="px-4 pb-4 pt-2 border-t">
+                                <div className="grid grid-cols-3 gap-6">
+                                  {/* Comentarios */}
+                                  <div>
+                                    <h4 className="text-sm font-medium mb-2">Comentarios</h4>
+                                    <p className="text-sm text-muted-foreground">
+                                      {siteLog.comments || 'Sin comentarios adicionales'}
+                                    </p>
+                                  </div>
+
+                                  {/* Personal */}
+                                  <div>
+                                    <h4 className="text-sm font-medium mb-2">Personal</h4>
+                                    {siteLog.attendees && siteLog.attendees.length > 0 ? (
+                                      <div className="space-y-2">
+                                        {siteLog.attendees.map((attendee: any, index: number) => (
+                                          <div key={index} className="flex items-center gap-2 text-sm">
+                                            <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center">
+                                              <span className="text-xs">
+                                                {attendee.contact?.full_name?.charAt(0) || 'U'}
+                                              </span>
+                                            </div>
+                                            <span>{attendee.contact?.full_name || 'Personal'}</span>
+                                            <Badge variant="outline" className="text-xs">
+                                              {attendee.attendance_type === 'full' ? 'Completa' : 'Media'}
+                                            </Badge>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    ) : (
+                                      <p className="text-sm text-muted-foreground">Sin personal registrado</p>
+                                    )}
+                                  </div>
+
+                                  {/* Eventos */}
+                                  <div>
+                                    <h4 className="text-sm font-medium mb-2">Eventos</h4>
+                                    {siteLog.events && siteLog.events.length > 0 ? (
+                                      <div className="space-y-2">
+                                        {siteLog.events.map((event: any, index: number) => (
+                                          <div key={index} className="text-sm">
+                                            <div className="font-medium">{event.event_type?.name || 'Evento'}</div>
+                                            <p className="text-muted-foreground text-xs">
+                                              {event.description || 'Sin descripción'}
+                                            </p>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    ) : (
+                                      <p className="text-sm text-muted-foreground">Sin eventos registrados</p>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </CollapsibleContent>
+                          </Card>
+                        </Collapsible>
+                      );
+                    })}
+                  </div>
+                </div>
               );
             })}
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Modal para nueva entrada */}
       {showNewSiteLogModal && (
