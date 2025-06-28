@@ -126,9 +126,14 @@ Changelog:
   • Personnel names column (264px width) has fixed background and doesn't scroll with timeline data
   • Timeline column scrolls independently with horizontal scrollbar only affecting attendance grid
   • Enhanced visual separation between personnel list and attendance tracking timeline
-  • Fixed border alignment between personnel rows and timeline rows for seamless visual continuity
+  • Fixed height alignment between personnel column and timeline - exact 65px height for all rows and headers
+  • Personnel header and timeline header now have identical heights with proper vertical centering
+  • All personnel rows match timeline row heights perfectly for seamless visual continuity
+  • Hidden horizontal scrollbar while maintaining touch/mouse wheel scroll functionality
+  • Added left/right navigation buttons positioned over timeline for easy date range navigation
+  • Navigation buttons have backdrop blur and border styling for clear visibility over content
   • Added "Hoy" (Today) button in navigation controls to quickly center view on current date
-  • Implemented vertical blue indicator line showing today's date across entire timeline
+  • Implemented vertical indicator line showing today's date across entire timeline
   • Default date range now centers on today (15 days before and after) instead of starting from today
   • Today's column highlighted with --accent color background and bold text for clear identification
   • Replaced month navigation with continuous timeline using start/end date selectors

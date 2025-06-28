@@ -292,3 +292,8 @@ label[data-required="true"]::after,
   content: " *";
   color: var(--accent);
 }
+
+/* Hide scrollbars while maintaining scroll functionality */
+.overflow-x-auto::-webkit-scrollbar {
+  display: none;
+}
