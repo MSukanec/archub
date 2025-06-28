@@ -82,7 +82,13 @@ function Router() {
         </ProtectedRoute>
       </Route>
 
-      <Route path="/construccion/bitacora">
+      <Route path="/obra/bitacora">
+        <ProtectedRoute>
+          <ConstructionLogs />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/construction/site-logs">
         <ProtectedRoute>
           <ConstructionLogs />
         </ProtectedRoute>

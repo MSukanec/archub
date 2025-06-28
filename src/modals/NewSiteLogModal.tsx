@@ -72,13 +72,6 @@ const siteLogAttendeeSchema = z.object({
   description: z.string().optional()
 })
 
-// Schema para equipamientos
-const siteLogEquipmentSchema = z.object({
-  equipment_id: z.string().min(1, 'Tipo de equipamiento es requerido'),
-  quantity: z.number().min(1, 'Cantidad debe ser mayor a 0').default(1),
-  description: z.string().optional()
-})
-
 const siteLogSchema = z.object({
   log_date: z.date(),
   created_by: z.string().min(1, 'Creador es requerido'),
@@ -98,14 +91,12 @@ const siteLogSchema = z.object({
   is_public: z.boolean().default(true),
   is_favorite: z.boolean().default(false),
   events: z.array(siteLogEventSchema).default([]),
-  attendees: z.array(siteLogAttendeeSchema).default([]),
-  equipment: z.array(siteLogEquipmentSchema).default([])
+  attendees: z.array(siteLogAttendeeSchema).default([])
 })
 
 type SiteLogForm = z.infer<typeof siteLogSchema>
 type SiteLogEventForm = z.infer<typeof siteLogEventSchema>
 type SiteLogAttendeeForm = z.infer<typeof siteLogAttendeeSchema>
-type SiteLogEquipmentForm = z.infer<typeof siteLogEquipmentSchema>
 
 // Definir tipos exactos basados en la base de datos
 interface SiteLog {
@@ -144,31 +135,6 @@ function useEventTypes() {
   });
 }
 
-// Hook para obtener tipos de equipamiento
-function useEquipment() {
-  return useQuery({
-    queryKey: ['equipment'],
-    queryFn: async () => {
-      if (!supabase) {
-        return [];
-      }
-
-      const { data, error } = await supabase
-        .from('equipment')
-        .select('*')
-        .order('name', { ascending: true });
-
-      if (error) {
-        console.error('Error fetching equipment:', error);
-        throw error;
-      }
-
-      return data || [];
-    },
-    enabled: !!supabase
-  });
-}
-
 // Props del modal
 interface NewSiteLogModalProps {
   open: boolean
@@ -182,12 +148,10 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
   const { data: userData } = useCurrentUser()
   const { data: members } = useOrganizationMembers(userData?.preferences?.last_organization_id || '')
   const { data: eventTypes } = useEventTypes()
-  const { data: equipmentData } = useEquipment()
   const { data: contactTypes } = useContactTypes()
   
   const [events, setEvents] = useState<SiteLogEventForm[]>([])
   const [attendees, setAttendees] = useState<SiteLogAttendeeForm[]>([])
-  const [equipmentList, setEquipmentList] = useState<SiteLogEquipmentForm[]>([])
   const [accordionValue, setAccordionValue] = useState<string>("informacion-basica")
   
   const form = useForm<SiteLogForm>({
@@ -201,8 +165,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
       is_public: true,
       is_favorite: false,
       events: [],
-      attendees: [],
-      equipment: []
+      attendees: []
     }
   })
 
@@ -225,10 +188,9 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
       // Load events and attendees for editing
       loadSiteLogData(editingSiteLog.id)
     } else {
-      // Reset events, attendees and equipment for new entries
+      // Reset events and attendees for new entries
       setEvents([])
       setAttendees([])
-      setEquipmentList([])
       
       // Seleccionar usuario actual por defecto en modo creación
       const currentUserMember = members?.find((member: any) => member.users.id === userData?.user?.id);
@@ -268,20 +230,6 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
           contact_id: attendee.contact_id,
           attendance_type: attendee.attendance_type,
           description: attendee.description || ''
-        })))
-      }
-
-      // Load equipment
-      const { data: equipmentData } = await supabase
-        .from('site_log_equipment')
-        .select('*')
-        .eq('site_log_id', siteLogId)
-
-      if (equipmentData) {
-        setEquipmentList(equipmentData.map(equip => ({
-          equipment_id: equip.equipment_id,
-          quantity: equip.quantity,
-          description: equip.description || ''
         })))
       }
     } catch (error) {
@@ -388,35 +336,6 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
 
           if (attendeesResult.error) {
             console.error('Error saving site log attendees:', attendeesResult.error)
-          }
-        }
-      }
-
-      // Handle site log equipment
-      if (siteLogResult.data) {
-        // If editing, delete existing equipment first
-        if (editingSiteLog) {
-          await supabase
-            .from('site_log_equipment')
-            .delete()
-            .eq('site_log_id', siteLogResult.data.id)
-        }
-
-        // Create new equipment if any
-        if (equipmentList.length > 0) {
-          const equipmentData = equipmentList.map(equip => ({
-            site_log_id: siteLogResult.data.id,
-            equipment_id: equip.equipment_id,
-            quantity: equip.quantity,
-            description: equip.description || null
-          }))
-
-          const equipmentResult = await supabase
-            .from('site_log_equipment')
-            .insert(equipmentData)
-
-          if (equipmentResult.error) {
-            console.error('Error saving site log equipment:', equipmentResult.error)
           }
         }
       }
@@ -895,107 +814,6 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                     </AccordionContent>
                   </AccordionItem>
 
-                  {/* Sección 4: Maquinarias y Equipos */}
-                  <AccordionItem value="equipamientos">
-                    <AccordionTrigger>
-                      <div className="flex items-center gap-2">
-                        <Settings className="w-4 h-4" />
-                        Maquinarias y Equipos ({equipmentList.length})
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="space-y-3 pt-3">
-                      {/* Lista de equipamientos */}
-                      {equipmentList.map((equipmentItem, index) => (
-                        <div key={index} className="border rounded-lg p-3 space-y-3">
-                          <div className="flex items-center justify-between">
-                            <h4 className="text-sm font-medium">Equipamiento {index + 1}</h4>
-                            <button
-                              type="button"
-                              className="h-6 w-6 rounded-md hover:bg-gray-100 flex items-center justify-center"
-                              onClick={() => {
-                                const newEquipment = equipmentList.filter((_, i) => i !== index);
-                                setEquipmentList(newEquipment);
-                              }}
-                            >
-                              <X className="h-4 w-4" />
-                            </button>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-3">
-                            <div>
-                              <label className="text-xs font-medium text-muted-foreground">Tipo de Equipamiento</label>
-                              <Select 
-                                value={equipmentItem.equipment_id} 
-                                onValueChange={(value) => {
-                                  const newEquipment = [...equipmentList];
-                                  newEquipment[index].equipment_id = value;
-                                  setEquipmentList(newEquipment);
-                                }}
-                              >
-                                <SelectTrigger className="h-8 text-sm">
-                                  <SelectValue placeholder="Seleccionar tipo" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {equipmentData?.map((equipmentType: any) => (
-                                    <SelectItem key={equipmentType.id} value={equipmentType.id}>
-                                      {equipmentType.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-
-                            <div>
-                              <label className="text-xs font-medium text-muted-foreground">Cantidad</label>
-                              <Input
-                                type="number"
-                                min="1"
-                                className="h-8 text-sm"
-                                value={equipmentItem.quantity}
-                                onChange={(e) => {
-                                  const newEquipment = [...equipmentList];
-                                  newEquipment[index].quantity = parseInt(e.target.value) || 1;
-                                  setEquipmentList(newEquipment);
-                                }}
-                              />
-                            </div>
-                          </div>
-
-                          <div>
-                            <label className="text-xs font-medium text-muted-foreground">Descripción</label>
-                            <Textarea
-                              className="min-h-[60px] text-sm"
-                              placeholder="Describe el uso del equipamiento..."
-                              value={equipmentItem.description || ''}
-                              onChange={(e) => {
-                                const newEquipment = [...equipmentList];
-                                newEquipment[index].description = e.target.value;
-                                setEquipmentList(newEquipment);
-                              }}
-                            />
-                          </div>
-                        </div>
-                      ))}
-
-                      {/* Botón para agregar equipamiento */}
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setEquipmentList([...equipmentList, {
-                            equipment_id: '',
-                            quantity: 1,
-                            description: ''
-                          }]);
-                        }}
-                        className="w-full"
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Agregar Equipamiento
-                      </Button>
-                    </AccordionContent>
-                  </AccordionItem>
 
                 </Accordion>
               </form>
