@@ -17,9 +17,10 @@ export function CustomEmptyState({
   className
 }: CustomEmptyStateProps) {
   return (
-    <div className="w-full h-full flex items-center justify-center">
+    <div className="w-full flex items-center justify-center min-h-[calc(100vh-200px)] md:min-h-0 md:h-full">
       <div className={cn(
-        "w-full h-[70%] py-20 px-4 text-center",
+        "w-full max-w-lg mx-auto py-12 md:py-20 px-4 text-center",
+        "min-h-[70vh] md:min-h-0 md:h-[70%]",
         "border-2 border-dashed border-[var(--accent)] rounded-xl",
         "bg-background/50 backdrop-blur-sm transition-all duration-300",
         "hover:border-[var(--accent)]/80 hover:bg-background/70",

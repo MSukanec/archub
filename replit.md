@@ -123,6 +123,7 @@ Changelog:
   • Fixed Personnel page routing issue by adding proper Link component from wouter for "Ir a Bitácora" button
   • Added CustomEmptyState to Activity page without action button as requested
   • Fixed Personnel and Bitácora pages to hide statistics cards when no data exists - now only CustomEmptyState shows
+  • Enhanced mobile responsiveness of CustomEmptyState to be vertically centered and occupy 70% of viewport height
   • Verified both Bitácora and Personal pages now show CustomEmptyState when no data exists (like projects/contacts pages)
   • Simplified CustomEmptyState design removing complex animated shapes for improved performance and cleaner aesthetic
   • Replaced complex animations with simple diagonal hatch background pattern using repeating-linear-gradient
