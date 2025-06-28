@@ -2,12 +2,9 @@ import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { CalendarIcon, Calculator, User } from "lucide-react";
+import { CalendarIcon, Calculator, X } from "lucide-react";
 
-import { CustomModalLayout } from "@/components/ui-custom/modals/CustomModalLayout";
-import { CustomModalHeader } from "@/components/ui-custom/modals/CustomModalHeader";
-import { CustomModalBody } from "@/components/ui-custom/modals/CustomModalBody";
-import { CustomModalFooter } from "@/components/ui-custom/modals/CustomModalFooter";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

@@ -126,8 +126,6 @@ export default function ConstructionBudgets() {
     setDeletingBudget(budget)
   }
 
-
-
   // Custom filters for the header
   const customFilters = (
     <div className="flex gap-4">
