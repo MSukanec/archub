@@ -270,10 +270,10 @@ export default function NewBudgetTaskModal({
         footer: (
           <CustomModalFooter
             cancelText="Cancelar"
-            submitText={editingTask ? "Actualizar" : "Agregar"}
+            saveText={editingTask ? "Actualizar" : "Agregar"}
             onCancel={handleClose}
-            isSubmitting={isSubmitting}
-            form="budget-task-form"
+            onSave={() => handleSubmit(onSubmit)()}
+            saveLoading={isSubmitting}
           />
         )
       }}
