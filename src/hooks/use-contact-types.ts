@@ -1,31 +1,19 @@
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
-
-interface ContactType {
-  id: string;
-  name: string;
-  created_at: string;
-}
+import { useQuery } from '@tanstack/react-query'
+import { supabase } from '@/lib/supabase'
 
 export function useContactTypes() {
-  return useQuery<ContactType[]>({
+  return useQuery({
     queryKey: ['contact-types'],
     queryFn: async () => {
-      if (!supabase) {
-        throw new Error('Supabase client not initialized');
-      }
-
+      if (!supabase) throw new Error('Supabase client not available')
+      
       const { data, error } = await supabase
         .from('contact_types')
         .select('*')
-        .order('name', { ascending: true });
-
-      if (error) {
-        console.error('Error fetching contact types:', error);
-        throw error;
-      }
-
-      return data || [];
+        .order('name')
+      
+      if (error) throw error
+      return data || []
     }
-  });
+  })
 }

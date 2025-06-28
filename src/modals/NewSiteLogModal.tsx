@@ -21,12 +21,18 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { useToast } from '@/hooks/use-toast'
 import { Calendar, User, FileText, Cloud, MessageSquare, Star, Eye, Calendar as CalendarIcon, Plus, X, Settings } from 'lucide-react'
 
-// Schema con enums exactos de Supabase
+// Schema para eventos
 const siteLogEventSchema = z.object({
   event_type_id: z.string().min(1, 'Tipo de evento es requerido'),
-  event_date: z.date(),
   description: z.string().min(1, 'Descripción es requerida'),
   is_custom: z.boolean().default(false)
+})
+
+// Schema para personal
+const siteLogAttendeeSchema = z.object({
+  contact_id: z.string().min(1, 'Contacto es requerido'),
+  attendance_type: z.enum(['full', 'half'], { required_error: 'Tipo de horario es requerido' }),
+  description: z.string().optional()
 })
 
 const siteLogSchema = z.object({

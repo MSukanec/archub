@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -94,6 +94,7 @@ export default function ConstructionLogs() {
     userData?.organization?.id
   );
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Filtrar bitácoras según los criterios
   let filteredSiteLogs = siteLogs?.filter((log: any) => {
@@ -128,6 +129,7 @@ export default function ConstructionLogs() {
       if (error) throw error;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['site-logs'] });
       toast({
         title: "Entrada eliminada",
         description: "La entrada de bitácora ha sido eliminada correctamente",
