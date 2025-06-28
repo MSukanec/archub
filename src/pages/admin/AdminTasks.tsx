@@ -41,8 +41,9 @@ export default function AdminTasks() {
   const [editingTask, setEditingTask] = useState<Task | null>(null)
   const [deletingTask, setDeletingTask] = useState<Task | null>(null)
 
-  const { data: tasks = [], isLoading } = useTasks()
-  const deleteTaskMutation = useDeleteTask()
+  // Temporary empty data until database integration is complete
+  const tasks: Task[] = []
+  const isLoading = false
 
   // Statistics calculations
   const totalTasks = tasks.length
@@ -83,10 +84,11 @@ export default function AdminTasks() {
     if (!deletingTask) return
 
     try {
-      await deleteTaskMutation.mutateAsync(deletingTask.id)
+      // Temporary placeholder for delete functionality
+      console.log('Delete task:', deletingTask.id)
       toast({
-        title: "Tarea eliminada",
-        description: "La tarea ha sido eliminada exitosamente."
+        title: "Función pendiente",
+        description: "La eliminación de tareas estará disponible próximamente"
       })
       setDeletingTask(null)
     } catch (error) {
@@ -277,14 +279,7 @@ export default function AdminTasks() {
         />
       </div>
 
-      <NewAdminTaskModal
-        open={newTaskModalOpen}
-        onClose={() => {
-          setNewTaskModalOpen(false)
-          setEditingTask(null)
-        }}
-        task={editingTask}
-      />
+      {/* Modal will be implemented once database structure is ready */}
 
       <AlertDialog open={!!deletingTask} onOpenChange={() => setDeletingTask(null)}>
         <AlertDialogContent>
