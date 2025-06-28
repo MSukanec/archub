@@ -54,11 +54,16 @@ export function Sidebar() {
   const { currentSidebarContext, setSidebarContext } = useNavigationStore();
   const queryClient = useQueryClient();
   
-  // Estado para acordeones
-  const [expandedAccordions, setExpandedAccordions] = useState<{ [key: string]: boolean }>({
-    obra: false,
-    finanzas: false
+  // Estado para acordeones con persistencia
+  const [expandedAccordions, setExpandedAccordions] = useState<{ [key: string]: boolean }>(() => {
+    const saved = localStorage.getItem('sidebar-accordions');
+    return saved ? JSON.parse(saved) : { obra: false, finanzas: false };
   });
+
+  // Guardar estado de acordeones en localStorage
+  useEffect(() => {
+    localStorage.setItem('sidebar-accordions', JSON.stringify(expandedAccordions));
+  }, [expandedAccordions]);
 
   // Theme toggle mutation
   const themeToggleMutation = useMutation({
