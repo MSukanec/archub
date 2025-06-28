@@ -2,12 +2,13 @@ import React from 'react'
 import { cn } from '@/lib/utils'
 
 interface CustomButtonProps {
-  children: React.ReactNode
+  children?: React.ReactNode
   icon?: React.ReactNode
   onClick?: () => void
   disabled?: boolean
   variant?: 'primary' | 'secondary' | 'ghost'
   size?: 'sm' | 'md' | 'lg'
+  iconOnly?: boolean
   className?: string
 }
 
@@ -18,6 +19,7 @@ export function CustomButton({
   disabled = false,
   variant = 'primary',
   size = 'md',
+  iconOnly = false,
   className
 }: CustomButtonProps) {
   const baseClasses = cn(
@@ -26,7 +28,8 @@ export function CustomButton({
     "font-medium transition-all duration-200",
     "focus:outline-none focus:ring-2 focus:ring-offset-2",
     "disabled:opacity-50 disabled:cursor-not-allowed",
-    "group"
+    "group",
+    iconOnly && "aspect-square"
   )
 
   const variantClasses = {
@@ -59,7 +62,11 @@ export function CustomButton({
     )
   }
 
-  const sizeClasses = {
+  const sizeClasses = iconOnly ? {
+    sm: "h-6 w-6 text-xs",
+    md: "h-7 w-7 text-sm",
+    lg: "h-8 w-8 text-base"
+  } : {
     sm: "h-6 text-xs",
     md: "h-7 text-sm",
     lg: "h-8 text-base"
@@ -71,7 +78,11 @@ export function CustomButton({
     lg: "w-7 h-7"
   }
 
-  const iconClasses = cn(
+  const iconClasses = iconOnly ? cn(
+    "flex items-center justify-center",
+    "text-white",
+    "transition-all duration-200"
+  ) : cn(
     "absolute right-1 top-1/2 -translate-y-1/2 flex items-center justify-center",
     "bg-[var(--accent)] text-white rounded-full",
     "shadow-inner",
@@ -103,18 +114,29 @@ export function CustomButton({
       {/* Glossy overlay effect */}
       <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-transparent rounded-full" />
       
-      {/* Text content */}
-      <span className={textClasses}>
-        {children}
-      </span>
-      
-      {/* Icon circle */}
-      {icon && (
+      {/* Icon-only mode */}
+      {iconOnly && icon ? (
         <div className={iconClasses}>
-          <div className="text-white [&>svg]:w-2.5 [&>svg]:h-2.5 [&>svg]:text-white">
+          <div className="text-inherit [&>svg]:w-3 [&>svg]:h-3">
             {icon}
           </div>
         </div>
+      ) : (
+        <>
+          {/* Text content */}
+          <span className={textClasses}>
+            {children}
+          </span>
+          
+          {/* Icon circle */}
+          {icon && (
+            <div className={iconClasses}>
+              <div className="text-white [&>svg]:w-2.5 [&>svg]:h-2.5 [&>svg]:text-white">
+                {icon}
+              </div>
+            </div>
+          )}
+        </>
       )}
     </button>
   )

@@ -19,6 +19,7 @@ import { useNavigationStore } from "@/stores/navigationStore";
 import { useLocation } from "wouter";
 import { NewOrganizationModal } from "@/modals/NewOrganizationModal";
 import { NewProjectModal } from "@/modals/NewProjectModal";
+import { CustomButton } from "@/components/ui-custom/misc/CustomButton";
 
 interface HeaderProps {
   icon?: React.ComponentType<any>;

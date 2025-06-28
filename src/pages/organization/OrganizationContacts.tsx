@@ -215,7 +215,7 @@ export default function OrganizationContacts() {
           action={
             <CustomButton 
               variant="primary"
-              size="md"
+              size="lg"
               icon={<Plus className="w-3 h-3" />}
               onClick={() => setShowCreateModal(true)}
             >
