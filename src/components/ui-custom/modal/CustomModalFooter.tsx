@@ -38,10 +38,11 @@ export function CustomModalFooter({
           {cancelText}
         </Button>
         <Button
-          type="button"
-          onClick={onSave}
+          type={saveProps?.type || "button"}
+          onClick={saveProps?.type === "submit" ? undefined : onSave}
+          form={saveProps?.form}
           className="w-3/4"
-          disabled={saveLoading || saveDisabled || isLoading}
+          disabled={saveLoading || saveDisabled || isLoading || saveProps?.disabled}
         >
           {(saveLoading || isLoading) ? "Guardando..." : saveText}
         </Button>
