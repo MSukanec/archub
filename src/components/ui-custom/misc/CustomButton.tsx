@@ -12,7 +12,7 @@ interface CustomButtonProps {
   className?: string
 }
 
-export function CustomButton({
+export const CustomButton = React.forwardRef<HTMLButtonElement, CustomButtonProps>(({
   children,
   icon,
   onClick,
@@ -21,7 +21,7 @@ export function CustomButton({
   size = 'md',
   iconOnly = false,
   className
-}: CustomButtonProps) {
+}, ref) => {
   const baseClasses = cn(
     "relative inline-flex items-center justify-center",
     "rounded-full overflow-hidden",
@@ -34,30 +34,26 @@ export function CustomButton({
 
   const variantClasses = {
     primary: cn(
-      "bg-gradient-to-b from-white/20 to-white/5",
-      "border border-white/20",
-      "text-foreground",
-      "shadow-lg shadow-black/10",
-      "hover:from-white/30 hover:to-white/10",
-      "hover:border-white/30",
-      "hover:shadow-xl hover:shadow-black/20",
-      "active:scale-[0.98] active:shadow-md",
-      "backdrop-blur-sm"
+      "bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900",
+      "text-white border border-gray-700",
+      "shadow-lg shadow-black/20",
+      "hover:shadow-xl hover:shadow-black/30",
+      "hover:scale-[1.02]",
+      "active:scale-[0.98]"
     ),
     secondary: cn(
-      "bg-gradient-to-b from-muted/80 to-muted/60",
-      "border border-border/50",
-      "text-muted-foreground",
-      "shadow-md shadow-black/5",
-      "hover:from-muted/90 hover:to-muted/70",
-      "hover:text-foreground",
+      "bg-gradient-to-r from-gray-100 via-gray-50 to-gray-100",
+      "text-gray-700 border border-gray-300",
+      "shadow-sm shadow-gray-200/50",
+      "hover:shadow-md hover:shadow-gray-300/30",
+      "hover:scale-[1.02]",
       "active:scale-[0.98]"
     ),
     ghost: cn(
-      "bg-transparent",
-      "text-muted-foreground",
-      "hover:bg-muted/20",
-      "hover:text-foreground",
+      "bg-transparent text-[var(--menues-fg)]",
+      "border border-transparent",
+      "hover:bg-[var(--button-ghost-hover-bg)]",
+      "hover:scale-[1.02]",
       "active:scale-[0.98]"
     )
   }
@@ -80,7 +76,7 @@ export function CustomButton({
 
   const iconClasses = iconOnly ? cn(
     "flex items-center justify-center",
-    "text-white",
+    "text-inherit",
     "transition-all duration-200"
   ) : cn(
     "absolute right-1 top-1/2 -translate-y-1/2 flex items-center justify-center",
@@ -102,6 +98,7 @@ export function CustomButton({
 
   return (
     <button
+      ref={ref}
       onClick={onClick}
       disabled={disabled}
       className={cn(
@@ -140,4 +137,6 @@ export function CustomButton({
       )}
     </button>
   )
-}
+})
+
+CustomButton.displayName = "CustomButton"

@@ -387,13 +387,12 @@ export function Header({
         {hasFilters && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
+              <CustomButton
                 variant="ghost"
-                size="icon"
-                className="h-8 w-8 hover:bg-[var(--button-ghost-hover-bg)]"
-              >
-                <Filter className="h-3 w-3" />
-              </Button>
+                size="md"
+                iconOnly
+                icon={<Filter className="h-3 w-3" />}
+              />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className={customFilters ? "w-72 p-2 space-y-3" : "w-48"}>
               {customFilters ? (
