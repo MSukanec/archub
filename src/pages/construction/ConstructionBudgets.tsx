@@ -194,8 +194,48 @@ export default function ConstructionBudgets() {
   // Budget Task Table Component
   function BudgetTaskTable({ budgetId }: { budgetId: string }) {
     const { budgetTasks, isLoading } = useBudgetTasks(budgetId);
+    const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
+
+    // Calculate totals for percentage calculations
+    const totalBudgetAmount = budgetTasks?.reduce((total, task) => {
+      const laborPrice = task.task?.unit_labor_price || 0;
+      const materialPrice = task.task?.unit_material_price || 0;
+      const subtotal = (laborPrice + materialPrice) * (task.quantity || 0);
+      return total + subtotal;
+    }, 0) || 0;
 
     const taskColumns = [
+      {
+        key: 'select',
+        label: (
+          <input
+            type="checkbox"
+            checked={selectedTasks.length === (budgetTasks?.length || 0) && (budgetTasks?.length || 0) > 0}
+            onChange={(e) => {
+              if (e.target.checked) {
+                setSelectedTasks(budgetTasks?.map(task => task.id) || []);
+              } else {
+                setSelectedTasks([]);
+              }
+            }}
+            className="rounded"
+          />
+        ),
+        render: (task: any) => (
+          <input
+            type="checkbox"
+            checked={selectedTasks.includes(task.id)}
+            onChange={(e) => {
+              if (e.target.checked) {
+                setSelectedTasks(prev => [...prev, task.id]);
+              } else {
+                setSelectedTasks(prev => prev.filter(id => id !== task.id));
+              }
+            }}
+            className="rounded"
+          />
+        )
+      },
       {
         key: 'category',
         label: 'Rubro (Categoría)',
@@ -287,10 +327,13 @@ export default function ConstructionBudgets() {
         key: 'incidence',
         label: '% de Incidencia',
         render: (task: any) => {
-          // Calculate percentage based on total budget - this would need budget total
+          const laborPrice = task.task?.unit_labor_price || 0;
+          const materialPrice = task.task?.unit_material_price || 0;
+          const subtotal = (laborPrice + materialPrice) * (task.quantity || 0);
+          const percentage = totalBudgetAmount > 0 ? (subtotal / totalBudgetAmount) * 100 : 0;
           return (
             <span className="text-sm text-muted-foreground">
-              0.0%
+              {percentage.toFixed(1)}%
             </span>
           );
         }
@@ -420,8 +463,8 @@ export default function ConstructionBudgets() {
                 className="border rounded-lg overflow-hidden"
               >
                 <Card className="border-0">
-                  <AccordionTrigger className="hover:no-underline p-0">
-                    <CardContent className="flex items-center justify-between w-full p-4">
+                  <div className="flex items-center justify-between w-full p-4">
+                    <AccordionTrigger className="hover:no-underline flex-1 text-left mr-4">
                       <div className="flex items-center gap-3">
                         <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
                           <Building2 className="h-4 w-4 text-primary" />
@@ -433,47 +476,40 @@ export default function ConstructionBudgets() {
                           )}
                         </div>
                       </div>
+                    </AccordionTrigger>
+                    
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        className="h-7 px-2 text-xs"
+                        onClick={() => handleAddTask(budget.id)}
+                      >
+                        <Plus className="w-3 h-3 mr-1" />
+                        Agregar Tarea
+                      </Button>
                       
-                      <div className="flex items-center gap-2">
-                        <Button
-                          size="sm"
-                          className="h-7 px-2 text-xs"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleAddTask(budget.id)
-                          }}
-                        >
-                          <Plus className="w-3 h-3 mr-1" />
-                          Agregar Tarea
-                        </Button>
-                        
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 w-7 p-0"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setEditingBudget(budget)
-                            setNewBudgetModalOpen(true)
-                          }}
-                        >
-                          <Building2 className="w-3 h-3" />
-                        </Button>
-                        
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 w-7 p-0 text-destructive hover:text-destructive"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleDeleteBudget(budget)
-                          }}
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </AccordionTrigger>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 w-7 p-0"
+                        onClick={() => {
+                          setEditingBudget(budget)
+                          setNewBudgetModalOpen(true)
+                        }}
+                      >
+                        <Building2 className="w-3 h-3" />
+                      </Button>
+                      
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                        onClick={() => handleDeleteBudget(budget)}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  </div>
                   
                   <AccordionContent className="px-4 pb-4">
                     <div className="pt-4 border-t">
