@@ -37,13 +37,14 @@ const entryTypes = {
 
 const weatherTypes = {
   sunny: { icon: Sun, label: "Soleado" },
+  partly_cloudy: { icon: CloudSun, label: "Parcialmente nublado" },
   cloudy: { icon: Cloud, label: "Nublado" },
-  rainy: { icon: CloudRain, label: "Lluvioso" },
-  stormy: { icon: CloudLightning, label: "Tormentoso" },
+  rain: { icon: CloudRain, label: "Lluvia" },
+  storm: { icon: CloudLightning, label: "Tormenta" },
+  snow: { icon: CloudSnow, label: "Nieve" },
+  fog: { icon: CloudDrizzle, label: "Niebla" },
   windy: { icon: Wind, label: "Ventoso" },
-  snowy: { icon: CloudSnow, label: "Nevado" },
-  hot: { icon: Thermometer, label: "Caluroso" },
-  cold: { icon: CloudSnow, label: "Frío" }
+  hail: { icon: CloudSnow, label: "Granizo" }
 };
 
 // Hook personalizado para obtener las bitácoras del proyecto
@@ -65,6 +66,32 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
             id,
             full_name,
             avatar_url
+          ),
+          events:site_log_events(
+            id,
+            description,
+            event_type:event_types(
+              id,
+              name
+            )
+          ),
+          attendees:site_log_attendees(
+            id,
+            attendance_type,
+            description,
+            contact:contacts(
+              id,
+              full_name
+            )
+          ),
+          equipment:site_log_equipment(
+            id,
+            quantity,
+            description,
+            equipment:equipment(
+              id,
+              name
+            )
           )
         `)
         .eq('project_id', projectId)
@@ -376,55 +403,49 @@ export default function ConstructionLogs() {
                       {/* Lado izquierdo: Información principal */}
                       <CollapsibleTrigger asChild>
                         <div className="flex-1 cursor-pointer">
-                          <div className="flex items-center gap-2 mb-2">
+                          <div className="flex items-center gap-4">
                             {isExpanded ? (
                               <ChevronDown className="h-4 w-4 text-muted-foreground" />
                             ) : (
                               <ChevronRight className="h-4 w-4 text-muted-foreground" />
                             )}
                             
-                            {/* Fecha y Hora - Clima */}
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm font-medium">
-                                {format(new Date(siteLog.created_at), 'dd/MM/yyyy HH:mm', { locale: es })}
-                              </span>
-                              {weatherConfig && (
-                                <div className="flex items-center gap-1">
-                                  <span className="text-muted-foreground">-</span>
-                                  <weatherConfig.icon className="h-4 w-4 text-muted-foreground" />
-                                  <span className="text-sm text-muted-foreground">
-                                    {weatherConfig.label}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
+                            {/* Fecha */}
+                            <span className="text-sm text-muted-foreground">
+                              {format(new Date(siteLog.created_at), 'dd/MM/yyyy HH:mm', { locale: es })}
+                            </span>
 
-                          {/* Tipo de Entrada */}
-                          <div className="flex items-center gap-2 mb-2">
-                            {entryTypeConfig && (
-                              <>
-                                <entryTypeConfig.icon className="h-4 w-4 text-muted-foreground" />
-                                <Badge variant="secondary" className={`text-xs ${entryTypeConfig.color}`}>
-                                  {entryTypeConfig.label}
-                                </Badge>
-                              </>
+                            {/* Tipo de Entrada */}
+                            <span className="text-sm font-bold">
+                              {entryTypeConfig?.label || 'Sin tipo'}
+                            </span>
+
+                            {/* Clima */}
+                            {weatherConfig && (
+                              <div className="flex items-center gap-1">
+                                <weatherConfig.icon className="h-4 w-4 text-muted-foreground" />
+                                <span className="text-sm text-muted-foreground">
+                                  {weatherConfig.label}
+                                </span>
+                              </div>
                             )}
-                            <div className="flex gap-1 ml-2">
+
+                            {/* Creador */}
+                            <div className="flex items-center gap-2">
+                              <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center">
+                                <span className="text-xs font-medium text-primary">
+                                  {siteLog.creator?.full_name?.charAt(0) || 'U'}
+                                </span>
+                              </div>
+                              <span className="text-sm text-muted-foreground">
+                                {siteLog.creator?.full_name || 'Usuario desconocido'}
+                              </span>
+                            </div>
+
+                            {/* Status indicators */}
+                            <div className="flex gap-1 ml-auto">
                               {siteLog.is_public ? <Globe className="h-3 w-3 text-green-500" /> : <Lock className="h-3 w-3 text-gray-400" />}
                             </div>
-                          </div>
-
-                          {/* Creador */}
-                          <div className="flex items-center gap-2">
-                            <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center">
-                              <span className="text-xs font-medium text-primary">
-                                {siteLog.creator?.full_name?.charAt(0) || 'U'}
-                              </span>
-                            </div>
-                            <span className="text-sm text-muted-foreground">
-                              {siteLog.creator?.full_name || 'Usuario desconocido'}
-                            </span>
                           </div>
                         </div>
                       </CollapsibleTrigger>
