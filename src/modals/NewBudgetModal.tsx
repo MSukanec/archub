@@ -111,7 +111,7 @@ export function NewBudgetModal({ open, onClose, editingBudget, onSuccess }: NewB
         return result
       }
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['budgets'] })
       toast({
         title: editingBudget ? "Presupuesto actualizado" : "Presupuesto creado",
@@ -119,6 +119,12 @@ export function NewBudgetModal({ open, onClose, editingBudget, onSuccess }: NewB
           ? "El presupuesto ha sido actualizado correctamente"
           : "El presupuesto ha sido creado correctamente",
       })
+      
+      // Call onSuccess callback with new budget ID for auto-expansion
+      if (!editingBudget && result?.id && onSuccess) {
+        onSuccess(result.id)
+      }
+      
       onClose()
       form.reset()
     },
@@ -275,8 +281,7 @@ export function NewBudgetModal({ open, onClose, editingBudget, onSuccess }: NewB
         onCancel={handleCancel}
         onSave={form.handleSubmit(onSubmit)}
         saveText={editingBudget ? "Actualizar" : "Crear"}
-        saveForm="budget-form"
-        isLoading={isLoading}
+        saveLoading={isLoading}
       />
     )
   }

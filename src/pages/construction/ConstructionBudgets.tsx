@@ -450,6 +450,7 @@ export default function ConstructionBudgets() {
         <NewBudgetModal
           open={newBudgetModalOpen}
           onClose={() => setNewBudgetModalOpen(false)}
+          onSuccess={(budgetId) => setExpandedAccordion(budgetId)}
         />
       )}
 
