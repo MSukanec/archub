@@ -101,7 +101,7 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
     }
     switch (status) {
       case "full":
-        return "bg-green-500"
+        return "bg-[var(--accent)]"
       case "half":
         return "bg-yellow-500"
       default:
@@ -240,21 +240,21 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
 
           {/* Timeline Column with Navigation */}
           <div className="flex-1 relative min-w-0">
-            {/* Left Navigation Button */}
+            {/* Left Navigation Button - Circular */}
             <Button
               variant="ghost"
-              size="sm"
-              className="absolute left-2 top-1/2 transform -translate-y-1/2 z-20 bg-background/80 backdrop-blur-sm border border-border hover:bg-muted"
+              size="icon"
+              className="absolute left-2 top-1/2 transform -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-background/90 backdrop-blur-sm border border-border hover:bg-muted shadow-sm"
               onClick={() => navigateDates('prev')}
             >
               <ChevronLeft className="w-4 h-4" />
             </Button>
 
-            {/* Right Navigation Button */}
+            {/* Right Navigation Button - Circular */}
             <Button
               variant="ghost"
-              size="sm" 
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 z-20 bg-background/80 backdrop-blur-sm border border-border hover:bg-muted"
+              size="icon"
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-background/90 backdrop-blur-sm border border-border hover:bg-muted shadow-sm"
               onClick={() => navigateDates('next')}
             >
               <ChevronRight className="w-4 h-4" />

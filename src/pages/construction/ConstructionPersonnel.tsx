@@ -32,7 +32,12 @@ function usePersonnelAttendance(projectId: string | undefined, organizationId: s
           contact:contacts(
             id,
             first_name,
-            last_name
+            last_name,
+            contact_type_id,
+            contact_type:contact_types(
+              id,
+              name
+            )
           )
         `)
         .eq('site_log.project_id', projectId)
@@ -48,19 +53,52 @@ function usePersonnelAttendance(projectId: string | undefined, organizationId: s
   })
 }
 
-// Transform attendance data for gradebook display
-function transformAttendanceData(attendanceData: any[]) {
+// Hook to fetch contact types for filtering
+function useContactTypes(organizationId: string | undefined) {
+  return useQuery({
+    queryKey: ['contact-types', organizationId],
+    queryFn: async () => {
+      if (!supabase || !organizationId) return []
+
+      const { data: contactTypes, error } = await supabase
+        .from('contact_types')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .order('name')
+
+      if (error) {
+        console.error('Error fetching contact types:', error)
+        return []
+      }
+
+      return contactTypes || []
+    },
+    enabled: !!supabase && !!organizationId
+  })
+}
+
+// Transform attendance data for gradebook display with contact type filtering
+function transformAttendanceData(attendanceData: any[], selectedContactTypeId?: string) {
   if (!attendanceData || attendanceData.length === 0) return { workers: [], attendance: [] }
 
-  // Get unique workers
+  // Get unique workers with contact type filtering
   const workersMap = new Map()
   attendanceData.forEach(attendance => {
     if (attendance.contact) {
+      // Filter by contact type if selected
+      if (selectedContactTypeId && attendance.contact.contact_type_id !== selectedContactTypeId) {
+        return
+      }
+
       const workerId = attendance.contact.id
       const workerName = `${attendance.contact.first_name || ''} ${attendance.contact.last_name || ''}`.trim()
+      const contactTypeName = attendance.contact.contact_type?.name || 'Sin tipo'
+      
       workersMap.set(workerId, {
         id: workerId,
-        name: workerName || 'Sin nombre'
+        name: workerName || 'Sin nombre',
+        contactType: contactTypeName,
+        contactTypeId: attendance.contact.contact_type_id
       })
     }
   })
