@@ -5,7 +5,8 @@ export interface TaskCategory {
   id: string
   name: string
   parent_id: string | null
-  level: number
+  code?: string
+  position?: string
   created_at: string
 }
 
@@ -35,11 +36,11 @@ export function useTaskCategories() {
   })
 }
 
-// Hook to get top-level categories (level 1)
+// Hook to get top-level categories (parent_id === null)
 export function useTopLevelCategories() {
   const { data: allCategories = [], ...rest } = useTaskCategories()
   
-  const topLevelCategories = allCategories.filter(category => category.level === 1)
+  const topLevelCategories = allCategories.filter(category => category.parent_id === null)
   
   console.log('Top level categories:', topLevelCategories)
   
@@ -49,12 +50,12 @@ export function useTopLevelCategories() {
   }
 }
 
-// Hook to get subcategories by parent_id (level 2)
+// Hook to get subcategories by parent_id
 export function useSubcategories(parentId: string | null) {
   const { data: allCategories = [], ...rest } = useTaskCategories()
   
   const subcategories = parentId 
-    ? allCategories.filter(category => category.parent_id === parentId && category.level === 2)
+    ? allCategories.filter(category => category.parent_id === parentId)
     : []
   
   return {
@@ -63,12 +64,12 @@ export function useSubcategories(parentId: string | null) {
   }
 }
 
-// Hook to get element categories by parent_id (level 3)
+// Hook to get element categories by parent_id
 export function useElementCategories(parentId: string | null) {
   const { data: allCategories = [], ...rest } = useTaskCategories()
   
   const elementCategories = parentId 
-    ? allCategories.filter(category => category.parent_id === parentId && category.level === 3)
+    ? allCategories.filter(category => category.parent_id === parentId)
     : []
   
   return {
@@ -77,7 +78,7 @@ export function useElementCategories(parentId: string | null) {
   }
 }
 
-// Hook to get units - tabla no existe en la base de datos
+// Hook to get units
 export function useUnits() {
   return useQuery({
     queryKey: ['units'],
@@ -86,7 +87,6 @@ export function useUnits() {
         throw new Error('Supabase client not initialized')
       }
 
-      console.log('Attempting to fetch units...')
       const { data, error } = await supabase
         .from('units')
         .select('*')
@@ -94,16 +94,15 @@ export function useUnits() {
 
       if (error) {
         console.error('Error fetching units:', error)
-        return [] // Retornar array vacío si la tabla no existe
+        throw error
       }
 
-      console.log('Units data:', data)
       return data || []
     }
   })
 }
 
-// Hook to get actions - tabla no existe en la base de datos
+// Hook to get actions
 export function useActions() {
   return useQuery({
     queryKey: ['actions'],
@@ -112,7 +111,6 @@ export function useActions() {
         throw new Error('Supabase client not initialized')
       }
 
-      console.log('Attempting to fetch actions...')
       const { data, error } = await supabase
         .from('actions')
         .select('*')
@@ -120,36 +118,33 @@ export function useActions() {
 
       if (error) {
         console.error('Error fetching actions:', error)
-        return [] // Retornar array vacío si la tabla no existe
+        throw error
       }
 
-      console.log('Actions data:', data)
       return data || []
     }
   })
 }
 
-// Hook to get elements - tabla no existe en la base de datos
+// Hook to get task elements
 export function useElements() {
   return useQuery({
-    queryKey: ['elements'],
+    queryKey: ['task-elements'],
     queryFn: async () => {
       if (!supabase) {
         throw new Error('Supabase client not initialized')
       }
 
-      console.log('Attempting to fetch elements...')
       const { data, error } = await supabase
-        .from('elements')
+        .from('task_elements')
         .select('*')
         .order('name')
 
       if (error) {
-        console.error('Error fetching elements:', error)
-        return [] // Retornar array vacío si la tabla no existe
+        console.error('Error fetching task elements:', error)
+        throw error
       }
 
-      console.log('Elements data:', data)
       return data || []
     }
   })
