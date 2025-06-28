@@ -164,28 +164,48 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
         throw new Error('Error de conexión con la base de datos')
       }
 
-      let result
+      let siteLogResult
       if (editingSiteLog) {
-        result = await supabase
+        siteLogResult = await supabase
           .from('site_logs')
           .update(siteLogData)
           .eq('id', editingSiteLog.id)
           .select()
           .single()
       } else {
-        result = await supabase
+        siteLogResult = await supabase
           .from('site_logs')
           .insert([siteLogData])
           .select()
           .single()
       }
 
-      if (result.error) {
-        console.error('Error saving site log:', result.error)
-        throw new Error(result.error.message)
+      if (siteLogResult.error) {
+        console.error('Error saving site log:', siteLogResult.error)
+        throw new Error(siteLogResult.error.message)
       }
 
-      return result.data
+      // Create site log events if any
+      if (events.length > 0 && siteLogResult.data) {
+        const eventsData = events.map(event => ({
+          site_log_id: siteLogResult.data.id,
+          event_type_id: event.event_type_id,
+          event_date: event.event_date.toISOString().split('T')[0],
+          description: event.description,
+          is_custom: event.is_custom
+        }))
+
+        const eventsResult = await supabase
+          .from('site_log_events')
+          .insert(eventsData)
+
+        if (eventsResult.error) {
+          console.error('Error saving site log events:', eventsResult.error)
+          // Don't throw error for events - log creation should succeed even if events fail
+        }
+      }
+
+      return siteLogResult.data
     },
     onSuccess: () => {
       // Invalidación inmediata y forzada del cache

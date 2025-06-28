@@ -119,6 +119,16 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 28, 2025. Site logs modal fixes and Events accordion implementation
+  • Fixed site logs modal database schema issues by removing problematic foreign key relationships and organization_id column
+  • Added Events accordion to site logs modal with full site_log_events and event_types integration
+  • Created useEventTypes hook to fetch event types from Supabase database
+  • Enhanced site log creation mutation to handle both site logs and associated events
+  • Fixed creator field to properly default to current user organization member
+  • Added complete Events management with add/remove functionality and proper form validation
+  • Events accordion shows event count in header and allows dynamic event creation with type, date, and description
+  • Site log modal now supports both basic information and related events in unified interface
+
 - June 28, 2025. Materials management system and budget selector interface implementation
   • Created ConstructionMaterials.tsx page following ai-page-template.md structure with WIDE layout and CustomTable
   • Built useConstructionMaterials hook to aggregate materials from task_materials table based on budget tasks
