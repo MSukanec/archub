@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button'
 import { Plus, X } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useCreateTask, useUpdateTask } from '@/hooks/use-tasks'
-import { useTaskCategories, useTaskSubcategories, useTaskElements, useTaskActions, useUnits } from '@/hooks/use-task-categories'
+import { useTopLevelCategories, useSubcategories, useElementCategories } from '@/hooks/use-task-categories'
 import { useMaterials } from '@/hooks/use-materials'
 
 // Task schema for validation
@@ -63,17 +63,19 @@ interface NewAdminTaskModalProps {
 export function NewAdminTaskModal({ open, onClose, task }: NewAdminTaskModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [taskMaterials, setTaskMaterials] = useState<TaskMaterial[]>([])
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null)
+  const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<string | null>(null)
+  const [selectedAction, setSelectedAction] = useState<string>('')
+  const [selectedElement, setSelectedElement] = useState<string>('')
   
   const { data: userData } = useCurrentUser()
   const createTaskMutation = useCreateTask()
   const updateTaskMutation = useUpdateTask()
   
-  // Data hooks
-  const { data: categories = [] } = useTaskCategories()
-  const { data: subcategories = [] } = useTaskSubcategories()
-  const { data: elements = [] } = useTaskElements()
-  const { data: actions = [] } = useTaskActions()
-  const { data: units = [] } = useUnits()
+  // Data hooks with hierarchical structure
+  const { data: categories = [] } = useTopLevelCategories()
+  const { data: subcategories = [] } = useSubcategories(selectedCategoryId)
+  const { data: elementCategories = [] } = useElementCategories(selectedSubcategoryId)
   const { data: materials = [] } = useMaterials()
 
   const {
@@ -105,16 +107,27 @@ export function NewAdminTaskModal({ open, onClose, task }: NewAdminTaskModalProp
 
   // Auto-generate task name when action and element are selected
   useEffect(() => {
-    if (actionId && elementId) {
-      const selectedAction = actions.find((a: any) => a.id === actionId)
-      const selectedElement = elements.find((e: any) => e.id === elementId)
-      
-      if (selectedAction && selectedElement) {
-        const generatedName = `${selectedAction.name} de ${selectedElement.name}`
-        setValue('name', generatedName)
-      }
+    if (selectedAction && selectedElement) {
+      const generatedName = `${selectedAction} de ${selectedElement}`
+      setValue('name', generatedName)
     }
-  }, [actionId, elementId, actions, elements, setValue])
+  }, [selectedAction, selectedElement, setValue])
+
+  // Handle category selection to unlock subcategories
+  const handleCategoryChange = (categoryId: string) => {
+    setSelectedCategoryId(categoryId)
+    setSelectedSubcategoryId(null) // Reset subcategory when category changes
+    setValue('category_id', categoryId)
+    setValue('subcategory_id', '')
+    setValue('element_category_id', '')
+  }
+
+  // Handle subcategory selection to unlock element categories
+  const handleSubcategoryChange = (subcategoryId: string) => {
+    setSelectedSubcategoryId(subcategoryId)
+    setValue('subcategory_id', subcategoryId)
+    setValue('element_category_id', '')
+  }
 
   // Reset form when modal opens/closes or task changes
   useEffect(() => {

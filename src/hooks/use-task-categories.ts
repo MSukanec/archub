@@ -1,12 +1,20 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 
+export interface TaskCategory {
+  id: string
+  name: string
+  parent_id: string | null
+  level: number
+  created_at: string
+}
+
 export function useTaskCategories() {
   return useQuery({
     queryKey: ['task-categories'],
     queryFn: async () => {
       if (!supabase) {
-        return []
+        throw new Error('Supabase client not initialized')
       }
 
       const { data, error } = await supabase
@@ -19,104 +27,47 @@ export function useTaskCategories() {
         throw error
       }
 
-      return data || []
-    },
-    enabled: !!supabase
+      return data as TaskCategory[]
+    }
   })
 }
 
-export function useTaskSubcategories() {
-  return useQuery({
-    queryKey: ['task-subcategories'],
-    queryFn: async () => {
-      if (!supabase) {
-        return []
-      }
-
-      const { data, error } = await supabase
-        .from('task_subcategories')
-        .select('*')
-        .order('name')
-
-      if (error) {
-        console.error('Error fetching task subcategories:', error)
-        throw error
-      }
-
-      return data || []
-    },
-    enabled: !!supabase
-  })
+// Hook to get top-level categories (level 1)
+export function useTopLevelCategories() {
+  const { data: allCategories = [], ...rest } = useTaskCategories()
+  
+  const topLevelCategories = allCategories.filter(category => category.level === 1)
+  
+  return {
+    data: topLevelCategories,
+    ...rest
+  }
 }
 
-export function useTaskElements() {
-  return useQuery({
-    queryKey: ['task-elements'],
-    queryFn: async () => {
-      if (!supabase) {
-        return []
-      }
-
-      const { data, error } = await supabase
-        .from('task_elements')
-        .select('*')
-        .order('name')
-
-      if (error) {
-        console.error('Error fetching task elements:', error)
-        throw error
-      }
-
-      return data || []
-    },
-    enabled: !!supabase
-  })
+// Hook to get subcategories by parent_id (level 2)
+export function useSubcategories(parentId: string | null) {
+  const { data: allCategories = [], ...rest } = useTaskCategories()
+  
+  const subcategories = parentId 
+    ? allCategories.filter(category => category.parent_id === parentId && category.level === 2)
+    : []
+  
+  return {
+    data: subcategories,
+    ...rest
+  }
 }
 
-export function useTaskActions() {
-  return useQuery({
-    queryKey: ['task-actions'],
-    queryFn: async () => {
-      if (!supabase) {
-        return []
-      }
-
-      const { data, error } = await supabase
-        .from('task_actions')
-        .select('*')
-        .order('name')
-
-      if (error) {
-        console.error('Error fetching task actions:', error)
-        throw error
-      }
-
-      return data || []
-    },
-    enabled: !!supabase
-  })
-}
-
-export function useUnits() {
-  return useQuery({
-    queryKey: ['units'],
-    queryFn: async () => {
-      if (!supabase) {
-        return []
-      }
-
-      const { data, error } = await supabase
-        .from('units')
-        .select('*')
-        .order('name')
-
-      if (error) {
-        console.error('Error fetching units:', error)
-        throw error
-      }
-
-      return data || []
-    },
-    enabled: !!supabase
-  })
+// Hook to get element categories by parent_id (level 3)
+export function useElementCategories(parentId: string | null) {
+  const { data: allCategories = [], ...rest } = useTaskCategories()
+  
+  const elementCategories = parentId 
+    ? allCategories.filter(category => category.parent_id === parentId && category.level === 3)
+    : []
+  
+  return {
+    data: elementCategories,
+    ...rest
+  }
 }
