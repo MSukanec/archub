@@ -306,7 +306,8 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
         comments: data.comments,
         is_public: data.is_public,
         is_favorite: data.is_favorite,
-        project_id: userData.preferences.last_project_id
+        project_id: userData.preferences.last_project_id,
+        organization_id: userData.preferences.last_organization_id
       }
 
       if (!supabase) {

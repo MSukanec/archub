@@ -119,6 +119,14 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 28, 2025. Critical Personnel page filtering fix and site logs organization_id integration
+  • Fixed Personnel page filtering bug - now correctly filters by project and organization instead of showing all data
+  • Updated usePersonnelAttendance hook to use new organization_id column in site_logs table
+  • Added organization_id to site log creation mutation ensuring new bitácoras save organization data
+  • Replaced custom empty state with CustomEmptyState component in Personnel page
+  • Enhanced filtering with two-step process: filter site_logs by project_id and organization_id, then filter attendees
+  • All Personnel attendance data now properly scoped to current project and organization context
+  • Site logs modal now saves organization_id automatically when creating new entries
 - June 28, 2025. Complete profile page redesign and sidebar functionality fixes
   • Fixed sidebar toggle switch in Profile page - now properly syncs with sidebar button and saves to database
   • Removed Theme and Panel buttons from sidebar footer as requested - only Profile button remains
