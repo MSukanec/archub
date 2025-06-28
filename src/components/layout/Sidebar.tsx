@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useIsAdmin } from "@/hooks/use-admin-permissions";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
@@ -43,6 +44,7 @@ import SidebarButton from "./SidebarButton";
 export function Sidebar() {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
+  const isAdmin = useIsAdmin();
   const { isDocked, isHovered, setHovered, setDocked } = useSidebarStore();
   
   // Sync sidebar state with user preferences
@@ -351,17 +353,19 @@ export function Sidebar() {
       {/* Bottom Section - Fixed Buttons */}
       <div className="border-t border-[var(--menues-border)] p-1">
         <div className="flex flex-col gap-[2px]">
-          {/* Administration */}
-          <SidebarButton
-            icon={<Shield className="w-[18px] h-[18px]" />}
-            label="Administración"
-            isActive={currentSidebarContext === 'admin'}
-            isExpanded={isExpanded}
-            onClick={() => {
-              setSidebarContext('admin');
-              navigate('/admin/dashboard');
-            }}
-          />
+          {/* Administration - Only for Admin Users */}
+          {isAdmin && (
+            <SidebarButton
+              icon={<Shield className="w-[18px] h-[18px]" />}
+              label="Administración"
+              isActive={currentSidebarContext === 'admin'}
+              isExpanded={isExpanded}
+              onClick={() => {
+                setSidebarContext('admin');
+                navigate('/admin/dashboard');
+              }}
+            />
+          )}
 
           {/* Theme Toggle */}
           <SidebarButton
