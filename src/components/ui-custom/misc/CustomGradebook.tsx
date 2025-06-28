@@ -174,45 +174,20 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
       </CardHeader>
 
       <CardContent className="p-0">
-        <div className="border-t">
-          {/* Combined Header Row */}
-          <div className="flex bg-muted/50 border-b">
-            {/* Personnel Header */}
-            <div className="flex-shrink-0 w-64 px-6 py-3 border-r">
+        <div className="flex border-t">
+          {/* Fixed Personnel Names Column */}
+          <div className="flex-shrink-0 w-64 bg-background border-r">
+            {/* Header */}
+            <div className="bg-muted/50 px-6 py-3 border-b">
               <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Personal
               </span>
             </div>
             
-            {/* Timeline Header - with padding to account for scrollbar */}
-            <div className="flex-1 pr-4">
-              <div className="overflow-x-auto">
-                <div className="flex">
-                  {dateRange.map((date) => {
-                    const isTodayDate = isToday(date)
-                    return (
-                      <div key={date.getTime()} className={`px-3 py-3 text-center text-xs font-medium uppercase tracking-wider min-w-[40px] flex-shrink-0 relative ${isTodayDate ? 'bg-blue-50 text-blue-700 border-x-2 border-blue-400' : 'text-muted-foreground'}`}>
-                        <div className="flex flex-col items-center">
-                          <span className={isTodayDate ? 'font-bold' : ''}>{format(date, 'dd')}</span>
-                          <span className={`text-[10px] ${isTodayDate ? 'font-semibold' : ''}`}>{format(date, 'EEE', { locale: es })}</span>
-                        </div>
-                        {isTodayDate && (
-                          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-0.5 h-full bg-blue-500 z-10"></div>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Combined Body Rows */}
-          <div className="divide-y divide-border">
-            {workers.map((worker, index) => (
-              <div key={worker.id} className="flex hover:bg-muted/50">
-                {/* Personnel Cell */}
-                <div className="flex-shrink-0 w-64 px-6 py-4 bg-background border-r">
+            {/* Personnel List */}
+            <div>
+              {workers.map((worker, index) => (
+                <div key={worker.id} className={`px-6 py-4 bg-background hover:bg-muted/50 ${index < workers.length - 1 ? 'border-b border-border' : ''}`}>
                   <div className="flex items-center">
                     <Avatar className="h-8 w-8 flex-shrink-0">
                       <AvatarImage src={worker.avatar_url} alt={worker.name} />
@@ -225,35 +200,60 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
                     </div>
                   </div>
                 </div>
+              ))}
+            </div>
+          </div>
 
-                {/* Timeline Cells - with padding to account for scrollbar */}
-                <div className="flex-1 pr-4">
-                  <div className="overflow-x-auto">
-                    <div className="flex">
-                      {dateRange.map((date) => {
-                        const status = getAttendanceStatus(worker.id, date)
-                        const isWeekendDay = isWeekend(date)
-                        const isTodayDate = isToday(date)
-                        return (
-                          <div key={`${worker.id}-${date.getTime()}`} className={`px-3 py-4 text-center min-w-[40px] flex-shrink-0 relative ${isTodayDate ? 'bg-blue-50/30 border-x-2 border-blue-400' : ''}`}>
-                            <div className={`w-6 h-6 rounded-full mx-auto ${getAttendanceColor(status, isWeekendDay)}`}>
-                              {isWeekendDay && !hideWeekends && (
-                                <div className="w-full h-full flex items-center justify-center">
-                                  <span className="text-xs text-gray-400">×</span>
-                                </div>
-                              )}
-                            </div>
-                            {isTodayDate && (
-                              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-0.5 h-full bg-blue-500 z-10 pointer-events-none"></div>
+          {/* Scrollable Timeline Column */}
+          <div className="flex-1 overflow-x-auto">
+            <table className="w-full">
+              {/* Timeline Header */}
+              <thead className="bg-muted/50 border-b">
+                <tr>
+                  {dateRange.map((date) => {
+                    const isTodayDate = isToday(date)
+                    return (
+                      <th key={date.getTime()} className={`px-3 py-3 text-center text-xs font-medium uppercase tracking-wider min-w-[40px] relative ${isTodayDate ? 'bg-blue-50 text-blue-700 border-x-2 border-blue-400' : 'text-muted-foreground'}`}>
+                        <div className="flex flex-col items-center">
+                          <span className={isTodayDate ? 'font-bold' : ''}>{format(date, 'dd')}</span>
+                          <span className={`text-[10px] ${isTodayDate ? 'font-semibold' : ''}`}>{format(date, 'EEE', { locale: es })}</span>
+                        </div>
+                        {isTodayDate && (
+                          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-0.5 h-full bg-blue-500 z-10"></div>
+                        )}
+                      </th>
+                    )
+                  })}
+                </tr>
+              </thead>
+              
+              {/* Timeline Body */}
+              <tbody className="bg-background divide-y divide-border">
+                {workers.map((worker) => (
+                  <tr key={worker.id} className="hover:bg-muted/50">
+                    {dateRange.map((date) => {
+                      const status = getAttendanceStatus(worker.id, date)
+                      const isWeekendDay = isWeekend(date)
+                      const isTodayDate = isToday(date)
+                      return (
+                        <td key={`${worker.id}-${date.getTime()}`} className={`px-3 py-4 text-center relative ${isTodayDate ? 'bg-blue-50/30 border-x-2 border-blue-400' : ''}`}>
+                          <div className={`w-6 h-6 rounded-full mx-auto ${getAttendanceColor(status, isWeekendDay)}`}>
+                            {isWeekendDay && !hideWeekends && (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <span className="text-xs text-gray-400">×</span>
+                              </div>
                             )}
                           </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
+                          {isTodayDate && (
+                            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-0.5 h-full bg-blue-500 z-10 pointer-events-none"></div>
+                          )}
+                        </td>
+                      )
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </CardContent>
