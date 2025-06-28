@@ -193,6 +193,7 @@ export function Sidebar() {
         onToggle: () => toggleAccordion('obra'),
         children: [
           { icon: Home, label: 'Resumen de Obra', href: '/construction/dashboard' },
+          { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
           { icon: FileText, label: 'Bitácora', href: '/bitacora' }
         ]
       },

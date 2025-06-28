@@ -19,7 +19,7 @@ import ProjectDashboard from "@/pages/project/ProjectDashboard";
 import FinancesDashboard from "@/pages/finances/FinancesDashboard";
 import Profile from "@/pages/others/Profile";
 import Movements from "@/pages/finances/FinancesMovements";
-import SiteLogs from "@/pages/site/SiteLogs";
+import ConstructionLogs from "@/pages/construction/ConstructionLogs";
 import OrganizationPreferences from "@/pages/organization/OrganizationPreferences";
 import ConstructionDashboard from "@/pages/construction/ConstructionDashboard";
 import ConstructionBudgets from "@/pages/construction/ConstructionBudgets";
@@ -59,7 +59,7 @@ function Router() {
 
       <Route path="/bitacora">
         <ProtectedRoute>
-          <SiteLogs />
+          <ConstructionLogs />
         </ProtectedRoute>
       </Route>
 
@@ -77,13 +77,13 @@ function Router() {
 
       <Route path="/obra/bitacora">
         <ProtectedRoute>
-          <SiteLogs />
+          <ConstructionLogs />
         </ProtectedRoute>
       </Route>
 
       <Route path="/construction/site-logs">
         <ProtectedRoute>
-          <SiteLogs />
+          <ConstructionLogs />
         </ProtectedRoute>
       </Route>
 
