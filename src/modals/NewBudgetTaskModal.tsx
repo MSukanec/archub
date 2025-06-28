@@ -2,13 +2,12 @@ import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { CalendarIcon, Calculator, X } from "lucide-react";
+import { CalendarIcon, Calculator } from "lucide-react";
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -66,7 +65,7 @@ export function NewBudgetTaskModal({ open, onClose, budgetId, editingTask }: New
         organization_id: userData.organization.id
       }));
     }
-  }, [userData, formData.organization_id]);
+  }, [userData?.organization?.id, formData.organization_id]);
 
   // Pre-populate form when editing
   useEffect(() => {
@@ -178,28 +177,26 @@ export function NewBudgetTaskModal({ open, onClose, budgetId, editingTask }: New
     }
   };
 
-  const handleCancel = () => {
-    onClose();
-  };
-
   const updateFormData = (field: keyof TaskFormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  if (!open) return null;
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <div className="flex items-center gap-3">
+            <Calculator className="h-5 w-5 text-primary" />
+            <div>
+              <DialogTitle>{editingTask ? "Editar Tarea del Presupuesto" : "Nueva Tarea del Presupuesto"}</DialogTitle>
+              <DialogDescription>
+                {editingTask ? "Modifica los detalles de la tarea seleccionada" : "Agrega una nueva tarea a este presupuesto"}
+              </DialogDescription>
+            </div>
+          </div>
+        </DialogHeader>
 
-  const modalContent = {
-    header: (
-      <CustomModalHeader
-        icon={Calculator}
-        title={editingTask ? "Editar Tarea del Presupuesto" : "Nueva Tarea del Presupuesto"}
-        description={editingTask ? "Modifica los detalles de la tarea seleccionada" : "Agrega una nueva tarea a este presupuesto"}
-        onClose={onClose}
-      />
-    ),
-    body: (
-      <CustomModalBody padding="md">
-        <form id="budget-task-form" onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           {/* Fecha de creación */}
           <div className="space-y-2">
             <Label htmlFor="created_at" className="required-asterisk">
@@ -247,12 +244,12 @@ export function NewBudgetTaskModal({ open, onClose, budgetId, editingTask }: New
                 <SelectValue placeholder="Seleccionar tarea" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="task1">Excavación</SelectItem>
-                <SelectItem value="task2">Cimentación</SelectItem>
-                <SelectItem value="task3">Estructura</SelectItem>
-                <SelectItem value="task4">Mampostería</SelectItem>
-                <SelectItem value="task5">Instalaciones</SelectItem>
-                <SelectItem value="task6">Acabados</SelectItem>
+                <SelectItem value="excavacion">Excavación</SelectItem>
+                <SelectItem value="cimentacion">Cimentación</SelectItem>
+                <SelectItem value="estructura">Estructura</SelectItem>
+                <SelectItem value="mamposteria">Mampostería</SelectItem>
+                <SelectItem value="instalaciones">Instalaciones</SelectItem>
+                <SelectItem value="acabados">Acabados</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -366,18 +363,30 @@ export function NewBudgetTaskModal({ open, onClose, budgetId, editingTask }: New
               </SelectContent>
             </Select>
           </div>
-        </form>
-      </CustomModalBody>
-    ),
-    footer: (
-      <CustomModalFooter
-        onCancel={handleCancel}
-        onSave={handleSubmit}
-        saveText={editingTask ? "Actualizar Tarea" : "Crear Tarea"}
-        isLoading={isLoading}
-      />
-    )
-  };
 
-  return <CustomModalLayout>{modalContent}</CustomModalLayout>;
+          {/* Footer buttons */}
+          <div className="flex gap-3 pt-4 border-t">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={onClose}
+              className="flex-1"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              disabled={isLoading || !formData.task_id}
+              className="flex-1"
+            >
+              {isLoading 
+                ? (editingTask ? 'Actualizando...' : 'Creando...') 
+                : (editingTask ? 'Actualizar Tarea' : 'Crear Tarea')
+              }
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
 }

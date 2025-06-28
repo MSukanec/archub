@@ -270,8 +270,8 @@ export default function ConstructionBudgets() {
                 className="border rounded-lg overflow-hidden"
               >
                 <Card className="border-0">
-                  <AccordionTrigger className="hover:no-underline p-0">
-                    <CardContent className="flex items-center justify-between w-full p-4">
+                  <div className="flex items-center justify-between w-full p-4">
+                    <AccordionTrigger className="hover:no-underline p-0 flex-1 mr-6">
                       <div className="flex items-center gap-3">
                         <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
                           <Building2 className="h-4 w-4 text-primary" />
@@ -283,34 +283,34 @@ export default function ConstructionBudgets() {
                           )}
                         </div>
                       </div>
+                    </AccordionTrigger>
+                    
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        className="h-7 px-2 text-xs"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleAddTask(budget.id)
+                        }}
+                      >
+                        <Plus className="w-3 h-3 mr-1" />
+                        Agregar Tarea
+                      </Button>
                       
-                      <div className="flex items-center gap-2">
-                        <Button
-                          size="sm"
-                          className="h-7 px-2 text-xs"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleAddTask(budget.id)
-                          }}
-                        >
-                          <Plus className="w-3 h-3 mr-1" />
-                          Agregar Tarea
-                        </Button>
-                        
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 w-7 p-0 text-destructive hover:text-destructive"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleDeleteBudget(budget)
-                          }}
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </AccordionTrigger>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDeleteBudget(budget)
+                        }}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  </div>
                   
                   <AccordionContent className="px-4 pb-4">
                     <div className="pt-4 border-t">
@@ -333,6 +333,20 @@ export default function ConstructionBudgets() {
         <NewBudgetModal
           open={newBudgetModalOpen}
           onClose={() => setNewBudgetModalOpen(false)}
+        />
+      )}
+
+      {/* New Task Modal */}
+      {showNewTaskModal && selectedBudgetId && (
+        <NewBudgetTaskModal
+          open={showNewTaskModal}
+          onClose={() => {
+            setShowNewTaskModal(false);
+            setSelectedBudgetId(null);
+            setEditingTask(null);
+          }}
+          budgetId={selectedBudgetId}
+          editingTask={editingTask}
         />
       )}
 
