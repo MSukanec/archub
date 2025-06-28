@@ -3,8 +3,8 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from '@/hooks/use-toast'
-import { useCreateTask, useUpdateTask } from '@/hooks/use-tasks'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCreateTask, useUpdateTask } from '@/hooks/use-tasks'
 
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -56,6 +56,7 @@ export function NewAdminTaskModal({ open, onClose, task }: NewAdminTaskModalProp
     handleSubmit,
     reset,
     setValue,
+    watch,
     formState: { errors }
   } = useForm<TaskFormData>({
     resolver: zodResolver(taskSchema),
@@ -233,8 +234,9 @@ export function NewAdminTaskModal({ open, onClose, task }: NewAdminTaskModalProp
           <CustomModalFooter
             onCancel={handleClose}
             onSave={() => {}}
-            isSubmitting={isSubmitting}
-            submitForm="task-form"
+            saveText={task ? 'Guardar cambios' : 'Crear tarea'}
+            saveLoading={isSubmitting}
+            saveDisabled={false}
           />
         )
       }}

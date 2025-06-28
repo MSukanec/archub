@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import { useCurrentUser } from './use-current-user'
+import { toast } from '@/hooks/use-toast'
 
 interface Task {
   id: string
@@ -32,14 +34,19 @@ interface CreateTaskData {
 }
 
 export function useTasks() {
+  const { data: userData } = useCurrentUser()
+  
   return useQuery({
-    queryKey: ['admin-tasks'],
+    queryKey: ['tasks', userData?.organization?.id],
     queryFn: async () => {
-      if (!supabase) throw new Error('Supabase client not initialized')
+      if (!supabase || !userData?.organization?.id) {
+        return []
+      }
 
       const { data, error } = await supabase
         .from('tasks')
         .select('*')
+        .eq('organization_id', userData.organization.id)
         .order('created_at', { ascending: false })
 
       if (error) {
@@ -48,16 +55,20 @@ export function useTasks() {
       }
 
       return data as Task[]
-    }
+    },
+    enabled: !!userData?.organization?.id && !!supabase
   })
 }
 
 export function useCreateTask() {
   const queryClient = useQueryClient()
+  const { data: userData } = useCurrentUser()
 
   return useMutation({
     mutationFn: async (taskData: CreateTaskData) => {
-      if (!supabase) throw new Error('Supabase client not initialized')
+      if (!supabase) {
+        throw new Error('Supabase client not available')
+      }
 
       const { data, error } = await supabase
         .from('tasks')
@@ -73,7 +84,18 @@ export function useCreateTask() {
       return data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-tasks'] })
+      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      toast({
+        title: 'Éxito',
+        description: 'Tarea creada correctamente'
+      })
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'Error al crear la tarea',
+        variant: 'destructive'
+      })
     }
   })
 }
@@ -82,12 +104,14 @@ export function useUpdateTask() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ id, ...taskData }: Partial<Task> & { id: string }) => {
-      if (!supabase) throw new Error('Supabase client not initialized')
+    mutationFn: async ({ id, ...updateData }: { id: string } & Partial<CreateTaskData>) => {
+      if (!supabase) {
+        throw new Error('Supabase client not available')
+      }
 
       const { data, error } = await supabase
         .from('tasks')
-        .update(taskData)
+        .update(updateData)
         .eq('id', id)
         .select()
         .single()
@@ -100,7 +124,18 @@ export function useUpdateTask() {
       return data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-tasks'] })
+      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      toast({
+        title: 'Éxito',
+        description: 'Tarea actualizada correctamente'
+      })
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'Error al actualizar la tarea',
+        variant: 'destructive'
+      })
     }
   })
 }
@@ -109,23 +144,34 @@ export function useDeleteTask() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (taskId: string) => {
-      if (!supabase) throw new Error('Supabase client not initialized')
+    mutationFn: async (id: string) => {
+      if (!supabase) {
+        throw new Error('Supabase client not available')
+      }
 
       const { error } = await supabase
         .from('tasks')
         .delete()
-        .eq('id', taskId)
+        .eq('id', id)
 
       if (error) {
         console.error('Error deleting task:', error)
         throw error
       }
-
-      return taskId
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-tasks'] })
+      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      toast({
+        title: 'Éxito',
+        description: 'Tarea eliminada correctamente'
+      })
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'Error al eliminar la tarea',
+        variant: 'destructive'
+      })
     }
   })
 }
