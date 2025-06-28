@@ -814,64 +814,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                     </AccordionContent>
                   </AccordionItem>
 
-                  {/* Sección 4: Configuración de Entrada */}
-                  <AccordionItem value="configuracion-entrada">
-                    <AccordionTrigger>
-                      <div className="flex items-center gap-2">
-                        <Settings className="h-4 w-4" />
-                        Configuración de Entrada
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="space-y-3 pt-3">
-                      <div className="grid grid-cols-2 gap-4">
-                        <FormField
-                          control={form.control}
-                          name="is_public"
-                          render={({ field }) => (
-                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                              <div className="space-y-0.5">
-                                <FormLabel>
-                                  Entrada pública
-                                </FormLabel>
-                                <div className="text-sm text-muted-foreground">
-                                  Visible para todos los miembros
-                                </div>
-                              </div>
-                              <FormControl>
-                                <Checkbox
-                                  checked={field.value}
-                                  onCheckedChange={field.onChange}
-                                />
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
 
-                        <FormField
-                          control={form.control}
-                          name="is_favorite"
-                          render={({ field }) => (
-                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                              <div className="space-y-0.5">
-                                <FormLabel>
-                                  Marcar como favorito
-                                </FormLabel>
-                                <div className="text-sm text-muted-foreground">
-                                  Destacar esta entrada
-                                </div>
-                              </div>
-                              <FormControl>
-                                <Checkbox
-                                  checked={field.value}
-                                  onCheckedChange={field.onChange}
-                                />
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
                 </Accordion>
               </form>
             </Form>
