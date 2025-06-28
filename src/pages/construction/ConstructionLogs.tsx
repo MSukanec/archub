@@ -61,14 +61,10 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
         .from('site_logs')
         .select(`
           *,
-          creator:organization_members!created_by(
+          creator:users!created_by(
             id,
-            user:users(
-              first_name,
-              last_name,
-              full_name,
-              avatar_url
-            )
+            full_name,
+            avatar_url
           )
         `)
         .eq('project_id', projectId)
@@ -371,11 +367,11 @@ export default function ConstructionLogs() {
                           <div className="col-span-2 flex items-center gap-2">
                             <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center">
                               <span className="text-xs font-medium text-primary">
-                                {siteLog.creator?.user?.full_name?.charAt(0) || 'U'}
+                                {siteLog.creator?.full_name?.charAt(0) || 'U'}
                               </span>
                             </div>
                             <span className="text-xs font-medium truncate">
-                              {siteLog.creator?.user?.full_name || 'Usuario desconocido'}
+                              {siteLog.creator?.full_name || 'Usuario desconocido'}
                             </span>
                           </div>
 

@@ -766,8 +766,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                         onClick={() => {
                           setEvents([...events, {
                             event_type_id: '',
-                            description: '',
-                            is_custom: false
+                            description: ''
                           }]);
                         }}
                         className="w-full"
