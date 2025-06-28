@@ -474,26 +474,32 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
                       </tr>
                       
                       {/* Worker Rows for this contact type */}
-                      {workersInGroup.map((worker, workerIndex) => (
-                        <tr key={worker.id} className={`h-[65px] hover:bg-muted/50 ${workerIndex < workersInGroup.length - 1 || groupIndex < Object.keys(groupedWorkers).length - 1 ? 'border-b border-border' : ''}`}>
-                          {dateRange.map((date) => {
-                            const status = getAttendanceStatus(worker.id, date)
-                            const isWeekendDay = isWeekend(date)
-                            const isTodayDate = isToday(date)
-                            return (
-                              <td key={`${worker.id}-${date.getTime()}`} className={`px-3 text-center relative ${isTodayDate ? 'bg-[var(--accent)]/50 border-x-2 border-[var(--accent)]' : ''}`}>
-                                <div className={`w-6 h-6 rounded-full mx-auto ${getAttendanceColor(status, isWeekendDay)}`}>
-                                  {isWeekendDay && !hideWeekends && (
-                                    <div className="w-full h-full flex items-center justify-center">
-                                      <span className="text-xs text-gray-400">×</span>
-                                    </div>
-                                  )}
-                                </div>
-                              </td>
-                            )
-                          })}
-                        </tr>
-                      ))}
+                      {workersInGroup.map((worker, workerIndex) => {
+                        const isLastWorkerInGroup = workerIndex === workersInGroup.length - 1
+                        const isLastGroup = groupIndex === Object.keys(groupedWorkers).length - 1
+                        const shouldShowBorder = !isLastWorkerInGroup || !isLastGroup
+                        
+                        return (
+                          <tr key={worker.id} className={`h-[65px] hover:bg-muted/50 ${shouldShowBorder ? 'border-b border-border' : ''}`}>
+                            {dateRange.map((date) => {
+                              const status = getAttendanceStatus(worker.id, date)
+                              const isWeekendDay = isWeekend(date)
+                              const isTodayDate = isToday(date)
+                              return (
+                                <td key={`${worker.id}-${date.getTime()}`} className={`px-3 text-center relative ${isTodayDate ? 'bg-[var(--accent)]/50 border-x-2 border-[var(--accent)]' : ''}`}>
+                                  <div className={`w-6 h-6 rounded-full mx-auto ${getAttendanceColor(status, isWeekendDay)}`}>
+                                    {isWeekendDay && !hideWeekends && (
+                                      <div className="w-full h-full flex items-center justify-center">
+                                        <span className="text-xs text-gray-400">×</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </td>
+                              )
+                            })}
+                          </tr>
+                        );
+                      })}
                     </React.Fragment>
                   ))}
                 </tbody>

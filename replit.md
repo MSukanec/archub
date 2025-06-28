@@ -119,6 +119,13 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 28, 2025. Fixed site logs modal and Personnel timeline alignment issues
+  • Made "Comentarios" field optional in site logs modal - no longer required for entry creation
+  • Enhanced timeline cache invalidation - Personnel attendance now updates immediately after site log modifications
+  • Fixed horizontal line alignment in Personnel timeline - synchronized row heights between personnel column and timeline data
+  • Timeline preserves exact visual continuity with proper border logic between contact type groups
+  • Site log updates now trigger immediate refresh of Personnel page attendance visualization
+
 - June 28, 2025. Enhanced Personnel timeline with drag functionality and auto-centering
   • Timeline now automatically centers on "today" ONLY on initial page load and when clicking "Hoy" button
   • Fixed drag-and-drop behavior - timeline maintains position after dragging without returning to "today"
