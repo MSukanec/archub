@@ -66,6 +66,34 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
             id,
             full_name,
             avatar_url
+          ),
+          events:site_log_events(
+            id,
+            description,
+            event_date,
+            event_type:event_types(
+              id,
+              name
+            )
+          ),
+          attendees:site_log_attendees(
+            id,
+            attendance_type,
+            description,
+            contact:contacts(
+              id,
+              first_name,
+              last_name
+            )
+          ),
+          equipment:site_log_equipment(
+            id,
+            quantity,
+            description,
+            equipment:equipment(
+              id,
+              name
+            )
           )
         `)
         .eq('project_id', projectId)
@@ -478,12 +506,22 @@ export default function ConstructionLogs() {
                           {/* Eventos */}
                           <div>
                             <span className="font-medium text-muted-foreground block mb-2">Eventos</span>
-                            <div className="space-y-1">
+                            <div className="space-y-2">
                               {siteLog.events && siteLog.events.length > 0 ? (
                                 siteLog.events.map((event: any, index: number) => (
-                                  <div key={index} className="text-xs bg-blue-50 px-2 py-1 rounded">
-                                    {event.event_type?.name || 'Evento'}: {event.description || 'Sin descripción'}
-                                  </div>
+                                  <Card key={index} className="p-2 bg-blue-50/50 border-blue-200">
+                                    <div className="flex items-center justify-between mb-1">
+                                      <span className="text-xs font-medium text-blue-800">
+                                        {event.event_type?.name || 'Evento'}
+                                      </span>
+                                      {event.event_date && (
+                                        <span className="text-xs text-muted-foreground">
+                                          {format(new Date(event.event_date), 'dd/MM', { locale: es })}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <p className="text-xs text-gray-700">{event.description || 'Sin descripción'}</p>
+                                  </Card>
                                 ))
                               ) : (
                                 <p className="text-xs text-muted-foreground">Sin eventos registrados</p>
@@ -494,12 +532,25 @@ export default function ConstructionLogs() {
                           {/* Personal */}
                           <div>
                             <span className="font-medium text-muted-foreground block mb-2">Personal</span>
-                            <div className="space-y-1">
+                            <div className="space-y-2">
                               {siteLog.attendees && siteLog.attendees.length > 0 ? (
                                 siteLog.attendees.map((attendee: any, index: number) => (
-                                  <div key={index} className="text-xs bg-green-50 px-2 py-1 rounded">
-                                    {attendee.contact ? `${attendee.contact.first_name || ''} ${attendee.contact.last_name || ''}`.trim() || 'Personal' : 'Personal'}: {attendee.attendance_type || 'Presente'}
-                                  </div>
+                                  <Card key={index} className="p-2 bg-green-50/50 border-green-200">
+                                    <div className="flex items-center justify-between mb-1">
+                                      <span className="text-xs font-medium text-green-800">
+                                        {attendee.contact ? 
+                                          `${attendee.contact.first_name || ''} ${attendee.contact.last_name || ''}`.trim() || 'Personal' 
+                                          : 'Personal'
+                                        }
+                                      </span>
+                                      <span className="text-xs px-1 py-0.5 bg-green-100 text-green-700 rounded">
+                                        {attendee.attendance_type || 'Presente'}
+                                      </span>
+                                    </div>
+                                    {attendee.description && (
+                                      <p className="text-xs text-gray-700">{attendee.description}</p>
+                                    )}
+                                  </Card>
                                 ))
                               ) : (
                                 <p className="text-xs text-muted-foreground">Sin personal registrado</p>
@@ -510,12 +561,22 @@ export default function ConstructionLogs() {
                           {/* Maquinaria */}
                           <div>
                             <span className="font-medium text-muted-foreground block mb-2">Maquinaria</span>
-                            <div className="space-y-1">
+                            <div className="space-y-2">
                               {siteLog.equipment && siteLog.equipment.length > 0 ? (
                                 siteLog.equipment.map((equipment: any, index: number) => (
-                                  <div key={index} className="text-xs bg-orange-50 px-2 py-1 rounded">
-                                    {equipment.equipment?.name || 'Equipo'} (x{equipment.quantity || 1})
-                                  </div>
+                                  <Card key={index} className="p-2 bg-orange-50/50 border-orange-200">
+                                    <div className="flex items-center justify-between mb-1">
+                                      <span className="text-xs font-medium text-orange-800">
+                                        {equipment.equipment?.name || 'Equipo'}
+                                      </span>
+                                      <span className="text-xs px-1 py-0.5 bg-orange-100 text-orange-700 rounded">
+                                        x{equipment.quantity || 1}
+                                      </span>
+                                    </div>
+                                    {equipment.description && (
+                                      <p className="text-xs text-gray-700">{equipment.description}</p>
+                                    )}
+                                  </Card>
                                 ))
                               ) : (
                                 <p className="text-xs text-muted-foreground">Sin maquinaria registrada</p>
