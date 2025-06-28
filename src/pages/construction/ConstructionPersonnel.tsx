@@ -204,7 +204,7 @@ export default function ConstructionPersonnel() {
         {filteredWorkers.length > 0 ? (
           <CustomGradebook 
             workers={filteredWorkers}
-            attendance={attendance}
+            attendance={filteredAttendance}
             onExportAttendance={handleExport}
           />
         ) : (

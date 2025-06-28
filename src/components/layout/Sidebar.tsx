@@ -168,7 +168,8 @@ export function Sidebar() {
           { icon: Home, label: 'Resumen de Obra', href: '/construction/dashboard' },
           { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
           { icon: Package, label: 'Materiales', href: '/construction/materials' },
-          { icon: FileText, label: 'Bitácora', href: '/bitacora' }
+          { icon: FileText, label: 'Bitácora', href: '/construction/logs' },
+          { icon: Users, label: 'Personal', href: '/construction/personnel' }
         ]
       },
       { 

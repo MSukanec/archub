@@ -119,6 +119,18 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 28, 2025. Complete Personnel page implementation with attendance tracking
+  • Created ConstructionPersonnel.tsx page following ai-page-template.md structure with WIDE layout
+  • Built usePersonnelAttendance hook to fetch attendance data from site_log_attendees table with contact and site_log joins
+  • Added Personnel page to construction section sidebar navigation under "Obra" accordion below "Bitácora"
+  • Integrated CustomGradebook component to display worker attendance in professional gradebook format
+  • Transform attendance data from database into gradebook format with worker names and attendance status
+  • Added filtering system with month/year selectors and search functionality for personnel management
+  • Personnel attendance automatically populated from site log entries with related contact data
+  • Added /construction/personnel route to App.tsx with proper routing configuration
+  • Shows visual attendance tracking with full day/half day indicators from site_log_attendees records
+  • Empty state displays when no personnel attendance data exists with helpful guidance messages
+
 - June 28, 2025. Site logs UI optimization with compact layout and auto-expansion
   • Optimized collapsed site log cards to single row format: Fecha y Hora - Clima - Creador - Tipo de Entrada
   • Added border to creator avatar for better visual definition (border border-primary/20)
