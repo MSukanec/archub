@@ -172,9 +172,12 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
   // Efecto para pre-cargar datos de edición
   useEffect(() => {
     if (editingSiteLog) {
+      // Find the organization member that corresponds to the creator user
+      const creatorMember = members?.find((member: any) => member.users.id === editingSiteLog.created_by);
+      
       form.reset({
         log_date: new Date(editingSiteLog.log_date),
-        created_by: editingSiteLog.created_by,
+        created_by: creatorMember?.id || '',
         entry_type: editingSiteLog.entry_type as any,
         weather: editingSiteLog.weather as any,
         comments: editingSiteLog.comments,
@@ -280,38 +283,60 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
         throw new Error(siteLogResult.error.message)
       }
 
-      // Create site log events if any
-      if (events.length > 0 && siteLogResult.data) {
-        const eventsData = events.map(event => ({
-          site_log_id: siteLogResult.data.id,
-          event_type_id: event.event_type_id,
-          description: event.description
-        }))
+      // Handle site log events
+      if (siteLogResult.data) {
+        // If editing, delete existing events first
+        if (editingSiteLog) {
+          await supabase
+            .from('site_log_events')
+            .delete()
+            .eq('site_log_id', siteLogResult.data.id)
+        }
 
-        const eventsResult = await supabase
-          .from('site_log_events')
-          .insert(eventsData)
+        // Create new events if any
+        if (events.length > 0) {
+          const eventsData = events.map(event => ({
+            site_log_id: siteLogResult.data.id,
+            event_type_id: event.event_type_id,
+            description: event.description
+          }))
 
-        if (eventsResult.error) {
-          console.error('Error saving site log events:', eventsResult.error)
+          const eventsResult = await supabase
+            .from('site_log_events')
+            .insert(eventsData)
+
+          if (eventsResult.error) {
+            console.error('Error saving site log events:', eventsResult.error)
+          }
         }
       }
 
-      // Create site log attendees if any
-      if (attendees.length > 0 && siteLogResult.data) {
-        const attendeesData = attendees.map(attendee => ({
-          log_id: siteLogResult.data.id,
-          contact_id: attendee.contact_id,
-          attendance_type: attendee.attendance_type,
-          description: attendee.description || null
-        }))
+      // Handle site log attendees
+      if (siteLogResult.data) {
+        // If editing, delete existing attendees first
+        if (editingSiteLog) {
+          await supabase
+            .from('site_log_attendees')
+            .delete()
+            .eq('log_id', siteLogResult.data.id)
+        }
 
-        const attendeesResult = await supabase
-          .from('site_log_attendees')
-          .insert(attendeesData)
+        // Create new attendees if any
+        if (attendees.length > 0) {
+          const attendeesData = attendees.map(attendee => ({
+            log_id: siteLogResult.data.id,
+            contact_id: attendee.contact_id,
+            attendance_type: attendee.attendance_type,
+            description: attendee.description || null
+          }))
 
-        if (attendeesResult.error) {
-          console.error('Error saving site log attendees:', attendeesResult.error)
+          const attendeesResult = await supabase
+            .from('site_log_attendees')
+            .insert(attendeesData)
+
+          if (attendeesResult.error) {
+            console.error('Error saving site log attendees:', attendeesResult.error)
+          }
         }
       }
 
