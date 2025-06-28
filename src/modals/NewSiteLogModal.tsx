@@ -183,9 +183,11 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
   const { data: members } = useOrganizationMembers(userData?.preferences?.last_organization_id || '')
   const { data: eventTypes } = useEventTypes()
   const { data: contactTypes } = useContactTypes()
+  const { data: equipment } = useEquipment()
   
   const [events, setEvents] = useState<SiteLogEventForm[]>([])
   const [attendees, setAttendees] = useState<SiteLogAttendeeForm[]>([])
+  const [equipmentList, setEquipmentList] = useState<SiteLogEquipmentForm[]>([])
   const [accordionValue, setAccordionValue] = useState<string>("informacion-basica")
   
   const form = useForm<SiteLogForm>({
@@ -199,7 +201,8 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
       is_public: true,
       is_favorite: false,
       events: [],
-      attendees: []
+      attendees: [],
+      equipment: []
     }
   })
 
@@ -222,9 +225,10 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
       // Load events and attendees for editing
       loadSiteLogData(editingSiteLog.id)
     } else {
-      // Reset events and attendees for new entries
+      // Reset events, attendees, and equipment for new entries
       setEvents([])
       setAttendees([])
+      setEquipmentList([])
       
       // Seleccionar usuario actual por defecto en modo creación
       const currentUserMember = members?.find((member: any) => member.users.id === userData?.user?.id);
@@ -264,6 +268,20 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
           contact_id: attendee.contact_id,
           attendance_type: attendee.attendance_type,
           description: attendee.description || ''
+        })))
+      }
+
+      // Load equipment
+      const { data: equipmentData } = await supabase
+        .from('site_log_equipment')
+        .select('*')
+        .eq('site_log_id', siteLogId)
+
+      if (equipmentData) {
+        setEquipmentList(equipmentData.map(equipment => ({
+          equipment_id: equipment.equipment_id,
+          quantity: equipment.quantity || 1,
+          description: equipment.description || ''
         })))
       }
     } catch (error) {
@@ -370,6 +388,35 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
 
           if (attendeesResult.error) {
             console.error('Error saving site log attendees:', attendeesResult.error)
+          }
+        }
+      }
+
+      // Handle site log equipment
+      if (siteLogResult.data) {
+        // If editing, delete existing equipment first
+        if (editingSiteLog) {
+          await supabase
+            .from('site_log_equipment')
+            .delete()
+            .eq('site_log_id', siteLogResult.data.id)
+        }
+
+        // Create new equipment if any
+        if (equipmentList.length > 0) {
+          const equipmentData = equipmentList.map(equipment => ({
+            site_log_id: siteLogResult.data.id,
+            equipment_id: equipment.equipment_id,
+            quantity: equipment.quantity,
+            description: equipment.description || null
+          }))
+
+          const equipmentResult = await supabase
+            .from('site_log_equipment')
+            .insert(equipmentData)
+
+          if (equipmentResult.error) {
+            console.error('Error saving site log equipment:', equipmentResult.error)
           }
         }
       }
@@ -659,12 +706,12 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                     </AccordionContent>
                   </AccordionItem>
 
-                  {/* Sección 2: Personal */}
-                  <AccordionItem value="personal">
+                  {/* Sección 2: Eventos */}
+                  <AccordionItem value="eventos">
                     <AccordionTrigger>
                       <div className="flex items-center gap-2">
-                        <User className="w-4 h-4" />
-                        Personal ({attendees.length})
+                        <CalendarIcon className="w-4 h-4" />
+                        Eventos ({events.length})
                       </div>
                     </AccordionTrigger>
                     <AccordionContent className="space-y-3 pt-3">
