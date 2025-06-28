@@ -19,7 +19,28 @@ function usePersonnelAttendance(projectId: string | undefined, organizationId: s
     queryFn: async () => {
       if (!supabase || !projectId || !organizationId) return []
 
-      // Get all site log attendees for this project
+      console.log('Fetching personnel attendance for project:', projectId, 'in organization:', organizationId)
+
+      // First get site logs for this specific project and organization
+      const { data: siteLogs, error: siteLogsError } = await supabase
+        .from('site_logs')
+        .select('id')
+        .eq('project_id', projectId)
+        .eq('organization_id', organizationId)
+
+      if (siteLogsError) {
+        console.error('Error fetching site logs:', siteLogsError)
+        return []
+      }
+
+      if (!siteLogs || siteLogs.length === 0) {
+        console.log('No site logs found for project/organization')
+        return []
+      }
+
+      const siteLogIds = siteLogs.map(log => log.id)
+
+      // Now get attendees only for those site logs
       const { data: attendanceData, error } = await supabase
         .from('site_log_attendees')
         .select(`
@@ -27,27 +48,37 @@ function usePersonnelAttendance(projectId: string | undefined, organizationId: s
           site_log:site_logs!site_log_id(
             id,
             log_date,
-            project_id
+            project_id,
+            organization_id
           ),
           contact:contacts(
             id,
             first_name,
             last_name,
             contact_type_id,
+            organization_id,
             contact_type:contact_types(
               id,
               name
             )
           )
         `)
-        .eq('site_log.project_id', projectId)
+        .in('site_log_id', siteLogIds)
 
       if (error) {
         console.error('Error fetching attendance data:', error)
         return []
       }
 
-      return attendanceData || []
+      // Additional filter to ensure contacts belong to the same organization
+      const filteredData = (attendanceData || []).filter(item => 
+        item.contact?.organization_id === organizationId &&
+        item.site_log?.organization_id === organizationId
+      )
+
+      console.log('Filtered personnel attendance data:', filteredData.length, 'records')
+      
+      return filteredData
     },
     enabled: !!supabase && !!projectId && !!organizationId
   })
