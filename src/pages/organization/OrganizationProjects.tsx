@@ -128,26 +128,6 @@ export default function OrganizationProjects() {
     setFilterByStatus('all')
   }
 
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status) {
-      case 'active': return 'default'
-      case 'planning': return 'secondary'
-      case 'completed': return 'outline'
-      case 'on-hold': return 'destructive'
-      default: return 'secondary'
-    }
-  }
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'active': return 'Activo'
-      case 'planning': return 'Planificación'
-      case 'completed': return 'Completado'
-      case 'on-hold': return 'En pausa'
-      default: return status
-    }
-  }
-
   // Filtros personalizados
   const customFilters = (
     <div className="w-72 p-4 space-y-4">
@@ -289,115 +269,115 @@ export default function OrganizationProjects() {
                 
                 return (
                   <Card 
-                key={project.id} 
-                className={`w-full cursor-pointer transition-all hover:shadow-sm border ${
-                  isSelected ? 'border-[var(--accent)] bg-[var(--accent-bg)]' : ''
-                }`}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleSelectProject(project.id)
-                }}
-              >
-                <CardContent className="p-4">
-                  <div className="grid grid-cols-12 gap-4 items-center">
-                    {/* Fecha */}
-                    <div className="col-span-2 text-xs text-muted-foreground">
-                      {format(new Date(project.created_at), 'dd/MM/yyyy', { locale: es })}
-                    </div>
+                    key={project.id} 
+                    className={`w-full cursor-pointer transition-all hover:shadow-sm border ${
+                      isSelected ? 'border-[var(--accent)] bg-[var(--accent-bg)]' : ''
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleSelectProject(project.id)
+                    }}
+                  >
+                    <CardContent className="p-4">
+                      <div className="grid grid-cols-12 gap-4 items-center">
+                        {/* Fecha */}
+                        <div className="col-span-2 text-xs text-muted-foreground">
+                          {format(new Date(project.created_at), 'dd/MM/yyyy', { locale: es })}
+                        </div>
 
-                    {/* Creador */}
-                    <div className="col-span-2 flex items-center gap-2">
-                      <Avatar className="w-6 h-6">
-                        <AvatarFallback className="text-xs">
-                          {project.creator?.full_name?.substring(0, 2).toUpperCase() || 
-                           project.creator?.email?.substring(0, 2).toUpperCase() || 'XX'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="text-xs text-muted-foreground truncate">
-                        {project.creator?.full_name || project.creator?.email || 'Sin asignar'}
-                      </span>
-                    </div>
+                        {/* Creador */}
+                        <div className="col-span-2 flex items-center gap-2">
+                          <Avatar className="w-6 h-6">
+                            <AvatarFallback className="text-xs">
+                              {project.creator?.full_name?.substring(0, 2).toUpperCase() || 
+                               project.creator?.email?.substring(0, 2).toUpperCase() || 'XX'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-xs text-muted-foreground truncate">
+                            {project.creator?.full_name || project.creator?.email || 'Sin asignar'}
+                          </span>
+                        </div>
 
-                    {/* Proyecto */}
-                    <div className="col-span-2 flex items-center gap-2">
-                      <Folder className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                      <div>
-                        <div className="font-medium flex items-center gap-2">
-                          {project.name}
-                          {isSelected && (
-                            <Badge variant="secondary" className="text-xs">
-                              Activo
-                            </Badge>
-                          )}
+                        {/* Proyecto */}
+                        <div className="col-span-2 flex items-center gap-2">
+                          <Folder className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                          <div>
+                            <div className="font-medium flex items-center gap-2">
+                              {project.name}
+                              {isSelected && (
+                                <Badge variant="secondary" className="text-xs">
+                                  Activo
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Tipología */}
+                        <div className="col-span-2 text-xs text-muted-foreground">
+                          {project.project_data?.project_type?.name || 'Sin especificar'}
+                        </div>
+
+                        {/* Modalidad */}
+                        <div className="col-span-2 text-xs text-muted-foreground">
+                          {project.project_data?.modality?.name || 'Sin especificar'}
+                        </div>
+
+                        {/* Estado */}
+                        <div className="col-span-1">
+                          <Badge 
+                            variant={
+                              project.status === 'active' ? 'default' :
+                              project.status === 'planning' ? 'secondary' :
+                              project.status === 'completed' ? 'outline' : 'destructive'
+                            }
+                            className="text-xs"
+                          >
+                            {project.status === 'planning' ? 'Planificación' :
+                             project.status === 'active' ? 'Activo' :
+                             project.status === 'on-hold' ? 'En pausa' : 'Completado'}
+                          </Badge>
+                        </div>
+
+                        {/* Acciones */}
+                        <div className="col-span-1 flex justify-start">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="start">
+                              <DropdownMenuItem 
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleEdit(project)
+                                }}
+                              >
+                                <Edit className="mr-2 h-4 w-4" />
+                                Editar
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleDeleteClick(project)
+                                }}
+                                className="text-destructive"
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Eliminar
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </div>
-                    </div>
-
-                    {/* Tipología */}
-                    <div className="col-span-2 text-xs text-muted-foreground">
-                      {project.project_data?.project_type?.name || 'Sin especificar'}
-                    </div>
-
-                    {/* Modalidad */}
-                    <div className="col-span-2 text-xs text-muted-foreground">
-                      {project.project_data?.modality?.name || 'Sin especificar'}
-                    </div>
-
-                    {/* Estado */}
-                    <div className="col-span-1">
-                      <Badge 
-                        variant={
-                          project.status === 'active' ? 'default' :
-                          project.status === 'planning' ? 'secondary' :
-                          project.status === 'completed' ? 'outline' : 'destructive'
-                        }
-                        className="text-xs"
-                      >
-                        {project.status === 'planning' ? 'Planificación' :
-                         project.status === 'active' ? 'Activo' :
-                         project.status === 'on-hold' ? 'En pausa' : 'Completado'}
-                      </Badge>
-                    </div>
-
-                    {/* Acciones */}
-                    <div className="col-span-1 flex justify-start">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start">
-                          <DropdownMenuItem 
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleEdit(project)
-                            }}
-                          >
-                            <Edit className="mr-2 h-4 w-4" />
-                            Editar
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleDeleteClick(project)
-                            }}
-                            className="text-destructive"
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Eliminar
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                    </CardContent>
+                  </Card>
                 )
               })}
             </div>
@@ -422,90 +402,92 @@ export default function OrganizationProjects() {
             }
           />
         )}
-      </div>
 
-      {/* New Project Modal */}
-      {showNewProjectModal && (
-        <NewProjectModal
-          open={showNewProjectModal}
-          onClose={() => {
-            setShowNewProjectModal(false)
-            setEditingProject(null)
-          }}
-          editingProject={editingProject}
-        />
-      )}
+        {/* New Project Modal */}
+        {showNewProjectModal && (
+          <NewProjectModal
+            open={showNewProjectModal}
+            onClose={() => {
+              setShowNewProjectModal(false)
+              setEditingProject(null)
+            }}
+            editingProject={editingProject}
+          />
+        )}
 
-      {/* Dialog de confirmación para eliminar */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar proyecto?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción eliminará permanentemente el proyecto "{projectToDelete?.name}". 
-              Esta acción no se puede deshacer.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={async () => {
-                if (projectToDelete && supabase) {
-                  try {
-                    // CORREGIDO: Solo eliminar el proyecto específico usando transaction
-                    const { error } = await supabase.rpc('delete_project_safely', {
-                      project_id: projectToDelete.id
-                    })
-                    
-                    if (error) {
-                      // Fallback: eliminar manualmente pero con más cuidado
-                      console.log('RPC failed, using manual deletion:', error)
+        {/* Dialog de confirmación para eliminar */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>¿Eliminar proyecto?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta acción eliminará permanentemente el proyecto "{projectToDelete?.name}". 
+                Esta acción no se puede deshacer.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={async () => {
+                  if (projectToDelete && supabase) {
+                    try {
+                      // CORREGIDO: Solo eliminar el proyecto específico usando transaction
+                      const { error } = await supabase.rpc('delete_project_safely', {
+                        project_id: projectToDelete.id
+                      })
                       
-                      // Primero eliminar project_data específico
-                      const { error: projectDataError } = await supabase
-                        .from('project_data')
-                        .delete()
-                        .eq('project_id', projectToDelete.id)
-                        .eq('organization_id', userData?.organization?.id) // SEGURIDAD EXTRA
+                      if (error) {
+                        // Fallback: eliminar manualmente pero con más cuidado
+                        console.log('RPC failed, using manual deletion:', error)
+                        
+                        // Primero eliminar project_data específico
+                        const { error: projectDataError } = await supabase
+                          .from('project_data')
+                          .delete()
+                          .eq('project_id', projectToDelete.id)
+                          .eq('organization_id', userData?.organization?.id) // SEGURIDAD EXTRA
+                        
+                        if (projectDataError) {
+                          console.error('Error deleting project_data:', projectDataError)
+                        }
+                        
+                        // Luego eliminar el proyecto principal
+                        const { error: projectError } = await supabase
+                          .from('projects')
+                          .delete()
+                          .eq('id', projectToDelete.id)
+                          .eq('organization_id', userData?.organization?.id) // SEGURIDAD EXTRA
+                        
+                        if (projectError) throw projectError
+                      }
                       
-                      if (projectDataError) console.log('Project data deletion error:', projectDataError)
+                      // Invalidar cache para actualizar lista
+                      queryClient.invalidateQueries({ queryKey: ['projects', userData?.organization?.id] })
+                      queryClient.invalidateQueries({ queryKey: ['current-user'] })
                       
-                      // Luego eliminar solo el proyecto específico
-                      const { error: projectError } = await supabase
-                        .from('projects')
-                        .delete()
-                        .eq('id', projectToDelete.id)
-                        .eq('organization_id', userData?.organization?.id) // SEGURIDAD EXTRA
-                      
-                      if (projectError) throw projectError
+                      toast({
+                        title: "Proyecto eliminado",
+                        description: "El proyecto se ha eliminado correctamente"
+                      })
+                    } catch (error: any) {
+                      toast({
+                        title: "Error",
+                        description: error.message || "No se pudo eliminar el proyecto",
+                        variant: "destructive"
+                      })
                     }
-                    
-                    // Invalidar cachés específicas con refetch forzado
-                    await queryClient.invalidateQueries({ queryKey: ['projects', userData?.organization?.id] })
-                    await queryClient.invalidateQueries({ queryKey: ['current-user'] })
-                    
-                    toast({
-                      title: "Proyecto eliminado",
-                      description: "El proyecto se ha eliminado correctamente"
-                    })
-                  } catch (error: any) {
-                    toast({
-                      title: "Error",
-                      description: error.message || "No se pudo eliminar el proyecto",
-                      variant: "destructive"
-                    })
                   }
-                }
-                setDeleteDialogOpen(false)
-                setProjectToDelete(null)
-              }}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+                  setDeleteDialogOpen(false)
+                  setProjectToDelete(null)
+                }}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Eliminar
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
     </Layout>
   )
 }
