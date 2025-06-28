@@ -14,7 +14,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 import { Layout } from '@/components/layout/Layout'
 import { CustomTable } from '@/components/ui-custom/misc/CustomTable'
-// import { NewAdminTaskModal } from '@/modals/NewAdminTaskModal'
+import { NewAdminTaskModal } from '@/modals/NewAdminTaskModal'
 
 import { Plus, Edit, Trash2, CheckSquare, Clock, Target } from 'lucide-react'
 
@@ -279,7 +279,14 @@ export default function AdminTasks() {
         />
       </div>
 
-      {/* Modal will be implemented once database structure is ready */}
+      <NewAdminTaskModal
+        open={newTaskModalOpen}
+        onClose={() => {
+          setNewTaskModalOpen(false)
+          setEditingTask(null)
+        }}
+        task={editingTask}
+      />
 
       <AlertDialog open={!!deletingTask} onOpenChange={() => setDeletingTask(null)}>
         <AlertDialogContent>
