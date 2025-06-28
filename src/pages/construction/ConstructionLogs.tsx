@@ -58,7 +58,8 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
 
       console.log('Fetching site logs for project:', projectId, 'in organization:', organizationId);
 
-      const { data, error } = await supabase
+      // First get the site logs
+      const { data: logsData, error } = await supabase
         .from('site_logs')
         .select(`
           *,
@@ -66,38 +67,69 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
             id,
             full_name,
             avatar_url
-          ),
-          events:site_log_events(
-            id,
-            description,
-            event_date,
-            event_type:event_types(
-              id,
-              name
-            )
-          ),
-          attendees:site_log_attendees(
-            id,
-            attendance_type,
-            description,
-            contact:contacts(
-              id,
-              first_name,
-              last_name
-            )
-          ),
-          equipment:site_log_equipment(
-            id,
-            quantity,
-            description,
-            equipment:equipment(
-              id,
-              name
-            )
           )
         `)
         .eq('project_id', projectId)
         .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching site logs:', error);
+        throw error;
+      }
+
+      if (!logsData || logsData.length === 0) {
+        return [];
+      }
+
+      // Get log IDs for related data
+      const logIds = logsData.map(log => log.id);
+
+      // Fetch events separately
+      const { data: eventsData } = await supabase
+        .from('site_log_events')
+        .select(`
+          *,
+          event_type:event_types(
+            id,
+            name
+          )
+        `)
+        .in('log_id', logIds);
+
+      // Fetch attendees separately
+      const { data: attendeesData } = await supabase
+        .from('site_log_attendees')
+        .select(`
+          *,
+          contact:contacts(
+            id,
+            first_name,
+            last_name
+          )
+        `)
+        .in('log_id', logIds);
+
+      // Fetch equipment separately
+      const { data: equipmentData } = await supabase
+        .from('site_log_equipment')
+        .select(`
+          *,
+          equipment:equipment(
+            id,
+            name
+          )
+        `)
+        .in('log_id', logIds);
+
+      // Combine data
+      const data = logsData.map(log => ({
+        ...log,
+        events: eventsData?.filter(event => event.log_id === log.id) || [],
+        attendees: attendeesData?.filter(attendee => attendee.log_id === log.id) || [],
+        equipment: equipmentData?.filter(equip => equip.log_id === log.id) || []
+      }));
+
+      console.log('Site logs with related data:', data);
 
       if (error) {
         console.error('Error fetching site logs:', error);
@@ -514,11 +546,7 @@ export default function ConstructionLogs() {
                                       <span className="text-xs font-medium text-blue-800">
                                         {event.event_type?.name || 'Evento'}
                                       </span>
-                                      {event.event_date && (
-                                        <span className="text-xs text-muted-foreground">
-                                          {format(new Date(event.event_date), 'dd/MM', { locale: es })}
-                                        </span>
-                                      )}
+
                                     </div>
                                     <p className="text-xs text-gray-700">{event.description || 'Sin descripción'}</p>
                                   </Card>
