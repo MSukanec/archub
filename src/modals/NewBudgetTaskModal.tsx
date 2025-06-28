@@ -7,8 +7,8 @@ import { CustomModalLayout } from "@/components/ui-custom/modal/CustomModalLayou
 import { CustomModalHeader } from "@/components/ui-custom/modal/CustomModalHeader";
 import { CustomModalBody } from "@/components/ui-custom/modal/CustomModalBody";
 import { CustomModalFooter } from "@/components/ui-custom/modal/CustomModalFooter";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useTasks } from "@/hooks/use-tasks";
@@ -19,9 +19,7 @@ const budgetTaskSchema = z.object({
   quantity: z.number().min(0.01, "La cantidad debe ser mayor a 0"),
   start_date: z.string().optional(),
   end_date: z.string().optional(),
-  planned_days: z.number().min(1, "Los días planificados deben ser al menos 1").optional(),
-  priority: z.enum(["low", "medium", "high", "urgent"]).optional(),
-  dependencies: z.array(z.string()).optional()
+  priority: z.enum(["low", "medium", "high", "urgent"]).optional()
 });
 
 type BudgetTaskFormData = z.infer<typeof budgetTaskSchema>;
@@ -53,9 +51,7 @@ export default function NewBudgetTaskModal({
       quantity: 1,
       start_date: "",
       end_date: "",
-      planned_days: 1,
-      priority: "medium",
-      dependencies: []
+      priority: "medium"
     }
   });
 
@@ -69,9 +65,7 @@ export default function NewBudgetTaskModal({
         quantity: editingTask.quantity || 1,
         start_date: editingTask.start_date || "",
         end_date: editingTask.end_date || "",
-        planned_days: editingTask.planned_days || 1,
-        priority: editingTask.priority || "medium",
-        dependencies: editingTask.dependencies || []
+        priority: editingTask.priority || "medium"
       });
     } else if (!editingTask && open) {
       reset({
@@ -79,9 +73,7 @@ export default function NewBudgetTaskModal({
         quantity: 1,
         start_date: "",
         end_date: "",
-        planned_days: 1,
-        priority: "medium",
-        dependencies: []
+        priority: "medium"
       });
     }
   }, [editingTask, open, reset]);
@@ -100,9 +92,7 @@ export default function NewBudgetTaskModal({
         quantity: data.quantity,
         start_date: data.start_date || null,
         end_date: data.end_date || null,
-        planned_days: data.planned_days || null,
         priority: data.priority || null,
-        dependencies: data.dependencies || [],
         organization_id: organizationId
       };
 
@@ -136,7 +126,12 @@ export default function NewBudgetTaskModal({
     }
   };
 
-  const selectedTask = tasks.find(task => task.id === watch("task_id"));
+  const priorityOptions = [
+    { value: "low", label: "Baja" },
+    { value: "medium", label: "Media" },
+    { value: "high", label: "Alta" },
+    { value: "urgent", label: "Urgente" }
+  ];
 
   return (
     <CustomModalLayout open={open} onClose={handleClose}>
@@ -150,151 +145,135 @@ export default function NewBudgetTaskModal({
         body: (
           <form onSubmit={handleSubmit(onSubmit)} id="budget-task-form">
             <CustomModalBody>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Selección de Tarea */}
-            <div className="col-span-2">
-              <Label className="required-asterisk">Tarea</Label>
-              <Select
-                value={watch("task_id")}
-                onValueChange={(value) => setValue("task_id", value)}
-                disabled={tasksLoading}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar tarea..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {tasks.map((task) => (
-                    <SelectItem key={task.id} value={task.id}>
-                      {task.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.task_id && (
-                <p className="text-sm text-destructive mt-1">{errors.task_id.message}</p>
-              )}
-            </div>
+              <Accordion type="single" collapsible defaultValue="datos-tarea" className="w-full">
+                <AccordionItem value="datos-tarea">
+                  <AccordionTrigger className="text-sm font-medium">
+                    Datos de Tarea
+                  </AccordionTrigger>
+                  <AccordionContent className="space-y-3 pt-3 pb-4">
+                    {/* Tarea */}
+                    <div className="space-y-1">
+                      <Label htmlFor="task_id" className="text-xs required-asterisk">
+                        Tarea
+                      </Label>
+                      <Select
+                        value={watch("task_id")}
+                        onValueChange={(value) => setValue("task_id", value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar tarea" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {tasksLoading ? (
+                            <SelectItem value="loading">Cargando tareas...</SelectItem>
+                          ) : tasks.length === 0 ? (
+                            <SelectItem value="empty">No hay tareas disponibles</SelectItem>
+                          ) : (
+                            tasks.map((task) => (
+                              <SelectItem key={task.id} value={task.id}>
+                                {task.name}
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
+                      {errors.task_id && (
+                        <p className="text-xs text-destructive">{errors.task_id.message}</p>
+                      )}
+                    </div>
 
-            {/* Información de la tarea seleccionada */}
-            {selectedTask && (
-              <div className="col-span-2 p-3 bg-muted rounded-lg">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                  <div>
-                    <span className="font-medium">Precio M.O.:</span>
-                    <span className="ml-2">${selectedTask.unit_labor_price || 0}</span>
-                  </div>
-                  <div>
-                    <span className="font-medium">Precio Material:</span>
-                    <span className="ml-2">${selectedTask.unit_material_price || 0}</span>
-                  </div>
-                  <div>
-                    <span className="font-medium">Total Unitario:</span>
-                    <span className="ml-2 font-semibold">
-                      ${(selectedTask.unit_labor_price || 0) + (selectedTask.unit_material_price || 0)}
-                    </span>
-                  </div>
-                </div>
-                {selectedTask.description && (
-                  <p className="text-muted-foreground mt-2">{selectedTask.description}</p>
-                )}
-              </div>
-            )}
+                    {/* Cantidad */}
+                    <div className="space-y-1">
+                      <Label htmlFor="quantity" className="text-xs required-asterisk">
+                        Cantidad
+                      </Label>
+                      <Input
+                        id="quantity"
+                        type="number"
+                        step="0.01"
+                        min="0.01"
+                        {...register("quantity", { valueAsNumber: true })}
+                        placeholder="Ej: 1"
+                      />
+                      {errors.quantity && (
+                        <p className="text-xs text-destructive">{errors.quantity.message}</p>
+                      )}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
 
-            {/* Cantidad */}
-            <div className="col-span-1">
-              <Label className="required-asterisk">Cantidad</Label>
-              <Input
-                type="number"
-                step="0.01"
-                min="0.01"
-                {...register("quantity", { valueAsNumber: true })}
-                placeholder="1.00"
-              />
-              {errors.quantity && (
-                <p className="text-sm text-destructive mt-1">{errors.quantity.message}</p>
-              )}
-            </div>
+                <AccordionItem value="ejecucion">
+                  <AccordionTrigger className="text-sm font-medium">
+                    Ejecución
+                  </AccordionTrigger>
+                  <AccordionContent className="space-y-3 pt-3 pb-4">
+                    {/* Fecha de Inicio */}
+                    <div className="space-y-1">
+                      <Label htmlFor="start_date" className="text-xs">
+                        Fecha de Inicio
+                      </Label>
+                      <Input
+                        id="start_date"
+                        type="date"
+                        {...register("start_date")}
+                      />
+                      {errors.start_date && (
+                        <p className="text-xs text-destructive">{errors.start_date.message}</p>
+                      )}
+                    </div>
 
-            {/* Días Planificados */}
-            <div className="col-span-1">
-              <Label>Días Planificados</Label>
-              <Input
-                type="number"
-                min="1"
-                {...register("planned_days", { valueAsNumber: true })}
-                placeholder="1"
-              />
-              {errors.planned_days && (
-                <p className="text-sm text-destructive mt-1">{errors.planned_days.message}</p>
-              )}
-            </div>
+                    {/* Fecha de Finalización */}
+                    <div className="space-y-1">
+                      <Label htmlFor="end_date" className="text-xs">
+                        Fecha de Finalización
+                      </Label>
+                      <Input
+                        id="end_date"
+                        type="date"
+                        {...register("end_date")}
+                      />
+                      {errors.end_date && (
+                        <p className="text-xs text-destructive">{errors.end_date.message}</p>
+                      )}
+                    </div>
 
-            {/* Fecha de Inicio */}
-            <div className="col-span-1">
-              <Label>Fecha de Inicio</Label>
-              <Input
-                type="date"
-                {...register("start_date")}
-              />
-            </div>
-
-            {/* Fecha de Fin */}
-            <div className="col-span-1">
-              <Label>Fecha de Fin</Label>
-              <Input
-                type="date"
-                {...register("end_date")}
-              />
-            </div>
-
-            {/* Prioridad */}
-            <div className="col-span-2">
-              <Label>Prioridad</Label>
-              <Select
-                value={watch("priority")}
-                onValueChange={(value) => setValue("priority", value as any)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar prioridad..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="low">Baja</SelectItem>
-                  <SelectItem value="medium">Media</SelectItem>
-                  <SelectItem value="high">Alta</SelectItem>
-                  <SelectItem value="urgent">Urgente</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Total calculado */}
-            {selectedTask && watch("quantity") && (
-              <div className="col-span-2 p-3 bg-accent/10 rounded-lg border">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium">Total de la Tarea:</span>
-                  <span className="text-lg font-bold">
-                    ${((selectedTask.unit_labor_price || 0) + (selectedTask.unit_material_price || 0)) * (watch("quantity") || 0)}
-                  </span>
-                </div>
-                <div className="grid grid-cols-2 gap-4 mt-2 text-sm text-muted-foreground">
-                  <div>
-                    <span>M.O.: ${(selectedTask.unit_labor_price || 0) * (watch("quantity") || 0)}</span>
-                  </div>
-                  <div>
-                    <span>Material: ${(selectedTask.unit_material_price || 0) * (watch("quantity") || 0)}</span>
-                  </div>
-                </div>
-              </div>
-            )}
-              </div>
+                    {/* Prioridad */}
+                    <div className="space-y-1">
+                      <Label htmlFor="priority" className="text-xs">
+                        Prioridad
+                      </Label>
+                      <Select
+                        value={watch("priority")}
+                        onValueChange={(value) => setValue("priority", value as any)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar prioridad" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {priorityOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {errors.priority && (
+                        <p className="text-xs text-destructive">{errors.priority.message}</p>
+                      )}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             </CustomModalBody>
           </form>
         ),
         footer: (
           <CustomModalFooter
+            cancelText="Cancelar"
+            submitText={editingTask ? "Actualizar" : "Agregar"}
             onCancel={handleClose}
-            onSave={handleSubmit(onSubmit)}
-            saveText={editingTask ? "Actualizar Tarea" : "Agregar Tarea"}
-            isLoading={isSubmitting}
+            isSubmitting={isSubmitting}
+            form="budget-task-form"
           />
         )
       }}
