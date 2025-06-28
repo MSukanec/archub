@@ -152,6 +152,38 @@ export default function ConstructionLogs() {
     }
   });
 
+  // Mutation para toggle favorito
+  const toggleFavoriteMutation = useMutation({
+    mutationFn: async (siteLogId: string) => {
+      if (!supabase) throw new Error('Supabase client not available');
+      
+      const siteLog = siteLogs?.find(log => log.id === siteLogId);
+      if (!siteLog) throw new Error('Site log not found');
+
+      const { error } = await supabase
+        .from('site_logs')
+        .update({ is_favorite: !siteLog.is_favorite })
+        .eq('id', siteLogId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['site-logs'] });
+    },
+    onError: (error) => {
+      console.error('Error toggling favorite:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar el favorito",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const toggleFavorite = (siteLogId: string) => {
+    toggleFavoriteMutation.mutate(siteLogId);
+  };
+
   const handleEditSiteLog = (siteLog: any) => {
     setEditingSiteLog(siteLog);
     setShowNewSiteLogModal(true);
@@ -429,8 +461,8 @@ export default function ConstructionLogs() {
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setDeleteConfirmOpen(true);
-                            setDeletingSiteLog(siteLog);
+                            setDeleteDialogOpen(true);
+                            setSiteLogToDelete(siteLog);
                           }}
                           className="h-8 w-8 p-0"
                         >
