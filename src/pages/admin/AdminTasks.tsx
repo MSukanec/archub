@@ -41,9 +41,10 @@ export default function AdminTasks() {
   const [editingTask, setEditingTask] = useState<Task | null>(null)
   const [deletingTask, setDeletingTask] = useState<Task | null>(null)
 
-  // Temporary empty data until database integration is complete
-  const tasks: Task[] = []
-  const isLoading = false
+  // Fetch tasks using the hook
+  const { data: tasks = [], isLoading } = useTasks()
+  
+  console.log('AdminTasks - tasks data:', tasks, 'isLoading:', isLoading)
 
   // Statistics calculations
   const totalTasks = tasks.length

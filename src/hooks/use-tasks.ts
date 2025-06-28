@@ -43,10 +43,11 @@ export function useTasks() {
         return []
       }
 
+      console.log('Fetching tasks for organization:', userData.organization.id)
+      
       const { data, error } = await supabase
         .from('tasks')
         .select('*')
-        .eq('organization_id', userData.organization.id)
         .order('created_at', { ascending: false })
 
       if (error) {
@@ -54,6 +55,7 @@ export function useTasks() {
         throw error
       }
 
+      console.log('Tasks data received:', data)
       return data as Task[]
     },
     enabled: !!userData?.organization?.id && !!supabase
