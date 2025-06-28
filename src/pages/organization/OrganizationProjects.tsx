@@ -20,6 +20,7 @@ import { es } from 'date-fns/locale'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useLocation } from 'wouter'
 import { NewProjectModal } from '@/modals/NewProjectModal'
+import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState'
 
 export default function OrganizationProjects() {
   const [searchValue, setSearchValue] = useState("")
@@ -398,16 +399,24 @@ export default function OrganizationProjects() {
           })}
 
           {filteredProjects.length === 0 && (
-            <div className="text-center py-12 text-muted-foreground">
-              <Folder className="mx-auto h-12 w-12 mb-4 opacity-50" />
-              <h3 className="text-sm font-medium mb-1">No se encontraron proyectos</h3>
-              <p className="text-xs">
-                {searchValue || filterByStatus !== 'all' 
-                  ? 'Prueba ajustando los filtros de búsqueda' 
-                  : 'Comienza creando tu primer proyecto'
-                }
-              </p>
-            </div>
+            <CustomEmptyState
+              icon={<Folder className="w-12 h-12 text-muted-foreground" />}
+              title={searchValue || filterByStatus !== 'all' ? "No se encontraron proyectos" : "No hay proyectos creados"}
+              description={searchValue || filterByStatus !== 'all' 
+                ? 'Prueba ajustando los filtros de búsqueda' 
+                : 'Comienza creando tu primer proyecto para gestionar tu trabajo'
+              }
+              action={
+                !searchValue && filterByStatus === 'all' && (
+                  <CustomRestricted feature="max_projects" current={filteredProjects?.length || 0}>
+                    <Button onClick={() => setShowNewProjectModal(true)}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Crear Primer Proyecto
+                    </Button>
+                  </CustomRestricted>
+                )
+              }
+            />
           )}
         </div>
       </div>
