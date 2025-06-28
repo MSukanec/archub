@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useProjects } from "@/hooks/use-projects";
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
@@ -129,34 +129,7 @@ export function Sidebar() {
     }
   }, [currentSidebarContext]);
   
-  // Obtener proyectos de la organización actual
-  const { data: projects, isLoading: isLoadingProjects } = useProjects(userData?.organization?.id);
-  
-  // Proyecto activo
-  const activeProject = projects?.find(p => p.id === userData?.preferences?.last_project_id);
-  
-  // Filtrar proyectos por búsqueda
-  const filteredProjects = projects?.filter(project =>
-    project.name.toLowerCase().includes(projectSearchValue.toLowerCase())
-  ) || [];
-  
-  // Mutación para seleccionar proyecto
-  const selectProjectMutation = useMutation({
-    mutationFn: async (projectId: string) => {
-      if (!supabase) throw new Error('Supabase client not initialized');
-      
-      const { error } = await supabase
-        .from('user_preferences')
-        .update({ last_project_id: projectId })
-        .eq('user_id', userData?.user?.id);
-      
-      if (error) throw error;
-      return projectId;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-    }
-  });
+  // Project selector removed as requested
   
   const toggleAccordion = (key: string) => {
     setExpandedAccordions(prev => {
