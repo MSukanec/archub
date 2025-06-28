@@ -60,15 +60,7 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
       const { data, error } = await supabase
         .from('site_logs')
         .select(`
-          *,
-          organization_members!created_by(
-            id,
-            users(
-              full_name,
-              avatar_url,
-              email
-            )
-          )
+          *
         `)
         .eq('project_id', projectId)
         .order('created_at', { ascending: false });

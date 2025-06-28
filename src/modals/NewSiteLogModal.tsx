@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { supabase } from '@/lib/supabase'
@@ -14,6 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
@@ -21,6 +22,13 @@ import { useToast } from '@/hooks/use-toast'
 import { Calendar, User, FileText, Cloud, MessageSquare, Star, Eye, Calendar as CalendarIcon, Plus, X } from 'lucide-react'
 
 // Schema con enums exactos de Supabase
+const siteLogEventSchema = z.object({
+  event_type_id: z.string().min(1, 'Tipo de evento es requerido'),
+  event_date: z.date(),
+  description: z.string().min(1, 'Descripción es requerida'),
+  is_custom: z.boolean().default(false)
+})
+
 const siteLogSchema = z.object({
   log_date: z.date(),
   created_by: z.string().min(1, 'Creador es requerido'),
@@ -38,10 +46,12 @@ const siteLogSchema = z.object({
   weather: z.enum(['sunny', 'cloudy', 'rainy', 'stormy', 'windy', 'snowy', 'hot', 'cold']).nullable(),
   comments: z.string().min(1, 'Comentarios son requeridos'),
   is_public: z.boolean().default(true),
-  is_favorite: z.boolean().default(false)
+  is_favorite: z.boolean().default(false),
+  events: z.array(siteLogEventSchema).default([])
 })
 
 type SiteLogForm = z.infer<typeof siteLogSchema>
+type SiteLogEventForm = z.infer<typeof siteLogEventSchema>
 
 // Definir tipos exactos basados en la base de datos
 interface SiteLog {
@@ -53,6 +63,32 @@ interface SiteLog {
   comments: string
   is_public: boolean
   is_favorite: boolean
+}
+
+// Hook para obtener tipos de eventos
+function useEventTypes() {
+  return useQuery({
+    queryKey: ['event-types'],
+    queryFn: async () => {
+      if (!supabase) {
+        return [];
+      }
+
+      const { data, error } = await supabase
+        .from('event_types')
+        .select('*')
+        .eq('is_custom', false)
+        .order('name', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching event types:', error);
+        throw error;
+      }
+
+      return data || [];
+    },
+    enabled: !!supabase
+  });
 }
 
 // Props del modal
@@ -67,6 +103,9 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
   const queryClient = useQueryClient()
   const { data: userData } = useCurrentUser()
   const { data: members } = useOrganizationMembers(userData?.preferences?.last_organization_id || '')
+  const { data: eventTypes } = useEventTypes()
+  
+  const [events, setEvents] = useState<SiteLogEventForm[]>([])
   
   const form = useForm<SiteLogForm>({
     resolver: zodResolver(siteLogSchema),
@@ -77,7 +116,8 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
       weather: null,
       comments: '',
       is_public: true,
-      is_favorite: false
+      is_favorite: false,
+      events: []
     }
   })
 
@@ -383,7 +423,109 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                     </AccordionContent>
                   </AccordionItem>
 
-                  {/* Sección 2: Configuración de Entrada */}
+                  {/* Sección 2: Eventos */}
+                  <AccordionItem value="eventos">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <CalendarIcon className="w-4 h-4" />
+                        Eventos ({events.length})
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="space-y-3 pt-3">
+                      {/* Lista de eventos */}
+                      {events.map((event, index) => (
+                        <div key={index} className="border rounded-lg p-3 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <h4 className="text-sm font-medium">Evento {index + 1}</h4>
+                            <button
+                              type="button"
+                              className="h-6 w-6 rounded-md hover:bg-gray-100 flex items-center justify-center"
+                              onClick={() => {
+                                const newEvents = events.filter((_, i) => i !== index);
+                                setEvents(newEvents);
+                              }}
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="text-xs font-medium text-muted-foreground">Tipo de evento</label>
+                              <Select 
+                                value={event.event_type_id} 
+                                onValueChange={(value) => {
+                                  const newEvents = [...events];
+                                  newEvents[index].event_type_id = value;
+                                  setEvents(newEvents);
+                                }}
+                              >
+                                <SelectTrigger className="h-8 text-sm">
+                                  <SelectValue placeholder="Seleccionar tipo" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {eventTypes?.map((eventType: any) => (
+                                    <SelectItem key={eventType.id} value={eventType.id}>
+                                      {eventType.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+
+                            <div>
+                              <label className="text-xs font-medium text-muted-foreground">Fecha del evento</label>
+                              <Input
+                                type="date"
+                                className="h-8 text-sm"
+                                value={event.event_date.toISOString().split('T')[0]}
+                                onChange={(e) => {
+                                  const newEvents = [...events];
+                                  newEvents[index].event_date = new Date(e.target.value);
+                                  setEvents(newEvents);
+                                }}
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground">Descripción</label>
+                            <Textarea
+                              className="min-h-[60px] text-sm"
+                              placeholder="Describe el evento..."
+                              value={event.description}
+                              onChange={(e) => {
+                                const newEvents = [...events];
+                                newEvents[index].description = e.target.value;
+                                setEvents(newEvents);
+                              }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Botón para agregar evento */}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setEvents([...events, {
+                            event_type_id: '',
+                            event_date: new Date(),
+                            description: '',
+                            is_custom: false
+                          }]);
+                        }}
+                        className="w-full"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Agregar Evento
+                      </Button>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  {/* Sección 3: Configuración de Entrada */}
                   <AccordionItem value="configuracion-entrada">
                     <AccordionTrigger>
                       Configuración de Entrada
