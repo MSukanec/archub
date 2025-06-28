@@ -20,6 +20,7 @@ import FinancesDashboard from "@/pages/finances/FinancesDashboard";
 import Profile from "@/pages/others/Profile";
 import Movements from "@/pages/finances/FinancesMovements";
 import ConstructionLogs from "@/pages/construction/ConstructionLogs";
+import ConstructionPersonnel from "@/pages/construction/ConstructionPersonnel";
 import OrganizationPreferences from "@/pages/organization/OrganizationPreferences";
 import ConstructionDashboard from "@/pages/construction/ConstructionDashboard";
 import ConstructionBudgets from "@/pages/construction/ConstructionBudgets";
@@ -97,6 +98,12 @@ function Router() {
       <Route path="/construction/logs">
         <ProtectedRoute>
           <ConstructionLogs />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/construction/personnel">
+        <ProtectedRoute>
+          <ConstructionPersonnel />
         </ProtectedRoute>
       </Route>
 
