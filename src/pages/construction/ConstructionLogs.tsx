@@ -184,9 +184,9 @@ export default function ConstructionLogs() {
 
   // Ordenar bitácoras
   if (sortBy === "date_recent") {
-    filteredSiteLogs.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    filteredSiteLogs.sort((a: any, b: any) => new Date(b.log_date).getTime() - new Date(a.log_date).getTime());
   } else if (sortBy === "date_old") {
-    filteredSiteLogs.sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+    filteredSiteLogs.sort((a: any, b: any) => new Date(a.log_date).getTime() - new Date(b.log_date).getTime());
   } else if (sortBy === "type") {
     filteredSiteLogs.sort((a: any, b: any) => a.entry_type.localeCompare(b.entry_type));
   }
@@ -455,7 +455,7 @@ export default function ConstructionLogs() {
                             
                             {/* Fecha y Hora */}
                             <span className="text-sm text-muted-foreground">
-                              {format(new Date(siteLog.created_at), 'dd/MM/yyyy HH:mm', { locale: es })}
+                              {format(new Date(siteLog.log_date), 'dd/MM/yyyy HH:mm', { locale: es })}
                             </span>
 
                             {/* Clima */}

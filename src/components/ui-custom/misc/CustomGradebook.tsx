@@ -240,21 +240,29 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
 
           {/* Timeline Column with Navigation */}
           <div className="flex-1 relative min-w-0">
-            {/* Left Navigation Button - Circular */}
+            {/* Left Navigation Button - Circular - Positioned in middle of data rows only */}
             <Button
               variant="ghost"
               size="icon"
-              className="absolute left-2 top-1/2 transform -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-background/90 backdrop-blur-sm border border-border hover:bg-muted shadow-sm"
+              className="absolute left-2 z-20 w-8 h-8 rounded-full bg-background/90 backdrop-blur-sm border border-border hover:bg-muted shadow-sm"
+              style={{ 
+                top: `calc(65px + ${workers.length * 65 / 2}px)`,
+                transform: 'translateY(-50%)'
+              }}
               onClick={() => navigateDates('prev')}
             >
               <ChevronLeft className="w-4 h-4" />
             </Button>
 
-            {/* Right Navigation Button - Circular */}
+            {/* Right Navigation Button - Circular - Positioned in middle of data rows only */}
             <Button
               variant="ghost"
               size="icon"
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-background/90 backdrop-blur-sm border border-border hover:bg-muted shadow-sm"
+              className="absolute right-2 z-20 w-8 h-8 rounded-full bg-background/90 backdrop-blur-sm border border-border hover:bg-muted shadow-sm"
+              style={{ 
+                top: `calc(65px + ${workers.length * 65 / 2}px)`,
+                transform: 'translateY(-50%)'
+              }}
               onClick={() => navigateDates('next')}
             >
               <ChevronRight className="w-4 h-4" />
@@ -262,6 +270,19 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
 
             {/* Scrollable Timeline - hidden scrollbar */}
             <div 
+              ref={(el) => {
+                if (el && dateRange.length > 0) {
+                  // Find today's column index
+                  const todayIndex = dateRange.findIndex(date => isToday(date))
+                  if (todayIndex !== -1) {
+                    // Center today's column horizontally
+                    const columnWidth = 40
+                    const containerWidth = el.clientWidth
+                    const scrollPosition = (todayIndex * columnWidth) - (containerWidth / 2) + (columnWidth / 2)
+                    el.scrollLeft = Math.max(0, scrollPosition)
+                  }
+                }
+              }}
               className="overflow-x-auto" 
               style={{ 
                 scrollbarWidth: 'none', 
