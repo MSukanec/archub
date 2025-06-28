@@ -96,7 +96,7 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
         `)
         .in('site_log_id', logIds);
       
-      console.log('Events query result:', { eventsData, eventsError, logIds });
+
 
       // Fetch attendees separately
       const { data: attendeesData } = await supabase
@@ -545,7 +545,6 @@ export default function ConstructionLogs() {
                           <div>
                             <span className="font-medium text-muted-foreground block mb-2">Eventos</span>
                             <div className="space-y-2">
-                              {console.log('Events data for', siteLog.id, ':', siteLog.events)}
                               {siteLog.events && Array.isArray(siteLog.events) && siteLog.events.length > 0 ? (
                                 siteLog.events.map((event: any, index: number) => (
                                   <Card key={index} className="p-2 bg-blue-50/50 border-blue-200">
@@ -558,7 +557,7 @@ export default function ConstructionLogs() {
                                   </Card>
                                 ))
                               ) : (
-                                <p className="text-xs text-muted-foreground">Sin eventos registrados ({siteLog.events?.length || 0})</p>
+                                <p className="text-xs text-muted-foreground">Sin eventos registrados</p>
                               )}
                             </div>
                           </div>
@@ -567,7 +566,6 @@ export default function ConstructionLogs() {
                           <div>
                             <span className="font-medium text-muted-foreground block mb-2">Personal</span>
                             <div className="space-y-2">
-                              {console.log('Attendees data for', siteLog.id, ':', siteLog.attendees)}
                               {siteLog.attendees && Array.isArray(siteLog.attendees) && siteLog.attendees.length > 0 ? (
                                 siteLog.attendees.map((attendee: any, index: number) => (
                                   <Card key={index} className="p-2 bg-green-50/50 border-green-200">
@@ -588,7 +586,7 @@ export default function ConstructionLogs() {
                                   </Card>
                                 ))
                               ) : (
-                                <p className="text-xs text-muted-foreground">Sin personal registrado ({siteLog.attendees?.length || 0})</p>
+                                <p className="text-xs text-muted-foreground">Sin personal registrado</p>
                               )}
                             </div>
                           </div>

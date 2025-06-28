@@ -94,6 +94,12 @@ function Router() {
         </ProtectedRoute>
       </Route>
 
+      <Route path="/construction/logs">
+        <ProtectedRoute>
+          <ConstructionLogs />
+        </ProtectedRoute>
+      </Route>
+
       <Route path="/preferencias">
         <ProtectedRoute>
           <OrganizationPreferences />
