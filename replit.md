@@ -119,8 +119,10 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- June 28, 2025. Simplified CustomEmptyState design and fixed positioning consistency
-  • Removed all complex animated shapes for improved performance and cleaner aesthetic
+- June 28, 2025. Fixed Personnel page navigation and standardized empty states across all pages
+  • Fixed Personnel page routing issue by adding proper Link component from wouter for "Ir a Bitácora" button
+  • Verified both Bitácora and Personal pages now show CustomEmptyState when no data exists (like projects/contacts pages)
+  • Simplified CustomEmptyState design removing complex animated shapes for improved performance and cleaner aesthetic
   • Replaced complex animations with simple diagonal hatch background pattern using repeating-linear-gradient
   • Fixed CustomEmptyState positioning issue on contacts page by removing min-h wrapper div
   • Component now uses 100% width and 70% height of its container with proper vertical centering
