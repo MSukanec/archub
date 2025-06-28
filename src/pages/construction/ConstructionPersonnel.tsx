@@ -6,6 +6,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import CustomGradebook from '@/components/ui-custom/misc/CustomGradebook'
+import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState'
 import { Users, Download, Calendar, CalendarDays } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
@@ -21,12 +22,11 @@ function usePersonnelAttendance(projectId: string | undefined, organizationId: s
 
       console.log('Fetching personnel attendance for project:', projectId, 'in organization:', organizationId)
 
-      // First get site logs for this specific project and organization
+      // Get site logs for this specific project only
       const { data: siteLogs, error: siteLogsError } = await supabase
         .from('site_logs')
         .select('id')
         .eq('project_id', projectId)
-        .eq('organization_id', organizationId)
 
       if (siteLogsError) {
         console.error('Error fetching site logs:', siteLogsError)
@@ -34,7 +34,7 @@ function usePersonnelAttendance(projectId: string | undefined, organizationId: s
       }
 
       if (!siteLogs || siteLogs.length === 0) {
-        console.log('No site logs found for project/organization')
+        console.log('No site logs found for project')
         return []
       }
 
@@ -48,8 +48,7 @@ function usePersonnelAttendance(projectId: string | undefined, organizationId: s
           site_log:site_logs!site_log_id(
             id,
             log_date,
-            project_id,
-            organization_id
+            project_id
           ),
           contact:contacts(
             id,
@@ -70,10 +69,9 @@ function usePersonnelAttendance(projectId: string | undefined, organizationId: s
         return []
       }
 
-      // Additional filter to ensure contacts belong to the same organization
+      // Filter to ensure contacts belong to the same organization
       const filteredData = (attendanceData || []).filter(item => 
-        item.contact?.organization_id === organizationId &&
-        item.site_log?.organization_id === organizationId
+        item.contact?.organization_id === organizationId
       )
 
       console.log('Filtered personnel attendance data:', filteredData.length, 'records')
@@ -320,16 +318,15 @@ export default function ConstructionPersonnel() {
             onHideWeekendsChange={setHideWeekends}
           />
         ) : (
-          <div className="text-center py-12">
-            <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-medium mb-2">Sin personal registrado</h3>
-            <p className="text-muted-foreground mb-4">
-              No hay registros de asistencia para este proyecto.
-            </p>
-            <p className="text-sm text-muted-foreground">
-              El personal aparecerá aquí cuando se registren entradas de bitácora con asistencia.
-            </p>
-          </div>
+          <CustomEmptyState
+            icon={Users}
+            title="Sin personal registrado"
+            description="No hay registros de asistencia para este proyecto."
+            action={{
+              label: "Ir a Bitácora",
+              href: "/construction/logs"
+            }}
+          />
         )}
       </div>
     </Layout>
