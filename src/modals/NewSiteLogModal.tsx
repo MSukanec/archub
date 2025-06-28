@@ -936,7 +936,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                                   <SelectValue placeholder="Seleccionar tipo" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {equipment?.map((equipmentType: any) => (
+                                  {equipmentData?.map((equipmentType: any) => (
                                     <SelectItem key={equipmentType.id} value={equipmentType.id}>
                                       {equipmentType.name}
                                     </SelectItem>
