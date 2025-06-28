@@ -5,7 +5,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { Calculator, Plus, Trash2, Building2 } from 'lucide-react'
 import { CustomTable } from '@/components/ui-custom/misc/CustomTable'
@@ -48,6 +48,8 @@ interface BudgetTask {
     }
   }
 }
+
+
 
 export default function ConstructionBudgets() {
   const [searchValue, setSearchValue] = useState('')
@@ -204,174 +206,11 @@ export default function ConstructionBudgets() {
       return total + subtotal;
     }, 0) || 0;
 
-    const taskColumns = [
-      {
-        key: 'select',
-        label: (
-          <input
-            type="checkbox"
-            checked={selectedTasks.length === (budgetTasks?.length || 0) && (budgetTasks?.length || 0) > 0}
-            onChange={(e) => {
-              if (e.target.checked) {
-                setSelectedTasks(budgetTasks?.map(task => task.id) || []);
-              } else {
-                setSelectedTasks([]);
-              }
-            }}
-            className="rounded"
-          />
-        ),
-        render: (task: any) => (
-          <input
-            type="checkbox"
-            checked={selectedTasks.includes(task.id)}
-            onChange={(e) => {
-              if (e.target.checked) {
-                setSelectedTasks(prev => [...prev, task.id]);
-              } else {
-                setSelectedTasks(prev => prev.filter(id => id !== task.id));
-              }
-            }}
-            className="rounded"
-          />
-        )
-      },
-      {
-        key: 'category',
-        label: 'Rubro (Categoría)',
-        render: (task: any) => (
-          <span className="text-sm text-muted-foreground">
-            {task.task?.category?.name || 'Sin categoría'}
-          </span>
-        )
-      },
-      {
-        key: 'task',
-        label: 'Tarea',
-        render: (task: any) => (
-          <div>
-            <div className="font-medium text-sm">{task.task?.name || 'Sin nombre'}</div>
-            {task.task?.description && (
-              <div className="text-xs text-muted-foreground">{task.task.description}</div>
-            )}
-          </div>
-        )
-      },
-      {
-        key: 'unit',
-        label: 'Unidad',
-        render: (task: any) => (
-          <span className="text-sm">
-            {task.task?.unit?.abbreviation || task.task?.unit?.name || 'Sin unidad'}
-          </span>
-        )
-      },
-      {
-        key: 'quantity',
-        label: 'Cantidad',
-        render: (task: any) => (
-          <input
-            type="number"
-            value={task.quantity || 0}
-            onChange={(e) => {
-              // Handle quantity edit - this would need proper state management
-              console.log('Editing quantity:', e.target.value);
-            }}
-            className="w-20 px-2 py-1 text-sm border rounded"
-            min="0"
-            step="0.01"
-          />
-        )
-      },
-      {
-        key: 'labor_cost',
-        label: 'Costo de Mano de Obra',
-        render: (task: any) => {
-          const laborPrice = task.task?.unit_labor_price || 0;
-          const laborCost = laborPrice * (task.quantity || 0);
-          return (
-            <span className="text-sm">
-              ${laborCost.toLocaleString()}
-            </span>
-          );
-        }
-      },
-      {
-        key: 'material_cost',
-        label: 'Costo de Materiales',
-        render: (task: any) => {
-          const materialPrice = task.task?.unit_material_price || 0;
-          const materialCost = materialPrice * (task.quantity || 0);
-          return (
-            <span className="text-sm">
-              ${materialCost.toLocaleString()}
-            </span>
-          );
-        }
-      },
-      {
-        key: 'subtotal',
-        label: 'Subtotal',
-        render: (task: any) => {
-          const laborPrice = task.task?.unit_labor_price || 0;
-          const materialPrice = task.task?.unit_material_price || 0;
-          const subtotal = (laborPrice + materialPrice) * (task.quantity || 0);
-          return (
-            <span className="text-sm font-medium">
-              ${subtotal.toLocaleString()}
-            </span>
-          );
-        }
-      },
-      {
-        key: 'incidence',
-        label: '% de Incidencia',
-        render: (task: any) => {
-          const laborPrice = task.task?.unit_labor_price || 0;
-          const materialPrice = task.task?.unit_material_price || 0;
-          const subtotal = (laborPrice + materialPrice) * (task.quantity || 0);
-          const percentage = totalBudgetAmount > 0 ? (subtotal / totalBudgetAmount) * 100 : 0;
-          return (
-            <span className="text-sm text-muted-foreground">
-              {percentage.toFixed(1)}%
-            </span>
-          );
-        }
-      },
-      {
-        key: 'actions',
-        label: 'Acciones',
-        render: (task: any) => (
-          <div className="flex gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleEditTask(budgetId, task)}
-              className="h-7 w-7 p-0"
-            >
-              <Building2 className="h-3 w-3" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                // Handle delete task
-                console.log('Delete task:', task.id);
-              }}
-              className="h-7 w-7 p-0 text-destructive hover:text-destructive"
-            >
-              <Trash2 className="h-3 w-3" />
-            </Button>
-          </div>
-        )
-      }
-    ];
-
     if (isLoading) {
       return <div className="p-4 text-center text-sm text-muted-foreground">Cargando tareas...</div>;
     }
 
-    if (budgetTasks.length === 0) {
+    if (!budgetTasks || budgetTasks.length === 0) {
       return (
         <CustomEmptyState
           icon={<Calculator className="w-8 h-8 text-muted-foreground" />}
@@ -391,12 +230,143 @@ export default function ConstructionBudgets() {
       );
     }
 
+    // Calculate totals for TOTAL row
+    const totalLaborCost = budgetTasks?.reduce((total, task) => {
+      const laborPrice = task.task?.unit_labor_price || 0;
+      return total + (laborPrice * (task.quantity || 0));
+    }, 0) || 0;
+
+    const totalMaterialCost = budgetTasks?.reduce((total, task) => {
+      const materialPrice = task.task?.unit_material_price || 0;
+      return total + (materialPrice * (task.quantity || 0));
+    }, 0) || 0;
+
     return (
-      <CustomTable
-        data={budgetTasks}
-        columns={taskColumns}
-        isLoading={isLoading}
-      />
+      <div className="space-y-4">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b bg-muted/50">
+                <th className="w-8 p-2 text-left">
+                  <input
+                    type="checkbox"
+                    checked={selectedTasks.length === (budgetTasks?.length || 0) && (budgetTasks?.length || 0) > 0}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedTasks(budgetTasks?.map(task => task.id) || []);
+                      } else {
+                        setSelectedTasks([]);
+                      }
+                    }}
+                    className="rounded"
+                  />
+                </th>
+                <th className="p-2 text-left text-xs font-medium">Rubro (Categoría)</th>
+                <th className="p-2 text-left text-xs font-medium">Tarea</th>
+                <th className="p-2 text-left text-xs font-medium">Unidad</th>
+                <th className="p-2 text-left text-xs font-medium">Cantidad</th>
+                <th className="p-2 text-left text-xs font-medium">Costo de Mano de Obra</th>
+                <th className="p-2 text-left text-xs font-medium">Costo de Materiales</th>
+                <th className="p-2 text-left text-xs font-medium">Subtotal</th>
+                <th className="p-2 text-left text-xs font-medium">% de Incidencia</th>
+                <th className="p-2 text-left text-xs font-medium">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {budgetTasks?.map((task: any) => {
+                const laborPrice = task.task?.unit_labor_price || 0;
+                const materialPrice = task.task?.unit_material_price || 0;
+                const laborCost = laborPrice * (task.quantity || 0);
+                const materialCost = materialPrice * (task.quantity || 0);
+                const subtotal = laborCost + materialCost;
+                const percentage = totalBudgetAmount > 0 ? (subtotal / totalBudgetAmount) * 100 : 0;
+
+                return (
+                  <tr key={task.id} className="border-b hover:bg-muted/20">
+                    <td className="p-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedTasks.includes(task.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedTasks(prev => [...prev, task.id]);
+                          } else {
+                            setSelectedTasks(prev => prev.filter(id => id !== task.id));
+                          }
+                        }}
+                        className="rounded"
+                      />
+                    </td>
+                    <td className="p-2 text-sm text-muted-foreground">
+                      {task.task?.category?.name || 'Sin categoría'}
+                    </td>
+                    <td className="p-2">
+                      <div className="font-medium text-sm">{task.task?.name || 'Sin nombre'}</div>
+                      {task.task?.description && (
+                        <div className="text-xs text-muted-foreground">{task.task.description}</div>
+                      )}
+                    </td>
+                    <td className="p-2 text-sm">
+                      {task.task?.unit?.abbreviation || task.task?.unit?.name || 'Sin unidad'}
+                    </td>
+                    <td className="p-2">
+                      <input
+                        type="number"
+                        value={task.quantity || 0}
+                        onChange={(e) => {
+                          console.log('Editing quantity:', e.target.value);
+                        }}
+                        className="w-20 px-2 py-1 text-sm border rounded"
+                        min="0"
+                        step="0.01"
+                      />
+                    </td>
+                    <td className="p-2 text-sm">${laborCost.toLocaleString()}</td>
+                    <td className="p-2 text-sm">${materialCost.toLocaleString()}</td>
+                    <td className="p-2 text-sm font-medium">${subtotal.toLocaleString()}</td>
+                    <td className="p-2 text-sm text-muted-foreground">{percentage.toFixed(1)}%</td>
+                    <td className="p-2">
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditTask(budgetId, task)}
+                          className="h-7 w-7 p-0"
+                        >
+                          <Building2 className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            console.log('Delete task:', task.id);
+                          }}
+                          className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+              {/* TOTAL Row */}
+              <tr className="border-b-2 bg-accent/10 font-medium">
+                <td className="p-2"></td>
+                <td className="p-2 text-sm font-semibold">TOTAL</td>
+                <td className="p-2"></td>
+                <td className="p-2"></td>
+                <td className="p-2"></td>
+                <td className="p-2 text-sm font-semibold">${totalLaborCost.toLocaleString()}</td>
+                <td className="p-2 text-sm font-semibold">${totalMaterialCost.toLocaleString()}</td>
+                <td className="p-2 text-sm font-semibold">${totalBudgetAmount.toLocaleString()}</td>
+                <td className="p-2 text-sm font-semibold">100.0%</td>
+                <td className="p-2"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     );
   }
 
