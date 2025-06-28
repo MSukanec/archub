@@ -23,6 +23,33 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { useToast } from '@/hooks/use-toast'
 import { Calendar, User, FileText, Cloud, MessageSquare, Star, Eye, Calendar as CalendarIcon, Plus, X, Settings } from 'lucide-react'
 
+// ContactSelect component for filtering contacts by type
+interface ContactSelectProps {
+  organizationId?: string
+  contactTypeId?: string
+  value: string
+  onChange: (value: string) => void
+}
+
+function ContactSelect({ organizationId, contactTypeId, value, onChange }: ContactSelectProps) {
+  const { data: contacts } = useContacts(organizationId, contactTypeId === 'all' ? undefined : contactTypeId)
+  
+  return (
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger className="h-8 text-sm">
+        <SelectValue placeholder="Seleccionar contacto" />
+      </SelectTrigger>
+      <SelectContent>
+        {contacts?.map((contact: any) => (
+          <SelectItem key={contact.id} value={contact.id}>
+            {contact.first_name} {contact.last_name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  )
+}
+
 // Schema para eventos
 const siteLogEventSchema = z.object({
   event_type_id: z.string().min(1, 'Tipo de evento es requerido'),
@@ -32,6 +59,7 @@ const siteLogEventSchema = z.object({
 
 // Schema para personal
 const siteLogAttendeeSchema = z.object({
+  contact_type_id: z.string().min(1, 'Tipo de personal es requerido'),
   contact_id: z.string().min(1, 'Contacto es requerido'),
   attendance_type: z.enum(['full', 'half'], { required_error: 'Tipo de horario es requerido' }),
   description: z.string().optional()
@@ -118,12 +146,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
   
   const [events, setEvents] = useState<SiteLogEventForm[]>([])
   const [attendees, setAttendees] = useState<SiteLogAttendeeForm[]>([])
-  const [selectedContactType, setSelectedContactType] = useState<string>('all')
-  
-  const { data: contacts } = useContacts(
-    userData?.organization?.id,
-    selectedContactType
-  )
+  const [accordionValue, setAccordionValue] = useState<string>("informacion-basica")
   
   const form = useForm<SiteLogForm>({
     resolver: zodResolver(siteLogSchema),
@@ -228,7 +251,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
       // Create site log attendees if any
       if (attendees.length > 0 && siteLogResult.data) {
         const attendeesData = attendees.map(attendee => ({
-          site_log_id: siteLogResult.data.id,
+          log_id: siteLogResult.data.id,
           contact_id: attendee.contact_id,
           attendance_type: attendee.attendance_type,
           description: attendee.description || null
@@ -494,24 +517,6 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                       </div>
                     </AccordionTrigger>
                     <AccordionContent className="space-y-3 pt-3">
-                      {/* Filtro por tipo de contacto */}
-                      <div>
-                        <label className="text-xs font-medium text-muted-foreground">Tipo de Personal</label>
-                        <Select value={selectedContactType} onValueChange={setSelectedContactType}>
-                          <SelectTrigger className="h-8 text-sm">
-                            <SelectValue placeholder="Seleccionar tipo" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">Todos los tipos</SelectItem>
-                            {contactTypes?.map((type) => (
-                              <SelectItem key={type.id} value={type.id}>
-                                {type.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
                       {/* Lista de personal agregado */}
                       {attendees.map((attendee, index) => (
                         <div key={index} className="border rounded-lg p-3 space-y-3">
@@ -531,26 +536,43 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                           </div>
 
                           <div>
-                            <label className="text-xs font-medium text-muted-foreground">Contacto</label>
+                            <label className="text-xs font-medium text-muted-foreground">Tipo de Personal</label>
                             <Select
-                              value={attendee.contact_id}
+                              value={attendee.contact_type_id}
                               onValueChange={(value) => {
                                 const newAttendees = [...attendees];
-                                newAttendees[index].contact_id = value;
+                                newAttendees[index].contact_type_id = value;
+                                // Reset contact when type changes
+                                newAttendees[index].contact_id = '';
                                 setAttendees(newAttendees);
                               }}
                             >
                               <SelectTrigger className="h-8 text-sm">
-                                <SelectValue placeholder="Seleccionar contacto" />
+                                <SelectValue placeholder="Seleccionar tipo" />
                               </SelectTrigger>
                               <SelectContent>
-                                {contacts?.map((contact) => (
-                                  <SelectItem key={contact.id} value={contact.id}>
-                                    {contact.first_name} {contact.last_name}
+                                <SelectItem value="all">Todos los tipos</SelectItem>
+                                {contactTypes?.map((type) => (
+                                  <SelectItem key={type.id} value={type.id}>
+                                    {type.name}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground">Contacto</label>
+                            <ContactSelect
+                              organizationId={userData?.organization?.id}
+                              contactTypeId={attendee.contact_type_id}
+                              value={attendee.contact_id}
+                              onChange={(value) => {
+                                const newAttendees = [...attendees];
+                                newAttendees[index].contact_id = value;
+                                setAttendees(newAttendees);
+                              }}
+                            />
                           </div>
 
                           <div>
@@ -596,6 +618,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                         size="sm"
                         onClick={() => {
                           setAttendees([...attendees, {
+                            contact_type_id: 'all',
                             contact_id: '',
                             attendance_type: 'full',
                             description: ''
