@@ -182,7 +182,7 @@ export default function ConstructionBudgets() {
 
   if (isLoading || budgetsLoading) {
     return (
-      <Layout headerProps={headerProps}>
+      <Layout wide={true} headerProps={headerProps}>
         <div className="p-8 text-center text-muted-foreground">
           Cargando presupuestos...
         </div>
@@ -196,6 +196,15 @@ export default function ConstructionBudgets() {
 
     const taskColumns = [
       {
+        key: 'category',
+        label: 'Rubro (Categoría)',
+        render: (task: any) => (
+          <span className="text-sm text-muted-foreground">
+            {task.task?.category?.name || 'Sin categoría'}
+          </span>
+        )
+      },
+      {
         key: 'task',
         label: 'Tarea',
         render: (task: any) => (
@@ -208,25 +217,109 @@ export default function ConstructionBudgets() {
         )
       },
       {
-        key: 'quantity',
-        label: 'Cantidad',
+        key: 'unit',
+        label: 'Unidad',
         render: (task: any) => (
-          <span className="text-sm">{task.quantity || 0}</span>
+          <span className="text-sm">
+            {task.task?.unit?.abbreviation || task.task?.unit?.name || 'Sin unidad'}
+          </span>
         )
       },
       {
-        key: 'total',
-        label: 'Total',
+        key: 'quantity',
+        label: 'Cantidad',
+        render: (task: any) => (
+          <input
+            type="number"
+            value={task.quantity || 0}
+            onChange={(e) => {
+              // Handle quantity edit - this would need proper state management
+              console.log('Editing quantity:', e.target.value);
+            }}
+            className="w-20 px-2 py-1 text-sm border rounded"
+            min="0"
+            step="0.01"
+          />
+        )
+      },
+      {
+        key: 'labor_cost',
+        label: 'Costo de Mano de Obra',
         render: (task: any) => {
           const laborPrice = task.task?.unit_labor_price || 0;
-          const materialPrice = task.task?.unit_material_price || 0;
-          const total = (laborPrice + materialPrice) * (task.quantity || 0);
+          const laborCost = laborPrice * (task.quantity || 0);
           return (
-            <span className="text-sm font-medium">
-              ${total.toLocaleString()}
+            <span className="text-sm">
+              ${laborCost.toLocaleString()}
             </span>
           );
         }
+      },
+      {
+        key: 'material_cost',
+        label: 'Costo de Materiales',
+        render: (task: any) => {
+          const materialPrice = task.task?.unit_material_price || 0;
+          const materialCost = materialPrice * (task.quantity || 0);
+          return (
+            <span className="text-sm">
+              ${materialCost.toLocaleString()}
+            </span>
+          );
+        }
+      },
+      {
+        key: 'subtotal',
+        label: 'Subtotal',
+        render: (task: any) => {
+          const laborPrice = task.task?.unit_labor_price || 0;
+          const materialPrice = task.task?.unit_material_price || 0;
+          const subtotal = (laborPrice + materialPrice) * (task.quantity || 0);
+          return (
+            <span className="text-sm font-medium">
+              ${subtotal.toLocaleString()}
+            </span>
+          );
+        }
+      },
+      {
+        key: 'incidence',
+        label: '% de Incidencia',
+        render: (task: any) => {
+          // Calculate percentage based on total budget - this would need budget total
+          return (
+            <span className="text-sm text-muted-foreground">
+              0.0%
+            </span>
+          );
+        }
+      },
+      {
+        key: 'actions',
+        label: 'Acciones',
+        render: (task: any) => (
+          <div className="flex gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleEditTask(budgetId, task)}
+              className="h-7 w-7 p-0"
+            >
+              <Building2 className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                // Handle delete task
+                console.log('Delete task:', task.id);
+              }}
+              className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+            >
+              <Trash2 className="h-3 w-3" />
+            </Button>
+          </div>
+        )
       }
     ];
 
@@ -236,17 +329,21 @@ export default function ConstructionBudgets() {
 
     if (budgetTasks.length === 0) {
       return (
-        <div className="p-4 text-center">
-          <p className="text-sm text-muted-foreground mb-3">No hay tareas en este presupuesto</p>
-          <Button 
-            size="sm" 
-            onClick={() => handleAddTask(budgetId)}
-            className="h-8 px-3 text-xs"
-          >
-            <Plus className="w-3 h-3 mr-1" />
-            Agregar Primera Tarea
-          </Button>
-        </div>
+        <CustomEmptyState
+          icon={<Calculator className="w-8 h-8 text-muted-foreground" />}
+          title="No hay tareas en este presupuesto"
+          description="Comienza agregando la primera tarea para gestionar los costos y materiales"
+          action={
+            <Button 
+              size="sm" 
+              onClick={() => handleAddTask(budgetId)}
+              className="h-8 px-3 text-xs"
+            >
+              <Plus className="w-3 h-3 mr-1" />
+              Agregar Tarea
+            </Button>
+          }
+        />
       );
     }
 
@@ -260,7 +357,7 @@ export default function ConstructionBudgets() {
   }
 
   return (
-    <Layout headerProps={headerProps}>
+    <Layout wide={true} headerProps={headerProps}>
       <div className="space-y-6">
         {filteredBudgets.length === 0 ? (
           <CustomEmptyState

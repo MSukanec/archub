@@ -36,9 +36,10 @@ interface NewBudgetModalProps {
   open: boolean
   onClose: () => void
   editingBudget?: any
+  onSuccess?: (budgetId: string) => void
 }
 
-export function NewBudgetModal({ open, onClose, editingBudget }: NewBudgetModalProps) {
+export function NewBudgetModal({ open, onClose, editingBudget, onSuccess }: NewBudgetModalProps) {
   const [isLoading, setIsLoading] = useState(false)
   const { data: userData } = useCurrentUser()
   const { toast } = useToast()
