@@ -72,6 +72,13 @@ const siteLogAttendeeSchema = z.object({
   description: z.string().optional()
 })
 
+// Schema para equipos
+const siteLogEquipmentSchema = z.object({
+  equipment_id: z.string().min(1, 'Tipo de equipamiento es requerido'),
+  quantity: z.number().min(1, 'Cantidad debe ser mayor a 0').default(1),
+  description: z.string().optional()
+})
+
 const siteLogSchema = z.object({
   log_date: z.date(),
   created_by: z.string().min(1, 'Creador es requerido'),
@@ -91,12 +98,14 @@ const siteLogSchema = z.object({
   is_public: z.boolean().default(true),
   is_favorite: z.boolean().default(false),
   events: z.array(siteLogEventSchema).default([]),
-  attendees: z.array(siteLogAttendeeSchema).default([])
+  attendees: z.array(siteLogAttendeeSchema).default([]),
+  equipment: z.array(siteLogEquipmentSchema).default([])
 })
 
 type SiteLogForm = z.infer<typeof siteLogSchema>
 type SiteLogEventForm = z.infer<typeof siteLogEventSchema>
 type SiteLogAttendeeForm = z.infer<typeof siteLogAttendeeSchema>
+type SiteLogEquipmentForm = z.infer<typeof siteLogEquipmentSchema>
 
 // Definir tipos exactos basados en la base de datos
 interface SiteLog {
@@ -126,6 +135,31 @@ function useEventTypes() {
 
       if (error) {
         console.error('Error fetching event types:', error);
+        throw error;
+      }
+
+      return data || [];
+    },
+    enabled: !!supabase
+  });
+}
+
+// Hook para obtener equipamiento
+function useEquipment() {
+  return useQuery({
+    queryKey: ['equipment'],
+    queryFn: async () => {
+      if (!supabase) {
+        return [];
+      }
+
+      const { data, error } = await supabase
+        .from('equipment')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching equipment:', error);
         throw error;
       }
 
