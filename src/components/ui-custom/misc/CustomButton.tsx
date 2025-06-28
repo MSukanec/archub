@@ -25,7 +25,7 @@ export const CustomButton = React.forwardRef<HTMLButtonElement, CustomButtonProp
   const baseClasses = cn(
     "relative inline-flex items-center justify-center",
     "rounded-full overflow-hidden",
-    "font-medium transition-all duration-200",
+    "font-xs transition-all duration-200",
     "focus:outline-none focus:ring-2 focus:ring-offset-2",
     "disabled:opacity-50 disabled:cursor-not-allowed",
     "group",
