@@ -209,7 +209,7 @@ export default function OrganizationContacts() {
         </Layout>
         <CustomEmptyState
           fullScreen={true}
-          icon={<Users className="w-16 h-16" />}
+          icon={<Users />}
           title={searchValue || filterByType !== 'all' ? "No se encontraron contactos" : "No hay contactos"}
           description={searchValue || filterByType !== 'all' 
             ? 'Prueba ajustando los filtros de búsqueda para encontrar los contactos que buscas' 
@@ -218,11 +218,9 @@ export default function OrganizationContacts() {
           action={
             !searchValue && filterByType === 'all' && (
               <Button 
-                size="lg" 
                 onClick={() => setShowCreateModal(true)}
-                className="px-8 py-3 text-base"
               >
-                <Plus className="w-5 h-5 mr-2" />
+                <Plus className="w-4 h-4 mr-2" />
                 Crear Primer Contacto
               </Button>
             )

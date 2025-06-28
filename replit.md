@@ -119,17 +119,17 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- June 28, 2025. Enhanced CustomEmptyState with fullScreen mode and animated particle effects
+- June 28, 2025. Enhanced CustomEmptyState with fullScreen mode and animated effects
   • Added fullScreen prop to CustomEmptyState component enabling fixed viewport positioning
-  • Enhanced particle animation system with CSS keyframes using float animations
-  • Updated CustomEmptyState to use --accent CSS variables for consistent icon theming
-  • Icons now display larger sizes (w-16 h-16) with accent color for better visual impact
+  • Implemented dotted border using border-dashed with --accent color for visual definition
+  • Created animated diagonal hatch background pattern with repeating-linear-gradient and hatchMove animation
+  • Enhanced particle system with varied floating elements (circles, squares, lines) using float animations
+  • Reduced text and icon sizes: w-6 h-6 icons, text-base titles, text-sm descriptions for refined appearance
+  • Added mobile-responsive vertical centering using flex layout for consistent positioning
   • Applied fullScreen mode to OrganizationProjects, OrganizationDashboard, and OrganizationContacts pages
-  • Empty states now cover entire viewport without scrolling, creating more engaging user experience
-  • Enhanced empty state descriptions with more detailed, helpful messaging
-  • Table headers automatically hidden when no data exists to display
-  • Updated buttons in fullScreen mode to use larger sizes (lg) with enhanced padding
-  • Improved visual hierarchy with accent-colored circular backgrounds and blur effects
+  • Empty states now cover entire viewport with proper mobile support and engaging animations
+  • Enhanced particle effects with ping, pulse, and custom float animations for playful user experience
+  • Added CSS keyframes for hatchMove animation creating smooth diagonal pattern movement
 - June 28, 2025. Complete OrganizationDashboard redesign and header dropdown modifications
   • Completely redesigned OrganizationDashboard.tsx with clean, professional layout following standard component styling
   • Changed page title from "Dashboard de la Organización" to "Resumen de la Organización"

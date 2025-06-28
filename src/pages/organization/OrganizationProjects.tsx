@@ -230,7 +230,7 @@ export default function OrganizationProjects() {
         </Layout>
         <CustomEmptyState
           fullScreen={true}
-          icon={<Folder className="w-16 h-16" />}
+          icon={<Folder />}
           title={searchValue || filterByStatus !== 'all' ? "No se encontraron proyectos" : "No hay proyectos creados"}
           description={searchValue || filterByStatus !== 'all' 
             ? 'Prueba ajustando los filtros de búsqueda para encontrar los proyectos que buscas' 
@@ -240,11 +240,9 @@ export default function OrganizationProjects() {
             !searchValue && filterByStatus === 'all' && (
               <CustomRestricted feature="max_projects" current={filteredProjects?.length || 0}>
                 <Button 
-                  size="lg" 
                   onClick={() => setShowNewProjectModal(true)}
-                  className="px-8 py-3 text-base"
                 >
-                  <Plus className="w-5 h-5 mr-2" />
+                  <Plus className="w-4 h-4 mr-2" />
                   Crear Primer Proyecto
                 </Button>
               </CustomRestricted>

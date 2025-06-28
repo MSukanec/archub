@@ -170,7 +170,7 @@ export default function OrganizationDashboard() {
         </Layout>
         <CustomEmptyState
           fullScreen={true}
-          icon={<Building className="h-16 w-16" />}
+          icon={<Building />}
           title="No hay organización seleccionada"
           description="Selecciona una organización desde el menú superior para ver el resumen completo de la organización"
         />

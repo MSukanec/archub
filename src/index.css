@@ -253,6 +253,11 @@
   75% { transform: translateY(-15px) translateX(8px); }
 }
 
+@keyframes hatchMove {
+  0% { transform: translateX(-50px); }
+  100% { transform: translateX(50px); }
+}
+
 /* Movement row solid color classes */
 .movement-row-income {
   background-color: rgba(34, 197, 94, 0.08);
