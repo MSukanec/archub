@@ -119,6 +119,18 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 28, 2025. Complete profile page redesign and sidebar functionality fixes
+  • Fixed sidebar toggle switch in Profile page - now properly syncs with sidebar button and saves to database
+  • Removed Theme and Panel buttons from sidebar footer as requested - only Profile button remains
+  • Completely redesigned Profile page following user reference image with two-column layout
+  • Left column: section titles and descriptions, right column: form fields
+  • Eliminated all Card components for clean layout matching reference design  
+  • Profile sections: Profile (avatar, name, email), Personal Information (names, country, birthdate), Preferences (theme, sidebar), Danger Zone (sign out)
+  • Used default layout width instead of hardcoded max-width for better responsive design
+  • Profile page now uses "Account settings" as title matching reference aesthetic
+  • All text in English following reference design language
+  • Switch controls now save immediately to database when toggled
+
 - June 28, 2025. Complete dashboard redesign with spectacular visual and functional improvements
   • Completely rebuilt ProjectDashboard.tsx with real data integration and advanced visual design
   • Added comprehensive project statistics: financial metrics (income, expenses, balance), site logs count, and progress tracking

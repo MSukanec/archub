@@ -367,29 +367,7 @@ export function Sidebar() {
             />
           )}
 
-          {/* Theme Toggle */}
-          <SidebarButton
-            icon={userData?.preferences?.theme === 'dark' ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
-            label={userData?.preferences?.theme === 'dark' ? "Día" : "Noche"}
-            isActive={false}
-            isExpanded={isExpanded}
-            onClick={() => {
-              const newTheme = userData?.preferences?.theme === 'dark' ? 'light' : 'dark';
-              themeToggleMutation.mutate(newTheme);
-            }}
-          />
 
-          {/* Sidebar Toggle */}
-          <SidebarButton
-            icon={userData?.preferences?.sidebar_docked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
-            label={userData?.preferences?.sidebar_docked ? "Cerrar Panel" : "Abrir Panel"}
-            isActive={false}
-            isExpanded={isExpanded}
-            onClick={() => {
-              const newDockedState = !userData?.preferences?.sidebar_docked;
-              sidebarToggleMutation.mutate(newDockedState);
-            }}
-          />
 
           {/* Profile */}
           <SidebarButton

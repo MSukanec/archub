@@ -1,6 +1,5 @@
 import { Layout } from '@/components/layout/Layout'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -8,7 +7,7 @@ import { Switch } from '@/components/ui/switch'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
-import { Camera, User, Settings, Upload, Link as LinkIcon, LogOut } from 'lucide-react'
+import { Upload, Link as LinkIcon, LogOut } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { supabase } from '@/lib/supabase'
@@ -16,7 +15,6 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
 import { useSidebarStore } from '@/stores/sidebarStore'
-import { useAuthStore } from '@/stores/authStore'
 
 interface Country {
   id: string
@@ -26,7 +24,7 @@ interface Country {
 export default function Profile() {
   const { data: userData, isLoading } = useCurrentUser()
   const { toast } = useToast()
-  const { isDocked, setDocked } = useSidebarStore()
+  const { setDocked } = useSidebarStore()
 
   // Form states
   const [firstName, setFirstName] = useState('')
@@ -45,13 +43,14 @@ export default function Profile() {
   const { data: countries = [] } = useQuery({
     queryKey: ['countries'],
     queryFn: async () => {
+      if (!supabase) return []
       const { data, error } = await supabase
         .from('countries')
         .select('id, name')
         .order('name')
       
       if (error) throw error
-      return data as Country[]
+      return data || []
     }
   })
 
@@ -83,53 +82,56 @@ export default function Profile() {
 
       // Update user avatar
       if (profileData.avatarUrl !== userData.user.avatar_url) {
+        if (!supabase) throw new Error('Supabase no disponible')
+        
         const { error: userError } = await supabase
           .from('users')
-          .update({ 
-            avatar_url: profileData.avatarUrl,
-            avatar_source: 'url'
-          })
+          .update({ avatar_url: profileData.avatarUrl })
           .eq('id', userData.user.id)
-
+        
         if (userError) throw userError
       }
 
-      // Update user_data (personal information)
-      const userDataUpdate: any = {}
-      if (profileData.firstName.trim()) userDataUpdate.first_name = profileData.firstName.trim()
-      if (profileData.lastName.trim()) userDataUpdate.last_name = profileData.lastName.trim()
-      if (profileData.country) userDataUpdate.country = profileData.country
-      if (profileData.birthdate) userDataUpdate.birthdate = profileData.birthdate
+      // Update user_data
+      if (profileData.firstName || profileData.lastName || profileData.country || profileData.birthdate) {
+        if (!supabase) throw new Error('Supabase no disponible')
+        
+        const updateData: any = {}
+        if (profileData.firstName.trim()) updateData.first_name = profileData.firstName.trim()
+        if (profileData.lastName.trim()) updateData.last_name = profileData.lastName.trim()
+        if (profileData.country) updateData.country = profileData.country
+        if (profileData.birthdate) updateData.birthdate = profileData.birthdate
 
-      if (Object.keys(userDataUpdate).length > 0) {
         const { error: dataError } = await supabase
           .from('user_data')
-          .update(userDataUpdate)
+          .update(updateData)
           .eq('user_id', userData.user.id)
-
+        
         if (dataError) throw dataError
       }
 
-      // Update user preferences
+      // Update user_preferences
+      if (!supabase) throw new Error('Supabase no disponible')
+      
       const { error: prefsError } = await supabase
         .from('user_preferences')
         .update({ sidebar_docked: profileData.sidebarDocked })
         .eq('id', userData.preferences.id)
-
+      
       if (prefsError) throw prefsError
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['current-user'] })
-      setDocked(sidebarDocked)
       toast({
-        title: "Perfil actualizado",
-        description: "Los cambios se han guardado correctamente"
+        title: "Profile updated",
+        description: "Your profile has been updated successfully"
       })
     },
     onError: (error) => {
+      console.error('Error updating profile:', error)
       toast({
         title: "Error",
-        description: `No se pudo actualizar el perfil: ${error.message}`,
+        description: "There was a problem updating your profile",
         variant: "destructive"
       })
     }
@@ -138,12 +140,10 @@ export default function Profile() {
   // Theme toggle mutation
   const toggleThemeMutation = useMutation({
     mutationFn: async () => {
-      const currentTheme = userData?.preferences?.theme || 'light'
-      const newTheme = currentTheme === 'light' ? 'dark' : 'light'
+      if (!userData?.preferences?.id) throw new Error('Missing preferences data')
+      if (!supabase) throw new Error('Supabase no disponible')
       
-      if (!userData?.preferences?.id) {
-        throw new Error('Missing preferences data')
-      }
+      const newTheme = userData.preferences.theme === 'dark' ? 'light' : 'dark'
       
       const { error } = await supabase
         .from('user_preferences')
@@ -155,14 +155,14 @@ export default function Profile() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['current-user'] })
       toast({
-        title: "Tema actualizado",
-        description: "El tema se ha cambiado correctamente"
+        title: "Theme updated",
+        description: "Your theme has been changed successfully"
       })
     },
     onError: () => {
       toast({
         title: "Error", 
-        description: "No se pudo cambiar el tema",
+        description: "Could not change theme",
         variant: "destructive"
       })
     }
@@ -177,14 +177,13 @@ export default function Profile() {
       if (error) throw error
     },
     onSuccess: () => {
-      // Redirigir inmediatamente sin mostrar toast
       window.location.href = '/'
     },
     onError: (error) => {
-      console.error('Error cerrando sesión:', error)
+      console.error('Error signing out:', error)
       toast({
         title: "Error",
-        description: "Hubo un problema al cerrar la sesión",
+        description: "There was a problem signing out",
         variant: "destructive"
       })
     }
@@ -201,60 +200,61 @@ export default function Profile() {
     })
   }
 
-  const handleAvatarFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
+  const handleAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
     if (file) {
       setAvatarFile(file)
-      // Create preview URL
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        setAvatarUrl(e.target?.result as string)
-      }
-      reader.readAsDataURL(file)
+      // For now, just show the file name - full upload implementation would go here
+      toast({
+        title: "File selected",
+        description: `Selected: ${file.name}. Upload functionality coming soon.`
+      })
     }
   }
 
-  const handleAvatarUrlSubmit = () => {
+  const handleApplyAvatarUrl = () => {
     if (avatarUrlInput.trim()) {
       setAvatarUrl(avatarUrlInput.trim())
       setAvatarUrlInput('')
       setShowAvatarUpload(false)
+      toast({
+        title: "Avatar updated",
+        description: "Avatar URL has been applied"
+      })
     }
   }
 
   const getInitials = () => {
-    if (firstName && lastName) {
-      return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
+    if (userData?.user_data?.first_name && userData?.user_data?.last_name) {
+      return `${userData.user_data.first_name[0]}${userData.user_data.last_name[0]}`.toUpperCase()
     }
     if (userData?.user?.full_name) {
       const names = userData.user.full_name.split(' ')
-      return names.length >= 2 
-        ? `${names[0].charAt(0)}${names[1].charAt(0)}`.toUpperCase()
-        : names[0].charAt(0).toUpperCase()
+      return names.length > 1 ? `${names[0][0]}${names[1][0]}`.toUpperCase() : names[0][0].toUpperCase()
     }
-    return userData?.user?.email?.charAt(0).toUpperCase() || 'U'
+    return 'U'
   }
 
   const headerProps = {
-    title: "Perfil",
+    title: 'Account settings',
     showSearch: false,
     showFilters: false,
-    actions: (
+    actions: [
       <Button 
+        key="save"
         onClick={handleSaveProfile}
         disabled={updateProfileMutation.isPending}
-        className="h-8 px-3 text-sm"
       >
-        {updateProfileMutation.isPending ? 'Guardando...' : 'Guardar'}
+        {updateProfileMutation.isPending ? 'Saving...' : 'Save changes'}
       </Button>
-    )
+    ]
   }
 
   if (isLoading) {
     return (
       <Layout headerProps={headerProps}>
         <div className="text-center text-muted-foreground">
-          Cargando perfil...
+          Loading profile...
         </div>
       </Layout>
     )
@@ -262,143 +262,153 @@ export default function Profile() {
 
   return (
     <Layout headerProps={headerProps}>
-      <div className="max-w-2xl mx-auto space-y-6">
-        {/* Avatar Section */}
-        <Card>
-          <CardHeader className="flex flex-row items-center gap-4">
-            <Camera className="w-5 h-5" />
-            <CardTitle>Foto de perfil</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-4">
-              <Avatar className="w-20 h-20">
-                <AvatarImage src={avatarUrl} />
-                <AvatarFallback className="text-lg font-medium">
-                  {getInitials()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="space-y-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowAvatarUpload(!showAvatarUpload)}
-                >
-                  <Camera className="w-4 h-4 mr-2" />
-                  Cambiar foto
-                </Button>
-                <p className="text-xs text-muted-foreground">
-                  Sube una imagen o proporciona una URL
-                </p>
-              </div>
+      <div className="space-y-12">
+        {/* Profile Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-1">
+            <div className="space-y-1">
+              <h3 className="text-lg font-medium">Profile</h3>
+              <p className="text-sm text-muted-foreground">
+                This information will be displayed publicly so be careful what you share.
+              </p>
             </div>
-
-            {showAvatarUpload && (
-              <div className="space-y-3 border rounded-lg p-4">
-                <div>
-                  <Label className="text-sm font-medium flex items-center gap-2">
-                    <Upload className="w-4 h-4" />
-                    Subir archivo
-                  </Label>
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleAvatarFileChange}
-                    className="mt-1"
-                  />
-                </div>
-                
-                <Separator />
-                
+          </div>
+          
+          <div className="lg:col-span-2 space-y-6">
+            {/* Avatar */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Avatar</Label>
+              <div className="flex items-center gap-4">
+                <Avatar className="w-16 h-16">
+                  <AvatarImage src={avatarUrl} />
+                  <AvatarFallback className="text-lg font-medium">
+                    {getInitials()}
+                  </AvatarFallback>
+                </Avatar>
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium flex items-center gap-2">
-                    <LinkIcon className="w-4 h-4" />
-                    URL de imagen
-                  </Label>
-                  <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowAvatarUpload(!showAvatarUpload)}
+                  >
+                    Change
+                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    Upload a photo or provide a URL
+                  </p>
+                </div>
+              </div>
+              
+              {showAvatarUpload && (
+                <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
+                  <div>
+                    <Label className="text-sm font-medium">Upload file</Label>
                     <Input
-                      value={avatarUrlInput}
-                      onChange={(e) => setAvatarUrlInput(e.target.value)}
-                      placeholder="https://ejemplo.com/imagen.jpg"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarFileChange}
+                      className="mt-1"
                     />
-                    <Button size="sm" onClick={handleAvatarUrlSubmit}>
-                      Aplicar
-                    </Button>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Image URL</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        value={avatarUrlInput}
+                        onChange={(e) => setAvatarUrlInput(e.target.value)}
+                        placeholder="https://example.com/image.jpg"
+                      />
+                      <Button
+                        size="sm"
+                        onClick={handleApplyAvatarUrl}
+                        disabled={!avatarUrlInput.trim()}
+                      >
+                        Apply
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Personal Information */}
-        <Card>
-          <CardHeader className="flex flex-row items-center gap-4">
-            <User className="w-5 h-5" />
-            <CardTitle>Información personal</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Nombre completo</Label>
-                <Input
-                  value={userData?.user?.full_name || ''}
-                  disabled
-                  className="bg-muted"
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Este campo no se puede editar
-                </p>
-              </div>
-              <div>
-                <Label>Mail</Label>
-                <Input
-                  value={userData?.user?.email || ''}
-                  disabled
-                  className="bg-muted"
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Este campo no se puede editar
-                </p>
-              </div>
+              )}
             </div>
+            
+            {/* Name */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Full name</Label>
+              <Input
+                value={userData?.user?.full_name || ''}
+                disabled
+                className="bg-muted"
+              />
+              <p className="text-xs text-muted-foreground">
+                This is your display name. It can be your real name or a pseudonym.
+              </p>
+            </div>
+            
+            {/* Email */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Email address</Label>
+              <Input
+                value={userData?.user?.email || ''}
+                disabled
+                className="bg-muted"
+              />
+              <p className="text-xs text-muted-foreground">
+                This is your account email address.
+              </p>
+            </div>
+          </div>
+        </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Nombre</Label>
+        <Separator />
+
+        {/* Personal Information Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-1">
+            <div className="space-y-1">
+              <h3 className="text-lg font-medium">Personal Information</h3>
+              <p className="text-sm text-muted-foreground">
+                Update your personal details here.
+              </p>
+            </div>
+          </div>
+          
+          <div className="lg:col-span-2 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">First name</Label>
                 <Input
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="Tu nombre"
                 />
               </div>
-              <div>
-                <Label>Apellido</Label>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Last name</Label>
                 <Input
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  placeholder="Tu apellido"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>País</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Country</Label>
                 <Select value={country} onValueChange={setCountry}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar país" />
+                    <SelectValue placeholder="Select a country" />
                   </SelectTrigger>
                   <SelectContent>
-                    {countries.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.name}
+                    {countries.map((country: Country) => (
+                      <SelectItem key={country.id} value={country.id}>
+                        {country.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <Label>Fecha de nacimiento</Label>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Date of birth</Label>
                 <Input
                   type="date"
                   value={birthdate}
@@ -406,22 +416,29 @@ export default function Profile() {
                 />
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        {/* Card de Preferencias */}
-        <Card>
-          <CardHeader className="flex flex-row items-center gap-4">
-            <Settings className="w-5 h-5" />
-            <CardTitle>Preferencias</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Tema */}
-            <div className="flex items-center justify-between">
+        <Separator />
+
+        {/* Preferences Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-1">
+            <div className="space-y-1">
+              <h3 className="text-lg font-medium">Preferences</h3>
+              <p className="text-sm text-muted-foreground">
+                Configure your application preferences.
+              </p>
+            </div>
+          </div>
+          
+          <div className="lg:col-span-2 space-y-6">
+            {/* Theme */}
+            <div className="flex items-center justify-between py-2">
               <div className="space-y-0.5">
-                <Label className="text-base">Tema</Label>
-                <div className="text-sm text-muted-foreground">
-                  Elige entre tema claro u oscuro
+                <Label className="text-sm font-medium">Dark mode</Label>
+                <div className="text-xs text-muted-foreground">
+                  Switch between light and dark themes
                 </div>
               </div>
               <Switch
@@ -431,60 +448,85 @@ export default function Profile() {
               />
             </div>
 
-            {/* Sidebar fijo */}
-            <div className="flex items-center justify-between">
+            {/* Sidebar fixed */}
+            <div className="flex items-center justify-between py-2">
               <div className="space-y-0.5">
-                <Label className="text-base">Sidebar Fijo</Label>
-                <div className="text-sm text-muted-foreground">
-                  Mantener el sidebar siempre visible
+                <Label className="text-sm font-medium">Fixed sidebar</Label>
+                <div className="text-xs text-muted-foreground">
+                  Keep the sidebar always visible
                 </div>
               </div>
               <Switch
-                checked={sidebarDocked}
-                onCheckedChange={setSidebarDocked}
+                checked={userData?.preferences?.sidebar_docked || false}
+                onCheckedChange={(newValue) => {
+                  setSidebarDocked(newValue);
+                  setDocked(newValue);
+                  // Save immediately to database
+                  if (userData?.preferences?.id) {
+                    updateProfileMutation.mutate({
+                      firstName,
+                      lastName,
+                      country,
+                      birthdate,
+                      avatarUrl,
+                      sidebarDocked: newValue
+                    });
+                  }
+                }}
               />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        {/* Card de Cerrar Sesión */}
-        <Card>
-          <CardHeader className="flex flex-row items-center gap-4">
-            <LogOut className="w-5 h-5" />
-            <CardTitle>Cerrar Sesión</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Al cerrar sesión, serás redirigido a la página de inicio de sesión.
-            </p>
-            
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" className="w-full">
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Cerrar Sesión
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>¿Cerrar sesión?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Estás a punto de cerrar tu sesión. Tendrás que volver a iniciar sesión para acceder a tu cuenta.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction 
-                    onClick={() => signOutMutation.mutate()}
-                    disabled={signOutMutation.isPending}
-                  >
-                    {signOutMutation.isPending ? 'Cerrando...' : 'Cerrar Sesión'}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </CardContent>
-        </Card>
+        <Separator />
+
+        {/* Danger Zone */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-1">
+            <div className="space-y-1">
+              <h3 className="text-lg font-medium">Danger zone</h3>
+              <p className="text-sm text-muted-foreground">
+                Irreversible and destructive actions.
+              </p>
+            </div>
+          </div>
+          
+          <div className="lg:col-span-2">
+            <div className="space-y-4 p-4 border border-destructive/20 rounded-lg">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-destructive">Sign out</Label>
+                <p className="text-xs text-muted-foreground">
+                  Sign out of your account. You will be redirected to the login page.
+                </p>
+              </div>
+              
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm">
+                    Sign out
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Sign out?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      You are about to sign out of your account. You will need to sign in again to access your account.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction 
+                      onClick={() => signOutMutation.mutate()}
+                      disabled={signOutMutation.isPending}
+                    >
+                      {signOutMutation.isPending ? 'Signing out...' : 'Sign out'}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </div>
+        </div>
       </div>
     </Layout>
   )
