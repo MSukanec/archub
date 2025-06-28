@@ -54,16 +54,15 @@ function usePersonnelAttendance(projectId: string | undefined, organizationId: s
 }
 
 // Hook to fetch contact types for filtering
-function useContactTypes(organizationId: string | undefined) {
+function useContactTypes() {
   return useQuery({
-    queryKey: ['contact-types', organizationId],
+    queryKey: ['contact-types'],
     queryFn: async () => {
-      if (!supabase || !organizationId) return []
+      if (!supabase) return []
 
       const { data: contactTypes, error } = await supabase
         .from('contact_types')
         .select('*')
-        .eq('organization_id', organizationId)
         .order('name')
 
       if (error) {
@@ -73,7 +72,7 @@ function useContactTypes(organizationId: string | undefined) {
 
       return contactTypes || []
     },
-    enabled: !!supabase && !!organizationId
+    enabled: !!supabase
   })
 }
 
@@ -143,7 +142,7 @@ export default function ConstructionPersonnel() {
     userData?.preferences?.last_project_id,
     userData?.organization?.id
   )
-  const { data: contactTypes = [] } = useContactTypes(userData?.organization?.id)
+  const { data: contactTypes = [] } = useContactTypes()
 
   const { workers, attendance } = useMemo(() => {
     return transformAttendanceData(attendanceData, selectedContactType || undefined)
