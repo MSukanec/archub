@@ -438,9 +438,9 @@ export default function ConstructionLogs() {
                             e.stopPropagation();
                             toggleFavorite(siteLog.id);
                           }}
-                          className="h-8 w-8 p-0"
+                          className="h-8 w-8 p-0 hover:bg-transparent group"
                         >
-                          <Star className={`h-4 w-4 ${siteLog.is_favorite ? 'text-yellow-500 fill-yellow-500' : 'text-muted-foreground'}`} />
+                          <Star className={`h-4 w-4 transition-colors ${siteLog.is_favorite ? 'text-yellow-500 fill-yellow-500' : 'text-muted-foreground group-hover:text-yellow-500'}`} />
                         </Button>
                         
                         <Button
@@ -451,9 +451,9 @@ export default function ConstructionLogs() {
                             setEditingSiteLog(siteLog);
                             setShowNewSiteLogModal(true);
                           }}
-                          className="h-8 w-8 p-0"
+                          className="h-8 w-8 p-0 hover:bg-transparent group"
                         >
-                          <Edit className="h-4 w-4 text-muted-foreground" />
+                          <Edit className="h-4 w-4 text-muted-foreground group-hover:text-blue-500 transition-colors" />
                         </Button>
                         
                         <Button
@@ -464,41 +464,69 @@ export default function ConstructionLogs() {
                             setDeleteDialogOpen(true);
                             setSiteLogToDelete(siteLog);
                           }}
-                          className="h-8 w-8 p-0"
+                          className="h-8 w-8 p-0 hover:bg-transparent group"
                         >
-                          <Trash2 className="h-4 w-4 text-muted-foreground" />
+                          <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500 transition-colors" />
                         </Button>
                       </div>
                     </div>
 
                     <CollapsibleContent>
                       <div className="px-4 pb-4 pt-2 border-t bg-muted/30">
-                        <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className="grid grid-cols-4 gap-4 text-sm">
+                          {/* Comentario Completo */}
                           <div>
-                            <span className="font-medium text-muted-foreground">Estado:</span>
-                            <p>{siteLog.is_public ? "Público" : "Privado"}</p>
+                            <span className="font-medium text-muted-foreground block mb-2">Comentario Completo</span>
+                            <p className="text-sm">{siteLog.comments || 'Sin comentarios adicionales'}</p>
                           </div>
+
+                          {/* Eventos */}
                           <div>
-                            <span className="font-medium text-muted-foreground">Creado:</span>
-                            <p>{format(new Date(siteLog.created_at), 'dd/MM/yyyy HH:mm', { locale: es })}</p>
-                          </div>
-                          <div className="col-span-2">
-                            <span className="font-medium text-muted-foreground">Comentarios completos:</span>
-                            <p className="mt-1 text-sm">{siteLog.comments || 'Sin comentarios adicionales'}</p>
-                          </div>
-                          {siteLog.weather && (
-                            <div className="col-span-2">
-                              <span className="font-medium text-muted-foreground">Condiciones climáticas:</span>
-                              <div className="flex items-center gap-2 mt-1">
-                                {weatherConfig && (
-                                  <>
-                                    <weatherConfig.icon className="h-4 w-4" />
-                                    <span className="text-sm">{weatherConfig.label}</span>
-                                  </>
-                                )}
-                              </div>
+                            <span className="font-medium text-muted-foreground block mb-2">Eventos</span>
+                            <div className="space-y-1">
+                              {siteLog.events && siteLog.events.length > 0 ? (
+                                siteLog.events.map((event: any, index: number) => (
+                                  <div key={index} className="text-xs bg-blue-50 px-2 py-1 rounded">
+                                    {event.event_type?.name || 'Evento'}: {event.description || 'Sin descripción'}
+                                  </div>
+                                ))
+                              ) : (
+                                <p className="text-xs text-muted-foreground">Sin eventos registrados</p>
+                              )}
                             </div>
-                          )}
+                          </div>
+
+                          {/* Personal */}
+                          <div>
+                            <span className="font-medium text-muted-foreground block mb-2">Personal</span>
+                            <div className="space-y-1">
+                              {siteLog.attendees && siteLog.attendees.length > 0 ? (
+                                siteLog.attendees.map((attendee: any, index: number) => (
+                                  <div key={index} className="text-xs bg-green-50 px-2 py-1 rounded">
+                                    {attendee.contact?.full_name || 'Personal'}: {attendee.attendance_type || 'Presente'}
+                                  </div>
+                                ))
+                              ) : (
+                                <p className="text-xs text-muted-foreground">Sin personal registrado</p>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Maquinaria */}
+                          <div>
+                            <span className="font-medium text-muted-foreground block mb-2">Maquinaria</span>
+                            <div className="space-y-1">
+                              {siteLog.equipment && siteLog.equipment.length > 0 ? (
+                                siteLog.equipment.map((equipment: any, index: number) => (
+                                  <div key={index} className="text-xs bg-orange-50 px-2 py-1 rounded">
+                                    {equipment.equipment?.name || 'Equipo'} (x{equipment.quantity || 1})
+                                  </div>
+                                ))
+                              ) : (
+                                <p className="text-xs text-muted-foreground">Sin maquinaria registrada</p>
+                              )}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </CollapsibleContent>

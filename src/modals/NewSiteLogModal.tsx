@@ -706,7 +706,91 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                     </AccordionContent>
                   </AccordionItem>
 
-                  {/* Sección 2: Personal */}
+                  {/* Sección 2: Eventos */}
+                  <AccordionItem value="eventos">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <CalendarIcon className="w-4 h-4" />
+                        Eventos ({events.length})
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="space-y-3 pt-3">
+                      {/* Lista de eventos */}
+                      {events.map((event, index) => (
+                        <div key={index} className="border rounded-lg p-3 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <h4 className="text-sm font-medium">Evento {index + 1}</h4>
+                            <button
+                              type="button"
+                              className="h-6 w-6 rounded-md hover:bg-gray-100 flex items-center justify-center"
+                              onClick={() => {
+                                const newEvents = events.filter((_, i) => i !== index);
+                                setEvents(newEvents);
+                              }}
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground">Tipo de evento</label>
+                            <Select 
+                              value={event.event_type_id} 
+                              onValueChange={(value) => {
+                                const newEvents = [...events];
+                                newEvents[index].event_type_id = value;
+                                setEvents(newEvents);
+                              }}
+                            >
+                              <SelectTrigger className="h-8 text-sm">
+                                <SelectValue placeholder="Seleccionar tipo" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {eventTypes?.map((eventType: any) => (
+                                  <SelectItem key={eventType.id} value={eventType.id}>
+                                    {eventType.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground">Descripción</label>
+                            <Textarea
+                              className="min-h-[60px] text-sm"
+                              placeholder="Describe el evento..."
+                              value={event.description}
+                              onChange={(e) => {
+                                const newEvents = [...events];
+                                newEvents[index].description = e.target.value;
+                                setEvents(newEvents);
+                              }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Botón para agregar evento */}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setEvents([...events, {
+                            event_type_id: '',
+                            description: ''
+                          }]);
+                        }}
+                        className="w-full"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Agregar Evento
+                      </Button>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  {/* Sección 3: Personal */}
                   <AccordionItem value="personal">
                     <AccordionTrigger>
                       <div className="flex items-center gap-2">
@@ -807,90 +891,6 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                       >
                         <Plus className="h-4 w-4 mr-2" />
                         Agregar Personal
-                      </Button>
-                    </AccordionContent>
-                  </AccordionItem>
-
-                  {/* Sección 3: Eventos */}
-                  <AccordionItem value="eventos">
-                    <AccordionTrigger>
-                      <div className="flex items-center gap-2">
-                        <CalendarIcon className="w-4 h-4" />
-                        Eventos ({events.length})
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="space-y-3 pt-3">
-                      {/* Lista de eventos */}
-                      {events.map((event, index) => (
-                        <div key={index} className="border rounded-lg p-3 space-y-3">
-                          <div className="flex items-center justify-between">
-                            <h4 className="text-sm font-medium">Evento {index + 1}</h4>
-                            <button
-                              type="button"
-                              className="h-6 w-6 rounded-md hover:bg-gray-100 flex items-center justify-center"
-                              onClick={() => {
-                                const newEvents = events.filter((_, i) => i !== index);
-                                setEvents(newEvents);
-                              }}
-                            >
-                              <X className="h-4 w-4" />
-                            </button>
-                          </div>
-
-                          <div>
-                            <label className="text-xs font-medium text-muted-foreground">Tipo de evento</label>
-                            <Select 
-                              value={event.event_type_id} 
-                              onValueChange={(value) => {
-                                const newEvents = [...events];
-                                newEvents[index].event_type_id = value;
-                                setEvents(newEvents);
-                              }}
-                            >
-                              <SelectTrigger className="h-8 text-sm">
-                                <SelectValue placeholder="Seleccionar tipo" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {eventTypes?.map((eventType: any) => (
-                                  <SelectItem key={eventType.id} value={eventType.id}>
-                                    {eventType.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-
-                          <div>
-                            <label className="text-xs font-medium text-muted-foreground">Descripción</label>
-                            <Textarea
-                              className="min-h-[60px] text-sm"
-                              placeholder="Describe el evento..."
-                              value={event.description}
-                              onChange={(e) => {
-                                const newEvents = [...events];
-                                newEvents[index].description = e.target.value;
-                                setEvents(newEvents);
-                              }}
-                            />
-                          </div>
-                        </div>
-                      ))}
-
-                      {/* Botón para agregar evento */}
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setEvents([...events, {
-                            event_type_id: '',
-                            description: ''
-                          }]);
-                        }}
-                        className="w-full"
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Agregar Evento
                       </Button>
                     </AccordionContent>
                   </AccordionItem>
