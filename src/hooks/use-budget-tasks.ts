@@ -15,13 +15,24 @@ export interface BudgetTask {
   organization_id: string;
   created_at: string;
   updated_at: string;
-  // Datos de la tarea relacionada
+  // Datos de la tarea relacionada con categoría y unidad
   task: {
     id: string;
     name: string;
     description: string;
     unit_labor_price: number;
     unit_material_price: number;
+    category_id: string | null;
+    unit_id: string | null;
+    task_categories: {
+      id: string;
+      name: string;
+    } | null;
+    units: {
+      id: string;
+      name: string;
+      symbol: string;
+    } | null;
   };
 }
 
@@ -67,7 +78,18 @@ export function useBudgetTasks(budgetId: string) {
             name,
             description,
             unit_labor_price,
-            unit_material_price
+            unit_material_price,
+            category_id,
+            unit_id,
+            task_categories(
+              id,
+              name
+            ),
+            units(
+              id,
+              name,
+              symbol
+            )
           )
         `)
         .eq("budget_id", budgetId)

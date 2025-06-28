@@ -342,7 +342,7 @@ export default function ConstructionBudgets() {
                       />
                     </td>
                     <td className="p-2 text-sm text-muted-foreground">
-                      {task.task?.category?.name || 'Sin categoría'}
+                      {task.task?.task_categories?.name || 'Sin categoría'}
                     </td>
                     <td className="p-2">
                       <div className="font-medium text-sm">{task.task?.name || 'Sin nombre'}</div>
@@ -351,7 +351,7 @@ export default function ConstructionBudgets() {
                       )}
                     </td>
                     <td className="p-2 text-sm">
-                      {task.task?.unit?.abbreviation || task.task?.unit?.name || 'Sin unidad'}
+                      {task.task?.units?.symbol || task.task?.units?.name || 'Sin unidad'}
                     </td>
                     <td className="p-2">
                       <input
