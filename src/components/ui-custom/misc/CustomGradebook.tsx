@@ -66,14 +66,18 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
     return groups
   }, [workers])
 
-  // Auto-center on today when component loads
+  // Auto-center on today ONLY on initial load
+  const [hasInitialized, setHasInitialized] = React.useState(false)
   React.useEffect(() => {
-    const today = startOfDay(new Date())
-    const newStart = subDays(today, 15)
-    const newEnd = addDays(today, 15)
-    onStartDateChange?.(newStart)
-    onEndDateChange?.(newEnd)
-  }, []) // Only run on mount
+    if (!hasInitialized) {
+      const today = startOfDay(new Date())
+      const newStart = subDays(today, 15)
+      const newEnd = addDays(today, 15)
+      onStartDateChange?.(newStart)
+      onEndDateChange?.(newEnd)
+      setHasInitialized(true)
+    }
+  }, [hasInitialized]) // Only run once on mount
 
   // Navigate dates
   const navigateDates = (direction: 'prev' | 'next') => {
@@ -145,6 +149,36 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
   const handleMouseLeave = () => {
     setIsDragging(false)
   }
+
+  // Smooth scroll functionality for hover navigation
+  const scrollIntervalRef = React.useRef<NodeJS.Timeout | null>(null)
+  
+  const startSmoothScroll = (direction: 'left' | 'right') => {
+    if (scrollIntervalRef.current) return
+    
+    scrollIntervalRef.current = setInterval(() => {
+      if (timelineElement) {
+        const scrollAmount = direction === 'left' ? -2 : 2 // Small increments for smooth scroll
+        timelineElement.scrollLeft += scrollAmount
+      }
+    }, 16) // ~60fps for smooth animation
+  }
+
+  const stopSmoothScroll = () => {
+    if (scrollIntervalRef.current) {
+      clearInterval(scrollIntervalRef.current)
+      scrollIntervalRef.current = null
+    }
+  }
+
+  // Cleanup interval on unmount
+  React.useEffect(() => {
+    return () => {
+      if (scrollIntervalRef.current) {
+        clearInterval(scrollIntervalRef.current)
+      }
+    }
+  }, [])
 
   const getAttendanceStatus = (workerId: string, date: Date) => {
     const dayString = format(date, 'yyyy-MM-dd')
@@ -309,31 +343,35 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
 
           {/* Timeline Column with Drag Navigation */}
           <div className="flex-1 relative min-w-0 group">
-            {/* Left Navigation Button - Full height, appears on hover */}
-            <Button
-              variant="ghost"
-              className="absolute left-0 z-20 w-[15px] h-full bg-background/80 backdrop-blur-sm border-r border-border hover:bg-muted/80 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-none flex items-center justify-center"
+            {/* Left Hover Area - Almost invisible, smooth scroll on hover */}
+            <div
+              className="absolute left-0 z-20 w-[15px] h-full bg-transparent hover:bg-muted/10 transition-all duration-300 cursor-pointer"
               style={{ 
                 top: '65px',
                 height: `calc(100% - 65px)`
               }}
-              onClick={() => navigateDates('prev')}
+              onMouseEnter={() => startSmoothScroll('left')}
+              onMouseLeave={stopSmoothScroll}
             >
-              <ChevronLeft className="w-3 h-3" />
-            </Button>
+              <div className="w-full h-full flex items-center justify-center opacity-0 hover:opacity-30 transition-opacity duration-300">
+                <ChevronLeft className="w-3 h-3 text-muted-foreground" />
+              </div>
+            </div>
 
-            {/* Right Navigation Button - Full height, appears on hover */}
-            <Button
-              variant="ghost"
-              className="absolute right-0 z-20 w-[15px] h-full bg-background/80 backdrop-blur-sm border-l border-border hover:bg-muted/80 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-none flex items-center justify-center"
+            {/* Right Hover Area - Almost invisible, smooth scroll on hover */}
+            <div
+              className="absolute right-0 z-20 w-[15px] h-full bg-transparent hover:bg-muted/10 transition-all duration-300 cursor-pointer"
               style={{ 
                 top: '65px',
                 height: `calc(100% - 65px)`
               }}
-              onClick={() => navigateDates('next')}
+              onMouseEnter={() => startSmoothScroll('right')}
+              onMouseLeave={stopSmoothScroll}
             >
-              <ChevronRight className="w-3 h-3" />
-            </Button>
+              <div className="w-full h-full flex items-center justify-center opacity-0 hover:opacity-30 transition-opacity duration-300">
+                <ChevronRight className="w-3 h-3 text-muted-foreground" />
+              </div>
+            </div>
 
             {/* Scrollable Timeline - hidden scrollbar */}
             <div 
@@ -341,7 +379,8 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
                 // Set timeline element for both auto-scroll and drag functionality
                 setTimelineElement(el)
                 
-                if (el && dateRange.length > 0) {
+                // Only auto-center on initial load, not on every re-render
+                if (el && dateRange.length > 0 && hasInitialized) {
                   // Use setTimeout to ensure DOM is fully rendered
                   setTimeout(() => {
                     const todayIndex = dateRange.findIndex(date => isToday(date))
