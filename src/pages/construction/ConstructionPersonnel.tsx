@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { format } from 'date-fns'
+import { useLocation } from 'wouter'
 
 // Hook to fetch personnel attendance data
 function usePersonnelAttendance(projectId: string | undefined, organizationId: string | undefined) {
@@ -323,7 +324,7 @@ export default function ConstructionPersonnel() {
             title="Sin personal registrado"
             description="No hay registros de asistencia para este proyecto. El personal aparecerá aquí cuando se registren entradas de bitácora con asistencia."
             action={
-              <Button onClick={() => window.location.href = '/construction/logs'}>
+              <Button onClick={() => navigate('/bitacora')}>
                 <FileText className="w-4 h-4 mr-2" />
                 Ir a Bitácora
               </Button>
