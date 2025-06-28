@@ -57,7 +57,7 @@ export default function ConstructionBudgets() {
   const [newBudgetModalOpen, setNewBudgetModalOpen] = useState(false)
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null)
   const [deletingBudget, setDeletingBudget] = useState<Budget | null>(null)
-  const [expandedAccordion, setExpandedAccordion] = useState<string>('')
+  const [selectedBudgetId, setSelectedBudgetId] = useState<string>('')
   const [budgetTaskModalOpen, setBudgetTaskModalOpen] = useState(false)
   const [currentBudgetId, setCurrentBudgetId] = useState<string>('')
   const [editingBudgetTask, setEditingBudgetTask] = useState<any>(null)
@@ -78,6 +78,16 @@ export default function ConstructionBudgets() {
       if (sortBy === 'status') return a.status.localeCompare(b.status)
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     })
+
+  // Auto-select first budget when budgets load
+  useEffect(() => {
+    if (filteredBudgets.length > 0 && !selectedBudgetId) {
+      setSelectedBudgetId(filteredBudgets[0].id);
+    }
+  }, [filteredBudgets, selectedBudgetId]);
+
+  // Get selected budget
+  const selectedBudget = filteredBudgets.find(budget => budget.id === selectedBudgetId);
 
   // Delete budget mutation
   const deleteBudgetMutation = useMutation({
@@ -132,6 +142,40 @@ export default function ConstructionBudgets() {
     setBudgetTaskModalOpen(false)
     setCurrentBudgetId('')
     setEditingBudgetTask(null)
+  }
+
+  // Delete task mutation
+  const deleteTaskMutation = useMutation({
+    mutationFn: async (taskId: string) => {
+      if (!supabase) throw new Error('Supabase client not available')
+      
+      const { error } = await supabase
+        .from('budget_tasks')
+        .delete()
+        .eq('id', taskId)
+
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['budget-tasks'] })
+      toast({
+        title: "Tarea eliminada",
+        description: "La tarea ha sido eliminada del presupuesto",
+      })
+    },
+    onError: (error) => {
+      console.error('Error deleting task:', error)
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar la tarea",
+        variant: "destructive",
+      })
+    }
+  })
+
+  // Handle delete task
+  const handleDeleteTask = (taskId: string) => {
+    deleteTaskMutation.mutate(taskId)
   }
 
 
@@ -338,9 +382,7 @@ export default function ConstructionBudgets() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => {
-                            console.log('Delete task:', task.id);
-                          }}
+                          onClick={() => handleDeleteTask(task.id)}
                           className="h-7 w-7 p-0 text-destructive hover:text-destructive"
                         >
                           <Trash2 className="h-3 w-3" />
@@ -419,77 +461,85 @@ export default function ConstructionBudgets() {
               </Card>
             </div>
 
-            <Accordion 
-              type="single" 
-              collapsible 
-              value={expandedAccordion}
-              onValueChange={setExpandedAccordion}
-              className="space-y-4"
-            >
-            {filteredBudgets.map((budget: Budget) => (
-              <AccordionItem 
-                key={budget.id} 
-                value={budget.id}
-                className="border rounded-lg overflow-hidden"
-              >
-                <Card className="border-0">
-                  <div className="flex items-center justify-between w-full p-4">
-                    <AccordionTrigger className="hover:no-underline flex-1 text-left mr-4">
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                          <Building2 className="h-4 w-4 text-primary" />
-                        </div>
-                        <div className="text-left">
-                          <h3 className="font-medium text-sm">{budget.name}</h3>
-                          {budget.description && (
-                            <p className="text-xs text-muted-foreground">{budget.description}</p>
-                          )}
-                        </div>
-                      </div>
-                    </AccordionTrigger>
-                    
-                    <div className="flex items-center gap-2">
-                      <Button
-                        size="sm"
-                        className="h-7 px-2 text-xs"
-                        onClick={() => handleAddTask(budget.id)}
-                      >
-                        <Plus className="w-3 h-3 mr-1" />
-                        Agregar Tarea
-                      </Button>
-                      
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 w-7 p-0"
-                        onClick={() => {
-                          setEditingBudget(budget)
-                          setNewBudgetModalOpen(true)
-                        }}
-                      >
-                        <Building2 className="w-3 h-3" />
-                      </Button>
-                      
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 w-7 p-0 text-destructive hover:text-destructive"
-                        onClick={() => handleDeleteBudget(budget)}
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </div>
+            {/* Single Budget Card with Selector */}
+            <Card className="border rounded-lg overflow-hidden">
+              <div className="flex items-center justify-between w-full p-4 border-b">
+                <div className="flex items-center gap-3 flex-1">
+                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Building2 className="h-4 w-4 text-primary" />
                   </div>
                   
-                  <AccordionContent className="px-4 pb-4">
-                    <div className="pt-4 border-t">
-                      <BudgetTaskTable budgetId={budget.id} />
-                    </div>
-                  </AccordionContent>
-                </Card>
-              </AccordionItem>
-            ))}
-          </Accordion>
+                  {/* Budget Selector */}
+                  <div className="flex-1">
+                    <Select value={selectedBudgetId} onValueChange={setSelectedBudgetId}>
+                      <SelectTrigger className="w-full max-w-sm">
+                        <SelectValue placeholder="Selecciona un presupuesto" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {filteredBudgets.map((budget: Budget) => (
+                          <SelectItem key={budget.id} value={budget.id}>
+                            <div>
+                              <div className="font-medium text-sm">{budget.name}</div>
+                              {budget.description && (
+                                <div className="text-xs text-muted-foreground">{budget.description}</div>
+                              )}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    className="h-7 px-2 text-xs"
+                    onClick={() => selectedBudget && handleAddTask(selectedBudget.id)}
+                    disabled={!selectedBudget}
+                  >
+                    <Plus className="w-3 h-3 mr-1" />
+                    Agregar Tarea
+                  </Button>
+                  
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 w-7 p-0"
+                    onClick={() => {
+                      if (selectedBudget) {
+                        setEditingBudget(selectedBudget)
+                        setNewBudgetModalOpen(true)
+                      }
+                    }}
+                    disabled={!selectedBudget}
+                  >
+                    <Building2 className="w-3 h-3" />
+                  </Button>
+                  
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                    onClick={() => selectedBudget && handleDeleteBudget(selectedBudget)}
+                    disabled={!selectedBudget}
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                </div>
+              </div>
+              
+              {/* Budget Tasks Table */}
+              <div className="p-4">
+                {selectedBudget ? (
+                  <BudgetTaskTable budgetId={selectedBudget.id} />
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    Selecciona un presupuesto para ver sus tareas
+                  </div>
+                )}
+              </div>
+            </Card>
           </>
         )}
       </div>
@@ -503,7 +553,7 @@ export default function ConstructionBudgets() {
             setEditingBudget(null)
           }}
           editingBudget={editingBudget}
-          onSuccess={(budgetId) => setExpandedAccordion(budgetId)}
+          onSuccess={(budgetId) => setSelectedBudgetId(budgetId)}
         />
       )}
 
