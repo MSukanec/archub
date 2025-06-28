@@ -221,94 +221,6 @@ export default function OrganizationProjects() {
   // Obtener el proyecto seleccionado para mostrar información
   const selectedProject = projects?.find(p => p.id === userData?.preferences?.last_project_id);
 
-  // Si no hay proyectos, mostrar estado vacío
-  if (filteredProjects.length === 0) {
-    return (
-      <Layout headerProps={headerProps}>
-        <CustomEmptyState
-          icon={<Folder />}
-          title={searchValue || filterByStatus !== 'all' ? "No se encontraron proyectos" : "No hay proyectos creados"}
-          description={searchValue || filterByStatus !== 'all' 
-            ? 'Prueba ajustando los filtros de búsqueda para encontrar los proyectos que buscas' 
-            : 'Comienza creando tu primer proyecto para gestionar tu trabajo y organizar tus tareas'
-          }
-          action={
-            !searchValue && filterByStatus === 'all' && (
-              <CustomRestricted feature="max_projects" current={filteredProjects?.length || 0}>
-                <Button 
-                  onClick={() => setShowNewProjectModal(true)}
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Crear Primer Proyecto
-                </Button>
-              </CustomRestricted>
-            )
-          }
-        />
-        
-        {/* New Project Modal */}
-        {showNewProjectModal && (
-          <NewProjectModal
-            open={showNewProjectModal}
-            onClose={() => {
-              setShowNewProjectModal(false)
-              setEditingProject(null)
-            }}
-            editingProject={editingProject}
-          />
-        )}
-
-        {/* Dialog de confirmación para eliminar */}
-        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>¿Eliminar proyecto?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Esta acción eliminará permanentemente el proyecto "{projectToDelete?.name}". 
-                Esta acción no se puede deshacer.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={async () => {
-                  if (projectToDelete && supabase) {
-                    try {
-                      const { error } = await supabase
-                        .from('projects')
-                        .delete()
-                        .eq('id', projectToDelete.id)
-
-                      if (error) throw error
-
-                      queryClient.invalidateQueries({ queryKey: ['projects'] })
-                      toast({
-                        title: "Proyecto eliminado",
-                        description: "El proyecto ha sido eliminado correctamente."
-                      })
-                    } catch (error) {
-                      console.error('Error deleting project:', error)
-                      toast({
-                        title: "Error",
-                        description: "No se pudo eliminar el proyecto.",
-                        variant: "destructive"
-                      })
-                    }
-                  }
-                  setDeleteDialogOpen(false)
-                  setProjectToDelete(null)
-                }}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              >
-                Eliminar
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </Layout>
-    )
-  }
-
   return (
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
@@ -485,6 +397,27 @@ export default function OrganizationProjects() {
               </Card>
             )
           })}
+
+          {filteredProjects.length === 0 && (
+            <CustomEmptyState
+              icon={<Folder className="w-12 h-12 text-muted-foreground" />}
+              title={searchValue || filterByStatus !== 'all' ? "No se encontraron proyectos" : "No hay proyectos creados"}
+              description={searchValue || filterByStatus !== 'all' 
+                ? 'Prueba ajustando los filtros de búsqueda' 
+                : 'Comienza creando tu primer proyecto para gestionar tu trabajo'
+              }
+              action={
+                !searchValue && filterByStatus === 'all' && (
+                  <CustomRestricted feature="max_projects" current={filteredProjects?.length || 0}>
+                    <Button onClick={() => setShowNewProjectModal(true)}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Crear Primer Proyecto
+                    </Button>
+                  </CustomRestricted>
+                )
+              }
+            />
+          )}
         </div>
       </div>
 

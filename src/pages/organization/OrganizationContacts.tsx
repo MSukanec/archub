@@ -155,73 +155,66 @@ export default function OrganizationContacts() {
 
   // Mostrar CustomEmptyState si no hay contactos
   if (filteredContacts.length === 0 && !isLoading && !contactsLoading) {
-    const headerProps = {
-      title: "Contactos",
-      showSearch: true,
-      searchValue,
-      onSearchChange: setSearchValue,
-      customFilters: (
-        <div className="flex flex-col gap-3 p-3 w-72">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="sort" className="text-xs font-medium">Ordenar por</Label>
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="h-8">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="name_asc">Nombre A-Z</SelectItem>
-                <SelectItem value="name_desc">Nombre Z-A</SelectItem>
-                <SelectItem value="date_desc">Más recientes</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="type" className="text-xs font-medium">Filtrar por tipo</Label>
-            <Select value={filterByType} onValueChange={setFilterByType}>
-              <SelectTrigger className="h-8">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos los tipos</SelectItem>
-                {contactTypes.map((type) => (
-                  <SelectItem key={type.id} value={type.id}>
-                    {type.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      ),
-      onClearFilters: handleClearFilters,
-      actions: [
-        <Button key="new" size="sm" onClick={() => setShowCreateModal(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Nuevo Contacto
-        </Button>
-      ]
-    }
-
     return (
-      <Layout wide={true} headerProps={headerProps}>
-        <CustomEmptyState
-          icon={<Users />}
-          title={searchValue || filterByType !== 'all' ? "No se encontraron contactos" : "No hay contactos"}
-          description={searchValue || filterByType !== 'all' 
-            ? 'Prueba ajustando los filtros de búsqueda para encontrar los contactos que buscas' 
-            : 'Comienza agregando tu primer contacto para gestionar las comunicaciones de la organización'
-          }
-          action={
-            !searchValue && filterByType === 'all' && (
-              <Button 
-                onClick={() => setShowCreateModal(true)}
-              >
+      <Layout wide={true} headerProps={{
+        title: "Contactos",
+        showSearch: true,
+        searchValue,
+        onSearchChange: setSearchValue,
+        customFilters: (
+          <div className="flex flex-col gap-3 p-3 w-72">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="sort" className="text-xs font-medium">Ordenar por</Label>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="name_asc">Nombre A-Z</SelectItem>
+                  <SelectItem value="name_desc">Nombre Z-A</SelectItem>
+                  <SelectItem value="date_desc">Más recientes</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="type" className="text-xs font-medium">Filtrar por tipo</Label>
+              <Select value={filterByType} onValueChange={setFilterByType}>
+                <SelectTrigger className="h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los tipos</SelectItem>
+                  {contactTypes.map((type) => (
+                    <SelectItem key={type.id} value={type.id}>
+                      {type.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        ),
+        onClearFilters: handleClearFilters,
+        actions: [
+          <Button key="new" size="sm" onClick={() => setShowCreateModal(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Nuevo Contacto
+          </Button>
+        ]
+      }}>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <CustomEmptyState
+            icon={<Users className="w-8 h-8 text-muted-foreground" />}
+            title="No hay contactos"
+            description="Comienza agregando tu primer contacto a la organización"
+            action={
+              <Button onClick={() => setShowCreateModal(true)}>
                 <Plus className="w-4 h-4 mr-2" />
-                Crear Primer Contacto
+                Nuevo Contacto
               </Button>
-            )
-          }
-        />
+            }
+          />
+        </div>
         
         {showCreateModal && (
           <NewContactModal
