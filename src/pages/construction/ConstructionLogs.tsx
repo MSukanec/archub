@@ -483,10 +483,7 @@ export default function ConstructionLogs() {
                               {entryTypeConfig?.label || 'Sin tipo'}
                             </span>
 
-                            {/* Status indicators */}
-                            <div className="flex gap-1 ml-auto">
-                              {siteLog.is_public ? <Globe className="h-3 w-3 text-green-500" /> : <Lock className="h-3 w-3 text-gray-400" />}
-                            </div>
+
                           </div>
                         </div>
                       </CollapsibleTrigger>

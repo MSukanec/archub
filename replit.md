@@ -119,6 +119,17 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 28, 2025. Site logs UI optimization with compact layout and auto-expansion
+  • Optimized collapsed site log cards to single row format: Fecha y Hora - Clima - Creador - Tipo de Entrada
+  • Added border to creator avatar for better visual definition (border border-primary/20)
+  • Implemented auto-expansion of most recent site log entry when page loads
+  • Removed status indicator icons for cleaner interface design
+  • Fixed database queries to fetch related data (events, personnel, equipment) using separate calls
+  • Enhanced expanded view with individual cards for each event, personnel, and equipment item
+  • Each related data item displays as colored card with proper spacing and typography
+  • Events show blue cards, personnel show green cards, equipment shows orange cards
+  • All related data properly integrated with site log creation and display functionality
+
 - June 28, 2025. CustomGradebook component for visual attendance tracking and Personnel accordion completion
   • Created CustomGradebook.tsx component in src/components/ui-custom/misc/ with professional gradebook-style interface
   • Component displays workers as rows, days (01-30) as columns, with colored circles for attendance status
