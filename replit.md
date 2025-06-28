@@ -126,7 +126,8 @@ Changelog:
   • Personnel names column (264px width) has fixed background and doesn't scroll with timeline data
   • Timeline column scrolls independently with horizontal scrollbar only affecting attendance grid
   • Enhanced visual separation between personnel list and attendance tracking timeline
-  • Fixed border alignment between personnel rows and timeline rows for seamless visual continuity
+  • Fixed border alignment between personnel rows and timeline rows by restructuring layout to account for scrollbar space
+  • Redesigned gradebook structure using unified flex rows instead of separate table/div sections for perfect alignment
   • Added "Hoy" (Today) button in navigation controls to quickly center view on current date
   • Implemented vertical blue indicator line showing today's date across entire timeline
   • Default date range now centers on today (15 days before and after) instead of starting from today
