@@ -53,11 +53,13 @@ const siteLogSchema = z.object({
   comments: z.string().min(1, 'Comentarios son requeridos'),
   is_public: z.boolean().default(true),
   is_favorite: z.boolean().default(false),
-  events: z.array(siteLogEventSchema).default([])
+  events: z.array(siteLogEventSchema).default([]),
+  attendees: z.array(siteLogAttendeeSchema).default([])
 })
 
 type SiteLogForm = z.infer<typeof siteLogSchema>
 type SiteLogEventForm = z.infer<typeof siteLogEventSchema>
+type SiteLogAttendeeForm = z.infer<typeof siteLogAttendeeSchema>
 
 // Definir tipos exactos basados en la base de datos
 interface SiteLog {
@@ -199,7 +201,6 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
         const eventsData = events.map(event => ({
           site_log_id: siteLogResult.data.id,
           event_type_id: event.event_type_id,
-          event_date: event.event_date.toISOString().split('T')[0],
           description: event.description,
           is_custom: event.is_custom
         }))
@@ -508,16 +509,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
 
                             <div>
                               <label className="text-xs font-medium text-muted-foreground">Fecha del evento</label>
-                              <Input
-                                type="date"
-                                className="h-8 text-sm"
-                                value={event.event_date.toISOString().split('T')[0]}
-                                onChange={(e) => {
-                                  const newEvents = [...events];
-                                  newEvents[index].event_date = new Date(e.target.value);
-                                  setEvents(newEvents);
-                                }}
-                              />
+
                             </div>
                           </div>
 
@@ -545,7 +537,6 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                         onClick={() => {
                           setEvents([...events, {
                             event_type_id: '',
-                            event_date: new Date(),
                             description: '',
                             is_custom: false
                           }]);
