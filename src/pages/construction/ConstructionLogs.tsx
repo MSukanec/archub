@@ -85,7 +85,7 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
       const logIds = logsData.map(log => log.id);
 
       // Fetch events separately
-      const { data: eventsData } = await supabase
+      const { data: eventsData, error: eventsError } = await supabase
         .from('site_log_events')
         .select(`
           *,
@@ -94,7 +94,9 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
             name
           )
         `)
-        .in('log_id', logIds);
+        .in('site_log_id', logIds);
+      
+      console.log('Events query result:', { eventsData, eventsError, logIds });
 
       // Fetch attendees separately
       const { data: attendeesData } = await supabase
@@ -107,7 +109,7 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
             last_name
           )
         `)
-        .in('log_id', logIds);
+        .in('site_log_id', logIds);
 
       // Fetch equipment separately
       const { data: equipmentData } = await supabase
@@ -119,14 +121,14 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
             name
           )
         `)
-        .in('log_id', logIds);
+        .in('site_log_id', logIds);
 
       // Combine data
       const data = logsData.map(log => ({
         ...log,
-        events: eventsData?.filter(event => event.log_id === log.id) || [],
-        attendees: attendeesData?.filter(attendee => attendee.log_id === log.id) || [],
-        equipment: equipmentData?.filter(equip => equip.log_id === log.id) || []
+        events: eventsData?.filter(event => event.site_log_id === log.id) || [],
+        attendees: attendeesData?.filter(attendee => attendee.site_log_id === log.id) || [],
+        equipment: equipmentData?.filter(equip => equip.site_log_id === log.id) || []
       }));
 
       console.log('Site logs with related data:', data);
@@ -543,20 +545,20 @@ export default function ConstructionLogs() {
                           <div>
                             <span className="font-medium text-muted-foreground block mb-2">Eventos</span>
                             <div className="space-y-2">
-                              {siteLog.events && siteLog.events.length > 0 ? (
+                              {console.log('Events data for', siteLog.id, ':', siteLog.events)}
+                              {siteLog.events && Array.isArray(siteLog.events) && siteLog.events.length > 0 ? (
                                 siteLog.events.map((event: any, index: number) => (
                                   <Card key={index} className="p-2 bg-blue-50/50 border-blue-200">
                                     <div className="flex items-center justify-between mb-1">
                                       <span className="text-xs font-medium text-blue-800">
-                                        {event.event_type?.name || 'Evento'}
+                                        {event.event_type?.name || event.type || 'Evento'}
                                       </span>
-
                                     </div>
                                     <p className="text-xs text-gray-700">{event.description || 'Sin descripción'}</p>
                                   </Card>
                                 ))
                               ) : (
-                                <p className="text-xs text-muted-foreground">Sin eventos registrados</p>
+                                <p className="text-xs text-muted-foreground">Sin eventos registrados ({siteLog.events?.length || 0})</p>
                               )}
                             </div>
                           </div>
@@ -565,7 +567,8 @@ export default function ConstructionLogs() {
                           <div>
                             <span className="font-medium text-muted-foreground block mb-2">Personal</span>
                             <div className="space-y-2">
-                              {siteLog.attendees && siteLog.attendees.length > 0 ? (
+                              {console.log('Attendees data for', siteLog.id, ':', siteLog.attendees)}
+                              {siteLog.attendees && Array.isArray(siteLog.attendees) && siteLog.attendees.length > 0 ? (
                                 siteLog.attendees.map((attendee: any, index: number) => (
                                   <Card key={index} className="p-2 bg-green-50/50 border-green-200">
                                     <div className="flex items-center justify-between mb-1">
@@ -585,7 +588,7 @@ export default function ConstructionLogs() {
                                   </Card>
                                 ))
                               ) : (
-                                <p className="text-xs text-muted-foreground">Sin personal registrado</p>
+                                <p className="text-xs text-muted-foreground">Sin personal registrado ({siteLog.attendees?.length || 0})</p>
                               )}
                             </div>
                           </div>
