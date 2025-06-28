@@ -19,7 +19,6 @@ import { useNavigationStore } from "@/stores/navigationStore";
 import { useLocation } from "wouter";
 import { NewOrganizationModal } from "@/modals/NewOrganizationModal";
 import { NewProjectModal } from "@/modals/NewProjectModal";
-import { CustomButton } from "@/components/ui-custom/misc/CustomButton";
 
 interface HeaderProps {
   icon?: React.ComponentType<any>;
@@ -387,12 +386,13 @@ export function Header({
         {hasFilters && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <CustomButton
+              <Button
                 variant="ghost"
-                size="md"
-                iconOnly
-                icon={<Filter className="h-3 w-3" />}
-              />
+                size="icon"
+                className="h-8 w-8 hover:bg-[var(--button-ghost-hover-bg)]"
+              >
+                <Filter className="h-3 w-3" />
+              </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className={customFilters ? "w-72 p-2 space-y-3" : "w-48"}>
               {customFilters ? (
@@ -413,13 +413,14 @@ export function Header({
         )}
 
         {onClearFilters && (
-          <CustomButton
+          <Button
             variant="ghost"
-            size="md"
-            iconOnly
-            icon={<X className="h-3 w-3" />}
+            size="icon"
             onClick={onClearFilters}
-          />
+            className="h-8 w-8 hover:bg-[var(--button-ghost-hover-bg)]"
+          >
+            <X className="h-3 w-3" />
+          </Button>
         )}
 
         {actions && actions.length > 0 && (

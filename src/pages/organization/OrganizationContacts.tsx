@@ -16,7 +16,6 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { NewContactModal } from '@/modals/NewContactModal'
 import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState'
-import { CustomButton } from '@/components/ui-custom/misc/CustomButton'
 
 export default function OrganizationContacts() {
   const [searchValue, setSearchValue] = useState("")
@@ -197,15 +196,10 @@ export default function OrganizationContacts() {
         ),
         onClearFilters: handleClearFilters,
         actions: [
-          <CustomButton 
-            key="new" 
-            size="md" 
-            variant="primary"
-            icon={<Plus className="w-3 h-3" />}
-            onClick={() => setShowCreateModal(true)}
-          >
+          <Button key="new" size="sm" onClick={() => setShowCreateModal(true)}>
+            <Plus className="w-4 h-4 mr-2" />
             Nuevo Contacto
-          </CustomButton>
+          </Button>
         ]
       }}>
         <CustomEmptyState
@@ -213,14 +207,10 @@ export default function OrganizationContacts() {
           title="No hay contactos"
           description="Comienza agregando tu primer contacto a la organización"
           action={
-            <CustomButton 
-              variant="primary"
-              size="lg"
-              icon={<Plus className="w-3 h-3" />}
-              onClick={() => setShowCreateModal(true)}
-            >
+            <Button onClick={() => setShowCreateModal(true)}>
+              <Plus className="w-4 h-4 mr-2" />
               Nuevo Contacto
-            </CustomButton>
+            </Button>
           }
         />
         
