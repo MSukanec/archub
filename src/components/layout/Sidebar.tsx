@@ -56,16 +56,30 @@ export function Sidebar() {
   const { currentSidebarContext, setSidebarContext } = useNavigationStore();
   const queryClient = useQueryClient();
   
-  // Estado para acordeones con persistencia
-  const [expandedAccordions, setExpandedAccordions] = useState<{ [key: string]: boolean }>(() => {
-    const saved = localStorage.getItem('sidebar-accordions');
-    return saved ? JSON.parse(saved) : { obra: false, finanzas: false };
-  });
+  // Determine which accordions should be expanded based on current route
+  const getExpandedAccordions = () => {
+    const accordionState: { [key: string]: boolean } = { obra: false, finanzas: false };
+    
+    // Check if current route is in construction (obra) pages
+    if (location.startsWith('/construction/') || location === '/construction') {
+      accordionState.obra = true;
+    }
+    
+    // Check if current route is in finance (finanzas) pages  
+    if (location.startsWith('/finance/') || location === '/finance' || location === '/movimientos') {
+      accordionState.finanzas = true;
+    }
+    
+    return accordionState;
+  };
 
-  // Guardar estado de acordeones en localStorage
+  // Estado para acordeones basado en la ruta actual
+  const [expandedAccordions, setExpandedAccordions] = useState<{ [key: string]: boolean }>(getExpandedAccordions);
+
+  // Update accordion state when route changes
   useEffect(() => {
-    localStorage.setItem('sidebar-accordions', JSON.stringify(expandedAccordions));
-  }, [expandedAccordions]);
+    setExpandedAccordions(getExpandedAccordions());
+  }, [location]);
 
   // Theme toggle mutation
   const themeToggleMutation = useMutation({
@@ -137,13 +151,6 @@ export function Sidebar() {
   }, [currentSidebarContext]);
   
   // Project selector removed as requested
-  
-  const toggleAccordion = (key: string) => {
-    setExpandedAccordions(prev => ({
-      ...prev,
-      [key]: !prev[key as keyof typeof prev]
-    }));
-  };
 
   // Different navigation items based on context
   const sidebarContexts = {
@@ -168,7 +175,6 @@ export function Sidebar() {
         href: '#', 
         isAccordion: true,
         expanded: expandedAccordions.obra,
-        onToggle: () => toggleAccordion('obra'),
         children: [
           { icon: Home, label: 'Resumen de Obra', href: '/construction/dashboard' },
           { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
@@ -183,7 +189,6 @@ export function Sidebar() {
         href: '#', 
         isAccordion: true,
         expanded: expandedAccordions.finanzas,
-        onToggle: () => toggleAccordion('finanzas'),
         children: [
           { icon: Home, label: 'Resumen de Finanzas', href: '/finance/dashboard' },
           { icon: DollarSign, label: 'Movimientos', href: '/movimientos' }
@@ -247,7 +252,7 @@ export function Sidebar() {
                   label={item.label}
                   isActive={location === item.href}
                   isExpanded={isExpanded}
-                  onClick={item.isAccordion ? item.onToggle : (item.onClick || (() => navigate(item.href)))}
+                  onClick={item.isAccordion ? undefined : (item.onClick || (() => navigate(item.href)))}
                   rightIcon={item.isAccordion && isExpanded ? (
                     item.expanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />
                   ) : undefined}
