@@ -187,6 +187,16 @@ export function Header({
                   </DropdownMenuItem>
                 ))}
                 <DropdownMenuSeparator />
+                <div
+                  className="relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-[var(--accent-bg)] focus:bg-[var(--accent-bg)]"
+                  onClick={() => {
+                    setShowNewOrganizationModal(true);
+                  }}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Nueva organización
+                </div>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => navigate('/organizaciones')}>
                   <Building className="mr-2 h-4 w-4" />
                   Gestión de Organizaciones
@@ -240,13 +250,15 @@ export function Header({
                       </DropdownMenuItem>
                     ))}
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem 
-                      className="text-sm"
-                      onClick={() => navigate('/organization/projects')}
-                    >
-                      <Folder className="mr-2 h-4 w-4" />
-                      Gestión de Proyectos
-                    </DropdownMenuItem>
+                    <CustomRestricted feature="max_projects" current={projects?.length || 0}>
+                      <DropdownMenuItem 
+                        className="text-sm"
+                        onClick={() => setShowNewProjectModal(true)}
+                      >
+                        <Plus className="mr-2 h-4 w-4" />
+                        Nuevo proyecto
+                      </DropdownMenuItem>
+                    </CustomRestricted>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
