@@ -60,8 +60,7 @@ function ContactOptionsInner({ organizationId, contactTypeId }: ContactOptionsPr
 // Schema para eventos
 const siteLogEventSchema = z.object({
   event_type_id: z.string().min(1, 'Tipo de evento es requerido'),
-  description: z.string().min(1, 'Descripción es requerida'),
-  is_custom: z.boolean().default(false)
+  description: z.string().min(1, 'Descripción es requerida')
 })
 
 // Schema para personal
@@ -182,7 +181,14 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
         is_public: editingSiteLog.is_public,
         is_favorite: editingSiteLog.is_favorite
       })
+      
+      // Load events and attendees for editing
+      loadSiteLogData(editingSiteLog.id)
     } else {
+      // Reset events and attendees for new entries
+      setEvents([])
+      setAttendees([])
+      
       // Seleccionar usuario actual por defecto en modo creación
       const currentUserMember = members?.find((member: any) => member.users.id === userData?.user?.id);
       if (currentUserMember?.id) {
@@ -190,6 +196,43 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
       }
     }
   }, [editingSiteLog, userData, members, form])
+
+  // Function to load site log events and attendees
+  const loadSiteLogData = async (siteLogId: string) => {
+    if (!supabase) return
+
+    try {
+      // Load events
+      const { data: eventsData } = await supabase
+        .from('site_log_events')
+        .select('*')
+        .eq('site_log_id', siteLogId)
+
+      if (eventsData) {
+        setEvents(eventsData.map(event => ({
+          event_type_id: event.event_type_id,
+          description: event.description || ''
+        })))
+      }
+
+      // Load attendees
+      const { data: attendeesData } = await supabase
+        .from('site_log_attendees')
+        .select('*')
+        .eq('log_id', siteLogId)
+
+      if (attendeesData) {
+        setAttendees(attendeesData.map(attendee => ({
+          contact_type_id: 'all',
+          contact_id: attendee.contact_id,
+          attendance_type: attendee.attendance_type,
+          description: attendee.description || ''
+        })))
+      }
+    } catch (error) {
+      console.error('Error loading site log data:', error)
+    }
+  }
 
   // Mutación para crear/editar site log
   const createSiteLogMutation = useMutation({
@@ -242,8 +285,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
         const eventsData = events.map(event => ({
           site_log_id: siteLogResult.data.id,
           event_type_id: event.event_type_id,
-          description: event.description,
-          is_custom: event.is_custom
+          description: event.description
         }))
 
         const eventsResult = await supabase

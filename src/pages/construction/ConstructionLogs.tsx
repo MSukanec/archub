@@ -60,7 +60,16 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
       const { data, error } = await supabase
         .from('site_logs')
         .select(`
-          *
+          *,
+          creator:organization_members!created_by(
+            id,
+            user:users(
+              first_name,
+              last_name,
+              full_name,
+              avatar_url
+            )
+          )
         `)
         .eq('project_id', projectId)
         .order('created_at', { ascending: false });
@@ -362,11 +371,11 @@ export default function ConstructionLogs() {
                           <div className="col-span-2 flex items-center gap-2">
                             <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center">
                               <span className="text-xs font-medium text-primary">
-                                {siteLog.created_by_member?.user?.full_name?.charAt(0) || 'U'}
+                                {siteLog.creator?.user?.full_name?.charAt(0) || 'U'}
                               </span>
                             </div>
                             <span className="text-xs font-medium truncate">
-                              {siteLog.created_by_member?.user?.full_name || 'Usuario desconocido'}
+                              {siteLog.creator?.user?.full_name || 'Usuario desconocido'}
                             </span>
                           </div>
 
