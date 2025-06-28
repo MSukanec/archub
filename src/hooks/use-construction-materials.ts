@@ -29,6 +29,7 @@ export function useConstructionMaterials(projectId: string) {
           id,
           task_id,
           budget_id,
+          quantity,
           budgets!inner (
             id,
             project_id
@@ -55,7 +56,7 @@ export function useConstructionMaterials(projectId: string) {
           id,
           task_id,
           material_id,
-          quantity,
+          amount,
           materials:material_id (
             id,
             name,
@@ -86,9 +87,9 @@ export function useConstructionMaterials(projectId: string) {
           const existingMaterial = materialMap.get(material.id);
           
           // For each task material, we need to multiply by the budget task quantity
-          const budgetTask = budgetTasksData.find(bt => bt.task_id === item.task_id);
-          const budgetTaskQuantity = budgetTask ? 1 : 1; // Default to 1 if not found for now
-          const totalQuantity = (item.quantity || 0) * budgetTaskQuantity;
+          const budgetTask = budgetTasksData.find((bt: any) => bt.task_id === item.task_id);
+          const budgetTaskQuantity = budgetTask?.quantity || 1;
+          const totalQuantity = (item.amount || 0) * budgetTaskQuantity;
           
           if (existingMaterial) {
             existingMaterial.computed_quantity += totalQuantity;
