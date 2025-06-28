@@ -86,7 +86,7 @@ const siteLogSchema = z.object({
     'foto_diaria',
     'registro_general'
   ]),
-  weather: z.enum(['sunny', 'cloudy', 'rainy', 'stormy', 'windy', 'snowy', 'hot', 'cold']).nullable(),
+  weather: z.enum(['sunny', 'partly_cloudy', 'cloudy', 'rain', 'storm', 'snow', 'fog', 'windy', 'hail', 'none']).nullable(),
   comments: z.string().min(1, 'Comentarios son requeridos'),
   is_public: z.boolean().default(true),
   is_favorite: z.boolean().default(false),
@@ -390,16 +390,17 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
     { value: 'registro_general', label: 'Registro general', icon: '📝' }
   ]
 
-  // Opciones de clima con iconos
+  // Opciones de clima con iconos (basado en enum de la base de datos)
   const weatherOptions = [
     { value: 'sunny', label: 'Soleado', icon: '☀️' },
+    { value: 'partly_cloudy', label: 'Parcialmente nublado', icon: '⛅' },
     { value: 'cloudy', label: 'Nublado', icon: '☁️' },
-    { value: 'rainy', label: 'Lluvioso', icon: '🌧️' },
-    { value: 'stormy', label: 'Tormentoso', icon: '⛈️' },
+    { value: 'rain', label: 'Lluvia', icon: '🌧️' },
+    { value: 'storm', label: 'Tormenta', icon: '⛈️' },
+    { value: 'snow', label: 'Nieve', icon: '❄️' },
+    { value: 'fog', label: 'Niebla', icon: '🌫️' },
     { value: 'windy', label: 'Ventoso', icon: '💨' },
-    { value: 'snowy', label: 'Nevado', icon: '❄️' },
-    { value: 'hot', label: 'Caluroso', icon: '🌡️' },
-    { value: 'cold', label: 'Frío', icon: '🥶' }
+    { value: 'hail', label: 'Granizo', icon: '🧊' }
   ]
 
   if (!open) return null
