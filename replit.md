@@ -119,6 +119,16 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 28, 2025. CustomGradebook component for visual attendance tracking and Personnel accordion completion
+  • Created CustomGradebook.tsx component in src/components/ui-custom/misc/ with professional gradebook-style interface
+  • Component displays workers as rows, days (01-30) as columns, with colored circles for attendance status
+  • Green circles for full day attendance, yellow circles for half day, empty cells for no attendance
+  • Includes responsive design with horizontal scroll, sticky worker names column, and hover effects
+  • Added export functionality, attendance legend, and summary statistics cards
+  • Fixed Personnel accordion in site logs modal with proper contact type filtering and database integration
+  • Resolved database column naming error (changed site_log_id to log_id for site_log_attendees table)
+  • Personnel accordion now properly saves contact selections with attendance type and description fields
+
 - June 28, 2025. Site logs modal fixes and Events accordion implementation
   • Fixed site logs modal database schema issues by removing problematic foreign key relationships and organization_id column
   • Added Events accordion to site logs modal with full site_log_events and event_types integration
