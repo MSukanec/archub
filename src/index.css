@@ -76,9 +76,9 @@
   --input-focus-border: hsl(90, 50%, 50%);
 
   /* Popover/Dropdown */
-  --popover-bg: hsl(0, 0%, 100%);
-  --popover-fg: hsl(240, 10%, 4%);
-  --accent-bg: hsl(240, 5%, 96%);
+  --popover-bg: hsl(0, 0%, 97%);
+  --popover-fg: hsl(0, 0%, 35%);
+  --accent-bg: hsl(90, 50%, 90%);
 
   /* Accent / State */
   --accent: hsl(90, 50%, 50%);

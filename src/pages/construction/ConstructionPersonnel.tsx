@@ -7,7 +7,7 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import CustomGradebook from '@/components/ui-custom/misc/CustomGradebook'
 import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState'
-import { Users, Download, Calendar, CalendarDays } from 'lucide-react'
+import { Users, Download, Calendar, CalendarDays, FileText } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
@@ -184,14 +184,52 @@ export default function ConstructionPersonnel() {
     const fullDayAttendance = filteredAttendance.filter(a => a.status === 'full').length
     const halfDayAttendance = filteredAttendance.filter(a => a.status === 'half').length
     
+    // Calculate unique active days
+    const uniqueDates = new Set()
+    attendanceData.forEach(item => {
+      if (item.site_log?.log_date) {
+        uniqueDates.add(item.site_log.log_date)
+      }
+    })
+    const activeDays = uniqueDates.size
+    
     return {
       totalWorkers,
       totalAttendanceRecords,
       fullDayAttendance,
       halfDayAttendance,
+      activeDays,
       attendanceRate: totalAttendanceRecords > 0 ? Math.round((fullDayAttendance / totalAttendanceRecords) * 100) : 0
     }
-  }, [filteredWorkers, filteredAttendance])
+  }, [filteredWorkers, filteredAttendance, attendanceData])
+
+  // Generate statistics cards dynamically
+  const statisticsCards = useMemo(() => [
+    {
+      title: "Total Personal",
+      value: stats.totalWorkers,
+      icon: Users,
+      description: "Personal registrado"
+    },
+    {
+      title: "Días Activos",
+      value: stats.activeDays,
+      icon: CalendarDays,
+      description: "Días con asistencia"
+    },
+    {
+      title: "Jornadas Completas",
+      value: stats.fullDayAttendance,
+      icon: Calendar,
+      description: `De ${stats.totalAttendanceRecords} registros`
+    },
+    {
+      title: "Tasa Completa",
+      value: `${stats.attendanceRate}%`,
+      icon: Users,
+      description: "Jornadas completas vs total"
+    }
+  ], [stats])
 
   const headerProps = {
     title: "Personal",
@@ -248,47 +286,23 @@ export default function ConstructionPersonnel() {
   return (
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
-        {/* Statistics Cards */}
+        {/* Dynamic Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Personal</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalWorkers}</div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Registros de Asistencia</CardTitle>
-              <CalendarDays className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalAttendanceRecords}</div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Jornadas Completas</CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.fullDayAttendance}</div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Tasa de Asistencia</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.attendanceRate}%</div>
-            </CardContent>
-          </Card>
+          {statisticsCards.map((card, index) => {
+            const IconComponent = card.icon
+            return (
+              <Card key={index}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
+                  <IconComponent className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{card.value}</div>
+                  <p className="text-xs text-muted-foreground">{card.description}</p>
+                </CardContent>
+              </Card>
+            )
+          })}
         </div>
 
         {/* Gradebook Component */}
@@ -308,6 +322,12 @@ export default function ConstructionPersonnel() {
             icon={<Users className="h-12 w-12" />}
             title="Sin personal registrado"
             description="No hay registros de asistencia para este proyecto. El personal aparecerá aquí cuando se registren entradas de bitácora con asistencia."
+            action={
+              <Button onClick={() => window.location.href = '/construction/logs'}>
+                <FileText className="w-4 h-4 mr-2" />
+                Ir a Bitácora
+              </Button>
+            }
           />
         )}
       </div>
