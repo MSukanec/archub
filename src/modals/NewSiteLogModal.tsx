@@ -22,7 +22,7 @@ import { Switch } from '@/components/ui/switch'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { useToast } from '@/hooks/use-toast'
-import { Calendar, User, FileText, Cloud, MessageSquare, Star, Eye, Calendar as CalendarIcon, Plus, X, Settings } from 'lucide-react'
+import { Calendar, User, FileText, Cloud, MessageSquare, Star, Eye, Calendar as CalendarIcon, Plus, X, Settings, Truck } from 'lucide-react'
 
 // ContactOptions component for rendering contact options
 interface ContactOptionsProps {
@@ -183,7 +183,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
   const { data: members } = useOrganizationMembers(userData?.preferences?.last_organization_id || '')
   const { data: eventTypes } = useEventTypes()
   const { data: contactTypes } = useContactTypes()
-  const { data: equipment } = useEquipment()
+  const { data: equipmentData } = useEquipment()
   
   const [events, setEvents] = useState<SiteLogEventForm[]>([])
   const [attendees, setAttendees] = useState<SiteLogAttendeeForm[]>([])
@@ -905,7 +905,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                     </AccordionTrigger>
                     <AccordionContent className="space-y-3 pt-3">
                       {/* Lista de maquinaria */}
-                      {equipmentList.map((equipment, index) => (
+                      {equipmentList.map((equipmentItem, index) => (
                         <div key={index} className="p-3 border border-border rounded-lg space-y-3">
                           <div className="flex items-center justify-between">
                             <span className="text-sm font-medium">Equipo #{index + 1}</span>
@@ -926,7 +926,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                             <div>
                               <label className="text-xs font-medium text-muted-foreground">Equipo</label>
                               <Select
-                                value={equipment.equipment_id}
+                                value={equipmentItem.equipment_id}
                                 onValueChange={(value) => {
                                   const newEquipmentList = [...equipmentList];
                                   newEquipmentList[index].equipment_id = value;
@@ -937,7 +937,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                                   <SelectValue placeholder="Seleccionar equipo" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {equipment?.map((equip: any) => (
+                                  {equipmentData?.map((equip: any) => (
                                     <SelectItem key={equip.id} value={equip.id}>
                                       {equip.name}
                                     </SelectItem>
@@ -952,7 +952,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                                 type="number"
                                 min="1"
                                 className="h-8 text-sm"
-                                value={equipment.quantity}
+                                value={equipmentItem.quantity}
                                 onChange={(e) => {
                                   const newEquipmentList = [...equipmentList];
                                   newEquipmentList[index].quantity = parseInt(e.target.value) || 1;
@@ -967,7 +967,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                             <Textarea
                               className="min-h-[60px] text-sm"
                               placeholder="Notas adicionales sobre el equipo..."
-                              value={equipment.description || ''}
+                              value={equipmentItem.description || ''}
                               onChange={(e) => {
                                 const newEquipmentList = [...equipmentList];
                                 newEquipmentList[index].description = e.target.value;
