@@ -94,7 +94,7 @@ const siteLogSchema = z.object({
     'registro_general'
   ]),
   weather: z.enum(['sunny', 'partly_cloudy', 'cloudy', 'rain', 'storm', 'snow', 'fog', 'windy', 'hail', 'none']).nullable(),
-  comments: z.string().min(1, 'Comentarios son requeridos'),
+  comments: z.string().optional(),
   is_public: z.boolean().default(true),
   is_favorite: z.boolean().default(false),
   events: z.array(siteLogEventSchema).default([]),
@@ -428,9 +428,15 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
       queryClient.removeQueries({ queryKey: ['site-logs'] })
       queryClient.refetchQueries({ queryKey: ['site-logs'] })
       
+      // CRÍTICO: Invalidar también el cache de personnel attendance para actualizar timeline
+      queryClient.invalidateQueries({ queryKey: ['personnel-attendance'] })
+      queryClient.removeQueries({ queryKey: ['personnel-attendance'] })
+      queryClient.refetchQueries({ queryKey: ['personnel-attendance'] })
+      
       // Actualizar el estado local inmediatamente
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ['site-logs'] })
+        queryClient.invalidateQueries({ queryKey: ['personnel-attendance'] })
       }, 100)
       
       toast({

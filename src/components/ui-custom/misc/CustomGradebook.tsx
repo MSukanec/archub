@@ -357,19 +357,25 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
                   </div>
                   
                   {/* Workers in this contact type */}
-                  {workersInGroup.map((worker, workerIndex) => (
-                    <div key={worker.id} className={`h-[65px] px-6 bg-background hover:bg-muted/50 flex items-center ${workerIndex < workersInGroup.length - 1 || groupIndex < Object.keys(groupedWorkers).length - 1 ? 'border-b border-border' : ''}`}>
-                      <Avatar className="h-8 w-8 flex-shrink-0">
-                        <AvatarImage src={worker.avatar_url} alt={worker.name} />
-                        <AvatarFallback className="text-xs font-medium">
-                          {getInitials(worker.name)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="ml-3">
-                        <div className="text-sm font-medium">{worker.name}</div>
+                  {workersInGroup.map((worker, workerIndex) => {
+                    const isLastWorkerInGroup = workerIndex === workersInGroup.length - 1
+                    const isLastGroup = groupIndex === Object.keys(groupedWorkers).length - 1
+                    const shouldShowBorder = !isLastWorkerInGroup || !isLastGroup
+                    
+                    return (
+                      <div key={worker.id} className={`h-[65px] px-6 bg-background hover:bg-muted/50 flex items-center ${shouldShowBorder ? 'border-b border-border' : ''}`}>
+                        <Avatar className="h-8 w-8 flex-shrink-0">
+                          <AvatarImage src={worker.avatar_url} alt={worker.name} />
+                          <AvatarFallback className="text-xs font-medium">
+                            {getInitials(worker.name)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="ml-3">
+                          <div className="text-sm font-medium">{worker.name}</div>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ))}
             </div>
