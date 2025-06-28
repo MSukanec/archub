@@ -9,6 +9,11 @@ interface CustomModalFooterProps {
   saveLoading?: boolean;
   saveDisabled?: boolean;
   isLoading?: boolean;
+  saveProps?: {
+    form?: string;
+    type?: "button" | "submit";
+    disabled?: boolean;
+  };
 }
 
 export function CustomModalFooter({
@@ -19,6 +24,7 @@ export function CustomModalFooter({
   saveLoading = false,
   saveDisabled = false,
   isLoading = false,
+  saveProps,
 }: CustomModalFooterProps) {
   return (
     <div className="p-2 border-t border-[var(--card-border)] mt-auto">

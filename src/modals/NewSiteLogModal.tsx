@@ -329,19 +329,25 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  {members?.map((member: any) => (
-                                    <SelectItem key={member.id} value={member.id}>
-                                      <div className="flex items-center gap-2">
-                                        <Avatar className="h-6 w-6">
-                                          <AvatarImage src={member.avatar_url} />
-                                          <AvatarFallback>
-                                            {member.full_name?.charAt(0) || member.email?.charAt(0) || '?'}
-                                          </AvatarFallback>
-                                        </Avatar>
-                                        <span>{member.full_name || member.email}</span>
-                                      </div>
-                                    </SelectItem>
-                                  ))}
+                                  {members?.map((member: any) => {
+                                    const user = member.users;
+                                    const displayName = user?.full_name || user?.email || 'Usuario sin nombre';
+                                    const avatarFallback = user?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U';
+                                    
+                                    return (
+                                      <SelectItem key={member.id} value={member.id}>
+                                        <div className="flex items-center gap-2">
+                                          <Avatar className="h-6 w-6">
+                                            <AvatarImage src={user?.avatar_url} />
+                                            <AvatarFallback>
+                                              {avatarFallback}
+                                            </AvatarFallback>
+                                          </Avatar>
+                                          <span>{displayName}</span>
+                                        </div>
+                                      </SelectItem>
+                                    );
+                                  })}
                                 </SelectContent>
                               </Select>
                               <FormMessage />
@@ -610,8 +616,13 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
         footer: (
           <CustomModalFooter
             onCancel={onClose}
-            onSave={form.handleSubmit(onSubmit)}
+            onSave={() => {}}
             saveText={editingSiteLog ? 'Actualizar entrada' : 'Crear entrada'}
+            saveProps={{
+              form: "site-log-form",
+              type: "submit",
+              disabled: createSiteLogMutation.isPending
+            }}
           />
         )
       }}
