@@ -307,15 +307,7 @@ export default function ConstructionLogs() {
           </div>
         </div>
 
-        {/* Headers de columnas */}
-        <div className="grid grid-cols-12 gap-4 px-4 py-2 text-xs font-medium text-muted-foreground border-b">
-          <div className="col-span-2">Fecha</div>
-          <div className="col-span-2">Creador</div>
-          <div className="col-span-3">Tipo de Entrada</div>
-          <div className="col-span-2">Clima</div>
-          <div className="col-span-2">Comentarios</div>
-          <div className="col-span-1">Acciones</div>
-        </div>
+
 
         {filteredSiteLogs.length === 0 ? (
           <CustomEmptyState
@@ -348,35 +340,36 @@ export default function ConstructionLogs() {
                   onOpenChange={(open) => setExpandedLogId(open ? siteLog.id : null)}
                 >
                   <Card className="w-full transition-all hover:shadow-sm">
-                    <CollapsibleTrigger asChild>
-                      <div className="w-full p-4 cursor-pointer">
-                        <div className="grid grid-cols-12 gap-4 items-center">
-                          {/* Fecha */}
-                          <div className="col-span-2 flex items-center gap-2">
+                    <div className="flex items-center justify-between p-4">
+                      {/* Lado izquierdo: Información principal */}
+                      <CollapsibleTrigger asChild>
+                        <div className="flex-1 cursor-pointer">
+                          <div className="flex items-center gap-2 mb-2">
                             {isExpanded ? (
                               <ChevronDown className="h-4 w-4 text-muted-foreground" />
                             ) : (
                               <ChevronRight className="h-4 w-4 text-muted-foreground" />
                             )}
-                            <span className="text-xs text-muted-foreground">
-                              {format(new Date(siteLog.created_at), 'dd/MM/yyyy', { locale: es })}
-                            </span>
-                          </div>
-
-                          {/* Creador */}
-                          <div className="col-span-2 flex items-center gap-2">
-                            <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center">
-                              <span className="text-xs font-medium text-primary">
-                                {siteLog.creator?.full_name?.charAt(0) || 'U'}
+                            
+                            {/* Fecha y Hora - Clima */}
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium">
+                                {format(new Date(siteLog.created_at), 'dd/MM/yyyy HH:mm', { locale: es })}
                               </span>
+                              {weatherConfig && (
+                                <div className="flex items-center gap-1">
+                                  <span className="text-muted-foreground">-</span>
+                                  <weatherConfig.icon className="h-4 w-4 text-muted-foreground" />
+                                  <span className="text-sm text-muted-foreground">
+                                    {weatherConfig.label}
+                                  </span>
+                                </div>
+                              )}
                             </div>
-                            <span className="text-xs font-medium truncate">
-                              {siteLog.creator?.full_name || 'Usuario desconocido'}
-                            </span>
                           </div>
 
-                          {/* Tipo de entrada */}
-                          <div className="col-span-3 flex items-center gap-2">
+                          {/* Tipo de Entrada */}
+                          <div className="flex items-center gap-2 mb-2">
                             {entryTypeConfig && (
                               <>
                                 <entryTypeConfig.icon className="h-4 w-4 text-muted-foreground" />
@@ -385,68 +378,66 @@ export default function ConstructionLogs() {
                                 </Badge>
                               </>
                             )}
-                            <div className="flex gap-1">
-                              {siteLog.is_favorite && <Star className="h-3 w-3 text-yellow-500" />}
+                            <div className="flex gap-1 ml-2">
                               {siteLog.is_public ? <Globe className="h-3 w-3 text-green-500" /> : <Lock className="h-3 w-3 text-gray-400" />}
                             </div>
                           </div>
 
-                          {/* Clima */}
-                          <div className="col-span-2 flex items-center gap-2">
-                            {weatherConfig && (
-                              <>
-                                <weatherConfig.icon className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-xs text-muted-foreground">
-                                  {weatherConfig.label}
-                                </span>
-                              </>
-                            )}
-                          </div>
-
-                          {/* Comentarios (preview) */}
-                          <div className="col-span-2">
-                            <span className="text-xs text-muted-foreground line-clamp-1">
-                              {siteLog.comments || 'Sin comentarios'}
+                          {/* Creador */}
+                          <div className="flex items-center gap-2">
+                            <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center">
+                              <span className="text-xs font-medium text-primary">
+                                {siteLog.creator?.full_name?.charAt(0) || 'U'}
+                              </span>
+                            </div>
+                            <span className="text-sm text-muted-foreground">
+                              {siteLog.creator?.full_name || 'Usuario desconocido'}
                             </span>
                           </div>
-
-                          {/* Acciones */}
-                          <div className="col-span-1">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm"
-                                  className="h-7 w-7 p-0"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleEditSiteLog(siteLog);
-                                }}>
-                                  <Edit className="h-4 w-4 mr-2" />
-                                  Editar
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDeleteSiteLog(siteLog);
-                                  }}
-                                  className="text-destructive"
-                                >
-                                  <Trash2 className="h-4 w-4 mr-2" />
-                                  Eliminar
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
                         </div>
+                      </CollapsibleTrigger>
+
+                      {/* Lado derecho: Botones de acción */}
+                      <div className="flex items-center gap-2 ml-4">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleFavorite(siteLog.id);
+                          }}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Star className={`h-4 w-4 ${siteLog.is_favorite ? 'text-yellow-500 fill-yellow-500' : 'text-muted-foreground'}`} />
+                        </Button>
+                        
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingSiteLog(siteLog);
+                            setShowNewSiteLogModal(true);
+                          }}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Edit className="h-4 w-4 text-muted-foreground" />
+                        </Button>
+                        
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteConfirmOpen(true);
+                            setDeletingSiteLog(siteLog);
+                          }}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Trash2 className="h-4 w-4 text-muted-foreground" />
+                        </Button>
                       </div>
-                    </CollapsibleTrigger>
+                    </div>
 
                     <CollapsibleContent>
                       <div className="px-4 pb-4 pt-2 border-t bg-muted/30">
