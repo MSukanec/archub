@@ -274,11 +274,11 @@ export default function OrganizationDashboard() {
             </CardHeader>
             <CardContent>
               {recentActivity.length === 0 ? (
-                <CustomEmptyState
-                  icon={Activity}
-                  title="No hay actividad"
-                  description="La actividad aparecerá aquí cuando comiences a trabajar"
-                />
+                <div className="text-center py-8">
+                  <Activity className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="font-medium mb-2">No hay actividad</h3>
+                  <p className="text-sm text-muted-foreground">La actividad aparecerá aquí cuando comiences a trabajar</p>
+                </div>
               ) : (
                 <div className="space-y-3">
                   {recentActivity.map((activity, index) => {
