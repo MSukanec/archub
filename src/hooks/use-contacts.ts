@@ -1,49 +1,30 @@
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
+import { useQuery } from '@tanstack/react-query'
+import { supabase } from '@/lib/supabase'
 
-interface Contact {
-  id: string;
-  organization_id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string;
-  company_name: string;
-  location: string;
-  notes: string;
-  contact_type_id: string;
-  created_at: string;
-  contact_type?: {
-    id: string;
-    name: string;
-  };
-}
-
-export function useContacts(organizationId: string | undefined) {
-  return useQuery<Contact[]>({
-    queryKey: ['contacts', organizationId],
+export function useContacts(organizationId?: string, contactTypeId?: string) {
+  return useQuery({
+    queryKey: ['contacts', organizationId, contactTypeId],
     queryFn: async () => {
-      if (!organizationId) return [];
+      if (!supabase || !organizationId) throw new Error('Supabase client or organization ID not available')
       
-      if (!supabase) {
-        throw new Error('Supabase client not initialized');
-      }
-
-      const { data, error } = await supabase
+      let query = supabase
         .from('contacts')
         .select(`
           *,
-          contact_type:contact_types(id, name)
+          contact_type:contact_types(name)
         `)
         .eq('organization_id', organizationId)
-        .order('created_at', { ascending: false });
+        .order('first_name')
 
-      if (error) {
-        throw error;
+      if (contactTypeId && contactTypeId !== 'all') {
+        query = query.eq('contact_type_id', contactTypeId)
       }
-
-      return data || [];
+      
+      const { data, error } = await query
+      
+      if (error) throw error
+      return data || []
     },
-    enabled: !!organizationId
-  });
+    enabled: !!supabase && !!organizationId
+  })
 }

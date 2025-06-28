@@ -5,6 +5,8 @@ import { z } from 'zod'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
+import { useContactTypes } from '@/hooks/use-contact-types'
+import { useContacts } from '@/hooks/use-contacts'
 import { supabase } from '@/lib/supabase'
 import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout'
 import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader'
@@ -112,8 +114,16 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
   const { data: userData } = useCurrentUser()
   const { data: members } = useOrganizationMembers(userData?.preferences?.last_organization_id || '')
   const { data: eventTypes } = useEventTypes()
+  const { data: contactTypes } = useContactTypes()
   
   const [events, setEvents] = useState<SiteLogEventForm[]>([])
+  const [attendees, setAttendees] = useState<SiteLogAttendeeForm[]>([])
+  const [selectedContactType, setSelectedContactType] = useState<string>('all')
+  
+  const { data: contacts } = useContacts(
+    userData?.organization?.id,
+    selectedContactType
+  )
   
   const form = useForm<SiteLogForm>({
     resolver: zodResolver(siteLogSchema),
@@ -125,7 +135,8 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
       comments: '',
       is_public: true,
       is_favorite: false,
-      events: []
+      events: [],
+      attendees: []
     }
   })
 
@@ -211,7 +222,24 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
 
         if (eventsResult.error) {
           console.error('Error saving site log events:', eventsResult.error)
-          // Don't throw error for events - log creation should succeed even if events fail
+        }
+      }
+
+      // Create site log attendees if any
+      if (attendees.length > 0 && siteLogResult.data) {
+        const attendeesData = attendees.map(attendee => ({
+          site_log_id: siteLogResult.data.id,
+          contact_id: attendee.contact_id,
+          attendance_type: attendee.attendance_type,
+          description: attendee.description || null
+        }))
+
+        const attendeesResult = await supabase
+          .from('site_log_attendees')
+          .insert(attendeesData)
+
+        if (attendeesResult.error) {
+          console.error('Error saving site log attendees:', attendeesResult.error)
         }
       }
 
@@ -457,7 +485,131 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                     </AccordionContent>
                   </AccordionItem>
 
-                  {/* Sección 2: Eventos */}
+                  {/* Sección 2: Personal */}
+                  <AccordionItem value="personal">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <User className="w-4 h-4" />
+                        Personal ({attendees.length})
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="space-y-3 pt-3">
+                      {/* Filtro por tipo de contacto */}
+                      <div>
+                        <label className="text-xs font-medium text-muted-foreground">Tipo de Personal</label>
+                        <Select value={selectedContactType} onValueChange={setSelectedContactType}>
+                          <SelectTrigger className="h-8 text-sm">
+                            <SelectValue placeholder="Seleccionar tipo" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Todos los tipos</SelectItem>
+                            {contactTypes?.map((type) => (
+                              <SelectItem key={type.id} value={type.id}>
+                                {type.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Lista de personal agregado */}
+                      {attendees.map((attendee, index) => (
+                        <div key={index} className="border rounded-lg p-3 space-y-3">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium">Personal #{index + 1}</span>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                const newAttendees = attendees.filter((_, i) => i !== index);
+                                setAttendees(newAttendees);
+                              }}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground">Contacto</label>
+                            <Select
+                              value={attendee.contact_id}
+                              onValueChange={(value) => {
+                                const newAttendees = [...attendees];
+                                newAttendees[index].contact_id = value;
+                                setAttendees(newAttendees);
+                              }}
+                            >
+                              <SelectTrigger className="h-8 text-sm">
+                                <SelectValue placeholder="Seleccionar contacto" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {contacts?.map((contact) => (
+                                  <SelectItem key={contact.id} value={contact.id}>
+                                    {contact.first_name} {contact.last_name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground">Horario</label>
+                            <Select
+                              value={attendee.attendance_type}
+                              onValueChange={(value) => {
+                                const newAttendees = [...attendees];
+                                newAttendees[index].attendance_type = value as 'full' | 'half';
+                                setAttendees(newAttendees);
+                              }}
+                            >
+                              <SelectTrigger className="h-8 text-sm">
+                                <SelectValue placeholder="Seleccionar horario" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="full">Jornada Completa</SelectItem>
+                                <SelectItem value="half">Media Jornada</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground">Descripción</label>
+                            <Textarea
+                              className="min-h-[60px] text-sm"
+                              placeholder="Notas adicionales..."
+                              value={attendee.description || ''}
+                              onChange={(e) => {
+                                const newAttendees = [...attendees];
+                                newAttendees[index].description = e.target.value;
+                                setAttendees(newAttendees);
+                              }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Botón para agregar personal */}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setAttendees([...attendees, {
+                            contact_id: '',
+                            attendance_type: 'full',
+                            description: ''
+                          }]);
+                        }}
+                        className="w-full"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Agregar Personal
+                      </Button>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  {/* Sección 3: Eventos */}
                   <AccordionItem value="eventos">
                     <AccordionTrigger>
                       <div className="flex items-center gap-2">
@@ -549,7 +701,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                     </AccordionContent>
                   </AccordionItem>
 
-                  {/* Sección 3: Configuración de Entrada */}
+                  {/* Sección 4: Configuración de Entrada */}
                   <AccordionItem value="configuracion-entrada">
                     <AccordionTrigger>
                       <div className="flex items-center gap-2">
