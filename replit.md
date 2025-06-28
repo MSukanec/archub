@@ -123,13 +123,15 @@ Changelog:
   • Fixed sidebar toggle switch in Profile page - now properly syncs with sidebar button and saves to database
   • Removed Theme and Panel buttons from sidebar footer as requested - only Profile button remains
   • Completely redesigned Profile page following user reference image with two-column layout
+  • Added plan information card at top showing current plan status with "Chatear con nosotros" and "Actualizar" buttons
   • Left column: section titles and descriptions, right column: form fields
-  • Eliminated all Card components for clean layout matching reference design  
+  • Added Separator components between all sections for clean visual division
   • Profile sections: Profile (avatar, name, email), Personal Information (names, country, birthdate), Preferences (theme, sidebar), Danger Zone (sign out)
-  • Used default layout width instead of hardcoded max-width for better responsive design
-  • Profile page now uses "Account settings" as title matching reference aesthetic
-  • All text in English following reference design language
-  • Switch controls now save immediately to database when toggled
+  • Used max-w-4xl constraint for optimal profile page width instead of default layout width
+  • Profile page now uses "Configuración de la cuenta" as title - fully translated to Spanish
+  • All text translated to Spanish following user requirements
+  • Changed danger zone border to use border-destructive color instead of muted gray
+  • Switch controls save immediately to database when toggled
 
 - June 28, 2025. Complete dashboard redesign with spectacular visual and functional improvements
   • Completely rebuilt ProjectDashboard.tsx with real data integration and advanced visual design

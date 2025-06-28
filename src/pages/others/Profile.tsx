@@ -1,5 +1,6 @@
 import { Layout } from '@/components/layout/Layout'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -7,7 +8,7 @@ import { Switch } from '@/components/ui/switch'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
-import { Upload, Link as LinkIcon, LogOut } from 'lucide-react'
+import { Upload, Link as LinkIcon, LogOut, Crown, MessageCircle } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { supabase } from '@/lib/supabase'
@@ -236,7 +237,7 @@ export default function Profile() {
   }
 
   const headerProps = {
-    title: 'Account settings',
+    title: 'Configuración de la cuenta',
     showSearch: false,
     showFilters: false,
     actions: [
@@ -245,7 +246,7 @@ export default function Profile() {
         onClick={handleSaveProfile}
         disabled={updateProfileMutation.isPending}
       >
-        {updateProfileMutation.isPending ? 'Saving...' : 'Save changes'}
+        {updateProfileMutation.isPending ? 'Guardando...' : 'Guardar cambios'}
       </Button>
     ]
   }
@@ -262,14 +263,40 @@ export default function Profile() {
 
   return (
     <Layout headerProps={headerProps}>
-      <div className="space-y-12">
-        {/* Profile Section */}
+      <div className="max-w-4xl mx-auto space-y-8">
+        {/* Plan Card */}
+        <Card className="bg-muted/30">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">
+                  Tu aplicación está actualmente en el plan gratuito
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Los planes pagos ofrecen límites de uso más altos, ramas adicionales y mucho más. 
+                  <span className="text-primary underline cursor-pointer ml-1">Aprende más aquí.</span>
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Button variant="outline" size="sm">
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Chatear con nosotros
+                </Button>
+                <Button size="sm">
+                  Actualizar
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Perfil Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-1">
             <div className="space-y-1">
-              <h3 className="text-lg font-medium">Profile</h3>
+              <h3 className="text-lg font-medium">Perfil</h3>
               <p className="text-sm text-muted-foreground">
-                This information will be displayed publicly so be careful what you share.
+                Esta información se mostrará públicamente, así que ten cuidado con lo que compartes.
               </p>
             </div>
           </div>
@@ -291,10 +318,10 @@ export default function Profile() {
                     size="sm"
                     onClick={() => setShowAvatarUpload(!showAvatarUpload)}
                   >
-                    Change
+                    Cambiar
                   </Button>
                   <p className="text-xs text-muted-foreground">
-                    Upload a photo or provide a URL
+                    Sube una foto o proporciona una URL
                   </p>
                 </div>
               </div>
@@ -302,7 +329,7 @@ export default function Profile() {
               {showAvatarUpload && (
                 <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
                   <div>
-                    <Label className="text-sm font-medium">Upload file</Label>
+                    <Label className="text-sm font-medium">Subir archivo</Label>
                     <Input
                       type="file"
                       accept="image/*"
@@ -312,19 +339,19 @@ export default function Profile() {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium">Image URL</Label>
+                    <Label className="text-sm font-medium">URL de imagen</Label>
                     <div className="flex gap-2">
                       <Input
                         value={avatarUrlInput}
                         onChange={(e) => setAvatarUrlInput(e.target.value)}
-                        placeholder="https://example.com/image.jpg"
+                        placeholder="https://ejemplo.com/imagen.jpg"
                       />
                       <Button
                         size="sm"
                         onClick={handleApplyAvatarUrl}
                         disabled={!avatarUrlInput.trim()}
                       >
-                        Apply
+                        Aplicar
                       </Button>
                     </div>
                   </div>
@@ -334,27 +361,27 @@ export default function Profile() {
             
             {/* Name */}
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Full name</Label>
+              <Label className="text-sm font-medium">Nombre completo</Label>
               <Input
                 value={userData?.user?.full_name || ''}
                 disabled
                 className="bg-muted"
               />
               <p className="text-xs text-muted-foreground">
-                This is your display name. It can be your real name or a pseudonym.
+                Este es tu nombre para mostrar. Puede ser tu nombre real o un seudónimo.
               </p>
             </div>
             
             {/* Email */}
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Email address</Label>
+              <Label className="text-sm font-medium">Dirección de email</Label>
               <Input
                 value={userData?.user?.email || ''}
                 disabled
                 className="bg-muted"
               />
               <p className="text-xs text-muted-foreground">
-                This is your account email address.
+                Esta es la dirección de email de tu cuenta.
               </p>
             </div>
           </div>
@@ -362,13 +389,13 @@ export default function Profile() {
 
         <Separator />
 
-        {/* Personal Information Section */}
+        {/* Información Personal Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-1">
             <div className="space-y-1">
-              <h3 className="text-lg font-medium">Personal Information</h3>
+              <h3 className="text-lg font-medium">Información Personal</h3>
               <p className="text-sm text-muted-foreground">
-                Update your personal details here.
+                Actualiza tus datos personales aquí.
               </p>
             </div>
           </div>
@@ -376,14 +403,14 @@ export default function Profile() {
           <div className="lg:col-span-2 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-sm font-medium">First name</Label>
+                <Label className="text-sm font-medium">Nombre</Label>
                 <Input
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Last name</Label>
+                <Label className="text-sm font-medium">Apellido</Label>
                 <Input
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
@@ -393,10 +420,10 @@ export default function Profile() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Country</Label>
+                <Label className="text-sm font-medium">País</Label>
                 <Select value={country} onValueChange={setCountry}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a country" />
+                    <SelectValue placeholder="Selecciona un país" />
                   </SelectTrigger>
                   <SelectContent>
                     {countries.map((country: Country) => (
@@ -408,7 +435,7 @@ export default function Profile() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Date of birth</Label>
+                <Label className="text-sm font-medium">Fecha de nacimiento</Label>
                 <Input
                   type="date"
                   value={birthdate}
@@ -421,13 +448,13 @@ export default function Profile() {
 
         <Separator />
 
-        {/* Preferences Section */}
+        {/* Preferencias Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-1">
             <div className="space-y-1">
-              <h3 className="text-lg font-medium">Preferences</h3>
+              <h3 className="text-lg font-medium">Preferencias</h3>
               <p className="text-sm text-muted-foreground">
-                Configure your application preferences.
+                Configura las preferencias de tu aplicación.
               </p>
             </div>
           </div>
@@ -436,9 +463,9 @@ export default function Profile() {
             {/* Theme */}
             <div className="flex items-center justify-between py-2">
               <div className="space-y-0.5">
-                <Label className="text-sm font-medium">Dark mode</Label>
+                <Label className="text-sm font-medium">Modo oscuro</Label>
                 <div className="text-xs text-muted-foreground">
-                  Switch between light and dark themes
+                  Alterna entre temas claro y oscuro
                 </div>
               </div>
               <Switch
@@ -451,9 +478,9 @@ export default function Profile() {
             {/* Sidebar fixed */}
             <div className="flex items-center justify-between py-2">
               <div className="space-y-0.5">
-                <Label className="text-sm font-medium">Fixed sidebar</Label>
+                <Label className="text-sm font-medium">Sidebar fijo</Label>
                 <div className="text-xs text-muted-foreground">
-                  Keep the sidebar always visible
+                  Mantener el sidebar siempre visible
                 </div>
               </div>
               <Switch
@@ -461,7 +488,7 @@ export default function Profile() {
                 onCheckedChange={(newValue) => {
                   setSidebarDocked(newValue);
                   setDocked(newValue);
-                  // Save immediately to database
+                  // Guardar inmediatamente en la base de datos
                   if (userData?.preferences?.id) {
                     updateProfileMutation.mutate({
                       firstName,
@@ -480,46 +507,46 @@ export default function Profile() {
 
         <Separator />
 
-        {/* Danger Zone */}
+        {/* Zona de Peligro */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-1">
             <div className="space-y-1">
-              <h3 className="text-lg font-medium">Danger zone</h3>
+              <h3 className="text-lg font-medium">Zona de peligro</h3>
               <p className="text-sm text-muted-foreground">
-                Irreversible and destructive actions.
+                Acciones irreversibles y destructivas.
               </p>
             </div>
           </div>
           
           <div className="lg:col-span-2">
-            <div className="space-y-4 p-4 border border-destructive/20 rounded-lg">
+            <div className="space-y-4 p-4 border border-destructive rounded-lg">
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-destructive">Sign out</Label>
+                <Label className="text-sm font-medium text-destructive">Cerrar sesión</Label>
                 <p className="text-xs text-muted-foreground">
-                  Sign out of your account. You will be redirected to the login page.
+                  Cerrar sesión de tu cuenta. Serás redirigido a la página de inicio de sesión.
                 </p>
               </div>
               
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button variant="destructive" size="sm">
-                    Sign out
+                    Cerrar sesión
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Sign out?</AlertDialogTitle>
+                    <AlertDialogTitle>¿Cerrar sesión?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      You are about to sign out of your account. You will need to sign in again to access your account.
+                      Estás a punto de cerrar tu sesión. Necesitarás iniciar sesión nuevamente para acceder a tu cuenta.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
                     <AlertDialogAction 
                       onClick={() => signOutMutation.mutate()}
                       disabled={signOutMutation.isPending}
                     >
-                      {signOutMutation.isPending ? 'Signing out...' : 'Sign out'}
+                      {signOutMutation.isPending ? 'Cerrando sesión...' : 'Cerrar sesión'}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
