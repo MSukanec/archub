@@ -232,6 +232,7 @@ export function Sidebar() {
       { icon: Home, label: 'Resumen de Administración', href: '/admin/dashboard' },
       { icon: Building, label: 'Organizaciones', href: '/admin/organizations' },
       { icon: Users, label: 'Usuarios', href: '/admin/users' },
+      { icon: CheckSquare, label: 'Tareas', href: '/admin/tasks' },
       { icon: Tag, label: 'Categorías de Materiales', href: '/admin/material-categories' },
       { icon: Package, label: 'Materiales', href: '/admin/materials' },
     ]
@@ -379,7 +380,7 @@ export function Sidebar() {
           )}>
             {isExpanded ? (
               <div className={cn(
-                "w-full border-2 rounded-lg p-3 bg-white transition-all duration-150 ease-out",
+                "w-full border-2 rounded-lg p-3 transition-all duration-150 ease-out",
                 (!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "border-[var(--accent)]",
                 userData?.plan?.name?.toLowerCase() === 'pro' && "border-blue-500",
                 userData?.plan?.name?.toLowerCase() === 'teams' && "border-purple-500"
@@ -431,7 +432,7 @@ export function Sidebar() {
               </div>
             ) : (
               <div className={cn(
-                "w-8 h-8 rounded-full border-2 bg-white flex items-center justify-center cursor-pointer transition-all duration-150 ease-out hover:scale-105",
+                "w-8 h-8 rounded-full border-2 flex items-center justify-center cursor-pointer transition-all duration-150 ease-out hover:scale-105",
                 (!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "border-[var(--accent)]",
                 userData?.plan?.name?.toLowerCase() === 'pro' && "border-blue-500",
                 userData?.plan?.name?.toLowerCase() === 'teams' && "border-purple-500"
