@@ -243,7 +243,7 @@ export default function ConstructionLogs() {
 
   if (isLoading || siteLogsLoading) {
     return (
-      <Layout headerProps={headerProps}>
+      <Layout wide headerProps={headerProps}>
         <div className="p-8 text-center text-muted-foreground">
           Cargando bitácora...
         </div>
@@ -252,7 +252,7 @@ export default function ConstructionLogs() {
   }
 
   return (
-    <Layout headerProps={headerProps}>
+    <Layout wide headerProps={headerProps}>
       <div className="space-y-6">
         {/* Headers de columnas */}
         <div className="grid grid-cols-12 gap-4 px-4 py-2 text-xs font-medium text-muted-foreground border-b">

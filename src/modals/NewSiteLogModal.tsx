@@ -149,9 +149,12 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
         throw new Error('No hay proyecto u organización seleccionada')
       }
 
+      // Get the user_id from the selected organization member
+      const selectedMember = members?.find(m => m.id === data.created_by);
+      
       const siteLogData = {
         log_date: data.log_date.toISOString().split('T')[0],
-        created_by: data.created_by,
+        created_by: selectedMember?.user_id || userData.user.id,
         entry_type: data.entry_type,
         weather: data.weather,
         comments: data.comments,
@@ -287,7 +290,10 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                   {/* Sección 1: Información Básica */}
                   <AccordionItem value="informacion-basica">
                     <AccordionTrigger>
-                      Información Básica
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4" />
+                        Información Básica
+                      </div>
                     </AccordionTrigger>
                     <AccordionContent className="space-y-3 pt-3">
                       {/* Primera fila: Fecha y Creador */}
@@ -297,8 +303,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                           name="log_date"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="flex items-center gap-2">
-                                <Calendar className="w-4 h-4" />
+                              <FormLabel>
                                 Fecha del log
                               </FormLabel>
                               <FormControl>
@@ -554,7 +559,10 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                   {/* Sección 3: Configuración de Entrada */}
                   <AccordionItem value="configuracion-entrada">
                     <AccordionTrigger>
-                      Configuración de Entrada
+                      <div className="flex items-center gap-2">
+                        <Settings className="h-4 w-4" />
+                        Configuración de Entrada
+                      </div>
                     </AccordionTrigger>
                     <AccordionContent className="space-y-3 pt-3">
                       <div className="grid grid-cols-2 gap-4">
