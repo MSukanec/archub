@@ -66,6 +66,9 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
     return groups
   }, [workers])
 
+  // Timeline element state - declared early to avoid reference errors
+  const [timelineElement, setTimelineElement] = React.useState<HTMLDivElement | null>(null)
+  
   // Auto-center on today ONLY on initial load
   const [hasInitialized, setHasInitialized] = React.useState(false)
   React.useEffect(() => {
@@ -102,7 +105,40 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
     const newEnd = addDays(today, 15)
     onStartDateChange?.(newStart)
     onEndDateChange?.(newEnd)
+    
+    // Manually center timeline after data update
+    setTimeout(() => {
+      if (timelineElement) {
+        const todayIndex = eachDayOfInterval({ start: newStart, end: newEnd }).findIndex(date => isToday(date))
+        if (todayIndex !== -1) {
+          const columnWidth = 40
+          const containerWidth = timelineElement.clientWidth
+          const scrollPosition = (todayIndex * columnWidth) - (containerWidth / 2) + (columnWidth / 2)
+          timelineElement.scrollLeft = Math.max(0, scrollPosition)
+        }
+      }
+    }, 100)
   }
+
+  // Manual center function for initial load
+  const centerTimelineOnToday = React.useCallback(() => {
+    if (timelineElement && dateRange.length > 0) {
+      const todayIndex = dateRange.findIndex(date => isToday(date))
+      if (todayIndex !== -1) {
+        const columnWidth = 40
+        const containerWidth = timelineElement.clientWidth
+        const scrollPosition = (todayIndex * columnWidth) - (containerWidth / 2) + (columnWidth / 2)
+        timelineElement.scrollLeft = Math.max(0, scrollPosition)
+      }
+    }
+  }, [timelineElement, dateRange])
+
+  // Auto-center only on initial component load
+  React.useEffect(() => {
+    if (hasInitialized && timelineElement) {
+      setTimeout(centerTimelineOnToday, 100)
+    }
+  }, [hasInitialized, timelineElement, centerTimelineOnToday])
 
   // Handle date input changes
   const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -122,8 +158,6 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
   // Drag functionality for timeline scrolling
   const [isDragging, setIsDragging] = React.useState(false)
   const [dragStart, setDragStart] = React.useState({ x: 0, scrollLeft: 0 })
-  const timelineRef = React.useRef<HTMLDivElement>(null)
-  const [timelineElement, setTimelineElement] = React.useState<HTMLDivElement | null>(null)
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!timelineElement) return
@@ -316,7 +350,7 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
               {Object.entries(groupedWorkers).map(([contactType, workersInGroup], groupIndex) => (
                 <div key={contactType}>
                   {/* Contact Type Header */}
-                  <div className="h-[40px] px-6 bg-muted/80 border-b border-border flex items-center">
+                  <div className="h-[20px] px-6 bg-muted/80 border-b border-border flex items-center">
                     <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                       {contactType} ({workersInGroup.length})
                     </span>
@@ -379,19 +413,8 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
                 // Set timeline element for both auto-scroll and drag functionality
                 setTimelineElement(el)
                 
-                // Only auto-center on initial load, not on every re-render
-                if (el && dateRange.length > 0 && hasInitialized) {
-                  // Use setTimeout to ensure DOM is fully rendered
-                  setTimeout(() => {
-                    const todayIndex = dateRange.findIndex(date => isToday(date))
-                    if (todayIndex !== -1) {
-                      const columnWidth = 40
-                      const containerWidth = el.clientWidth
-                      const scrollPosition = (todayIndex * columnWidth) - (containerWidth / 2) + (columnWidth / 2)
-                      el.scrollLeft = Math.max(0, scrollPosition)
-                    }
-                  }, 100)
-                }
+                // Only auto-center when explicitly requested (initial load or "Hoy" button)
+                // This prevents unwanted centering during drag operations
               }}
               className={`overflow-x-auto ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
               style={{ 
@@ -433,12 +456,15 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
                   {Object.entries(groupedWorkers).map(([contactType, workersInGroup], groupIndex) => (
                     <React.Fragment key={contactType}>
                       {/* Contact Type Header Row */}
-                      <tr className="h-[40px] bg-muted/80 border-b border-border">
-                        {dateRange.map((date) => (
-                          <td key={`${contactType}-header-${date.getTime()}`} className="px-3 text-center bg-muted/80">
-                            {/* Empty cells for contact type header */}
-                          </td>
-                        ))}
+                      <tr className="h-[20px] bg-muted/80 border-b border-border">
+                        {dateRange.map((date) => {
+                          const isTodayDate = isToday(date)
+                          return (
+                            <td key={`${contactType}-header-${date.getTime()}`} className={`px-3 text-center bg-muted/80 ${isTodayDate ? 'bg-[var(--accent)]/10 border-x-2 border-[var(--accent)]' : ''}`}>
+                              {/* Empty cells for contact type header */}
+                            </td>
+                          )
+                        })}
                       </tr>
                       
                       {/* Worker Rows for this contact type */}
