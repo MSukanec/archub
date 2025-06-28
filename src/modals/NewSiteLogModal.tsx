@@ -121,7 +121,6 @@ function useEventTypes() {
       const { data, error } = await supabase
         .from('event_types')
         .select('*')
-        .eq('is_custom', false)
         .order('name', { ascending: true });
 
       if (error) {
