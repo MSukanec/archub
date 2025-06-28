@@ -153,6 +153,7 @@ export default function ConstructionPersonnel() {
   const [hideWeekends, setHideWeekends] = useState(false)
   const [selectedContactType, setSelectedContactType] = useState<string>("")
 
+  const [location, navigate] = useLocation()
   const { data: userData } = useCurrentUser()
   const { data: attendanceData = [], isLoading } = usePersonnelAttendance(
     userData?.preferences?.last_project_id,
