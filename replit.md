@@ -119,6 +119,18 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 28, 2025. Complete OrganizationDashboard redesign and header dropdown modifications
+  • Completely redesigned OrganizationDashboard.tsx with clean, professional layout following standard component styling
+  • Changed page title from "Dashboard de la Organización" to "Resumen de la Organización"
+  • Removed all hardcoded colors and gradients - now uses default shadcn/ui Card components
+  • Implemented wide layout for better content display across full viewport
+  • Added CustomEmptyState components for sections without data (projects, activity)
+  • Created three-column layout: Proyectos Recientes, Actividad Reciente, Acciones Rápidas
+  • Organization info card at top shows name, status badges, plan info, and foundation date
+  • All action buttons have correct URLs: /proyectos, /organization/contactos, /finanzas/movimientos, /obra/bitacora, /construction/budgets
+  • Modified header dropdowns: removed "Nueva Organización" button, changed "Nuevo Proyecto" to "Gestión de Proyectos"
+  • Header project dropdown now links to /proyectos page for project management
+  • All navigation properly configured with working routes and authentication flow
 - June 28, 2025. Complete Personnel page enhancement with dynamic cards and month headers
   • Fixed Personnel page filtering bug - now correctly filters by project and organization instead of showing all data
   • Updated usePersonnelAttendance hook to use new organization_id column in site_logs table
