@@ -119,9 +119,19 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 27, 2025. Complete Tasks admin system and plan button transparency fixes
+  • Fixed plan button background - removed white/colored backgrounds, now transparent in both collapsed and expanded states
+  • Created complete AdminTasks.tsx page with comprehensive table interface, statistics cards, and CRUD operations
+  • Built NewAdminTaskModal.tsx with form fields for name, description, unit labor price, and unit material price
+  • Added Tasks navigation button to admin sidebar positioned below Users with CheckSquare icon
+  • Implemented useTasks hook with full CRUD operations: create, read, update, delete with proper Supabase integration
+  • Added /admin/tasks route to App.tsx routing system with proper component import
+  • Tasks page follows established admin patterns: wide layout, CustomTable, filtering system, action buttons
+  • All task data sourced from authentic Supabase tasks table with proper error handling and loading states
+
 - June 27, 2025. Complete admin system standardization and material categories table fixes
   • Fixed AdminMaterialCategories table layout issue - adjusted column widths to 15%, 70%, 15% to prevent action column overflow
-  • Standardized ALL 5 admin pages to use wide layout: AdminDashboard, AdminOrganizations, AdminUsers, AdminMaterials, AdminMaterialCategories
+  • Standardized ALL 6 admin pages to use wide layout: AdminDashboard, AdminOrganizations, AdminUsers, AdminTasks, AdminMaterials, AdminMaterialCategories
   • Removed all hardcoded card styling from admin pages - now use consistent p-3, text-xs, text-lg font-semibold structure
   • Eliminated all colored icon variations in statistics cards - all icons now use text-muted-foreground
   • Material categories table now displays correctly with proper headers, columns, and inline action buttons

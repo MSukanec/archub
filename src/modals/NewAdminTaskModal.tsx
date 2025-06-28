@@ -9,9 +9,10 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { CustomModal } from '@/components/ui-custom/modals/CustomModal'
-import { CustomModalBody } from '@/components/ui-custom/modals/CustomModalBody'
-import { CustomModalFooter } from '@/components/ui-custom/modals/CustomModalFooter'
+import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout'
+import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader'
+import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody'
+import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter'
 
 const taskSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
@@ -146,15 +147,17 @@ export function NewAdminTaskModal({ open, onClose, task }: NewAdminTaskModalProp
   }
 
   return (
-    <CustomModal
-      title={task ? "Editar Tarea" : "Nueva Tarea"}
-      open={open}
-      onClose={handleClose}
-    >
+    <CustomModalLayout open={open} onClose={handleClose}>
       {{
+        header: (
+          <CustomModalHeader
+            title={task ? "Editar Tarea" : "Nueva Tarea"}
+            onClose={handleClose}
+          />
+        ),
         body: (
           <form id="task-form" onSubmit={handleSubmit(onSubmit)}>
-            <CustomModalBody>
+            <CustomModalBody padding="md">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Task Name */}
                 <div className="col-span-2">
@@ -235,6 +238,6 @@ export function NewAdminTaskModal({ open, onClose, task }: NewAdminTaskModalProp
           />
         )
       }}
-    </CustomModal>
+    </CustomModalLayout>
   )
 }

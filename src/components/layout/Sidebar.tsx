@@ -30,7 +30,8 @@ import {
   Sun,
   Moon,
   PanelLeftOpen,
-  PanelLeftClose
+  PanelLeftClose,
+  CheckSquare
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";

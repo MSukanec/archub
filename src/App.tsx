@@ -25,6 +25,7 @@ import ConstructionDashboard from "@/pages/construction/ConstructionDashboard";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminOrganizations from "@/pages/admin/AdminOrganizations";
 import AdminUsers from "@/pages/admin/AdminUsers";
+import AdminTasks from "@/pages/admin/AdminTasks";
 import AdminMaterials from "@/pages/admin/AdminMaterials";
 import AdminMaterialCategories from "@/pages/admin/AdminMaterialCategories";
 
@@ -149,6 +150,12 @@ function Router() {
       <Route path="/admin/users">
         <ProtectedRoute>
           <AdminUsers />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/admin/tasks">
+        <ProtectedRoute>
+          <AdminTasks />
         </ProtectedRoute>
       </Route>
 
