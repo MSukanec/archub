@@ -13,6 +13,39 @@
   }
 }
 
+@keyframes float-horizontal {
+  0%, 100% {
+    transform: translateX(0px);
+  }
+  50% {
+    transform: translateX(20px);
+  }
+}
+
+@keyframes float-vertical {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+@keyframes float-diagonal {
+  0%, 100% {
+    transform: translate(0px, 0px);
+  }
+  25% {
+    transform: translate(10px, -8px);
+  }
+  50% {
+    transform: translate(-5px, -12px);
+  }
+  75% {
+    transform: translate(-10px, 5px);
+  }
+}
+
 :root {
   /* Layout */
   --layout-bg: hsl(0, 0%, 99%);
