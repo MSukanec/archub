@@ -1,13 +1,15 @@
 import { Layout } from '@/components/layout/Layout'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useState, useMemo } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import CustomGradebook from '@/components/ui-custom/misc/CustomGradebook'
-import { Users, Download, Calendar } from 'lucide-react'
+import { Users, Download, Calendar, CalendarDays } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
 
 // Hook to fetch personnel attendance data
 function usePersonnelAttendance(projectId: string | undefined, organizationId: string | undefined) {
@@ -92,8 +94,9 @@ function transformAttendanceData(attendanceData: any[]) {
 
 export default function ConstructionPersonnel() {
   const [searchValue, setSearchValue] = useState("")
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth().toString())
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString())
+  const [startDate, setStartDate] = useState(new Date())
+  const [endDate, setEndDate] = useState(new Date(new Date().setDate(new Date().getDate() + 30)))
+  const [hideWeekends, setHideWeekends] = useState(false)
 
   const { data: userData } = useCurrentUser()
   const { data: attendanceData = [], isLoading } = usePersonnelAttendance(
@@ -119,73 +122,28 @@ export default function ConstructionPersonnel() {
     return attendance.filter(record => filteredWorkerIds.has(record.workerId))
   }, [attendance, filteredWorkers])
 
-  // Export functionality
-  const handleExport = () => {
-    // TODO: Implement export to Excel/CSV
-    console.log('Exporting attendance data...')
-  }
-
-  const customFilters = (
-    <div className="space-y-3">
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <Label className="text-xs">Mes</Label>
-          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-            <SelectTrigger className="h-8">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="0">Enero</SelectItem>
-              <SelectItem value="1">Febrero</SelectItem>
-              <SelectItem value="2">Marzo</SelectItem>
-              <SelectItem value="3">Abril</SelectItem>
-              <SelectItem value="4">Mayo</SelectItem>
-              <SelectItem value="5">Junio</SelectItem>
-              <SelectItem value="6">Julio</SelectItem>
-              <SelectItem value="7">Agosto</SelectItem>
-              <SelectItem value="8">Septiembre</SelectItem>
-              <SelectItem value="9">Octubre</SelectItem>
-              <SelectItem value="10">Noviembre</SelectItem>
-              <SelectItem value="11">Diciembre</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label className="text-xs">Año</Label>
-          <Select value={selectedYear} onValueChange={setSelectedYear}>
-            <SelectTrigger className="h-8">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="2024">2024</SelectItem>
-              <SelectItem value="2025">2025</SelectItem>
-              <SelectItem value="2026">2026</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-    </div>
-  )
+  // Calculate summary statistics
+  const stats = useMemo(() => {
+    const totalWorkers = filteredWorkers.length
+    const totalAttendanceRecords = filteredAttendance.length
+    const fullDayAttendance = filteredAttendance.filter(a => a.status === 'full').length
+    const halfDayAttendance = filteredAttendance.filter(a => a.status === 'half').length
+    
+    return {
+      totalWorkers,
+      totalAttendanceRecords,
+      fullDayAttendance,
+      halfDayAttendance,
+      attendanceRate: totalAttendanceRecords > 0 ? Math.round((fullDayAttendance / totalAttendanceRecords) * 100) : 0
+    }
+  }, [filteredWorkers, filteredAttendance])
 
   const headerProps = {
-    icon: Users,
-    title: "Personal de Obra",
+    title: "Personal",
     showSearch: true,
     searchValue,
     onSearchChange: setSearchValue,
-    showFilters: true,
-    customFilters,
-    onClearFilters: () => {
-      setSearchValue("")
-      setSelectedMonth(new Date().getMonth().toString())
-      setSelectedYear(new Date().getFullYear().toString())
-    },
-    actions: [
-      <Button key="export" variant="outline" size="sm" onClick={handleExport}>
-        <Download className="h-4 w-4 mr-2" />
-        Exportar
-      </Button>
-    ]
+    onClearFilters: () => setSearchValue("")
   }
 
   if (isLoading) {
@@ -201,11 +159,60 @@ export default function ConstructionPersonnel() {
   return (
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Personal</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalWorkers}</div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Registros de Asistencia</CardTitle>
+              <CalendarDays className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalAttendanceRecords}</div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Jornadas Completas</CardTitle>
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.fullDayAttendance}</div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Tasa de Asistencia</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.attendanceRate}%</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Gradebook Component */}
         {filteredWorkers.length > 0 ? (
           <CustomGradebook 
             workers={filteredWorkers}
             attendance={filteredAttendance}
-            onExportAttendance={handleExport}
+            startDate={startDate}
+            endDate={endDate}
+            hideWeekends={hideWeekends}
+            onStartDateChange={setStartDate}
+            onEndDateChange={setEndDate}
+            onHideWeekendsChange={setHideWeekends}
           />
         ) : (
           <div className="text-center py-12">
