@@ -42,7 +42,7 @@ export function CustomModalLayout({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-end">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Overlay */}
       <div
         className="absolute inset-0 bg-black/50 transition-opacity duration-300 ease-in-out"
@@ -52,8 +52,8 @@ export function CustomModalLayout({
       {/* Modal */}
       <div
         className={cn(
-          "relative z-10 flex flex-col bg-[var(--card-bg)] shadow-2xl transition-all duration-300 ease-in-out",
-          "h-screen w-full md:w-[480px] md:max-w-[480px]",
+          "relative z-10 flex flex-col bg-[var(--card-bg)] shadow-2xl transition-all duration-300 ease-in-out rounded-lg border border-[var(--card-border)]",
+          "w-full max-w-md mx-4 max-h-[90vh]",
           className,
         )}
       >

@@ -28,189 +28,246 @@ export function CustomEmptyState({
       {/* Moving and Rotating Background Shapes - Enhanced and More Prominent */}
       <div className="absolute inset-0 z-[-1] overflow-hidden">
         {/* Large Moving Circles - Much Bigger and More Visible */}
-        <div className="absolute w-16 h-16 bg-[var(--accent)]/40 rounded-full animate-bounce" 
+        <div className="absolute w-16 h-16 rounded-full" 
              style={{ 
                top: '8%', 
                left: '12%', 
+               backgroundColor: 'var(--accent)',
+               opacity: 0.4,
                animation: 'bounce 4s ease-in-out infinite, float-horizontal 8s ease-in-out infinite'
              }} />
-        <div className="absolute w-12 h-12 bg-[var(--accent)]/50 rounded-full animate-bounce" 
+        <div className="absolute w-12 h-12 rounded-full" 
              style={{ 
                top: '18%', 
                right: '18%', 
+               backgroundColor: 'var(--accent)',
+               opacity: 0.5,
                animationDelay: '1s',
                animation: 'bounce 3.5s ease-in-out infinite, float-diagonal 7s ease-in-out infinite reverse'
              }} />
-        <div className="absolute w-20 h-20 bg-[var(--accent)]/35 rounded-full animate-bounce" 
+        <div className="absolute w-20 h-20 rounded-full" 
              style={{ 
                bottom: '12%', 
                left: '22%', 
+               backgroundColor: 'var(--accent)',
+               opacity: 0.35,
                animationDelay: '2s',
                animation: 'bounce 5s ease-in-out infinite, float-vertical 6s ease-in-out infinite'
              }} />
-        <div className="absolute w-14 h-14 bg-[var(--accent)]/45 rounded-full animate-bounce" 
+        <div className="absolute w-14 h-14 rounded-full" 
              style={{ 
                bottom: '22%', 
                right: '12%', 
+               backgroundColor: 'var(--accent)',
+               opacity: 0.45,
                animationDelay: '0.5s',
                animation: 'bounce 4.5s ease-in-out infinite, float-horizontal 9s ease-in-out infinite reverse'
              }} />
-        <div className="absolute w-10 h-10 bg-[var(--accent)]/38 rounded-full animate-bounce" 
+        <div className="absolute w-10 h-10 rounded-full" 
              style={{ 
                top: '35%', 
                left: '8%', 
+               backgroundColor: 'var(--accent)',
+               opacity: 0.38,
                animationDelay: '1.5s',
                animation: 'bounce 3.8s ease-in-out infinite, float-diagonal 7.5s ease-in-out infinite'
              }} />
-        <div className="absolute w-18 h-18 bg-[var(--accent)]/42 rounded-full animate-bounce" 
+        <div className="absolute w-18 h-18 rounded-full" 
              style={{ 
                top: '50%', 
                right: '8%', 
+               backgroundColor: 'var(--accent)',
+               opacity: 0.42,
                animationDelay: '2.5s',
                animation: 'bounce 4.2s ease-in-out infinite, float-vertical 8.5s ease-in-out infinite reverse'
              }} />
 
         {/* Large Rotating Squares - Much More Prominent */}
-        <div className="absolute w-12 h-12 bg-[var(--accent)]/55 animate-spin" 
+        <div className="absolute w-12 h-12" 
              style={{ 
                top: '28%', 
                left: '8%', 
+               backgroundColor: 'var(--accent)',
+               opacity: 0.55,
                animation: 'spin 6s linear infinite, float-diagonal 8s ease-in-out infinite'
              }} />
-        <div className="absolute w-10 h-10 bg-[var(--accent)]/48 animate-spin" 
+        <div className="absolute w-10 h-10" 
              style={{ 
                top: '58%', 
                right: '8%', 
+               backgroundColor: 'var(--accent)',
+               opacity: 0.48,
                animationDelay: '1s',
                animation: 'spin 8s linear infinite reverse, float-vertical 7s ease-in-out infinite'
              }} />
-        <div className="absolute w-14 h-14 bg-[var(--accent)]/40 animate-spin" 
+        <div className="absolute w-14 h-14" 
              style={{ 
                bottom: '38%', 
                left: '6%', 
+               backgroundColor: 'var(--accent)',
+               opacity: 0.40,
                animationDelay: '2s',
                animation: 'spin 7s linear infinite, float-horizontal 10s ease-in-out infinite reverse'
              }} />
-        <div className="absolute w-8 h-8 bg-[var(--accent)]/52 animate-spin" 
+        <div className="absolute w-8 h-8" 
              style={{ 
                top: '15%', 
                left: '50%', 
+               backgroundColor: 'var(--accent)',
+               opacity: 0.52,
                animationDelay: '0.8s',
                animation: 'spin 5s linear infinite reverse, float-diagonal 9s ease-in-out infinite'
              }} />
-        <div className="absolute w-11 h-11 bg-[var(--accent)]/46 animate-spin" 
+        <div className="absolute w-11 h-11" 
              style={{ 
                bottom: '15%', 
                right: '50%', 
+               backgroundColor: 'var(--accent)',
+               opacity: 0.46,
                animationDelay: '1.8s',
                animation: 'spin 9s linear infinite, float-vertical 7.5s ease-in-out infinite reverse'
              }} />
 
         {/* Large Moving Triangles - Much More Visible */}
-        <div className="absolute w-0 h-0 border-l-[12px] border-r-[12px] border-b-[20px] border-l-transparent border-r-transparent border-b-[var(--accent)]/45" 
+        <div className="absolute w-0 h-0 border-l-[12px] border-r-[12px] border-b-[20px] border-l-transparent border-r-transparent" 
              style={{ 
                top: '12%', 
                left: '68%', 
+               borderBottomColor: 'var(--accent)',
+               opacity: 0.45,
                animation: 'float-vertical 5s ease-in-out infinite, spin 12s linear infinite'
              }} />
-        <div className="absolute w-0 h-0 border-l-[10px] border-r-[10px] border-b-[16px] border-l-transparent border-r-transparent border-b-[var(--accent)]/50" 
+        <div className="absolute w-0 h-0 border-l-[10px] border-r-[10px] border-b-[16px] border-l-transparent border-r-transparent" 
              style={{ 
                bottom: '18%', 
                right: '68%', 
+               borderBottomColor: 'var(--accent)',
+               opacity: 0.50,
                animationDelay: '1.5s',
                animation: 'float-diagonal 6s ease-in-out infinite reverse, spin 10s linear infinite reverse'
              }} />
-        <div className="absolute w-0 h-0 border-l-[8px] border-r-[8px] border-b-[14px] border-l-transparent border-r-transparent border-b-[var(--accent)]/42" 
+        <div className="absolute w-0 h-0 border-l-[8px] border-r-[8px] border-b-[14px] border-l-transparent border-r-transparent" 
              style={{ 
                top: '42%', 
                left: '3%', 
+               borderBottomColor: 'var(--accent)',
+               opacity: 0.42,
                animationDelay: '2.2s',
                animation: 'float-horizontal 7s ease-in-out infinite, spin 8s linear infinite'
              }} />
-        <div className="absolute w-0 h-0 border-l-[14px] border-r-[14px] border-b-[24px] border-l-transparent border-r-transparent border-b-[var(--accent)]/38" 
+        <div className="absolute w-0 h-0 border-l-[14px] border-r-[14px] border-b-[24px] border-l-transparent border-r-transparent" 
              style={{ 
                top: '65%', 
                right: '25%', 
+               borderBottomColor: 'var(--accent)',
+               opacity: 0.38,
                animationDelay: '0.7s',
                animation: 'float-vertical 6.5s ease-in-out infinite reverse, spin 11s linear infinite'
              }} />
 
         {/* Large Rotating Diamonds - Much More Prominent */}
-        <div className="absolute w-10 h-10 bg-[var(--accent)]/60 rotate-45" 
+        <div className="absolute w-10 h-10 rotate-45" 
              style={{ 
                top: '22%', 
                right: '28%', 
+               backgroundColor: 'var(--accent)',
+               opacity: 0.60,
                animation: 'spin 5s linear infinite, float-vertical 8s ease-in-out infinite'
              }} />
-        <div className="absolute w-12 h-12 bg-[var(--accent)]/45 rotate-45" 
+        <div className="absolute w-12 h-12 rotate-45" 
              style={{ 
                bottom: '28%', 
                left: '38%', 
+               backgroundColor: 'var(--accent)',
+               opacity: 0.45,
                animationDelay: '1.2s',
                animation: 'spin 9s linear infinite reverse, float-diagonal 6s ease-in-out infinite'
              }} />
-        <div className="absolute w-8 h-8 bg-[var(--accent)]/55 rotate-45" 
+        <div className="absolute w-8 h-8 rotate-45" 
              style={{ 
                top: '52%', 
                right: '3%', 
+               backgroundColor: 'var(--accent)',
+               opacity: 0.55,
                animationDelay: '2.1s',
                animation: 'spin 7s linear infinite, float-horizontal 9s ease-in-out infinite reverse'
              }} />
-        <div className="absolute w-14 h-14 bg-[var(--accent)]/40 rotate-45" 
+        <div className="absolute w-14 h-14 rotate-45" 
              style={{ 
                bottom: '45%', 
                left: '75%', 
+               backgroundColor: 'var(--accent)',
+               opacity: 0.40,
                animationDelay: '0.9s',
                animation: 'spin 6s linear infinite reverse, float-vertical 7.8s ease-in-out infinite'
              }} />
 
         {/* Large Moving Hexagons - More Visible */}
-        <div className="absolute w-16 h-16 bg-[var(--accent)]/35" 
+        <div className="absolute w-16 h-16" 
              style={{ 
                top: '38%', 
                left: '78%', 
+               backgroundColor: 'var(--accent)',
+               opacity: 0.35,
                clipPath: 'polygon(30% 0%, 70% 0%, 100% 50%, 70% 100%, 30% 100%, 0% 50%)',
                animation: 'float-vertical 6s ease-in-out infinite, spin 15s linear infinite'
              }} />
-        <div className="absolute w-12 h-12 bg-[var(--accent)]/48" 
+        <div className="absolute w-12 h-12" 
              style={{ 
                bottom: '32%', 
                right: '38%', 
+               backgroundColor: 'var(--accent)',
+               opacity: 0.48,
                animationDelay: '1.3s',
                clipPath: 'polygon(30% 0%, 70% 0%, 100% 50%, 70% 100%, 30% 100%, 0% 50%)',
                animation: 'float-horizontal 8s ease-in-out infinite reverse, spin 12s linear infinite reverse'
              }} />
-        <div className="absolute w-10 h-10 bg-[var(--accent)]/42" 
+        <div className="absolute w-10 h-10" 
              style={{ 
                top: '8%', 
                left: '40%', 
+               backgroundColor: 'var(--accent)',
+               opacity: 0.42,
                animationDelay: '2.8s',
                clipPath: 'polygon(30% 0%, 70% 0%, 100% 50%, 70% 100%, 30% 100%, 0% 50%)',
                animation: 'float-diagonal 7.5s ease-in-out infinite, spin 13s linear infinite'
              }} />
 
         {/* Additional Stars and Complex Shapes */}
-        <div className="absolute w-8 h-8 bg-[var(--accent)]/50" 
+        <div className="absolute w-8 h-8" 
              style={{ 
                top: '75%', 
                left: '15%', 
+               backgroundColor: 'var(--accent)',
+               opacity: 0.50,
                clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)',
                animation: 'float-vertical 4.5s ease-in-out infinite, spin 14s linear infinite'
              }} />
-        <div className="absolute w-6 h-6 bg-[var(--accent)]/58" 
+        <div className="absolute w-6 h-6" 
              style={{ 
                bottom: '8%', 
                right: '85%', 
+               backgroundColor: 'var(--accent)',
+               opacity: 0.58,
                animationDelay: '1.7s',
                clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)',
                animation: 'float-horizontal 5.2s ease-in-out infinite reverse, spin 16s linear infinite reverse'
              }} />
 
         {/* Enhanced Central Glow Effects */}
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-[var(--accent)]/8 rounded-full blur-3xl animate-pulse" 
-             style={{ animationDuration: '4s' }} />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-[var(--accent)]/6 rounded-full blur-2xl animate-pulse" 
-             style={{ animationDelay: '2s', animationDuration: '5s' }} />
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 rounded-full blur-3xl animate-pulse" 
+             style={{ 
+               backgroundColor: 'var(--accent)',
+               opacity: 0.08,
+               animationDuration: '4s' 
+             }} />
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full blur-2xl animate-pulse" 
+             style={{ 
+               backgroundColor: 'var(--accent)',
+               opacity: 0.06,
+               animationDelay: '2s', 
+               animationDuration: '5s' 
+             }} />
       </div>
 
       {/* Icon container */}
