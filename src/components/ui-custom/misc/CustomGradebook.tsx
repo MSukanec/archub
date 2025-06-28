@@ -51,6 +51,47 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
     return hideWeekends ? dates.filter(date => !isWeekend(date)) : dates
   }, [startDate, endDate, hideWeekends])
 
+  // Generate month headers for timeline
+  const monthHeaders = React.useMemo(() => {
+    const headers: { month: string; start: number; span: number }[] = []
+    let currentMonth = ''
+    let monthStart = 0
+    let monthSpan = 0
+
+    dateRange.forEach((date, index) => {
+      const monthYear = format(date, 'MMMM yyyy', { locale: es })
+      
+      if (monthYear !== currentMonth) {
+        // Save previous month if exists
+        if (currentMonth && monthSpan > 0) {
+          headers.push({
+            month: currentMonth,
+            start: monthStart,
+            span: monthSpan
+          })
+        }
+        
+        // Start new month
+        currentMonth = monthYear
+        monthStart = index
+        monthSpan = 1
+      } else {
+        monthSpan++
+      }
+    })
+
+    // Add last month
+    if (currentMonth && monthSpan > 0) {
+      headers.push({
+        month: currentMonth,
+        start: monthStart,
+        span: monthSpan
+      })
+    }
+
+    return headers
+  }, [dateRange])
+
   // Group workers by contact type
   const groupedWorkers = React.useMemo(() => {
     const groups: { [key: string]: Worker[] } = {}
@@ -338,8 +379,8 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
         <div className="flex border-t relative max-w-full overflow-hidden">
           {/* Fixed Personnel Names Column */}
           <div className="flex-shrink-0 w-64 bg-background border-r">
-            {/* Header - matching timeline header height exactly */}
-            <div className="bg-muted/50 border-b h-[65px] flex items-center px-6">
+            {/* Header - matching timeline header height exactly (25px + 40px) */}
+            <div className="bg-muted/50 border-b h-[65px] flex items-end px-6 pb-2">
               <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Personal
               </span>
@@ -440,9 +481,23 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
                   width: `${dateRange.length * 40}px`
                 }}
               >
-                {/* Timeline Header - exact height match */}
+                {/* Timeline Header with Month Row */}
                 <thead className="bg-muted/50 border-b">
-                  <tr className="h-[65px]">
+                  {/* Month Headers Row */}
+                  <tr className="h-[25px] border-b border-border/30">
+                    {monthHeaders.map((monthHeader, index) => (
+                      <th 
+                        key={index}
+                        colSpan={monthHeader.span}
+                        className="px-1 text-center text-xs font-medium text-muted-foreground bg-muted/30 border-r border-border/20"
+                      >
+                        <span className="capitalize">{monthHeader.month}</span>
+                      </th>
+                    ))}
+                  </tr>
+                  
+                  {/* Days Row */}
+                  <tr className="h-[40px]">
                     {dateRange.map((date) => {
                       const isTodayDate = isToday(date)
                       return (
