@@ -12,6 +12,8 @@ interface Worker {
   id: string
   name: string
   avatar_url?: string
+  contactType?: string
+  contactTypeId?: string
 }
 
 interface AttendanceRecord {
@@ -48,6 +50,21 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
     const dates = eachDayOfInterval({ start: startDate, end: endDate })
     return hideWeekends ? dates.filter(date => !isWeekend(date)) : dates
   }, [startDate, endDate, hideWeekends])
+
+  // Group workers by contact type
+  const groupedWorkers = React.useMemo(() => {
+    const groups: { [key: string]: Worker[] } = {}
+    
+    workers.forEach(worker => {
+      const contactType = worker.contactType || 'Sin tipo'
+      if (!groups[contactType]) {
+        groups[contactType] = []
+      }
+      groups[contactType].push(worker)
+    })
+
+    return groups
+  }, [workers])
 
   // Navigate dates
   const navigateDates = (direction: 'prev' | 'next') => {
@@ -220,19 +237,31 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
               </span>
             </div>
             
-            {/* Personnel List - matching timeline row heights exactly */}
+            {/* Personnel List - grouped by contact type */}
             <div>
-              {workers.map((worker, index) => (
-                <div key={worker.id} className={`h-[65px] px-6 bg-background hover:bg-muted/50 flex items-center ${index < workers.length - 1 ? 'border-b border-border' : ''}`}>
-                  <Avatar className="h-8 w-8 flex-shrink-0">
-                    <AvatarImage src={worker.avatar_url} alt={worker.name} />
-                    <AvatarFallback className="text-xs font-medium">
-                      {getInitials(worker.name)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="ml-3">
-                    <div className="text-sm font-medium">{worker.name}</div>
+              {Object.entries(groupedWorkers).map(([contactType, workersInGroup], groupIndex) => (
+                <div key={contactType}>
+                  {/* Contact Type Header */}
+                  <div className="h-[40px] px-6 bg-muted/80 border-b border-border flex items-center">
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      {contactType} ({workersInGroup.length})
+                    </span>
                   </div>
+                  
+                  {/* Workers in this contact type */}
+                  {workersInGroup.map((worker, workerIndex) => (
+                    <div key={worker.id} className={`h-[65px] px-6 bg-background hover:bg-muted/50 flex items-center ${workerIndex < workersInGroup.length - 1 || groupIndex < Object.keys(groupedWorkers).length - 1 ? 'border-b border-border' : ''}`}>
+                      <Avatar className="h-8 w-8 flex-shrink-0">
+                        <AvatarImage src={worker.avatar_url} alt={worker.name} />
+                        <AvatarFallback className="text-xs font-medium">
+                          {getInitials(worker.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="ml-3">
+                        <div className="text-sm font-medium">{worker.name}</div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ))}
             </div>
@@ -240,13 +269,15 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
 
           {/* Timeline Column with Navigation */}
           <div className="flex-1 relative min-w-0">
-            {/* Left Navigation Button - Circular - Positioned in middle of data rows only */}
+            {/* Left Navigation Button - Circular - Positioned in middle of all content */}
             <Button
               variant="ghost"
               size="icon"
               className="absolute left-2 z-20 w-8 h-8 rounded-full bg-background/90 backdrop-blur-sm border border-border hover:bg-muted shadow-sm"
               style={{ 
-                top: `calc(65px + ${workers.length * 65 / 2}px)`,
+                top: `calc(65px + ${Object.keys(groupedWorkers).reduce((total, contactType) => {
+                  return total + 40 + (groupedWorkers[contactType].length * 65) // 40px for header + worker rows
+                }, 0) / 2}px)`,
                 transform: 'translateY(-50%)'
               }}
               onClick={() => navigateDates('prev')}
@@ -254,13 +285,15 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
               <ChevronLeft className="w-4 h-4" />
             </Button>
 
-            {/* Right Navigation Button - Circular - Positioned in middle of data rows only */}
+            {/* Right Navigation Button - Circular - Positioned in middle of all content */}
             <Button
               variant="ghost"
               size="icon"
               className="absolute right-2 z-20 w-8 h-8 rounded-full bg-background/90 backdrop-blur-sm border border-border hover:bg-muted shadow-sm"
               style={{ 
-                top: `calc(65px + ${workers.length * 65 / 2}px)`,
+                top: `calc(65px + ${Object.keys(groupedWorkers).reduce((total, contactType) => {
+                  return total + 40 + (groupedWorkers[contactType].length * 65) // 40px for header + worker rows
+                }, 0) / 2}px)`,
                 transform: 'translateY(-50%)'
               }}
               onClick={() => navigateDates('next')}
@@ -272,15 +305,16 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
             <div 
               ref={(el) => {
                 if (el && dateRange.length > 0) {
-                  // Find today's column index
-                  const todayIndex = dateRange.findIndex(date => isToday(date))
-                  if (todayIndex !== -1) {
-                    // Center today's column horizontally
-                    const columnWidth = 40
-                    const containerWidth = el.clientWidth
-                    const scrollPosition = (todayIndex * columnWidth) - (containerWidth / 2) + (columnWidth / 2)
-                    el.scrollLeft = Math.max(0, scrollPosition)
-                  }
+                  // Use setTimeout to ensure DOM is fully rendered
+                  setTimeout(() => {
+                    const todayIndex = dateRange.findIndex(date => isToday(date))
+                    if (todayIndex !== -1) {
+                      const columnWidth = 40
+                      const containerWidth = el.clientWidth
+                      const scrollPosition = (todayIndex * columnWidth) - (containerWidth / 2) + (columnWidth / 2)
+                      el.scrollLeft = Math.max(0, scrollPosition)
+                    }
+                  }, 100)
                 }
               }}
               className="overflow-x-auto" 
@@ -313,27 +347,41 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
                   </tr>
                 </thead>
                 
-                {/* Timeline Body - exact height match */}
+                {/* Timeline Body - matching grouped personnel structure */}
                 <tbody className="bg-background">
-                  {workers.map((worker, index) => (
-                    <tr key={worker.id} className={`h-[65px] hover:bg-muted/50 ${index < workers.length - 1 ? 'border-b border-border' : ''}`}>
-                      {dateRange.map((date) => {
-                        const status = getAttendanceStatus(worker.id, date)
-                        const isWeekendDay = isWeekend(date)
-                        const isTodayDate = isToday(date)
-                        return (
-                          <td key={`${worker.id}-${date.getTime()}`} className={`px-3 text-center relative ${isTodayDate ? 'bg-[var(--accent)]/5 border-x-2 border-[var(--accent)]' : ''}`}>
-                            <div className={`w-6 h-6 rounded-full mx-auto ${getAttendanceColor(status, isWeekendDay)}`}>
-                              {isWeekendDay && !hideWeekends && (
-                                <div className="w-full h-full flex items-center justify-center">
-                                  <span className="text-xs text-gray-400">×</span>
-                                </div>
-                              )}
-                            </div>
+                  {Object.entries(groupedWorkers).map(([contactType, workersInGroup], groupIndex) => (
+                    <React.Fragment key={contactType}>
+                      {/* Contact Type Header Row */}
+                      <tr className="h-[40px] bg-muted/80 border-b border-border">
+                        {dateRange.map((date) => (
+                          <td key={`${contactType}-header-${date.getTime()}`} className="px-3 text-center bg-muted/80">
+                            {/* Empty cells for contact type header */}
                           </td>
-                        )
-                      })}
-                    </tr>
+                        ))}
+                      </tr>
+                      
+                      {/* Worker Rows for this contact type */}
+                      {workersInGroup.map((worker, workerIndex) => (
+                        <tr key={worker.id} className={`h-[65px] hover:bg-muted/50 ${workerIndex < workersInGroup.length - 1 || groupIndex < Object.keys(groupedWorkers).length - 1 ? 'border-b border-border' : ''}`}>
+                          {dateRange.map((date) => {
+                            const status = getAttendanceStatus(worker.id, date)
+                            const isWeekendDay = isWeekend(date)
+                            const isTodayDate = isToday(date)
+                            return (
+                              <td key={`${worker.id}-${date.getTime()}`} className={`px-3 text-center relative ${isTodayDate ? 'bg-[var(--accent)]/5 border-x-2 border-[var(--accent)]' : ''}`}>
+                                <div className={`w-6 h-6 rounded-full mx-auto ${getAttendanceColor(status, isWeekendDay)}`}>
+                                  {isWeekendDay && !hideWeekends && (
+                                    <div className="w-full h-full flex items-center justify-center">
+                                      <span className="text-xs text-gray-400">×</span>
+                                    </div>
+                                  )}
+                                </div>
+                              </td>
+                            )
+                          })}
+                        </tr>
+                      ))}
+                    </React.Fragment>
                   ))}
                 </tbody>
               </table>
