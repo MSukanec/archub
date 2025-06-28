@@ -221,7 +221,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
       const { data: attendeesData } = await supabase
         .from('site_log_attendees')
         .select('*')
-        .eq('log_id', siteLogId)
+        .eq('site_log_id', siteLogId)
 
       if (attendeesData) {
         setAttendees(attendeesData.map(attendee => ({
@@ -317,13 +317,13 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
           await supabase
             .from('site_log_attendees')
             .delete()
-            .eq('log_id', siteLogResult.data.id)
+            .eq('site_log_id', siteLogResult.data.id)
         }
 
         // Create new attendees if any
         if (attendees.length > 0) {
           const attendeesData = attendees.map(attendee => ({
-            log_id: siteLogResult.data.id,
+            site_log_id: siteLogResult.data.id,
             contact_id: attendee.contact_id,
             attendance_type: attendee.attendance_type,
             description: attendee.description || null
