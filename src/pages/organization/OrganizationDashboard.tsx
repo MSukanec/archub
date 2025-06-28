@@ -283,10 +283,15 @@ export default function OrganizationDashboard() {
             </CardHeader>
             <CardContent>
               {recentActivity.length === 0 ? (
-                <div className="text-center py-8">
-                  <Activity className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="font-medium mb-2">No hay actividad</h3>
-                  <p className="text-sm text-muted-foreground">La actividad aparecerá aquí cuando comiences a trabajar</p>
+                <div className="text-center py-12">
+                  <div className="relative mb-6">
+                    <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center border-2 border-[var(--accent)]/20">
+                      <Activity className="h-8 w-8 text-[var(--accent)]" />
+                    </div>
+                    <div className="absolute inset-0 w-16 h-16 mx-auto bg-[var(--accent)]/10 rounded-full blur-lg animate-pulse" />
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2">No hay actividad</h3>
+                  <p className="text-sm text-muted-foreground">La actividad aparecerá aquí cuando comiences a trabajar en proyectos</p>
                 </div>
               ) : (
                 <div className="space-y-3">
