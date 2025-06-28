@@ -10,6 +10,7 @@ import { Users, Download, Calendar, CalendarDays } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
+import { format } from 'date-fns'
 
 // Hook to fetch personnel attendance data
 function usePersonnelAttendance(projectId: string | undefined, organizationId: string | undefined) {
@@ -73,7 +74,7 @@ function transformAttendanceData(attendanceData: any[]) {
     if (attendanceRecord.contact && attendanceRecord.site_log) {
       const workerId = attendanceRecord.contact.id
       const logDate = new Date(attendanceRecord.site_log.log_date)
-      const day = logDate.getDate().toString().padStart(2, '0')
+      const day = format(logDate, 'yyyy-MM-dd') // Use full date format for matching
       
       // Map attendance_type to gradebook format
       let status: 'full' | 'half' = 'full'

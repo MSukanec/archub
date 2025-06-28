@@ -210,7 +210,7 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
       </CardHeader>
 
       <CardContent className="p-0">
-        <div className="flex border-t relative">
+        <div className="flex border-t relative max-w-full overflow-hidden">
           {/* Fixed Personnel Names Column */}
           <div className="flex-shrink-0 w-64 bg-background border-r">
             {/* Header - matching timeline header height exactly */}
@@ -239,7 +239,7 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
           </div>
 
           {/* Timeline Column with Navigation */}
-          <div className="flex-1 relative">
+          <div className="flex-1 relative min-w-0">
             {/* Left Navigation Button */}
             <Button
               variant="ghost"
@@ -269,7 +269,12 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
                 WebkitOverflowScrolling: 'touch'
               }}
             >
-              <table className="w-full">
+              <table 
+                style={{ 
+                  minWidth: `${dateRange.length * 40}px`,
+                  width: `${dateRange.length * 40}px`
+                }}
+              >
                 {/* Timeline Header - exact height match */}
                 <thead className="bg-muted/50 border-b">
                   <tr className="h-[65px]">
