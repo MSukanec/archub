@@ -132,12 +132,10 @@ export function Sidebar() {
   // Project selector removed as requested
   
   const toggleAccordion = (key: string) => {
-    setExpandedAccordions(prev => {
-      // Solo uno abierto a la vez
-      const newState = { obra: false, finanzas: false };
-      newState[key as keyof typeof newState] = !prev[key];
-      return newState;
-    });
+    setExpandedAccordions(prev => ({
+      ...prev,
+      [key]: !prev[key as keyof typeof prev]
+    }));
   };
 
   // Different navigation items based on context

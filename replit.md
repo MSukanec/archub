@@ -119,6 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 28, 2025. Fixed sidebar accordion behavior and enhanced Personnel page layout
+  • Fixed sidebar accordion collapse issue - accordions now stay open when clicking sub-items (Finanzas accordion stays open when clicking Movimientos)
+  • Made Personnel page use wide layout for better viewing of attendance data across full viewport
+  • Completely redesigned CustomGradebook layout with separate columns for personnel names and timeline
+  • Personnel names column (264px width) has fixed background and doesn't scroll with timeline data
+  • Timeline column scrolls independently with horizontal scrollbar only affecting attendance grid
+  • Enhanced visual separation between personnel list and attendance tracking timeline
+  • Fixed layout prevents personnel names from being obscured by scrolling timeline data
+
 - June 28, 2025. Complete Personnel page implementation with attendance tracking
   • Created ConstructionPersonnel.tsx page following ai-page-template.md structure with WIDE layout
   • Built usePersonnelAttendance hook to fetch attendance data from site_log_attendees table with contact and site_log joins

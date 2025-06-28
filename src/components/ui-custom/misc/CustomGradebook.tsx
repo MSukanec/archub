@@ -161,61 +161,77 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
       </CardHeader>
 
       <CardContent className="p-0">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            {/* Table Header */}
-            <thead className="bg-muted/50 border-b">
-              <tr>
-                <th className="sticky left-0 bg-muted/50 px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-r">
-                  Personal
-                </th>
-                {dateRange.map((date) => (
-                  <th key={date.getTime()} className="px-3 py-3 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider min-w-[40px]">
-                    <div className="flex flex-col items-center">
-                      <span>{format(date, 'dd')}</span>
-                      <span className="text-[10px]">{format(date, 'EEE', { locale: es })}</span>
-                    </div>
-                  </th>
-                ))}
-              </tr>
-            </thead>
+        <div className="flex border-t">
+          {/* Fixed Personnel Names Column */}
+          <div className="flex-shrink-0 w-64 bg-background border-r">
+            {/* Header */}
+            <div className="bg-muted/50 px-6 py-3 border-b">
+              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Personal
+              </span>
+            </div>
             
-            {/* Table Body */}
-            <tbody className="bg-background divide-y divide-border">
+            {/* Personnel List */}
+            <div className="divide-y divide-border">
               {workers.map((worker) => (
-                <tr key={worker.id} className="hover:bg-muted/50">
-                  <td className="sticky left-0 bg-background px-6 py-4 whitespace-nowrap border-r">
-                    <div className="flex items-center">
-                      <Avatar className="h-8 w-8 flex-shrink-0">
-                        <AvatarImage src={worker.avatar_url} alt={worker.name} />
-                        <AvatarFallback className="text-xs font-medium">
-                          {getInitials(worker.name)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="ml-3">
-                        <div className="text-sm font-medium">{worker.name}</div>
-                      </div>
+                <div key={worker.id} className="px-6 py-4 bg-background hover:bg-muted/50">
+                  <div className="flex items-center">
+                    <Avatar className="h-8 w-8 flex-shrink-0">
+                      <AvatarImage src={worker.avatar_url} alt={worker.name} />
+                      <AvatarFallback className="text-xs font-medium">
+                        {getInitials(worker.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="ml-3">
+                      <div className="text-sm font-medium">{worker.name}</div>
                     </div>
-                  </td>
-                  {dateRange.map((date) => {
-                    const status = getAttendanceStatus(worker.id, date)
-                    const isWeekendDay = isWeekend(date)
-                    return (
-                      <td key={`${worker.id}-${date.getTime()}`} className="px-3 py-4 text-center">
-                        <div className={`w-6 h-6 rounded-full mx-auto ${getAttendanceColor(status, isWeekendDay)}`}>
-                          {isWeekendDay && !hideWeekends && (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <span className="text-xs text-gray-400">×</span>
-                            </div>
-                          )}
-                        </div>
-                      </td>
-                    )
-                  })}
-                </tr>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          </div>
+
+          {/* Scrollable Timeline Column */}
+          <div className="flex-1 overflow-x-auto">
+            <table className="w-full">
+              {/* Timeline Header */}
+              <thead className="bg-muted/50 border-b">
+                <tr>
+                  {dateRange.map((date) => (
+                    <th key={date.getTime()} className="px-3 py-3 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider min-w-[40px]">
+                      <div className="flex flex-col items-center">
+                        <span>{format(date, 'dd')}</span>
+                        <span className="text-[10px]">{format(date, 'EEE', { locale: es })}</span>
+                      </div>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              
+              {/* Timeline Body */}
+              <tbody className="bg-background divide-y divide-border">
+                {workers.map((worker) => (
+                  <tr key={worker.id} className="hover:bg-muted/50">
+                    {dateRange.map((date) => {
+                      const status = getAttendanceStatus(worker.id, date)
+                      const isWeekendDay = isWeekend(date)
+                      return (
+                        <td key={`${worker.id}-${date.getTime()}`} className="px-3 py-4 text-center">
+                          <div className={`w-6 h-6 rounded-full mx-auto ${getAttendanceColor(status, isWeekendDay)}`}>
+                            {isWeekendDay && !hideWeekends && (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <span className="text-xs text-gray-400">×</span>
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                      )
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </CardContent>
     </Card>
