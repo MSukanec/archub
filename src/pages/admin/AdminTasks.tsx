@@ -45,9 +45,9 @@ export default function AdminTasks() {
 
   // Statistics calculations
   const totalTasks = tasks.length
-  const averageLaborPrice = tasks.length > 0 ? tasks.reduce((sum, task) => sum + (task.unit_labor_price || 0), 0) / tasks.length : 0
-  const averageMaterialPrice = tasks.length > 0 ? tasks.reduce((sum, task) => sum + (task.unit_material_price || 0), 0) / tasks.length : 0
-  const recentTasks = tasks.filter(task => {
+  const averageLaborPrice = tasks.length > 0 ? tasks.reduce((sum: number, task: any) => sum + (task.unit_labor_price || 0), 0) / tasks.length : 0
+  const averageMaterialPrice = tasks.length > 0 ? tasks.reduce((sum: number, task: any) => sum + (task.unit_material_price || 0), 0) / tasks.length : 0
+  const recentTasks = tasks.filter((task: any) => {
     const taskDate = new Date(task.created_at)
     const sevenDaysAgo = new Date()
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
@@ -56,11 +56,11 @@ export default function AdminTasks() {
 
   // Filter and sort tasks
   const filteredTasks = tasks
-    .filter(task =>
+    .filter((task: any) =>
       task.name.toLowerCase().includes(searchValue.toLowerCase()) ||
       task.description?.toLowerCase().includes(searchValue.toLowerCase())
     )
-    .sort((a, b) => {
+    .sort((a: any, b: any) => {
       if (sortBy === 'name') {
         return a.name.localeCompare(b.name)
       }
