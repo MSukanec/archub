@@ -119,6 +119,17 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 28, 2025. Enhanced CustomEmptyState with prominent moving shapes and 70% viewport height
+  • Updated CustomEmptyState to occupy 70% of viewport height (h-[70vh]) for better visual presence
+  • Component now perfectly vertically centered and responsive across tablet and mobile devices
+  • Completely redesigned background animation system with much larger and more visible shapes
+  • Enhanced geometric shapes: circles (up to 20x20), squares (up to 14x14), triangles (up to 24px), diamonds (up to 14x14), hexagons (up to 16x16), and stars (up to 8x8)
+  • Increased accent color opacity from /15-/30 range to /35-/60 range for much better visibility
+  • Added sophisticated floating animations: float-horizontal, float-vertical, and float-diagonal with different durations
+  • Implemented multiple animation layers with varied timing delays for dynamic, organic movement
+  • Enhanced central glow effects with larger blur radiuses (up to 60x60) for atmospheric depth
+  • All shapes now use stronger --accent color values making them clearly visible against any background
+  • Added custom CSS keyframes for smooth floating movements in three directions
 - June 28, 2025. Complete OrganizationDashboard redesign and header dropdown modifications
   • Completely redesigned OrganizationDashboard.tsx with clean, professional layout following standard component styling
   • Changed page title from "Dashboard de la Organización" to "Resumen de la Organización"
