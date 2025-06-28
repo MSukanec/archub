@@ -18,20 +18,13 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   }, [initialized, initialize])
 
   useEffect(() => {
-    console.log('ProtectedRoute state:', { initialized, loading, user: !!user });
-    
     // Solo mostrar modal si ya se inicializó y no hay usuario
     if (initialized && !loading && !user) {
-      console.log('Showing auth modal');
       setShowAuthModal(true)
     } else if (user) {
-      console.log('User found, hiding auth modal');
       setShowAuthModal(false)
     }
   }, [user, initialized, loading])
-
-  // Debug adicional
-  console.log('ProtectedRoute render:', { initialized, loading, user: !!user, showAuthModal })
 
   // Mostrar loading mientras se inicializa
   if (!initialized) {

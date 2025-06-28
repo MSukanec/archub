@@ -117,7 +117,7 @@ export function useCurrentUser() {
         throw new Error('No user data returned')
       }
 
-      console.log('User data received:', data)
+      // User data loaded successfully
       return data as UserData
     },
     enabled: !!authUser && !!supabase,
