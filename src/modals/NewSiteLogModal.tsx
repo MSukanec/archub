@@ -18,6 +18,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Switch } from '@/components/ui/switch'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { useToast } from '@/hooks/use-toast'
@@ -427,7 +428,50 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                       </div>
                     </AccordionTrigger>
                     <AccordionContent className="space-y-3 pt-3">
-                      {/* Primera fila: Fecha y Creador */}
+                      {/* Primera fila: Entrada Pública y Favorito */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="is_public"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                              <div className="space-y-0.5">
+                                <FormLabel className="text-sm font-medium">
+                                  Entrada Pública
+                                </FormLabel>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="is_favorite"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                              <div className="space-y-0.5">
+                                <FormLabel className="text-sm font-medium">
+                                  Marcar como favorito
+                                </FormLabel>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      {/* Segunda fila: Fecha y Creador */}
                       <div className="grid grid-cols-2 gap-4">
                         <FormField
                           control={form.control}
@@ -608,69 +652,45 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                             </Button>
                           </div>
 
-                          <div>
-                            <label className="text-xs font-medium text-muted-foreground">Tipo de Personal</label>
-                            <Select
-                              value={attendee.contact_type_id}
-                              onValueChange={(value) => {
-                                const newAttendees = [...attendees];
-                                newAttendees[index].contact_type_id = value;
-                                // Reset contact when type changes
-                                newAttendees[index].contact_id = '';
-                                setAttendees(newAttendees);
-                              }}
-                            >
-                              <SelectTrigger className="h-8 text-sm">
-                                <SelectValue placeholder="Seleccionar tipo" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="all">Todos los tipos</SelectItem>
-                                {contactTypes?.map((type) => (
-                                  <SelectItem key={type.id} value={type.id}>
-                                    {type.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="text-xs font-medium text-muted-foreground">Contacto</label>
+                              <Select
+                                value={attendee.contact_id}
+                                onValueChange={(value) => {
+                                  const newAttendees = [...attendees];
+                                  newAttendees[index].contact_id = value;
+                                  setAttendees(newAttendees);
+                                }}
+                              >
+                                <SelectTrigger className="h-8 text-sm">
+                                  <SelectValue placeholder="Seleccionar contacto" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <ContactOptions contactTypeId="all" organizationId={userData?.organization?.id} />
+                                </SelectContent>
+                              </Select>
+                            </div>
 
-                          <div>
-                            <label className="text-xs font-medium text-muted-foreground">Contacto</label>
-                            <Select
-                              value={attendee.contact_id}
-                              onValueChange={(value) => {
-                                const newAttendees = [...attendees];
-                                newAttendees[index].contact_id = value;
-                                setAttendees(newAttendees);
-                              }}
-                            >
-                              <SelectTrigger className="h-8 text-sm">
-                                <SelectValue placeholder="Seleccionar contacto" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <ContactOptions contactTypeId={attendee.contact_type_id} organizationId={userData?.organization?.id} />
-                              </SelectContent>
-                            </Select>
-                          </div>
-
-                          <div>
-                            <label className="text-xs font-medium text-muted-foreground">Horario</label>
-                            <Select
-                              value={attendee.attendance_type}
-                              onValueChange={(value) => {
-                                const newAttendees = [...attendees];
-                                newAttendees[index].attendance_type = value as 'full' | 'half';
-                                setAttendees(newAttendees);
-                              }}
-                            >
-                              <SelectTrigger className="h-8 text-sm">
-                                <SelectValue placeholder="Seleccionar horario" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="full">Jornada Completa</SelectItem>
-                                <SelectItem value="half">Media Jornada</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <div>
+                              <label className="text-xs font-medium text-muted-foreground">Horario</label>
+                              <Select
+                                value={attendee.attendance_type}
+                                onValueChange={(value) => {
+                                  const newAttendees = [...attendees];
+                                  newAttendees[index].attendance_type = value as 'full' | 'half';
+                                  setAttendees(newAttendees);
+                                }}
+                              >
+                                <SelectTrigger className="h-8 text-sm">
+                                  <SelectValue placeholder="Seleccionar horario" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="full">Jornada Completa</SelectItem>
+                                  <SelectItem value="half">Media Jornada</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
                           </div>
 
                           <div>
@@ -736,34 +756,27 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                             </button>
                           </div>
 
-                          <div className="grid grid-cols-2 gap-3">
-                            <div>
-                              <label className="text-xs font-medium text-muted-foreground">Tipo de evento</label>
-                              <Select 
-                                value={event.event_type_id} 
-                                onValueChange={(value) => {
-                                  const newEvents = [...events];
-                                  newEvents[index].event_type_id = value;
-                                  setEvents(newEvents);
-                                }}
-                              >
-                                <SelectTrigger className="h-8 text-sm">
-                                  <SelectValue placeholder="Seleccionar tipo" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {eventTypes?.map((eventType: any) => (
-                                    <SelectItem key={eventType.id} value={eventType.id}>
-                                      {eventType.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-
-                            <div>
-                              <label className="text-xs font-medium text-muted-foreground">Fecha del evento</label>
-
-                            </div>
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground">Tipo de evento</label>
+                            <Select 
+                              value={event.event_type_id} 
+                              onValueChange={(value) => {
+                                const newEvents = [...events];
+                                newEvents[index].event_type_id = value;
+                                setEvents(newEvents);
+                              }}
+                            >
+                              <SelectTrigger className="h-8 text-sm">
+                                <SelectValue placeholder="Seleccionar tipo" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {eventTypes?.map((eventType: any) => (
+                                  <SelectItem key={eventType.id} value={eventType.id}>
+                                    {eventType.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </div>
 
                           <div>
