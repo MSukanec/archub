@@ -11,7 +11,9 @@ import { Calculator, Plus, Trash2, Building2 } from 'lucide-react'
 import { CustomTable } from '@/components/ui-custom/misc/CustomTable'
 import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState'
 import { NewBudgetModal } from '@/modals/NewBudgetModal'
+import { NewBudgetTaskModal } from '@/modals/NewBudgetTaskModal'
 import { useBudgets } from '@/hooks/use-budgets'
+import { useBudgetTasks } from '@/hooks/use-budget-tasks'
 import { useToast } from '@/hooks/use-toast'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
@@ -53,9 +55,28 @@ export default function ConstructionBudgets() {
   const [newBudgetModalOpen, setNewBudgetModalOpen] = useState(false)
   const [deletingBudget, setDeletingBudget] = useState<Budget | null>(null)
   const [expandedAccordion, setExpandedAccordion] = useState<string>('')
+  
+  // Task modal states
+  const [showNewTaskModal, setShowNewTaskModal] = useState(false)
+  const [selectedBudgetId, setSelectedBudgetId] = useState<string | null>(null)
+  const [editingTask, setEditingTask] = useState<any>(null)
 
   const { data: userData, isLoading } = useCurrentUser()
   const { data: budgets = [], isLoading: budgetsLoading } = useBudgets(userData?.preferences?.last_project_id)
+  
+  // Task handlers
+  const handleAddTask = (budgetId: string) => {
+    console.log('Add task to budget:', budgetId)
+    setSelectedBudgetId(budgetId)
+    setEditingTask(null)
+    setShowNewTaskModal(true)
+  }
+  
+  const handleEditTask = (task: any) => {
+    setSelectedBudgetId(task.budget_id)
+    setEditingTask(task)
+    setShowNewTaskModal(true)
+  }
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
@@ -105,10 +126,7 @@ export default function ConstructionBudgets() {
     setDeletingBudget(budget)
   }
 
-  const handleAddTask = (budgetId: string) => {
-    // TODO: Implement add task to budget functionality
-    console.log('Add task to budget:', budgetId)
-  }
+
 
   // Custom filters for the header
   const customFilters = (
