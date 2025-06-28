@@ -52,8 +52,8 @@ export function CustomModalLayout({
       {/* Modal */}
       <div
         className={cn(
-          "relative z-10 flex flex-col bg-[var(--card-bg)] shadow-2xl transition-all duration-300 ease-in-out rounded-lg border border-[var(--card-border)]",
-          "w-full max-w-md mx-4 max-h-[90vh]",
+          "relative z-10 flex flex-col bg-[var(--card-bg)] shadow-2xl transition-all duration-300 ease-in-out border border-[var(--card-border)]",
+          "w-full h-full md:w-[480px] md:max-w-[480px] md:h-full md:rounded-lg md:max-h-[95vh]",
           className,
         )}
       >
