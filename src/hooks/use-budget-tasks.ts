@@ -81,7 +81,7 @@ export function useBudgetTasks(budgetId: string) {
             unit_material_price,
             category_id,
             unit_id,
-            task_categories(
+            task_categories!tasks_category_id_fkey(
               id,
               name
             ),
