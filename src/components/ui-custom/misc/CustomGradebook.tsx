@@ -440,7 +440,7 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
                     {dateRange.map((date) => {
                       const isTodayDate = isToday(date)
                       return (
-                        <th key={date.getTime()} className={`px-3 text-center text-xs font-medium uppercase tracking-wider min-w-[40px] relative ${isTodayDate ? 'bg-[var(--accent)]/10 text-[var(--accent)] border-x-2 border-[var(--accent)]' : 'text-muted-foreground'}`}>
+                        <th key={date.getTime()} className={`px-3 text-center text-xs font-medium uppercase tracking-wider min-w-[40px] relative ${isTodayDate ? 'bg-[var(--accent)]/50 text-[var(--accent)] border-x-2 border-[var(--accent)]' : 'text-muted-foreground'}`}>
                           <div className="flex flex-col items-center">
                             <span className={isTodayDate ? 'font-bold' : ''}>{format(date, 'dd')}</span>
                             <span className={`text-[10px] ${isTodayDate ? 'font-semibold' : ''}`}>{format(date, 'EEE', { locale: es })}</span>
@@ -475,7 +475,7 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
                             const isWeekendDay = isWeekend(date)
                             const isTodayDate = isToday(date)
                             return (
-                              <td key={`${worker.id}-${date.getTime()}`} className={`px-3 text-center relative ${isTodayDate ? 'bg-[var(--accent)]/5 border-x-2 border-[var(--accent)]' : ''}`}>
+                              <td key={`${worker.id}-${date.getTime()}`} className={`px-3 text-center relative ${isTodayDate ? 'bg-[var(--accent)]/50 border-x-2 border-[var(--accent)]' : ''}`}>
                                 <div className={`w-6 h-6 rounded-full mx-auto ${getAttendanceColor(status, isWeekendDay)}`}>
                                   {isWeekendDay && !hideWeekends && (
                                     <div className="w-full h-full flex items-center justify-center">

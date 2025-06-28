@@ -120,14 +120,14 @@ Archub is a modern construction management platform built with a React frontend 
 ```
 Changelog:
 - June 28, 2025. Enhanced Personnel timeline with drag functionality and auto-centering
-  • Timeline now automatically centers on "today" when page loads without requiring button click
-  • Replaced circular navigation buttons with full-height hover-only buttons (15px wide, 100% height)
-  • Implemented drag functionality for timeline scrolling - users can click and drag to navigate dates
-  • Hover navigation buttons only appear when mouse hovers over timeline area with smooth opacity transitions
-  • Enhanced cursor feedback: grab cursor when idle, grabbing cursor when dragging timeline
-  • Contact type grouping headers properly aligned with timeline rows for seamless visual continuity
-  • Disabled text selection during drag operations to prevent interference with timeline navigation
-  • Auto-scroll to center today's date happens immediately on component mount for better UX
+  • Timeline now automatically centers on "today" ONLY on initial page load and when clicking "Hoy" button
+  • Fixed drag-and-drop behavior - timeline maintains position after dragging without returning to "today"
+  • Replaced click buttons with invisible hover areas for smooth continuous scrolling (2px increments at 60fps)
+  • Navigation areas are nearly transparent with no borders, only visible on hover (opacity 0 → 30%)
+  • Contact type grouping headers reduced to 20px height with xs text for compact display
+  • Enhanced "today" visual indicator with 50% accent background color plus left/right borders
+  • Timeline preserves user navigation position during all interactions except explicit "today" centering
+  • Improved UX with hover-based navigation that doesn't interfere with drag functionality
 
 - June 28, 2025. Fixed sidebar accordion behavior and enhanced Personnel page layout with today indicator
   • Fixed sidebar accordion collapse issue - accordions now stay open when clicking sub-items (Finanzas accordion stays open when clicking Movimientos)
