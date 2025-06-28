@@ -18,8 +18,7 @@ const budgetTaskSchema = z.object({
   task_id: z.string().min(1, "Debe seleccionar una tarea"),
   quantity: z.number().min(0.01, "La cantidad debe ser mayor a 0"),
   start_date: z.string().optional(),
-  end_date: z.string().optional(),
-  priority: z.enum(["low", "medium", "high", "urgent"]).optional()
+  end_date: z.string().optional()
 });
 
 type BudgetTaskFormData = z.infer<typeof budgetTaskSchema>;
@@ -50,8 +49,7 @@ export default function NewBudgetTaskModal({
       task_id: "",
       quantity: 1,
       start_date: "",
-      end_date: "",
-      priority: "medium"
+      end_date: ""
     }
   });
 
@@ -64,16 +62,14 @@ export default function NewBudgetTaskModal({
         task_id: editingTask.task_id || "",
         quantity: editingTask.quantity || 1,
         start_date: editingTask.start_date || "",
-        end_date: editingTask.end_date || "",
-        priority: editingTask.priority || "medium"
+        end_date: editingTask.end_date || ""
       });
     } else if (!editingTask && open) {
       reset({
         task_id: "",
         quantity: 1,
         start_date: "",
-        end_date: "",
-        priority: "medium"
+        end_date: ""
       });
     }
   }, [editingTask, open, reset]);
@@ -92,7 +88,6 @@ export default function NewBudgetTaskModal({
         quantity: data.quantity,
         start_date: data.start_date || null,
         end_date: data.end_date || null,
-        priority: data.priority || null,
         organization_id: organizationId
       };
 
@@ -126,12 +121,7 @@ export default function NewBudgetTaskModal({
     }
   };
 
-  const priorityOptions = [
-    { value: "low", label: "Baja" },
-    { value: "medium", label: "Media" },
-    { value: "high", label: "Alta" },
-    { value: "urgent", label: "Urgente" }
-  ];
+
 
   return (
     <CustomModalLayout open={open} onClose={handleClose}>
@@ -237,30 +227,7 @@ export default function NewBudgetTaskModal({
                       )}
                     </div>
 
-                    {/* Prioridad */}
-                    <div className="space-y-1">
-                      <Label htmlFor="priority" className="text-xs">
-                        Prioridad
-                      </Label>
-                      <Select
-                        value={watch("priority")}
-                        onValueChange={(value) => setValue("priority", value as any)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar prioridad" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {priorityOptions.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {errors.priority && (
-                        <p className="text-xs text-destructive">{errors.priority.message}</p>
-                      )}
-                    </div>
+
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
