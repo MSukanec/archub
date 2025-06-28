@@ -119,6 +119,17 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 28, 2025. Complete Tasks admin system with hierarchical categories and accordion modal functionality
+  • Fixed AdminTasks page import error - added missing useTasks hook import to resolve white screen issue
+  • Implemented accordion modal with single-section behavior - only one section can be open at a time with "Datos Básicos" expanded by default
+  • Fixed cancel button functionality using proper CustomModalFooter interface with onCancel and onSave props
+  • Updated useTasks hook to fetch authentic data from tasks table instead of returning empty array
+  • Removed unused ContactModal.tsx - NewContactModal.tsx is the only contact modal used in OrganizationContacts.tsx
+  • Built hierarchical category system with three-level cascading dropdowns: Categoría → Subcategoría → Elemento (Categoría)
+  • Added automatic name generation combining action + " de " + element fields when both are entered
+  • Created accordion structure with three sections: Datos Básicos, Costos, Lista de Materiales
+  • Tasks table now displays real data from Supabase tasks table filtered by organization_id
+  • Debug logging confirms successful data loading: "Muro de Ladrillos" task visible in console logs
 - June 27, 2025. Complete Tasks admin system and plan button transparency fixes
   • Fixed plan button background - removed white/colored backgrounds, now transparent in both collapsed and expanded states
   • Created complete AdminTasks.tsx page with comprehensive table interface, statistics cards, and CRUD operations

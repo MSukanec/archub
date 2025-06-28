@@ -15,6 +15,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Layout } from '@/components/layout/Layout'
 import { CustomTable } from '@/components/ui-custom/misc/CustomTable'
 import { NewAdminTaskModal } from '@/modals/NewAdminTaskModal'
+import { useTasks } from '@/hooks/use-tasks'
 
 import { Plus, Edit, Trash2, CheckSquare, Clock, Target } from 'lucide-react'
 
