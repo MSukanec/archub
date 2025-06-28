@@ -162,6 +162,13 @@ export default function ConstructionLogs() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Auto-expand the most recent entry when data loads
+  useEffect(() => {
+    if (siteLogs && siteLogs.length > 0 && !expandedLogId) {
+      setExpandedLogId(siteLogs[0].id);
+    }
+  }, [siteLogs, expandedLogId]);
+
   // Filtrar bitácoras según los criterios
   let filteredSiteLogs = siteLogs?.filter((log: any) => {
     const matchesSearch = log.comments?.toLowerCase().includes(searchValue.toLowerCase()) || "";
@@ -444,14 +451,9 @@ export default function ConstructionLogs() {
                               <ChevronRight className="h-4 w-4 text-muted-foreground" />
                             )}
                             
-                            {/* Fecha */}
+                            {/* Fecha y Hora */}
                             <span className="text-sm text-muted-foreground">
                               {format(new Date(siteLog.created_at), 'dd/MM/yyyy HH:mm', { locale: es })}
-                            </span>
-
-                            {/* Tipo de Entrada */}
-                            <span className="text-sm font-bold">
-                              {entryTypeConfig?.label || 'Sin tipo'}
                             </span>
 
                             {/* Clima */}
@@ -466,7 +468,7 @@ export default function ConstructionLogs() {
 
                             {/* Creador */}
                             <div className="flex items-center gap-2">
-                              <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center">
+                              <div className="h-5 w-5 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
                                 <span className="text-xs font-medium text-primary">
                                   {siteLog.creator?.full_name?.charAt(0) || 'U'}
                                 </span>
@@ -475,6 +477,11 @@ export default function ConstructionLogs() {
                                 {siteLog.creator?.full_name || 'Usuario desconocido'}
                               </span>
                             </div>
+
+                            {/* Tipo de Entrada */}
+                            <span className="text-sm font-bold">
+                              {entryTypeConfig?.label || 'Sin tipo'}
+                            </span>
 
                             {/* Status indicators */}
                             <div className="flex gap-1 ml-auto">
