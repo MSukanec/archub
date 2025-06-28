@@ -301,7 +301,6 @@ export default function ConstructionBudgets() {
                       <CustomTable
                         data={[]} // TODO: Load budget tasks
                         columns={budgetTaskColumns}
-                        emptyMessage="No hay tareas en este presupuesto"
                         isLoading={false}
                       />
                     </div>

@@ -31,7 +31,8 @@ import {
   Moon,
   PanelLeftOpen,
   PanelLeftClose,
-  CheckSquare
+  CheckSquare,
+  Calculator
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -218,6 +219,7 @@ export function Sidebar() {
     ],
     construction: [
       { icon: Home, label: 'Resumen', href: '/construction/dashboard' },
+      { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
       { icon: FileText, label: 'Bitácora', href: '/bitacora' },
       { icon: ArrowLeft, label: 'Volver al Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
     ],
