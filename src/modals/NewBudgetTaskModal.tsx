@@ -3,9 +3,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "@/hooks/use-toast";
-import { CustomModal } from "@/components/ui-custom/CustomModalLayout";
-import { CustomModalBody } from "@/components/ui-custom/CustomModalBody";
-import { CustomModalFooter } from "@/components/ui-custom/CustomModalFooter";
+import { CustomModalLayout } from "@/components/ui-custom/modal/CustomModalLayout";
+import { CustomModalHeader } from "@/components/ui-custom/modal/CustomModalHeader";
+import { CustomModalBody } from "@/components/ui-custom/modal/CustomModalBody";
+import { CustomModalFooter } from "@/components/ui-custom/modal/CustomModalFooter";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -42,7 +43,8 @@ export default function NewBudgetTaskModal({
 }: NewBudgetTaskModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { data: tasks = [], isLoading: tasksLoading } = useTasks(organizationId);
-  const { createBudgetTask, updateBudgetTask } = useBudgetTasks(budgetId);
+  const budgetTasksHook = useBudgetTasks(budgetId);
+  const { createBudgetTask, updateBudgetTask } = budgetTasksHook;
 
   const form = useForm<BudgetTaskFormData>({
     resolver: zodResolver(budgetTaskSchema),
@@ -137,14 +139,18 @@ export default function NewBudgetTaskModal({
   const selectedTask = tasks.find(task => task.id === watch("task_id"));
 
   return (
-    <CustomModal
-      title={editingTask ? "Editar Tarea del Presupuesto" : "Agregar Tarea al Presupuesto"}
-      open={open}
-      onClose={handleClose}
-    >
-      <form onSubmit={handleSubmit(onSubmit)} id="budget-task-form">
-        <CustomModalBody>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <CustomModalLayout open={open} onClose={handleClose}>
+      {{
+        header: (
+          <CustomModalHeader
+            title={editingTask ? "Editar Tarea del Presupuesto" : "Agregar Tarea al Presupuesto"}
+            onClose={handleClose}
+          />
+        ),
+        body: (
+          <form onSubmit={handleSubmit(onSubmit)} id="budget-task-form">
+            <CustomModalBody>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Selección de Tarea */}
             <div className="col-span-2">
               <Label className="required-asterisk">Tarea</Label>
@@ -279,16 +285,19 @@ export default function NewBudgetTaskModal({
                 </div>
               </div>
             )}
-          </div>
-        </CustomModalBody>
-
-        <CustomModalFooter
-          onCancel={handleClose}
-          onSave={handleSubmit(onSubmit)}
-          saveText={editingTask ? "Actualizar Tarea" : "Agregar Tarea"}
-          isLoading={isSubmitting}
-        />
-      </form>
-    </CustomModal>
+              </div>
+            </CustomModalBody>
+          </form>
+        ),
+        footer: (
+          <CustomModalFooter
+            onCancel={handleClose}
+            onSave={handleSubmit(onSubmit)}
+            saveText={editingTask ? "Actualizar Tarea" : "Agregar Tarea"}
+            isLoading={isSubmitting}
+          />
+        )
+      }}
+    </CustomModalLayout>
   );
 }
