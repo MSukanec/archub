@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { CustomTable } from '@/components/ui-custom/misc/CustomTable';
+import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { supabase } from '@/lib/supabase';
@@ -377,11 +378,11 @@ export default function OrganizationActivity() {
           data={filteredActivities}
           isLoading={isLoading}
           emptyState={
-            <div className="text-center py-12 text-muted-foreground">
-              <Activity className="h-12 w-12 mx-auto mb-4 opacity-20" />
-              <p className="text-sm">No hay actividad reciente en esta organización.</p>
-              <p className="text-xs">La actividad aparecerá aquí cuando se creen proyectos, movimientos o contactos.</p>
-            </div>
+            <CustomEmptyState
+              icon={<Activity className="h-12 w-12" />}
+              title="No hay actividad reciente"
+              description="La actividad aparecerá aquí cuando se creen proyectos, movimientos o contactos en esta organización."
+            />
           }
         />
     </Layout>

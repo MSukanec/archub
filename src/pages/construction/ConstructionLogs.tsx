@@ -363,51 +363,53 @@ export default function ConstructionLogs() {
   return (
     <Layout wide headerProps={headerProps}>
       <div className="space-y-6">
-        {/* Tarjetas de estadísticas */}
-        <div className="grid grid-cols-4 gap-4">
-          <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-3">
-            <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">Total de Entradas</span>
+        {/* Tarjetas de estadísticas - Only show when there's data */}
+        {filteredSiteLogs && filteredSiteLogs.length > 0 && (
+          <div className="grid grid-cols-4 gap-4">
+            <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-3">
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Total de Entradas</span>
+              </div>
+              <p className="text-lg font-semibold mt-1">{filteredSiteLogs?.length || 0}</p>
             </div>
-            <p className="text-lg font-semibold mt-1">{filteredSiteLogs?.length || 0}</p>
-          </div>
-          
-          <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-3">
-            <div className="flex items-center gap-2">
-              <Star className="h-4 w-4 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">Favoritos</span>
+            
+            <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-3">
+              <div className="flex items-center gap-2">
+                <Star className="h-4 w-4 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Favoritos</span>
+              </div>
+              <p className="text-lg font-semibold mt-1">
+                {filteredSiteLogs?.filter(log => log.is_favorite).length || 0}
+              </p>
             </div>
-            <p className="text-lg font-semibold mt-1">
-              {filteredSiteLogs?.filter(log => log.is_favorite).length || 0}
-            </p>
-          </div>
-          
-          <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-3">
-            <div className="flex items-center gap-2">
-              <Eye className="h-4 w-4 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">Entradas Públicas</span>
+            
+            <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-3">
+              <div className="flex items-center gap-2">
+                <Eye className="h-4 w-4 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Entradas Públicas</span>
+              </div>
+              <p className="text-lg font-semibold mt-1">
+                {filteredSiteLogs?.filter(log => log.is_public).length || 0}
+              </p>
             </div>
-            <p className="text-lg font-semibold mt-1">
-              {filteredSiteLogs?.filter(log => log.is_public).length || 0}
-            </p>
-          </div>
-          
-          <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-3">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">Esta Semana</span>
+            
+            <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-3">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Esta Semana</span>
+              </div>
+              <p className="text-lg font-semibold mt-1">
+                {filteredSiteLogs?.filter(log => {
+                  const logDate = new Date(log.log_date);
+                  const weekAgo = new Date();
+                  weekAgo.setDate(weekAgo.getDate() - 7);
+                  return logDate >= weekAgo;
+                }).length || 0}
+              </p>
             </div>
-            <p className="text-lg font-semibold mt-1">
-              {filteredSiteLogs?.filter(log => {
-                const logDate = new Date(log.log_date);
-                const weekAgo = new Date();
-                weekAgo.setDate(weekAgo.getDate() - 7);
-                return logDate >= weekAgo;
-              }).length || 0}
-            </p>
           </div>
-        </div>
+        )}
 
 
 
