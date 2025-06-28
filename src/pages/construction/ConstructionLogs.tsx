@@ -1,78 +1,79 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { createClient } from "@supabase/supabase-js";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { FileText, Plus, Star, Globe, Lock, ChevronDown, ChevronRight, Edit, Trash2, MoreHorizontal, Flame, Package, StickyNote, Sun, Cloud, CloudRain, CloudSnow, Wind, CloudDrizzle, CloudLightning, Thermometer, TrendingUp, Users, AlertTriangle, CloudSun, CheckCircle, Search, Camera, Eye, Calendar } from "lucide-react";
-
-import { Layout } from '@/components/layout/Layout';
+import { 
+  ChevronDown, 
+  ChevronRight, 
+  Plus, 
+  MoreHorizontal, 
+  Edit, 
+  Trash2, 
+  Clock,
+  User,
+  Cloud,
+  MessageSquare
+} from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { CustomEmptyState } from "@/components/ui-custom/misc/CustomEmptyState";
-
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+import { toast } from "@/hooks/use-toast";
+import { Layout } from "@/components/layout/Layout";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useOrganizationMembers } from "@/hooks/use-organization-members";
 import { NewSiteLogModal } from "@/modals/NewSiteLogModal";
-import { supabase } from "@/lib/supabase";
-import { useToast } from "@/hooks/use-toast";
+import { CustomGradebook } from "@/components/ui-custom/misc/CustomGradebook";
 
-// Entry types enum with their icons and labels
-const entryTypes = {
-  avance_de_obra: { icon: TrendingUp, label: "Avance de obra", color: "bg-green-100 text-green-800" },
-  visita_tecnica: { icon: Users, label: "Visita técnica", color: "bg-blue-100 text-blue-800" },
-  problema_detectado: { icon: AlertTriangle, label: "Problema detectado", color: "bg-red-100 text-red-800" },
-  pedido_material: { icon: Package, label: "Pedido material", color: "bg-orange-100 text-orange-800" },
-  nota_climatica: { icon: Sun, label: "Nota climática", color: "bg-yellow-100 text-yellow-800" },
-  decision: { icon: CheckCircle, label: "Decisión", color: "bg-purple-100 text-purple-800" },
-  inspeccion: { icon: Search, label: "Inspección", color: "bg-indigo-100 text-indigo-800" },
-  foto_diaria: { icon: Camera, label: "Foto diaria", color: "bg-gray-100 text-gray-800" },
-  registro_general: { icon: StickyNote, label: "Registro general", color: "bg-teal-100 text-teal-800" }
+const ENTRY_TYPE_LABELS = {
+  avance_de_obra: "Avance de Obra",
+  visita_tecnica: "Visita Técnica", 
+  problema_detectado: "Problema Detectado",
+  pedido_material: "Pedido Material",
+  nota_climatica: "Nota Climática",
+  decision: "Decisión",
+  inspeccion: "Inspección",
+  foto_diaria: "Foto Diaria",
+  registro_general: "Registro General"
 };
 
-const weatherTypes = {
-  sunny: { icon: Sun, label: "Soleado" },
-  cloudy: { icon: Cloud, label: "Nublado" },
-  rainy: { icon: CloudRain, label: "Lluvioso" },
-  stormy: { icon: CloudLightning, label: "Tormentoso" },
-  windy: { icon: Wind, label: "Ventoso" },
-  snowy: { icon: CloudSnow, label: "Nevado" },
-  hot: { icon: Thermometer, label: "Caluroso" },
-  cold: { icon: CloudSnow, label: "Frío" }
+const WEATHER_LABELS = {
+  sunny: "Soleado",
+  cloudy: "Nublado",
+  rainy: "Lluvioso",
+  stormy: "Tormentoso",
+  windy: "Ventoso",
+  snowy: "Nevado",
+  hot: "Caluroso",
+  cold: "Frío"
 };
 
-// Hook personalizado para obtener las bitácoras del proyecto
 function useSiteLogs(projectId: string | undefined, organizationId: string | undefined) {
+  const supabase = createClient(
+    import.meta.env.VITE_SUPABASE_URL,
+    import.meta.env.VITE_SUPABASE_ANON_KEY
+  );
+
   return useQuery({
     queryKey: ['site-logs', projectId, organizationId],
     queryFn: async () => {
-      if (!supabase || !projectId || !organizationId) {
-        return [];
-      }
-
-      console.log('Fetching site logs for project:', projectId, 'in organization:', organizationId);
+      if (!supabase || !projectId || !organizationId) return [];
 
       const { data, error } = await supabase
         .from('site_logs')
-        .select(`
-          *,
-          creator:users!created_by(
-            id,
-            full_name,
-            avatar_url
-          )
-        `)
+        .select('*')
         .eq('project_id', projectId)
-        .order('created_at', { ascending: false });
+        .eq('organization_id', organizationId)
+        .order('log_date', { ascending: false });
 
       if (error) {
         console.error('Error fetching site logs:', error);
-        throw error;
+        return [];
       }
 
       return data || [];
@@ -81,444 +82,328 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
   });
 }
 
+function groupLogsByDate(logs: any[]) {
+  const grouped: { [key: string]: any[] } = {};
+  
+  logs.forEach(log => {
+    const dateKey = format(new Date(log.log_date), 'yyyy-MM-dd');
+    if (!grouped[dateKey]) {
+      grouped[dateKey] = [];
+    }
+    grouped[dateKey].push(log);
+  });
+  
+  return grouped;
+}
+
 export default function ConstructionLogs() {
   const [searchValue, setSearchValue] = useState("");
   const [sortBy, setSortBy] = useState("date_recent");
   const [filterByType, setFilterByType] = useState("all");
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [publicOnly, setPublicOnly] = useState(false);
-  const [showNewSiteLogModal, setShowNewSiteLogModal] = useState(false);
-  const [editingSiteLog, setEditingSiteLog] = useState<any>(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [siteLogToDelete, setSiteLogToDelete] = useState<any>(null);
-  const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [editingLog, setEditingLog] = useState<any>(null);
+  const [expandedLogs, setExpandedLogs] = useState<Set<string>>(new Set());
 
-  const { data: userData, isLoading } = useCurrentUser();
-  const { data: siteLogs = [], isLoading: siteLogsLoading } = useSiteLogs(
-    userData?.preferences?.last_project_id,
-    userData?.organization?.id
-  );
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+  const { data: userData } = useCurrentUser();
+  const projectId = userData?.preferences?.last_project_id;
+  const organizationId = userData?.preferences?.last_organization_id;
 
-  // Filtrar bitácoras según los criterios
-  let filteredSiteLogs = siteLogs?.filter((log: any) => {
-    const matchesSearch = log.comments?.toLowerCase().includes(searchValue.toLowerCase()) || "";
-    
-    if (filterByType !== "all" && log.entry_type !== filterByType) return false;
-    if (favoritesOnly && !log.is_favorite) return false;
-    if (publicOnly && !log.is_public) return false;
-    
-    return matchesSearch;
-  }) || [];
+  const { data: logs = [], isLoading, error } = useSiteLogs(projectId, organizationId);
 
-  // Ordenar bitácoras
-  if (sortBy === "date_recent") {
-    filteredSiteLogs.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-  } else if (sortBy === "date_old") {
-    filteredSiteLogs.sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-  } else if (sortBy === "type") {
-    filteredSiteLogs.sort((a: any, b: any) => a.entry_type.localeCompare(b.entry_type));
-  }
+  // Auto-expand most recent log
+  useEffect(() => {
+    if (logs && logs.length > 0) {
+      setExpandedLogs(new Set([logs[0].id]));
+    }
+  }, [logs]);
 
-  // Mutation para eliminar bitácora
-  const deleteSiteLogMutation = useMutation({
-    mutationFn: async (siteLogId: string) => {
-      if (!supabase) throw new Error('Supabase client not available');
-      
-      const { error } = await supabase
-        .from('site_logs')
-        .delete()
-        .eq('id', siteLogId);
+  const toggleExpanded = (logId: string) => {
+    setExpandedLogs(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(logId)) {
+        newSet.delete(logId);
+      } else {
+        newSet.add(logId);
+      }
+      return newSet;
+    });
+  };
 
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['site-logs'] });
-      toast({
-        title: "Entrada eliminada",
-        description: "La entrada de bitácora ha sido eliminada correctamente",
-      });
-      setDeleteDialogOpen(false);
-      setSiteLogToDelete(null);
-    },
-    onError: (error) => {
-      console.error('Error deleting site log:', error);
-      toast({
-        title: "Error",
-        description: "No se pudo eliminar la entrada de bitácora",
-        variant: "destructive",
-      });
+  const filteredLogs = logs.filter(log => {
+    if (searchValue && !log.comments?.toLowerCase().includes(searchValue.toLowerCase())) {
+      return false;
+    }
+    if (filterByType !== "all" && log.entry_type !== filterByType) {
+      return false;
+    }
+    if (favoritesOnly && !log.is_favorite) {
+      return false;
+    }
+    if (publicOnly && !log.is_public) {
+      return false;
+    }
+    return true;
+  });
+
+  const sortedLogs = [...filteredLogs].sort((a, b) => {
+    switch (sortBy) {
+      case "date_recent":
+        return new Date(b.log_date).getTime() - new Date(a.log_date).getTime();
+      case "date_oldest":
+        return new Date(a.log_date).getTime() - new Date(b.log_date).getTime();
+      case "type":
+        return a.entry_type.localeCompare(b.entry_type);
+      default:
+        return 0;
     }
   });
 
-  const handleEditSiteLog = (siteLog: any) => {
-    setEditingSiteLog(siteLog);
-    setShowNewSiteLogModal(true);
-  };
-
-  const handleDeleteSiteLog = (siteLog: any) => {
-    setSiteLogToDelete(siteLog);
-    setDeleteDialogOpen(true);
-  };
-
-  const customFilters = (
-    <div className="flex gap-4">
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Ordenar por</Label>
-        <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="w-[140px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="date_recent">Más recientes</SelectItem>
-            <SelectItem value="date_old">Más antiguos</SelectItem>
-            <SelectItem value="type">Tipo</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Filtrar por tipo</Label>
-        <Select value={filterByType} onValueChange={setFilterByType}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos los tipos</SelectItem>
-            {Object.entries(entryTypes).map(([key, { label }]) => (
-              <SelectItem key={key} value={key}>{label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Filtros adicionales</Label>
-        <div className="flex gap-3">
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="favorites"
-              checked={favoritesOnly}
-              onCheckedChange={setFavoritesOnly}
-            />
-            <Label htmlFor="favorites" className="text-sm">Solo favoritos</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="public"
-              checked={publicOnly}
-              onCheckedChange={setPublicOnly}
-            />
-            <Label htmlFor="public" className="text-sm">Solo públicos</Label>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const clearFilters = () => {
-    setSearchValue("");
-    setSortBy("date_recent");
-    setFilterByType("all");
-    setFavoritesOnly(false);
-    setPublicOnly(false);
-  };
-
-  const actions = [
-    <Button 
-      key="new-entry"
-      className="h-8 px-3 text-sm"
-      onClick={() => setShowNewSiteLogModal(true)}
-    >
-      <Plus className="w-4 h-4 mr-2" />
-      Nueva Entrada
-    </Button>
-  ];
+  const groupedLogs = groupLogsByDate(sortedLogs);
 
   const headerProps = {
-    icon: FileText,
-    title: "Bitácora",
+    title: "Bitácora de Obra",
     showSearch: true,
     searchValue,
     onSearchChange: setSearchValue,
-    showFilters: true,
-    customFilters,
-    onClearFilters: clearFilters,
-    actions
+    customFilters: (
+      <div className="space-y-3">
+        <div>
+          <label className="block text-xs font-medium text-muted-foreground mb-1">
+            Ordenar por
+          </label>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="w-full px-3 py-2 text-sm border rounded-md bg-background"
+          >
+            <option value="date_recent">Fecha (Más recientes)</option>
+            <option value="date_oldest">Fecha (Más antiguos)</option>
+            <option value="type">Tipo de entrada</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-muted-foreground mb-1">
+            Filtrar por tipo
+          </label>
+          <select
+            value={filterByType}
+            onChange={(e) => setFilterByType(e.target.value)}
+            className="w-full px-3 py-2 text-sm border rounded-md bg-background"
+          >
+            <option value="all">Todos los tipos</option>
+            {Object.entries(ENTRY_TYPE_LABELS).map(([value, label]) => (
+              <option key={value} value={value}>{label}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+    ),
+    onClearFilters: () => {
+      setSearchValue("");
+      setSortBy("date_recent");
+      setFilterByType("all");
+      setFavoritesOnly(false);
+      setPublicOnly(false);
+    },
+    actions: (
+      <Button onClick={() => setShowModal(true)} size="sm">
+        <Plus className="w-4 h-4 mr-2" />
+        Nueva Entrada
+      </Button>
+    )
   };
 
-  if (isLoading || siteLogsLoading) {
+  if (isLoading) {
     return (
-      <Layout wide headerProps={headerProps}>
-        <div className="p-8 text-center text-muted-foreground">
-          Cargando bitácora...
+      <Layout headerProps={headerProps}>
+        <div className="p-6">
+          <div className="space-y-4">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-16 bg-muted rounded-lg animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout headerProps={headerProps}>
+        <div className="p-6">
+          <div className="text-center text-muted-foreground">
+            Error al cargar las entradas de bitácora
+          </div>
         </div>
       </Layout>
     );
   }
 
   return (
-    <Layout wide headerProps={headerProps}>
-      <div className="space-y-6">
-        {/* Tarjetas de estadísticas */}
-        <div className="grid grid-cols-4 gap-4">
-          <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-3">
-            <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">Total de Entradas</span>
+    <Layout headerProps={headerProps}>
+      <div className="p-6 space-y-6">
+        {Object.keys(groupedLogs).length === 0 ? (
+          <div className="text-center py-12">
+            <div className="text-muted-foreground">
+              No hay entradas de bitácora para mostrar
             </div>
-            <p className="text-lg font-semibold mt-1">{filteredSiteLogs?.length || 0}</p>
+            <Button 
+              onClick={() => setShowModal(true)} 
+              className="mt-4"
+              variant="outline"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Crear Primera Entrada
+            </Button>
           </div>
-          
-          <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-3">
-            <div className="flex items-center gap-2">
-              <Star className="h-4 w-4 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">Favoritos</span>
-            </div>
-            <p className="text-lg font-semibold mt-1">
-              {filteredSiteLogs?.filter(log => log.is_favorite).length || 0}
-            </p>
-          </div>
-          
-          <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-3">
-            <div className="flex items-center gap-2">
-              <Eye className="h-4 w-4 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">Entradas Públicas</span>
-            </div>
-            <p className="text-lg font-semibold mt-1">
-              {filteredSiteLogs?.filter(log => log.is_public).length || 0}
-            </p>
-          </div>
-          
-          <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-3">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">Esta Semana</span>
-            </div>
-            <p className="text-lg font-semibold mt-1">
-              {filteredSiteLogs?.filter(log => {
-                const logDate = new Date(log.log_date);
-                const weekAgo = new Date();
-                weekAgo.setDate(weekAgo.getDate() - 7);
-                return logDate >= weekAgo;
-              }).length || 0}
-            </p>
-          </div>
-        </div>
-
-        {/* Headers de columnas */}
-        <div className="grid grid-cols-12 gap-4 px-4 py-2 text-xs font-medium text-muted-foreground border-b">
-          <div className="col-span-2">Fecha</div>
-          <div className="col-span-2">Creador</div>
-          <div className="col-span-3">Tipo de Entrada</div>
-          <div className="col-span-2">Clima</div>
-          <div className="col-span-2">Comentarios</div>
-          <div className="col-span-1">Acciones</div>
-        </div>
-
-        {filteredSiteLogs.length === 0 ? (
-          <CustomEmptyState
-            icon={<FileText className="w-12 h-12 text-muted-foreground" />}
-            title={searchValue || filterByType !== 'all' || favoritesOnly || publicOnly ? "No se encontraron entradas" : "No hay entradas de bitácora"}
-            description={searchValue || filterByType !== 'all' || favoritesOnly || publicOnly 
-              ? 'Prueba ajustando los filtros de búsqueda' 
-              : 'Comienza creando tu primera entrada de bitácora para documentar el progreso'
-            }
-            action={
-              !searchValue && filterByType === 'all' && !favoritesOnly && !publicOnly && (
-                <Button onClick={() => setShowNewSiteLogModal(true)}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Crear Primera Entrada
-                </Button>
-              )
-            }
-          />
         ) : (
-          <div className="space-y-3">
-            {filteredSiteLogs.map((siteLog: any) => {
-              const entryTypeConfig = entryTypes[siteLog.entry_type as keyof typeof entryTypes];
-              const weatherConfig = weatherTypes[siteLog.weather as keyof typeof weatherTypes];
-              const isExpanded = expandedLogId === siteLog.id;
-              
-              return (
-                <Collapsible 
-                  key={siteLog.id}
-                  open={isExpanded}
-                  onOpenChange={(open) => setExpandedLogId(open ? siteLog.id : null)}
-                >
-                  <Card className="w-full transition-all hover:shadow-sm">
-                    <CollapsibleTrigger asChild>
-                      <div className="w-full p-4 cursor-pointer">
-                        <div className="grid grid-cols-12 gap-4 items-center">
-                          {/* Fecha */}
-                          <div className="col-span-2 flex items-center gap-2">
-                            {isExpanded ? (
-                              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                            ) : (
-                              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                            )}
-                            <span className="text-xs text-muted-foreground">
-                              {format(new Date(siteLog.created_at), 'dd/MM/yyyy', { locale: es })}
-                            </span>
-                          </div>
+          <div className="space-y-6">
+            {Object.entries(groupedLogs)
+              .sort(([a], [b]) => new Date(b).getTime() - new Date(a).getTime())
+              .map(([date, dateLogs]) => (
+                <div key={date} className="space-y-3">
+                  {/* Date marker */}
+                  <div className="flex items-center space-x-3">
+                    <div className="w-3 h-3 bg-primary rounded-full flex-shrink-0" />
+                    <h3 className="text-lg font-semibold text-foreground">
+                      {format(new Date(date), "EEEE, d 'de' MMMM 'de' yyyy", { locale: es })}
+                    </h3>
+                    <div className="flex-1 h-px bg-border" />
+                  </div>
 
-                          {/* Creador */}
-                          <div className="col-span-2 flex items-center gap-2">
-                            <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center">
-                              <span className="text-xs font-medium text-primary">
-                                {siteLog.creator?.full_name?.charAt(0) || 'U'}
-                              </span>
-                            </div>
-                            <span className="text-xs font-medium truncate">
-                              {siteLog.creator?.full_name || 'Usuario desconocido'}
-                            </span>
-                          </div>
-
-                          {/* Tipo de entrada */}
-                          <div className="col-span-3 flex items-center gap-2">
-                            {entryTypeConfig && (
-                              <>
-                                <entryTypeConfig.icon className="h-4 w-4 text-muted-foreground" />
-                                <Badge variant="secondary" className={`text-xs ${entryTypeConfig.color}`}>
-                                  {entryTypeConfig.label}
-                                </Badge>
-                              </>
-                            )}
-                            <div className="flex gap-1">
-                              {siteLog.is_favorite && <Star className="h-3 w-3 text-yellow-500" />}
-                              {siteLog.is_public ? <Globe className="h-3 w-3 text-green-500" /> : <Lock className="h-3 w-3 text-gray-400" />}
-                            </div>
-                          </div>
-
-                          {/* Clima */}
-                          <div className="col-span-2 flex items-center gap-2">
-                            {weatherConfig && (
-                              <>
-                                <weatherConfig.icon className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-xs text-muted-foreground">
-                                  {weatherConfig.label}
+                  {/* Logs for this date */}
+                  <div className="ml-6 space-y-3">
+                    {dateLogs.map((log) => (
+                      <Card key={log.id} className="border shadow-sm">
+                        {/* Collapsed view */}
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            {/* Left side info */}
+                            <div className="flex items-center space-x-4 flex-1">
+                              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                                <Clock className="w-4 h-4" />
+                                <span>{format(new Date(log.created_at), "HH:mm")}</span>
+                              </div>
+                              
+                              <div className="flex items-center space-x-2">
+                                <User className="w-4 h-4 text-muted-foreground" />
+                                <span className="text-sm font-medium">
+                                  {log.created_by || "Usuario"}
                                 </span>
-                              </>
-                            )}
-                          </div>
+                              </div>
 
-                          {/* Comentarios (preview) */}
-                          <div className="col-span-2">
-                            <span className="text-xs text-muted-foreground line-clamp-1">
-                              {siteLog.comments || 'Sin comentarios'}
-                            </span>
-                          </div>
+                              <Badge variant="outline" className="text-xs">
+                                {ENTRY_TYPE_LABELS[log.entry_type as keyof typeof ENTRY_TYPE_LABELS] || log.entry_type}
+                              </Badge>
 
-                          {/* Acciones */}
-                          <div className="col-span-1">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm"
-                                  className="h-7 w-7 p-0"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleEditSiteLog(siteLog);
-                                }}>
-                                  <Edit className="h-4 w-4 mr-2" />
-                                  Editar
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDeleteSiteLog(siteLog);
-                                  }}
-                                  className="text-destructive"
-                                >
-                                  <Trash2 className="h-4 w-4 mr-2" />
-                                  Eliminar
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        </div>
-                      </div>
-                    </CollapsibleTrigger>
+                              {log.weather && (
+                                <div className="flex items-center space-x-1">
+                                  <Cloud className="w-4 h-4 text-muted-foreground" />
+                                  <span className="text-xs text-muted-foreground">
+                                    {WEATHER_LABELS[log.weather as keyof typeof WEATHER_LABELS] || log.weather}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
 
-                    <CollapsibleContent>
-                      <div className="px-4 pb-4 pt-2 border-t bg-muted/30">
-                        <div className="grid grid-cols-2 gap-4 text-sm">
-                          <div>
-                            <span className="font-medium text-muted-foreground">Estado:</span>
-                            <p>{siteLog.is_public ? "Público" : "Privado"}</p>
-                          </div>
-                          <div>
-                            <span className="font-medium text-muted-foreground">Creado:</span>
-                            <p>{format(new Date(siteLog.created_at), 'dd/MM/yyyy HH:mm', { locale: es })}</p>
-                          </div>
-                          <div className="col-span-2">
-                            <span className="font-medium text-muted-foreground">Comentarios completos:</span>
-                            <p className="mt-1 text-sm">{siteLog.comments || 'Sin comentarios adicionales'}</p>
-                          </div>
-                          {siteLog.weather && (
-                            <div className="col-span-2">
-                              <span className="font-medium text-muted-foreground">Condiciones climáticas:</span>
-                              <div className="flex items-center gap-2 mt-1">
-                                {weatherConfig && (
-                                  <>
-                                    <weatherConfig.icon className="h-4 w-4" />
-                                    <span className="text-sm">{weatherConfig.label}</span>
-                                  </>
+                            {/* Right side actions */}
+                            <div className="flex items-center space-x-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => toggleExpanded(log.id)}
+                              >
+                                {expandedLogs.has(log.id) ? (
+                                  <ChevronDown className="w-4 h-4" />
+                                ) : (
+                                  <ChevronRight className="w-4 h-4" />
                                 )}
+                              </Button>
+
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm">
+                                    <MoreHorizontal className="w-4 h-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => {
+                                    setEditingLog(log);
+                                    setShowModal(true);
+                                  }}>
+                                    <Edit className="w-4 h-4 mr-2" />
+                                    Editar
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem className="text-destructive">
+                                    <Trash2 className="w-4 h-4 mr-2" />
+                                    Eliminar
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </div>
+
+                          {/* Expanded view */}
+                          {expandedLogs.has(log.id) && (
+                            <div className="mt-4 pt-4 border-t">
+                              <div className="grid grid-cols-3 gap-6">
+                                {/* Comments column */}
+                                <div className="space-y-2">
+                                  <div className="flex items-center space-x-2">
+                                    <MessageSquare className="w-4 h-4 text-muted-foreground" />
+                                    <h4 className="text-sm font-medium">Comentarios</h4>
+                                  </div>
+                                  <div className="text-sm text-muted-foreground bg-muted rounded-md p-3">
+                                    {log.comments || "Sin comentarios"}
+                                  </div>
+                                </div>
+
+                                {/* Personnel column */}
+                                <div className="space-y-2">
+                                  <div className="flex items-center space-x-2">
+                                    <User className="w-4 h-4 text-muted-foreground" />
+                                    <h4 className="text-sm font-medium">Personal</h4>
+                                  </div>
+                                  <div className="text-sm text-muted-foreground bg-muted rounded-md p-3">
+                                    Sin personal registrado
+                                  </div>
+                                </div>
+
+                                {/* Events column */}
+                                <div className="space-y-2">
+                                  <div className="flex items-center space-x-2">
+                                    <Clock className="w-4 h-4 text-muted-foreground" />
+                                    <h4 className="text-sm font-medium">Eventos</h4>
+                                  </div>
+                                  <div className="text-sm text-muted-foreground bg-muted rounded-md p-3">
+                                    Sin eventos registrados
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           )}
-                        </div>
-                      </div>
-                    </CollapsibleContent>
-                  </Card>
-                </Collapsible>
-              );
-            })}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              ))}
           </div>
         )}
       </div>
 
-      {/* Modal para nueva entrada */}
-      {showNewSiteLogModal && (
-        <NewSiteLogModal
-          open={showNewSiteLogModal}
+      {showModal && (
+        <NewSiteLogModal 
+          isOpen={showModal}
           onClose={() => {
-            setShowNewSiteLogModal(false);
-            setEditingSiteLog(null);
+            setShowModal(false);
+            setEditingLog(null);
           }}
-          editingSiteLog={editingSiteLog}
+          editingLog={editingLog}
         />
       )}
-
-      {/* Diálogo de confirmación para eliminar */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar entrada de bitácora?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción no se puede deshacer. Se eliminará permanentemente esta entrada de la bitácora.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={() => siteLogToDelete && deleteSiteLogMutation.mutate(siteLogToDelete.id)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </Layout>
   );
 }
