@@ -23,30 +23,37 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { useToast } from '@/hooks/use-toast'
 import { Calendar, User, FileText, Cloud, MessageSquare, Star, Eye, Calendar as CalendarIcon, Plus, X, Settings } from 'lucide-react'
 
-// ContactSelect component for filtering contacts by type
-interface ContactSelectProps {
+// ContactOptions component for rendering contact options
+interface ContactOptionsProps {
   organizationId?: string
   contactTypeId?: string
-  value: string
-  onChange: (value: string) => void
 }
 
-function ContactSelect({ organizationId, contactTypeId, value, onChange }: ContactSelectProps) {
+function ContactOptions({ organizationId, contactTypeId }: ContactOptionsProps) {
   const { data: contacts } = useContacts(organizationId, contactTypeId === 'all' ? undefined : contactTypeId)
   
   return (
-    <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className="h-8 text-sm">
-        <SelectValue placeholder="Seleccionar contacto" />
-      </SelectTrigger>
-      <SelectContent>
-        {contacts?.map((contact: any) => (
-          <SelectItem key={contact.id} value={contact.id}>
-            {contact.first_name} {contact.last_name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <>
+      {contacts?.map((contact: any) => (
+        <SelectItem key={contact.id} value={contact.id}>
+          {contact.first_name} {contact.last_name}
+        </SelectItem>
+      ))}
+    </>
+  )
+}
+
+function ContactOptionsInner({ organizationId, contactTypeId }: ContactOptionsProps) {
+  const { data: contacts } = useContacts(organizationId, contactTypeId === 'all' ? undefined : contactTypeId)
+  
+  return (
+    <>
+      {contacts?.map((contact: any) => (
+        <SelectItem key={contact.id} value={contact.id}>
+          {contact.first_name} {contact.last_name}
+        </SelectItem>
+      ))}
+    </>
   )
 }
 
@@ -563,16 +570,21 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
 
                           <div>
                             <label className="text-xs font-medium text-muted-foreground">Contacto</label>
-                            <ContactSelect
-                              organizationId={userData?.organization?.id}
-                              contactTypeId={attendee.contact_type_id}
+                            <Select
                               value={attendee.contact_id}
-                              onChange={(value) => {
+                              onValueChange={(value) => {
                                 const newAttendees = [...attendees];
                                 newAttendees[index].contact_id = value;
                                 setAttendees(newAttendees);
                               }}
-                            />
+                            >
+                              <SelectTrigger className="h-8 text-sm">
+                                <SelectValue placeholder="Seleccionar contacto" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <ContactOptions contactTypeId={attendee.contact_type_id} organizationId={userData?.organization?.id} />
+                              </SelectContent>
+                            </Select>
                           </div>
 
                           <div>
