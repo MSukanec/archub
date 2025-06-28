@@ -182,7 +182,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
   const { data: userData } = useCurrentUser()
   const { data: members } = useOrganizationMembers(userData?.preferences?.last_organization_id || '')
   const { data: eventTypes } = useEventTypes()
-  const { data: equipment } = useEquipment()
+  const { data: equipmentData } = useEquipment()
   const { data: contactTypes } = useContactTypes()
   
   const [events, setEvents] = useState<SiteLogEventForm[]>([])
@@ -895,6 +895,107 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                     </AccordionContent>
                   </AccordionItem>
 
+                  {/* Sección 4: Maquinarias y Equipos */}
+                  <AccordionItem value="equipamientos">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <Settings className="w-4 h-4" />
+                        Maquinarias y Equipos ({equipmentList.length})
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="space-y-3 pt-3">
+                      {/* Lista de equipamientos */}
+                      {equipmentList.map((equipmentItem, index) => (
+                        <div key={index} className="border rounded-lg p-3 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <h4 className="text-sm font-medium">Equipamiento {index + 1}</h4>
+                            <button
+                              type="button"
+                              className="h-6 w-6 rounded-md hover:bg-gray-100 flex items-center justify-center"
+                              onClick={() => {
+                                const newEquipment = equipmentList.filter((_, i) => i !== index);
+                                setEquipmentList(newEquipment);
+                              }}
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="text-xs font-medium text-muted-foreground">Tipo de Equipamiento</label>
+                              <Select 
+                                value={equipmentItem.equipment_id} 
+                                onValueChange={(value) => {
+                                  const newEquipment = [...equipmentList];
+                                  newEquipment[index].equipment_id = value;
+                                  setEquipmentList(newEquipment);
+                                }}
+                              >
+                                <SelectTrigger className="h-8 text-sm">
+                                  <SelectValue placeholder="Seleccionar tipo" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {equipment?.map((equipmentType: any) => (
+                                    <SelectItem key={equipmentType.id} value={equipmentType.id}>
+                                      {equipmentType.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+
+                            <div>
+                              <label className="text-xs font-medium text-muted-foreground">Cantidad</label>
+                              <Input
+                                type="number"
+                                min="1"
+                                className="h-8 text-sm"
+                                value={equipmentItem.quantity}
+                                onChange={(e) => {
+                                  const newEquipment = [...equipmentList];
+                                  newEquipment[index].quantity = parseInt(e.target.value) || 1;
+                                  setEquipmentList(newEquipment);
+                                }}
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground">Descripción</label>
+                            <Textarea
+                              className="min-h-[60px] text-sm"
+                              placeholder="Describe el uso del equipamiento..."
+                              value={equipmentItem.description || ''}
+                              onChange={(e) => {
+                                const newEquipment = [...equipmentList];
+                                newEquipment[index].description = e.target.value;
+                                setEquipmentList(newEquipment);
+                              }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Botón para agregar equipamiento */}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setEquipmentList([...equipmentList, {
+                            equipment_id: '',
+                            quantity: 1,
+                            description: ''
+                          }]);
+                        }}
+                        className="w-full"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Agregar Equipamiento
+                      </Button>
+                    </AccordionContent>
+                  </AccordionItem>
 
                 </Accordion>
               </form>
