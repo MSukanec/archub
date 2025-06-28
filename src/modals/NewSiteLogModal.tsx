@@ -72,6 +72,13 @@ const siteLogAttendeeSchema = z.object({
   description: z.string().optional()
 })
 
+// Schema para equipamientos
+const siteLogEquipmentSchema = z.object({
+  equipment_id: z.string().min(1, 'Tipo de equipamiento es requerido'),
+  quantity: z.number().min(1, 'Cantidad debe ser mayor a 0').default(1),
+  description: z.string().optional()
+})
+
 const siteLogSchema = z.object({
   log_date: z.date(),
   created_by: z.string().min(1, 'Creador es requerido'),
@@ -91,12 +98,14 @@ const siteLogSchema = z.object({
   is_public: z.boolean().default(true),
   is_favorite: z.boolean().default(false),
   events: z.array(siteLogEventSchema).default([]),
-  attendees: z.array(siteLogAttendeeSchema).default([])
+  attendees: z.array(siteLogAttendeeSchema).default([]),
+  equipment: z.array(siteLogEquipmentSchema).default([])
 })
 
 type SiteLogForm = z.infer<typeof siteLogSchema>
 type SiteLogEventForm = z.infer<typeof siteLogEventSchema>
 type SiteLogAttendeeForm = z.infer<typeof siteLogAttendeeSchema>
+type SiteLogEquipmentForm = z.infer<typeof siteLogEquipmentSchema>
 
 // Definir tipos exactos basados en la base de datos
 interface SiteLog {
@@ -135,6 +144,31 @@ function useEventTypes() {
   });
 }
 
+// Hook para obtener tipos de equipamiento
+function useEquipment() {
+  return useQuery({
+    queryKey: ['equipment'],
+    queryFn: async () => {
+      if (!supabase) {
+        return [];
+      }
+
+      const { data, error } = await supabase
+        .from('equipment')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching equipment:', error);
+        throw error;
+      }
+
+      return data || [];
+    },
+    enabled: !!supabase
+  });
+}
+
 // Props del modal
 interface NewSiteLogModalProps {
   open: boolean
@@ -148,10 +182,12 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
   const { data: userData } = useCurrentUser()
   const { data: members } = useOrganizationMembers(userData?.preferences?.last_organization_id || '')
   const { data: eventTypes } = useEventTypes()
+  const { data: equipment } = useEquipment()
   const { data: contactTypes } = useContactTypes()
   
   const [events, setEvents] = useState<SiteLogEventForm[]>([])
   const [attendees, setAttendees] = useState<SiteLogAttendeeForm[]>([])
+  const [equipmentList, setEquipmentList] = useState<SiteLogEquipmentForm[]>([])
   const [accordionValue, setAccordionValue] = useState<string>("informacion-basica")
   
   const form = useForm<SiteLogForm>({
@@ -165,7 +201,8 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
       is_public: true,
       is_favorite: false,
       events: [],
-      attendees: []
+      attendees: [],
+      equipment: []
     }
   })
 
@@ -188,9 +225,10 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
       // Load events and attendees for editing
       loadSiteLogData(editingSiteLog.id)
     } else {
-      // Reset events and attendees for new entries
+      // Reset events, attendees and equipment for new entries
       setEvents([])
       setAttendees([])
+      setEquipmentList([])
       
       // Seleccionar usuario actual por defecto en modo creación
       const currentUserMember = members?.find((member: any) => member.users.id === userData?.user?.id);
@@ -230,6 +268,20 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
           contact_id: attendee.contact_id,
           attendance_type: attendee.attendance_type,
           description: attendee.description || ''
+        })))
+      }
+
+      // Load equipment
+      const { data: equipmentData } = await supabase
+        .from('site_log_equipment')
+        .select('*')
+        .eq('site_log_id', siteLogId)
+
+      if (equipmentData) {
+        setEquipmentList(equipmentData.map(equip => ({
+          equipment_id: equip.equipment_id,
+          quantity: equip.quantity,
+          description: equip.description || ''
         })))
       }
     } catch (error) {
@@ -336,6 +388,35 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
 
           if (attendeesResult.error) {
             console.error('Error saving site log attendees:', attendeesResult.error)
+          }
+        }
+      }
+
+      // Handle site log equipment
+      if (siteLogResult.data) {
+        // If editing, delete existing equipment first
+        if (editingSiteLog) {
+          await supabase
+            .from('site_log_equipment')
+            .delete()
+            .eq('site_log_id', siteLogResult.data.id)
+        }
+
+        // Create new equipment if any
+        if (equipmentList.length > 0) {
+          const equipmentData = equipmentList.map(equip => ({
+            site_log_id: siteLogResult.data.id,
+            equipment_id: equip.equipment_id,
+            quantity: equip.quantity,
+            description: equip.description || null
+          }))
+
+          const equipmentResult = await supabase
+            .from('site_log_equipment')
+            .insert(equipmentData)
+
+          if (equipmentResult.error) {
+            console.error('Error saving site log equipment:', equipmentResult.error)
           }
         }
       }
