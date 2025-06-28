@@ -55,6 +55,9 @@ export default function ConstructionBudgets() {
   const [newBudgetModalOpen, setNewBudgetModalOpen] = useState(false)
   const [deletingBudget, setDeletingBudget] = useState<Budget | null>(null)
   const [expandedAccordion, setExpandedAccordion] = useState<string>('')
+  const [budgetTaskModalOpen, setBudgetTaskModalOpen] = useState(false)
+  const [currentBudgetId, setCurrentBudgetId] = useState<string>('')
+  const [editingBudgetTask, setEditingBudgetTask] = useState<any>(null)
 
   const { data: userData, isLoading } = useCurrentUser()
   const { data: budgets = [], isLoading: budgetsLoading } = useBudgets(userData?.preferences?.last_project_id)
@@ -107,10 +110,28 @@ export default function ConstructionBudgets() {
     setDeletingBudget(budget)
   }
 
+  // Handle add task to budget
   const handleAddTask = (budgetId: string) => {
-    // TODO: Implement add task to budget functionality
-    console.log('Add task to budget:', budgetId)
+    setCurrentBudgetId(budgetId)
+    setEditingBudgetTask(null)
+    setBudgetTaskModalOpen(true)
   }
+
+  // Handle edit task
+  const handleEditTask = (budgetId: string, task: any) => {
+    setCurrentBudgetId(budgetId)
+    setEditingBudgetTask(task)
+    setBudgetTaskModalOpen(true)
+  }
+
+  // Close task modal
+  const handleCloseTaskModal = () => {
+    setBudgetTaskModalOpen(false)
+    setCurrentBudgetId('')
+    setEditingBudgetTask(null)
+  }
+
+
 
   // Custom filters for the header
   const customFilters = (
@@ -169,57 +190,75 @@ export default function ConstructionBudgets() {
     )
   }
 
-  // Budget task table columns
-  const budgetTaskColumns = [
-    {
-      key: 'task.name' as keyof BudgetTask,
-      label: 'Tarea',
-      render: (task: BudgetTask) => (
-        <div>
-          <div className="font-medium text-sm">{task.task.name}</div>
-          {task.task.description && (
-            <div className="text-xs text-muted-foreground">{task.task.description}</div>
-          )}
-        </div>
-      )
-    },
-    {
-      key: 'quantity' as keyof BudgetTask,
-      label: 'Cantidad',
-      render: (task: BudgetTask) => (
-        <span className="text-sm">
-          {task.quantity} {task.task.unit.abbreviation}
-        </span>
-      )
-    },
-    {
-      key: 'unit_labor_price' as keyof BudgetTask,
-      label: 'Precio M.O.',
-      render: (task: BudgetTask) => (
-        <span className="text-sm">
-          ${task.unit_labor_price.toLocaleString()}
-        </span>
-      )
-    },
-    {
-      key: 'unit_material_price' as keyof BudgetTask,
-      label: 'Precio Mat.',
-      render: (task: BudgetTask) => (
-        <span className="text-sm">
-          ${task.unit_material_price.toLocaleString()}
-        </span>
-      )
-    },
-    {
-      key: 'total_cost' as keyof BudgetTask,
-      label: 'Total',
-      render: (task: BudgetTask) => (
-        <span className="text-sm font-medium">
-          ${task.total_cost.toLocaleString()}
-        </span>
-      )
+  // Budget Task Table Component
+  function BudgetTaskTable({ budgetId }: { budgetId: string }) {
+    const { budgetTasks, isLoading } = useBudgetTasks(budgetId);
+
+    const taskColumns = [
+      {
+        key: 'task' as keyof any,
+        label: 'Tarea',
+        render: (task: any) => (
+          <div>
+            <div className="font-medium text-sm">{task.task?.name || 'Sin nombre'}</div>
+            {task.task?.description && (
+              <div className="text-xs text-muted-foreground">{task.task.description}</div>
+            )}
+          </div>
+        )
+      },
+      {
+        key: 'quantity' as keyof any,
+        label: 'Cantidad',
+        render: (task: any) => (
+          <span className="text-sm">{task.quantity || 0}</span>
+        )
+      },
+      {
+        key: 'total' as keyof any,
+        label: 'Total',
+        render: (task: any) => {
+          const laborPrice = task.task?.unit_labor_price || 0;
+          const materialPrice = task.task?.unit_material_price || 0;
+          const total = (laborPrice + materialPrice) * (task.quantity || 0);
+          return (
+            <span className="text-sm font-medium">
+              ${total.toLocaleString()}
+            </span>
+          );
+        }
+      }
+    ];
+
+    if (isLoading) {
+      return <div className="p-4 text-center text-sm text-muted-foreground">Cargando tareas...</div>;
     }
-  ]
+
+    if (budgetTasks.length === 0) {
+      return (
+        <div className="p-4 text-center">
+          <p className="text-sm text-muted-foreground mb-3">No hay tareas en este presupuesto</p>
+          <Button 
+            size="sm" 
+            onClick={() => handleAddTask(budgetId)}
+            className="h-8 px-3 text-xs"
+          >
+            <Plus className="w-3 h-3 mr-1" />
+            Agregar Primera Tarea
+          </Button>
+        </div>
+      );
+    }
+
+    return (
+      <CustomTable
+        data={budgetTasks}
+        columns={taskColumns}
+        loading={isLoading}
+        emptyMessage="No hay tareas en este presupuesto"
+      />
+    );
+  }
 
   return (
     <Layout headerProps={headerProps}>
@@ -300,11 +339,7 @@ export default function ConstructionBudgets() {
                   
                   <AccordionContent className="px-4 pb-4">
                     <div className="pt-4 border-t">
-                      <CustomTable
-                        data={[]} // TODO: Load budget tasks
-                        columns={budgetTaskColumns}
-                        isLoading={false}
-                      />
+                      <BudgetTaskTable budgetId={budget.id} />
                     </div>
                   </AccordionContent>
                 </Card>
