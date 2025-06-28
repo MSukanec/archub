@@ -74,6 +74,21 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
     onEndDateChange?.(newEnd)
   }
 
+  // Handle date input changes
+  const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newStart = new Date(e.target.value)
+    if (!isNaN(newStart.getTime())) {
+      onStartDateChange?.(newStart)
+    }
+  }
+
+  const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newEnd = new Date(e.target.value)
+    if (!isNaN(newEnd.getTime())) {
+      onEndDateChange?.(newEnd)
+    }
+  }
+
   const getAttendanceStatus = (workerId: string, date: Date) => {
     const dayString = format(date, 'yyyy-MM-dd')
     const record = attendance.find(a => a.workerId === workerId && a.day === dayString)
@@ -103,7 +118,7 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
       .slice(0, 2)
   }
 
-  const currentMonth = format(startDate, 'MMMM yyyy', { locale: es })
+
 
   return (
     <Card className="w-full">
@@ -117,17 +132,38 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
           </div>
           
           <div className="flex items-center gap-4">
-            {/* Date Navigation */}
-            <div className="flex items-center gap-2">
+            {/* Date Range Controls */}
+            <div className="flex items-center gap-3">
               <Button variant="outline" size="sm" onClick={() => navigateDates('prev')}>
                 <ChevronLeft className="w-4 h-4" />
               </Button>
-              <span className="text-sm font-medium min-w-[120px] text-center">
-                {currentMonth}
-              </span>
+              
+              <div className="flex items-center gap-2">
+                <Label htmlFor="start-date" className="text-xs text-muted-foreground">Desde:</Label>
+                <input
+                  id="start-date"
+                  type="date"
+                  value={format(startDate, 'yyyy-MM-dd')}
+                  onChange={handleStartDateChange}
+                  className="text-xs border border-border rounded px-2 py-1 bg-background"
+                />
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Label htmlFor="end-date" className="text-xs text-muted-foreground">Hasta:</Label>
+                <input
+                  id="end-date"
+                  type="date"
+                  value={format(endDate, 'yyyy-MM-dd')}
+                  onChange={handleEndDateChange}
+                  className="text-xs border border-border rounded px-2 py-1 bg-background"
+                />
+              </div>
+              
               <Button variant="outline" size="sm" onClick={() => navigateDates('next')}>
                 <ChevronRight className="w-4 h-4" />
               </Button>
+              
               <Button variant="outline" size="sm" onClick={navigateToToday}>
                 <CalendarDays className="w-4 h-4 mr-1" />
                 Hoy
@@ -213,14 +249,11 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
                   {dateRange.map((date) => {
                     const isTodayDate = isToday(date)
                     return (
-                      <th key={date.getTime()} className={`px-3 py-3 text-center text-xs font-medium uppercase tracking-wider min-w-[40px] relative ${isTodayDate ? 'bg-blue-50 text-blue-700 border-x-2 border-blue-400' : 'text-muted-foreground'}`}>
+                      <th key={date.getTime()} className={`px-3 py-3 text-center text-xs font-medium uppercase tracking-wider min-w-[40px] relative ${isTodayDate ? 'bg-[var(--accent)]/10 text-[var(--accent)] border-x-2 border-[var(--accent)]' : 'text-muted-foreground'}`}>
                         <div className="flex flex-col items-center">
                           <span className={isTodayDate ? 'font-bold' : ''}>{format(date, 'dd')}</span>
                           <span className={`text-[10px] ${isTodayDate ? 'font-semibold' : ''}`}>{format(date, 'EEE', { locale: es })}</span>
                         </div>
-                        {isTodayDate && (
-                          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-0.5 h-full bg-blue-500 z-10"></div>
-                        )}
                       </th>
                     )
                   })}
@@ -236,7 +269,7 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
                       const isWeekendDay = isWeekend(date)
                       const isTodayDate = isToday(date)
                       return (
-                        <td key={`${worker.id}-${date.getTime()}`} className={`px-3 py-4 text-center relative ${isTodayDate ? 'bg-blue-50/30 border-x-2 border-blue-400' : ''}`}>
+                        <td key={`${worker.id}-${date.getTime()}`} className={`px-3 py-4 text-center relative ${isTodayDate ? 'bg-[var(--accent)]/5 border-x-2 border-[var(--accent)]' : ''}`}>
                           <div className={`w-6 h-6 rounded-full mx-auto ${getAttendanceColor(status, isWeekendDay)}`}>
                             {isWeekendDay && !hideWeekends && (
                               <div className="w-full h-full flex items-center justify-center">
@@ -244,9 +277,6 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
                               </div>
                             )}
                           </div>
-                          {isTodayDate && (
-                            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-0.5 h-full bg-blue-500 z-10 pointer-events-none"></div>
-                          )}
                         </td>
                       )
                     })}

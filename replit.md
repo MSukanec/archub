@@ -130,7 +130,11 @@ Changelog:
   • Added "Hoy" (Today) button in navigation controls to quickly center view on current date
   • Implemented vertical blue indicator line showing today's date across entire timeline
   • Default date range now centers on today (15 days before and after) instead of starting from today
-  • Today's column highlighted with blue background and bold text for clear identification
+  • Today's column highlighted with --accent color background and bold text for clear identification
+  • Replaced month navigation with continuous timeline using start/end date selectors
+  • Today indicators now use --accent CSS variable with left/right borders only (no center line)
+  • Added date input controls for precise timeline range selection with "Desde" and "Hasta" labels
+  • Continuous timeline allows infinite scrolling through any date range without month restrictions
 
 - June 28, 2025. Complete Personnel page implementation with attendance tracking
   • Created ConstructionPersonnel.tsx page following ai-page-template.md structure with WIDE layout
