@@ -268,24 +268,27 @@ export default function OrganizationProjects() {
           </div>
         )}
 
-        {/* Headers de columnas */}
-        <div className="grid grid-cols-12 gap-4 px-4 py-2 text-xs font-medium text-muted-foreground border-b">
-          <div className="col-span-2">Fecha</div>
-          <div className="col-span-2">Creador</div>
-          <div className="col-span-2">Proyecto</div>
-          <div className="col-span-2">Tipología</div>
-          <div className="col-span-2">Modalidad</div>
-          <div className="col-span-1">Estado</div>
-          <div className="col-span-1">Acciones</div>
-        </div>
+        {/* Mostrar contenido solo si hay proyectos */}
+        {filteredProjects.length > 0 ? (
+          <>
+            {/* Headers de columnas */}
+            <div className="grid grid-cols-12 gap-4 px-4 py-2 text-xs font-medium text-muted-foreground border-b">
+              <div className="col-span-2">Fecha</div>
+              <div className="col-span-2">Creador</div>
+              <div className="col-span-2">Proyecto</div>
+              <div className="col-span-2">Tipología</div>
+              <div className="col-span-2">Modalidad</div>
+              <div className="col-span-1">Estado</div>
+              <div className="col-span-1">Acciones</div>
+            </div>
 
-        {/* Lista de proyectos */}
-        <div className="space-y-2">
-          {filteredProjects.map((project) => {
-            const isSelected = userData?.preferences?.last_project_id === project.id
-            
-            return (
-              <Card 
+            {/* Lista de proyectos */}
+            <div className="space-y-2">
+              {filteredProjects.map((project) => {
+                const isSelected = userData?.preferences?.last_project_id === project.id
+                
+                return (
+                  <Card 
                 key={project.id} 
                 className={`w-full cursor-pointer transition-all hover:shadow-sm border ${
                   isSelected ? 'border-[var(--accent)] bg-[var(--accent-bg)]' : ''
@@ -395,30 +398,30 @@ export default function OrganizationProjects() {
                   </div>
                 </CardContent>
               </Card>
-            )
-          })}
-
-          {filteredProjects.length === 0 && (
-            <CustomEmptyState
-              icon={<Folder className="w-12 h-12 text-muted-foreground" />}
-              title={searchValue || filterByStatus !== 'all' ? "No se encontraron proyectos" : "No hay proyectos creados"}
-              description={searchValue || filterByStatus !== 'all' 
-                ? 'Prueba ajustando los filtros de búsqueda' 
-                : 'Comienza creando tu primer proyecto para gestionar tu trabajo'
-              }
-              action={
-                !searchValue && filterByStatus === 'all' && (
-                  <CustomRestricted feature="max_projects" current={filteredProjects?.length || 0}>
-                    <Button onClick={() => setShowNewProjectModal(true)}>
-                      <Plus className="w-4 h-4 mr-2" />
-                      Crear Primer Proyecto
-                    </Button>
-                  </CustomRestricted>
                 )
-              }
-            />
-          )}
-        </div>
+              })}
+            </div>
+          </>
+        ) : (
+          <CustomEmptyState
+            icon={<Folder className="w-12 h-12" />}
+            title={searchValue || filterByStatus !== 'all' ? "No se encontraron proyectos" : "No hay proyectos creados"}
+            description={searchValue || filterByStatus !== 'all' 
+              ? 'Prueba ajustando los filtros de búsqueda' 
+              : 'Comienza creando tu primer proyecto para gestionar tu trabajo'
+            }
+            action={
+              !searchValue && filterByStatus === 'all' && (
+                <CustomRestricted feature="max_projects" current={filteredProjects?.length || 0}>
+                  <Button onClick={() => setShowNewProjectModal(true)}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Crear Primer Proyecto
+                  </Button>
+                </CustomRestricted>
+              )
+            }
+          />
+        )}
       </div>
 
       {/* New Project Modal */}
