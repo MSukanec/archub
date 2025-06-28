@@ -19,7 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { useToast } from '@/hooks/use-toast'
-import { Calendar, User, FileText, Cloud, MessageSquare, Star, Eye, Calendar as CalendarIcon, Plus, X } from 'lucide-react'
+import { Calendar, User, FileText, Cloud, MessageSquare, Star, Eye, Calendar as CalendarIcon, Plus, X, Settings } from 'lucide-react'
 
 // Schema con enums exactos de Supabase
 const siteLogEventSchema = z.object({
@@ -323,8 +323,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                           name="created_by"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="flex items-center gap-2">
-                                <User className="w-4 h-4" />
+                              <FormLabel>
                                 Creador
                               </FormLabel>
                               <Select onValueChange={field.onChange} value={field.value}>
@@ -368,8 +367,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                           name="entry_type"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="flex items-center gap-2">
-                                <FileText className="w-4 h-4" />
+                              <FormLabel>
                                 Tipo de entrada
                               </FormLabel>
                               <Select onValueChange={field.onChange} value={field.value}>
@@ -399,8 +397,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                           name="weather"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="flex items-center gap-2">
-                                <Cloud className="w-4 h-4" />
+                              <FormLabel>
                                 Clima (opcional)
                               </FormLabel>
                               <Select 
@@ -436,8 +433,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                         name="comments"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="flex items-center gap-2">
-                              <MessageSquare className="w-4 h-4" />
+                            <FormLabel>
                               Comentarios
                             </FormLabel>
                             <FormControl>
@@ -572,8 +568,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                           render={({ field }) => (
                             <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
                               <div className="space-y-0.5">
-                                <FormLabel className="flex items-center gap-2">
-                                  <Eye className="w-4 h-4" />
+                                <FormLabel>
                                   Entrada pública
                                 </FormLabel>
                                 <div className="text-sm text-muted-foreground">
@@ -596,8 +591,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                           render={({ field }) => (
                             <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
                               <div className="space-y-0.5">
-                                <FormLabel className="flex items-center gap-2">
-                                  <Star className="w-4 h-4" />
+                                <FormLabel>
                                   Marcar como favorito
                                 </FormLabel>
                                 <div className="text-sm text-muted-foreground">
