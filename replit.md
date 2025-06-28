@@ -119,15 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- June 28, 2025. Created CustomButton component with glossy aesthetic and icon integration
-  • Built new CustomButton component in src/components/ui-custom/misc/ with modern glossy design
-  • Features rounded pill shape with circular icon section on right side matching reference design
-  • Supports three variants: primary (glossy with gradients), secondary (muted), ghost (transparent)
-  • Icon prop places icon in circular dark section, text remains in main button area
-  • Includes glossy overlay effects, backdrop blur, shadows, and smooth hover/active transitions
-  • Three size options (sm/md/lg) with proper scaling for both text and icon sections
-  • Demonstrated implementation in OrganizationContacts page replacing standard Button components
-  • Component ready for use across application replacing standard buttons where glossy aesthetic desired
+- June 28, 2025. Refined CustomButton component with compact design and accent color integration
+  • Enhanced CustomButton with smaller circular icon section using more padding for compact appearance
+  • Reduced button heights to h-6/h-7/h-8 for sm/md/lg sizes to provide more "air" in header layouts
+  • Changed icon circle background from black gradient to --accent CSS variable for brand consistency
+  • Positioned icon circle with right-1 positioning and smaller w-5/w-6/w-7 dimensions for better proportions
+  • Reduced icon size to w-2.5 h-2.5 within circles for optimal visual balance
+  • Updated CustomEmptyState in OrganizationContacts to use new CustomButton replacing standard Button
+  • Component now matches provided reference design with proper glossy effects and accent color theming
+  • Ready for wider adoption across application where modern button aesthetic is desired
 - June 28, 2025. Simplified CustomEmptyState design and fixed positioning consistency
   • Removed all complex animated shapes for improved performance and cleaner aesthetic
   • Replaced complex animations with simple diagonal hatch background pattern using repeating-linear-gradient

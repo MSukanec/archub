@@ -60,33 +60,32 @@ export function CustomButton({
   }
 
   const sizeClasses = {
-    sm: "h-7 text-xs",
-    md: "h-8 text-sm",
-    lg: "h-10 text-base"
+    sm: "h-6 text-xs",
+    md: "h-7 text-sm",
+    lg: "h-8 text-base"
   }
 
   const iconSizeClasses = {
-    sm: "w-7 h-7",
-    md: "w-8 h-8", 
-    lg: "w-10 h-10"
+    sm: "w-5 h-5",
+    md: "w-6 h-6", 
+    lg: "w-7 h-7"
   }
 
   const iconClasses = cn(
-    "absolute right-0 top-0 flex items-center justify-center",
-    "bg-gradient-to-b from-black/80 to-black/60",
-    "text-white rounded-full",
+    "absolute right-1 top-1/2 -translate-y-1/2 flex items-center justify-center",
+    "bg-[var(--accent)] text-white rounded-full",
     "shadow-inner",
     "transition-all duration-200",
-    "group-hover:from-black/90 group-hover:to-black/70",
+    "group-hover:bg-[var(--accent)]/90",
     iconSizeClasses[size]
   )
 
   const textClasses = cn(
-    "px-4 pr-10",
+    "px-4",
     {
-      "pr-9": size === 'sm',
-      "pr-10": size === 'md',
-      "pr-12": size === 'lg'
+      "pr-8": size === 'sm',
+      "pr-9": size === 'md',
+      "pr-10": size === 'lg'
     }
   )
 
@@ -112,7 +111,7 @@ export function CustomButton({
       {/* Icon circle */}
       {icon && (
         <div className={iconClasses}>
-          <div className="text-white [&>svg]:w-3 [&>svg]:h-3 [&>svg]:text-white">
+          <div className="text-white [&>svg]:w-2.5 [&>svg]:h-2.5 [&>svg]:text-white">
             {icon}
           </div>
         </div>

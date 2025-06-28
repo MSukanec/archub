@@ -213,10 +213,14 @@ export default function OrganizationContacts() {
           title="No hay contactos"
           description="Comienza agregando tu primer contacto a la organización"
           action={
-            <Button onClick={() => setShowCreateModal(true)}>
-              <Plus className="w-4 h-4 mr-2" />
+            <CustomButton 
+              variant="primary"
+              size="md"
+              icon={<Plus className="w-3 h-3" />}
+              onClick={() => setShowCreateModal(true)}
+            >
               Nuevo Contacto
-            </Button>
+            </CustomButton>
           }
         />
         
