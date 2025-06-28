@@ -66,32 +66,6 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
             id,
             full_name,
             avatar_url
-          ),
-          events:site_log_events(
-            id,
-            description,
-            event_type:event_types(
-              id,
-              name
-            )
-          ),
-          attendees:site_log_attendees(
-            id,
-            attendance_type,
-            description,
-            contact:contacts(
-              id,
-              full_name
-            )
-          ),
-          equipment:site_log_equipment(
-            id,
-            quantity,
-            description,
-            equipment:equipment(
-              id,
-              name
-            )
           )
         `)
         .eq('project_id', projectId)
@@ -524,7 +498,7 @@ export default function ConstructionLogs() {
                               {siteLog.attendees && siteLog.attendees.length > 0 ? (
                                 siteLog.attendees.map((attendee: any, index: number) => (
                                   <div key={index} className="text-xs bg-green-50 px-2 py-1 rounded">
-                                    {attendee.contact?.full_name || 'Personal'}: {attendee.attendance_type || 'Presente'}
+                                    {attendee.contact ? `${attendee.contact.first_name || ''} ${attendee.contact.last_name || ''}`.trim() || 'Personal' : 'Personal'}: {attendee.attendance_type || 'Presente'}
                                   </div>
                                 ))
                               ) : (
