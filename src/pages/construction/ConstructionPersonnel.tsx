@@ -136,16 +136,18 @@ export default function ConstructionPersonnel() {
   const [startDate, setStartDate] = useState(new Date())
   const [endDate, setEndDate] = useState(new Date(new Date().setDate(new Date().getDate() + 30)))
   const [hideWeekends, setHideWeekends] = useState(false)
+  const [selectedContactType, setSelectedContactType] = useState<string>("")
 
   const { data: userData } = useCurrentUser()
   const { data: attendanceData = [], isLoading } = usePersonnelAttendance(
     userData?.preferences?.last_project_id,
     userData?.organization?.id
   )
+  const { data: contactTypes = [] } = useContactTypes(userData?.organization?.id)
 
   const { workers, attendance } = useMemo(() => {
-    return transformAttendanceData(attendanceData)
-  }, [attendanceData])
+    return transformAttendanceData(attendanceData, selectedContactType || undefined)
+  }, [attendanceData, selectedContactType])
 
   // Filter workers based on search
   const filteredWorkers = useMemo(() => {
@@ -182,7 +184,41 @@ export default function ConstructionPersonnel() {
     showSearch: true,
     searchValue,
     onSearchChange: setSearchValue,
-    onClearFilters: () => setSearchValue("")
+    onClearFilters: () => {
+      setSearchValue("")
+      setSelectedContactType("")
+    },
+    customFilters: (
+      <div className="space-y-3">
+        <div>
+          <Label className="text-xs font-medium mb-1">Tipo de Personal</Label>
+          <Select value={selectedContactType} onValueChange={setSelectedContactType}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Todos los tipos" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Todos los tipos</SelectItem>
+              {contactTypes.map(type => (
+                <SelectItem key={type.id} value={type.id}>
+                  {type.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="hide-weekends"
+            checked={hideWeekends}
+            onCheckedChange={setHideWeekends}
+          />
+          <Label htmlFor="hide-weekends" className="text-xs">
+            Ocultar fines de semana
+          </Label>
+        </div>
+      </div>
+    )
   }
 
   if (isLoading) {

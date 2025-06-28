@@ -140,6 +140,12 @@ Changelog:
   • Today indicators now use --accent CSS variable with left/right borders only (no center line)
   • Added date input controls for precise timeline range selection with "Desde" and "Hasta" labels
   • Continuous timeline allows infinite scrolling through any date range without month restrictions
+  • Navigation buttons redesigned as circular icons with backdrop blur and shadow styling
+  • Full workday attendance now uses --accent CSS variable color instead of hardcoded green
+  • Added contact type filtering functionality to Personnel page with dropdown selector
+  • Contact type filtering integrates with contacts table and contact_types for dynamic personnel grouping
+  • Enhanced filtering UI includes contact type selector and weekend toggle in header dropdown
+  • Personnel attendance data properly filtered by contact type (albañil, arquitecto, etc.)
 
 - June 28, 2025. Complete Personnel page implementation with attendance tracking
   • Created ConstructionPersonnel.tsx page following ai-page-template.md structure with WIDE layout
