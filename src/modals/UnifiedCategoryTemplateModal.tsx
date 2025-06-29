@@ -247,7 +247,7 @@ export function UnifiedCategoryTemplateModal({
                           <SelectValue placeholder="Seleccionar categoría padre" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Sin categoría padre</SelectItem>
+                          <SelectItem value="none">Sin categoría padre</SelectItem>
                           {getTopLevelCategories().map((category) => (
                             <SelectItem key={category.id} value={category.id}>
                               {category.code ? `${category.code} - ${category.name}` : category.name}
@@ -342,12 +342,47 @@ export function UnifiedCategoryTemplateModal({
                       <TemplateNameBuilder
                         value={templateForm.watch('name_template')}
                         onChange={(value) => templateForm.setValue('name_template', value)}
-                        availableParameters={[
-                          { name: 'material', label: 'Material' },
-                          { name: 'dimension', label: 'Dimensión' },
-                          { name: 'ubicacion', label: 'Ubicación' },
-                          { name: 'tipo', label: 'Tipo' },
-                          { name: 'nivel', label: 'Nivel' }
+                        parameters={[
+                          { 
+                            id: '1', 
+                            name: 'material', 
+                            label: 'Material', 
+                            type: 'text', 
+                            is_required: false, 
+                            position: 1 
+                          },
+                          { 
+                            id: '2', 
+                            name: 'dimension', 
+                            label: 'Dimensión', 
+                            type: 'text', 
+                            is_required: false, 
+                            position: 2 
+                          },
+                          { 
+                            id: '3', 
+                            name: 'ubicacion', 
+                            label: 'Ubicación', 
+                            type: 'text', 
+                            is_required: false, 
+                            position: 3 
+                          },
+                          { 
+                            id: '4', 
+                            name: 'tipo', 
+                            label: 'Tipo', 
+                            type: 'text', 
+                            is_required: false, 
+                            position: 4 
+                          },
+                          { 
+                            id: '5', 
+                            name: 'nivel', 
+                            label: 'Nivel', 
+                            type: 'text', 
+                            is_required: false, 
+                            position: 5 
+                          }
                         ]}
                       />
                       {templateForm.formState.errors.name_template && (

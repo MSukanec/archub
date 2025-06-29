@@ -189,28 +189,8 @@ export default function AdminTaskCategoriesTemplates() {
                 onClick={() => handleEditCategory(category)}
               >
                 <Edit className="h-4 w-4 mr-1" />
-                Editar Categoría
+                Editar
               </Button>
-
-              {category.template ? (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleEditTemplate(category.template)}
-                >
-                  <FileText className="h-4 w-4 mr-1" />
-                  Editar Plantilla
-                </Button>
-              ) : (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleCreateTemplate(category.id)}
-                >
-                  <Plus className="h-4 w-4 mr-1" />
-                  Crear Plantilla
-                </Button>
-              )}
 
               <Button
                 variant="ghost"
@@ -218,7 +198,8 @@ export default function AdminTaskCategoriesTemplates() {
                 onClick={() => setDeleteCategoryId(category.id)}
                 className="text-destructive hover:text-destructive"
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-4 w-4 mr-1" />
+                Eliminar
               </Button>
             </div>
           </div>
@@ -236,33 +217,32 @@ export default function AdminTaskCategoriesTemplates() {
   };
 
   const headerProps = {
-    icon: <Settings className="h-5 w-5" />,
+    icon: Settings,
     title: "Gestión de Categorías y Plantillas",
-    actions: (
-      <div className="flex items-center space-x-3">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar categorías..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 w-64"
-          />
-        </div>
-        <Button
-          onClick={() => {
-            setModalMode('create');
-            setEditingCategory(null);
-            setEditingTemplate(null);
-            setPreselectedCategoryId('');
-            setIsUnifiedModalOpen(true);
-          }}
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Nueva Categoría
-        </Button>
-      </div>
-    ),
+    actions: [
+      <div key="search" className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Buscar categorías..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-10 w-64"
+        />
+      </div>,
+      <Button
+        key="new-category"
+        onClick={() => {
+          setModalMode('create');
+          setEditingCategory(null);
+          setEditingTemplate(null);
+          setPreselectedCategoryId('');
+          setIsUnifiedModalOpen(true);
+        }}
+      >
+        <Plus className="h-4 w-4 mr-2" />
+        Nueva Categoría
+      </Button>
+    ],
   };
 
   if (isLoading) {
