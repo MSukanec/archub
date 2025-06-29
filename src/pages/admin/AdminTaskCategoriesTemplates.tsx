@@ -132,103 +132,110 @@ export default function AdminTaskCategoriesTemplates() {
     const hasChildren = category.children && category.children.length > 0;
 
     return (
-      <div key={category.id} className="border rounded-lg bg-card">
+      <div key={category.id} className="border border-border rounded-md overflow-hidden">
         <Collapsible open={isExpanded} onOpenChange={() => toggleCategoryExpansion(category.id)}>
-          <div className="flex items-center justify-between p-4 hover:bg-muted/50">
-            <div className="flex items-center space-x-3">
+          <div className="flex items-center justify-between p-3 hover:bg-muted/30 transition-colors" style={{ paddingLeft: `${12 + level * 16}px` }}>
+            <div className="flex items-center space-x-3 flex-1">
               {hasChildren && (
                 <CollapsibleTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                  <Button variant="ghost" size="sm" className="h-5 w-5 p-0">
                     {isExpanded ? 
-                      <ChevronDown className="h-4 w-4" /> : 
-                      <ChevronRight className="h-4 w-4" />
+                      <ChevronDown className="h-3 w-3" /> : 
+                      <ChevronRight className="h-3 w-3" />
                     }
                   </Button>
                 </CollapsibleTrigger>
               )}
               
-              <div className="flex items-center space-x-2" style={{ marginLeft: `${level * 20}px` }}>
+              <div className="flex items-center space-x-2 flex-1">
                 <Package2 className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <div className="flex items-center space-x-2">
-                    <span className="font-medium">{category.name}</span>
-                    {category.code && (
-                      <Badge variant="outline" className="text-xs">
-                        {category.code}
+                <span className="font-medium text-sm">{category.name}</span>
+                {category.code && (
+                  <Badge variant="outline" className="text-xs h-5">
+                    {category.code}
+                  </Badge>
+                )}
+
+                {/* Solo mostrar estado de plantilla en categorías NIETO */}
+                {!hasChildren && (
+                  <div className="flex items-center">
+                    {category.template ? (
+                      <Badge variant="default" className="text-xs h-5 bg-green-100 text-green-700 border-green-300">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Con plantilla
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary" className="text-xs h-5 bg-gray-100 text-gray-600">
+                        <XCircle className="h-3 w-3 mr-1" />
+                        Sin plantilla
                       </Badge>
                     )}
                   </div>
-                </div>
+                )}
               </div>
-
-              {/* Solo mostrar iconos de plantilla en categorías NIETO (que no tienen hijos) */}
-              {!hasChildren && (
-                <div className="flex items-center space-x-2">
-                  {category.template ? (
-                    <div className="flex items-center space-x-1 text-green-600">
-                      <CheckCircle className="h-4 w-4" />
-                      <span className="text-xs">Con plantilla</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center space-x-1 text-red-600">
-                      <XCircle className="h-4 w-4" />
-                      <span className="text-xs">Sin plantilla</span>
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
 
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleEditCategory(category)}
-              >
-                <Edit className="h-4 w-4 mr-1" />
-                Editar Categoría
-              </Button>
-
-              {/* Solo mostrar botones de plantilla en categorías NIETO (que no tienen hijos) */}
+            <div className="flex items-center space-x-1">
+              {/* Solo mostrar botones de plantilla en categorías NIETO */}
               {!hasChildren && (
                 <>
                   {category.template ? (
                     <Button
                       variant="ghost"
-                      size="sm"
+                      size="sm" 
+                      className="h-7 px-2"
                       onClick={() => handleEditTemplate(category.template)}
                     >
-                      <FileText className="h-4 w-4 mr-1" />
-                      Editar Plantilla
+                      <FileText className="h-3 w-3 mr-1" />
+                      <span className="text-xs">Editar</span>
                     </Button>
                   ) : (
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       size="sm"
+                      className="h-7 px-2"
                       onClick={() => handleCreateTemplate(category.id)}
                     >
-                      <Plus className="h-4 w-4 mr-1" />
-                      Crear Plantilla
+                      <Plus className="h-3 w-3 mr-1" />
+                      <span className="text-xs">Plantilla</span>
                     </Button>
                   )}
                 </>
               )}
 
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setDeleteCategoryId(category.id)}
-                className="text-destructive hover:text-destructive"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                    <MoreHorizontal className="h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => handleEditCategory(category)}>
+                    <Edit className="h-4 w-4 mr-2" />
+                    Editar Categoría
+                  </DropdownMenuItem>
+                  {!hasChildren && category.template && (
+                    <DropdownMenuItem onClick={() => setDeleteTemplateId(category.template!.id)}>
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Eliminar Plantilla
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem 
+                    onClick={() => setDeleteCategoryId(category.id)}
+                    className="text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Eliminar Categoría
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
 
           {hasChildren && (
-            <CollapsibleContent className="border-t">
-              <div className="p-2 space-y-2">
-                {category.children!.map(child => renderCategory(child, level + 1))}
+            <CollapsibleContent className="border-t border-border bg-muted/10">
+              <div className="space-y-0">
+                {category.children?.map(child => renderCategory(child, level + 1))}
               </div>
             </CollapsibleContent>
           )}
@@ -273,9 +280,10 @@ export default function AdminTaskCategoriesTemplates() {
   }
 
   return (
-    <Layout headerProps={headerProps}>
-      <div className="p-6 space-y-6">
-        {/* Statistics Cards */}
+    <>
+      <Layout headerProps={headerProps}>
+        <div className="p-6 space-y-6">
+          {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card className="p-3">
             <CardContent className="p-0">
@@ -339,71 +347,73 @@ export default function AdminTaskCategoriesTemplates() {
           )}
         </div>
 
-        {/* Category Modal */}
-        <NewAdminTaskCategoryModal
-          open={isCategoryModalOpen}
-          onClose={() => {
-            setIsCategoryModalOpen(false);
-            setEditingCategory(null);
-          }}
-          category={editingCategory || undefined}
-          allCategories={categories}
-        />
+        </div>
+      </Layout>
 
-        {/* Template Modal */}
-        <NewTaskTemplateModal
-          open={isTemplateModalOpen}
-          onClose={() => {
-            setIsTemplateModalOpen(false);
-            setEditingTemplate(null);
-            setTemplateCategoryId('');
-          }}
-          template={editingTemplate || undefined}
-          preselectedCategoryId={templateCategoryId}
-        />
+      {/* Category Modal */}
+      <NewAdminTaskCategoryModal
+        open={isCategoryModalOpen}
+        onClose={() => {
+          setIsCategoryModalOpen(false);
+          setEditingCategory(null);
+        }}
+        category={editingCategory || undefined}
+        allCategories={categories}
+      />
 
-        {/* Delete Category Confirmation */}
-        <AlertDialog open={!!deleteCategoryId} onOpenChange={() => setDeleteCategoryId(null)}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>¿Eliminar categoría?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Esta acción no se puede deshacer. Se eliminará la categoría permanentemente.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => deleteCategoryId && handleDeleteCategory(deleteCategoryId)}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              >
-                Eliminar
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+      {/* Template Modal */}
+      <NewTaskTemplateModal
+        open={isTemplateModalOpen}
+        onClose={() => {
+          setIsTemplateModalOpen(false);
+          setEditingTemplate(null);
+          setTemplateCategoryId('');
+        }}
+        template={editingTemplate || undefined}
+        preselectedCategoryId={templateCategoryId}
+      />
 
-        {/* Delete Template Confirmation */}
-        <AlertDialog open={!!deleteTemplateId} onOpenChange={() => setDeleteTemplateId(null)}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>¿Eliminar plantilla?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Esta acción no se puede deshacer. Se eliminará la plantilla permanentemente.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => deleteTemplateId && handleDeleteTemplate(deleteTemplateId)}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              >
-                Eliminar
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
-    </Layout>
+      {/* Delete Category Confirmation */}
+      <AlertDialog open={!!deleteCategoryId} onOpenChange={() => setDeleteCategoryId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar categoría?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. Se eliminará la categoría permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteCategoryId && handleDeleteCategory(deleteCategoryId)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Template Confirmation */}
+      <AlertDialog open={!!deleteTemplateId} onOpenChange={() => setDeleteTemplateId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar plantilla?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. Se eliminará la plantilla permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteTemplateId && handleDeleteTemplate(deleteTemplateId)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
