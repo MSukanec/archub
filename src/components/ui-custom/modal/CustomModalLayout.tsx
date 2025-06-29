@@ -42,7 +42,7 @@ export function CustomModalLayout({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-4 pb-4 md:items-center md:pt-0 md:pb-0">
       {/* Overlay */}
       <div
         className="absolute inset-0 bg-black/85 transition-opacity duration-600 ease-in-out"
@@ -53,7 +53,7 @@ export function CustomModalLayout({
       <div
         className={cn(
           "relative z-10 flex flex-col bg-[var(--card-bg)] shadow-2xl transition-all duration-300 ease-in-out border border-[var(--card-border)]",
-          "w-full h-full md:w-[480px] md:max-w-[480px] md:h-full md:rounded-lg md:max-h-[95vh]",
+          "w-full h-full md:w-[480px] md:max-w-[480px] md:h-auto md:rounded-lg md:max-h-[90vh]",
           className,
         )}
       >

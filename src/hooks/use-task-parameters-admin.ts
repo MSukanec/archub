@@ -8,7 +8,7 @@ export interface TaskParameter {
   name: string;
   label: string;
   type: 'text' | 'number' | 'select' | 'boolean';
-  unit?: string;
+  unit_id?: string;
   is_required: boolean;
   position: number;
   created_at: string;
@@ -29,7 +29,7 @@ export interface CreateTaskParameterData {
   name: string;
   label: string;
   type: 'text' | 'number' | 'select' | 'boolean';
-  unit?: string;
+  unit_id?: string;
   is_required: boolean;
   position: number;
 }

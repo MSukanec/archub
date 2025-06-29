@@ -266,9 +266,9 @@ export default function AdminTaskParameters() {
                                     Obligatorio
                                   </Badge>
                                 )}
-                                {parameter.unit && (
+                                {parameter.unit_id && (
                                   <Badge variant="outline" className="text-xs">
-                                    {parameter.unit}
+                                    {parameter.unit_id}
                                   </Badge>
                                 )}
                               </div>

@@ -23,7 +23,7 @@ const taskParameterSchema = z.object({
   type: z.enum(['text', 'number', 'select', 'boolean'], { 
     required_error: 'El tipo es requerido' 
   }),
-  unit: z.string().optional(),
+  unit_id: z.string().optional(),
   is_required: z.boolean(),
   position: z.number().min(0, 'La posición debe ser mayor o igual a 0'),
 });
@@ -71,7 +71,7 @@ export function NewTaskParameterModal({
         name: parameter.name,
         label: parameter.label,
         type: parameter.type,
-        unit: parameter.unit || '',
+        unit_id: parameter.unit_id || '',
         is_required: parameter.is_required,
         position: parameter.position,
       });
