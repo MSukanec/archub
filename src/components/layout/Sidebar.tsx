@@ -18,6 +18,7 @@ import {
   FolderOpen,
   Mail,
   Activity,
+  Zap,
   ArrowLeft,
   Tag,
   ChevronDown,
@@ -27,7 +28,6 @@ import {
   Package,
   Shield,
   Star,
-  Zap,
   Sun,
   Moon,
   PanelLeftOpen,
@@ -217,6 +217,7 @@ export function Sidebar() {
       { icon: Building, label: 'Organizaciones', href: '/admin/organizations' },
       { icon: Users, label: 'Usuarios', href: '/admin/users' },
       { icon: CheckSquare, label: 'Tareas', href: '/admin/tasks' },
+      { icon: Zap, label: 'Tareas Generadas', href: '/admin/generated-tasks' },
       { icon: Tag, label: 'Categorías de Materiales', href: '/admin/material-categories' },
       { icon: Package, label: 'Materiales', href: '/admin/materials' },
     ]
