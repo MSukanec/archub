@@ -107,7 +107,8 @@ export function NewTaskParameterOptionModal({
         body: (
           <CustomModalBody padding="md">
             <Form {...form}>
-              <div className="space-y-4">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id="option-form">
+                <div className="space-y-4">
                 <FormField
                   control={form.control}
                   name="label"
@@ -143,18 +144,32 @@ export function NewTaskParameterOptionModal({
                     </FormItem>
                   )}
                 />
-
-              </div>
+                </div>
+              </form>
             </Form>
           </CustomModalBody>
         ),
         footer: (
-          <CustomModalFooter
-            onCancel={handleClose}
-            onSave={form.handleSubmit(onSubmit)}
-            saveText={isSubmitting ? 'Guardando...' : option ? 'Actualizar' : 'Crear'}
-            saveDisabled={isSubmitting}
-          />
+          <div className="p-2 border-t border-[var(--card-border)] mt-auto">
+            <div className="flex gap-2 w-full">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={handleClose}
+                className="w-1/4"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                form="option-form"
+                className="w-3/4"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Guardando...' : (option ? "Actualizar" : "Guardar")}
+              </Button>
+            </div>
+          </div>
         ),
       }}
     </CustomModalLayout>
