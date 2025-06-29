@@ -12,19 +12,18 @@ import { Layout } from '@/components/layout/Layout';
 
 import { useTaskCategoriesAdmin, useDeleteTaskCategory, TaskCategoryAdmin } from '@/hooks/use-task-categories-admin';
 import { useDeleteTaskTemplate } from '@/hooks/use-task-templates-admin';
-import { NewTaskTemplateModal } from '@/modals/NewTaskTemplateModal';
-import { NewAdminTaskCategoryModal } from '@/modals/NewAdminTaskCategoryModal';
+import { UnifiedCategoryTemplateModal } from '@/modals/UnifiedCategoryTemplateModal';
 
 export default function AdminTaskCategoriesTemplates() {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   
   // Modal states
-  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
-  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
+  const [isUnifiedModalOpen, setIsUnifiedModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
   const [editingCategory, setEditingCategory] = useState<TaskCategoryAdmin | null>(null);
   const [editingTemplate, setEditingTemplate] = useState<any>(null);
-  const [templateCategoryId, setTemplateCategoryId] = useState<string>('');
+  const [preselectedCategoryId, setPreselectedCategoryId] = useState<string>('');
   
   // Delete confirmation states
   const [deleteCategoryId, setDeleteCategoryId] = useState<string | null>(null);
@@ -93,20 +92,27 @@ export default function AdminTaskCategoriesTemplates() {
   };
 
   const handleEditCategory = (category: TaskCategoryAdmin) => {
+    setModalMode('edit');
     setEditingCategory(category);
-    setIsCategoryModalOpen(true);
+    setEditingTemplate(null);
+    setPreselectedCategoryId('');
+    setIsUnifiedModalOpen(true);
   };
 
   const handleCreateTemplate = (categoryId: string) => {
-    setTemplateCategoryId(categoryId);
+    setModalMode('create');
+    setEditingCategory(null);
     setEditingTemplate(null);
-    setIsTemplateModalOpen(true);
+    setPreselectedCategoryId(categoryId);
+    setIsUnifiedModalOpen(true);
   };
 
   const handleEditTemplate = (template: any) => {
+    setModalMode('edit');
+    setEditingCategory(null);
     setEditingTemplate(template);
-    setTemplateCategoryId(template.category_id);
-    setIsTemplateModalOpen(true);
+    setPreselectedCategoryId('');
+    setIsUnifiedModalOpen(true);
   };
 
   const handleDeleteCategory = async (categoryId: string) => {
@@ -245,8 +251,11 @@ export default function AdminTaskCategoriesTemplates() {
         </div>
         <Button
           onClick={() => {
+            setModalMode('create');
             setEditingCategory(null);
-            setIsCategoryModalOpen(true);
+            setEditingTemplate(null);
+            setPreselectedCategoryId('');
+            setIsUnifiedModalOpen(true);
           }}
         >
           <Plus className="h-4 w-4 mr-2" />
@@ -333,27 +342,19 @@ export default function AdminTaskCategoriesTemplates() {
           )}
         </div>
 
-        {/* Category Modal */}
-        <NewAdminTaskCategoryModal
-          open={isCategoryModalOpen}
+        {/* Unified Modal */}
+        <UnifiedCategoryTemplateModal
+          open={isUnifiedModalOpen}
           onClose={() => {
-            setIsCategoryModalOpen(false);
+            setIsUnifiedModalOpen(false);
             setEditingCategory(null);
-          }}
-          category={editingCategory || undefined}
-          allCategories={categories}
-        />
-
-        {/* Template Modal */}
-        <NewTaskTemplateModal
-          open={isTemplateModalOpen}
-          onClose={() => {
-            setIsTemplateModalOpen(false);
             setEditingTemplate(null);
-            setTemplateCategoryId('');
+            setPreselectedCategoryId('');
           }}
-          template={editingTemplate || undefined}
-          preselectedCategoryId={templateCategoryId}
+          mode={modalMode}
+          editingCategory={editingCategory}
+          editingTemplate={editingTemplate}
+          preselectedCategoryId={preselectedCategoryId}
         />
 
         {/* Delete Category Confirmation */}
