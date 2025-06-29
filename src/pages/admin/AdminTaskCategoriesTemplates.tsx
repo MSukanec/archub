@@ -230,30 +230,28 @@ export default function AdminTaskCategoriesTemplates() {
   };
 
   const headerProps = {
-    icon: <Settings className="h-5 w-5" />,
-    title: "Gestión de Categorías y Plantillas",
-    actions: (
-      <div className="flex items-center space-x-3">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar categorías..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 w-64"
-          />
-        </div>
-        <Button
-          onClick={() => {
-            setEditingCategory(null);
-            setIsCategoryModalOpen(true);
-          }}
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Nueva Categoría
-        </Button>
-      </div>
-    ),
+    title: "Categorías de Tareas",
+    actions: [
+      <div key="search" className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Buscar categorías..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-10 w-64"
+        />
+      </div>,
+      <Button
+        key="nueva-categoria"
+        onClick={() => {
+          setEditingCategory(null);
+          setIsCategoryModalOpen(true);
+        }}
+      >
+        <Plus className="h-4 w-4 mr-2" />
+        Nueva Categoría
+      </Button>
+    ],
   };
 
   if (isLoading) {
