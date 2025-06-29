@@ -12,7 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 import { Layout } from '@/components/layout/Layout'
 import { CustomTable } from '@/components/ui-custom/misc/CustomTable'
-import { NewTaskTemplateModal } from '@/modals/NewTaskTemplateModal'
+import { NewTaskTemplateModal } from '@/modals/tasks/NewTaskTemplateModal'
 import { useTaskTemplatesAdmin, useDeleteTaskTemplate, type TaskTemplate } from '@/hooks/use-task-templates-admin'
 
 import { Plus, Edit, Trash2, Settings, Eye, FileCode, Code, Calendar } from 'lucide-react'

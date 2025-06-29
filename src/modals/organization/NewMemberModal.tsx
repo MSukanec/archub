@@ -1,36 +1,31 @@
-import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { Mail, User } from 'lucide-react';
+import { useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Mail, User, Calendar, UserCheck } from "lucide-react";
 
-import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout';
-import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader';
-import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
-import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter';
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CustomModalLayout } from "@/components/ui-custom/modal/CustomModalLayout";
+import { CustomModalHeader } from "@/components/ui-custom/modal/CustomModalHeader";
+import { CustomModalBody } from "@/components/ui-custom/modal/CustomModalBody";
+import { CustomModalFooter } from "@/components/ui-custom/modal/CustomModalFooter";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-import { supabase } from '@/lib/supabase';
-import { useCurrentUser } from '@/hooks/use-current-user';
-import { useToast } from '@/hooks/use-toast';
-import { queryClient } from '@/lib/queryClient';
+import { useCurrentUser } from "@/hooks/use-current-user";
+import { supabase } from "@/lib/supabase";
+import { useToast } from "@/hooks/use-toast";
+import { queryClient } from "@/lib/queryClient";
 
-const memberInviteSchema = z.object({
-  email: z.string().email('Ingresa un email válido'),
-  role_id: z.string().min(1, 'Selecciona un rol')
+const memberSchema = z.object({
+  email: z.string().email("Debe ser un email válido"),
+  role_id: z.string().min(1, "Debe seleccionar un rol"),
 });
 
-type MemberInviteFormData = z.infer<typeof memberInviteSchema>;
-
-interface Role {
-  id: string;
-  name: string;
-  description: string;
-  type: string;
-}
+type MemberFormData = z.infer<typeof memberSchema>;
 
 interface NewMemberModalProps {
   open: boolean;
@@ -40,112 +35,98 @@ interface NewMemberModalProps {
 export function NewMemberModal({ open, onClose }: NewMemberModalProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
-  const organizationId = userData?.organization?.id;
+  const [isLoading, setIsLoading] = useState(false);
 
-  const form = useForm<MemberInviteFormData>({
-    resolver: zodResolver(memberInviteSchema),
+  const form = useForm<MemberFormData>({
+    resolver: zodResolver(memberSchema),
     defaultValues: {
-      email: '',
-      role_id: ''
-    }
+      email: "",
+      role_id: "",
+    },
   });
 
-  // Fetch organization roles
+  // Fetch available roles
   const { data: roles = [] } = useQuery({
     queryKey: ['organization-roles'],
     queryFn: async () => {
+      if (!supabase) throw new Error('Supabase not initialized');
+      
       const { data, error } = await supabase
         .from('roles')
-        .select('id, name, description, type')
-        .eq('type', 'organization')
+        .select('id, name')
         .order('name');
-
+      
       if (error) throw error;
-      return data as Role[];
+      return data;
     },
-    enabled: open
+    enabled: open,
   });
 
-  // Reset form when modal opens/closes
-  useEffect(() => {
-    if (open) {
-      form.reset({
-        email: '',
-        role_id: ''
-      });
-    }
-  }, [open, form]);
-
-  const inviteMutation = useMutation({
-    mutationFn: async (formData: MemberInviteFormData) => {
-      if (!organizationId || !userData?.user?.id) {
-        throw new Error('No se pudo identificar la organización o usuario');
+  const inviteMemberMutation = useMutation({
+    mutationFn: async (memberData: MemberFormData) => {
+      if (!supabase || !userData?.organization?.id) {
+        throw new Error('No organization selected');
       }
 
-      // First check if user already exists in the organization
-      const { data: existingMember } = await supabase
-        .from('organization_members')
+      // First, check if user exists
+      const { data: existingUser, error: userError } = await supabase
+        .from('users')
         .select('id')
-        .eq('organization_id', organizationId)
-        .eq('user_id', userData.user.id)
+        .eq('email', memberData.email)
         .single();
 
-      if (existingMember) {
-        throw new Error('Este usuario ya es miembro de la organización');
+      if (userError && userError.code !== 'PGRST116') {
+        throw userError;
       }
 
-      // Check if there's a pending invitation
-      const { data: existingInvite } = await supabase
-        .from('organization_invitations')
-        .select('id')
-        .eq('organization_id', organizationId)
-        .eq('email', formData.email)
-        .eq('status', 'pending')
-        .single();
+      if (existingUser) {
+        // User exists, add to organization
+        const { data, error } = await supabase
+          .from('organization_members')
+          .insert({
+            user_id: existingUser.id,
+            organization_id: userData.organization.id,
+            role_id: memberData.role_id,
+            is_active: true,
+            joined_at: new Date().toISOString(),
+            last_active_at: new Date().toISOString(),
+          })
+          .select()
+          .single();
 
-      if (existingInvite) {
-        throw new Error('Ya existe una invitación pendiente para este email');
+        if (error) throw error;
+        return data;
+      } else {
+        // User doesn't exist, send invitation (would require invitation system)
+        throw new Error('El usuario no existe en el sistema. Primero debe registrarse.');
       }
-
-      // Create invitation record
-      const { error: inviteError } = await supabase
-        .from('organization_invitations')
-        .insert({
-          organization_id: organizationId,
-          email: formData.email,
-          role_id: formData.role_id,
-          invited_by: userData.user.id,
-          status: 'pending',
-          invited_at: new Date().toISOString()
-        });
-
-      if (inviteError) throw inviteError;
-
-      // In a real app, you would send an email here
-      // For now, we'll just create the invitation record
-      return { success: true };
     },
     onSuccess: () => {
       toast({
-        title: "Invitación enviada",
-        description: "Se ha enviado la invitación por email correctamente"
+        title: "Miembro agregado",
+        description: "El miembro ha sido agregado exitosamente a la organización.",
       });
-      
       queryClient.invalidateQueries({ queryKey: ['organization-members'] });
-      queryClient.invalidateQueries({ queryKey: ['organization-invites'] });
-      handleClose();
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      form.reset();
+      onClose();
     },
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || "No se pudo enviar la invitación",
-        variant: "destructive"
+        description: error.message || "Error al agregar el miembro",
+        variant: "destructive",
       });
-    }
+    },
   });
 
-  const handleSubmit = (data: MemberInviteFormData) => {
-    inviteMutation.mutate(data);
+  const handleSubmit = async (data: MemberFormData) => {
+    setIsLoading(true);
+    try {
+      await inviteMemberMutation.mutateAsync(data);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleClose = () => {
@@ -158,48 +139,43 @@ export function NewMemberModal({ open, onClose }: NewMemberModalProps) {
       {{
         header: (
           <CustomModalHeader
-            title="Invitar miembro"
-            description="Envía una invitación por email para que se una a tu organización"
+            title="Agregar Miembro"
+            description="Invita a un nuevo miembro a la organización"
             onClose={handleClose}
           />
         ),
         body: (
           <CustomModalBody padding="md">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-                
-                {/* Email field */}
+              <form id="member-form" onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
                 <FormField
                   control={form.control}
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium flex items-center gap-2">
-                        <Mail className="w-4 h-4" />
-                        Email del invitado
-                      </FormLabel>
+                      <FormLabel className="required-asterisk">Email del Usuario</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="usuario@ejemplo.com"
-                          type="email"
-                          {...field}
-                        />
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            {...field}
+                            type="email"
+                            placeholder="usuario@ejemplo.com"
+                            className="pl-10"
+                          />
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                {/* Role selection */}
                 <FormField
                   control={form.control}
                   name="role_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium flex items-center gap-2">
-                        <User className="w-4 h-4" />
-                        Rol en la organización
-                      </FormLabel>
+                      <FormLabel className="required-asterisk">Rol</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -209,12 +185,7 @@ export function NewMemberModal({ open, onClose }: NewMemberModalProps) {
                         <SelectContent>
                           {roles.map((role) => (
                             <SelectItem key={role.id} value={role.id}>
-                              <div>
-                                <div className="font-medium">{role.name}</div>
-                                {role.description && (
-                                  <div className="text-xs text-muted-foreground">{role.description}</div>
-                                )}
-                              </div>
+                              {role.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -224,6 +195,27 @@ export function NewMemberModal({ open, onClose }: NewMemberModalProps) {
                   )}
                 />
 
+                {userData?.user && (
+                  <div className="space-y-2">
+                    <FormLabel>Invitado por</FormLabel>
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={userData.user.avatar_url} />
+                        <AvatarFallback>
+                          {userData.user.full_name
+                            ?.split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                            .toUpperCase() || "U"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-medium">{userData.user.full_name}</p>
+                        <p className="text-xs text-muted-foreground">{userData.user.email}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </form>
             </Form>
           </CustomModalBody>
@@ -231,11 +223,13 @@ export function NewMemberModal({ open, onClose }: NewMemberModalProps) {
         footer: (
           <CustomModalFooter
             onCancel={handleClose}
-            onSave={form.handleSubmit(handleSubmit)}
-            saveText="Enviar invitación"
-            saveLoading={inviteMutation.isPending}
+            onSubmit={() => form.handleSubmit(handleSubmit)()}
+            submitText="Agregar Miembro"
+            cancelText="Cancelar"
+            isLoading={isLoading}
+            form="member-form"
           />
-        )
+        ),
       }}
     </CustomModalLayout>
   );

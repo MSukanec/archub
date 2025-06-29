@@ -17,8 +17,8 @@ import { supabase } from "@/lib/supabase";
 import { queryClient } from "@/lib/queryClient";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useLocation } from "wouter";
-import { NewOrganizationModal } from "@/modals/NewOrganizationModal";
-import { NewProjectModal } from "@/modals/NewProjectModal";
+import { NewOrganizationModal } from "@/modals/organization/NewOrganizationModal";
+import { NewProjectModal } from "@/modals/project/NewProjectModal";
 
 interface HeaderProps {
   icon?: React.ComponentType<any>;

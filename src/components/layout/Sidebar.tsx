@@ -184,7 +184,7 @@ export function Sidebar() {
         label: 'Finanzas', 
         href: '#', 
         isAccordion: true,
-        expanded: expandedAccordions.finanzas,
+        expanded: expandedAccordion === 'finanzas',
         onToggle: () => toggleAccordion('finanzas'),
         children: [
           { icon: Home, label: 'Resumen de Finanzas', href: '/finance/dashboard' },
@@ -220,7 +220,7 @@ export function Sidebar() {
         icon: Users, 
         label: 'Comunidad', 
         isAccordion: true, 
-        expanded: expandedAccordions['admin-comunidad'] || false,
+        expanded: expandedAccordion === 'admin-comunidad',
         onToggle: () => toggleAccordion('admin-comunidad'),
         children: [
           { icon: Building, label: 'Organizaciones', href: '/admin/organizations' },
@@ -231,7 +231,7 @@ export function Sidebar() {
         icon: CheckSquare, 
         label: 'Tareas', 
         isAccordion: true, 
-        expanded: expandedAccordions['admin-tareas'] || false,
+        expanded: expandedAccordion === 'admin-tareas',
         onToggle: () => toggleAccordion('admin-tareas'),
         children: [
           { icon: CheckSquare, label: 'Tareas', href: '/admin/tasks' },
@@ -243,7 +243,7 @@ export function Sidebar() {
         icon: Package, 
         label: 'Materiales', 
         isAccordion: true, 
-        expanded: expandedAccordions['admin-materiales'] || false,
+        expanded: expandedAccordion === 'admin-materiales',
         onToggle: () => toggleAccordion('admin-materiales'),
         children: [
           { icon: Package, label: 'Materiales', href: '/admin/materials' },
