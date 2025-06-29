@@ -18,7 +18,6 @@ import { useCreateTaskParameter, useUpdateTaskParameter, TaskParameter } from '@
 import { useUnits } from '@/hooks/use-units';
 
 const taskParameterSchema = z.object({
-  template_id: z.string().min(1, 'Template ID es requerido'),
   name: z.string().min(1, 'El nombre es requerido'),
   label: z.string().min(1, 'La etiqueta es requerida'),
   type: z.enum(['text', 'number', 'select', 'boolean'], { 
@@ -34,14 +33,12 @@ interface NewTaskParameterModalProps {
   open: boolean;
   onClose: () => void;
   parameter?: TaskParameter;
-  templateId: string;
 }
 
 export function NewTaskParameterModal({ 
   open, 
   onClose, 
-  parameter,
-  templateId
+  parameter
 }: NewTaskParameterModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -51,12 +48,9 @@ export function NewTaskParameterModal({
   // Load units for the selector
   const { data: units, isLoading: unitsLoading } = useUnits();
   
-
-
   const form = useForm<TaskParameterFormData>({
     resolver: zodResolver(taskParameterSchema),
     defaultValues: {
-      template_id: templateId,
       name: '',
       label: '',
       type: 'text',
@@ -69,7 +63,6 @@ export function NewTaskParameterModal({
   useEffect(() => {
     if (parameter && open) {
       form.reset({
-        template_id: parameter.template_id,
         name: parameter.name,
         label: parameter.label,
         type: parameter.type,
@@ -78,7 +71,6 @@ export function NewTaskParameterModal({
       });
     } else if (!parameter && open) {
       form.reset({
-        template_id: templateId,
         name: '',
         label: '',
         type: 'text',
@@ -86,7 +78,7 @@ export function NewTaskParameterModal({
         is_required: false,
       });
     }
-  }, [parameter, open, form, templateId]);
+  }, [parameter, open, form]);
 
   const onSubmit = async (data: TaskParameterFormData) => {
     setIsSubmitting(true);

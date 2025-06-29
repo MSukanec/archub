@@ -24,7 +24,6 @@ export interface TaskParameterOption {
 }
 
 export interface CreateTaskParameterData {
-  template_id: string;
   name: string;
   label: string;
   type: 'text' | 'number' | 'select' | 'boolean';
@@ -52,25 +51,10 @@ export function useTaskParametersAdmin() {
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase client not initialized');
 
-      // Fetch parameters from task_template_parameters with join to get parameter details
-      const { data: templateParams, error: parametersError } = await supabase
-        .from('task_template_parameters')
-        .select(`
-          id,
-          template_id,
-          parameter_id,
-          is_required,
-          position,
-          created_at,
-          updated_at,
-          task_parameters!inner (
-            id,
-            name,
-            label,
-            type,
-            unit_id
-          )
-        `)
+      // Fetch parameters directly from task_parameters table
+      const { data: parameters, error: parametersError } = await supabase
+        .from('task_parameters')
+        .select('id, name, label, type, unit_id, created_at')
         .order('created_at');
 
       if (parametersError) {
@@ -80,7 +64,7 @@ export function useTaskParametersAdmin() {
 
       // Fetch all options
       const { data: options, error: optionsError } = await supabase
-        .from('task_template_parameter_options')
+        .from('task_parameter_options')
         .select('id, parameter_id, value, label, created_at')
         .order('created_at');
 
@@ -98,22 +82,19 @@ export function useTaskParametersAdmin() {
         optionsMap.get(option.parameter_id)!.push(option);
       });
 
-      // Transform the joined data to flat parameter structure
-      const parametersWithOptions: TaskParameter[] = (templateParams as any[]).map((templateParam: any) => {
-        const param = templateParam.task_parameters;
-        return {
-          id: templateParam.id, // Use junction table ID for editing/deleting
-          template_id: templateParam.template_id,
-          parameter_id: param.id, // Real parameter ID for options
-          name: param.name,
-          label: param.label,
-          type: param.type,
-          unit_id: param.unit_id,
-          is_required: templateParam.is_required,
-          created_at: templateParam.created_at,
-          options: optionsMap.get(param.id) || [] // Use actual parameter ID for options
-        };
-      });
+      // Transform the data to include options
+      const parametersWithOptions: TaskParameter[] = parameters.map((param: any) => ({
+        id: param.id,
+        template_id: '', // Not needed for standalone parameters
+        parameter_id: param.id, // Same as ID for standalone parameters
+        name: param.name,
+        label: param.label,
+        type: param.type,
+        unit_id: param.unit_id,
+        is_required: false, // Default for standalone parameters
+        created_at: param.created_at,
+        options: optionsMap.get(param.id) || []
+      }));
 
       return parametersWithOptions;
     },
@@ -127,34 +108,20 @@ export function useCreateTaskParameter() {
     mutationFn: async (parameterData: CreateTaskParameterData) => {
       if (!supabase) throw new Error('Supabase client not initialized');
 
-      // First create the parameter in task_parameters table
+      // Create the parameter directly in task_parameters table
       const { data: parameter, error: paramError } = await supabase
         .from('task_parameters')
         .insert([{
           name: parameterData.name,
           label: parameterData.label,
           type: parameterData.type,
-          unit_id: parameterData.unit_id
+          unit_id: parameterData.unit_id || null
         }])
         .select()
         .single();
 
       if (paramError) throw paramError;
-
-      // Then create the association in task_template_parameters
-      const { data: templateParam, error: templateError } = await supabase
-        .from('task_template_parameters')
-        .insert([{
-          template_id: parameterData.template_id,
-          parameter_id: parameter.id,
-          is_required: parameterData.is_required,
-          position: 0
-        }])
-        .select()
-        .single();
-
-      if (templateError) throw templateError;
-      return templateParam;
+      return parameter;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
