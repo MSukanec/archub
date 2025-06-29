@@ -125,14 +125,34 @@ export function useCreateTaskParameter() {
     mutationFn: async (parameterData: CreateTaskParameterData) => {
       if (!supabase) throw new Error('Supabase client not initialized');
 
-      const { data, error } = await supabase
-        .from('task_template_parameters')
-        .insert([parameterData])
+      // First create the parameter in task_parameters table
+      const { data: parameter, error: paramError } = await supabase
+        .from('task_parameters')
+        .insert([{
+          name: parameterData.name,
+          label: parameterData.label,
+          type: parameterData.type,
+          unit_id: parameterData.unit_id
+        }])
         .select()
         .single();
 
-      if (error) throw error;
-      return data;
+      if (paramError) throw paramError;
+
+      // Then create the association in task_template_parameters
+      const { data: templateParam, error: templateError } = await supabase
+        .from('task_template_parameters')
+        .insert([{
+          template_id: parameterData.template_id,
+          parameter_id: parameter.id,
+          is_required: parameterData.is_required,
+          position: 0
+        }])
+        .select()
+        .single();
+
+      if (templateError) throw templateError;
+      return templateParam;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
@@ -159,15 +179,42 @@ export function useUpdateTaskParameter() {
     mutationFn: async ({ id, ...updateData }: UpdateTaskParameterData) => {
       if (!supabase) throw new Error('Supabase client not initialized');
 
-      const { data, error } = await supabase
+      // First get the parameter_id from task_template_parameters
+      const { data: templateParam, error: templateError } = await supabase
         .from('task_template_parameters')
-        .update(updateData)
+        .select('parameter_id, id')
+        .eq('id', id)
+        .single();
+
+      if (templateError) throw templateError;
+
+      // Update the parameter details in task_parameters table
+      const { data: parameter, error: paramError } = await supabase
+        .from('task_parameters')
+        .update({
+          name: updateData.name,
+          label: updateData.label,
+          type: updateData.type,
+          unit_id: updateData.unit_id
+        })
+        .eq('id', templateParam.parameter_id)
+        .select()
+        .single();
+
+      if (paramError) throw paramError;
+
+      // Update the template association (is_required field)
+      const { data: updatedTemplateParam, error: updateTemplateError } = await supabase
+        .from('task_template_parameters')
+        .update({
+          is_required: updateData.is_required
+        })
         .eq('id', id)
         .select()
         .single();
 
-      if (error) throw error;
-      return data;
+      if (updateTemplateError) throw updateTemplateError;
+      return updatedTemplateParam;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });

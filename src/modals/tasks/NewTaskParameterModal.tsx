@@ -51,12 +51,7 @@ export function NewTaskParameterModal({
   // Load units for the selector
   const { data: units, isLoading: unitsLoading } = useUnits();
   
-  // Debug units data
-  useEffect(() => {
-    if (units) {
-      console.log('Units loaded:', units);
-    }
-  }, [units]);
+
 
   const form = useForm<TaskParameterFormData>({
     resolver: zodResolver(taskParameterSchema),
@@ -218,7 +213,7 @@ export function NewTaskParameterModal({
                         <SelectContent className="z-[9999]">
                           <SelectItem value="">Sin unidad</SelectItem>
                           {unitsLoading ? (
-                            <SelectItem value="" disabled>Cargando unidades...</SelectItem>
+                            <SelectItem value="loading" disabled>Cargando unidades...</SelectItem>
                           ) : units && units.length > 0 ? (
                             units.map((unit) => (
                               <SelectItem key={unit.id} value={unit.id}>
@@ -226,7 +221,7 @@ export function NewTaskParameterModal({
                               </SelectItem>
                             ))
                           ) : (
-                            <SelectItem value="" disabled>No hay unidades disponibles</SelectItem>
+                            <SelectItem value="no-units" disabled>No hay unidades disponibles</SelectItem>
                           )}
                         </SelectContent>
                       </Select>
