@@ -35,8 +35,7 @@ export function NewTaskParameterOptionModal({
   onClose, 
   option,
   parameterId,
-  parameterLabel,
-  nextPosition
+  parameterLabel
 }: NewTaskParameterOptionModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   

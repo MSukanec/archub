@@ -41,8 +41,7 @@ export function NewTaskParameterModal({
   open, 
   onClose, 
   parameter,
-  templateId,
-  nextPosition
+  templateId
 }: NewTaskParameterModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   

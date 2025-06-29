@@ -64,8 +64,7 @@ export function useTaskParametersAdmin() {
       // Fetch all options
       const { data: options, error: optionsError } = await supabase
         .from('task_template_parameter_options')
-        .select('*')
-        .order('created_at');
+        .select('id, parameter_id, value, label');
 
       if (optionsError) {
         console.error('Error fetching options:', optionsError);
