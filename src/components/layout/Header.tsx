@@ -333,10 +333,13 @@ export function Header({
             <>
               <span className="text-[var(--menues-fg)] opacity-70">/</span>
               <div className="flex items-center gap-1">
-                {icon && (
+                {icon && React.isValidElement(icon) && (
                   <span className="text-[var(--menues-fg)]">
-                    {typeof icon === 'function' ? React.createElement(icon, { className: "h-3 w-3" }) : icon}
+                    {React.cloneElement(icon as React.ReactElement, { className: "h-3 w-3" })}
                   </span>
+                )}
+                {icon && typeof icon === 'function' && (
+                  React.createElement(icon, { className: "h-3 w-3 text-[var(--menues-fg)]" })
                 )}
                 <span className="text-sm font-medium text-[var(--menues-fg)]">{title}</span>
               </div>

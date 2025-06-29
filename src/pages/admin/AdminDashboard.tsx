@@ -76,7 +76,6 @@ export default function AdminDashboard() {
 
   const headerProps = {
     title: "Resumen de Administración",
-    icon: Activity,
     showSearch: false,
     showFilters: false,
     actions: []
