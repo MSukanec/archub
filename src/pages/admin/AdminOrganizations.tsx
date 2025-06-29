@@ -12,7 +12,7 @@ import { supabase } from '@/lib/supabase';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { MoreHorizontal, Building, Crown, Filter } from 'lucide-react';
-import { NewAdminOrganizationModal } from '@/modals/NewAdminOrganizationModal';
+import { NewAdminOrganizationModal } from '@/modals/admin/NewAdminOrganizationModal';
 
 interface Organization {
   id: string;
