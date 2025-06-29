@@ -18,7 +18,6 @@ const taskParameterOptionSchema = z.object({
   parameter_id: z.string().min(1, 'Parameter ID es requerido'),
   label: z.string().min(1, 'La etiqueta es requerida'),
   value: z.string().min(1, 'El valor es requerido'),
-  position: z.number().min(0, 'La posición debe ser mayor o igual a 0'),
 });
 
 type TaskParameterOptionFormData = z.infer<typeof taskParameterOptionSchema>;
@@ -51,7 +50,6 @@ export function NewTaskParameterOptionModal({
       parameter_id: parameterId,
       label: '',
       value: '',
-      position: nextPosition,
     },
   });
 

@@ -49,6 +49,9 @@ export function NewTaskParameterModal({
   
   const createMutation = useCreateTaskParameter();
   const updateMutation = useUpdateTaskParameter();
+  
+  // Load units for the selector
+  const { data: units, isLoading: unitsLoading } = useUnits();
 
   const form = useForm<TaskParameterFormData>({
     resolver: zodResolver(taskParameterSchema),
@@ -72,7 +75,6 @@ export function NewTaskParameterModal({
         type: parameter.type,
         unit_id: parameter.unit_id || '',
         is_required: parameter.is_required,
-        position: parameter.position,
       });
     } else if (!parameter && open) {
       form.reset({
@@ -82,10 +84,9 @@ export function NewTaskParameterModal({
         type: 'text',
         unit_id: '',
         is_required: false,
-        position: nextPosition,
       });
     }
-  }, [parameter, open, form, templateId, nextPosition]);
+  }, [parameter, open, form, templateId]);
 
   const onSubmit = async (data: TaskParameterFormData) => {
     setIsSubmitting(true);
@@ -216,19 +217,25 @@ export function NewTaskParameterModal({
 
                 <FormField
                   control={form.control}
-                  name="position"
+                  name="unit_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Posición</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="number"
-                          min="0"
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                          disabled={isSubmitting}
-                        />
-                      </FormControl>
+                      <FormLabel>Unidad (opcional)</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value || ''} disabled={isSubmitting}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecciona una unidad" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="">Sin unidad</SelectItem>
+                          {units?.map((unit) => (
+                            <SelectItem key={unit.id} value={unit.id}>
+                              {unit.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}

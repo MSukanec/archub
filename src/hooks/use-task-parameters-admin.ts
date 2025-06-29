@@ -41,7 +41,6 @@ export interface CreateTaskParameterOptionData {
   parameter_id: string;
   value: string;
   label: string;
-  position: number;
 }
 
 export interface UpdateTaskParameterOptionData extends CreateTaskParameterOptionData {
