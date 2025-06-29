@@ -103,15 +103,14 @@ export default function AdminTaskParameters() {
   // Get template ID for new parameters (this would come from context or be selected)
   const defaultTemplateId = "default-template-id"; // This should be dynamic based on selected template
   
-  // Get next position for new parameters/options
-  const getNextParameterPosition = () => {
-    return Math.max(...parameters.map(p => p.position), -1) + 1;
+  // Helper functions for parameter/option management
+  const getParameterById = (parameterId: string) => {
+    return parameters.find(p => p.id === parameterId);
   };
 
-  const getNextOptionPosition = (parameterId: string) => {
-    const parameter = parameters.find(p => p.id === parameterId);
-    if (!parameter || !parameter.options) return 0;
-    return Math.max(...parameter.options.map(o => o.position), -1) + 1;
+  const getOptionsByParameter = (parameterId: string) => {
+    const parameter = getParameterById(parameterId);
+    return parameter?.options || [];
   };
 
   const getParameterTypeLabel = (type: string) => {

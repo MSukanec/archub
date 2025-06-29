@@ -10,7 +10,6 @@ export interface TaskParameter {
   type: 'text' | 'number' | 'select' | 'boolean';
   unit_id?: string;
   is_required: boolean;
-  position: number;
   created_at: string;
   options?: TaskParameterOption[];
 }
@@ -20,7 +19,6 @@ export interface TaskParameterOption {
   parameter_id: string;
   value: string;
   label: string;
-  position: number;
   created_at: string;
 }
 
@@ -57,7 +55,7 @@ export function useTaskParametersAdmin() {
       const { data: parameters, error: parametersError } = await supabase
         .from('task_template_parameters')
         .select('*')
-        .order('position');
+        .order('created_at');
 
       if (parametersError) {
         console.error('Error fetching parameters:', parametersError);
@@ -68,7 +66,7 @@ export function useTaskParametersAdmin() {
       const { data: options, error: optionsError } = await supabase
         .from('task_template_parameter_options')
         .select('*')
-        .order('position');
+        .order('created_at');
 
       if (optionsError) {
         console.error('Error fetching options:', optionsError);

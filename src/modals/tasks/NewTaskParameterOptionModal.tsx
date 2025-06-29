@@ -60,17 +60,15 @@ export function NewTaskParameterOptionModal({
         parameter_id: option.parameter_id,
         label: option.label,
         value: option.value,
-        position: option.position,
       });
     } else if (!option && open) {
       form.reset({
         parameter_id: parameterId,
         label: '',
         value: '',
-        position: nextPosition,
       });
     }
-  }, [option, open, form, parameterId, nextPosition]);
+  }, [option, open, form, parameterId]);
 
   const onSubmit = async (data: TaskParameterOptionFormData) => {
     setIsSubmitting(true);
@@ -148,25 +146,7 @@ export function NewTaskParameterOptionModal({
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="position"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Posición</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="number"
-                          min="0"
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                          disabled={isSubmitting}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+
               </form>
             </Form>
           </CustomModalBody>
