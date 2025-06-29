@@ -374,10 +374,12 @@ export function NewTaskTemplateModal({
                           <FormItem>
                             <FormLabel className="required-asterisk">Plantilla de Nombre</FormLabel>
                             <FormControl>
-                              <Textarea 
-                                {...field} 
-                                placeholder="Ej: Excavación de {{tipo}} en {{material}} con {{herramienta}}"
-                                rows={3}
+                              <TemplateNameBuilder
+                                value={field.value || ""}
+                                onChange={field.onChange}
+                                parameters={mockParameters}
+                                placeholder="Construye tu plantilla insertando texto y parámetros..."
+                                disabled={false}
                               />
                             </FormControl>
                             <FormMessage />
