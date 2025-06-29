@@ -161,19 +161,22 @@ export default function AdminTaskCategoriesTemplates() {
                 </div>
               </div>
 
-              <div className="flex items-center space-x-2">
-                {category.template ? (
-                  <div className="flex items-center space-x-1 text-green-600">
-                    <CheckCircle className="h-4 w-4" />
-                    <span className="text-xs">Con plantilla</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center space-x-1 text-red-600">
-                    <XCircle className="h-4 w-4" />
-                    <span className="text-xs">Sin plantilla</span>
-                  </div>
-                )}
-              </div>
+              {/* Solo mostrar iconos de plantilla en categorías NIETO (que no tienen hijos) */}
+              {!hasChildren && (
+                <div className="flex items-center space-x-2">
+                  {category.template ? (
+                    <div className="flex items-center space-x-1 text-green-600">
+                      <CheckCircle className="h-4 w-4" />
+                      <span className="text-xs">Con plantilla</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-1 text-red-600">
+                      <XCircle className="h-4 w-4" />
+                      <span className="text-xs">Sin plantilla</span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="flex items-center space-x-2">
@@ -186,24 +189,29 @@ export default function AdminTaskCategoriesTemplates() {
                 Editar Categoría
               </Button>
 
-              {category.template ? (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleEditTemplate(category.template)}
-                >
-                  <FileText className="h-4 w-4 mr-1" />
-                  Editar Plantilla
-                </Button>
-              ) : (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleCreateTemplate(category.id)}
-                >
-                  <Plus className="h-4 w-4 mr-1" />
-                  Crear Plantilla
-                </Button>
+              {/* Solo mostrar botones de plantilla en categorías NIETO (que no tienen hijos) */}
+              {!hasChildren && (
+                <>
+                  {category.template ? (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleEditTemplate(category.template)}
+                    >
+                      <FileText className="h-4 w-4 mr-1" />
+                      Editar Plantilla
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleCreateTemplate(category.id)}
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Crear Plantilla
+                    </Button>
+                  )}
+                </>
               )}
 
               <Button
