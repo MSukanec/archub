@@ -19,6 +19,7 @@ export interface TaskParameterOption {
   parameter_id: string;
   value: string;
   label: string;
+  created_at: string;
 }
 
 export interface CreateTaskParameterData {
@@ -64,7 +65,8 @@ export function useTaskParametersAdmin() {
       // Fetch all options
       const { data: options, error: optionsError } = await supabase
         .from('task_template_parameter_options')
-        .select('id, parameter_id, value, label');
+        .select('id, parameter_id, value, label, created_at')
+        .order('created_at');
 
       if (optionsError) {
         console.error('Error fetching options:', optionsError);

@@ -255,11 +255,6 @@ export default function AdminTaskParameters() {
                                 <Badge variant={getParameterTypeVariant(parameter.type)}>
                                   {getParameterTypeLabel(parameter.type)}
                                 </Badge>
-                                {parameter.is_required && (
-                                  <Badge variant="destructive" className="text-xs">
-                                    Obligatorio
-                                  </Badge>
-                                )}
                                 {parameter.unit_id && (
                                   <Badge variant="outline" className="text-xs">
                                     {parameter.unit_id}
