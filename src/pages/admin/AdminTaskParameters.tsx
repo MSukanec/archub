@@ -36,8 +36,8 @@ export default function AdminTaskParameters() {
   const deleteParameterMutation = useDeleteTaskParameter();
   const deleteOptionMutation = useDeleteTaskParameterOption();
 
-  // Default template ID for parameter creation
-  const defaultTemplateId = "template-1";
+  // Default template ID for parameter creation (using a proper UUID format)
+  const defaultTemplateId = "00000000-0000-0000-0000-000000000000";
 
   // Calculate statistics
   const calculateStats = (parameters: TaskParameter[]) => {
