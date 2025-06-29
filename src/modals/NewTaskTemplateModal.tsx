@@ -8,7 +8,6 @@ import { CustomModalBody } from "@/components/ui-custom/modal/CustomModalBody";
 import { CustomModalFooter } from "@/components/ui-custom/modal/CustomModalFooter";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -21,8 +20,6 @@ const formSchema = z.object({
   code_prefix: z.string().min(1, "El prefijo de código es requerido"),
   name_template: z.string().min(1, "La plantilla de nombre es requerida"),
   category_id: z.string().min(1, "La categoría es requerida"),
-  parent_category_id: z.string().min(1, "La categoría principal es requerida"),
-  sub_category_id: z.string().min(1, "La subcategoría es requerida"),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -105,8 +102,6 @@ export function NewTaskTemplateModal({
       code_prefix: "",
       name_template: "",
       category_id: "",
-      parent_category_id: "",
-      sub_category_id: "",
     },
   });
 
@@ -131,9 +126,6 @@ export function NewTaskTemplateModal({
         code_prefix: template.code_prefix,
         name_template: template.name_template,
         category_id: template.category_id,
-        parent_category_id: templateCategory?.parent_id ? 
-          allCategories.find(cat => cat.id === templateCategory.parent_id)?.parent_id || "" : "",
-        sub_category_id: templateCategory?.parent_id || "",
       });
     } else if (!template && open) {
       // Reset form for new template
@@ -142,8 +134,6 @@ export function NewTaskTemplateModal({
         code_prefix: "",
         name_template: "",
         category_id: "",
-        parent_category_id: "",
-        sub_category_id: "",
       });
       setSelectedParentId("");
       setSelectedSubId("");
@@ -192,87 +182,70 @@ export function NewTaskTemplateModal({
                     </AccordionTrigger>
                     <AccordionContent className="px-4 pb-4 space-y-4">
                       {/* Categoría Principal */}
-                      <FormField
-                        control={form.control}
-                        name="parent_category_id"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="required-asterisk">Categoría Principal</FormLabel>
-                            {isLoadingParents ? (
-                              <Skeleton className="h-10 w-full" />
-                            ) : (
-                              <Select 
-                                onValueChange={(value) => {
-                                  field.onChange(value);
-                                  setSelectedParentId(value);
-                                  // Reset dependent dropdowns and fields
-                                  form.setValue("sub_category_id", "");
-                                  form.setValue("category_id", "");
-                                  form.setValue("code_prefix", "");
-                                  form.setValue("name", "");
-                                  setSelectedSubId("");
-                                }} 
-                                value={field.value}
-                              >
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Seleccionar categoría principal" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {parentCategories?.map((category) => (
-                                    <SelectItem key={category.id} value={category.id}>
-                                      {category.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            )}
-                            <FormMessage />
-                          </FormItem>
+                      <div>
+                        <label className="text-xs font-medium text-muted-foreground mb-1 block required-asterisk">
+                          Categoría Principal
+                        </label>
+                        {isLoadingParents ? (
+                          <Skeleton className="h-10 w-full" />
+                        ) : (
+                          <Select 
+                            onValueChange={(value) => {
+                              setSelectedParentId(value);
+                              // Reset dependent dropdowns and fields
+                              setSelectedSubId("");
+                              form.setValue("category_id", "");
+                              form.setValue("code_prefix", "");
+                              form.setValue("name", "");
+                            }} 
+                            value={selectedParentId}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Seleccionar categoría principal" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {parentCategories?.map((category) => (
+                                <SelectItem key={category.id} value={category.id}>
+                                  {category.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         )}
-                      />
+                      </div>
 
                       {/* Subcategoría */}
-                      <FormField
-                        control={form.control}
-                        name="sub_category_id"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="required-asterisk">Subcategoría</FormLabel>
-                            {isLoadingSubs && selectedParentId ? (
-                              <Skeleton className="h-10 w-full" />
-                            ) : (
-                              <Select 
-                                onValueChange={(value) => {
-                                  field.onChange(value);
-                                  setSelectedSubId(value);
-                                  // Reset final category and dependent fields
-                                  form.setValue("category_id", "");
-                                  form.setValue("code_prefix", "");
-                                  form.setValue("name", "");
-                                }} 
-                                value={field.value}
-                                disabled={!selectedParentId}
-                              >
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder={!selectedParentId ? "Seleccione primero una categoría principal" : "Seleccionar subcategoría"} />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {subCategories?.map((category) => (
-                                    <SelectItem key={category.id} value={category.id}>
-                                      {category.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            )}
-                            <FormMessage />
-                          </FormItem>
+                      <div>
+                        <label className="text-xs font-medium text-muted-foreground mb-1 block required-asterisk">
+                          Subcategoría
+                        </label>
+                        {isLoadingSubs && selectedParentId ? (
+                          <Skeleton className="h-10 w-full" />
+                        ) : (
+                          <Select 
+                            onValueChange={(value) => {
+                              setSelectedSubId(value);
+                              // Reset final category and dependent fields
+                              form.setValue("category_id", "");
+                              form.setValue("code_prefix", "");
+                              form.setValue("name", "");
+                            }} 
+                            value={selectedSubId}
+                            disabled={!selectedParentId}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder={!selectedParentId ? "Seleccione primero una categoría principal" : "Seleccionar subcategoría"} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {subCategories?.map((category) => (
+                                <SelectItem key={category.id} value={category.id}>
+                                  {category.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         )}
-                      />
+                      </div>
 
                       {/* Categoría Final */}
                       <FormField

@@ -283,7 +283,7 @@ export default function AdminTaskTemplates() {
       <NewTaskTemplateModal
         open={isModalOpen}
         onClose={handleCloseModal}
-        template={editingTemplate}
+        template={editingTemplate || undefined}
       />
 
       {/* Delete Confirmation Dialog */}

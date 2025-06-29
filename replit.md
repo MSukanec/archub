@@ -119,6 +119,16 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 29, 2025. Created TemplateNameBuilder component and fixed modal accordion structure
+  • Built comprehensive TemplateNameBuilder.tsx component in src/components/ui-custom/misc for visual template construction
+  • Replaced traditional textarea with visual component allowing parameter chips and text elements
+  • Component supports inserting parameters from dropdown, editing text inline, removing elements
+  • Includes preview with example values showing how template will render
+  • Converts visual elements to {{parameter}} string format internally for database storage
+  • Fixed NewTaskTemplateModal.tsx schema to match actual task_templates table structure (removed parent_category_id references)
+  • Reorganized modal into accordion sections: Categoría (hierarchical selection) and Plantilla (visual builder)
+  • Added mock parameters for demonstration of visual template building functionality
+  • Fixed TypeScript errors related to form field validation and database column mismatches
 - June 29, 2025. Complete AdminGeneratedTasks system, Task Templates management, and improved admin sidebar navigation
   • Created AdminGeneratedTasks.tsx page duplicating AdminTasks functionality with real Supabase data integration
   • Built complete NewAdminGeneratedTaskModal.tsx with dynamic form generation based on task templates
