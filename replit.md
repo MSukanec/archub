@@ -119,9 +119,8 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- June 29, 2025. Complete AdminGeneratedTasks system with dynamic form generation functionality
+- June 29, 2025. Complete AdminGeneratedTasks system and improved admin sidebar navigation
   • Created AdminGeneratedTasks.tsx page duplicating AdminTasks functionality with real Supabase data integration
-  • Added "Tareas Generadas" sidebar button below "Tareas" in admin navigation with Zap icon
   • Built complete NewAdminGeneratedTaskModal.tsx with dynamic form generation based on task templates
   • Implemented useTaskTemplates, useTaskTemplateParameters, and useGeneratedTasks hooks for full Supabase integration
   • Dynamic parameter rendering supports text, number, select, and boolean field types with validation
@@ -132,6 +131,8 @@ Changelog:
   • Modal supports template dropdown, parameter loading, form validation, and success/error handling
   • Added /admin/generated-tasks route to App.tsx with proper AdminProtectedRoute wrapper
   • Complete parametric task generation system ready for production use with generated_tasks table
+  • Restructured admin sidebar to use accordion sections: Resumen de Administración, Comunidad (Organizaciones, Usuarios), Tareas (Tareas, Tareas Generadas), Materiales (Materiales, Categorías de Materiales)
+  • Enhanced admin navigation with accordion functionality matching project sidebar pattern for improved UX
 - June 28, 2025. Fixed Personnel page navigation and standardized empty states across all pages
   • Fixed Personnel page routing issue by adding proper Link component from wouter for "Ir a Bitácora" button
   • Added CustomEmptyState to Activity page without action button as requested

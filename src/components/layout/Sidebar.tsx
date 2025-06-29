@@ -214,12 +214,39 @@ export function Sidebar() {
     ],
     admin: [
       { icon: Home, label: 'Resumen de Administración', href: '/admin/dashboard' },
-      { icon: Building, label: 'Organizaciones', href: '/admin/organizations' },
-      { icon: Users, label: 'Usuarios', href: '/admin/users' },
-      { icon: CheckSquare, label: 'Tareas', href: '/admin/tasks' },
-      { icon: Zap, label: 'Tareas Generadas', href: '/admin/generated-tasks' },
-      { icon: Tag, label: 'Categorías de Materiales', href: '/admin/material-categories' },
-      { icon: Package, label: 'Materiales', href: '/admin/materials' },
+      { 
+        icon: Users, 
+        label: 'Comunidad', 
+        isAccordion: true, 
+        expanded: expandedAccordions['admin-comunidad'] || false,
+        onToggle: () => toggleAccordion('admin-comunidad'),
+        children: [
+          { icon: Building, label: 'Organizaciones', href: '/admin/organizations' },
+          { icon: Users, label: 'Usuarios', href: '/admin/users' }
+        ]
+      },
+      { 
+        icon: CheckSquare, 
+        label: 'Tareas', 
+        isAccordion: true, 
+        expanded: expandedAccordions['admin-tareas'] || false,
+        onToggle: () => toggleAccordion('admin-tareas'),
+        children: [
+          { icon: CheckSquare, label: 'Tareas', href: '/admin/tasks' },
+          { icon: Zap, label: 'Tareas Generadas', href: '/admin/generated-tasks' }
+        ]
+      },
+      { 
+        icon: Package, 
+        label: 'Materiales', 
+        isAccordion: true, 
+        expanded: expandedAccordions['admin-materiales'] || false,
+        onToggle: () => toggleAccordion('admin-materiales'),
+        children: [
+          { icon: Package, label: 'Materiales', href: '/admin/materials' },
+          { icon: Tag, label: 'Categorías de Materiales', href: '/admin/material-categories' }
+        ]
+      }
     ]
   };
 
