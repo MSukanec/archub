@@ -307,9 +307,10 @@ export function Sidebar() {
         </div>
       </div>
 
-      {/* Plan Section - Above Divider */}
-      <div className="p-1">
-        <div className="flex justify-center w-full">
+      {/* Plan Section - Above Divider - Hidden in admin context */}
+      {currentSidebarContext !== 'admin' && (
+        <div className="p-1">
+          <div className="flex justify-center w-full">
           <div className={cn(
             "transition-all duration-150 ease-out",
             isExpanded ? "w-full" : "w-8 h-8"
@@ -380,7 +381,7 @@ export function Sidebar() {
             )}
           </div>
         </div>
-      </div>
+      )}
 
       {/* Bottom Section - Fixed Buttons */}
       <div className="border-t border-[var(--menues-border)] p-1">
