@@ -58,7 +58,7 @@ export function NewTaskParameterModal({
       name: '',
       label: '',
       type: 'text',
-      unit_id: '',
+      unit_id: undefined,
       is_required: false,
     },
   });
@@ -71,7 +71,7 @@ export function NewTaskParameterModal({
         name: parameter.name,
         label: parameter.label,
         type: parameter.type,
-        unit_id: parameter.unit_id || '',
+        unit_id: parameter.unit_id || undefined,
         is_required: parameter.is_required,
       });
     } else if (!parameter && open) {
@@ -80,7 +80,7 @@ export function NewTaskParameterModal({
         name: '',
         label: '',
         type: 'text',
-        unit_id: '',
+        unit_id: undefined,
         is_required: false,
       });
     }

@@ -62,6 +62,8 @@ export function useTaskParametersAdmin() {
         throw parametersError;
       }
 
+      console.log('Fetched parameters:', parameters);
+
       // Fetch all options
       const { data: options, error: optionsError } = await supabase
         .from('task_template_parameter_options')
@@ -72,6 +74,8 @@ export function useTaskParametersAdmin() {
         console.error('Error fetching options:', optionsError);
         throw optionsError;
       }
+
+      console.log('Fetched options:', options);
 
       // Group options by parameter_id
       const optionsMap = new Map<string, TaskParameterOption[]>();
