@@ -30,6 +30,7 @@ import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminOrganizations from "@/pages/admin/AdminOrganizations";
 import AdminUsers from "@/pages/admin/AdminUsers";
 import AdminTasks from "@/pages/admin/AdminTasks";
+import AdminGeneratedTasks from "@/pages/admin/AdminGeneratedTasks";
 import AdminMaterials from "@/pages/admin/AdminMaterials";
 import AdminMaterialCategories from "@/pages/admin/AdminMaterialCategories";
 
@@ -191,6 +192,14 @@ function Router() {
         <ProtectedRoute>
           <AdminProtectedRoute>
             <AdminTasks />
+          </AdminProtectedRoute>
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/admin/generated-tasks">
+        <ProtectedRoute>
+          <AdminProtectedRoute>
+            <AdminGeneratedTasks />
           </AdminProtectedRoute>
         </ProtectedRoute>
       </Route>
