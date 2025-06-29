@@ -105,6 +105,8 @@ export function useCreateTaskCategory() {
 
   return useMutation({
     mutationFn: async (categoryData: CreateTaskCategoryData) => {
+      if (!supabase) throw new Error('Supabase client not initialized');
+      
       const { data, error } = await supabase
         .from('task_categories')
         .insert([categoryData])
@@ -141,6 +143,8 @@ export function useUpdateTaskCategory() {
 
   return useMutation({
     mutationFn: async ({ id, ...updateData }: UpdateTaskCategoryData) => {
+      if (!supabase) throw new Error('Supabase client not initialized');
+      
       const { data, error } = await supabase
         .from('task_categories')
         .update(updateData)
@@ -178,6 +182,8 @@ export function useDeleteTaskCategory() {
 
   return useMutation({
     mutationFn: async (id: string) => {
+      if (!supabase) throw new Error('Supabase client not initialized');
+      
       const { error } = await supabase
         .from('task_categories')
         .delete()
