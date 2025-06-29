@@ -311,74 +311,75 @@ export function Sidebar() {
       {currentSidebarContext !== 'admin' && (
         <div className="p-1">
           <div className="flex justify-center w-full">
-          <div className={cn(
-            "transition-all duration-150 ease-out",
-            isExpanded ? "w-full" : "w-8 h-8"
-          )}>
-            {isExpanded ? (
-              <div className={cn(
-                "w-full border-2 rounded-lg p-3 transition-all duration-150 ease-out",
-                (!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "border-[var(--accent)]",
-                userData?.plan?.name?.toLowerCase() === 'pro' && "border-blue-500",
-                userData?.plan?.name?.toLowerCase() === 'teams' && "border-purple-500"
-              )}>
-                <div className="flex items-center gap-2 mb-2 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.05s_forwards]">
-                  <div className="w-5 h-5 rounded-full border-2 bg-white flex items-center justify-center transition-all duration-150">
-                    {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && <Star className={cn("w-3 h-3 text-[var(--accent)]")} />}
-                    {userData?.plan?.name?.toLowerCase() === 'pro' && <Crown className="w-3 h-3 text-blue-500" />}
-                    {userData?.plan?.name?.toLowerCase() === 'teams' && <Zap className="w-3 h-3 text-purple-500" />}
+            <div className={cn(
+              "transition-all duration-150 ease-out",
+              isExpanded ? "w-full" : "w-8 h-8"
+            )}>
+              {isExpanded ? (
+                <div className={cn(
+                  "w-full border-2 rounded-lg p-3 transition-all duration-150 ease-out",
+                  (!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "border-[var(--accent)]",
+                  userData?.plan?.name?.toLowerCase() === 'pro' && "border-blue-500",
+                  userData?.plan?.name?.toLowerCase() === 'teams' && "border-purple-500"
+                )}>
+                  <div className="flex items-center gap-2 mb-2 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.05s_forwards]">
+                    <div className="w-5 h-5 rounded-full border-2 bg-white flex items-center justify-center transition-all duration-150">
+                      {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && <Star className={cn("w-3 h-3 text-[var(--accent)]")} />}
+                      {userData?.plan?.name?.toLowerCase() === 'pro' && <Crown className="w-3 h-3 text-blue-500" />}
+                      {userData?.plan?.name?.toLowerCase() === 'teams' && <Zap className="w-3 h-3 text-purple-500" />}
+                    </div>
+                    <span className="text-xs font-medium text-gray-600">Plan actual:</span>
                   </div>
-                  <span className="text-xs font-medium text-gray-600">Plan actual:</span>
+                  <div className="mb-2 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.1s_forwards]">
+                    <span className={cn(
+                      "text-sm font-semibold capitalize",
+                      (!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "text-[var(--accent)]",
+                      userData?.plan?.name?.toLowerCase() === 'pro' && "text-blue-600",
+                      userData?.plan?.name?.toLowerCase() === 'teams' && "text-purple-600"
+                    )}>
+                      {userData?.plan?.name || 'Free'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 mb-3 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.15s_forwards]">
+                    {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "Actualiza para obtener las últimas y exclusivas funcionalidades"}
+                    {userData?.plan?.name?.toLowerCase() === 'pro' && "Todas las funcionalidades profesionales"}
+                    {userData?.plan?.name?.toLowerCase() === 'teams' && "Máximo rendimiento para equipos"}
+                  </p>
+                  {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && (
+                    <button className={cn(
+                      "w-full py-2 px-3 rounded-lg text-xs font-medium text-white flex items-center justify-center gap-1 transition-all duration-150 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.2s_forwards]",
+                      "bg-[var(--accent)] hover:bg-[var(--accent)]/80"
+                    )}>
+                      <Zap className="w-3 h-3" />
+                      Actualizar a Pro
+                    </button>
+                  )}
+                  {userData?.plan?.name?.toLowerCase() === 'pro' && (
+                    <button className="w-full py-2 px-3 rounded-lg text-xs font-medium bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center gap-1 transition-all duration-150 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.2s_forwards]">
+                      <Crown className="w-3 h-3" />
+                      Actualizar a Teams
+                    </button>
+                  )}
+                  {userData?.plan?.name?.toLowerCase() === 'teams' && (
+                    <button className="w-full py-2 px-3 rounded-lg text-xs font-medium bg-purple-600 text-white hover:bg-purple-700 flex items-center justify-center gap-1 transition-all duration-150 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.2s_forwards]">
+                      <Zap className="w-3 h-3" />
+                      Plan Premium
+                    </button>
+                  )}
                 </div>
-                <div className="mb-2 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.1s_forwards]">
-                  <span className={cn(
-                    "text-sm font-semibold capitalize",
-                    (!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "text-[var(--accent)]",
-                    userData?.plan?.name?.toLowerCase() === 'pro' && "text-blue-600",
-                    userData?.plan?.name?.toLowerCase() === 'teams' && "text-purple-600"
-                  )}>
-                    {userData?.plan?.name || 'Free'}
-                  </span>
+              ) : (
+                <div className={cn(
+                  "w-8 h-8 rounded-full border-2 flex items-center justify-center cursor-pointer transition-all duration-150 ease-out hover:scale-105",
+                  (!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "border-[var(--accent)]",
+                  userData?.plan?.name?.toLowerCase() === 'pro' && "border-blue-500",
+                  userData?.plan?.name?.toLowerCase() === 'teams' && "border-purple-500"
+                )}>
+                  {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && <Star className="w-4 h-4 text-[var(--accent)] transition-all duration-150" />}
+                  {userData?.plan?.name?.toLowerCase() === 'pro' && <Crown className="w-4 h-4 text-blue-500 transition-all duration-150" />}
+                  {userData?.plan?.name?.toLowerCase() === 'teams' && <Zap className="w-4 h-4 text-purple-500 transition-all duration-150" />}
                 </div>
-                <p className="text-xs text-gray-500 mb-3 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.15s_forwards]">
-                  {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "Actualiza para obtener las últimas y exclusivas funcionalidades"}
-                  {userData?.plan?.name?.toLowerCase() === 'pro' && "Todas las funcionalidades profesionales"}
-                  {userData?.plan?.name?.toLowerCase() === 'teams' && "Máximo rendimiento para equipos"}
-                </p>
-                {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && (
-                  <button className={cn(
-                    "w-full py-2 px-3 rounded-lg text-xs font-medium text-white flex items-center justify-center gap-1 transition-all duration-150 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.2s_forwards]",
-                    "bg-[var(--accent)] hover:bg-[var(--accent)]/80"
-                  )}>
-                    <Zap className="w-3 h-3" />
-                    Actualizar a Pro
-                  </button>
-                )}
-                {userData?.plan?.name?.toLowerCase() === 'pro' && (
-                  <button className="w-full py-2 px-3 rounded-lg text-xs font-medium bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center gap-1 transition-all duration-150 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.2s_forwards]">
-                    <Crown className="w-3 h-3" />
-                    Actualizar a Teams
-                  </button>
-                )}
-                {userData?.plan?.name?.toLowerCase() === 'teams' && (
-                  <button className="w-full py-2 px-3 rounded-lg text-xs font-medium bg-purple-600 text-white hover:bg-purple-700 flex items-center justify-center gap-1 transition-all duration-150 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.2s_forwards]">
-                    <Zap className="w-3 h-3" />
-                    Plan Premium
-                  </button>
-                )}
-              </div>
-            ) : (
-              <div className={cn(
-                "w-8 h-8 rounded-full border-2 flex items-center justify-center cursor-pointer transition-all duration-150 ease-out hover:scale-105",
-                (!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "border-[var(--accent)]",
-                userData?.plan?.name?.toLowerCase() === 'pro' && "border-blue-500",
-                userData?.plan?.name?.toLowerCase() === 'teams' && "border-purple-500"
-              )}>
-                {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && <Star className="w-4 h-4 text-[var(--accent)] transition-all duration-150" />}
-                {userData?.plan?.name?.toLowerCase() === 'pro' && <Crown className="w-4 h-4 text-blue-500 transition-all duration-150" />}
-                {userData?.plan?.name?.toLowerCase() === 'teams' && <Zap className="w-4 h-4 text-purple-500 transition-all duration-150" />}
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -399,8 +400,6 @@ export function Sidebar() {
               }}
             />
           )}
-
-
 
           {/* Profile */}
           <SidebarButton
