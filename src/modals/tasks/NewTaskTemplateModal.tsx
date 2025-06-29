@@ -28,12 +28,14 @@ interface NewTaskTemplateModalProps {
   open: boolean;
   onClose: () => void;
   template?: TaskTemplate;
+  preselectedCategoryId?: string;
 }
 
 export function NewTaskTemplateModal({ 
   open, 
   onClose, 
-  template 
+  template,
+  preselectedCategoryId
 }: NewTaskTemplateModalProps) {
   const isEditing = !!template;
   
@@ -101,7 +103,7 @@ export function NewTaskTemplateModal({
       name: "",
       code_prefix: "",
       name_template: "",
-      category_id: "",
+      category_id: preselectedCategoryId || "",
     },
   });
 

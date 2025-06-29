@@ -3,12 +3,15 @@ import { Button } from "@/components/ui/button";
 
 interface CustomModalFooterProps {
   onCancel: () => void;
-  onSave: () => void;
+  onSave?: () => void;
+  onSubmit?: () => void | Promise<void>;
   cancelText?: string;
   saveText?: string;
+  submitText?: string;
   saveLoading?: boolean;
   saveDisabled?: boolean;
   isLoading?: boolean;
+  form?: string;
   saveProps?: {
     form?: string;
     type?: "button" | "submit";
@@ -19,11 +22,14 @@ interface CustomModalFooterProps {
 export function CustomModalFooter({
   onCancel,
   onSave,
+  onSubmit,
   cancelText = "Cancelar",
   saveText = "Guardar",
+  submitText = "Guardar",
   saveLoading = false,
   saveDisabled = false,
   isLoading = false,
+  form,
   saveProps,
 }: CustomModalFooterProps) {
   return (
@@ -38,13 +44,13 @@ export function CustomModalFooter({
           {cancelText}
         </Button>
         <Button
-          type={saveProps?.type || "button"}
-          onClick={saveProps?.type === "submit" ? undefined : onSave}
-          form={saveProps?.form}
+          type={saveProps?.type || (form ? "submit" : "button")}
+          onClick={saveProps?.type === "submit" || form ? undefined : (onSubmit || onSave)}
+          form={saveProps?.form || form}
           className="w-3/4"
           disabled={saveLoading || saveDisabled || isLoading || saveProps?.disabled}
         >
-          {(saveLoading || isLoading) ? "Guardando..." : saveText}
+          {(saveLoading || isLoading) ? "Guardando..." : (submitText || saveText)}
         </Button>
       </div>
     </div>
