@@ -9,7 +9,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { CustomTable } from '@/components/ui-custom/misc/CustomTable';
 import { Layout } from '@/components/layout/Layout';
 import { useMaterialCategories, useDeleteMaterialCategory, MaterialCategory } from '@/hooks/use-material-categories';
-import { NewAdminMaterialCategoryModal } from '@/modals/NewAdminMaterialCategoryModal';
+import { NewAdminMaterialCategoryModal } from '@/modals/admin/NewAdminMaterialCategoryModal';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';

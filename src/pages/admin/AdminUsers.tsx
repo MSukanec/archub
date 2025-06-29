@@ -16,7 +16,7 @@ import { useToast } from '@/hooks/use-toast'
 import { Plus, MoreHorizontal, Edit, Trash2, Crown, Users, UserCheck, UserX, Building } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-// import { NewAdminUserModal } from '@/modals/NewAdminUserModal'
+// import { NewAdminUserModal } from '@/modals/admin/NewAdminUserModal'
 
 interface User {
   id: string

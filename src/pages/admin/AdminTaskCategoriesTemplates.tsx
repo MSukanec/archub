@@ -12,8 +12,8 @@ import { Layout } from '@/components/layout/Layout';
 
 import { useTaskCategoriesAdmin, useDeleteTaskCategory, TaskCategoryAdmin } from '@/hooks/use-task-categories-admin';
 import { useDeleteTaskTemplate } from '@/hooks/use-task-templates-admin';
-import { NewTaskTemplateModal } from '@/modals/NewTaskTemplateModal';
-import { NewAdminTaskCategoryModal } from '@/modals/NewAdminTaskCategoryModal';
+import { NewTaskTemplateModal } from '@/modals/tasks/NewTaskTemplateModal';
+import { NewAdminTaskCategoryModal } from '@/modals/admin/NewAdminTaskCategoryModal';
 
 export default function AdminTaskCategoriesTemplates() {
   const [searchTerm, setSearchTerm] = useState('');

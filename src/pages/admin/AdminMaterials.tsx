@@ -14,7 +14,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 import { Layout } from '@/components/layout/Layout'
 import { CustomTable } from '@/components/ui-custom/misc/CustomTable'
-import { NewAdminMaterialModal } from '@/modals/NewAdminMaterialModal'
+import { NewAdminMaterialModal } from '@/modals/admin/NewAdminMaterialModal'
 
 import { Plus, Edit, Trash2, Package, Crown } from 'lucide-react'
 

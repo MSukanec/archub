@@ -12,7 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 import { Layout } from '@/components/layout/Layout'
 import { CustomTable } from '@/components/ui-custom/misc/CustomTable'
-import { NewAdminGeneratedTaskModal } from '@/modals/NewAdminGeneratedTaskModal'
+import { NewAdminGeneratedTaskModal } from '@/modals/admin/NewAdminGeneratedTaskModal'
 import { useGeneratedTasks } from '@/hooks/use-generated-tasks'
 
 import { Plus, Edit, Trash2, CheckSquare, Clock, Target, Zap } from 'lucide-react'

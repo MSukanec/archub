@@ -17,7 +17,7 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useLocation } from 'wouter'
-import { NewOrganizationModal } from '@/modals/NewOrganizationModal'
+import { NewOrganizationModal } from '@/modals/organization/NewOrganizationModal'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 
 // Componente para una sola tarjeta de organización
