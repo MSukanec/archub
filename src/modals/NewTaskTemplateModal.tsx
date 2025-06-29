@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -117,15 +117,26 @@ export function NewTaskTemplateModal({
 
   const handleSubmit = async (data: TaskTemplateFormData) => {
     try {
+      // Only send the final category_id and other required fields
+      const submitData = {
+        name: data.name,
+        code_prefix: data.code_prefix,
+        name_template: data.name_template,
+        category_id: data.category_id
+      };
+
       if (isEditing && template) {
         await updateTaskTemplate.mutateAsync({
           id: template.id,
-          ...data
+          ...submitData
         });
       } else {
-        await createTaskTemplate.mutateAsync(data);
+        await createTaskTemplate.mutateAsync(submitData);
       }
       onClose();
+      form.reset();
+      setSelectedParentId("");
+      setSelectedSubId("");
     } catch (error) {
       console.error("Error saving task template:", error);
     }
@@ -147,20 +158,96 @@ export function NewTaskTemplateModal({
           <CustomModalBody padding="md">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+                {/* Categoría Principal */}
+                <FormField
+                  control={form.control}
+                  name="parent_category_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="required-asterisk">Categoría Principal</FormLabel>
+                      <Select 
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          setSelectedParentId(value);
+                          // Reset dependent dropdowns
+                          form.setValue("sub_category_id", "");
+                          form.setValue("category_id", "");
+                          setSelectedSubId("");
+                        }} 
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar categoría principal" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {parentCategories?.map((category) => (
+                            <SelectItem key={category.id} value={category.id}>
+                              {category.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Subcategoría */}
+                <FormField
+                  control={form.control}
+                  name="sub_category_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="required-asterisk">Subcategoría</FormLabel>
+                      <Select 
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          setSelectedSubId(value);
+                          // Reset final category
+                          form.setValue("category_id", "");
+                        }} 
+                        value={field.value}
+                        disabled={!selectedParentId}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar subcategoría" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {subCategories?.map((category) => (
+                            <SelectItem key={category.id} value={category.id}>
+                              {category.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Categoría Final */}
                 <FormField
                   control={form.control}
                   name="category_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="required-asterisk">Categoría</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <FormLabel className="required-asterisk">Categoría Final</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        value={field.value}
+                        disabled={!selectedSubId}
+                      >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar categoría" />
+                            <SelectValue placeholder="Seleccionar categoría final" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {categories?.map((category) => (
+                          {elementCategories?.map((category) => (
                             <SelectItem key={category.id} value={category.id}>
                               {category.name}
                             </SelectItem>
@@ -183,9 +270,16 @@ export function NewTaskTemplateModal({
                           placeholder="Ej: FFF, SAB" 
                           {...field}
                           style={{ textTransform: 'uppercase' }}
+                          readOnly={!!form.watch("category_id")}
+                          className={form.watch("category_id") ? "bg-muted cursor-not-allowed" : ""}
                           onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                         />
                       </FormControl>
+                      {form.watch("category_id") && (
+                        <p className="text-xs text-muted-foreground">
+                          Este valor se toma automáticamente desde la categoría seleccionada
+                        </p>
+                      )}
                       <FormMessage />
                     </FormItem>
                   )}
