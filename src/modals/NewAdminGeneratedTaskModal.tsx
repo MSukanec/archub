@@ -146,7 +146,7 @@ export function NewAdminGeneratedTaskModal({
   }, [isEditing, generatedTask, open, form]);
 
   const handleSubmit = async (data: any) => {
-    if (!userData?.user?.id) return;
+    if (!userData?.organization?.id) return;
     
     const { template_id, ...params } = data;
     
@@ -154,7 +154,7 @@ export function NewAdminGeneratedTaskModal({
       const result = await createGeneratedTask.mutateAsync({
         input_template_id: template_id,
         input_param_values: params,
-        input_created_by: userData.user.id
+        input_organization_id: userData.organization.id
       });
       
       if (result.existing_task) {

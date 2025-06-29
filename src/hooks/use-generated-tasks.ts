@@ -38,7 +38,7 @@ export function useCreateGeneratedTask() {
     mutationFn: async (payload: {
       input_template_id: string;
       input_param_values: Record<string, any>;
-      input_created_by: string;
+      input_organization_id: string;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
       
