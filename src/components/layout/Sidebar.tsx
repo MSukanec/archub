@@ -33,7 +33,8 @@ import {
   PanelLeftOpen,
   PanelLeftClose,
   CheckSquare,
-  Calculator
+  Calculator,
+  FileCode
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -233,7 +234,8 @@ export function Sidebar() {
         onToggle: () => toggleAccordion('admin-tareas'),
         children: [
           { icon: CheckSquare, label: 'Tareas', href: '/admin/tasks' },
-          { icon: Zap, label: 'Tareas Generadas', href: '/admin/generated-tasks' }
+          { icon: Zap, label: 'Tareas Generadas', href: '/admin/generated-tasks' },
+          { icon: FileTemplate, label: 'Plantillas de Tareas', href: '/admin/task-templates' }
         ]
       },
       { 
