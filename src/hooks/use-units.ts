@@ -3,8 +3,8 @@ import { supabase } from '@/lib/supabase';
 
 export interface Unit {
   id: string;
-  value: string;
-  label: string;
+  name: string;
+  description: string;
   created_at: string;
 }
 
@@ -19,7 +19,7 @@ export function useUnits() {
       const { data, error } = await supabase
         .from('units')
         .select('*')
-        .order('label', { ascending: true });
+        .order('name', { ascending: true });
 
       if (error) {
         throw error;

@@ -211,7 +211,7 @@ export function NewTaskParameterModal({
                           <SelectItem value="">Sin unidad</SelectItem>
                           {units?.map((unit) => (
                             <SelectItem key={unit.id} value={unit.id}>
-                              {unit.label}
+                              {unit.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
