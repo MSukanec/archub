@@ -63,7 +63,7 @@ export function NewAdminGeneratedTaskModal({
           <CustomModalFooter
             onCancel={onClose}
             onSave={handleSubmit}
-            saveLabel={isEditing ? "Actualizar Tarea Generada" : "Crear Tarea Generada"}
+            saveText={isEditing ? "Actualizar Tarea Generada" : "Crear Tarea Generada"}
             saveDisabled={true}
           />
         )
