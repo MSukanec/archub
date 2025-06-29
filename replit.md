@@ -119,13 +119,19 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- June 29, 2025. Complete AdminGeneratedTasks page implementation following AdminTasks pattern
-  • Created AdminGeneratedTasks.tsx by duplicating AdminTasks.tsx functionality exactly as requested
+- June 29, 2025. Complete AdminGeneratedTasks system with dynamic form generation functionality
+  • Created AdminGeneratedTasks.tsx page duplicating AdminTasks functionality with real Supabase data integration
   • Added "Tareas Generadas" sidebar button below "Tareas" in admin navigation with Zap icon
-  • Created NewAdminGeneratedTaskModal.tsx that opens successfully but has no fields yet (placeholder for future parametric task creation)
+  • Built complete NewAdminGeneratedTaskModal.tsx with dynamic form generation based on task templates
+  • Implemented useTaskTemplates, useTaskTemplateParameters, and useGeneratedTasks hooks for full Supabase integration
+  • Dynamic parameter rendering supports text, number, select, and boolean field types with validation
+  • Select fields automatically load options from task_template_parameter_options table
+  • Form validation enforces required fields (is_required = true) with custom error messages
+  • RPC function create_generated_task handles parametric task creation with duplicate detection
+  • Existing task detection shows code/description instead of creating duplicates
+  • Modal supports template dropdown, parameter loading, form validation, and success/error handling
   • Added /admin/generated-tasks route to App.tsx with proper AdminProtectedRoute wrapper
-  • Configured for "generated_tasks" Supabase table usage for parametric task creation system
-  • Modal and page architecture prepared for future implementation of parametric task generation functionality
+  • Complete parametric task generation system ready for production use with generated_tasks table
 - June 28, 2025. Fixed Personnel page navigation and standardized empty states across all pages
   • Fixed Personnel page routing issue by adding proper Link component from wouter for "Ir a Bitácora" button
   • Added CustomEmptyState to Activity page without action button as requested

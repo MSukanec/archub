@@ -35,9 +35,8 @@ export default function AdminGeneratedTasks() {
   const [editingGeneratedTask, setEditingGeneratedTask] = useState<GeneratedTask | null>(null)
   const [deletingGeneratedTask, setDeletingGeneratedTask] = useState<GeneratedTask | null>(null)
 
-  // Temporary placeholder data until generated_tasks table is properly integrated
-  const generatedTasks: GeneratedTask[] = []
-  const isLoading = false
+  // Real data from useGeneratedTasks hook
+  const { data: generatedTasks = [], isLoading } = useGeneratedTasks()
 
   // Statistics calculations
   const totalGeneratedTasks = generatedTasks.length
