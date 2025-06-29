@@ -11,21 +11,20 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCreateTaskTemplate, useUpdateTaskTemplate, type TaskTemplate } from "@/hooks/use-task-templates-admin";
-import { useTaskCategories } from "@/hooks/use-task-categories";
+import { useTopLevelCategories, useSubcategories, useElementCategories, useTaskCategories } from "@/hooks/use-task-categories";
 
 const taskTemplateSchema = z.object({
   name: z.string().min(1, "El nombre es requerido"),
-  code_prefix: z.string()
-    .min(2, "El prefijo debe tener al menos 2 caracteres")
-    .max(4, "El prefijo debe tener máximo 4 caracteres")
-    .regex(/^[A-Z]+$/, "El prefijo debe contener solo letras mayúsculas"),
+  code_prefix: z.string().min(1, "El prefijo es requerido"),
   name_template: z.string()
     .min(1, "La plantilla de nombre es requerida")
     .refine(
       (val) => /\{\{[\w]+\}\}/.test(val),
       "La plantilla debe contener al menos un parámetro como {{parametro}}"
     ),
-  category_id: z.string().min(1, "Debe seleccionar una categoría")
+  parent_category_id: z.string().min(1, "Debe seleccionar una categoría principal"),
+  sub_category_id: z.string().min(1, "Debe seleccionar una subcategoría"),
+  category_id: z.string().min(1, "Debe seleccionar una categoría final")
 });
 
 type TaskTemplateFormData = z.infer<typeof taskTemplateSchema>;
@@ -43,9 +42,18 @@ export function NewTaskTemplateModal({
 }: NewTaskTemplateModalProps) {
   const isEditing = !!template;
   
-  const { data: categories } = useTaskCategories();
+  const { data: parentCategories } = useTopLevelCategories();
+  const { data: allCategories } = useTaskCategories();
   const createTaskTemplate = useCreateTaskTemplate();
   const updateTaskTemplate = useUpdateTaskTemplate();
+
+  // State for cascading dropdowns
+  const [selectedParentId, setSelectedParentId] = useState<string>("");
+  const [selectedSubId, setSelectedSubId] = useState<string>("");
+  
+  // Get subcategories and element categories based on selections
+  const { data: subCategories } = useSubcategories(selectedParentId || null);
+  const { data: elementCategories } = useElementCategories(selectedSubId || null);
   
   const form = useForm<TaskTemplateFormData>({
     resolver: zodResolver(taskTemplateSchema),
@@ -53,28 +61,59 @@ export function NewTaskTemplateModal({
       name: "",
       code_prefix: "",
       name_template: "",
+      parent_category_id: "",
+      sub_category_id: "",
       category_id: ""
     }
   });
 
   // Initialize form for editing
   useEffect(() => {
-    if (isEditing && template && open) {
-      form.reset({
-        name: template.name,
-        code_prefix: template.code_prefix,
-        name_template: template.name_template,
-        category_id: template.category_id
-      });
+    if (isEditing && template && open && allCategories) {
+      // Find the category hierarchy for the template
+      const finalCategory = allCategories.find(cat => cat.id === template.category_id);
+      if (finalCategory) {
+        const subCategory = allCategories.find(cat => cat.id === finalCategory.parent_id);
+        if (subCategory) {
+          const parentCategory = allCategories.find(cat => cat.id === subCategory.parent_id);
+          
+          setSelectedParentId(parentCategory?.id || "");
+          setSelectedSubId(subCategory.id);
+          
+          form.reset({
+            name: template.name,
+            code_prefix: template.code_prefix,
+            name_template: template.name_template,
+            parent_category_id: parentCategory?.id || "",
+            sub_category_id: subCategory.id,
+            category_id: finalCategory.id
+          });
+        }
+      }
     } else if (!isEditing && open) {
       form.reset({
         name: "",
         code_prefix: "",
         name_template: "",
+        parent_category_id: "",
+        sub_category_id: "",
         category_id: ""
       });
+      setSelectedParentId("");
+      setSelectedSubId("");
     }
-  }, [isEditing, template, open, form]);
+  }, [isEditing, template, open, form, allCategories]);
+
+  // Auto-populate code_prefix when final category is selected
+  useEffect(() => {
+    const categoryId = form.watch("category_id");
+    if (categoryId && allCategories) {
+      const selectedCategory = allCategories.find(cat => cat.id === categoryId);
+      if (selectedCategory?.code) {
+        form.setValue("code_prefix", selectedCategory.code);
+      }
+    }
+  }, [form.watch("category_id"), allCategories, form]);
 
   const handleSubmit = async (data: TaskTemplateFormData) => {
     try {
