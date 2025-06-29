@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { ChevronDown, Plus, Filter, X, Search, Building, Folder } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,7 +21,7 @@ import { NewOrganizationModal } from "@/modals/organization/NewOrganizationModal
 import { NewProjectModal } from "@/modals/project/NewProjectModal";
 
 interface HeaderProps {
-  icon?: React.ComponentType<any>;
+  icon?: React.ComponentType<any> | React.ReactNode;
   title?: string;
   showSearch?: boolean;
   searchValue?: string;
@@ -34,7 +34,7 @@ interface HeaderProps {
 }
 
 export function Header({
-  icon: Icon,
+  icon,
   title,
   showSearch = false,
   searchValue = "",
@@ -332,7 +332,14 @@ export function Header({
           {title && (
             <>
               <span className="text-[var(--menues-fg)] opacity-70">/</span>
-              <span className="text-sm font-medium text-[var(--menues-fg)]">{title}</span>
+              <div className="flex items-center gap-1">
+                {Icon && (
+                  <span className="text-[var(--menues-fg)]">
+                    {typeof Icon === 'function' ? React.createElement(Icon, { className: "h-3 w-3" }) : Icon}
+                  </span>
+                )}
+                <span className="text-sm font-medium text-[var(--menues-fg)]">{title}</span>
+              </div>
             </>
           )}
         </div>
