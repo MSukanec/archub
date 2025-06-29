@@ -10,6 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useCreateTaskTemplate, useUpdateTaskTemplate, type TaskTemplate } from "@/hooks/use-task-templates-admin";
 import { useTopLevelCategories, useSubcategories, useElementCategories, useTaskCategories } from "@/hooks/use-task-categories";
 
@@ -42,8 +43,8 @@ export function NewTaskTemplateModal({
 }: NewTaskTemplateModalProps) {
   const isEditing = !!template;
   
-  const { data: parentCategories } = useTopLevelCategories();
-  const { data: allCategories } = useTaskCategories();
+  const { data: parentCategories, isLoading: isLoadingParents } = useTopLevelCategories();
+  const { data: allCategories, isLoading: isLoadingAll } = useTaskCategories();
   const createTaskTemplate = useCreateTaskTemplate();
   const updateTaskTemplate = useUpdateTaskTemplate();
 
@@ -52,8 +53,8 @@ export function NewTaskTemplateModal({
   const [selectedSubId, setSelectedSubId] = useState<string>("");
   
   // Get subcategories and element categories based on selections
-  const { data: subCategories } = useSubcategories(selectedParentId || null);
-  const { data: elementCategories } = useElementCategories(selectedSubId || null);
+  const { data: subCategories, isLoading: isLoadingSubs } = useSubcategories(selectedParentId || null);
+  const { data: elementCategories, isLoading: isLoadingElements } = useElementCategories(selectedSubId || null);
   
   const form = useForm<TaskTemplateFormData>({
     resolver: zodResolver(taskTemplateSchema),
@@ -67,42 +68,51 @@ export function NewTaskTemplateModal({
     }
   });
 
-  // Initialize form for editing
+  // Initialize form for editing - properly handle category hierarchy
   useEffect(() => {
-    if (isEditing && template && open && allCategories) {
-      // Find the category hierarchy for the template
-      const finalCategory = allCategories.find(cat => cat.id === template.category_id);
-      if (finalCategory) {
-        const subCategory = allCategories.find(cat => cat.id === finalCategory.parent_id);
-        if (subCategory) {
-          const parentCategory = allCategories.find(cat => cat.id === subCategory.parent_id);
+    if (open && allCategories && allCategories.length > 0) {
+      if (isEditing && template) {
+        // Find the complete category hierarchy for the template
+        const finalCategory = allCategories.find(cat => cat.id === template.category_id);
+        
+        if (finalCategory && finalCategory.parent_id) {
+          const subCategory = allCategories.find(cat => cat.id === finalCategory.parent_id);
           
-          setSelectedParentId(parentCategory?.id || "");
-          setSelectedSubId(subCategory.id);
-          
-          form.reset({
-            name: template.name,
-            code_prefix: template.code_prefix,
-            name_template: template.name_template,
-            parent_category_id: parentCategory?.id || "",
-            sub_category_id: subCategory.id,
-            category_id: finalCategory.id
-          });
+          if (subCategory && subCategory.parent_id) {
+            const parentCategory = allCategories.find(cat => cat.id === subCategory.parent_id);
+            
+            if (parentCategory) {
+              // Set all state at once to ensure proper loading
+              setSelectedParentId(parentCategory.id);
+              setSelectedSubId(subCategory.id);
+              
+              // Reset form with all hierarchy values
+              form.reset({
+                name: template.name,
+                code_prefix: template.code_prefix,
+                name_template: template.name_template,
+                parent_category_id: parentCategory.id,
+                sub_category_id: subCategory.id,
+                category_id: finalCategory.id
+              });
+            }
+          }
         }
+      } else if (!isEditing) {
+        // Reset everything for new template
+        setSelectedParentId("");
+        setSelectedSubId("");
+        form.reset({
+          name: "",
+          code_prefix: "",
+          name_template: "",
+          parent_category_id: "",
+          sub_category_id: "",
+          category_id: ""
+        });
       }
-    } else if (!isEditing && open) {
-      form.reset({
-        name: "",
-        code_prefix: "",
-        name_template: "",
-        parent_category_id: "",
-        sub_category_id: "",
-        category_id: ""
-      });
-      setSelectedParentId("");
-      setSelectedSubId("");
     }
-  }, [isEditing, template, open, form, allCategories]);
+  }, [isEditing, template, open, allCategories, form]);
 
   // Auto-populate code_prefix when final category is selected
   useEffect(() => {
@@ -165,30 +175,35 @@ export function NewTaskTemplateModal({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="required-asterisk">Categoría Principal</FormLabel>
-                      <Select 
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          setSelectedParentId(value);
-                          // Reset dependent dropdowns
-                          form.setValue("sub_category_id", "");
-                          form.setValue("category_id", "");
-                          setSelectedSubId("");
-                        }} 
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar categoría principal" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {parentCategories?.map((category) => (
-                            <SelectItem key={category.id} value={category.id}>
-                              {category.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      {isLoadingParents ? (
+                        <Skeleton className="h-10 w-full" />
+                      ) : (
+                        <Select 
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            setSelectedParentId(value);
+                            // Reset dependent dropdowns
+                            form.setValue("sub_category_id", "");
+                            form.setValue("category_id", "");
+                            form.setValue("code_prefix", "");
+                            setSelectedSubId("");
+                          }} 
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Seleccionar categoría principal" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {parentCategories?.map((category) => (
+                              <SelectItem key={category.id} value={category.id}>
+                                {category.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
                       <FormMessage />
                     </FormItem>
                   )}
@@ -201,29 +216,34 @@ export function NewTaskTemplateModal({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="required-asterisk">Subcategoría</FormLabel>
-                      <Select 
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          setSelectedSubId(value);
-                          // Reset final category
-                          form.setValue("category_id", "");
-                        }} 
-                        value={field.value}
-                        disabled={!selectedParentId}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar subcategoría" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {subCategories?.map((category) => (
-                            <SelectItem key={category.id} value={category.id}>
-                              {category.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      {isLoadingSubs && selectedParentId ? (
+                        <Skeleton className="h-10 w-full" />
+                      ) : (
+                        <Select 
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            setSelectedSubId(value);
+                            // Reset final category
+                            form.setValue("category_id", "");
+                            form.setValue("code_prefix", "");
+                          }} 
+                          value={field.value}
+                          disabled={!selectedParentId}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder={!selectedParentId ? "Seleccione primero una categoría principal" : "Seleccionar subcategoría"} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {subCategories?.map((category) => (
+                              <SelectItem key={category.id} value={category.id}>
+                                {category.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
                       <FormMessage />
                     </FormItem>
                   )}
@@ -236,24 +256,28 @@ export function NewTaskTemplateModal({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="required-asterisk">Categoría Final</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        value={field.value}
-                        disabled={!selectedSubId}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar categoría final" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {elementCategories?.map((category) => (
-                            <SelectItem key={category.id} value={category.id}>
-                              {category.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      {isLoadingElements && selectedSubId ? (
+                        <Skeleton className="h-10 w-full" />
+                      ) : (
+                        <Select 
+                          onValueChange={field.onChange} 
+                          value={field.value}
+                          disabled={!selectedSubId}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder={!selectedSubId ? "Seleccione primero una subcategoría" : "Seleccionar categoría final"} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {elementCategories?.map((category) => (
+                              <SelectItem key={category.id} value={category.id}>
+                                {category.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
                       <FormMessage />
                     </FormItem>
                   )}
@@ -327,6 +351,7 @@ export function NewTaskTemplateModal({
             onCancel={onClose}
             onSave={form.handleSubmit(handleSubmit)}
             isLoading={isLoading}
+            disabled={!form.watch("category_id") || !form.watch("name") || !form.watch("name_template")}
           />
         )
       }}

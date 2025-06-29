@@ -1,0 +1,40 @@
+## Mejorar el modal de edición de plantillas de tareas
+
+### Objetivo
+Corregir el problema actual en el modal de edición donde los campos jerárquicos (`categoría principal`, `subcategoría`, `categoría final`) no se cargan completamente al abrir el modal por primera vez. Actualmente hay que abrir y cerrar el modal varias veces para que aparezcan todos los selectores correctamente. Además, asegurar que el campo `prefijo de código` se complete automáticamente y no sea editable.
+
+---
+
+### Requisitos de implementación
+
+#### Jerarquía de categorías
+1. Utilizar la tabla `task_categories` que tiene las relaciones jerárquicas mediante el campo `parent_id`.
+2. Crear tres selectores:
+   - **Categoría Principal**: muestra solo los registros con `parent_id = null`.
+   - **Subcategoría**: muestra registros con `parent_id = id de la categoría principal seleccionada`.
+   - **Categoría Final**: muestra registros con `parent_id = id de la subcategoría seleccionada`.
+
+#### En modo edición
+- Al abrir el modal con una plantilla ya existente:
+  - Determinar la categoría final (`finalCategoryId`) guardada en la plantilla.
+  - Hacer un fetch inverso para obtener también su `parent_id` (subcategoría) y el `parent_id` de esta (categoría principal).
+  - Con esos 3 IDs, cargar los tres selectores y setear sus valores automáticamente en orden jerárquico.
+  - Esto debe hacerse al mismo tiempo (no esperar un cambio manual del usuario para avanzar).
+
+#### Campo `Prefijo de Código`
+- Debe ser completado automáticamente en función del campo `code` de la categoría final seleccionada.
+- Este campo debe estar deshabilitado (solo lectura).
+- Mostrar debajo una aclaración tipo: _"Este valor se toma automáticamente desde la categoría seleccionada"_.
+
+---
+
+### Estilo y experiencia
+- Todos los selectores deben tener un `skeleton` o `spinner` visible mientras cargan las opciones.
+- El modal debe ser totalmente funcional desde la primera vez que se abre, tanto para edición como para creación.
+- Usar tipografía, spacing y estructura visual coherente con el resto del sistema de modales (como los optimizados recientemente).
+
+---
+
+### Bonus opcional (si queda tiempo)
+- Validar que el usuario no pueda guardar si no seleccionó los tres niveles de categoría.
+- Si se cambia manualmente la categoría final, actualizar automáticamente el prefijo mostrado.
