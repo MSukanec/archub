@@ -236,7 +236,8 @@ export function Sidebar() {
         children: [
           { icon: CheckSquare, label: 'Tareas', href: '/admin/tasks' },
           { icon: Zap, label: 'Tareas Generadas', href: '/admin/generated-tasks' },
-          { icon: FileCode, label: 'Plantillas de Tareas', href: '/admin/task-templates' }
+          { icon: FileCode, label: 'Plantillas de Tareas', href: '/admin/task-templates' },
+          { icon: Settings, label: 'Parámetros', href: '/admin/task-parameters' }
         ]
       },
       { 
