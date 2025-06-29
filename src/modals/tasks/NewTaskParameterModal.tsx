@@ -200,24 +200,6 @@ export function NewTaskParameterModal({
                   name="unit_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Unidad</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="Ej: metros, kg, unidades..."
-                          disabled={isSubmitting}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="unit_id"
-                  render={({ field }) => (
-                    <FormItem>
                       <FormLabel>Unidad (opcional)</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value || ''} disabled={isSubmitting}>
                         <FormControl>
