@@ -31,6 +31,7 @@ import AdminOrganizations from "@/pages/admin/AdminOrganizations";
 import AdminUsers from "@/pages/admin/AdminUsers";
 import AdminTasks from "@/pages/admin/AdminTasks";
 import AdminGeneratedTasks from "@/pages/admin/AdminGeneratedTasks";
+import AdminTaskTemplates from "@/pages/admin/AdminTaskTemplates";
 import AdminMaterials from "@/pages/admin/AdminMaterials";
 import AdminMaterialCategories from "@/pages/admin/AdminMaterialCategories";
 

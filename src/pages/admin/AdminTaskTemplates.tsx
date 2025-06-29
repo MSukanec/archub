@@ -15,7 +15,7 @@ import { CustomTable } from '@/components/ui-custom/misc/CustomTable'
 import { NewTaskTemplateModal } from '@/modals/NewTaskTemplateModal'
 import { useTaskTemplatesAdmin, useDeleteTaskTemplate, type TaskTemplate } from '@/hooks/use-task-templates-admin'
 
-import { Plus, Edit, Trash2, Settings, Eye, Template, Code, Calendar } from 'lucide-react'
+import { Plus, Edit, Trash2, Settings, Eye, FileCode, Code, Calendar } from 'lucide-react'
 
 export default function AdminTaskTemplates() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -97,8 +97,8 @@ export default function AdminTaskTemplates() {
 
   const columns = [
     {
-      key: 'created_at' as keyof TaskTemplate,
-      header: 'Fecha',
+      key: 'created_at',
+      label: 'Fecha',
       width: '15%',
       render: (template: TaskTemplate) => (
         <div className="flex items-center gap-2">
@@ -110,8 +110,8 @@ export default function AdminTaskTemplates() {
       )
     },
     {
-      key: 'code_prefix' as keyof TaskTemplate,
-      header: 'Prefijo',
+      key: 'code_prefix',
+      label: 'Prefijo',
       width: '10%',
       render: (template: TaskTemplate) => (
         <Badge variant="outline" className="font-mono">
@@ -120,19 +120,19 @@ export default function AdminTaskTemplates() {
       )
     },
     {
-      key: 'name' as keyof TaskTemplate,
-      header: 'Nombre',
+      key: 'name',
+      label: 'Nombre',
       width: '25%',
       render: (template: TaskTemplate) => (
         <div className="flex items-center gap-2">
-          <Template className="w-4 h-4 text-muted-foreground" />
+          <FileCode className="w-4 h-4 text-muted-foreground" />
           <span className="font-medium">{template.name}</span>
         </div>
       )
     },
     {
-      key: 'task_categories' as keyof TaskTemplate,
-      header: 'Categoría',
+      key: 'task_categories',
+      label: 'Categoría',
       width: '20%',
       render: (template: TaskTemplate) => (
         <Badge variant="secondary">
@@ -141,8 +141,8 @@ export default function AdminTaskTemplates() {
       )
     },
     {
-      key: 'name_template' as keyof TaskTemplate,
-      header: 'Plantilla',
+      key: 'name_template',
+      label: 'Plantilla',
       width: '20%',
       render: (template: TaskTemplate) => (
         <div className="flex items-center gap-2">
@@ -154,8 +154,8 @@ export default function AdminTaskTemplates() {
       )
     },
     {
-      key: 'actions' as keyof TaskTemplate,
-      header: 'Acciones',
+      key: 'actions',
+      label: 'Acciones',
       width: '10%',
       render: (template: TaskTemplate) => (
         <div className="flex items-center gap-1">
@@ -213,7 +213,6 @@ export default function AdminTaskTemplates() {
     <Layout
       headerProps={{
         title: "Plantillas de Tareas",
-        subtitle: "Gestión de plantillas para tareas parametrizadas",
         showSearch: true,
         searchValue,
         onSearchChange: setSearchValue,
@@ -237,7 +236,7 @@ export default function AdminTaskTemplates() {
                 <p className="text-xs text-muted-foreground">Total Plantillas</p>
                 <p className="text-lg font-semibold">{totalTemplates}</p>
               </div>
-              <Template className="w-4 h-4 text-muted-foreground" />
+              <FileCode className="w-4 h-4 text-muted-foreground" />
             </div>
           </Card>
 
@@ -277,7 +276,6 @@ export default function AdminTaskTemplates() {
           data={filteredAndSortedTemplates}
           columns={columns}
           isLoading={isLoading}
-          emptyMessage="No se encontraron plantillas"
         />
       </div>
 
