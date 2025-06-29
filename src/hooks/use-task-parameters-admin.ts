@@ -51,10 +51,25 @@ export function useTaskParametersAdmin() {
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase client not initialized');
 
-      // Fetch parameters
-      const { data: parameters, error: parametersError } = await supabase
+      // Fetch parameters from task_template_parameters with join to get parameter details
+      const { data: templateParams, error: parametersError } = await supabase
         .from('task_template_parameters')
-        .select('*')
+        .select(`
+          id,
+          template_id,
+          parameter_id,
+          is_required,
+          position,
+          created_at,
+          updated_at,
+          task_parameters!inner (
+            id,
+            name,
+            label,
+            type,
+            unit_id
+          )
+        `)
         .order('created_at');
 
       if (parametersError) {
@@ -62,7 +77,7 @@ export function useTaskParametersAdmin() {
         throw parametersError;
       }
 
-      console.log('Fetched parameters:', parameters);
+      console.log('Fetched template parameters:', templateParams);
 
       // Fetch all options
       const { data: options, error: optionsError } = await supabase
@@ -105,7 +120,7 @@ export function useCreateTaskParameter() {
       if (!supabase) throw new Error('Supabase client not initialized');
 
       const { data, error } = await supabase
-        .from('task_template_parameters')
+        .from('task_parameters')
         .insert([parameterData])
         .select()
         .single();
