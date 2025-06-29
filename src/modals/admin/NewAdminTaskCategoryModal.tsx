@@ -58,13 +58,13 @@ export function NewAdminTaskCategoryModal({
       form.reset({
         name: category.name,
         code: category.code || '',
-        parent_id: category.parent_id || '',
+        parent_id: category.parent_id || 'none',
       });
     } else if (!category && open) {
       form.reset({
         name: '',
         code: '',
-        parent_id: '',
+        parent_id: 'none',
       });
     }
   }, [category, open, form]);
