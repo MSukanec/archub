@@ -57,16 +57,20 @@ export function Sidebar() {
   const { currentSidebarContext, setSidebarContext } = useNavigationStore();
   const queryClient = useQueryClient();
   
-  // Estado para acordeones con persistencia
-  const [expandedAccordions, setExpandedAccordions] = useState<{ [key: string]: boolean }>(() => {
-    const saved = localStorage.getItem('sidebar-accordions');
-    return saved ? JSON.parse(saved) : { obra: false, finanzas: false };
+  // Estado para acordeones - solo uno abierto a la vez
+  const [expandedAccordion, setExpandedAccordion] = useState<string | null>(() => {
+    const saved = localStorage.getItem('sidebar-accordion');
+    return saved || null;
   });
 
-  // Guardar estado de acordeones en localStorage
+  // Guardar estado de acordeón en localStorage
   useEffect(() => {
-    localStorage.setItem('sidebar-accordions', JSON.stringify(expandedAccordions));
-  }, [expandedAccordions]);
+    if (expandedAccordion) {
+      localStorage.setItem('sidebar-accordion', expandedAccordion);
+    } else {
+      localStorage.removeItem('sidebar-accordion');
+    }
+  }, [expandedAccordion]);
 
   // Theme toggle mutation
   const themeToggleMutation = useMutation({
@@ -140,10 +144,7 @@ export function Sidebar() {
   // Project selector removed as requested
   
   const toggleAccordion = (key: string) => {
-    setExpandedAccordions(prev => ({
-      ...prev,
-      [key]: !prev[key as keyof typeof prev]
-    }));
+    setExpandedAccordion(prev => prev === key ? null : key);
   };
 
   // Different navigation items based on context
@@ -168,7 +169,7 @@ export function Sidebar() {
         label: 'Obra', 
         href: '#', 
         isAccordion: true,
-        expanded: expandedAccordions.obra,
+        expanded: expandedAccordion === 'obra',
         onToggle: () => toggleAccordion('obra'),
         children: [
           { icon: Home, label: 'Resumen de Obra', href: '/construction/dashboard' },

@@ -14,7 +14,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { NewContactModal } from '@/modals/NewContactModal'
+import { NewContactModal } from '@/modals/contacts/NewContactModal'
 import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState'
 
 export default function OrganizationContacts() {

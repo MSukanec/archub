@@ -18,7 +18,7 @@ import { CustomEmptyState } from "@/components/ui-custom/misc/CustomEmptyState";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/hooks/use-organization-members";
-import { NewSiteLogModal } from "@/modals/NewSiteLogModal";
+import { NewSiteLogModal } from "@/modals/construction/NewSiteLogModal";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 
