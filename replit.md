@@ -119,6 +119,17 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 29, 2025. Complete AdminTaskParameters system with accordion interface for parameter and option management
+  • Created comprehensive AdminTaskParameters.tsx page with accordion-based interface for managing task_template_parameters and task_template_parameter_options
+  • Built NewTaskParameterModal.tsx and NewTaskParameterOptionModal.tsx with full form validation and CRUD operations
+  • Implemented useTaskParametersAdmin hook with complete Supabase integration for parameters and options management
+  • Accordion interface displays parameters with expandable sections showing their options, following single-accordion behavior
+  • Parameter creation supports text, number, select, and boolean types with optional units and required field settings
+  • Option management allows creating, editing, and deleting parameter options with position-based ordering
+  • Added statistics cards showing total parameters, select-type parameters, total options, and required parameters
+  • Integrated with admin sidebar under "Tareas > Parámetros" navigation with proper AdminProtectedRoute wrapper
+  • Modal system uses feature-based organization in /modals/tasks/ with consistent CustomModalFooter pattern
+  • Complete delete confirmation dialogs for both parameters and options with cascade deletion handling
 - June 29, 2025. Complete modal reorganization into feature-based structure with systematic TypeScript error resolution
   • Organized all modals into feature-based folders: /modals/admin, /modals/budget, /modals/contact, /modals/material, /modals/movement, /modals/organization, /modals/project, /modals/site, /modals/tasks
   • Updated all import paths across 50+ files to use new modal structure with @/modals/ prefix

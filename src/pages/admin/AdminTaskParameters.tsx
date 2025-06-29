@@ -47,9 +47,9 @@ export default function AdminTaskParameters() {
 
   // Filter parameters based on search
   const filteredParameters = parameters.filter(parameter =>
-    parameter.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    parameter.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    parameter.type.toLowerCase().includes(searchTerm.toLowerCase())
+    (parameter.label || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (parameter.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (parameter.type || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Toggle parameter expansion
