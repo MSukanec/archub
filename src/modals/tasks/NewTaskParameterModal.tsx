@@ -186,7 +186,7 @@ export function NewTaskParameterModal({
                             <SelectValue placeholder="Seleccionar tipo" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent className="z-[9999]">
                           <SelectItem value="text">Texto</SelectItem>
                           <SelectItem value="number">Número</SelectItem>
                           <SelectItem value="select">Selección</SelectItem>
