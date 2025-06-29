@@ -99,7 +99,7 @@ export function NewAdminTaskCategoryModal({
     try {
       const submitData = {
         ...data,
-        parent_id: data.parent_id === '' ? null : data.parent_id,
+        parent_id: data.parent_id === '' || data.parent_id === 'none' ? null : data.parent_id,
       };
 
       if (category) {
@@ -128,27 +128,11 @@ export function NewAdminTaskCategoryModal({
     <CustomModalLayout open={open} onClose={handleClose}>
       {{
         header: (
-          <CustomModalHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-semibold">
-                  {category ? 'Editar Categoría' : 'Nueva Categoría'}
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  {category ? 'Modifica los datos de la categoría' : 'Crea una nueva categoría de tarea'}
-                </p>
-              </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6"
-                onClick={handleClose}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </CustomModalHeader>
+          <CustomModalHeader
+            title={category ? 'Editar Categoría' : 'Nueva Categoría'}
+            description={category ? 'Modifica los datos de la categoría' : 'Crea una nueva categoría de tarea'}
+            onClose={handleClose}
+          />
         ),
         body: (
           <CustomModalBody padding="md">
@@ -207,7 +191,7 @@ export function NewAdminTaskCategoryModal({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="">Sin categoría padre</SelectItem>
+                          <SelectItem value="none">Sin categoría padre</SelectItem>
                           {flatCategories.map((cat) => (
                             <SelectItem key={cat.id} value={cat.id}>
                               {'—'.repeat(cat.level)} {cat.name}
@@ -224,23 +208,12 @@ export function NewAdminTaskCategoryModal({
           </CustomModalBody>
         ),
         footer: (
-          <CustomModalFooter>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={handleClose}
-              disabled={isSubmitting}
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              onClick={form.handleSubmit(onSubmit)}
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Guardando...' : category ? 'Actualizar' : 'Crear'}
-            </Button>
-          </CustomModalFooter>
+          <CustomModalFooter
+            onCancel={handleClose}
+            onSave={form.handleSubmit(onSubmit)}
+            saveText={isSubmitting ? 'Guardando...' : category ? 'Actualizar' : 'Crear'}
+            saveDisabled={isSubmitting}
+          />
         ),
       }}
     </CustomModalLayout>
