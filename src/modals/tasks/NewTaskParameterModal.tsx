@@ -57,7 +57,7 @@ export function NewTaskParameterModal({
       name: '',
       label: '',
       type: 'text',
-      unit: '',
+      unit_id: '',
       is_required: false,
       position: nextPosition,
     },
@@ -81,7 +81,7 @@ export function NewTaskParameterModal({
         name: '',
         label: '',
         type: 'text',
-        unit: '',
+        unit_id: '',
         is_required: false,
         position: nextPosition,
       });
@@ -94,7 +94,7 @@ export function NewTaskParameterModal({
     try {
       const submitData = {
         ...data,
-        unit: data.unit?.trim() || undefined,
+        unit_id: data.unit_id?.trim() || undefined,
       };
 
       if (parameter) {
@@ -199,7 +199,7 @@ export function NewTaskParameterModal({
 
                 <FormField
                   control={form.control}
-                  name="unit"
+                  name="unit_id"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Unidad</FormLabel>
