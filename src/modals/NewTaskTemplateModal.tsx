@@ -11,29 +11,25 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useCreateTaskTemplate, useUpdateTaskTemplate, type TaskTemplate } from "@/hooks/use-task-templates-admin";
 import { useTopLevelCategories, useSubcategories, useElementCategories, useTaskCategories } from "@/hooks/use-task-categories";
 
-const taskTemplateSchema = z.object({
+const formSchema = z.object({
   name: z.string().min(1, "El nombre es requerido"),
-  code_prefix: z.string().min(1, "El prefijo es requerido"),
-  name_template: z.string()
-    .min(1, "La plantilla de nombre es requerida")
-    .refine(
-      (val) => /\{\{[\w]+\}\}/.test(val),
-      "La plantilla debe contener al menos un parámetro como {{parametro}}"
-    ),
-  parent_category_id: z.string().min(1, "Debe seleccionar una categoría principal"),
-  sub_category_id: z.string().min(1, "Debe seleccionar una subcategoría"),
-  category_id: z.string().min(1, "Debe seleccionar una categoría final")
+  code_prefix: z.string().min(1, "El prefijo de código es requerido"),
+  name_template: z.string().min(1, "La plantilla de nombre es requerida"),
+  category_id: z.string().min(1, "La categoría es requerida"),
+  parent_category_id: z.string().min(1, "La categoría principal es requerida"),
+  sub_category_id: z.string().min(1, "La subcategoría es requerida"),
 });
 
-type TaskTemplateFormData = z.infer<typeof taskTemplateSchema>;
+type FormData = z.infer<typeof formSchema>;
 
 interface NewTaskTemplateModalProps {
   open: boolean;
   onClose: () => void;
-  template?: TaskTemplate | null;
+  template?: TaskTemplate;
 }
 
 export function NewTaskTemplateModal({ 
@@ -55,104 +51,78 @@ export function NewTaskTemplateModal({
   // Get subcategories and element categories based on selections
   const { data: subCategories, isLoading: isLoadingSubs } = useSubcategories(selectedParentId || null);
   const { data: elementCategories, isLoading: isLoadingElements } = useElementCategories(selectedSubId || null);
-  
-  const form = useForm<TaskTemplateFormData>({
-    resolver: zodResolver(taskTemplateSchema),
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       code_prefix: "",
       name_template: "",
+      category_id: "",
       parent_category_id: "",
       sub_category_id: "",
-      category_id: ""
-    }
+    },
   });
 
-  // Initialize form for editing - properly handle category hierarchy
+  // Populate form when editing
   useEffect(() => {
-    if (open && allCategories && allCategories.length > 0) {
-      if (isEditing && template) {
-        // Find the complete category hierarchy for the template
-        const finalCategory = allCategories.find(cat => cat.id === template.category_id);
-        
-        if (finalCategory && finalCategory.parent_id) {
-          const subCategory = allCategories.find(cat => cat.id === finalCategory.parent_id);
-          
-          if (subCategory && subCategory.parent_id) {
-            const parentCategory = allCategories.find(cat => cat.id === subCategory.parent_id);
-            
-            if (parentCategory) {
-              // Set all state at once to ensure proper loading
-              setSelectedParentId(parentCategory.id);
-              setSelectedSubId(subCategory.id);
-              
-              // Reset form with all hierarchy values
-              form.reset({
-                name: template.name,
-                code_prefix: template.code_prefix,
-                name_template: template.name_template,
-                parent_category_id: parentCategory.id,
-                sub_category_id: subCategory.id,
-                category_id: finalCategory.id
-              });
-            }
+    if (template && open && allCategories) {
+      // Find the template's category in the hierarchy
+      const templateCategory = allCategories.find(cat => cat.id === template.category_id);
+      if (templateCategory && templateCategory.parent_id) {
+        const parentCategory = allCategories.find(cat => cat.id === templateCategory.parent_id);
+        if (parentCategory && parentCategory.parent_id) {
+          const grandParentCategory = allCategories.find(cat => cat.id === parentCategory.parent_id);
+          if (grandParentCategory) {
+            setSelectedParentId(grandParentCategory.id);
+            setSelectedSubId(parentCategory.id);
           }
         }
-      } else if (!isEditing) {
-        // Reset everything for new template
-        setSelectedParentId("");
-        setSelectedSubId("");
-        form.reset({
-          name: "",
-          code_prefix: "",
-          name_template: "",
-          parent_category_id: "",
-          sub_category_id: "",
-          category_id: ""
-        });
       }
-    }
-  }, [isEditing, template, open, allCategories, form]);
 
-  // Auto-populate code_prefix when final category is selected
-  useEffect(() => {
-    const categoryId = form.watch("category_id");
-    if (categoryId && allCategories) {
-      const selectedCategory = allCategories.find(cat => cat.id === categoryId);
-      if (selectedCategory?.code) {
-        form.setValue("code_prefix", selectedCategory.code);
-      }
+      form.reset({
+        name: template.name,
+        code_prefix: template.code_prefix,
+        name_template: template.name_template,
+        category_id: template.category_id,
+        parent_category_id: templateCategory?.parent_id ? 
+          allCategories.find(cat => cat.id === templateCategory.parent_id)?.parent_id || "" : "",
+        sub_category_id: templateCategory?.parent_id || "",
+      });
+    } else if (!template && open) {
+      // Reset form for new template
+      form.reset({
+        name: "",
+        code_prefix: "",
+        name_template: "",
+        category_id: "",
+        parent_category_id: "",
+        sub_category_id: "",
+      });
+      setSelectedParentId("");
+      setSelectedSubId("");
     }
-  }, [form.watch("category_id"), allCategories, form]);
+  }, [template, open, allCategories, form]);
 
-  const handleSubmit = async (data: TaskTemplateFormData) => {
+  const isLoading = createTaskTemplate.isPending || updateTaskTemplate.isPending;
+
+  const handleSubmit = async (data: FormData) => {
     try {
-      // Only send the final category_id and other required fields
-      const submitData = {
-        name: data.name,
-        code_prefix: data.code_prefix,
-        name_template: data.name_template,
-        category_id: data.category_id
-      };
-
       if (isEditing && template) {
         await updateTaskTemplate.mutateAsync({
           id: template.id,
-          ...submitData
+          ...data,
         });
       } else {
-        await createTaskTemplate.mutateAsync(submitData);
+        await createTaskTemplate.mutateAsync(data);
       }
       onClose();
-      form.reset();
-      setSelectedParentId("");
-      setSelectedSubId("");
     } catch (error) {
       console.error("Error saving task template:", error);
     }
   };
 
-  const isLoading = createTaskTemplate.isPending || updateTaskTemplate.isPending;
+  if (!open) return null;
 
   return (
     <CustomModalLayout open={open} onClose={onClose}>
@@ -167,179 +137,210 @@ export function NewTaskTemplateModal({
         body: (
           <CustomModalBody padding="md">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-                {/* Categoría Principal */}
-                <FormField
-                  control={form.control}
-                  name="parent_category_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="required-asterisk">Categoría Principal</FormLabel>
-                      {isLoadingParents ? (
-                        <Skeleton className="h-10 w-full" />
-                      ) : (
-                        <Select 
-                          onValueChange={(value) => {
-                            field.onChange(value);
-                            setSelectedParentId(value);
-                            // Reset dependent dropdowns
-                            form.setValue("sub_category_id", "");
-                            form.setValue("category_id", "");
-                            form.setValue("code_prefix", "");
-                            setSelectedSubId("");
-                          }} 
-                          value={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Seleccionar categoría principal" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {parentCategories?.map((category) => (
-                              <SelectItem key={category.id} value={category.id}>
-                                {category.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      )}
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              <form onSubmit={form.handleSubmit(handleSubmit)}>
+                <Accordion type="single" collapsible defaultValue="categoria" className="space-y-2">
+                  {/* Sección Categoría */}
+                  <AccordionItem value="categoria" className="border rounded-lg">
+                    <AccordionTrigger className="px-4 py-3 hover:no-underline">
+                      <span className="text-sm font-medium">Categoría</span>
+                    </AccordionTrigger>
+                    <AccordionContent className="px-4 pb-4 space-y-4">
+                      {/* Categoría Principal */}
+                      <FormField
+                        control={form.control}
+                        name="parent_category_id"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="required-asterisk">Categoría Principal</FormLabel>
+                            {isLoadingParents ? (
+                              <Skeleton className="h-10 w-full" />
+                            ) : (
+                              <Select 
+                                onValueChange={(value) => {
+                                  field.onChange(value);
+                                  setSelectedParentId(value);
+                                  // Reset dependent dropdowns and fields
+                                  form.setValue("sub_category_id", "");
+                                  form.setValue("category_id", "");
+                                  form.setValue("code_prefix", "");
+                                  form.setValue("name", "");
+                                  setSelectedSubId("");
+                                }} 
+                                value={field.value}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Seleccionar categoría principal" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {parentCategories?.map((category) => (
+                                    <SelectItem key={category.id} value={category.id}>
+                                      {category.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            )}
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                {/* Subcategoría */}
-                <FormField
-                  control={form.control}
-                  name="sub_category_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="required-asterisk">Subcategoría</FormLabel>
-                      {isLoadingSubs && selectedParentId ? (
-                        <Skeleton className="h-10 w-full" />
-                      ) : (
-                        <Select 
-                          onValueChange={(value) => {
-                            field.onChange(value);
-                            setSelectedSubId(value);
-                            // Reset final category
-                            form.setValue("category_id", "");
-                            form.setValue("code_prefix", "");
-                          }} 
-                          value={field.value}
-                          disabled={!selectedParentId}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder={!selectedParentId ? "Seleccione primero una categoría principal" : "Seleccionar subcategoría"} />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {subCategories?.map((category) => (
-                              <SelectItem key={category.id} value={category.id}>
-                                {category.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      )}
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                      {/* Subcategoría */}
+                      <FormField
+                        control={form.control}
+                        name="sub_category_id"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="required-asterisk">Subcategoría</FormLabel>
+                            {isLoadingSubs && selectedParentId ? (
+                              <Skeleton className="h-10 w-full" />
+                            ) : (
+                              <Select 
+                                onValueChange={(value) => {
+                                  field.onChange(value);
+                                  setSelectedSubId(value);
+                                  // Reset final category and dependent fields
+                                  form.setValue("category_id", "");
+                                  form.setValue("code_prefix", "");
+                                  form.setValue("name", "");
+                                }} 
+                                value={field.value}
+                                disabled={!selectedParentId}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder={!selectedParentId ? "Seleccione primero una categoría principal" : "Seleccionar subcategoría"} />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {subCategories?.map((category) => (
+                                    <SelectItem key={category.id} value={category.id}>
+                                      {category.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            )}
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                {/* Categoría Final */}
-                <FormField
-                  control={form.control}
-                  name="category_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="required-asterisk">Categoría Final</FormLabel>
-                      {isLoadingElements && selectedSubId ? (
-                        <Skeleton className="h-10 w-full" />
-                      ) : (
-                        <Select 
-                          onValueChange={field.onChange} 
-                          value={field.value}
-                          disabled={!selectedSubId}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder={!selectedSubId ? "Seleccione primero una subcategoría" : "Seleccionar categoría final"} />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {elementCategories?.map((category) => (
-                              <SelectItem key={category.id} value={category.id}>
-                                {category.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      )}
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                      {/* Categoría Final */}
+                      <FormField
+                        control={form.control}
+                        name="category_id"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="required-asterisk">Categoría Final</FormLabel>
+                            {isLoadingElements && selectedSubId ? (
+                              <Skeleton className="h-10 w-full" />
+                            ) : (
+                              <Select 
+                                onValueChange={(value) => {
+                                  field.onChange(value);
+                                  
+                                  // Find the selected category to get its code and name
+                                  const selectedCategory = elementCategories?.find(cat => cat.id === value);
+                                  if (selectedCategory) {
+                                    // Set code_prefix and name from selected category
+                                    form.setValue("code_prefix", selectedCategory.code || "");
+                                    form.setValue("name", selectedCategory.name || "");
+                                  }
+                                }} 
+                                value={field.value}
+                                disabled={!selectedSubId}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder={!selectedSubId ? "Seleccione primero una subcategoría" : "Seleccionar categoría final"} />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {elementCategories?.map((category) => (
+                                    <SelectItem key={category.id} value={category.id}>
+                                      {category.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            )}
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                <FormField
-                  control={form.control}
-                  name="code_prefix"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="required-asterisk">Prefijo de Código</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Ej: FFF, SAB" 
-                          {...field}
-                          style={{ textTransform: 'uppercase' }}
-                          readOnly={!!form.watch("category_id")}
-                          className={form.watch("category_id") ? "bg-muted cursor-not-allowed" : ""}
-                          onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                        />
-                      </FormControl>
-                      {form.watch("category_id") && (
-                        <p className="text-xs text-muted-foreground">
-                          Este valor se toma automáticamente desde la categoría seleccionada
-                        </p>
-                      )}
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                      {/* Prefijo de Código */}
+                      <FormField
+                        control={form.control}
+                        name="code_prefix"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Prefijo de Código</FormLabel>
+                            <FormControl>
+                              <Input 
+                                {...field} 
+                                placeholder="Generado automáticamente"
+                                readOnly
+                                className="bg-muted cursor-not-allowed"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="required-asterisk">Nombre</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Nombre de la plantilla" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                      {/* Nombre */}
+                      <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="required-asterisk">Nombre</FormLabel>
+                            <FormControl>
+                              <Input 
+                                {...field} 
+                                placeholder="Copiado de Categoría Final"
+                                readOnly
+                                className="bg-muted cursor-not-allowed"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
 
-                <FormField
-                  control={form.control}
-                  name="name_template"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="required-asterisk">Plantilla de Nombre</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Ej: Hormigonado de {{elemento}} con {{material}} de {{espesor}}"
-                          className="min-h-[100px]"
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  {/* Sección Plantilla */}
+                  <AccordionItem value="plantilla" className="border rounded-lg">
+                    <AccordionTrigger className="px-4 py-3 hover:no-underline">
+                      <span className="text-sm font-medium">Plantilla</span>
+                    </AccordionTrigger>
+                    <AccordionContent className="px-4 pb-4">
+                      {/* Plantilla de Nombre */}
+                      <FormField
+                        control={form.control}
+                        name="name_template"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="required-asterisk">Plantilla de Nombre</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                {...field} 
+                                placeholder="Ej: Excavación de {{tipo}} en {{material}} con {{herramienta}}"
+                                rows={3}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
               </form>
             </Form>
           </CustomModalBody>
@@ -351,7 +352,7 @@ export function NewTaskTemplateModal({
             onCancel={onClose}
             onSave={form.handleSubmit(handleSubmit)}
             isLoading={isLoading}
-            disabled={!form.watch("category_id") || !form.watch("name") || !form.watch("name_template")}
+            saveDisabled={!form.watch("category_id") || !form.watch("name") || !form.watch("name_template")}
           />
         )
       }}
