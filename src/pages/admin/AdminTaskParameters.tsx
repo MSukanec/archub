@@ -281,19 +281,18 @@ export default function AdminTaskParameters() {
                           <div className="flex items-center space-x-2">
                             <Button
                               variant="ghost"
-                              size="sm"
+                              size="icon"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleEditParameter(parameter);
                               }}
                             >
-                              <Edit className="h-4 w-4 mr-1" />
-                              Editar
+                              <Edit className="h-4 w-4" />
                             </Button>
 
                             <Button
                               variant="ghost"
-                              size="sm"
+                              size="icon"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setDeleteParameterId(parameter.id);
@@ -342,7 +341,7 @@ export default function AdminTaskParameters() {
                                   <div className="flex items-center space-x-1">
                                     <Button
                                       variant="ghost"
-                                      size="sm"
+                                      size="icon"
                                       onClick={() => handleEditOption(option)}
                                     >
                                       <Edit className="h-4 w-4" />
@@ -350,7 +349,7 @@ export default function AdminTaskParameters() {
 
                                     <Button
                                       variant="ghost"
-                                      size="sm"
+                                      size="icon"
                                       onClick={() => setDeleteOptionId(option.id)}
                                       className="text-destructive hover:text-destructive"
                                     >

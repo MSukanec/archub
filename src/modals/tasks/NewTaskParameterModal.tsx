@@ -15,6 +15,7 @@ import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
 import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter';
 
 import { useCreateTaskParameter, useUpdateTaskParameter, TaskParameter } from '@/hooks/use-task-parameters-admin';
+import { useUnits } from '@/hooks/use-units';
 
 const taskParameterSchema = z.object({
   template_id: z.string().min(1, 'Template ID es requerido'),
@@ -25,7 +26,6 @@ const taskParameterSchema = z.object({
   }),
   unit_id: z.string().optional(),
   is_required: z.boolean(),
-  position: z.number().min(0, 'La posición debe ser mayor o igual a 0'),
 });
 
 type TaskParameterFormData = z.infer<typeof taskParameterSchema>;
@@ -59,7 +59,6 @@ export function NewTaskParameterModal({
       type: 'text',
       unit_id: '',
       is_required: false,
-      position: nextPosition,
     },
   });
 

@@ -31,7 +31,6 @@ export interface CreateTaskParameterData {
   type: 'text' | 'number' | 'select' | 'boolean';
   unit_id?: string;
   is_required: boolean;
-  position: number;
 }
 
 export interface UpdateTaskParameterData extends CreateTaskParameterData {
