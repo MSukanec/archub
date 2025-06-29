@@ -182,24 +182,23 @@ export default function AdminTaskCategoriesTemplates() {
               </div>
             </div>
 
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1">
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon"
+                className="h-8 w-8"
                 onClick={() => handleEditCategory(category)}
               >
-                <Edit className="h-4 w-4 mr-1" />
-                Editar
+                <Edit className="h-4 w-4" />
               </Button>
 
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon"
+                className="h-8 w-8 text-destructive hover:text-destructive"
                 onClick={() => setDeleteCategoryId(category.id)}
-                className="text-destructive hover:text-destructive"
               >
-                <Trash2 className="h-4 w-4 mr-1" />
-                Eliminar
+                <Trash2 className="h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -219,16 +218,10 @@ export default function AdminTaskCategoriesTemplates() {
   const headerProps = {
     icon: Settings,
     title: "Gestión de Categorías y Plantillas",
+    showSearch: true,
+    searchValue: searchTerm,
+    onSearchChange: setSearchTerm,
     actions: [
-      <div key="search" className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Buscar categorías..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 w-64"
-        />
-      </div>,
       <Button
         key="new-category"
         onClick={() => {
