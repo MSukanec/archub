@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Plus, ChevronRight, ChevronDown, Edit, Trash2, FileText, Package2, Settings, CheckCircle, XCircle } from 'lucide-react';
+import { Search, Plus, ChevronRight, ChevronDown, Edit, Trash2, FileText, Package2, Settings, CheckCircle, XCircle, MoreHorizontal } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 import { Layout } from '@/components/layout/Layout';
 
