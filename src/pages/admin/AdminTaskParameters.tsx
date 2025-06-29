@@ -33,6 +33,9 @@ export default function AdminTaskParameters() {
   const deleteParameterMutation = useDeleteTaskParameter();
   const deleteOptionMutation = useDeleteTaskParameterOption();
 
+  // Default template ID for parameter creation
+  const defaultTemplateId = "template-1";
+
   // Calculate statistics
   const calculateStats = (parameters: TaskParameter[]) => {
     const totalParameters = parameters.length;
@@ -48,8 +51,7 @@ export default function AdminTaskParameters() {
   // Filter parameters based on search
   const filteredParameters = parameters.filter(parameter =>
     (parameter.label || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (parameter.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (parameter.type || '').toLowerCase().includes(searchTerm.toLowerCase())
+    (parameter.name || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Toggle parameter expansion
@@ -63,12 +65,7 @@ export default function AdminTaskParameters() {
     setExpandedParameters(newExpanded);
   };
 
-  // Handle parameter actions
-  const handleEditParameter = (parameter: TaskParameter) => {
-    setEditingParameter(parameter);
-    setIsParameterModalOpen(true);
-  };
-
+  // Handle parameter deletion
   const handleDeleteParameter = async (parameterId: string) => {
     try {
       await deleteParameterMutation.mutateAsync(parameterId);
@@ -78,19 +75,7 @@ export default function AdminTaskParameters() {
     }
   };
 
-  // Handle option actions
-  const handleCreateOption = (parameterId: string) => {
-    setSelectedParameterId(parameterId);
-    setEditingOption(null);
-    setIsOptionModalOpen(true);
-  };
-
-  const handleEditOption = (option: TaskParameterOption) => {
-    setSelectedParameterId(option.parameter_id);
-    setEditingOption(option);
-    setIsOptionModalOpen(true);
-  };
-
+  // Handle option deletion
   const handleDeleteOption = async (optionId: string) => {
     try {
       await deleteOptionMutation.mutateAsync(optionId);
@@ -100,19 +85,7 @@ export default function AdminTaskParameters() {
     }
   };
 
-  // Get template ID for new parameters (this would come from context or be selected)
-  const defaultTemplateId = "default-template-id"; // This should be dynamic based on selected template
-  
-  // Helper functions for parameter/option management
-  const getParameterById = (parameterId: string) => {
-    return parameters.find(p => p.id === parameterId);
-  };
-
-  const getOptionsByParameter = (parameterId: string) => {
-    const parameter = getParameterById(parameterId);
-    return parameter?.options || [];
-  };
-
+  // Get parameter type label for display
   const getParameterTypeLabel = (type: string) => {
     switch (type) {
       case 'text': return 'Texto';
@@ -133,30 +106,28 @@ export default function AdminTaskParameters() {
     }
   };
 
-  const headerProps = {
-    title: "Parámetros de Tarea",
-    showSearch: true,
-    searchValue: searchTerm,
-    onSearchChange: setSearchTerm,
-    actions: [
-      <Button
-        key="new-parameter"
-        onClick={() => {
-          setEditingParameter(null);
-          setIsParameterModalOpen(true);
-        }}
-        size="sm"
-        className="gap-2"
-      >
-        <Plus className="h-4 w-4" />
-        Nuevo Parámetro
-      </Button>
-    ]
-  };
-
   if (isLoading) {
     return (
-      <Layout headerProps={headerProps}>
+      <Layout headerProps={{
+        title: "Parámetros de Tarea",
+        showSearch: true,
+        searchValue: searchTerm,
+        onSearchChange: setSearchTerm,
+        actions: [
+          <Button
+            key="new-parameter"
+            onClick={() => {
+              setEditingParameter(null);
+              setIsParameterModalOpen(true);
+            }}
+            size="sm"
+            className="gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Nuevo Parámetro
+          </Button>
+        ]
+      }}>
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="text-lg font-semibold">Cargando parámetros...</div>
@@ -167,197 +138,228 @@ export default function AdminTaskParameters() {
   }
 
   return (
-    <Layout headerProps={headerProps}>
-      <div className="space-y-6">
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="p-3">
-            <CardContent className="p-0">
-              <div className="flex items-center space-x-2">
-                <List className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Total Parámetros</p>
-                  <p className="text-lg font-semibold">{stats.totalParameters}</p>
+    <>
+      <Layout wide={true} headerProps={{
+        title: "Parámetros de Tarea",
+        showSearch: true,
+        searchValue: searchTerm,
+        onSearchChange: setSearchTerm,
+        actions: [
+          <Button
+            key="new-parameter"
+            onClick={() => {
+              setEditingParameter(null);
+              setIsParameterModalOpen(true);
+            }}
+            size="sm"
+            className="gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Nuevo Parámetro
+          </Button>
+        ]
+      }}>
+        <div className="space-y-6">
+          {/* Statistics Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card className="p-3">
+              <CardContent className="p-0">
+                <div className="flex items-center space-x-2">
+                  <List className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Total Parámetros</p>
+                    <p className="text-lg font-semibold">{stats.totalParameters}</p>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="p-3">
-            <CardContent className="p-0">
-              <div className="flex items-center space-x-2">
-                <Search className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Tipo Selección</p>
-                  <p className="text-lg font-semibold">{stats.selectParameters}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="p-3">
-            <CardContent className="p-0">
-              <div className="flex items-center space-x-2">
-                <Hash className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Total Opciones</p>
-                  <p className="text-lg font-semibold">{stats.totalOptions}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="p-3">
-            <CardContent className="p-0">
-              <div className="flex items-center space-x-2">
-                <Settings className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Obligatorios</p>
-                  <p className="text-lg font-semibold">{stats.requiredParameters}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Parameters Accordion */}
-        <div className="space-y-2">
-          {filteredParameters.length === 0 ? (
-            <Card className="p-8">
-              <div className="text-center text-muted-foreground">
-                {searchTerm ? 'No se encontraron parámetros que coincidan con la búsqueda' : 'No hay parámetros creados'}
-              </div>
+              </CardContent>
             </Card>
-          ) : (
-            filteredParameters.map(parameter => {
-              const isExpanded = expandedParameters.has(parameter.id);
-              const optionsCount = parameter.options?.length || 0;
 
-              return (
-                <Collapsible
-                  key={parameter.id}
-                  open={isExpanded}
-                  onOpenChange={() => toggleParameter(parameter.id)}
-                >
-                  <Card>
-                    <CollapsibleTrigger asChild>
-                      <div className="p-4 cursor-pointer hover:bg-muted/50 transition-colors">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            {isExpanded ? (
-                              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                            ) : (
-                              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                            )}
-                            <div>
-                              <div className="flex items-center space-x-2">
-                                <span className="font-medium">{parameter.label}</span>
-                                <Badge variant={getParameterTypeVariant(parameter.type)}>
-                                  {getParameterTypeLabel(parameter.type)}
-                                </Badge>
-                                {parameter.unit_id && (
-                                  <Badge variant="outline" className="text-xs">
-                                    {parameter.unit_id}
+            <Card className="p-3">
+              <CardContent className="p-0">
+                <div className="flex items-center space-x-2">
+                  <Search className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Tipo Select</p>
+                    <p className="text-lg font-semibold">{stats.selectParameters}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="p-3">
+              <CardContent className="p-0">
+                <div className="flex items-center space-x-2">
+                  <Hash className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Total Opciones</p>
+                    <p className="text-lg font-semibold">{stats.totalOptions}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="p-3">
+              <CardContent className="p-0">
+                <div className="flex items-center space-x-2">
+                  <Settings className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Obligatorios</p>
+                    <p className="text-lg font-semibold">{stats.requiredParameters}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Parameters Accordion */}
+          <div className="space-y-2">
+            {filteredParameters.length === 0 ? (
+              <Card className="p-8">
+                <div className="text-center text-muted-foreground">
+                  {searchTerm ? 'No se encontraron parámetros que coincidan con la búsqueda' : 'No hay parámetros creados'}
+                </div>
+              </Card>
+            ) : (
+              filteredParameters.map(parameter => {
+                const isExpanded = expandedParameters.has(parameter.id);
+                const optionsCount = parameter.options?.length || 0;
+
+                return (
+                  <Collapsible
+                    key={parameter.id}
+                    open={isExpanded}
+                    onOpenChange={() => toggleParameter(parameter.id)}
+                  >
+                    <Card>
+                      <CollapsibleTrigger asChild>
+                        <div className="p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              {isExpanded ? (
+                                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                              ) : (
+                                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                              )}
+                              <div className="flex-1">
+                                <div className="flex items-center space-x-2">
+                                  <h3 className="font-medium">{parameter.label}</h3>
+                                  <Badge variant={getParameterTypeVariant(parameter.type)}>
+                                    {getParameterTypeLabel(parameter.type)}
                                   </Badge>
-                                )}
+                                  {parameter.is_required && (
+                                    <Badge variant="destructive" className="text-xs">
+                                      Obligatorio
+                                    </Badge>
+                                  )}
+                                </div>
+                                <p className="text-sm text-muted-foreground mt-1">
+                                  {parameter.name} • {optionsCount} opciones
+                                </p>
                               </div>
-                              <p className="text-xs text-muted-foreground">
-                                {parameter.name} • {optionsCount} opciones
-                              </p>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingParameter(parameter);
+                                  setIsParameterModalOpen(true);
+                                }}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setDeleteParameterId(parameter.id);
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
                             </div>
                           </div>
-
-                          <div className="flex items-center space-x-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleEditParameter(parameter);
-                              }}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setDeleteParameterId(parameter.id);
-                              }}
-                              className="text-destructive hover:text-destructive"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
                         </div>
-                      </div>
-                    </CollapsibleTrigger>
+                      </CollapsibleTrigger>
 
-                    <CollapsibleContent>
-                      <div className="border-t p-4">
-                        <div className="flex items-center justify-between mb-4">
-                          <h4 className="text-sm font-medium">Opciones del parámetro</h4>
-                          <Button
-                            size="sm"
-                            onClick={() => handleCreateOption(parameter.id)}
-                          >
-                            <Plus className="h-4 w-4 mr-1" />
-                            Agregar Opción
-                          </Button>
-                        </div>
+                      <CollapsibleContent>
+                        <div className="px-4 pb-4 border-t border-muted">
+                          <div className="pt-4">
+                            <div className="flex items-center justify-between mb-3">
+                              <h4 className="text-sm font-medium text-muted-foreground">
+                                Opciones ({optionsCount})
+                              </h4>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedParameterId(parameter.id);
+                                  setEditingOption(null);
+                                  setIsOptionModalOpen(true);
+                                }}
+                              >
+                                <Plus className="h-4 w-4 mr-1" />
+                                Agregar Opción
+                              </Button>
+                            </div>
 
-                        {parameter.options && parameter.options.length > 0 ? (
-                          <div className="grid gap-2">
-                            {parameter.options.map(option => (
-                                <div
-                                  key={option.id}
-                                  className="flex items-center justify-between p-3 border rounded-lg"
-                                >
-                                  <div className="flex items-center space-x-3">
-                                    <div>
-                                      <span className="font-medium">{option.label}</span>
-                                      <p className="text-xs text-muted-foreground">{option.value}</p>
+                            <div className="space-y-2">
+                              {parameter.options && parameter.options.length > 0 ? (
+                                parameter.options.map((option) => (
+                                  <div
+                                    key={option.id}
+                                    className="flex items-center justify-between p-2 bg-muted/30 rounded-md"
+                                  >
+                                    <div className="flex-1">
+                                      <span className="text-sm font-medium">{option.label}</span>
+                                      <span className="text-xs text-muted-foreground ml-2">
+                                        ({option.value})
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center space-x-1">
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => {
+                                          setSelectedParameterId(parameter.id);
+                                          setEditingOption(option);
+                                          setIsOptionModalOpen(true);
+                                        }}
+                                      >
+                                        <Edit className="h-3 w-3" />
+                                      </Button>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => setDeleteOptionId(option.id)}
+                                      >
+                                        <Trash2 className="h-3 w-3" />
+                                      </Button>
                                     </div>
                                   </div>
-
-                                  <div className="flex items-center space-x-1">
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      onClick={() => handleEditOption(option)}
-                                    >
-                                      <Edit className="h-4 w-4" />
-                                    </Button>
-
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      onClick={() => setDeleteOptionId(option.id)}
-                                      className="text-destructive hover:text-destructive"
-                                    >
-                                      <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                  </div>
+                                ))
+                              ) : (
+                                <div className="text-center py-4 text-sm text-muted-foreground">
+                                  No hay opciones definidas
                                 </div>
-                              ))}
+                              )}
+                            </div>
                           </div>
-                        ) : (
-                          <div className="text-center py-8 text-muted-foreground text-sm">
-                            No hay opciones para este parámetro
-                          </div>
-                        )}
-                      </div>
-                    </CollapsibleContent>
-                  </Card>
-                </Collapsible>
-              );
-            })
-          )}
+                        </div>
+                      </CollapsibleContent>
+                    </Card>
+                  </Collapsible>
+                );
+              })
+            )}
+          </div>
         </div>
+      </Layout>
 
-        {/* Parameter Modal */}
+      {/* Parameter Modal */}
+      {isParameterModalOpen && (
         <NewTaskParameterModal
           open={isParameterModalOpen}
           onClose={() => {
@@ -366,10 +368,11 @@ export default function AdminTaskParameters() {
           }}
           parameter={editingParameter || undefined}
           templateId={defaultTemplateId}
-
         />
+      )}
 
-        {/* Option Modal */}
+      {/* Option Modal */}
+      {isOptionModalOpen && (
         <NewTaskParameterOptionModal
           open={isOptionModalOpen}
           onClose={() => {
@@ -382,51 +385,50 @@ export default function AdminTaskParameters() {
           parameterLabel={
             parameters.find(p => p.id === selectedParameterId)?.label || ''
           }
-
         />
+      )}
 
-        {/* Delete Parameter Confirmation */}
-        <AlertDialog open={!!deleteParameterId} onOpenChange={() => setDeleteParameterId(null)}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>¿Eliminar parámetro?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Esta acción no se puede deshacer. Se eliminará el parámetro y todas sus opciones permanentemente.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => deleteParameterId && handleDeleteParameter(deleteParameterId)}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              >
-                Eliminar
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+      {/* Delete Parameter Confirmation */}
+      <AlertDialog open={!!deleteParameterId} onOpenChange={() => setDeleteParameterId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar parámetro?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. Se eliminará el parámetro y todas sus opciones permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteParameterId && handleDeleteParameter(deleteParameterId)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-        {/* Delete Option Confirmation */}
-        <AlertDialog open={!!deleteOptionId} onOpenChange={() => setDeleteOptionId(null)}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>¿Eliminar opción?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Esta acción no se puede deshacer. Se eliminará la opción permanentemente.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => deleteOptionId && handleDeleteOption(deleteOptionId)}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              >
-                Eliminar
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
-    </Layout>
+      {/* Delete Option Confirmation */}
+      <AlertDialog open={!!deleteOptionId} onOpenChange={() => setDeleteOptionId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar opción?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. Se eliminará la opción permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteOptionId && handleDeleteOption(deleteOptionId)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
