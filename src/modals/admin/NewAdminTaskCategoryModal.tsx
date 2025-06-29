@@ -2,13 +2,12 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout';
 import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader';
@@ -16,11 +15,14 @@ import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
 import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter';
 
 import { useCreateTaskCategory, useUpdateTaskCategory, TaskCategoryAdmin } from '@/hooks/use-task-categories-admin';
+import { useTopLevelCategories, useSubcategories, useElementCategories } from '@/hooks/use-task-categories';
 
 const taskCategorySchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   code: z.string().optional(),
-  parent_id: z.string().optional(),
+  category_id: z.string().optional(),
+  subcategory_id: z.string().optional(),
+  element_category_id: z.string().optional(),
 });
 
 type TaskCategoryFormData = z.infer<typeof taskCategorySchema>;
@@ -39,73 +41,105 @@ export function NewAdminTaskCategoryModal({
   allCategories 
 }: NewAdminTaskCategoryModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
+  const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<string>('');
   
   const createMutation = useCreateTaskCategory();
   const updateMutation = useUpdateTaskCategory();
+
+  // Data hooks for hierarchical selection
+  const { data: topLevelCategories } = useTopLevelCategories();
+  const { data: subcategories } = useSubcategories(selectedCategoryId || null);
+  const { data: elementCategories } = useElementCategories(selectedSubcategoryId || null);
 
   const form = useForm<TaskCategoryFormData>({
     resolver: zodResolver(taskCategorySchema),
     defaultValues: {
       name: '',
       code: '',
-      parent_id: '',
+      category_id: undefined,
+      subcategory_id: undefined,
+      element_category_id: undefined,
     },
   });
+
+  // Helper function to determine parent_id based on hierarchy level
+  const determineParentId = (formData: TaskCategoryFormData) => {
+    if (formData.element_category_id) return formData.subcategory_id;
+    if (formData.subcategory_id) return formData.category_id;
+    return null; // Top level category
+  };
+
+  // Helper function to find category in hierarchy and set parent values
+  const findCategoryHierarchy = (categoryId: string) => {
+    // Search through the flat categories to find hierarchy
+    for (const topCat of allCategories) {
+      if (topCat.id === categoryId) {
+        return { level: 0, categoryId: '', subcategoryId: '', elementCategoryId: '' };
+      }
+      if (topCat.children) {
+        for (const subCat of topCat.children) {
+          if (subCat.id === categoryId) {
+            return { level: 1, categoryId: topCat.id, subcategoryId: '', elementCategoryId: '' };
+          }
+          if (subCat.children) {
+            for (const elemCat of subCat.children) {
+              if (elemCat.id === categoryId) {
+                return { level: 2, categoryId: topCat.id, subcategoryId: subCat.id, elementCategoryId: '' };
+              }
+            }
+          }
+        }
+      }
+    }
+    return { level: 0, categoryId: '', subcategoryId: '', elementCategoryId: '' };
+  };
 
   // Reset form when modal opens/closes or category changes
   useEffect(() => {
     if (category && open) {
+      const hierarchy = findCategoryHierarchy(category.id);
+      
+      setSelectedCategoryId(hierarchy.categoryId);
+      setSelectedSubcategoryId(hierarchy.subcategoryId);
+      
       form.reset({
         name: category.name,
         code: category.code || '',
-        parent_id: category.parent_id || 'none',
+        category_id: hierarchy.categoryId || undefined,
+        subcategory_id: hierarchy.subcategoryId || undefined,
+        element_category_id: hierarchy.elementCategoryId || undefined,
       });
     } else if (!category && open) {
+      setSelectedCategoryId('');
+      setSelectedSubcategoryId('');
+      
       form.reset({
         name: '',
         code: '',
-        parent_id: 'none',
+        category_id: undefined,
+        subcategory_id: undefined,
+        element_category_id: undefined,
       });
     }
-  }, [category, open, form]);
-
-  // Flatten categories for parent selection dropdown
-  const flattenCategories = (categories: TaskCategoryAdmin[], level = 0): Array<{id: string, name: string, level: number}> => {
-    const result: Array<{id: string, name: string, level: number}> = [];
-    
-    categories.forEach(cat => {
-      // Don't include the current category being edited as a potential parent
-      if (!category || cat.id !== category.id) {
-        result.push({
-          id: cat.id,
-          name: cat.name,
-          level
-        });
-        
-        if (cat.children && cat.children.length > 0) {
-          result.push(...flattenCategories(cat.children, level + 1));
-        }
-      }
-    });
-    
-    return result;
-  };
-
-  const flatCategories = flattenCategories(allCategories);
+  }, [category, open, form, allCategories]);
 
   const onSubmit = async (data: TaskCategoryFormData) => {
     setIsSubmitting(true);
     
     try {
+      const parentId = determineParentId(data);
+      
       const submitData = {
-        ...data,
-        parent_id: data.parent_id === '' || data.parent_id === 'none' ? null : data.parent_id,
+        name: data.name,
+        code: data.code || undefined,
+        parent_id: parentId,
       };
 
       if (category) {
-        await updateMutation.mutateAsync({
-          id: category.id,
-          ...submitData,
+        await updateMutation.mutateAsync({ 
+          id: category.id, 
+          ...submitData 
         });
       } else {
         await createMutation.mutateAsync(submitData);
@@ -113,106 +147,190 @@ export function NewAdminTaskCategoryModal({
       
       onClose();
     } catch (error) {
-      console.error('Error submitting category:', error);
+      console.error('Error saving category:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleClose = () => {
-    form.reset();
-    onClose();
+  // Handle category selection changes
+  const handleCategoryChange = (value: string) => {
+    setSelectedCategoryId(value);
+    setSelectedSubcategoryId(''); // Reset subcategory when category changes
+    form.setValue('category_id', value);
+    form.setValue('subcategory_id', undefined);
+    form.setValue('element_category_id', undefined);
+  };
+
+  const handleSubcategoryChange = (value: string) => {
+    setSelectedSubcategoryId(value);
+    form.setValue('subcategory_id', value);
+    form.setValue('element_category_id', undefined); // Reset element category when subcategory changes
+  };
+
+  const handleElementCategoryChange = (value: string) => {
+    form.setValue('element_category_id', value);
   };
 
   return (
-    <CustomModalLayout open={open} onClose={handleClose}>
+    <CustomModalLayout open={open} onClose={onClose}>
       {{
         header: (
           <CustomModalHeader
             title={category ? 'Editar Categoría' : 'Nueva Categoría'}
-            description={category ? 'Modifica los datos de la categoría' : 'Crea una nueva categoría de tarea'}
-            onClose={handleClose}
+            description="Modifica los datos de la categoría"
+            onClose={onClose}
           />
         ),
         body: (
           <CustomModalBody padding="md">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="required-asterisk">Nombre</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="Ej: Estructuras, Fundaciones..."
-                          disabled={isSubmitting}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <Accordion type="single" collapsible defaultValue="categoria" className="w-full">
+                  <AccordionItem value="categoria">
+                    <AccordionTrigger>Categoría</AccordionTrigger>
+                    <AccordionContent className="space-y-4">
+                      {/* Categoría Principal */}
+                      <FormField
+                        control={form.control}
+                        name="category_id"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Categoría Principal *</FormLabel>
+                            <Select onValueChange={handleCategoryChange} value={selectedCategoryId}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Seleccionar categoría principal" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {topLevelCategories?.map((cat) => (
+                                  <SelectItem key={cat.id} value={cat.id}>
+                                    {cat.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                <FormField
-                  control={form.control}
-                  name="code"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Código</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="Ej: E, F, A..."
-                          disabled={isSubmitting}
+                      {/* Subcategoría */}
+                      {selectedCategoryId && (
+                        <FormField
+                          control={form.control}
+                          name="subcategory_id"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Subcategoría *</FormLabel>
+                              <Select onValueChange={handleSubcategoryChange} value={selectedSubcategoryId}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Seleccionar subcategoría" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {subcategories?.map((subcat) => (
+                                    <SelectItem key={subcat.id} value={subcat.id}>
+                                      {subcat.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
                         />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                      )}
 
-                <FormField
-                  control={form.control}
-                  name="parent_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Categoría Padre</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        disabled={isSubmitting}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar categoría padre (opcional)" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="none">Sin categoría padre</SelectItem>
-                          {flatCategories.map((cat) => (
-                            <SelectItem key={cat.id} value={cat.id}>
-                              {'—'.repeat(cat.level)} {cat.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                      {/* Categoría Final */}
+                      {selectedSubcategoryId && (
+                        <FormField
+                          control={form.control}
+                          name="element_category_id"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Categoría Final *</FormLabel>
+                              <Select onValueChange={handleElementCategoryChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecciona primero una subcategoría" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {elementCategories?.map((elemcat) => (
+                                    <SelectItem key={elemcat.id} value={elemcat.id}>
+                                      {elemcat.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
+
+                      {/* Prefijo de Código */}
+                      <FormField
+                        control={form.control}
+                        name="code"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Prefijo de Código</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Generado automáticamente"
+                                {...field}
+                                disabled
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Nombre */}
+                      <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Nombre *</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Copiado de Categoría Final"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="plantilla">
+                    <AccordionTrigger>Plantilla</AccordionTrigger>
+                    <AccordionContent className="space-y-4">
+                      <p className="text-sm text-muted-foreground">
+                        Las plantillas se configuran por separado en la sección de Plantillas de Tareas.
+                      </p>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
               </form>
             </Form>
           </CustomModalBody>
         ),
         footer: (
           <CustomModalFooter
-            onCancel={handleClose}
             onSave={form.handleSubmit(onSubmit)}
-            saveText={isSubmitting ? 'Guardando...' : category ? 'Actualizar' : 'Crear'}
-            saveDisabled={isSubmitting}
+            onCancel={onClose}
+            saveText="Guardar"
+            cancelText="Cancelar"
+            disabled={isSubmitting}
           />
         ),
       }}

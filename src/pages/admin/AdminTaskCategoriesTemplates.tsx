@@ -170,9 +170,9 @@ export default function AdminTaskCategoriesTemplates() {
                   {/* Badge de código con colores según nivel */}
                   {category.code && (
                     <>
-                      {level === 0 && <Badge variant="outline" className="text-xs h-5 border-blue-300 text-blue-700">PADRE - {category.code}</Badge>}
-                      {level === 1 && <Badge variant="outline" className="text-xs h-5 border-green-300 text-green-700">HIJO - {category.code}</Badge>}
-                      {level === 2 && <Badge variant="outline" className="text-xs h-5 border-orange-300 text-orange-700">NIETO - {category.code}</Badge>}
+                      {level === 0 && <Badge variant="outline" className="text-xs h-5 border-blue-300 text-blue-700">{category.code}</Badge>}
+                      {level === 1 && <Badge variant="outline" className="text-xs h-5 border-green-300 text-green-700">{category.code}</Badge>}
+                      {level === 2 && <Badge variant="outline" className="text-xs h-5 border-orange-300 text-orange-700">{category.code}</Badge>}
                     </>
                   )}
 
