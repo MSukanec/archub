@@ -7,6 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 
 import { Layout } from '@/components/layout/Layout';
 
@@ -16,6 +18,7 @@ import { NewTaskParameterOptionModal } from '@/modals/tasks/NewTaskParameterOpti
 
 export default function AdminTaskParameters() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('name_asc');
   const [expandedParameters, setExpandedParameters] = useState<Set<string>>(new Set());
   
   // Modal states
@@ -48,21 +51,40 @@ export default function AdminTaskParameters() {
 
   const stats = calculateStats(parameters);
 
-  // Filter parameters based on search
-  const filteredParameters = parameters.filter(parameter =>
-    (parameter.label || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (parameter.name || '').toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter and sort parameters
+  const filteredAndSortedParameters = parameters
+    .filter(parameter =>
+      (parameter.label || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (parameter.name || '').toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'name_asc':
+          return (a.label || '').localeCompare(b.label || '');
+        case 'name_desc':
+          return (b.label || '').localeCompare(a.label || '');
+        case 'type_asc':
+          return a.type.localeCompare(b.type);
+        case 'type_desc':
+          return b.type.localeCompare(a.type);
+        default:
+          return 0;
+      }
+    });
 
-  // Toggle parameter expansion
+  // Toggle parameter expansion (single accordion behavior)
   const toggleParameter = (parameterId: string) => {
-    const newExpanded = new Set(expandedParameters);
-    if (newExpanded.has(parameterId)) {
-      newExpanded.delete(parameterId);
-    } else {
+    const newExpanded = new Set<string>();
+    if (!expandedParameters.has(parameterId)) {
       newExpanded.add(parameterId);
     }
     setExpandedParameters(newExpanded);
+  };
+
+  // Clear all filters
+  const clearFilters = () => {
+    setSearchTerm('');
+    setSortBy('name_asc');
   };
 
   // Handle parameter deletion
@@ -144,6 +166,25 @@ export default function AdminTaskParameters() {
         showSearch: true,
         searchValue: searchTerm,
         onSearchChange: setSearchTerm,
+        customFilters: (
+          <div className="space-y-3">
+            <div>
+              <Label className="text-xs font-medium">Ordenar por</Label>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Seleccionar orden" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="name_asc">Nombre (A-Z)</SelectItem>
+                  <SelectItem value="name_desc">Nombre (Z-A)</SelectItem>
+                  <SelectItem value="type_asc">Tipo (A-Z)</SelectItem>
+                  <SelectItem value="type_desc">Tipo (Z-A)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        ),
+        onClearFilters: clearFilters,
         actions: [
           <Button
             key="new-parameter"
@@ -213,14 +254,14 @@ export default function AdminTaskParameters() {
 
           {/* Parameters Accordion */}
           <div className="space-y-2">
-            {filteredParameters.length === 0 ? (
+            {filteredAndSortedParameters.length === 0 ? (
               <Card className="p-8">
                 <div className="text-center text-muted-foreground">
                   {searchTerm ? 'No se encontraron parámetros que coincidan con la búsqueda' : 'No hay parámetros creados'}
                 </div>
               </Card>
             ) : (
-              filteredParameters.map(parameter => {
+              filteredAndSortedParameters.map(parameter => {
                 const isExpanded = expandedParameters.has(parameter.id);
                 const optionsCount = parameter.options?.length || 0;
 
@@ -232,7 +273,7 @@ export default function AdminTaskParameters() {
                   >
                     <Card>
                       <CollapsibleTrigger asChild>
-                        <div className="p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+                        <div className="p-3 cursor-pointer hover:bg-muted/50 transition-colors">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-3">
                               {isExpanded ? (
@@ -242,17 +283,12 @@ export default function AdminTaskParameters() {
                               )}
                               <div className="flex-1">
                                 <div className="flex items-center space-x-2">
-                                  <h3 className="font-medium">{parameter.label}</h3>
-                                  <Badge variant={getParameterTypeVariant(parameter.type)}>
+                                  <h3 className="font-medium text-sm">{parameter.label}</h3>
+                                  <Badge variant={getParameterTypeVariant(parameter.type)} className="text-xs">
                                     {getParameterTypeLabel(parameter.type)}
                                   </Badge>
-                                  {parameter.is_required && (
-                                    <Badge variant="destructive" className="text-xs">
-                                      Obligatorio
-                                    </Badge>
-                                  )}
                                 </div>
-                                <p className="text-sm text-muted-foreground mt-1">
+                                <p className="text-xs text-muted-foreground">
                                   {parameter.name} • {optionsCount} opciones
                                 </p>
                               </div>
@@ -267,7 +303,7 @@ export default function AdminTaskParameters() {
                                   setIsParameterModalOpen(true);
                                 }}
                               >
-                                <Edit className="h-4 w-4" />
+                                <Edit className="h-3 w-3" />
                               </Button>
                               <Button
                                 variant="ghost"
@@ -277,7 +313,7 @@ export default function AdminTaskParameters() {
                                   setDeleteParameterId(parameter.id);
                                 }}
                               >
-                                <Trash2 className="h-4 w-4" />
+                                <Trash2 className="h-3 w-3" />
                               </Button>
                             </div>
                           </div>
@@ -285,10 +321,10 @@ export default function AdminTaskParameters() {
                       </CollapsibleTrigger>
 
                       <CollapsibleContent>
-                        <div className="px-4 pb-4 border-t border-muted">
-                          <div className="pt-4">
-                            <div className="flex items-center justify-between mb-3">
-                              <h4 className="text-sm font-medium text-muted-foreground">
+                        <div className="px-3 pb-3 border-t border-muted">
+                          <div className="pt-3">
+                            <div className="flex items-center justify-between mb-2">
+                              <h4 className="text-xs font-medium text-muted-foreground">
                                 Opciones ({optionsCount})
                               </h4>
                               <Button
@@ -300,12 +336,12 @@ export default function AdminTaskParameters() {
                                   setIsOptionModalOpen(true);
                                 }}
                               >
-                                <Plus className="h-4 w-4 mr-1" />
-                                Agregar Opción
+                                <Plus className="h-3 w-3 mr-1" />
+                                Agregar
                               </Button>
                             </div>
 
-                            <div className="space-y-2">
+                            <div className="space-y-1">
                               {parameter.options && parameter.options.length > 0 ? (
                                 parameter.options.map((option) => (
                                   <div
@@ -313,7 +349,7 @@ export default function AdminTaskParameters() {
                                     className="flex items-center justify-between p-2 bg-muted/30 rounded-md"
                                   >
                                     <div className="flex-1">
-                                      <span className="text-sm font-medium">{option.label}</span>
+                                      <span className="text-xs font-medium">{option.label}</span>
                                       <span className="text-xs text-muted-foreground ml-2">
                                         ({option.value})
                                       </span>
@@ -341,7 +377,7 @@ export default function AdminTaskParameters() {
                                   </div>
                                 ))
                               ) : (
-                                <div className="text-center py-4 text-sm text-muted-foreground">
+                                <div className="text-center py-2 text-xs text-muted-foreground">
                                   No hay opciones definidas
                                 </div>
                               )}
