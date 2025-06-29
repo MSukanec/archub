@@ -12,18 +12,19 @@ import { Layout } from '@/components/layout/Layout';
 
 import { useTaskCategoriesAdmin, useDeleteTaskCategory, TaskCategoryAdmin } from '@/hooks/use-task-categories-admin';
 import { useDeleteTaskTemplate } from '@/hooks/use-task-templates-admin';
-import { UnifiedCategoryTemplateModal } from '@/modals/UnifiedCategoryTemplateModal';
+import { NewTaskTemplateModal } from '@/modals/NewTaskTemplateModal';
+import { NewAdminTaskCategoryModal } from '@/modals/NewAdminTaskCategoryModal';
 
 export default function AdminTaskCategoriesTemplates() {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   
   // Modal states
-  const [isUnifiedModalOpen, setIsUnifiedModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<TaskCategoryAdmin | null>(null);
   const [editingTemplate, setEditingTemplate] = useState<any>(null);
-  const [preselectedCategoryId, setPreselectedCategoryId] = useState<string>('');
+  const [templateCategoryId, setTemplateCategoryId] = useState<string>('');
   
   // Delete confirmation states
   const [deleteCategoryId, setDeleteCategoryId] = useState<string | null>(null);
@@ -92,27 +93,20 @@ export default function AdminTaskCategoriesTemplates() {
   };
 
   const handleEditCategory = (category: TaskCategoryAdmin) => {
-    setModalMode('edit');
     setEditingCategory(category);
-    setEditingTemplate(null);
-    setPreselectedCategoryId('');
-    setIsUnifiedModalOpen(true);
+    setIsCategoryModalOpen(true);
   };
 
   const handleCreateTemplate = (categoryId: string) => {
-    setModalMode('create');
-    setEditingCategory(null);
+    setTemplateCategoryId(categoryId);
     setEditingTemplate(null);
-    setPreselectedCategoryId(categoryId);
-    setIsUnifiedModalOpen(true);
+    setIsTemplateModalOpen(true);
   };
 
   const handleEditTemplate = (template: any) => {
-    setModalMode('edit');
-    setEditingCategory(null);
     setEditingTemplate(template);
-    setPreselectedCategoryId('');
-    setIsUnifiedModalOpen(true);
+    setTemplateCategoryId(template.category_id);
+    setIsTemplateModalOpen(true);
   };
 
   const handleDeleteCategory = async (categoryId: string) => {
@@ -182,21 +176,41 @@ export default function AdminTaskCategoriesTemplates() {
               </div>
             </div>
 
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center space-x-2">
               <Button
                 variant="ghost"
-                size="icon"
-                className="h-8 w-8"
+                size="sm"
                 onClick={() => handleEditCategory(category)}
               >
-                <Edit className="h-4 w-4" />
+                <Edit className="h-4 w-4 mr-1" />
+                Editar Categoría
               </Button>
+
+              {category.template ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleEditTemplate(category.template)}
+                >
+                  <FileText className="h-4 w-4 mr-1" />
+                  Editar Plantilla
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleCreateTemplate(category.id)}
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Crear Plantilla
+                </Button>
+              )}
 
               <Button
                 variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-destructive hover:text-destructive"
+                size="sm"
                 onClick={() => setDeleteCategoryId(category.id)}
+                className="text-destructive hover:text-destructive"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -216,26 +230,30 @@ export default function AdminTaskCategoriesTemplates() {
   };
 
   const headerProps = {
-    icon: Settings,
+    icon: <Settings className="h-5 w-5" />,
     title: "Gestión de Categorías y Plantillas",
-    showSearch: true,
-    searchValue: searchTerm,
-    onSearchChange: setSearchTerm,
-    actions: [
-      <Button
-        key="new-category"
-        onClick={() => {
-          setModalMode('create');
-          setEditingCategory(null);
-          setEditingTemplate(null);
-          setPreselectedCategoryId('');
-          setIsUnifiedModalOpen(true);
-        }}
-      >
-        <Plus className="h-4 w-4 mr-2" />
-        Nueva Categoría
-      </Button>
-    ],
+    actions: (
+      <div className="flex items-center space-x-3">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar categorías..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 w-64"
+          />
+        </div>
+        <Button
+          onClick={() => {
+            setEditingCategory(null);
+            setIsCategoryModalOpen(true);
+          }}
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Nueva Categoría
+        </Button>
+      </div>
+    ),
   };
 
   if (isLoading) {
@@ -315,19 +333,27 @@ export default function AdminTaskCategoriesTemplates() {
           )}
         </div>
 
-        {/* Unified Modal */}
-        <UnifiedCategoryTemplateModal
-          open={isUnifiedModalOpen}
+        {/* Category Modal */}
+        <NewAdminTaskCategoryModal
+          open={isCategoryModalOpen}
           onClose={() => {
-            setIsUnifiedModalOpen(false);
+            setIsCategoryModalOpen(false);
             setEditingCategory(null);
-            setEditingTemplate(null);
-            setPreselectedCategoryId('');
           }}
-          mode={modalMode}
-          editingCategory={editingCategory}
-          editingTemplate={editingTemplate}
-          preselectedCategoryId={preselectedCategoryId}
+          category={editingCategory || undefined}
+          allCategories={categories}
+        />
+
+        {/* Template Modal */}
+        <NewTaskTemplateModal
+          open={isTemplateModalOpen}
+          onClose={() => {
+            setIsTemplateModalOpen(false);
+            setEditingTemplate(null);
+            setTemplateCategoryId('');
+          }}
+          template={editingTemplate || undefined}
+          preselectedCategoryId={templateCategoryId}
         />
 
         {/* Delete Category Confirmation */}
