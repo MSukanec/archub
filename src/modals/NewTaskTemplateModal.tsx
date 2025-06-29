@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useCreateTaskTemplate, useUpdateTaskTemplate, type TaskTemplate } from "@/hooks/use-task-templates-admin";
 import { useTopLevelCategories, useSubcategories, useElementCategories, useTaskCategories } from "@/hooks/use-task-categories";
+import { TemplateNameBuilder, type TaskTemplateParameter } from "@/components/ui-custom/misc/TemplateNameBuilder";
 
 const formSchema = z.object({
   name: z.string().min(1, "El nombre es requerido"),
@@ -51,6 +52,51 @@ export function NewTaskTemplateModal({
   // Get subcategories and element categories based on selections
   const { data: subCategories, isLoading: isLoadingSubs } = useSubcategories(selectedParentId || null);
   const { data: elementCategories, isLoading: isLoadingElements } = useElementCategories(selectedSubId || null);
+
+  // Mock parameters for demonstration - in a real implementation these would come from the template
+  const mockParameters: TaskTemplateParameter[] = [
+    {
+      id: "1",
+      name: "material",
+      label: "Material",
+      type: "select",
+      is_required: true,
+      position: 1
+    },
+    {
+      id: "2", 
+      name: "espesor",
+      label: "Espesor",
+      type: "number",
+      unit: "cm",
+      is_required: true,
+      position: 2
+    },
+    {
+      id: "3",
+      name: "tipo_mortero", 
+      label: "Tipo de Mortero",
+      type: "select",
+      is_required: false,
+      position: 3
+    },
+    {
+      id: "4",
+      name: "ubicacion",
+      label: "Ubicación",
+      type: "text",
+      is_required: false,
+      position: 4
+    },
+    {
+      id: "5",
+      name: "con_refuerzo",
+      label: "Con Refuerzo",
+      type: "boolean",
+      is_required: false,
+      position: 5
+    }
+  ];
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
