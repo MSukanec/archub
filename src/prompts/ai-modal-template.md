@@ -63,6 +63,4 @@ Componentes compatibles
 
 <FileInput /> si se requieren archivos
 
-yaml
-Copiar
-Editar
+## Asegurate de que el modal NUNCA este dentro del Layout de la página, y que no haya errores de SELECT ITEM. ##

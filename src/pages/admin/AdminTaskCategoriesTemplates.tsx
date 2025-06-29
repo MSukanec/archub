@@ -133,59 +133,82 @@ export default function AdminTaskCategoriesTemplates() {
     const hasChildren = category.children && category.children.length > 0;
 
     return (
-      <div key={category.id} className="border border-border rounded-md overflow-hidden">
+      <div key={category.id} className={`
+        border rounded-md overflow-hidden
+        ${level === 0 ? 'border-blue-300 bg-blue-50/30' : ''}
+        ${level === 1 ? 'border-green-300 bg-green-50/30' : ''}
+        ${level === 2 ? 'border-orange-300 bg-orange-50/30' : ''}
+      `}>
         <Collapsible open={isExpanded} onOpenChange={() => toggleCategoryExpansion(category.id)}>
-          <div className="flex items-center justify-between p-3 hover:bg-muted/30 transition-colors" style={{ paddingLeft: `${12 + level * 16}px` }}>
+          <div 
+            className="flex items-center justify-between p-3 hover:bg-muted/30 transition-colors cursor-pointer" 
+            style={{ paddingLeft: `${12 + level * 16}px` }}
+            onClick={() => hasChildren && toggleCategoryExpansion(category.id)}
+          >
             <div className="flex items-center space-x-3 flex-1">
               {hasChildren && (
-                <CollapsibleTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-5 w-5 p-0">
-                    {isExpanded ? 
-                      <ChevronDown className="h-3 w-3" /> : 
-                      <ChevronRight className="h-3 w-3" />
-                    }
-                  </Button>
-                </CollapsibleTrigger>
+                <div className="h-5 w-5 flex items-center justify-center">
+                  {isExpanded ? 
+                    <ChevronDown className="h-3 w-3" /> : 
+                    <ChevronRight className="h-3 w-3" />
+                  }
+                </div>
               )}
               
               <div className="flex items-center space-x-2 flex-1">
-                <Package2 className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium text-sm">{category.name}</span>
-                {category.code && (
-                  <Badge variant="outline" className="text-xs h-5">
-                    {category.code}
-                  </Badge>
-                )}
+                {/* Iconos diferentes según el nivel jerárquico */}
+                {level === 0 && <Package2 className="h-5 w-5 text-blue-600" />}
+                {level === 1 && <Package2 className="h-4 w-4 text-green-600" />}
+                {level === 2 && <Package2 className="h-3 w-3 text-orange-600" />}
+                
+                <div className="flex items-center space-x-2">
+                  {/* Texto con tamaños diferentes según nivel */}
+                  {level === 0 && <span className="font-semibold text-base text-blue-900">{category.name}</span>}
+                  {level === 1 && <span className="font-medium text-sm text-green-800">{category.name}</span>}
+                  {level === 2 && <span className="font-normal text-xs text-orange-800">{category.name}</span>}
+                  
+                  {/* Badge de código con colores según nivel */}
+                  {category.code && (
+                    <>
+                      {level === 0 && <Badge variant="outline" className="text-xs h-5 border-blue-300 text-blue-700">PADRE - {category.code}</Badge>}
+                      {level === 1 && <Badge variant="outline" className="text-xs h-5 border-green-300 text-green-700">HIJO - {category.code}</Badge>}
+                      {level === 2 && <Badge variant="outline" className="text-xs h-5 border-orange-300 text-orange-700">NIETO - {category.code}</Badge>}
+                    </>
+                  )}
 
-                {/* Solo mostrar estado de plantilla en categorías NIETO */}
-                {!hasChildren && (
-                  <div className="flex items-center">
-                    {category.template ? (
-                      <Badge variant="default" className="text-xs h-5 bg-green-100 text-green-700 border-green-300">
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        Con plantilla
-                      </Badge>
-                    ) : (
-                      <Badge variant="secondary" className="text-xs h-5 bg-gray-100 text-gray-600">
-                        <XCircle className="h-3 w-3 mr-1" />
-                        Sin plantilla
-                      </Badge>
-                    )}
-                  </div>
-                )}
+                  {/* Solo mostrar estado de plantilla en categorías NIETO */}
+                  {level === 2 && (
+                    <div className="flex items-center">
+                      {category.template ? (
+                        <Badge variant="default" className="text-xs h-5 bg-green-100 text-green-700 border-green-300">
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Con plantilla
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary" className="text-xs h-5 bg-red-100 text-red-600 border-red-300">
+                          <XCircle className="h-3 w-3 mr-1" />
+                          Sin plantilla
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center space-x-1" onClick={(e) => e.stopPropagation()}>
               {/* Solo mostrar botones de plantilla en categorías NIETO */}
-              {!hasChildren && (
+              {level === 2 && (
                 <>
                   {category.template ? (
                     <Button
                       variant="ghost"
                       size="sm" 
                       className="h-7 px-2"
-                      onClick={() => handleEditTemplate(category.template)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditTemplate(category.template);
+                      }}
                     >
                       <FileText className="h-3 w-3 mr-1" />
                       <span className="text-xs">Editar</span>
@@ -195,7 +218,10 @@ export default function AdminTaskCategoriesTemplates() {
                       variant="ghost"
                       size="sm"
                       className="h-7 px-2"
-                      onClick={() => handleCreateTemplate(category.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCreateTemplate(category.id);
+                      }}
                     >
                       <Plus className="h-3 w-3 mr-1" />
                       <span className="text-xs">Plantilla</span>
@@ -206,7 +232,12 @@ export default function AdminTaskCategoriesTemplates() {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-7 w-7 p-0"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <MoreHorizontal className="h-3 w-3" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -215,7 +246,7 @@ export default function AdminTaskCategoriesTemplates() {
                     <Edit className="h-4 w-4 mr-2" />
                     Editar Categoría
                   </DropdownMenuItem>
-                  {!hasChildren && category.template && (
+                  {level === 2 && category.template && (
                     <DropdownMenuItem onClick={() => setDeleteTemplateId(category.template!.id)}>
                       <Trash2 className="h-4 w-4 mr-2" />
                       Eliminar Plantilla
@@ -234,8 +265,12 @@ export default function AdminTaskCategoriesTemplates() {
           </div>
 
           {hasChildren && (
-            <CollapsibleContent className="border-t border-border bg-muted/10">
-              <div className="space-y-0">
+            <CollapsibleContent className={`
+              border-t
+              ${level === 0 ? 'border-blue-200 bg-blue-50/20' : ''}
+              ${level === 1 ? 'border-green-200 bg-green-50/20' : ''}
+            `}>
+              <div className="p-2 space-y-1">
                 {category.children?.map(child => renderCategory(child, level + 1))}
               </div>
             </CollapsibleContent>

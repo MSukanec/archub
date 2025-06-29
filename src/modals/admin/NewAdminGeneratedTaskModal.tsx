@@ -236,8 +236,8 @@ export function NewAdminGeneratedTaskModal({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {options?.map((option: any) => (
-                      <SelectItem key={option.id} value={option.value}>
+                    {options?.map((option: any, index: number) => (
+                      <SelectItem key={option.id || `option-${index}`} value={option.value}>
                         {option.label}
                       </SelectItem>
                     ))}
