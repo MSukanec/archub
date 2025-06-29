@@ -31,8 +31,13 @@ export interface CreateTaskParameterData {
   is_required: boolean;
 }
 
-export interface UpdateTaskParameterData extends CreateTaskParameterData {
+export interface UpdateTaskParameterData {
   id: string;
+  name: string;
+  label: string;
+  type: 'text' | 'number' | 'select' | 'boolean';
+  unit_id?: string;
+  is_required: boolean;
 }
 
 export interface CreateTaskParameterOptionData {
@@ -64,7 +69,7 @@ export function useTaskParametersAdmin() {
 
       // Fetch all options
       const { data: options, error: optionsError } = await supabase
-        .from('task_parameter_options')
+        .from('task_template_parameter_options')
         .select('id, parameter_id, value, label, created_at')
         .order('created_at');
 
@@ -148,16 +153,7 @@ export function useUpdateTaskParameter() {
     mutationFn: async ({ id, ...updateData }: UpdateTaskParameterData) => {
       if (!supabase) throw new Error('Supabase client not initialized');
 
-      // First get the parameter_id from task_template_parameters
-      const { data: templateParam, error: templateError } = await supabase
-        .from('task_template_parameters')
-        .select('parameter_id, id')
-        .eq('id', id)
-        .single();
-
-      if (templateError) throw templateError;
-
-      // Update the parameter details in task_parameters table
+      // Update the parameter directly in task_parameters table
       const { data: parameter, error: paramError } = await supabase
         .from('task_parameters')
         .update({
@@ -166,24 +162,12 @@ export function useUpdateTaskParameter() {
           type: updateData.type,
           unit_id: updateData.unit_id
         })
-        .eq('id', templateParam.parameter_id)
-        .select()
-        .single();
-
-      if (paramError) throw paramError;
-
-      // Update the template association (is_required field)
-      const { data: updatedTemplateParam, error: updateTemplateError } = await supabase
-        .from('task_template_parameters')
-        .update({
-          is_required: updateData.is_required
-        })
         .eq('id', id)
         .select()
         .single();
 
-      if (updateTemplateError) throw updateTemplateError;
-      return updatedTemplateParam;
+      if (paramError) throw paramError;
+      return parameter;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
@@ -218,9 +202,9 @@ export function useDeleteTaskParameter() {
 
       if (optionsError) throw optionsError;
 
-      // Then delete the parameter
+      // Then delete the parameter directly from task_parameters
       const { error } = await supabase
-        .from('task_template_parameters')
+        .from('task_parameters')
         .delete()
         .eq('id', parameterId);
 
