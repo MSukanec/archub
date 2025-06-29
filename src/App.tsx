@@ -205,6 +205,14 @@ function Router() {
         </ProtectedRoute>
       </Route>
 
+      <Route path="/admin/task-templates">
+        <ProtectedRoute>
+          <AdminProtectedRoute>
+            <AdminTaskTemplates />
+          </AdminProtectedRoute>
+        </ProtectedRoute>
+      </Route>
+
       <Route path="/admin/material-categories">
         <ProtectedRoute>
           <AdminProtectedRoute>
