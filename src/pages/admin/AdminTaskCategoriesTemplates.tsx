@@ -66,25 +66,41 @@ export default function AdminTaskCategoriesTemplates() {
 
   const stats = calculateStats(categories);
 
-  // Filter categories based on search
-  const filterCategories = (categories: TaskCategoryAdmin[], term: string): TaskCategoryAdmin[] => {
-    if (!term) return categories;
-
+  // Filter categories based on search and template filter
+  const filterCategories = (categories: TaskCategoryAdmin[], term: string, templateFilter: string): TaskCategoryAdmin[] => {
     return categories.filter(category => {
-      const matchesSearch = category.name.toLowerCase().includes(term.toLowerCase()) ||
-                           category.code?.toLowerCase().includes(term.toLowerCase());
+      // Search filter
+      const matchesSearch = !term || 
+        category.name.toLowerCase().includes(term.toLowerCase()) ||
+        category.code?.toLowerCase().includes(term.toLowerCase());
       
+      // Template filter (only apply to leaf/NIETO categories - level 2)
+      const hasChildrenLevel0 = category.children && category.children.length > 0;
+      const hasChildrenLevel1 = category.children?.some(child => child.children && child.children.length > 0);
+      const isLeafCategory = !hasChildrenLevel0 || (hasChildrenLevel0 && !hasChildrenLevel1);
+      
+      let matchesTemplate = true;
+      if (templateFilter !== 'all' && isLeafCategory) {
+        // Only apply template filter to leaf categories
+        if (templateFilter === 'with-template') {
+          matchesTemplate = !!category.template;
+        } else if (templateFilter === 'without-template') {
+          matchesTemplate = !category.template;
+        }
+      }
+      
+      // Check if children match filters
       const hasMatchingChildren = category.children && 
-                                 filterCategories(category.children, term).length > 0;
+                                 filterCategories(category.children, term, templateFilter).length > 0;
       
-      return matchesSearch || hasMatchingChildren;
+      return (matchesSearch && matchesTemplate) || hasMatchingChildren;
     }).map(category => ({
       ...category,
-      children: category.children ? filterCategories(category.children, term) : []
+      children: category.children ? filterCategories(category.children, term, templateFilter) : []
     }));
   };
 
-  const filteredCategories = filterCategories(categories, searchTerm);
+  const filteredCategories = filterCategories(categories, searchTerm, templateFilter);
 
   const toggleCategoryExpansion = (categoryId: string) => {
     const newExpanded = new Set(expandedCategories);

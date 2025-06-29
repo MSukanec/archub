@@ -283,14 +283,17 @@ export function NewAdminTaskCategoryModal({
                         name="code"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Prefijo de Código</FormLabel>
+                            <FormLabel>Prefijo de Código {category ? '(Bloqueado)' : ''}</FormLabel>
                             <FormControl>
                               <Input
-                                placeholder="Generado automáticamente"
+                                placeholder={category ? "Generado automáticamente" : "Generado automáticamente"}
                                 {...field}
-                                disabled
+                                disabled={category ? true : false}
                               />
                             </FormControl>
+                            {category && (
+                              <p className="text-xs text-muted-foreground">Este campo está bloqueado porque se genera automáticamente.</p>
+                            )}
                             <FormMessage />
                           </FormItem>
                         )}
@@ -302,13 +305,17 @@ export function NewAdminTaskCategoryModal({
                         name="name"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Nombre *</FormLabel>
+                            <FormLabel>Nombre * {category ? '(Bloqueado)' : ''}</FormLabel>
                             <FormControl>
                               <Input
-                                placeholder="Copiado de Categoría Final"
+                                placeholder={category ? "Copiado de Categoría Final" : "Nombre de la categoría"}
                                 {...field}
+                                disabled={category ? true : false}
                               />
                             </FormControl>
+                            {category && (
+                              <p className="text-xs text-muted-foreground">Este campo está bloqueado porque se genera automáticamente.</p>
+                            )}
                             <FormMessage />
                           </FormItem>
                         )}
@@ -316,14 +323,17 @@ export function NewAdminTaskCategoryModal({
                     </AccordionContent>
                   </AccordionItem>
 
-                  <AccordionItem value="plantilla">
-                    <AccordionTrigger>Plantilla</AccordionTrigger>
-                    <AccordionContent className="space-y-4">
-                      <p className="text-sm text-muted-foreground">
-                        Las plantillas se configuran por separado en la sección de Plantillas de Tareas.
-                      </p>
-                    </AccordionContent>
-                  </AccordionItem>
+                  {/* Only show template section for new categories, not editing */}
+                  {!category && (
+                    <AccordionItem value="plantilla">
+                      <AccordionTrigger>Plantilla</AccordionTrigger>
+                      <AccordionContent className="space-y-4">
+                        <p className="text-sm text-muted-foreground">
+                          Las plantillas se configuran por separado en la sección de Plantillas de Tareas.
+                        </p>
+                      </AccordionContent>
+                    </AccordionItem>
+                  )}
                 </Accordion>
               </form>
             </Form>
