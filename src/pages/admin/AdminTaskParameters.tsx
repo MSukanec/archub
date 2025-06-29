@@ -30,10 +30,6 @@ export default function AdminTaskParameters() {
   const [deleteOptionId, setDeleteOptionId] = useState<string | null>(null);
 
   const { data: parameters = [], isLoading } = useTaskParametersAdmin();
-  
-  // Debug logging
-  console.log('AdminTaskParameters - parameters data:', parameters);
-  console.log('AdminTaskParameters - isLoading:', isLoading);
   const deleteParameterMutation = useDeleteTaskParameter();
   const deleteOptionMutation = useDeleteTaskParameterOption();
 

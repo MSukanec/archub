@@ -77,8 +77,6 @@ export function useTaskParametersAdmin() {
         throw parametersError;
       }
 
-      console.log('Fetched template parameters:', templateParams);
-
       // Fetch all options
       const { data: options, error: optionsError } = await supabase
         .from('task_template_parameter_options')
@@ -90,8 +88,6 @@ export function useTaskParametersAdmin() {
         throw optionsError;
       }
 
-      console.log('Fetched options:', options);
-
       // Group options by parameter_id
       const optionsMap = new Map<string, TaskParameterOption[]>();
       options.forEach(option => {
@@ -101,11 +97,21 @@ export function useTaskParametersAdmin() {
         optionsMap.get(option.parameter_id)!.push(option);
       });
 
-      // Combine parameters with their options
-      const parametersWithOptions: TaskParameter[] = parameters.map(param => ({
-        ...param,
-        options: optionsMap.get(param.id) || []
-      }));
+      // Transform the joined data to flat parameter structure
+      const parametersWithOptions: TaskParameter[] = (templateParams as any[]).map((templateParam: any) => {
+        const param = templateParam.task_parameters;
+        return {
+          id: templateParam.id, // Use junction table ID for editing/deleting
+          template_id: templateParam.template_id,
+          name: param.name,
+          label: param.label,
+          type: param.type,
+          unit_id: param.unit_id,
+          is_required: templateParam.is_required,
+          created_at: templateParam.created_at,
+          options: optionsMap.get(param.id) || [] // Use actual parameter ID for options
+        };
+      });
 
       return parametersWithOptions;
     },
@@ -120,7 +126,7 @@ export function useCreateTaskParameter() {
       if (!supabase) throw new Error('Supabase client not initialized');
 
       const { data, error } = await supabase
-        .from('task_parameters')
+        .from('task_template_parameters')
         .insert([parameterData])
         .select()
         .single();
