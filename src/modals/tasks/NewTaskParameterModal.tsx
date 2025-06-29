@@ -35,7 +35,6 @@ interface NewTaskParameterModalProps {
   onClose: () => void;
   parameter?: TaskParameter;
   templateId: string;
-  nextPosition: number;
 }
 
 export function NewTaskParameterModal({ 

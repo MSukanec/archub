@@ -320,17 +320,12 @@ export default function AdminTaskParameters() {
 
                         {parameter.options && parameter.options.length > 0 ? (
                           <div className="grid gap-2">
-                            {parameter.options
-                              .sort((a, b) => a.position - b.position)
-                              .map(option => (
+                            {parameter.options.map(option => (
                                 <div
                                   key={option.id}
                                   className="flex items-center justify-between p-3 border rounded-lg"
                                 >
                                   <div className="flex items-center space-x-3">
-                                    <Badge variant="outline" className="text-xs">
-                                      {option.position}
-                                    </Badge>
                                     <div>
                                       <span className="font-medium">{option.label}</span>
                                       <p className="text-xs text-muted-foreground">{option.value}</p>
@@ -381,7 +376,7 @@ export default function AdminTaskParameters() {
           }}
           parameter={editingParameter || undefined}
           templateId={defaultTemplateId}
-          nextPosition={getNextParameterPosition()}
+
         />
 
         {/* Option Modal */}
@@ -397,7 +392,7 @@ export default function AdminTaskParameters() {
           parameterLabel={
             parameters.find(p => p.id === selectedParameterId)?.label || ''
           }
-          nextPosition={getNextOptionPosition(selectedParameterId)}
+
         />
 
         {/* Delete Parameter Confirmation */}

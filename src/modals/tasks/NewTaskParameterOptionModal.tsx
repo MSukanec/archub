@@ -28,7 +28,6 @@ interface NewTaskParameterOptionModalProps {
   option?: TaskParameterOption;
   parameterId: string;
   parameterLabel: string;
-  nextPosition: number;
 }
 
 export function NewTaskParameterOptionModal({ 

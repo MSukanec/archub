@@ -19,7 +19,6 @@ export interface TaskParameterOption {
   parameter_id: string;
   value: string;
   label: string;
-  created_at: string;
 }
 
 export interface CreateTaskParameterData {
