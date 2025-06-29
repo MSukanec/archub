@@ -330,7 +330,7 @@ export function NewAdminTaskCategoryModal({
             onCancel={onClose}
             saveText="Guardar"
             cancelText="Cancelar"
-            disabled={isSubmitting}
+            saveDisabled={isSubmitting}
           />
         ),
       }}
