@@ -5,6 +5,7 @@ import { toast } from '@/hooks/use-toast';
 export interface TaskParameter {
   id: string;
   template_id: string;
+  parameter_id: string; // Real parameter ID for options
   name: string;
   label: string;
   type: 'text' | 'number' | 'select' | 'boolean';
@@ -103,6 +104,7 @@ export function useTaskParametersAdmin() {
         return {
           id: templateParam.id, // Use junction table ID for editing/deleting
           template_id: templateParam.template_id,
+          parameter_id: param.id, // Real parameter ID for options
           name: param.name,
           label: param.label,
           type: param.type,

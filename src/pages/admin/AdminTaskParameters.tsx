@@ -331,7 +331,7 @@ export default function AdminTaskParameters() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => {
-                                  setSelectedParameterId(parameter.id);
+                                  setSelectedParameterId(parameter.parameter_id);
                                   setEditingOption(null);
                                   setIsOptionModalOpen(true);
                                 }}
@@ -341,40 +341,39 @@ export default function AdminTaskParameters() {
                               </Button>
                             </div>
 
-                            <div className="space-y-1">
+                            <div className="space-y-2">
                               {parameter.options && parameter.options.length > 0 ? (
                                 parameter.options.map((option) => (
-                                  <div
-                                    key={option.id}
-                                    className="flex items-center justify-between p-2 bg-muted/30 rounded-md"
-                                  >
-                                    <div className="flex-1">
-                                      <span className="text-xs font-medium">{option.label}</span>
-                                      <span className="text-xs text-muted-foreground ml-2">
-                                        ({option.value})
-                                      </span>
+                                  <Card key={option.id} className="p-3">
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex-1">
+                                        <span className="text-xs font-medium">{option.label}</span>
+                                        <span className="text-xs text-muted-foreground ml-2">
+                                          ({option.value})
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center space-x-1">
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => {
+                                            setSelectedParameterId(parameter.parameter_id);
+                                            setEditingOption(option);
+                                            setIsOptionModalOpen(true);
+                                          }}
+                                        >
+                                          <Edit className="h-3 w-3" />
+                                        </Button>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => setDeleteOptionId(option.id)}
+                                        >
+                                          <Trash2 className="h-3 w-3" />
+                                        </Button>
+                                      </div>
                                     </div>
-                                    <div className="flex items-center space-x-1">
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => {
-                                          setSelectedParameterId(parameter.id);
-                                          setEditingOption(option);
-                                          setIsOptionModalOpen(true);
-                                        }}
-                                      >
-                                        <Edit className="h-3 w-3" />
-                                      </Button>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => setDeleteOptionId(option.id)}
-                                      >
-                                        <Trash2 className="h-3 w-3" />
-                                      </Button>
-                                    </div>
-                                  </div>
+                                  </Card>
                                 ))
                               ) : (
                                 <div className="text-center py-2 text-xs text-muted-foreground">
