@@ -206,7 +206,7 @@ function Router() {
         </ProtectedRoute>
       </Route>
 
-      <Route path="/admin/task-templates">
+      <Route path="/admin/task-categories-templates">
         <ProtectedRoute>
           <AdminProtectedRoute>
             <AdminTaskCategoriesTemplates />
