@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Plus, ChevronRight, ChevronDown, Edit, Trash2, FileText, Package2, Settings, CheckCircle, XCircle, MoreHorizontal } from 'lucide-react';
+import { Search, Plus, ChevronRight, ChevronDown, Edit, Trash2, FileText, Package2, Settings, CheckCircle, XCircle, MoreHorizontal, Filter, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 
 import { Layout } from '@/components/layout/Layout';
 
@@ -19,6 +21,7 @@ import { NewAdminTaskCategoryModal } from '@/modals/admin/NewAdminTaskCategoryMo
 export default function AdminTaskCategoriesTemplates() {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const [templateFilter, setTemplateFilter] = useState<'all' | 'with-template' | 'without-template'>('all');
   
   // Modal states
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
@@ -280,18 +283,40 @@ export default function AdminTaskCategoriesTemplates() {
     );
   };
 
+  const hasFiltersApplied = searchTerm || templateFilter !== 'all';
+
+  const customFilters = (
+    <div className="space-y-3">
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Plantillas</Label>
+        <Select value={templateFilter} onValueChange={(value: 'all' | 'with-template' | 'without-template') => setTemplateFilter(value)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Filtrar por plantillas" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas las categorías</SelectItem>
+            <SelectItem value="with-template">Solo con plantilla</SelectItem>
+            <SelectItem value="without-template">Solo sin plantilla</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  );
+
+  const clearFilters = () => {
+    setSearchTerm('');
+    setTemplateFilter('all');
+  };
+
   const headerProps = {
+    icon: Package2,
     title: "Categorías de Tareas",
+    showSearch: true,
+    searchValue: searchTerm,
+    onSearchChange: setSearchTerm,
+    customFilters,
+    onClearFilters: clearFilters,
     actions: [
-      <div key="search" className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Buscar categorías..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 w-64"
-        />
-      </div>,
       <Button
         key="nueva-categoria"
         onClick={() => {

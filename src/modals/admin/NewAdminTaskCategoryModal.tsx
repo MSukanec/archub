@@ -85,7 +85,7 @@ export function NewAdminTaskCategoryModal({
           if (subCat.children) {
             for (const elemCat of subCat.children) {
               if (elemCat.id === categoryId) {
-                return { level: 2, categoryId: topCat.id, subcategoryId: subCat.id, elementCategoryId: '' };
+                return { level: 2, categoryId: topCat.id, subcategoryId: subCat.id, elementCategoryId: categoryId };
               }
             }
           }
@@ -110,6 +110,11 @@ export function NewAdminTaskCategoryModal({
         subcategory_id: hierarchy.subcategoryId || undefined,
         element_category_id: hierarchy.elementCategoryId || undefined,
       });
+      
+      // Properly set the selected subcategory for element category loading if editing a level 2 category
+      if (hierarchy.elementCategoryId) {
+        setSelectedSubcategoryId(hierarchy.subcategoryId);
+      }
     } else if (!category && open) {
       setSelectedCategoryId('');
       setSelectedSubcategoryId('');
