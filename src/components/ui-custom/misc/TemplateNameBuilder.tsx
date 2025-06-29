@@ -311,6 +311,7 @@ export function TemplateNameBuilder({
           </Popover>
 
           <Button 
+            type="button"
             variant="outline" 
             size="sm" 
             className="h-8"
