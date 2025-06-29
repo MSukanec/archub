@@ -119,6 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 29, 2025. Complete modal reorganization into feature-based structure with systematic TypeScript error resolution
+  • Organized all modals into feature-based folders: /modals/admin, /modals/budget, /modals/contact, /modals/material, /modals/movement, /modals/organization, /modals/project, /modals/site, /modals/tasks
+  • Updated all import paths across 50+ files to use new modal structure with @/modals/ prefix
+  • Implemented single-accordion sidebar behavior ensuring only one accordion opens at a time
+  • Enhanced CustomModalFooter to support both onSave and onSubmit props for flexible modal handling
+  • Fixed NewTaskTemplateModal to properly handle preselectedCategoryId prop with correct form initialization
+  • Resolved Header component TypeScript errors by updating icon prop interface to accept both ComponentType and ReactNode
+  • Systematically fixed all TypeScript errors across the application for stable compilation
+  • Modal architecture now follows clean separation of concerns with feature-based organization
 - June 29, 2025. Created TemplateNameBuilder component and fixed modal accordion structure
   • Built comprehensive TemplateNameBuilder.tsx component in src/components/ui-custom/misc for visual template construction
   • Replaced traditional textarea with visual component allowing parameter chips and text elements

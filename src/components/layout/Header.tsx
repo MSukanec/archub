@@ -333,9 +333,9 @@ export function Header({
             <>
               <span className="text-[var(--menues-fg)] opacity-70">/</span>
               <div className="flex items-center gap-1">
-                {Icon && (
+                {icon && (
                   <span className="text-[var(--menues-fg)]">
-                    {typeof Icon === 'function' ? React.createElement(Icon, { className: "h-3 w-3" }) : Icon}
+                    {typeof icon === 'function' ? React.createElement(icon, { className: "h-3 w-3" }) : icon}
                   </span>
                 )}
                 <span className="text-sm font-medium text-[var(--menues-fg)]">{title}</span>
