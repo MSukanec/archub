@@ -1,15 +1,15 @@
 import React from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout';
-import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader';
-import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
-import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { useCreateKanbanBoard } from '@/hooks/use-kanban';
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { toast } from '@/hooks/use-toast';
 
 const boardSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
@@ -24,94 +24,98 @@ interface NewBoardModalProps {
 }
 
 export function NewBoardModal({ open, onClose }: NewBoardModalProps) {
+  const { data: userData } = useCurrentUser();
   const createBoardMutation = useCreateKanbanBoard();
 
-  const form = useForm<BoardFormData>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors }
+  } = useForm<BoardFormData>({
     resolver: zodResolver(boardSchema),
     defaultValues: {
       name: '',
-      description: '',
-    },
+      description: ''
+    }
   });
 
   const onSubmit = async (data: BoardFormData) => {
+    if (!userData?.organization?.id) {
+      toast({
+        title: "Error",
+        description: "No se pudo obtener la organización",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       await createBoardMutation.mutateAsync({
         name: data.name,
         description: data.description || undefined,
+        project_id: userData.preferences?.last_project_id || undefined
       });
-      
-      form.reset();
+
+      toast({
+        title: "Éxito",
+        description: "Tablero creado correctamente"
+      });
+
+      reset();
       onClose();
     } catch (error) {
-      console.error('Error creating board:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo crear el tablero",
+        variant: "destructive"
+      });
     }
   };
 
-  const handleClose = () => {
-    form.reset();
-    onClose();
-  };
-
   return (
-    <CustomModalLayout open={open} onClose={handleClose}>
-      {{
-        header: (
-          <CustomModalHeader
-            title="Nuevo Tablero"
-            description="Crear un nuevo tablero Kanban"
-            onClose={handleClose}
-          />
-        ),
-        body: (
-          <CustomModalBody padding="md">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="required-asterisk">Nombre del tablero</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Mi tablero de tareas..." {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Nuevo Tablero Kanban</DialogTitle>
+        </DialogHeader>
+        
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Nombre del tablero</Label>
+            <Input
+              id="name"
+              {...register('name')}
+              placeholder="Ej: Desarrollo de Producto"
+            />
+            {errors.name && (
+              <p className="text-sm text-red-500">{errors.name.message}</p>
+            )}
+          </div>
 
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Descripción</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Descripción del tablero..." 
-                          className="min-h-[100px]"
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </form>
-            </Form>
-          </CustomModalBody>
-        ),
-        footer: (
-          <CustomModalFooter
-            onCancel={handleClose}
-            onSave={form.handleSubmit(onSubmit)}
-            saveText="Crear Tablero"
-            saveDisabled={createBoardMutation.isPending}
-            saveLoading={createBoardMutation.isPending}
-          />
-        )
-      }}
-    </CustomModalLayout>
+          <div className="space-y-2">
+            <Label htmlFor="description">Descripción (opcional)</Label>
+            <Textarea
+              id="description"
+              {...register('description')}
+              placeholder="Describe el propósito de este tablero..."
+              rows={3}
+            />
+          </div>
+
+          <div className="flex justify-end gap-2 pt-4">
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancelar
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={createBoardMutation.isPending}
+            >
+              {createBoardMutation.isPending ? 'Creando...' : 'Crear Tablero'}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

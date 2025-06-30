@@ -57,9 +57,9 @@
   --menues-fg: hsl(0, 0%, 45%);
   --menues-secondary-fg: hsl(0, 0%, 50%);
   --menues-border: hsl(0, 0%, 85%);
-  --menues-hover-bg: hsl(0, 0%, 45%);
+  --menues-hover-bg: hsl(90, 50%, 50%);
   --menues-hover-fg: hsl(0, 0%, 97%);
-  --menues-active-bg: hsl(0, 0%, 45%);
+  --menues-active-bg: hsl(90, 50%, 50%);
   --menues-active-fg: hsl(0, 0%, 97%);
 
   /* Cards */
@@ -173,9 +173,9 @@
   --menues-fg: hsl(0, 0%, 70%);
   --menues-secondary-fg: hsl(0, 0%, 60%);
   --menues-border: hsl(240, 8%, 20%);
-  --menues-hover-bg: hsl(0, 0%, 20%);
+  --menues-hover-bg: hsl(90, 50%, 50%);
   --menues-hover-fg: hsl(0, 0%, 90%);
-  --menues-active-bg: hsl(0, 0%, 25%);
+  --menues-active-bg: hsl(90, 50%, 50%);
   --menues-active-fg: hsl(0, 0%, 98%);
 
   /* Cards */

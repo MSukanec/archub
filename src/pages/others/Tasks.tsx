@@ -8,7 +8,7 @@ import { CheckSquare, Plus, Kanban } from 'lucide-react';
 import { useKanbanBoards, useKanbanLists, useKanbanCards, useMoveKanbanCard } from '@/hooks/use-kanban';
 import { useKanbanStore } from '@/stores/kanbanStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
-// import { NewBoardModal } from '@/modals/tasks/NewBoardModal';
+import { NewBoardModal } from '@/modals/tasks/NewBoardModal';
 // import { NewListModal } from '@/modals/tasks/NewListModal';
 
 export default function Tasks() {
@@ -94,7 +94,7 @@ export default function Tasks() {
   // Loading state
   if (boardsLoading) {
     return (
-      <Layout headerProps={{ title: "Tareas", showSearch: false, actions: [] }}>
+      <Layout headerProps={headerProps}>
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="text-lg font-semibold">Cargando tableros...</div>
@@ -107,10 +107,10 @@ export default function Tasks() {
   // Empty state with CustomEmptyState
   if (boards.length === 0) {
     return (
-      <Layout headerProps={{ title: "Tareas", showSearch: false, actions: [] }}>
+      <Layout headerProps={headerProps}>
         <CustomEmptyState
           icon={<Kanban className="w-8 h-8 text-muted-foreground" />}
-          title="No hay tableros Kanban"
+          title="Aún no hay tareas!"
           description="Crea tu primer tablero para comenzar a organizar tareas"
           action={
             <Button onClick={() => setShowNewBoardModal(true)} className="h-8 px-3 text-sm">
@@ -120,11 +120,10 @@ export default function Tasks() {
           }
         />
         
-        {/* Modal temporarily disabled */}
-        {/* <NewBoardModal
+        <NewBoardModal
           open={showNewBoardModal}
           onClose={() => setShowNewBoardModal(false)}
-        /> */}
+        />
       </Layout>
     );
   }
@@ -150,13 +149,13 @@ export default function Tasks() {
         loading={listsLoading || cardsLoading}
       />
 
-      {/* Modals - Temporarily disabled while fixing imports */}
-      {/* <NewBoardModal
+      {/* Modals */}
+      <NewBoardModal
         open={showNewBoardModal}
         onClose={() => setShowNewBoardModal(false)}
       />
       
-      {currentBoardId && (
+      {/* {currentBoardId && (
         <NewListModal
           boardId={currentBoardId}
           open={showNewListModal}
