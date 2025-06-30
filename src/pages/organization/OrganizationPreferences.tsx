@@ -54,7 +54,6 @@ export default function OrganizationPreferences() {
   const { toast } = useToast();
 
   const { setSidebarContext } = useNavigationStore();
-  const { toast } = useToast();
 
   // Set sidebar context to organization when component mounts
   useEffect(() => {
@@ -237,9 +236,10 @@ export default function OrganizationPreferences() {
       }
     },
     onSuccess: () => {
+      // Sutil notificación de auto-guardado
       toast({
-        title: "Preferencias guardadas",
-        description: "Las preferencias de la organización se han actualizado correctamente.",
+        description: "Cambios guardados automáticamente",
+        duration: 2000,
       });
       
       // Invalidate related queries
@@ -250,9 +250,10 @@ export default function OrganizationPreferences() {
     onError: (error) => {
       console.error('Error saving preferences:', error);
       toast({
-        title: "Error",
-        description: "No se pudieron guardar las preferencias. Inténtalo de nuevo.",
+        title: "Error al guardar",
+        description: "No se pudieron guardar las preferencias. Se reintentará automáticamente.",
         variant: "destructive",
+        duration: 4000,
       });
     },
   });

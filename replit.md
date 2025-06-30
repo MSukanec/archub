@@ -119,6 +119,16 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 30, 2025. Enhanced Organization Preferences with auto-save functionality and improved UI consistency
+  • Implemented automatic save with 1.5-second debounce delay eliminating the need for manual save button
+  • Added page title "Configuración de la Organización" and description following reference design pattern
+  • Enhanced form sections with horizontal Separator components for better visual organization
+  • Updated CustomMultiComboBox styling to match input component aesthetics exactly (height, padding, colors, borders)
+  • Created wrapper functions for all state setters to trigger auto-save on every change
+  • Added subtle toast notifications for auto-save feedback ("Cambios guardados automáticamente")
+  • Improved error handling with descriptive messages for auto-save failures
+  • Removed save button from header as part of streamlined auto-save implementation
+  • Enhanced UX with immediate visual feedback and seamless preference management
 - June 30, 2025. Complete Kanban board system implementation with Supabase integration
   • Created comprehensive Kanban system using kanban_boards, kanban_lists, kanban_cards, kanban_comments, and kanban_attachments tables
   • Built useKanban hooks for all CRUD operations with proper React Query integration and error handling
