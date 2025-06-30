@@ -81,19 +81,24 @@ export function useKanbanBoards(projectId?: string) {
   return useQuery({
     queryKey: ['kanban-boards', organizationId, effectiveProjectId],
     queryFn: async () => {
-      if (!organizationId || !effectiveProjectId) throw new Error('Organization ID and Project ID required')
+      if (!organizationId) throw new Error('Organization ID required')
 
-      const { data, error } = await supabase
+      let query = supabase
         .from('kanban_boards')
         .select('*')
         .eq('organization_id', organizationId)
-        .eq('project_id', effectiveProjectId)
-        .order('created_at', { ascending: false })
+
+      // If project is specified, filter by project. Otherwise show all organization boards
+      if (effectiveProjectId) {
+        query = query.eq('project_id', effectiveProjectId)
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false })
 
       if (error) throw error
       return data as KanbanBoard[]
     },
-    enabled: !!organizationId && !!effectiveProjectId
+    enabled: !!organizationId
   })
 }
 

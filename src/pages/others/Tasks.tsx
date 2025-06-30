@@ -27,7 +27,8 @@ export default function Tasks() {
   // Get project data from user preferences
   const projectId = userData?.preferences?.last_project_id;
   
-  const { data: boards = [], isLoading: boardsLoading } = useKanbanBoards(projectId);
+  // Pass null if no project is selected to show all organization boards
+  const { data: boards = [], isLoading: boardsLoading } = useKanbanBoards(projectId || null);
   const { data: lists = [], isLoading: listsLoading } = useKanbanLists(currentBoardId || '');
   const { data: cards = [], isLoading: cardsLoading } = useKanbanCards(currentBoardId || '');
   
