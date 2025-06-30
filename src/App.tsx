@@ -239,6 +239,12 @@ function Router() {
         </ProtectedRoute>
       </Route>
 
+      <Route path="/tasks">
+        <ProtectedRoute>
+          <Tasks />
+        </ProtectedRoute>
+      </Route>
+
       {/* Redirección de /dashboard por compatibilidad */}
       <Route path="/dashboard">
         <Redirect to="/organization/dashboard" />
