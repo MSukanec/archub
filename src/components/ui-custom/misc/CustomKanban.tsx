@@ -143,27 +143,37 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
                                   snapshot.isDraggingOver ? 'bg-accent/10' : ''
                                 }`}
                               >
-                                {cardsByList[list.id]?.map((card, index) => (
-                                  <Draggable key={card.id} draggableId={card.id} index={index}>
-                                    {(provided, snapshot) => (
-                                      <Card
-                                        ref={provided.innerRef}
-                                        {...provided.draggableProps}
-                                        {...provided.dragHandleProps}
-                                        className={`p-2 cursor-pointer hover:shadow-sm transition-shadow ${
-                                          snapshot.isDragging ? 'shadow-md rotate-1' : ''
-                                        }`}
-                                      >
-                                        <div className="text-sm font-medium">{card.title}</div>
-                                        {card.description && (
-                                          <div className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                                            {card.description}
-                                          </div>
-                                        )}
-                                      </Card>
-                                    )}
-                                  </Draggable>
-                                ))}
+                                {(cardsByList[list.id]?.length || 0) > 0 ? (
+                                  cardsByList[list.id]?.map((card, index) => (
+                                    <Draggable key={card.id} draggableId={card.id} index={index}>
+                                      {(provided, snapshot) => (
+                                        <Card
+                                          ref={provided.innerRef}
+                                          {...provided.draggableProps}
+                                          {...provided.dragHandleProps}
+                                          className={`p-2 cursor-pointer hover:shadow-sm transition-shadow ${
+                                            snapshot.isDragging ? 'shadow-md rotate-1' : ''
+                                          }`}
+                                        >
+                                          <div className="text-sm font-medium">{card.title}</div>
+                                          {card.description && (
+                                            <div className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                                              {card.description}
+                                            </div>
+                                          )}
+                                        </Card>
+                                      )}
+                                    </Draggable>
+                                  ))
+                                ) : (
+                                  <div className="py-8">
+                                    <CustomEmptyState
+                                      icon={<Plus className="w-6 h-6 text-muted-foreground" />}
+                                      title="No hay tarjetas"
+                                      description="Esta lista está vacía"
+                                    />
+                                  </div>
+                                )}
                                 {provided.placeholder}
                               </div>
                             )}

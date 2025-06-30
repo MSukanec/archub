@@ -113,6 +113,38 @@ export function NewCardModal({ open, onClose, listId }: NewCardModalProps) {
             <form id="card-form" onSubmit={handleSubmit(onSubmit)}>
               <div className="grid grid-cols-1 gap-4">
                 <div className="col-span-1">
+                  <Label htmlFor="created_by">Creador</Label>
+                  <Select 
+                    value={watch('created_by')} 
+                    onValueChange={(value) => setValue('created_by', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar creador" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {organizationMembers?.map((member) => (
+                        <SelectItem key={member.id} value={member.user_id}>
+                          <div className="flex items-center gap-2">
+                            <Avatar className="h-5 w-5">
+                              {member.user.avatar_url && (
+                                <AvatarImage src={member.user.avatar_url} />
+                              )}
+                              <AvatarFallback className="text-xs">
+                                {member.user.full_name.charAt(0).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            {member.user.full_name}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.created_by && (
+                    <p className="text-sm text-red-500 mt-1">{errors.created_by.message}</p>
+                  )}
+                </div>
+
+                <div className="col-span-1">
                   <Label htmlFor="title">Título</Label>
                   <Input 
                     id="title"
@@ -141,13 +173,23 @@ export function NewCardModal({ open, onClose, listId }: NewCardModalProps) {
                     onValueChange={(value) => setValue('assigned_to', value)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar miembro" />
+                      <SelectValue placeholder="Sin asignar" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="">Sin asignar</SelectItem>
                       {organizationMembers?.map((member) => (
                         <SelectItem key={member.id} value={member.user_id}>
-                          {member.user.full_name}
+                          <div className="flex items-center gap-2">
+                            <Avatar className="h-5 w-5">
+                              {member.user.avatar_url && (
+                                <AvatarImage src={member.user.avatar_url} />
+                              )}
+                              <AvatarFallback className="text-xs">
+                                {member.user.full_name.charAt(0).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            {member.user.full_name}
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
