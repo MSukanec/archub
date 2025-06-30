@@ -119,7 +119,7 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- June 30, 2025. Enhanced Organization Preferences with auto-save functionality and improved UI consistency
+- June 30, 2025. Enhanced Organization Preferences with auto-save functionality, improved UI consistency, and movement concepts management
   • Implemented automatic save with 1.5-second debounce delay eliminating the need for manual save button
   • Added page title "Configuración de la Organización" and description following reference design pattern
   • Enhanced form sections with horizontal Separator components for better visual organization
@@ -128,6 +128,13 @@ Changelog:
   • Added subtle toast notifications for auto-save feedback ("Cambios guardados automáticamente")
   • Improved error handling with descriptive messages for auto-save failures
   • Removed save button from header as part of streamlined auto-save implementation
+  • Fixed visual separators between sections using hr elements with explicit border styling for better visibility
+  • Increased column spacing from gap-8 to gap-12 for better content distribution between title/description and form fields
+  • Created comprehensive Movement Concepts management section with hierarchical display and CRUD operations
+  • Added MovementConcept interface and queries to load system concepts (organization_id null) and organization-specific concepts
+  • Implemented create/delete mutations for movement concepts with proper parent-child relationships (only children can be created by organizations)
+  • Built visual hierarchy showing parent concepts (EGRESOS, INGRESOS, CONVERSION) with their child concepts organized and labeled as "Sistema" or "Personalizado"
+  • Added form controls for creating new child concepts with parent selection and name input, plus delete buttons for organization-owned concepts only
   • Enhanced UX with immediate visual feedback and seamless preference management
 - June 30, 2025. Complete Kanban board system implementation with Supabase integration
   • Created comprehensive Kanban system using kanban_boards, kanban_lists, kanban_cards, kanban_comments, and kanban_attachments tables
