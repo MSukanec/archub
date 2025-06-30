@@ -1,12 +1,14 @@
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout';
+import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader';
+import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
+import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter';
 import { useCreateKanbanBoard } from '@/hooks/use-kanban';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { toast } from '@/hooks/use-toast';
@@ -21,9 +23,10 @@ type BoardFormData = z.infer<typeof boardSchema>;
 interface NewBoardModalProps {
   open: boolean;
   onClose: () => void;
+  editingBoard?: any;
 }
 
-export function NewBoardModal({ open, onClose }: NewBoardModalProps) {
+export function NewBoardModal({ open, onClose, editingBoard }: NewBoardModalProps) {
   const { data: userData } = useCurrentUser();
   const createBoardMutation = useCreateKanbanBoard();
 
@@ -31,7 +34,7 @@ export function NewBoardModal({ open, onClose }: NewBoardModalProps) {
     register,
     handleSubmit,
     reset,
-    formState: { errors }
+    formState: { errors, isSubmitting }
   } = useForm<BoardFormData>({
     resolver: zodResolver(boardSchema),
     defaultValues: {
@@ -39,6 +42,11 @@ export function NewBoardModal({ open, onClose }: NewBoardModalProps) {
       description: ''
     }
   });
+
+  const handleClose = () => {
+    reset();
+    onClose();
+  };
 
   const onSubmit = async (data: BoardFormData) => {
     if (!userData?.organization?.id) {
@@ -62,9 +70,9 @@ export function NewBoardModal({ open, onClose }: NewBoardModalProps) {
         description: "Tablero creado correctamente"
       });
 
-      reset();
-      onClose();
+      handleClose();
     } catch (error) {
+      console.error('Error creating board:', error);
       toast({
         title: "Error",
         description: "No se pudo crear el tablero",
@@ -74,51 +82,55 @@ export function NewBoardModal({ open, onClose }: NewBoardModalProps) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Nuevo Tablero Kanban</DialogTitle>
-          <DialogDescription>
-            Crea un nuevo tablero para organizar tus tareas con listas y tarjetas.
-          </DialogDescription>
-        </DialogHeader>
-        
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Nombre del tablero</Label>
-            <Input
-              id="name"
-              {...register('name')}
-              placeholder="Ej: Desarrollo de Producto"
-            />
-            {errors.name && (
-              <p className="text-sm text-red-500">{errors.name.message}</p>
-            )}
-          </div>
+    <CustomModalLayout
+      open={open}
+      onClose={handleClose}
+      children={{
+        header: (
+          <CustomModalHeader
+            title="Nuevo Tablero de Ideas"
+            description="Crea un nuevo tablero para organizar tus tareas con listas y tarjetas"
+            onClose={handleClose}
+          />
+        ),
+        body: (
+          <CustomModalBody>
+            <form id="board-form" onSubmit={handleSubmit(onSubmit)}>
+              <div className="grid grid-cols-1 gap-4">
+                <div className="col-span-1">
+                  <Label htmlFor="name">Nombre del tablero</Label>
+                  <Input 
+                    id="name"
+                    {...register('name')}
+                    placeholder="Cosas para Hacer"
+                  />
+                  {errors.name && (
+                    <p className="text-sm text-red-500 mt-1">{errors.name.message}</p>
+                  )}
+                </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Descripción (opcional)</Label>
-            <Textarea
-              id="description"
-              {...register('description')}
-              placeholder="Describe el propósito de este tablero..."
-              rows={3}
-            />
-          </div>
-
-          <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancelar
-            </Button>
-            <Button 
-              type="submit" 
-              disabled={createBoardMutation.isPending}
-            >
-              {createBoardMutation.isPending ? 'Creando...' : 'Crear Tablero'}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+                <div className="col-span-1">
+                  <Label htmlFor="description">Descripción (opcional)</Label>
+                  <Textarea 
+                    id="description"
+                    {...register('description')}
+                    placeholder="Describe el propósito de este tablero..."
+                    rows={3}
+                  />
+                </div>
+              </div>
+            </form>
+          </CustomModalBody>
+        ),
+        footer: (
+          <CustomModalFooter
+            onCancel={handleClose}
+            form="board-form"
+            saveText="Crear Tablero"
+            isLoading={isSubmitting}
+          />
+        )
+      }}
+    />
   );
 }
