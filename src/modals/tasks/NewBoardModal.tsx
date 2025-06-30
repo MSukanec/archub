@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -44,6 +44,16 @@ export function NewBoardModal({ open, onClose, board, isEditing = false }: NewBo
       description: board?.description || ''
     }
   });
+
+  // Reset form when board changes or modal opens/closes
+  useEffect(() => {
+    if (open) {
+      reset({
+        name: board?.name || '',
+        description: board?.description || ''
+      });
+    }
+  }, [open, board, reset]);
 
   const handleClose = () => {
     reset();

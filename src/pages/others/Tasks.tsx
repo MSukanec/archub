@@ -79,65 +79,58 @@ export default function Tasks() {
 
   // Header configuration following ai-page-template.md
   const headerProps = {
-    title: (
-      <div className="flex items-center gap-3">
-        <span>Tareas</span>
-        {boards.length > 0 && currentBoard && (
-          <>
-            <span className="text-muted-foreground">·</span>
-            <div className="flex items-center gap-2">
-              <Select value={currentBoardId || undefined} onValueChange={handleBoardChange}>
-                <SelectTrigger className="w-[200px] h-8 border-0 bg-transparent p-0 font-medium focus:ring-0">
-                  <SelectValue>{currentBoard.name}</SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {boards.map((board) => (
-                    <SelectItem key={board.id} value={board.id}>
-                      {board.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+    title: currentBoard ? `Tareas - ${currentBoard.name}` : "Tareas",
+    showSearch: false,
+    actions: [
+      boards.length > 0 && currentBoard && (
+        <div key="board-controls" className="flex items-center gap-2">
+          <Select value={currentBoardId || undefined} onValueChange={handleBoardChange}>
+            <SelectTrigger className="w-[200px] h-8">
+              <SelectValue placeholder="Seleccionar tablero..." />
+            </SelectTrigger>
+            <SelectContent>
+              {boards.map((board) => (
+                <SelectItem key={board.id} value={board.id}>
+                  {board.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => handleEditBoard(currentBoard)}
+          >
+            <Edit className="h-3 w-3" />
+          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6"
-                onClick={() => handleEditBoard(currentBoard)}
+                className="h-8 w-8"
               >
-                <Edit className="h-3 w-3" />
+                <Trash2 className="h-3 w-3" />
               </Button>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>¿Eliminar tablero?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Esta acción eliminará permanentemente el tablero "{currentBoard.name}" y todas sus listas y tarjetas.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => handleDeleteBoard(currentBoard.id)}>
-                      Eliminar
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-          </>
-        )}
-      </div>
-    ),
-    showSearch: false,
-    actions: [
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>¿Eliminar tablero?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Esta acción eliminará permanentemente el tablero "{currentBoard.name}" y todas sus listas y tarjetas.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={() => handleDeleteBoard(currentBoard.id)}>
+                  Eliminar
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      ),
       <Button 
         key="new-board"
         className="h-8 px-3 text-sm"
@@ -146,13 +139,28 @@ export default function Tasks() {
         <Plus className="h-3 w-3 mr-1" />
         Nuevo Tablero
       </Button>
-    ]
+    ].filter(Boolean)
   };
 
   // Loading state
   if (boardsLoading) {
+    const loadingHeaderProps = {
+      title: "Tareas",
+      showSearch: false,
+      actions: [
+        <Button 
+          key="new-board"
+          className="h-8 px-3 text-sm"
+          onClick={() => setShowNewBoardModal(true)}
+        >
+          <Plus className="h-3 w-3 mr-1" />
+          Nuevo Tablero
+        </Button>
+      ]
+    };
+
     return (
-      <Layout headerProps={headerProps}>
+      <Layout headerProps={loadingHeaderProps}>
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="text-lg font-semibold">Cargando tableros...</div>
@@ -164,8 +172,23 @@ export default function Tasks() {
 
   // Empty state with CustomEmptyState
   if (boards.length === 0) {
+    const emptyHeaderProps = {
+      title: "Tareas",
+      showSearch: false,
+      actions: [
+        <Button 
+          key="new-board"
+          className="h-8 px-3 text-sm"
+          onClick={() => setShowNewBoardModal(true)}
+        >
+          <Plus className="h-3 w-3 mr-1" />
+          Nuevo Tablero
+        </Button>
+      ]
+    };
+
     return (
-      <Layout headerProps={headerProps}>
+      <Layout headerProps={emptyHeaderProps}>
         <CustomEmptyState
           icon={<Kanban className="w-8 h-8 text-muted-foreground" />}
           title="Aún no hay tareas!"
