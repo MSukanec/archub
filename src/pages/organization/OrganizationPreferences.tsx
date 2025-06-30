@@ -7,8 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CustomComboBox } from '@/components/ui-custom/misc/CustomComboBox';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -35,22 +33,6 @@ interface Currency {
   created_at: string;
 }
 
-interface OrganizationCurrency {
-  id: string;
-  organization_id: string;
-  currency_id: string;
-  is_default: boolean;
-  created_at: string;
-}
-
-interface OrganizationWallet {
-  id: string;
-  organization_id: string;
-  wallet_id: string;
-  is_default: boolean;
-  created_at: string;
-}
-
 interface OrganizationPreferences {
   id: string;
   organization_id: string;
@@ -65,8 +47,8 @@ export default function OrganizationPreferences() {
   const [defaultCurrency, setDefaultCurrency] = useState('none');
   const [defaultWallet, setDefaultWallet] = useState('none');
   const [defaultPdfTemplate, setDefaultPdfTemplate] = useState('none');
-  const [secondaryCurrency, setSecondaryCurrency] = useState('none');
-  const [secondaryWallet, setSecondaryWallet] = useState('none');
+  const [secondaryCurrency, setSecondaryCurrency] = useState('');
+  const [secondaryWallet, setSecondaryWallet] = useState('');
 
   const { setSidebarContext } = useNavigationStore();
   const { toast } = useToast();
@@ -83,120 +65,101 @@ export default function OrganizationPreferences() {
   const { data: allCurrencies = [] } = useQuery({
     queryKey: ['currencies'],
     queryFn: async () => {
-      console.log('Fetching currencies...');
+      if (!supabase) throw new Error('Supabase not initialized');
+      
       const { data, error } = await supabase
         .from('currencies')
         .select('*')
         .order('name');
       
-      if (error) {
-        console.error('Error fetching currencies:', error);
-        throw error;
-      }
-      
-      console.log('Currencies fetched:', data);
+      if (error) throw error;
       return data as Currency[];
     },
   });
 
-  // Fetch all wallets (global list, not organization-specific)
+  // Fetch all wallets
   const { data: allWallets = [] } = useQuery({
     queryKey: ['wallets'],
     queryFn: async () => {
-      console.log('Fetching all wallets...');
+      if (!supabase) throw new Error('Supabase not initialized');
+      
       const { data, error } = await supabase
         .from('wallets')
         .select('*')
         .order('name');
       
-      if (error) {
-        console.error('Error fetching wallets:', error);
-        throw error;
-      }
-      
-      console.log('Wallets fetched:', data);
+      if (error) throw error;
       return data as Wallet[];
     },
   });
 
-  // Fetch organization preferences
-  const { data: orgPreferences } = useQuery({
-    queryKey: ['organization-preferences', organizationId],
-    queryFn: async () => {
-      if (!organizationId) return null;
-      
-      const { data, error } = await supabase
-        .from('organization_preferences')
-        .select('*')
-        .eq('organization_id', organizationId)
-        .single();
-      
-      if (error && error.code !== 'PGRST116') throw error;
-      return data as OrganizationPreferences | null;
-    },
-    enabled: !!organizationId,
-  });
-
-  // Fetch organization currencies
-  const { data: orgCurrencies = [] } = useQuery({
-    queryKey: ['organization-currencies', organizationId],
-    queryFn: async () => {
-      if (!organizationId) return [];
-      
-      const { data, error } = await supabase
-        .from('organization_currencies')
-        .select('*')
-        .eq('organization_id', organizationId)
-        .eq('is_active', true);
-      
-      if (error) throw error;
-      return data as OrganizationCurrency[];
-    },
-    enabled: !!organizationId,
-  });
-
-  // Fetch organization wallets (using our new hook that matches currencies structure)
-  const { data: orgWallets = [] } = useWallets(organizationId);
-
-  // Load current preferences when data is available
+  // Load existing preferences
   useEffect(() => {
-    if (orgPreferences) {
-      setDefaultCurrency(orgPreferences.default_currency_id || 'none');
-      setDefaultWallet(orgPreferences.default_wallet_id || 'none');
-      setDefaultPdfTemplate(orgPreferences.default_pdf_template_id || 'none');
-    }
-  }, [orgPreferences]);
+    if (!organizationId) return;
 
-  // Load secondary currencies and wallets
-  useEffect(() => {
-    const secondaries = orgCurrencies
-      .filter(oc => !oc.is_default)
-      .map(oc => oc.currency_id);
-    setSecondaryCurrencies(secondaries);
-  }, [orgCurrencies]);
+    const loadPreferences = async () => {
+      if (!supabase) return;
+      
+      try {
+        // Load organization preferences
+        const { data: preferences } = await supabase
+          .from('organization_preferences')
+          .select('*')
+          .eq('organization_id', organizationId)
+          .single();
 
-  useEffect(() => {
-    const secondaries = orgWallets
-      .filter(ow => !ow.is_default)
-      .map(ow => ow.wallet_id);
-    setSecondaryWallets(secondaries);
-  }, [orgWallets]);
+        if (preferences) {
+          setDefaultCurrency(preferences.default_currency_id || 'none');
+          setDefaultWallet(preferences.default_wallet_id || 'none');
+          setDefaultPdfTemplate(preferences.default_pdf_template_id || 'none');
+        }
+
+        // Load secondary currencies
+        const { data: orgCurrencies } = await supabase
+          .from('organization_currencies')
+          .select('currency_id, is_default')
+          .eq('organization_id', organizationId);
+
+        // Find secondary currency (non-default)
+        const secondaryCurr = orgCurrencies?.find(oc => !oc.is_default);
+        if (secondaryCurr) {
+          setSecondaryCurrency(secondaryCurr.currency_id);
+        }
+
+        // Load secondary wallets
+        const { data: orgWallets } = await supabase
+          .from('organization_wallets')
+          .select('wallet_id, is_default')
+          .eq('organization_id', organizationId);
+
+        // Find secondary wallet (non-default)
+        const secondaryWall = orgWallets?.find(ow => !ow.is_default);
+        if (secondaryWall) {
+          setSecondaryWallet(secondaryWall.wallet_id);
+        }
+      } catch (error) {
+        console.error('Error loading preferences:', error);
+      }
+    };
+
+    loadPreferences();
+  }, [organizationId]);
 
   // Save preferences mutation
   const savePreferencesMutation = useMutation({
     mutationFn: async () => {
-      if (!organizationId) throw new Error('No organization selected');
+      if (!organizationId || !supabase) {
+        throw new Error('Organization ID required');
+      }
 
-      // Save organization preferences
+      // Upsert organization preferences
       const { error: prefError } = await supabase
         .from('organization_preferences')
         .upsert({
           organization_id: organizationId,
-          default_currency_id: defaultCurrency === 'none' ? null : defaultCurrency,
-          default_wallet_id: defaultWallet === 'none' ? null : defaultWallet,
-          default_pdf_template_id: defaultPdfTemplate === 'none' ? null : defaultPdfTemplate,
-        }, {
-          onConflict: 'organization_id'
+          default_currency_id: defaultCurrency !== 'none' ? defaultCurrency : null,
+          default_wallet_id: defaultWallet !== 'none' ? defaultWallet : null,
+          default_pdf_template_id: defaultPdfTemplate !== 'none' ? defaultPdfTemplate : null,
         });
 
       if (prefError) throw prefError;
@@ -225,17 +188,15 @@ export default function OrganizationPreferences() {
         if (currError) throw currError;
       }
 
-      // Add secondary currencies
-      if (secondaryCurrencies.length > 0) {
-        const secondaryCurrencyInserts = secondaryCurrencies.map(currencyId => ({
-          organization_id: organizationId,
-          currency_id: currencyId,
-          is_default: false,
-        }));
-
+      // Add secondary currency if selected
+      if (secondaryCurrency && secondaryCurrency !== defaultCurrency) {
         const { error: secCurrError } = await supabase
           .from('organization_currencies')
-          .insert(secondaryCurrencyInserts);
+          .insert({
+            organization_id: organizationId,
+            currency_id: secondaryCurrency,
+            is_default: false,
+          });
 
         if (secCurrError) throw secCurrError;
       }
@@ -253,17 +214,15 @@ export default function OrganizationPreferences() {
         if (walletError) throw walletError;
       }
 
-      // Add secondary wallets
-      if (secondaryWallets.length > 0) {
-        const secondaryWalletInserts = secondaryWallets.map(walletId => ({
-          organization_id: organizationId,
-          wallet_id: walletId,
-          is_default: false,
-        }));
-
+      // Add secondary wallet if selected
+      if (secondaryWallet && secondaryWallet !== defaultWallet) {
         const { error: secWalletError } = await supabase
           .from('organization_wallets')
-          .insert(secondaryWalletInserts);
+          .insert({
+            organization_id: organizationId,
+            wallet_id: secondaryWallet,
+            is_default: false,
+          });
 
         if (secWalletError) throw secWalletError;
       }
@@ -293,32 +252,23 @@ export default function OrganizationPreferences() {
     savePreferencesMutation.mutate();
   };
 
-  // Filter out default selections from secondary options
-  const availableSecondaryCurrencies = allCurrencies.filter(c => 
-    c.id !== defaultCurrency || defaultCurrency === 'none'
-  );
-  const availableSecondaryWallets = allWallets.filter(w => 
-    w.id !== defaultWallet || defaultWallet === 'none'
-  );
+  // Convert currencies and wallets to options for CustomComboBox
+  const currencyOptions = allCurrencies.map(currency => ({
+    value: currency.id,
+    label: `${currency.code} - ${currency.name}`
+  }));
 
-  const handleSecondaryCurrencyToggle = (currencyId: string) => {
-    setSecondaryCurrencies(prev => 
-      prev.includes(currencyId)
-        ? prev.filter(id => id !== currencyId)
-        : [...prev, currencyId]
-    );
-  };
+  const walletOptions = allWallets.map(wallet => ({
+    value: wallet.id,
+    label: wallet.name
+  }));
 
-  const handleSecondaryWalletToggle = (walletId: string) => {
-    setSecondaryWallets(prev => 
-      prev.includes(walletId)
-        ? prev.filter(id => id !== walletId)
-        : [...prev, walletId]
-    );
-  };
+  // Filter secondary options to exclude default selections
+  const secondaryCurrencyOptions = currencyOptions.filter(option => option.value !== defaultCurrency);
+  const secondaryWalletOptions = walletOptions.filter(option => option.value !== defaultWallet);
 
   const headerProps = {
-    title: "Preferencias",
+    title: "Preferencias de Finanzas",
     actions: [
       <Button 
         key="save-preferences"
@@ -344,144 +294,128 @@ export default function OrganizationPreferences() {
 
   return (
     <Layout headerProps={headerProps}>
-      <div className="space-y-6">
-        {/* Monedas */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Monedas</CardTitle>
-            <CardDescription>
-              Configura las monedas disponibles en esta organización
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="default-currency">Moneda por defecto</Label>
-              <Select value={defaultCurrency} onValueChange={setDefaultCurrency}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar moneda" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Sin seleccionar</SelectItem>
-                  {allCurrencies.map((currency) => (
-                    <SelectItem key={currency.id} value={currency.id}>
-                      {currency.code} - {currency.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+      <div className="max-w-4xl mx-auto space-y-8">
+        {/* Monedas Section */}
+        <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Left Column - Title and Description */}
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5 text-[var(--accent)]" />
+                <h3 className="text-lg font-semibold">Monedas</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Configura las monedas disponibles para esta organización. 
+                Define una moneda principal y una secundaria opcional.
+              </p>
             </div>
 
-            <div className="space-y-2">
-              <Label>Monedas secundarias</Label>
+            {/* Right Column - Form Fields */}
+            <div className="space-y-4">
               <div className="space-y-2">
-                <div className="flex flex-wrap gap-2">
-                  {secondaryCurrencies.map((currencyId) => {
-                    const currency = allCurrencies.find(c => c.id === currencyId);
-                    return currency ? (
-                      <Badge 
-                        key={currencyId} 
-                        variant="secondary" 
-                        className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground"
-                        onClick={() => handleSecondaryCurrencyToggle(currencyId)}
-                      >
-                        {currency.code} - {currency.name} ×
-                      </Badge>
-                    ) : null;
-                  })}
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                  {availableSecondaryCurrencies.map((currency) => (
-                    <div 
-                      key={currency.id}
-                      className="p-2 border rounded cursor-pointer hover:bg-accent text-sm"
-                      onClick={() => handleSecondaryCurrencyToggle(currency.id)}
-                    >
-                      <div className="font-medium">{currency.code}</div>
-                      <div className="text-xs opacity-70">{currency.name}</div>
-                    </div>
-                  ))}
-                </div>
+                <Label htmlFor="default-currency">Moneda principal</Label>
+                <Select value={defaultCurrency} onValueChange={setDefaultCurrency}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar moneda" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Sin seleccionar</SelectItem>
+                    {allCurrencies.map((currency) => (
+                      <SelectItem key={currency.id} value={currency.id}>
+                        {currency.code} - {currency.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="secondary-currency">Moneda secundaria</Label>
+                <CustomComboBox
+                  options={secondaryCurrencyOptions}
+                  value={secondaryCurrency}
+                  onValueChange={setSecondaryCurrency}
+                  placeholder="Seleccionar moneda secundaria..."
+                  searchPlaceholder="Buscar moneda..."
+                  emptyText="No se encontraron monedas."
+                />
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        {/* Billeteras */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Billeteras</CardTitle>
-            <CardDescription>
-              Configura las billeteras disponibles en esta organización
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="default-wallet">Billetera por defecto</Label>
-              <Select value={defaultWallet} onValueChange={setDefaultWallet}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar billetera" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Sin seleccionar</SelectItem>
-                  {allWallets.map((wallet) => (
-                    <SelectItem key={wallet.id} value={wallet.id}>
-                      {wallet.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+        <Separator />
+
+        {/* Billeteras Section */}
+        <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Left Column - Title and Description */}
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Wallet className="h-5 w-5 text-[var(--accent)]" />
+                <h3 className="text-lg font-semibold">Billeteras</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Configura las billeteras disponibles para esta organización. 
+                Define una billetera principal y una secundaria opcional.
+              </p>
             </div>
 
-            <div className="space-y-2">
-              <Label>Billeteras secundarias</Label>
+            {/* Right Column - Form Fields */}
+            <div className="space-y-4">
               <div className="space-y-2">
-                <div className="flex flex-wrap gap-2">
-                  {secondaryWallets.map((walletId) => {
-                    const wallet = allWallets.find(w => w.id === walletId);
-                    return wallet ? (
-                      <Badge 
-                        key={walletId} 
-                        variant="secondary" 
-                        className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground"
-                        onClick={() => handleSecondaryWalletToggle(walletId)}
-                      >
-                        {wallet.name} ×
-                      </Badge>
-                    ) : null;
-                  })}
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                  {availableSecondaryWallets.map((wallet) => (
-                    <div 
-                      key={wallet.id}
-                      className="p-2 border rounded cursor-pointer hover:bg-accent text-sm"
-                      onClick={() => handleSecondaryWalletToggle(wallet.id)}
-                    >
-                      <div className="font-medium">{wallet.name}</div>
-                    </div>
-                  ))}
-                </div>
+                <Label htmlFor="default-wallet">Billetera principal</Label>
+                <Select value={defaultWallet} onValueChange={setDefaultWallet}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar billetera" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Sin seleccionar</SelectItem>
+                    {allWallets.map((wallet) => (
+                      <SelectItem key={wallet.id} value={wallet.id}>
+                        {wallet.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="secondary-wallet">Billetera secundaria</Label>
+                <CustomComboBox
+                  options={secondaryWalletOptions}
+                  value={secondaryWallet}
+                  onValueChange={setSecondaryWallet}
+                  placeholder="Seleccionar billetera secundaria..."
+                  searchPlaceholder="Buscar billetera..."
+                  emptyText="No se encontraron billeteras."
+                />
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        {/* Plantillas */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Plantillas</CardTitle>
-            <CardDescription>
-              Configura las plantillas por defecto para diferentes tipos de reportes
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="budget-template" className="text-sm font-medium">
-                Plantilla de Cómputo y Presupuesto:
-              </Label>
-              <div className="w-64">
+        <Separator />
+
+        {/* Plantillas Section */}
+        <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Left Column - Title and Description */}
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Settings className="h-5 w-5 text-[var(--accent)]" />
+                <h3 className="text-lg font-semibold">Plantillas</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Configura las plantillas por defecto para diferentes tipos de reportes 
+                y documentos de la organización.
+              </p>
+            </div>
+
+            {/* Right Column - Form Fields */}
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="pdf-template">Plantilla de Cómputo y Presupuesto</Label>
                 <Select value={defaultPdfTemplate} onValueChange={setDefaultPdfTemplate}>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar plantilla" />
@@ -494,35 +428,27 @@ export default function OrganizationPreferences() {
                   </SelectContent>
                 </Select>
               </div>
-            </div>
 
-            <div className="flex items-center justify-between">
-              <Label htmlFor="movements-template" className="text-sm font-medium">
-                Plantilla de Movimientos:
-              </Label>
-              <div className="w-64">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium opacity-50">Plantilla de Movimientos</Label>
                 <Select value="none" disabled>
-                  <SelectTrigger>
+                  <SelectTrigger className="opacity-50">
+                    <SelectValue placeholder="Próximamente" />
+                  </SelectTrigger>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm font-medium opacity-50">Plantilla de Bitácora</Label>
+                <Select value="none" disabled>
+                  <SelectTrigger className="opacity-50">
                     <SelectValue placeholder="Próximamente" />
                   </SelectTrigger>
                 </Select>
               </div>
             </div>
-
-            <div className="flex items-center justify-between">
-              <Label htmlFor="sitelog-template" className="text-sm font-medium">
-                Plantilla de Bitácora:
-              </Label>
-              <div className="w-64">
-                <Select value="none" disabled>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Próximamente" />
-                  </SelectTrigger>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </Layout>
   );
