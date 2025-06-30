@@ -73,8 +73,9 @@ export function CustomCombobox({
         </Button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-[var(--radix-popover-trigger-width)] p-0 z-[9999] bg-[var(--popover-bg)] border border-[var(--card-border)]" 
+        className="w-[var(--radix-popover-trigger-width)] p-0 bg-[var(--popover-bg)] border border-[var(--card-border)]" 
         align="start"
+        style={{ zIndex: 99999 }}
       >
         <Command className="bg-[var(--popover-bg)]">
           <CommandInput 

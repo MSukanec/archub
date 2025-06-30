@@ -148,9 +148,10 @@ export function TemplateNameBuilder({
   }, [value, parameters]);
 
   // Handle action change
-  const handleActionChange = (actionName: string | null) => {
-    const action = actionName || "";
-    setSelectedAction(action);
+  const handleActionChange = (actionId: string | null) => {
+    const actionObj = actionId ? actions.find(a => a.id === actionId) : null;
+    const actionName = actionObj ? actionObj.name : "";
+    setSelectedAction(actionId || "");
     
     // Filter out existing action element and rebuild with new action
     const elementsWithoutAction = elements.filter(el => el.type !== 'action');
@@ -158,11 +159,11 @@ export function TemplateNameBuilder({
     const newElements: TemplateElement[] = [];
     
     // Add new action element if action is selected
-    if (action) {
+    if (actionName) {
       newElements.push({
         id: 'action',
         type: 'action',
-        content: `${action} de `,
+        content: `${actionName} de `,
         immutable: true
       });
     }
