@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { CustomKanban } from '@/components/ui-custom/misc/CustomKanban';
+import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CheckSquare, Plus } from 'lucide-react';
+import { CheckSquare, Plus, Kanban } from 'lucide-react';
 import { useKanbanBoards, useKanbanLists, useKanbanCards, useMoveKanbanCard } from '@/hooks/use-kanban';
 import { useKanbanStore } from '@/stores/kanbanStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -48,9 +49,51 @@ export default function Tasks() {
     setCurrentBoardId(boardId);
   };
 
+  // Header configuration following ai-page-template.md
+  const headerProps = {
+    title: "Tareas",
+    showSearch: false,
+    actions: [
+      boards.length > 0 && (
+        <Select key="board-selector" value={currentBoardId || undefined} onValueChange={handleBoardChange}>
+          <SelectTrigger className="w-[200px] h-8">
+            <SelectValue placeholder="Seleccionar tablero..." />
+          </SelectTrigger>
+          <SelectContent>
+            {boards.map((board) => (
+              <SelectItem key={board.id} value={board.id}>
+                {board.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      ),
+      boards.length > 0 && (
+        <Button 
+          key="new-list"
+          variant="outline" 
+          className="h-8 px-3 text-sm"
+          onClick={() => setShowNewListModal(true)}
+          disabled={!currentBoardId}
+        >
+          <Plus className="h-3 w-3 mr-1" />
+          Nueva Lista
+        </Button>
+      ),
+      <Button 
+        key="new-board"
+        className="h-8 px-3 text-sm"
+        onClick={() => setShowNewBoardModal(true)}
+      >
+        <Plus className="h-3 w-3 mr-1" />
+        Nuevo Tablero
+      </Button>
+    ].filter(Boolean)
+  };
+
   if (boardsLoading) {
     return (
-      <Layout headerProps={{ title: "Gestión de Tareas", showSearch: false, actions: [] }}>
+      <Layout headerProps={headerProps}>
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="text-lg font-semibold">Cargando tableros...</div>
@@ -62,20 +105,20 @@ export default function Tasks() {
 
   if (boards.length === 0) {
     return (
-      <Layout headerProps={{ title: "Gestión de Tareas", showSearch: false, actions: [] }}>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center space-y-4">
-            <div className="text-lg font-semibold">No hay tableros Kanban</div>
-            <div className="text-sm text-muted-foreground">
-              Crea tu primer tablero para comenzar a organizar tareas
-            </div>
-            <Button onClick={() => setShowNewBoardModal(true)}>
-              <Plus className="h-4 w-4 mr-2" />
+      <Layout headerProps={headerProps}>
+        <CustomEmptyState
+          icon={<Kanban className="w-8 h-8 text-muted-foreground" />}
+          title="No hay tableros Kanban"
+          description="Crea tu primer tablero para comenzar a organizar tareas"
+          action={
+            <Button onClick={() => setShowNewBoardModal(true)} className="h-8 px-3 text-sm">
+              <Plus className="h-3 w-3 mr-1" />
               Crear Tablero
             </Button>
-          </div>
-        </div>
+          }
+        />
         
+        {/* Modal temporarily disabled */}
         {/* <NewBoardModal
           open={showNewBoardModal}
           onClose={() => setShowNewBoardModal(false)}
@@ -87,64 +130,23 @@ export default function Tasks() {
   const selectedBoard = boards.find(board => board.id === currentBoardId);
 
   return (
-    <Layout 
-      headerProps={{
-        title: "Gestión de Tareas",
-        showSearch: false,
-        actions: [
-          <div key="board-selector" className="flex items-center gap-2">
-            <Select value={currentBoardId || undefined} onValueChange={handleBoardChange}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Seleccionar tablero..." />
-              </SelectTrigger>
-              <SelectContent>
-                {boards.map((board) => (
-                  <SelectItem key={board.id} value={board.id}>
-                    {board.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>,
-          <Button 
-            key="new-list"
-            variant="outline" 
-            size="sm"
-            onClick={() => setShowNewListModal(true)}
-            disabled={!currentBoardId}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Nueva Lista
-          </Button>,
-          <Button 
-            key="new-board"
-            size="sm"
-            onClick={() => setShowNewBoardModal(true)}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Nuevo Tablero
-          </Button>
-        ]
-      }}
-    >
-      <div className="h-full">
-        {selectedBoard && (
-          <div className="mb-4">
-            <h2 className="text-xl font-semibold">{selectedBoard.name}</h2>
-            {selectedBoard.description && (
-              <p className="text-sm text-muted-foreground">{selectedBoard.description}</p>
-            )}
-          </div>
-        )}
-        
-        <CustomKanban 
-          lists={lists}
-          cards={cards}
-          boardId={currentBoardId || ''}
-          onCardMove={handleCardMove}
-          loading={listsLoading || cardsLoading}
-        />
-      </div>
+    <Layout headerProps={headerProps}>
+      {selectedBoard && (
+        <div className="mb-4">
+          <h2 className="text-xl font-semibold">{selectedBoard.name}</h2>
+          {selectedBoard.description && (
+            <p className="text-sm text-muted-foreground">{selectedBoard.description}</p>
+          )}
+        </div>
+      )}
+      
+      <CustomKanban 
+        lists={lists}
+        cards={cards}
+        boardId={currentBoardId || ''}
+        onCardMove={handleCardMove}
+        loading={listsLoading || cardsLoading}
+      />
 
       {/* Modals - Temporarily disabled while fixing imports */}
       {/* <NewBoardModal

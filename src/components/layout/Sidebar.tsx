@@ -152,7 +152,6 @@ export function Sidebar() {
     organization: [
       { icon: Home, label: 'Resumen de la Organización', href: '/organization/dashboard' },
       { icon: FolderOpen, label: 'Proyectos', href: '/proyectos' },
-      { icon: CheckSquare, label: 'Gestión de Tareas', href: '/tasks' },
       { icon: Mail, label: 'Contactos', href: '/organization/contactos' },
       { icon: Activity, label: 'Actividad', href: '/organization/activity' },
       { icon: Users, label: 'Miembros', href: '/organization/members' },
@@ -400,7 +399,14 @@ export function Sidebar() {
             />
           )}
 
-
+          {/* Tareas - Always visible above profile */}
+          <SidebarButton
+            icon={<CheckSquare className="w-[18px] h-[18px]" />}
+            label="Tareas"
+            isActive={location === '/tasks'}
+            isExpanded={isExpanded}
+            onClick={() => navigate('/tasks')}
+          />
 
           {/* Profile */}
           <SidebarButton
