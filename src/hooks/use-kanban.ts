@@ -286,25 +286,12 @@ export function useCreateKanbanCard() {
       list_id: string; 
       title: string; 
       description?: string; 
+      created_by: string;
       assigned_to?: string;
       due_date?: string;
     }) => {
       if (!userData?.user?.id) throw new Error('User required')
       
-      // Get current user's organization member ID
-      const organizationId = userData?.organization?.id
-      if (!organizationId) throw new Error('Organization required')
-
-      const { data: memberData } = await supabase
-        .from('organization_members')
-        .select('id')
-        .eq('user_id', userData.user.id)
-        .eq('organization_id', organizationId)
-        .eq('is_active', true)
-        .single()
-
-      if (!memberData) throw new Error('User is not an active member of this organization')
-
       // Get next position in list
       const { data: cards } = await supabase
         .from('kanban_cards')
@@ -318,9 +305,13 @@ export function useCreateKanbanCard() {
       const { data, error } = await supabase
         .from('kanban_cards')
         .insert({
-          ...cardData,
+          list_id: cardData.list_id,
+          title: cardData.title,
+          description: cardData.description,
           position: nextPosition,
-          created_by: memberData.id
+          created_by: cardData.created_by,
+          assigned_to: cardData.assigned_to,
+          due_date: cardData.due_date
         })
         .select()
         .single()

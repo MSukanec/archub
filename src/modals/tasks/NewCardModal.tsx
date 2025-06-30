@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useCreateKanbanCard } from '@/hooks/use-kanban';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useOrganizationMembers } from '@/hooks/use-organization-members';
@@ -18,6 +19,7 @@ import { toast } from '@/hooks/use-toast';
 const cardSchema = z.object({
   title: z.string().min(1, 'El título es requerido'),
   description: z.string().optional(),
+  created_by: z.string().min(1, 'El creador es requerido'),
   assigned_to: z.string().optional(),
   due_date: z.string().optional(),
 });
@@ -47,15 +49,16 @@ export function NewCardModal({ open, onClose, listId }: NewCardModalProps) {
     defaultValues: {
       title: '',
       description: '',
-      assigned_to: userData?.user?.id || '',
+      created_by: userData?.user?.id || '',
+      assigned_to: '',
       due_date: ''
     }
   });
 
-  // Set current user as default when modal opens
+  // Set current user as default creator when modal opens
   useEffect(() => {
     if (open && userData?.user?.id) {
-      setValue('assigned_to', userData.user.id);
+      setValue('created_by', userData.user.id);
     }
   }, [open, userData?.user?.id, setValue]);
 
@@ -70,6 +73,7 @@ export function NewCardModal({ open, onClose, listId }: NewCardModalProps) {
         list_id: listId,
         title: data.title,
         description: data.description || undefined,
+        created_by: data.created_by,
         assigned_to: data.assigned_to || undefined,
         due_date: data.due_date || undefined
       });
