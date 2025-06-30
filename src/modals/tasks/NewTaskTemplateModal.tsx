@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useEffect } from "react";
 import { CustomModalLayout } from "@/components/ui-custom/modal/CustomModalLayout";
 import { CustomModalHeader } from "@/components/ui-custom/modal/CustomModalHeader";
 import { CustomModalBody } from "@/components/ui-custom/modal/CustomModalBody";
@@ -66,6 +67,14 @@ export function NewTaskTemplateModal({
       action_id: template?.action_id || null,
     },
   });
+
+  // Update form values when templateCategory changes
+  useEffect(() => {
+    if (templateCategory) {
+      form.setValue('name', templateCategory.name);
+      form.setValue('code_prefix', templateCategory.code);
+    }
+  }, [templateCategory, form]);
 
   const onSubmit = async (data: FormData) => {
     try {
