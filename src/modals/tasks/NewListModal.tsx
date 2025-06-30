@@ -79,8 +79,8 @@ export function NewListModal({ open, onClose, boardId, editingList }: NewListMod
       children={{
         header: (
           <CustomModalHeader
-            title="Nueva Lista"
-            description="Crea una nueva lista para organizar tarjetas en este tablero"
+            title={isEditing ? "Editar Lista" : "Nueva Lista"}
+            description={isEditing ? "Modifica el nombre de esta lista" : "Crea una nueva lista para organizar tarjetas en este tablero"}
             onClose={handleClose}
           />
         ),
@@ -107,7 +107,7 @@ export function NewListModal({ open, onClose, boardId, editingList }: NewListMod
           <CustomModalFooter
             onCancel={handleClose}
             form="list-form"
-            saveText="Crear Lista"
+            saveText={isEditing ? "Actualizar Lista" : "Crear Lista"}
             isLoading={isSubmitting}
           />
         )
