@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCreateKanbanCard } from '@/hooks/use-kanban';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { useOrganizationMembers } from '@/hooks/use-organization-members';
 import { toast } from '@/hooks/use-toast';
 
 const cardSchema = z.object({
@@ -32,6 +33,7 @@ interface NewCardModalProps {
 export function NewCardModal({ open, onClose, listId }: NewCardModalProps) {
   const createCardMutation = useCreateKanbanCard();
   const { data: userData } = useCurrentUser();
+  const { data: organizationMembers, isLoading: membersLoading } = useOrganizationMembers();
 
   const {
     register,
@@ -45,10 +47,17 @@ export function NewCardModal({ open, onClose, listId }: NewCardModalProps) {
     defaultValues: {
       title: '',
       description: '',
-      assigned_to: '',
+      assigned_to: userData?.user?.id || '',
       due_date: ''
     }
   });
+
+  // Set current user as default when modal opens
+  useEffect(() => {
+    if (open && userData?.user?.id) {
+      setValue('assigned_to', userData.user.id);
+    }
+  }, [open, userData?.user?.id, setValue]);
 
   const handleClose = () => {
     reset();
@@ -66,13 +75,19 @@ export function NewCardModal({ open, onClose, listId }: NewCardModalProps) {
       });
       
       handleClose();
+      toast({
+        title: "Tarjeta creada",
+        description: "La tarjeta se ha creado exitosamente"
+      });
     } catch (error) {
       console.error('Error creating card:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo crear la tarjeta",
+        variant: "destructive"
+      });
     }
   };
-
-  // Get organization members for assignment
-  const organizationMembers = userData?.memberships || [];
 
   if (!open) return null;
 
@@ -117,15 +132,18 @@ export function NewCardModal({ open, onClose, listId }: NewCardModalProps) {
 
                 <div className="col-span-1">
                   <Label htmlFor="assigned_to">Asignado a (opcional)</Label>
-                  <Select onValueChange={(value) => setValue('assigned_to', value)}>
+                  <Select 
+                    value={watch('assigned_to')} 
+                    onValueChange={(value) => setValue('assigned_to', value)}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar miembro" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="">Sin asignar</SelectItem>
-                      {organizationMembers.map((member) => (
-                        <SelectItem key={member.organization_id} value={member.organization_id}>
-                          {member.organization_name}
+                      {organizationMembers?.map((member) => (
+                        <SelectItem key={member.id} value={member.user_id}>
+                          {member.user.full_name}
                         </SelectItem>
                       ))}
                     </SelectContent>
