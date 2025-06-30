@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { CustomComboBox } from '@/components/ui-custom/misc/CustomComboBox';
+import { CustomMultiComboBox } from '@/components/ui-custom/misc/CustomMultiComboBox';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useCurrencies } from '@/hooks/use-currencies';
@@ -46,9 +47,8 @@ interface OrganizationPreferences {
 export default function OrganizationPreferences() {
   const [defaultCurrency, setDefaultCurrency] = useState('none');
   const [defaultWallet, setDefaultWallet] = useState('none');
-  const [defaultPdfTemplate, setDefaultPdfTemplate] = useState('none');
-  const [secondaryCurrency, setSecondaryCurrency] = useState('');
-  const [secondaryWallet, setSecondaryWallet] = useState('');
+  const [secondaryCurrencies, setSecondaryCurrencies] = useState<string[]>([]);
+  const [secondaryWallets, setSecondaryWallets] = useState<string[]>([]);
 
   const { setSidebarContext } = useNavigationStore();
   const { toast } = useToast();
@@ -111,7 +111,6 @@ export default function OrganizationPreferences() {
         if (preferences) {
           setDefaultCurrency(preferences.default_currency_id || 'none');
           setDefaultWallet(preferences.default_wallet_id || 'none');
-          setDefaultPdfTemplate(preferences.default_pdf_template_id || 'none');
         }
 
         // Load secondary currencies
@@ -120,11 +119,9 @@ export default function OrganizationPreferences() {
           .select('currency_id, is_default')
           .eq('organization_id', organizationId);
 
-        // Find secondary currency (non-default)
-        const secondaryCurr = orgCurrencies?.find(oc => !oc.is_default);
-        if (secondaryCurr) {
-          setSecondaryCurrency(secondaryCurr.currency_id);
-        }
+        // Get all secondary currencies (non-default)
+        const secondaryCurrs = orgCurrencies?.filter(oc => !oc.is_default).map(oc => oc.currency_id) || [];
+        setSecondaryCurrencies(secondaryCurrs);
 
         // Load secondary wallets
         const { data: orgWallets } = await supabase
@@ -132,11 +129,9 @@ export default function OrganizationPreferences() {
           .select('wallet_id, is_default')
           .eq('organization_id', organizationId);
 
-        // Find secondary wallet (non-default)
-        const secondaryWall = orgWallets?.find(ow => !ow.is_default);
-        if (secondaryWall) {
-          setSecondaryWallet(secondaryWall.wallet_id);
-        }
+        // Get all secondary wallets (non-default)
+        const secondaryWalls = orgWallets?.filter(ow => !ow.is_default).map(ow => ow.wallet_id) || [];
+        setSecondaryWallets(secondaryWalls);
       } catch (error) {
         console.error('Error loading preferences:', error);
       }
@@ -159,7 +154,6 @@ export default function OrganizationPreferences() {
           organization_id: organizationId,
           default_currency_id: defaultCurrency !== 'none' ? defaultCurrency : null,
           default_wallet_id: defaultWallet !== 'none' ? defaultWallet : null,
-          default_pdf_template_id: defaultPdfTemplate !== 'none' ? defaultPdfTemplate : null,
         });
 
       if (prefError) throw prefError;
@@ -188,17 +182,23 @@ export default function OrganizationPreferences() {
         if (currError) throw currError;
       }
 
-      // Add secondary currency if selected
-      if (secondaryCurrency && secondaryCurrency !== defaultCurrency) {
-        const { error: secCurrError } = await supabase
-          .from('organization_currencies')
-          .insert({
+      // Add secondary currencies if selected
+      if (secondaryCurrencies.length > 0) {
+        const secondaryCurrencyInserts = secondaryCurrencies
+          .filter(currencyId => currencyId !== defaultCurrency)
+          .map(currencyId => ({
             organization_id: organizationId,
-            currency_id: secondaryCurrency,
+            currency_id: currencyId,
             is_default: false,
-          });
+          }));
 
-        if (secCurrError) throw secCurrError;
+        if (secondaryCurrencyInserts.length > 0) {
+          const { error: secCurrError } = await supabase
+            .from('organization_currencies')
+            .insert(secondaryCurrencyInserts);
+
+          if (secCurrError) throw secCurrError;
+        }
       }
 
       // Add default wallet if selected
@@ -214,17 +214,23 @@ export default function OrganizationPreferences() {
         if (walletError) throw walletError;
       }
 
-      // Add secondary wallet if selected
-      if (secondaryWallet && secondaryWallet !== defaultWallet) {
-        const { error: secWalletError } = await supabase
-          .from('organization_wallets')
-          .insert({
+      // Add secondary wallets if selected
+      if (secondaryWallets.length > 0) {
+        const secondaryWalletInserts = secondaryWallets
+          .filter(walletId => walletId !== defaultWallet)
+          .map(walletId => ({
             organization_id: organizationId,
-            wallet_id: secondaryWallet,
+            wallet_id: walletId,
             is_default: false,
-          });
+          }));
 
-        if (secWalletError) throw secWalletError;
+        if (secondaryWalletInserts.length > 0) {
+          const { error: secWalletError } = await supabase
+            .from('organization_wallets')
+            .insert(secondaryWalletInserts);
+
+          if (secWalletError) throw secWalletError;
+        }
       }
     },
     onSuccess: () => {
