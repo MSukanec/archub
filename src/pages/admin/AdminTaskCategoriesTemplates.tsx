@@ -125,6 +125,10 @@ export default function AdminTaskCategoriesTemplates() {
   };
 
   const handleEditTemplate = (template: any) => {
+    console.log('Editing template:', template);
+    const category = allCategories.find(cat => cat.id === template.category_id);
+    console.log('Found category:', category);
+    console.log('All categories:', allCategories);
     setEditingTemplate(template);
     setTemplateCategoryId(template.category_id);
     setIsTemplateModalOpen(true);
