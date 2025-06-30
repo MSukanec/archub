@@ -10,12 +10,13 @@ import { Input } from "@/components/ui/input";
 import { useCreateTaskTemplate, useUpdateTaskTemplate, type TaskTemplate } from "@/hooks/use-task-templates-admin";
 import { useTaskParametersAdmin } from "@/hooks/use-task-parameters-admin";
 import { TemplateNameBuilder, type TaskTemplateParameter } from "@/components/ui-custom/misc/TemplateNameBuilder";
-import { type TaskCategoryAdmin } from "@/hooks/use-task-categories-admin";
+import { type TaskCategoryAdmin, useTaskCategoriesAdmin } from "@/hooks/use-task-categories-admin";
 
 const formSchema = z.object({
   name: z.string().min(1, "El nombre es requerido"),
   code_prefix: z.string().min(1, "El prefijo de código es requerido"),
   name_template: z.string().min(1, "La plantilla de nombre es requerida"),
+  action_id: z.string().optional().nullable(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -36,8 +37,14 @@ export function NewTaskTemplateModal({
   const isEditing = !!template;
   
   const { data: parameters = [] } = useTaskParametersAdmin();
+  const { data: categories = [] } = useTaskCategoriesAdmin();
   const createTaskTemplate = useCreateTaskTemplate();
   const updateTaskTemplate = useUpdateTaskTemplate();
+
+  // Get category data for editing mode
+  const templateCategory = isEditing && template 
+    ? categories.find(cat => cat.id === template.category_id) 
+    : category;
 
   // Transform parameters to TaskTemplateParameter format
   const templateParameters: TaskTemplateParameter[] = parameters.map(param => ({
@@ -53,9 +60,10 @@ export function NewTaskTemplateModal({
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: category?.name || template?.name || "",
-      code_prefix: category?.code || template?.code_prefix || "",
+      name: templateCategory?.name || "",
+      code_prefix: templateCategory?.code || "",
       name_template: template?.name_template || "",
+      action_id: template?.action_id || null,
     },
   });
 
@@ -66,11 +74,13 @@ export function NewTaskTemplateModal({
           ...data,
           id: template.id,
           category_id: template.category_id, // Keep existing category
+          action_id: data.action_id,
         });
       } else {
         await createTaskTemplate.mutateAsync({
           ...data,
-          category_id: "4ec7eacb-37b0-4b00-8420-36dca30cc291", // Default category
+          category_id: category?.id || "4ec7eacb-37b0-4b00-8420-36dca30cc291", // Use category prop or default
+          action_id: data.action_id,
         });
       }
       onClose();

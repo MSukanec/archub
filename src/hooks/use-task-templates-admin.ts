@@ -8,6 +8,7 @@ export interface TaskTemplate {
   code_prefix: string;
   name_template: string;
   category_id: string;
+  action_id: string | null;
   created_at: string;
   task_categories?: {
     id: string;
@@ -20,6 +21,7 @@ export interface CreateTaskTemplateData {
   code_prefix: string;
   name_template: string;
   category_id: string;
+  action_id?: string | null;
 }
 
 export interface UpdateTaskTemplateData extends CreateTaskTemplateData {
