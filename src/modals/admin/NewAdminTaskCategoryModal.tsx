@@ -5,8 +5,11 @@ import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
+import { Check, ChevronsUpDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout';
@@ -116,26 +119,66 @@ export function NewAdminTaskCategoryModal({
                   control={form.control}
                   name="parent_id"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="flex flex-col">
                       <FormLabel>Categoría Padre</FormLabel>
-                      <Select onValueChange={(value) => {
-                        const actualValue = value === 'none' ? null : value;
-                        field.onChange(actualValue);
-                      }} value={field.value ?? 'none'}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar categoría padre (opcional)" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="z-[9999]">
-                          <SelectItem value="none">Sin padre (Categoría de nivel superior)</SelectItem>
-                          {allCategories?.map((cat) => (
-                            <SelectItem key={cat.id} value={cat.id}>
-                              {cat.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              className={cn(
+                                "w-full justify-between",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value
+                                ? allCategories?.find((cat) => cat.id === field.value)?.name
+                                : "Seleccionar categoría padre (opcional)"}
+                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-full p-0 z-[9999]">
+                          <Command>
+                            <CommandInput placeholder="Buscar categoría..." />
+                            <CommandEmpty>No se encontraron categorías.</CommandEmpty>
+                            <CommandGroup className="max-h-64 overflow-y-auto">
+                              <CommandItem
+                                value="none"
+                                onSelect={() => {
+                                  field.onChange(null);
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    !field.value ? "opacity-100" : "opacity-0"
+                                  )}
+                                />
+                                Sin padre (Categoría de nivel superior)
+                              </CommandItem>
+                              {allCategories?.map((cat) => (
+                                <CommandItem
+                                  key={cat.id}
+                                  value={cat.name}
+                                  onSelect={() => {
+                                    field.onChange(cat.id);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      cat.id === field.value ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                  {cat.name}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
                       <FormMessage />
                     </FormItem>
                   )}
