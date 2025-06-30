@@ -88,8 +88,8 @@ export function CustomMultiComboBox({
             role="combobox"
             aria-expanded={open}
             className={cn(
-              "w-full justify-between text-sm h-10",
-              selectedOptions.length === 0 && "text-muted-foreground"
+              "w-full justify-between text-xs leading-tight py-2 px-3 h-auto border border-[var(--input-border)] bg-[var(--input-bg)] rounded-md transition-all duration-150 hover:bg-[var(--input-bg)] focus-visible:ring-1 focus-visible:ring-accent",
+              selectedOptions.length === 0 && "text-[var(--input-placeholder)]"
             )}
             disabled={disabled}
           >
@@ -100,7 +100,7 @@ export function CustomMultiComboBox({
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-full p-0" align="start">
+        <PopoverContent className="w-[var(--radix-popover-trigger-width)] max-w-[var(--radix-popover-trigger-width)] p-0" align="start">
           <Command>
             <CommandInput placeholder={searchPlaceholder} />
             <CommandEmpty>{emptyText}</CommandEmpty>

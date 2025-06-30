@@ -12,8 +12,8 @@ import { CustomMultiComboBox } from '@/components/ui-custom/misc/CustomMultiComb
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useCurrencies } from '@/hooks/use-currencies';
 import { useWallets } from '@/hooks/use-wallets';
-import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';
 import { useNavigationStore } from '@/stores/navigationStore';
 
@@ -48,6 +48,10 @@ export default function OrganizationPreferences() {
   const [defaultWallet, setDefaultWallet] = useState('none');
   const [secondaryCurrencies, setSecondaryCurrencies] = useState<string[]>([]);
   const [secondaryWallets, setSecondaryWallets] = useState<string[]>([]);
+  
+  // Auto-save debounce
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const { toast } = useToast();
 
   const { setSidebarContext } = useNavigationStore();
   const { toast } = useToast();
@@ -253,9 +257,46 @@ export default function OrganizationPreferences() {
     },
   });
 
-  const handleSavePreferences = () => {
-    savePreferencesMutation.mutate();
-  };
+  // Auto-save function with debounce
+  const debouncedSave = useCallback(() => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    
+    saveTimeoutRef.current = setTimeout(() => {
+      savePreferencesMutation.mutate();
+    }, 1500); // 1.5 seconds delay
+  }, [savePreferencesMutation]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Wrapper functions that trigger auto-save
+  const handleDefaultCurrencyChange = useCallback((value: string) => {
+    setDefaultCurrency(value);
+    debouncedSave();
+  }, [debouncedSave]);
+
+  const handleDefaultWalletChange = useCallback((value: string) => {
+    setDefaultWallet(value);
+    debouncedSave();
+  }, [debouncedSave]);
+
+  const handleSecondaryCurrenciesChange = useCallback((values: string[]) => {
+    setSecondaryCurrencies(values);
+    debouncedSave();
+  }, [debouncedSave]);
+
+  const handleSecondaryWalletsChange = useCallback((values: string[]) => {
+    setSecondaryWallets(values);
+    debouncedSave();
+  }, [debouncedSave]);
 
   // Convert currencies and wallets to options for CustomComboBox
   const currencyOptions = allCurrencies.map(currency => ({
@@ -319,7 +360,7 @@ export default function OrganizationPreferences() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="default-currency">Moneda principal</Label>
-                <Select value={defaultCurrency} onValueChange={setDefaultCurrency}>
+                <Select value={defaultCurrency} onValueChange={handleDefaultCurrencyChange}>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar moneda" />
                   </SelectTrigger>
@@ -339,7 +380,7 @@ export default function OrganizationPreferences() {
                 <CustomMultiComboBox
                   options={secondaryCurrencyOptions}
                   values={secondaryCurrencies}
-                  onValuesChange={setSecondaryCurrencies}
+                  onValuesChange={handleSecondaryCurrenciesChange}
                   placeholder="Seleccionar monedas secundarias..."
                   searchPlaceholder="Buscar monedas..."
                   emptyText="No se encontraron monedas."
@@ -370,7 +411,7 @@ export default function OrganizationPreferences() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="default-wallet">Billetera principal</Label>
-                <Select value={defaultWallet} onValueChange={setDefaultWallet}>
+                <Select value={defaultWallet} onValueChange={handleDefaultWalletChange}>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar billetera" />
                   </SelectTrigger>
@@ -390,7 +431,7 @@ export default function OrganizationPreferences() {
                 <CustomMultiComboBox
                   options={secondaryWalletOptions}
                   values={secondaryWallets}
-                  onValuesChange={setSecondaryWallets}
+                  onValuesChange={handleSecondaryWalletsChange}
                   placeholder="Seleccionar billeteras secundarias..."
                   searchPlaceholder="Buscar billeteras..."
                   emptyText="No se encontraron billeteras."
