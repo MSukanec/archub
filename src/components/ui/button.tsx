@@ -16,7 +16,7 @@ const buttonVariants = cva(
           "border border-border bg-background hover:bg-accent hover:text-accent-foreground rounded-md px-4 py-2",
         secondary:
           "bg-[var(--button-secondary-bg)] text-[var(--button-secondary-text)] border border-[var(--button-secondary-border)] hover:bg-[var(--button-secondary-hover-bg)] hover:text-[var(--button-secondary-hover-text)] hover:border-[var(--button-secondary-hover-border)] rounded-md px-4 py-2",
-        ghost: "hover:bg-accent hover:text-accent-foreground rounded-md px-4 py-2",
+        ghost: "hover:text-accent rounded-md px-4 py-2 [&_svg]:hover:text-accent",
         link: "text-accent underline-offset-4 hover:underline px-4 py-2",
       },
       size: {

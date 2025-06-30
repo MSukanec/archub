@@ -12,6 +12,7 @@ import { useKanbanStore } from '@/stores/kanbanStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { NewBoardModal } from '@/modals/tasks/NewBoardModal';
 import { NewListModal } from '@/modals/tasks/NewListModal';
+import { CustomRestricted } from '@/components/ui-custom/CustomRestricted';
 
 export default function Tasks() {
   const [showNewBoardModal, setShowNewBoardModal] = useState(false);
@@ -93,14 +94,19 @@ export default function Tasks() {
     title: "Tareas",
     showSearch: false,
     actions: [
-      <Button 
+      <CustomRestricted 
         key="new-board"
-        className="h-8 px-3 text-sm"
-        onClick={() => setShowNewBoardModal(true)}
+        feature="max_kanban_boards"
+        current={boards.length}
       >
-        <Plus className="h-3 w-3 mr-1" />
-        Nuevo Tablero
-      </Button>
+        <Button 
+          className="h-8 px-3 text-sm"
+          onClick={() => setShowNewBoardModal(true)}
+        >
+          <Plus className="h-3 w-3 mr-1" />
+          Nuevo Tablero
+        </Button>
+      </CustomRestricted>
     ]
   };
 
@@ -110,14 +116,19 @@ export default function Tasks() {
       title: "Tareas",
       showSearch: false,
       actions: [
-        <Button 
+        <CustomRestricted 
           key="new-board"
-          className="h-8 px-3 text-sm"
-          onClick={() => setShowNewBoardModal(true)}
+          feature="max_kanban_boards"
+          current={0}
         >
-          <Plus className="h-3 w-3 mr-1" />
-          Nuevo Tablero
-        </Button>
+          <Button 
+            className="h-8 px-3 text-sm"
+            onClick={() => setShowNewBoardModal(true)}
+          >
+            <Plus className="h-3 w-3 mr-1" />
+            Nuevo Tablero
+          </Button>
+        </CustomRestricted>
       ]
     };
 
@@ -138,14 +149,19 @@ export default function Tasks() {
       title: "Tareas",
       showSearch: false,
       actions: [
-        <Button 
+        <CustomRestricted 
           key="new-board"
-          className="h-8 px-3 text-sm"
-          onClick={() => setShowNewBoardModal(true)}
+          feature="max_kanban_boards"
+          current={0}
         >
-          <Plus className="h-3 w-3 mr-1" />
-          Nuevo Tablero
-        </Button>
+          <Button 
+            className="h-8 px-3 text-sm"
+            onClick={() => setShowNewBoardModal(true)}
+          >
+            <Plus className="h-3 w-3 mr-1" />
+            Nuevo Tablero
+          </Button>
+        </CustomRestricted>
       ]
     };
 
