@@ -76,10 +76,10 @@ export default function Tasks() {
           </div>
         </div>
         
-        <NewBoardModal
+        {/* <NewBoardModal
           open={showNewBoardModal}
           onClose={() => setShowNewBoardModal(false)}
-        />
+        /> */}
       </Layout>
     );
   }
@@ -146,8 +146,8 @@ export default function Tasks() {
         />
       </div>
 
-      {/* Modals */}
-      <NewBoardModal
+      {/* Modals - Temporarily disabled while fixing imports */}
+      {/* <NewBoardModal
         open={showNewBoardModal}
         onClose={() => setShowNewBoardModal(false)}
       />
@@ -158,7 +158,7 @@ export default function Tasks() {
           open={showNewListModal}
           onClose={() => setShowNewListModal(false)}
         />
-      )}
+      )} */}
     </Layout>
   );
 }
