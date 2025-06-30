@@ -184,6 +184,7 @@ export function NewTaskTemplateModal({
                           value={field.value}
                           onChange={field.onChange}
                           parameters={templateParameters}
+                          categoryName={template ? template.name : templateCategory?.name}
                           placeholder="Construye la plantilla de nombre usando parámetros..."
                         />
                       </FormControl>
