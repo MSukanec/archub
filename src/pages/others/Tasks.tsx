@@ -81,20 +81,8 @@ export default function Tasks() {
     setCurrentBoardId(boardId);
   };
 
-  const handleDeleteList = async (listId: string) => {
-    try {
-      await deleteListMutation.mutateAsync(listId);
-      toast({
-        title: "Lista eliminada",
-        description: "La lista ha sido eliminada correctamente.",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "No se pudo eliminar la lista.",
-        variant: "destructive",
-      });
-    }
+  const handleDeleteList = (listId: string, boardId: string) => {
+    deleteListMutation.mutate({ listId, boardId });
   };
 
   // Current board for display

@@ -18,14 +18,15 @@ export interface OrganizationMember {
   };
 }
 
-export function useOrganizationMembers() {
+export function useOrganizationMembers(organizationId?: string) {
   const { data: userData } = useCurrentUser();
-  const organizationId = userData?.organization?.id;
+  const effectiveOrgId = organizationId || userData?.organization?.id;
 
   return useQuery({
-    queryKey: ['organization-members', organizationId],
+    queryKey: ['organization-members', effectiveOrgId],
     queryFn: async () => {
-      if (!organizationId) throw new Error('Organization ID required');
+      if (!effectiveOrgId) throw new Error('Organization ID required');
+      if (!supabase) throw new Error('Supabase not initialized');
 
       const { data, error } = await supabase
         .from('organization_members')
@@ -44,7 +45,7 @@ export function useOrganizationMembers() {
             avatar_url
           )
         `)
-        .eq('organization_id', organizationId)
+        .eq('organization_id', effectiveOrgId)
         .eq('is_active', true)
         .order('joined_at', { ascending: true });
 
@@ -56,6 +57,6 @@ export function useOrganizationMembers() {
         user: Array.isArray(member.users) ? member.users[0] : member.users
       })) as OrganizationMember[];
     },
-    enabled: !!organizationId
+    enabled: !!effectiveOrgId
   });
 }

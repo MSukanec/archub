@@ -118,6 +118,36 @@ export function NewListModal({ open, onClose, boardId, editingList }: NewListMod
                     <p className="text-sm text-red-500 mt-1">{errors.name.message}</p>
                   )}
                 </div>
+                
+                <div className="col-span-1">
+                  <Label htmlFor="created_by">Creador</Label>
+                  <Select 
+                    value={watchedCreatedBy} 
+                    onValueChange={(value) => setValue('created_by', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar creador" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {members.map((member) => (
+                        <SelectItem key={member.id} value={member.id}>
+                          <div className="flex items-center gap-2">
+                            <Avatar className="h-5 w-5">
+                              <AvatarImage src={member.user?.avatar_url} />
+                              <AvatarFallback className="text-xs">
+                                {member.user?.full_name?.split(' ').map(n => n[0]).join('') || 'U'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span>{member.user?.full_name || member.user?.email || 'Usuario'}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.created_by && (
+                    <p className="text-sm text-red-500 mt-1">{errors.created_by.message}</p>
+                  )}
+                </div>
               </div>
             </form>
           </CustomModalBody>
