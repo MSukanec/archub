@@ -189,10 +189,8 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
                         <div className="p-3">
                           {/* Add Card Button - Always show first */}
                           <Button
-                            variant="ghost"
-                            size="sm"
                             onClick={() => setNewCardListId(list.id)}
-                            className="w-full mb-2 h-8 justify-start text-muted-foreground hover:text-foreground"
+                            className="w-full mb-2 h-8 justify-start"
                           >
                             <Plus className="h-3 w-3 mr-2" />
                             Añade una tarjeta
@@ -207,28 +205,53 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
                                   snapshot.isDraggingOver ? 'bg-accent/10' : ''
                                 }`}
                               >
-                                {cardsByList[list.id]?.map((card, index) => (
-                                  <Draggable key={card.id} draggableId={card.id} index={index}>
-                                    {(provided, snapshot) => (
-                                      <Card
-                                        ref={provided.innerRef}
-                                        {...provided.draggableProps}
-                                        {...provided.dragHandleProps}
-                                        className={`p-2 cursor-pointer hover:shadow-sm transition-shadow ${
-                                          snapshot.isDragging ? 'shadow-md rotate-1' : ''
-                                        }`}
-                                        onClick={() => setSelectedCard(card)}
-                                      >
-                                        <div className="text-sm font-medium">{card.title}</div>
-                                        {card.description && (
-                                          <div className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                                            {card.description}
+                                {cardsByList[list.id]?.map((card, index) => {
+                                  const creatorInfo = getCreatorInfo(card.created_by);
+                                  return (
+                                    <Draggable key={card.id} draggableId={card.id} index={index}>
+                                      {(provided, snapshot) => (
+                                        <Card
+                                          ref={provided.innerRef}
+                                          {...provided.draggableProps}
+                                          {...provided.dragHandleProps}
+                                          className={`p-3 cursor-pointer hover:shadow-sm transition-shadow ${
+                                            snapshot.isDragging ? 'shadow-md rotate-1' : ''
+                                          }`}
+                                          onClick={() => setSelectedCard(card)}
+                                        >
+                                          {/* Creator Info Header */}
+                                          <div className="flex items-center justify-between mb-2">
+                                            <div className="flex items-center gap-2">
+                                              <Avatar className="h-6 w-6">
+                                                <AvatarImage src={creatorInfo?.avatar} />
+                                                <AvatarFallback className="text-xs">
+                                                  {creatorInfo?.initials || 'U'}
+                                                </AvatarFallback>
+                                              </Avatar>
+                                              <span className="text-xs text-muted-foreground font-medium">
+                                                {creatorInfo?.name || 'Usuario'}
+                                              </span>
+                                            </div>
+                                            <span className="text-xs text-muted-foreground">
+                                              {new Date(card.created_at).toLocaleDateString('es-ES', {
+                                                month: 'short',
+                                                day: 'numeric'
+                                              })}
+                                            </span>
                                           </div>
-                                        )}
-                                      </Card>
-                                    )}
-                                  </Draggable>
-                                ))}
+                                          
+                                          {/* Card Content */}
+                                          <div className="text-sm font-medium mb-1">{card.title}</div>
+                                          {card.description && (
+                                            <div className="text-xs text-muted-foreground line-clamp-2">
+                                              {card.description}
+                                            </div>
+                                          )}
+                                        </Card>
+                                      )}
+                                    </Draggable>
+                                  );
+                                })}
                                 {provided.placeholder}
                               </div>
                             )}
