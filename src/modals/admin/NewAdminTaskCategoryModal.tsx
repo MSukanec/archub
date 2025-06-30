@@ -118,70 +118,76 @@ export function NewAdminTaskCategoryModal({
                 <FormField
                   control={form.control}
                   name="parent_id"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Categoría Padre</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant="outline"
-                              role="combobox"
-                              className={cn(
-                                "w-full justify-between",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value
-                                ? allCategories?.find((cat) => cat.id === field.value)?.name
-                                : "Seleccionar categoría padre (opcional)"}
-                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-full p-0 z-[9999]">
-                          <Command>
-                            <CommandInput placeholder="Buscar categoría..." />
-                            <CommandEmpty>No se encontraron categorías.</CommandEmpty>
-                            <CommandGroup className="max-h-64 overflow-y-auto">
-                              <CommandItem
-                                value="none"
-                                onSelect={() => {
-                                  field.onChange(null);
-                                }}
+                  render={({ field }) => {
+                    const [open, setOpen] = useState(false);
+                    return (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>Categoría Padre</FormLabel>
+                        <Popover open={open} onOpenChange={setOpen}>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={open}
+                                className={cn(
+                                  "w-full justify-between",
+                                  !field.value && "text-muted-foreground"
+                                )}
                               >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    !field.value ? "opacity-100" : "opacity-0"
-                                  )}
-                                />
-                                Sin padre (Categoría de nivel superior)
-                              </CommandItem>
-                              {allCategories?.map((cat) => (
+                                {field.value
+                                  ? allCategories?.find((cat) => cat.id === field.value)?.name
+                                  : "Seleccionar categoría padre (opcional)"}
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-full p-0 z-[9999]">
+                            <Command>
+                              <CommandInput placeholder="Buscar categoría..." />
+                              <CommandEmpty>No se encontraron categorías.</CommandEmpty>
+                              <CommandGroup className="max-h-64 overflow-y-auto">
                                 <CommandItem
-                                  key={cat.id}
-                                  value={cat.name}
+                                  value="none"
                                   onSelect={() => {
-                                    field.onChange(cat.id);
+                                    field.onChange(null);
+                                    setOpen(false);
                                   }}
                                 >
                                   <Check
                                     className={cn(
                                       "mr-2 h-4 w-4",
-                                      cat.id === field.value ? "opacity-100" : "opacity-0"
+                                      !field.value ? "opacity-100" : "opacity-0"
                                     )}
                                   />
-                                  {cat.name}
+                                  Sin padre (Categoría de nivel superior)
                                 </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                                {allCategories?.map((cat) => (
+                                  <CommandItem
+                                    key={cat.id}
+                                    value={cat.name}
+                                    onSelect={() => {
+                                      field.onChange(cat.id);
+                                      setOpen(false);
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        cat.id === field.value ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                    {cat.name}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
                 />
 
 
