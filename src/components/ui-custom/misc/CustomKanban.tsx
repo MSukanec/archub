@@ -135,12 +135,19 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
                               {cardsByList[list.id]?.length || 0}
                             </Badge>
                           </div>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                                <MoreHorizontal className="h-3 w-3" />
-                              </Button>
-                            </DropdownMenuTrigger>
+                          <div className="flex items-center gap-2">
+                            {list.created_by && getCreatorInfo(list.created_by) && (
+                              <Avatar className="h-5 w-5">
+                                {getCreatorInfo(list.created_by)?.avatar && <AvatarImage src={getCreatorInfo(list.created_by)?.avatar} />}
+                                <AvatarFallback className="text-xs">{getCreatorInfo(list.created_by)?.initials}</AvatarFallback>
+                              </Avatar>
+                            )}
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                                  <MoreHorizontal className="h-3 w-3" />
+                                </Button>
+                              </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem onClick={() => setEditingListId(list.id)}>
                                 <Edit className="h-3 w-3 mr-2" />
@@ -172,7 +179,8 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
                                 </AlertDialogContent>
                               </AlertDialog>
                             </DropdownMenuContent>
-                          </DropdownMenu>
+                            </DropdownMenu>
+                          </div>
                         </div>
 
                         {/* Cards Container */}

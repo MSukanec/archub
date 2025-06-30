@@ -307,6 +307,15 @@ export function useCreateKanbanList() {
     mutationFn: async (listData: { board_id: string; name: string; created_by: string }) => {
       if (!supabase) throw new Error('Supabase not initialized')
       
+      // Get the user_id from organization_members table
+      const { data: memberData, error: memberError } = await supabase
+        .from('organization_members')
+        .select('user_id')
+        .eq('id', listData.created_by)
+        .single()
+
+      if (memberError) throw memberError
+      
       // Get next position
       const { data: lists } = await supabase
         .from('kanban_lists')
@@ -322,7 +331,7 @@ export function useCreateKanbanList() {
         .insert({
           board_id: listData.board_id,
           name: listData.name,
-          created_by: listData.created_by,
+          created_by: memberData.user_id,
           position: nextPosition
         })
         .select()
@@ -353,11 +362,20 @@ export function useUpdateKanbanList() {
     mutationFn: async (listData: { id: string; name: string; board_id: string; created_by: string }) => {
       if (!supabase) throw new Error('Supabase not initialized')
       
+      // Get the user_id from organization_members table
+      const { data: memberData, error: memberError } = await supabase
+        .from('organization_members')
+        .select('user_id')
+        .eq('id', listData.created_by)
+        .single()
+
+      if (memberError) throw memberError
+      
       const { data, error } = await supabase
         .from('kanban_lists')
         .update({ 
           name: listData.name,
-          created_by: listData.created_by
+          created_by: memberData.user_id
         })
         .eq('id', listData.id)
         .select()
