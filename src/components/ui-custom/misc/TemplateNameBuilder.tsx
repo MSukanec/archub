@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { Plus, X, Type } from "lucide-react";
+import { CustomCombobox } from "@/components/ui-custom/misc/CustomCombobox";
+import { useActions } from "@/hooks/use-actions";
 
 export interface TaskTemplateParameter {
   id: string;
@@ -25,9 +27,10 @@ interface TemplateNameBuilderProps {
 
 interface TemplateElement {
   id: string;
-  type: 'text' | 'parameter';
+  type: 'text' | 'parameter' | 'action' | 'period';
   content: string;
   parameter?: TaskTemplateParameter;
+  immutable?: boolean;
 }
 
 export function TemplateNameBuilder({ 
@@ -41,18 +44,40 @@ export function TemplateNameBuilder({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [editingText, setEditingText] = useState<string | null>(null);
   const [editingValue, setEditingValue] = useState("");
+  const [selectedAction, setSelectedAction] = useState<string>("");
   const inputRef = useRef<HTMLInputElement>(null);
+  
+  const { data: actions = [] } = useActions();
 
   // Parse the value string into elements on mount and when value changes
   useEffect(() => {
     if (!value) {
       setElements([]);
+      setSelectedAction("");
       return;
     }
 
     const parsed: TemplateElement[] = [];
     let currentText = "";
     let i = 0;
+
+    // Check if value starts with an action pattern (action " de ")
+    const actionPattern = /^(.+?) de /;
+    const actionMatch = value.match(actionPattern);
+    if (actionMatch) {
+      const actionName = actionMatch[1];
+      setSelectedAction(actionName);
+      
+      // Add immutable action element
+      parsed.push({
+        id: 'action',
+        type: 'action',
+        content: `${actionName} de `,
+        immutable: true
+      });
+      
+      i = actionMatch[0].length; // Skip past the action part
+    }
 
     while (i < value.length) {
       if (value.substr(i, 2) === "{{") {
@@ -91,17 +116,73 @@ export function TemplateNameBuilder({
       }
     }
 
-    // Save any remaining text
+    // Save any remaining text (except final period)
     if (currentText) {
-      parsed.push({
-        id: `text-${parsed.length}`,
-        type: 'text',
-        content: currentText
-      });
+      let finalText = currentText;
+      if (finalText.endsWith('.')) {
+        finalText = finalText.slice(0, -1);
+        if (finalText.trim()) {
+          parsed.push({
+            id: `text-${parsed.length}`,
+            type: 'text',
+            content: finalText
+          });
+        }
+        // Add immutable period element
+        parsed.push({
+          id: 'period',
+          type: 'period',
+          content: '.',
+          immutable: true
+        });
+      } else if (finalText.trim()) {
+        parsed.push({
+          id: `text-${parsed.length}`,
+          type: 'text',
+          content: finalText
+        });
+      }
     }
 
     setElements(parsed);
   }, [value, parameters]);
+
+  // Handle action change
+  const handleActionChange = (actionName: string) => {
+    setSelectedAction(actionName);
+    
+    // Filter out existing action element and rebuild with new action
+    const elementsWithoutAction = elements.filter(el => el.type !== 'action');
+    
+    const newElements: TemplateElement[] = [];
+    
+    // Add new action element if action is selected
+    if (actionName) {
+      newElements.push({
+        id: 'action',
+        type: 'action',
+        content: `${actionName} de `,
+        immutable: true
+      });
+    }
+    
+    // Add other elements
+    newElements.push(...elementsWithoutAction);
+    
+    // Ensure period at end if not empty
+    const hasPeriod = newElements.some(el => el.type === 'period');
+    if (newElements.length > 0 && !hasPeriod) {
+      newElements.push({
+        id: 'period',
+        type: 'period',
+        content: '.',
+        immutable: true
+      });
+    }
+    
+    setElements(newElements);
+    onChange(elementsToString(newElements));
+  };
 
   // Convert elements back to string format
   const elementsToString = (elements: TemplateElement[]): string => {
@@ -200,6 +281,23 @@ export function TemplateNameBuilder({
 
   return (
     <div className="space-y-3">
+      {/* Action selector */}
+      <div className="space-y-2">
+        <label className="text-xs font-medium text-muted-foreground">
+          Acción de la Plantilla
+        </label>
+        <CustomCombobox
+          value={selectedAction}
+          onValueChange={handleActionChange}
+          options={actions}
+          placeholder="Seleccionar acción..."
+          searchPlaceholder="Buscar acción..."
+          emptyMessage="No se encontraron acciones."
+          allowClear={true}
+          clearLabel="Sin acción"
+        />
+      </div>
+
       {/* Preview area */}
       <div className="min-h-[80px] p-3 border border-input rounded-md bg-background">
         {elements.length === 0 ? (
