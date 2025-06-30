@@ -73,27 +73,20 @@ export interface KanbanAttachment {
 }
 
 // Hook to get boards for current organization
-export function useKanbanBoards(projectId?: string) {
+export function useKanbanBoards() {
   const { data: userData } = useCurrentUser()
   const organizationId = userData?.organization?.id
-  const effectiveProjectId = projectId || userData?.preferences?.last_project_id
 
   return useQuery({
-    queryKey: ['kanban-boards', organizationId, effectiveProjectId],
+    queryKey: ['kanban-boards', organizationId],
     queryFn: async () => {
       if (!organizationId) throw new Error('Organization ID required')
 
-      let query = supabase
+      const { data, error } = await supabase
         .from('kanban_boards')
         .select('*')
         .eq('organization_id', organizationId)
-
-      // If project is specified, filter by project. Otherwise show all organization boards
-      if (effectiveProjectId) {
-        query = query.eq('project_id', effectiveProjectId)
-      }
-
-      const { data, error } = await query.order('created_at', { ascending: false })
+        .order('created_at', { ascending: false })
 
       if (error) throw error
       return data as KanbanBoard[]
@@ -211,8 +204,8 @@ export function useCreateKanbanBoard() {
 
   return useMutation({
     mutationFn: async (boardData: { name: string; description?: string }) => {
-      if (!userData?.organization?.id || !userData?.preferences?.last_project_id) {
-        throw new Error('Organization and Project required')
+      if (!userData?.organization?.id) {
+        throw new Error('Organization required')
       }
 
       const { data, error } = await supabase
@@ -221,7 +214,6 @@ export function useCreateKanbanBoard() {
           name: boardData.name,
           description: boardData.description,
           organization_id: userData.organization.id,
-          project_id: userData.preferences.last_project_id,
           created_by: userData.user.id
         })
         .select()
@@ -536,12 +528,13 @@ export function useMoveKanbanCard() {
       newPosition: number;
       boardId: string;
     }) => {
+      if (!supabase) throw new Error('Supabase not initialized')
+      
       const { error } = await supabase
         .from('kanban_cards')
         .update({ 
           list_id: newListId, 
-          position: newPosition,
-          updated_at: new Date().toISOString()
+          position: newPosition
         })
         .eq('id', cardId)
 
@@ -551,6 +544,7 @@ export function useMoveKanbanCard() {
       queryClient.invalidateQueries({ queryKey: ['kanban-cards', variables.boardId] })
     },
     onError: (error) => {
+      console.error('Error moving card:', error)
       toast({
         title: "Error al mover tarjeta",
         description: error.message,

@@ -24,11 +24,8 @@ export default function Tasks() {
   const { data: userData } = useCurrentUser();
   const { toast } = useToast();
   
-  // Get project data from user preferences
-  const projectId = userData?.preferences?.last_project_id;
-  
-  // Pass null if no project is selected to show all organization boards
-  const { data: boards = [], isLoading: boardsLoading } = useKanbanBoards(projectId || null);
+  // Get boards for current organization (no project filtering)
+  const { data: boards = [], isLoading: boardsLoading } = useKanbanBoards();
   const { data: lists = [], isLoading: listsLoading } = useKanbanLists(currentBoardId || '');
   const { data: cards = [], isLoading: cardsLoading } = useKanbanCards(currentBoardId || '');
   
