@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { DollarSign, Save, Settings, Wallet } from 'lucide-react';
+import { DollarSign, Settings, Wallet } from 'lucide-react';
 
 import { Layout } from '@/components/layout/Layout';
-import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
@@ -275,17 +274,6 @@ export default function OrganizationPreferences() {
 
   const headerProps = {
     title: "Preferencias de Finanzas",
-    actions: [
-      <Button 
-        key="save-preferences"
-        onClick={handleSavePreferences}
-        disabled={savePreferencesMutation.isPending}
-        className="h-8"
-      >
-        <Save className="mr-2 h-4 w-4" />
-        {savePreferencesMutation.isPending ? 'Guardando...' : 'Guardar cambios'}
-      </Button>
-    ]
   };
 
   if (!organizationId) {
@@ -301,6 +289,17 @@ export default function OrganizationPreferences() {
   return (
     <Layout headerProps={headerProps}>
       <div className="max-w-4xl mx-auto space-y-8">
+        {/* Header Section */}
+        <div className="space-y-2">
+          <h1 className="text-2xl font-semibold">Preferencias de Finanzas</h1>
+          <p className="text-muted-foreground">
+            Configura las preferencias financieras de tu organización. Define monedas y billeteras principales y secundarias 
+            para gestionar transacciones y reportes de manera eficiente.
+          </p>
+        </div>
+
+        <Separator />
+
         {/* Monedas Section */}
         <div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
