@@ -238,7 +238,7 @@ export function useCreateKanbanList() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (listData: { board_id: string; name: string; color?: string }) => {
+    mutationFn: async (listData: { board_id: string; name: string }) => {
       // Get next position
       const { data: lists } = await supabase
         .from('kanban_lists')
@@ -252,7 +252,8 @@ export function useCreateKanbanList() {
       const { data, error } = await supabase
         .from('kanban_lists')
         .insert({
-          ...listData,
+          board_id: listData.board_id,
+          name: listData.name,
           position: nextPosition
         })
         .select()

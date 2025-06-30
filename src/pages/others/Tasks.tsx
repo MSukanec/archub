@@ -146,6 +146,7 @@ export default function Tasks() {
         cards={cards}
         boardId={currentBoardId || ''}
         onCardMove={handleCardMove}
+        onCreateList={() => setShowNewListModal(true)}
         loading={listsLoading || cardsLoading}
       />
 

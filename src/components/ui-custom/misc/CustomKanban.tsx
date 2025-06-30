@@ -4,9 +4,10 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Calendar, User, MessageSquare, Paperclip, Plus, MoreHorizontal } from 'lucide-react';
+import { Calendar, User, MessageSquare, Paperclip, Plus, MoreHorizontal, List } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState';
 import type { KanbanList, KanbanCard } from '@/hooks/use-kanban';
 // import { CardDetailsModal } from '@/modals/tasks/CardDetailsModal';
 // import { NewCardModal } from '@/modals/tasks/NewCardModal';
@@ -16,10 +17,11 @@ interface CustomKanbanProps {
   cards: KanbanCard[];
   boardId: string;
   onCardMove?: (cardId: string, sourceListId: string, destListId: string, destIndex: number) => void;
+  onCreateList?: () => void;
   loading?: boolean;
 }
 
-export function CustomKanban({ lists, cards, boardId, onCardMove, loading }: CustomKanbanProps) {
+export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, loading }: CustomKanbanProps) {
   const [selectedCard, setSelectedCard] = useState<KanbanCard | null>(null);
   const [newCardListId, setNewCardListId] = useState<string | null>(null);
 
@@ -83,18 +85,17 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, loading }: Cus
 
   if (lists.length === 0) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center space-y-4">
-          <div className="text-lg font-semibold">No hay listas en este tablero</div>
-          <div className="text-sm text-muted-foreground">
-            Crea tu primera lista para comenzar a organizar tareas
-          </div>
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
+      <CustomEmptyState
+        icon={<List className="w-8 h-8 text-muted-foreground" />}
+        title="No hay listas en este tablero"
+        description="Crea tu primera lista para comenzar a organizar tareas"
+        action={
+          <Button onClick={onCreateList} className="h-8 px-3 text-sm">
+            <Plus className="h-3 w-3 mr-1" />
             Crear Lista
           </Button>
-        </div>
-      </div>
+        }
+      />
     );
   }
 

@@ -13,7 +13,6 @@ import { toast } from '@/hooks/use-toast';
 
 const listSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
-  color: z.string().optional(),
 });
 
 type ListFormData = z.infer<typeof listSchema>;
@@ -35,8 +34,7 @@ export function NewListModal({ open, onClose, boardId }: NewListModalProps) {
   } = useForm<ListFormData>({
     resolver: zodResolver(listSchema),
     defaultValues: {
-      name: '',
-      color: ''
+      name: ''
     }
   });
 
@@ -49,8 +47,7 @@ export function NewListModal({ open, onClose, boardId }: NewListModalProps) {
     try {
       await createListMutation.mutateAsync({
         board_id: boardId,
-        name: data.name,
-        color: data.color || undefined
+        name: data.name
       });
 
       toast({
@@ -95,16 +92,6 @@ export function NewListModal({ open, onClose, boardId }: NewListModalProps) {
                   {errors.name && (
                     <p className="text-sm text-red-500 mt-1">{errors.name.message}</p>
                   )}
-                </div>
-
-                <div className="col-span-1">
-                  <Label htmlFor="color">Color (opcional)</Label>
-                  <Input 
-                    id="color"
-                    type="color"
-                    {...register('color')}
-                    placeholder="#3b82f6"
-                  />
                 </div>
               </div>
             </form>
