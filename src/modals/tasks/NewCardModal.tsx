@@ -175,7 +175,7 @@ export function NewCardModal({ open, onClose, listId }: NewCardModalProps) {
                     <SelectTrigger>
                       <SelectValue placeholder="Sin asignar" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="z-[9999]">
                       <SelectItem value="">Sin asignar</SelectItem>
                       {organizationMembers?.map((member) => (
                         <SelectItem key={member.id} value={member.user_id}>

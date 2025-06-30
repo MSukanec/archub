@@ -180,10 +180,8 @@ export default function Tasks() {
         <div className="mb-6">
           <div className="flex items-center gap-3">
             <Select value={currentBoardId || undefined} onValueChange={handleBoardChange}>
-              <SelectTrigger className="w-[300px] h-12 text-xl font-semibold border-0 bg-transparent p-0 focus:ring-0">
-                <SelectValue placeholder="Seleccionar tablero...">
-                  {selectedBoard?.name || "Seleccionar tablero..."}
-                </SelectValue>
+              <SelectTrigger className="w-[300px] h-10 border border-input bg-background px-3 py-2 text-sm ring-offset-background">
+                <SelectValue placeholder="Seleccionar tablero..." />
               </SelectTrigger>
               <SelectContent>
                 {boards.map((board) => (

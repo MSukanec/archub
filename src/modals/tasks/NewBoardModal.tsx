@@ -11,6 +11,7 @@ import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
 import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter';
 import { useCreateKanbanBoard, useUpdateKanbanBoard } from '@/hooks/use-kanban';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { useKanbanStore } from '@/stores/kanbanStore';
 import { toast } from '@/hooks/use-toast';
 
 const boardSchema = z.object({
@@ -29,6 +30,7 @@ interface NewBoardModalProps {
 
 export function NewBoardModal({ open, onClose, board, isEditing = false }: NewBoardModalProps) {
   const { data: userData } = useCurrentUser();
+  const { setCurrentBoardId } = useKanbanStore();
   const createBoardMutation = useCreateKanbanBoard();
   const updateBoardMutation = useUpdateKanbanBoard();
 
@@ -78,10 +80,12 @@ export function NewBoardModal({ open, onClose, board, isEditing = false }: NewBo
           description: data.description || undefined
         });
       } else {
-        await createBoardMutation.mutateAsync({
+        const newBoard = await createBoardMutation.mutateAsync({
           name: data.name,
           description: data.description || undefined
         });
+        // Auto-select the newly created board
+        setCurrentBoardId(newBoard.id);
       }
 
       handleClose();
