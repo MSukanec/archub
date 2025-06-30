@@ -191,27 +191,55 @@ export function NewAdminTaskCategoryModal({
           <CustomModalBody padding="md">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <Accordion type="single" collapsible defaultValue="categoria" className="w-full">
-                  <AccordionItem value="categoria">
-                    <AccordionTrigger>Categoría</AccordionTrigger>
-                    <AccordionContent className="space-y-4">
-                      {/* Categoría Principal */}
+                {/* Simplified form without accordion - only essential category fields */}
+                
+                {/* Show hierarchical selection only for new categories */}
+                {!category && (
+                  <>
+                    {/* Categoría Principal */}
+                    <FormField
+                      control={form.control}
+                      name="category_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Categoría Principal *</FormLabel>
+                          <Select onValueChange={handleCategoryChange} value={selectedCategoryId}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Seleccionar categoría principal" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {topLevelCategories?.map((cat) => (
+                                <SelectItem key={cat.id} value={cat.id}>
+                                  {cat.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Subcategoría */}
+                    {selectedCategoryId && (
                       <FormField
                         control={form.control}
-                        name="category_id"
+                        name="subcategory_id"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Categoría Principal *</FormLabel>
-                            <Select onValueChange={handleCategoryChange} value={selectedCategoryId}>
+                            <FormLabel>Subcategoría *</FormLabel>
+                            <Select onValueChange={handleSubcategoryChange} value={selectedSubcategoryId}>
                               <FormControl>
                                 <SelectTrigger>
-                                  <SelectValue placeholder="Seleccionar categoría principal" />
+                                  <SelectValue placeholder="Seleccionar subcategoría" />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                {topLevelCategories?.map((cat) => (
-                                  <SelectItem key={cat.id} value={cat.id}>
-                                    {cat.name}
+                                {subcategories?.map((subcat) => (
+                                  <SelectItem key={subcat.id} value={subcat.id}>
+                                    {subcat.name}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
@@ -220,121 +248,90 @@ export function NewAdminTaskCategoryModal({
                           </FormItem>
                         )}
                       />
+                    )}
 
-                      {/* Subcategoría */}
-                      {selectedCategoryId && (
-                        <FormField
-                          control={form.control}
-                          name="subcategory_id"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Subcategoría *</FormLabel>
-                              <Select onValueChange={handleSubcategoryChange} value={selectedSubcategoryId}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Seleccionar subcategoría" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {subcategories?.map((subcat) => (
-                                    <SelectItem key={subcat.id} value={subcat.id}>
-                                      {subcat.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      )}
-
-                      {/* Categoría Final */}
-                      {selectedSubcategoryId && (
-                        <FormField
-                          control={form.control}
-                          name="element_category_id"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Categoría Final *</FormLabel>
-                              <Select onValueChange={handleElementCategoryChange} value={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Selecciona primero una subcategoría" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {elementCategories?.map((elemcat) => (
-                                    <SelectItem key={elemcat.id} value={elemcat.id}>
-                                      {elemcat.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      )}
-
-                      {/* Prefijo de Código */}
+                    {/* Categoría Final */}
+                    {selectedSubcategoryId && (
                       <FormField
                         control={form.control}
-                        name="code"
+                        name="element_category_id"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Prefijo de Código {category ? '(Bloqueado)' : ''}</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder={category ? "Generado automáticamente" : "Generado automáticamente"}
-                                {...field}
-                                disabled={category ? true : false}
-                              />
-                            </FormControl>
-                            {category && (
-                              <p className="text-xs text-muted-foreground">Este campo está bloqueado porque se genera automáticamente.</p>
-                            )}
+                            <FormLabel>Categoría Final *</FormLabel>
+                            <Select onValueChange={handleElementCategoryChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecciona primero una subcategoría" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {elementCategories?.map((elemcat) => (
+                                  <SelectItem key={elemcat.id} value={elemcat.id}>
+                                    {elemcat.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
+                    )}
+                  </>
+                )}
 
-                      {/* Nombre */}
-                      <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Nombre * {category ? '(Bloqueado)' : ''}</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder={category ? "Copiado de Categoría Final" : "Nombre de la categoría"}
-                                {...field}
-                                disabled={category ? true : false}
-                              />
-                            </FormControl>
-                            {category && (
-                              <p className="text-xs text-muted-foreground">Este campo está bloqueado porque se genera automáticamente.</p>
-                            )}
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </AccordionContent>
-                  </AccordionItem>
+                {/* For editing, show only the essential fields */}
+                {category && (
+                  <div className="space-y-4">
+                    <div className="text-sm text-muted-foreground mb-4">
+                      Editando categoría: <strong>{category.name}</strong>
+                    </div>
+                  </div>
+                )}
 
-                  {/* Only show template section for new categories, not editing */}
-                  {!category && (
-                    <AccordionItem value="plantilla">
-                      <AccordionTrigger>Plantilla</AccordionTrigger>
-                      <AccordionContent className="space-y-4">
-                        <p className="text-sm text-muted-foreground">
-                          Las plantillas se configuran por separado en la sección de Plantillas de Tareas.
-                        </p>
-                      </AccordionContent>
-                    </AccordionItem>
+                {/* Prefijo de Código - Always show but disabled when editing */}
+                <FormField
+                  control={form.control}
+                  name="code"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Prefijo de Código {category ? '(Bloqueado)' : ''}</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder={category ? "Generado automáticamente" : "Generado automáticamente"}
+                          {...field}
+                          disabled={!!category}
+                        />
+                      </FormControl>
+                      {category && (
+                        <p className="text-xs text-muted-foreground">Este campo está bloqueado porque se genera automáticamente.</p>
+                      )}
+                      <FormMessage />
+                    </FormItem>
                   )}
-                </Accordion>
+                />
+
+                {/* Nombre - Always show but disabled when editing */}
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nombre * {category ? '(Bloqueado)' : ''}</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder={category ? "Nombre heredado de categoría" : "Nombre de la categoría"}
+                          {...field}
+                          disabled={!!category}
+                        />
+                      </FormControl>
+                      {category && (
+                        <p className="text-xs text-muted-foreground">Este campo está bloqueado porque se genera automáticamente.</p>
+                      )}
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </form>
             </Form>
           </CustomModalBody>
