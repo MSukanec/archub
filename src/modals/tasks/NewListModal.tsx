@@ -4,15 +4,20 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout';
 import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader';
 import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
 import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter';
 import { useCreateKanbanList, useUpdateKanbanList, type KanbanList } from '@/hooks/use-kanban';
+import { useOrganizationMembers } from '@/hooks/use-organization-members';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import { toast } from '@/hooks/use-toast';
 
 const listSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
+  created_by: z.string().min(1, 'El creador es requerido'),
 });
 
 type ListFormData = z.infer<typeof listSchema>;
@@ -28,18 +33,30 @@ export function NewListModal({ open, onClose, boardId, editingList }: NewListMod
   const createListMutation = useCreateKanbanList();
   const updateListMutation = useUpdateKanbanList();
   const isEditing = !!editingList;
+  
+  const { data: userData } = useCurrentUser();
+  const organizationId = userData?.organization?.id;
+  const { data: members = [] } = useOrganizationMembers(organizationId);
+  
+  // Find current user's member ID for default selection
+  const currentUserMember = members.find(member => member.user_id === userData?.user?.id);
 
   const {
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors, isSubmitting }
   } = useForm<ListFormData>({
     resolver: zodResolver(listSchema),
     defaultValues: {
-      name: editingList?.name || ''
+      name: editingList?.name || '',
+      created_by: editingList?.created_by || currentUserMember?.id || ''
     }
   });
+
+  const watchedCreatedBy = watch('created_by');
 
   const handleClose = () => {
     reset();
@@ -52,12 +69,14 @@ export function NewListModal({ open, onClose, boardId, editingList }: NewListMod
         await updateListMutation.mutateAsync({
           id: editingList.id,
           board_id: boardId,
-          name: data.name
+          name: data.name,
+          created_by: data.created_by
         });
       } else {
         await createListMutation.mutateAsync({
           board_id: boardId,
-          name: data.name
+          name: data.name,
+          created_by: data.created_by
         });
       }
 

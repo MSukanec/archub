@@ -20,6 +20,7 @@ export interface KanbanList {
   name: string
   position: number
   color?: string
+  created_by: string
   created_at: string
   updated_at: string
 }
@@ -72,27 +73,27 @@ export interface KanbanAttachment {
 }
 
 // Hook to get boards for current organization
-export function useKanbanBoards() {
+export function useKanbanBoards(projectId?: string) {
   const { data: userData } = useCurrentUser()
   const organizationId = userData?.organization?.id
-  const projectId = userData?.preferences?.last_project_id
+  const effectiveProjectId = projectId || userData?.preferences?.last_project_id
 
   return useQuery({
-    queryKey: ['kanban-boards', organizationId, projectId],
+    queryKey: ['kanban-boards', organizationId, effectiveProjectId],
     queryFn: async () => {
-      if (!organizationId || !projectId) throw new Error('Organization ID and Project ID required')
+      if (!organizationId || !effectiveProjectId) throw new Error('Organization ID and Project ID required')
 
       const { data, error } = await supabase
         .from('kanban_boards')
         .select('*')
         .eq('organization_id', organizationId)
-        .eq('project_id', projectId)
+        .eq('project_id', effectiveProjectId)
         .order('created_at', { ascending: false })
 
       if (error) throw error
       return data as KanbanBoard[]
     },
-    enabled: !!organizationId && !!projectId
+    enabled: !!organizationId && !!effectiveProjectId
   })
 }
 
