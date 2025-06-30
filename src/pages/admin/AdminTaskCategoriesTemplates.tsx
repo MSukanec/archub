@@ -448,7 +448,10 @@ export default function AdminTaskCategoriesTemplates() {
           setTemplateCategoryId('');
         }}
         template={editingTemplate || undefined}
-        category={editingTemplate ? allCategories.find(cat => cat.id === editingTemplate.category_id) : undefined}
+        category={editingTemplate 
+          ? allCategories.find(cat => cat.id === editingTemplate.category_id)
+          : allCategories.find(cat => cat.id === templateCategoryId)
+        }
       />
 
       {/* Delete Category Confirmation */}

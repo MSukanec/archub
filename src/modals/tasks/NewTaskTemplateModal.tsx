@@ -70,9 +70,15 @@ export function NewTaskTemplateModal({
 
   // Update form values when templateCategory changes
   useEffect(() => {
+    console.log('templateCategory changed:', templateCategory);
     if (templateCategory) {
-      form.setValue('name', templateCategory.name);
-      form.setValue('code_prefix', templateCategory.code);
+      console.log('Setting form values:', templateCategory.name, templateCategory.code);
+      if (templateCategory.name) {
+        form.setValue('name', templateCategory.name);
+      }
+      if (templateCategory.code) {
+        form.setValue('code_prefix', templateCategory.code);
+      }
     }
   }, [templateCategory, form]);
 
