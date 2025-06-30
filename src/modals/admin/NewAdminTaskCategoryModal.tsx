@@ -98,23 +98,46 @@ export function NewAdminTaskCategoryModal({
   // Reset form when modal opens/closes or category changes
   useEffect(() => {
     if (category && open) {
-      const hierarchy = findCategoryHierarchy(category.id);
+      // For editing, we need to find the parent_id from the category
+      const parentId = category.parent_id;
       
-      setSelectedCategoryId(hierarchy.categoryId);
-      setSelectedSubcategoryId(hierarchy.subcategoryId);
+      // Find the parent category to determine hierarchy
+      let parentCategoryId = '';
+      let parentSubcategoryId = '';
+      
+      if (parentId) {
+        // Find which level the parent belongs to
+        const parentCategory = allCategories.find(cat => 
+          cat.id === parentId || 
+          cat.children?.some(child => child.id === parentId) ||
+          cat.children?.some(child => child.children?.some(grandchild => grandchild.id === parentId))
+        );
+        
+        if (parentCategory) {
+          // Check if parent is a top-level category
+          if (parentCategory.id === parentId) {
+            parentCategoryId = parentId;
+          } else {
+            // Check if parent is a subcategory
+            const subCategory = parentCategory.children?.find(child => child.id === parentId);
+            if (subCategory) {
+              parentCategoryId = parentCategory.id;
+              parentSubcategoryId = parentId;
+            }
+          }
+        }
+      }
+      
+      setSelectedCategoryId(parentCategoryId);
+      setSelectedSubcategoryId(parentSubcategoryId);
       
       form.reset({
         name: category.name,
         code: category.code || '',
-        category_id: hierarchy.categoryId || undefined,
-        subcategory_id: hierarchy.subcategoryId || undefined,
-        element_category_id: hierarchy.elementCategoryId || undefined,
+        category_id: parentCategoryId || undefined,
+        subcategory_id: parentSubcategoryId || undefined,
+        element_category_id: undefined,
       });
-      
-      // Properly set the selected subcategory for element category loading if editing a level 2 category
-      if (hierarchy.elementCategoryId) {
-        setSelectedSubcategoryId(hierarchy.subcategoryId);
-      }
     } else if (!category && open) {
       setSelectedCategoryId('');
       setSelectedSubcategoryId('');
@@ -160,16 +183,18 @@ export function NewAdminTaskCategoryModal({
 
   // Handle category selection changes
   const handleCategoryChange = (value: string) => {
-    setSelectedCategoryId(value);
+    const actualValue = value === 'none' ? '' : value;
+    setSelectedCategoryId(actualValue);
     setSelectedSubcategoryId(''); // Reset subcategory when category changes
-    form.setValue('category_id', value);
+    form.setValue('category_id', actualValue || undefined);
     form.setValue('subcategory_id', undefined);
     form.setValue('element_category_id', undefined);
   };
 
   const handleSubcategoryChange = (value: string) => {
-    setSelectedSubcategoryId(value);
-    form.setValue('subcategory_id', value);
+    const actualValue = value === 'none' ? '' : value;
+    setSelectedSubcategoryId(actualValue);
+    form.setValue('subcategory_id', actualValue || undefined);
     form.setValue('element_category_id', undefined); // Reset element category when subcategory changes
   };
 
@@ -280,54 +305,102 @@ export function NewAdminTaskCategoryModal({
                   </>
                 )}
 
-                {/* For editing, show only the essential fields */}
+                {/* For editing, show hierarchical selection to change parent */}
                 {category && (
                   <div className="space-y-4">
                     <div className="text-sm text-muted-foreground mb-4">
                       Editando categoría: <strong>{category.name}</strong>
                     </div>
+                    
+                    {/* Parent Category Selector for editing */}
+                    <FormField
+                      control={form.control}
+                      name="category_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Categoría Padre</FormLabel>
+                          <Select onValueChange={handleCategoryChange} value={selectedCategoryId}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Seleccionar categoría padre (opcional para nivel superior)" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="none">Sin padre (Categoría de nivel superior)</SelectItem>
+                              {topLevelCategories?.map((cat) => (
+                                <SelectItem key={cat.id} value={cat.id}>
+                                  {cat.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Subcategory selection for editing if parent selected */}
+                    {selectedCategoryId && selectedCategoryId !== 'none' && (
+                      <FormField
+                        control={form.control}
+                        name="subcategory_id"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Subcategoría Padre</FormLabel>
+                            <Select onValueChange={handleSubcategoryChange} value={selectedSubcategoryId}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Seleccionar subcategoría padre (opcional)" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="none">Sin subcategoría padre</SelectItem>
+                                {subcategories?.map((subcat) => (
+                                  <SelectItem key={subcat.id} value={subcat.id}>
+                                    {subcat.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
                   </div>
                 )}
 
-                {/* Prefijo de Código - Always show but disabled when editing */}
+                {/* Prefijo de Código - Always editable */}
                 <FormField
                   control={form.control}
                   name="code"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Prefijo de Código {category ? '(Bloqueado)' : ''}</FormLabel>
+                      <FormLabel>Prefijo de Código</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder={category ? "Generado automáticamente" : "Generado automáticamente"}
+                          placeholder="Código de la categoría (ej: ABC)"
                           {...field}
-                          disabled={!!category}
                         />
                       </FormControl>
-                      {category && (
-                        <p className="text-xs text-muted-foreground">Este campo está bloqueado porque se genera automáticamente.</p>
-                      )}
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                {/* Nombre - Always show but disabled when editing */}
+                {/* Nombre - Always editable */}
                 <FormField
                   control={form.control}
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nombre * {category ? '(Bloqueado)' : ''}</FormLabel>
+                      <FormLabel>Nombre *</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder={category ? "Nombre heredado de categoría" : "Nombre de la categoría"}
+                          placeholder="Nombre de la categoría"
                           {...field}
-                          disabled={!!category}
                         />
                       </FormControl>
-                      {category && (
-                        <p className="text-xs text-muted-foreground">Este campo está bloqueado porque se genera automáticamente.</p>
-                      )}
                       <FormMessage />
                     </FormItem>
                   )}
