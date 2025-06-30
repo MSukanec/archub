@@ -207,6 +207,7 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
                                           className={`p-2 cursor-pointer hover:shadow-sm transition-shadow ${
                                             snapshot.isDragging ? 'shadow-md rotate-1' : ''
                                           }`}
+                                          onClick={() => setSelectedCard(card)}
                                         >
                                           <div className="text-sm font-medium">{card.title}</div>
                                           {card.description && (
@@ -295,6 +296,14 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
           editingList={lists.find(l => l.id === editingListId)}
           open={!!editingListId}
           onClose={() => setEditingListId(null)}
+        />
+      )}
+
+      {selectedCard && (
+        <CardDetailsModal
+          card={selectedCard}
+          open={!!selectedCard}
+          onClose={() => setSelectedCard(null)}
         />
       )}
     </>
