@@ -155,7 +155,17 @@ export function Sidebar() {
       { icon: Mail, label: 'Contactos', href: '/organization/contactos' },
       { icon: Activity, label: 'Actividad', href: '/organization/activity' },
       { icon: Users, label: 'Miembros', href: '/organization/members' },
-      { icon: Settings, label: 'Preferencias', href: '/preferencias' },
+      { 
+        icon: Settings, 
+        label: 'Preferencias', 
+        href: '#', 
+        isAccordion: true,
+        expanded: expandedAccordion === 'preferencias',
+        onToggle: () => toggleAccordion('preferencias'),
+        children: [
+          { icon: DollarSign, label: 'Preferencias de Finanzas', href: '/preferencias' }
+        ]
+      },
       { icon: Building, label: 'Gestión de Organizaciones', href: '#', onClick: () => { setSidebarContext('organizations'); navigate('/organizations'); } },
     ],
     organizations: [

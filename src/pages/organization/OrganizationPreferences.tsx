@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Settings, Save } from 'lucide-react';
+import { DollarSign, Save, Settings, Wallet } from 'lucide-react';
 
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { CustomComboBox } from '@/components/ui-custom/misc/CustomComboBox';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useCurrencies } from '@/hooks/use-currencies';
@@ -63,8 +65,8 @@ export default function OrganizationPreferences() {
   const [defaultCurrency, setDefaultCurrency] = useState('none');
   const [defaultWallet, setDefaultWallet] = useState('none');
   const [defaultPdfTemplate, setDefaultPdfTemplate] = useState('none');
-  const [secondaryCurrencies, setSecondaryCurrencies] = useState<string[]>([]);
-  const [secondaryWallets, setSecondaryWallets] = useState<string[]>([]);
+  const [secondaryCurrency, setSecondaryCurrency] = useState('none');
+  const [secondaryWallet, setSecondaryWallet] = useState('none');
 
   const { setSidebarContext } = useNavigationStore();
   const { toast } = useToast();
