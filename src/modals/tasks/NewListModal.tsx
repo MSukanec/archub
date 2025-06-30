@@ -8,7 +8,7 @@ import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayou
 import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader';
 import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
 import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter';
-import { useCreateKanbanList } from '@/hooks/use-kanban';
+import { useCreateKanbanList, useUpdateKanbanList, type KanbanList } from '@/hooks/use-kanban';
 import { toast } from '@/hooks/use-toast';
 
 const listSchema = z.object({
@@ -21,10 +21,13 @@ interface NewListModalProps {
   open: boolean;
   onClose: () => void;
   boardId: string;
+  editingList?: KanbanList;
 }
 
-export function NewListModal({ open, onClose, boardId }: NewListModalProps) {
+export function NewListModal({ open, onClose, boardId, editingList }: NewListModalProps) {
   const createListMutation = useCreateKanbanList();
+  const updateListMutation = useUpdateKanbanList();
+  const isEditing = !!editingList;
 
   const {
     register,
@@ -34,7 +37,7 @@ export function NewListModal({ open, onClose, boardId }: NewListModalProps) {
   } = useForm<ListFormData>({
     resolver: zodResolver(listSchema),
     defaultValues: {
-      name: ''
+      name: editingList?.name || ''
     }
   });
 
@@ -45,22 +48,25 @@ export function NewListModal({ open, onClose, boardId }: NewListModalProps) {
 
   const onSubmit = async (data: ListFormData) => {
     try {
-      await createListMutation.mutateAsync({
-        board_id: boardId,
-        name: data.name
-      });
-
-      toast({
-        title: "Éxito",
-        description: "Lista creada correctamente"
-      });
+      if (isEditing && editingList) {
+        await updateListMutation.mutateAsync({
+          id: editingList.id,
+          board_id: boardId,
+          name: data.name
+        });
+      } else {
+        await createListMutation.mutateAsync({
+          board_id: boardId,
+          name: data.name
+        });
+      }
 
       handleClose();
     } catch (error) {
-      console.error('Error creating list:', error);
+      console.error('Error saving list:', error);
       toast({
         title: "Error",
-        description: "No se pudo crear la lista",
+        description: isEditing ? "No se pudo actualizar la lista" : "No se pudo crear la lista",
         variant: "destructive"
       });
     }

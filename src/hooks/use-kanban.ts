@@ -276,6 +276,36 @@ export function useCreateKanbanList() {
   })
 }
 
+// Update kanban list
+export function useUpdateKanbanList() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (listData: { id: string; name: string; board_id: string }) => {
+      const { data, error } = await supabase
+        .from('kanban_lists')
+        .update({ name: listData.name })
+        .eq('id', listData.id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['kanban-lists', variables.board_id] })
+      toast({ title: "Lista actualizada exitosamente" })
+    },
+    onError: (error) => {
+      toast({
+        title: "Error al actualizar lista",
+        description: error.message,
+        variant: "destructive"
+      })
+    }
+  })
+}
+
 // Mutation to create a new card
 export function useCreateKanbanCard() {
   const queryClient = useQueryClient()

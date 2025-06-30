@@ -7,6 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Plus, MoreHorizontal, List, Edit, Trash2 } from 'lucide-react';
 import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState';
 import { NewCardModal } from '@/modals/tasks/NewCardModal';
+import { NewListModal } from '@/modals/tasks/NewListModal';
 import type { KanbanList, KanbanCard } from '@/hooks/use-kanban';
 
 interface CustomKanbanProps {
@@ -121,7 +122,7 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => setEditingListId(list.id)}>
                                 <Edit className="h-3 w-3 mr-2" />
                                 Editar lista
                               </DropdownMenuItem>
@@ -236,6 +237,15 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
           listId={newCardListId}
           open={!!newCardListId}
           onClose={() => setNewCardListId(null)}
+        />
+      )}
+      
+      {editingListId && (
+        <NewListModal
+          boardId={boardId}
+          editingList={lists.find(l => l.id === editingListId)}
+          open={!!editingListId}
+          onClose={() => setEditingListId(null)}
         />
       )}
     </>
