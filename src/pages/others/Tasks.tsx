@@ -5,7 +5,7 @@ import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CheckSquare, Plus, Kanban, Edit, Trash2 } from 'lucide-react';
-import { useKanbanBoards, useKanbanLists, useKanbanCards, useMoveKanbanCard, useUpdateKanbanBoard, useDeleteKanbanBoard, useDeleteKanbanList } from '@/hooks/use-kanban';
+import { useKanbanBoards, useKanbanLists, useKanbanCards, useMoveKanbanCard, useUpdateKanbanBoard, useDeleteKanbanBoard, useDeleteKanbanList, useUpdateLastKanbanBoard } from '@/hooks/use-kanban';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useKanbanStore } from '@/stores/kanbanStore';
@@ -35,13 +35,21 @@ export default function Tasks() {
   const updateBoardMutation = useUpdateKanbanBoard();
   const deleteBoardMutation = useDeleteKanbanBoard();
   const deleteListMutation = useDeleteKanbanList();
+  const updateLastBoardMutation = useUpdateLastKanbanBoard();
 
-  // Auto-select first board if none selected
+  // Initialize board selection based on saved preference or first available board
   useEffect(() => {
-    if (!currentBoardId && boards.length > 0) {
-      setCurrentBoardId(boards[0].id);
+    if (boards.length > 0) {
+      const savedBoardId = userData?.preferences?.last_kanban_board_id;
+      const boardExists = savedBoardId && boards.some(board => board.id === savedBoardId);
+      
+      if (!currentBoardId) {
+        // Set to saved board if it exists, otherwise first board
+        const selectedBoardId = boardExists ? savedBoardId : boards[0].id;
+        setCurrentBoardId(selectedBoardId);
+      }
     }
-  }, [boards, currentBoardId, setCurrentBoardId]);
+  }, [boards, currentBoardId, setCurrentBoardId, userData?.preferences?.last_kanban_board_id]);
 
   const handleEditBoard = (board: any) => {
     setEditingBoard(board);
@@ -80,6 +88,8 @@ export default function Tasks() {
 
   const handleBoardChange = (boardId: string) => {
     setCurrentBoardId(boardId);
+    // Save the selected board preference
+    updateLastBoardMutation.mutate(boardId);
   };
 
   const handleDeleteList = (listId: string, boardId?: string) => {

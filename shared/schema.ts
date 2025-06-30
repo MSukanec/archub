@@ -38,6 +38,7 @@ export const user_preferences = pgTable("user_preferences", {
   last_organization_id: uuid("last_organization_id"),
   last_project_id: uuid("last_project_id"),
   last_budget_id: uuid("last_budget_id"),
+  last_kanban_board_id: uuid("last_kanban_board_id"),
   onboarding_completed: boolean("onboarding_completed").default(false),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),

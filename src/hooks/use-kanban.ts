@@ -706,3 +706,33 @@ export function useCreateKanbanAttachment() {
     }
   })
 }
+
+// Hook to update last kanban board preference
+export function useUpdateLastKanbanBoard() {
+  const queryClient = useQueryClient()
+  const { data: userData } = useCurrentUser()
+
+  return useMutation({
+    mutationFn: async (boardId: string) => {
+      if (!userData?.preferences?.id) throw new Error('User preferences required')
+      if (!supabase) throw new Error('Supabase not initialized')
+
+      const { data, error } = await supabase
+        .from('user_preferences')
+        .update({ last_kanban_board_id: boardId })
+        .eq('id', userData.preferences.id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      // Invalidate current user data to refresh preferences
+      queryClient.invalidateQueries({ queryKey: ['current-user'] })
+    },
+    onError: (error) => {
+      console.error('Error updating last kanban board:', error)
+    }
+  })
+}
