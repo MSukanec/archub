@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { DollarSign, Settings, Wallet } from 'lucide-react';
+import { DollarSign, Settings, Wallet, Tags, Plus, Trash2 } from 'lucide-react';
 
 import { Layout } from '@/components/layout/Layout';
 import { Label } from '@/components/ui/label';
@@ -43,11 +43,21 @@ interface OrganizationPreferences {
   updated_at: string;
 }
 
+interface MovementConcept {
+  id: string;
+  name: string;
+  parent_id: string | null;
+  organization_id: string | null;
+  created_at: string;
+}
+
 export default function OrganizationPreferences() {
   const [defaultCurrency, setDefaultCurrency] = useState('none');
   const [defaultWallet, setDefaultWallet] = useState('none');
   const [secondaryCurrencies, setSecondaryCurrencies] = useState<string[]>([]);
   const [secondaryWallets, setSecondaryWallets] = useState<string[]>([]);
+  const [newConceptName, setNewConceptName] = useState('');
+  const [selectedParentConcept, setSelectedParentConcept] = useState('');
   
   // Auto-save debounce
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -93,6 +103,24 @@ export default function OrganizationPreferences() {
       if (error) throw error;
       return data as Wallet[];
     },
+  });
+
+  // Fetch movement concepts (system + organization)
+  const { data: movementConcepts = [] } = useQuery({
+    queryKey: ['movement-concepts', organizationId],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase not initialized');
+      
+      const { data, error } = await supabase
+        .from('movement_concepts')
+        .select('*')
+        .or(`organization_id.is.null,organization_id.eq.${organizationId}`)
+        .order('name');
+      
+      if (error) throw error;
+      return data as MovementConcept[];
+    },
+    enabled: !!organizationId,
   });
 
   // Load existing preferences
@@ -340,7 +368,7 @@ export default function OrganizationPreferences() {
           </p>
         </div>
 
-        <Separator className="bg-border opacity-100" />
+        <hr className="border-t border-gray-200 dark:border-gray-700 my-8" />
 
         {/* Monedas Section */}
         <div>
@@ -391,7 +419,7 @@ export default function OrganizationPreferences() {
           </div>
         </div>
 
-        <Separator className="bg-border opacity-100" />
+        <hr className="border-t border-gray-200 dark:border-gray-700 my-8" />
 
         {/* Billeteras Section */}
         <div>
