@@ -121,13 +121,13 @@ export function NewAdminTaskCategoryModal({
                       <Select onValueChange={(value) => {
                         const actualValue = value === 'none' ? null : value;
                         field.onChange(actualValue);
-                      }} value={field.value || 'none'}>
+                      }} value={field.value ?? 'none'}>
                         <FormControl>
-                          <SelectTrigger className="z-50">
+                          <SelectTrigger>
                             <SelectValue placeholder="Seleccionar categoría padre (opcional)" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="z-[100]">
+                        <SelectContent className="z-[9999]">
                           <SelectItem value="none">Sin padre (Categoría de nivel superior)</SelectItem>
                           {allCategories?.map((cat) => (
                             <SelectItem key={cat.id} value={cat.id}>
@@ -141,11 +141,7 @@ export function NewAdminTaskCategoryModal({
                   )}
                 />
 
-                {category && (
-                  <div className="text-sm text-muted-foreground mb-4">
-                    Editando categoría: <strong>{category.name}</strong>
-                  </div>
-                )}
+
 
                 {/* Prefijo de Código - Always editable */}
                 <FormField
