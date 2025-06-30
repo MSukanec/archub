@@ -23,12 +23,14 @@ type BoardFormData = z.infer<typeof boardSchema>;
 interface NewBoardModalProps {
   open: boolean;
   onClose: () => void;
-  editingBoard?: any;
+  board?: any;
+  isEditing?: boolean;
 }
 
-export function NewBoardModal({ open, onClose, editingBoard }: NewBoardModalProps) {
+export function NewBoardModal({ open, onClose, board, isEditing = false }: NewBoardModalProps) {
   const { data: userData } = useCurrentUser();
   const createBoardMutation = useCreateKanbanBoard();
+  const updateBoardMutation = useUpdateKanbanBoard();
 
   const {
     register,
@@ -38,8 +40,8 @@ export function NewBoardModal({ open, onClose, editingBoard }: NewBoardModalProp
   } = useForm<BoardFormData>({
     resolver: zodResolver(boardSchema),
     defaultValues: {
-      name: '',
-      description: ''
+      name: board?.name || '',
+      description: board?.description || ''
     }
   });
 
@@ -59,22 +61,25 @@ export function NewBoardModal({ open, onClose, editingBoard }: NewBoardModalProp
     }
 
     try {
-      await createBoardMutation.mutateAsync({
-        name: data.name,
-        description: data.description || undefined
-      });
-
-      toast({
-        title: "Éxito",
-        description: "Tablero creado correctamente"
-      });
+      if (isEditing && board) {
+        await updateBoardMutation.mutateAsync({
+          id: board.id,
+          name: data.name,
+          description: data.description || undefined
+        });
+      } else {
+        await createBoardMutation.mutateAsync({
+          name: data.name,
+          description: data.description || undefined
+        });
+      }
 
       handleClose();
     } catch (error) {
-      console.error('Error creating board:', error);
+      console.error('Error saving board:', error);
       toast({
         title: "Error",
-        description: "No se pudo crear el tablero",
+        description: isEditing ? "No se pudo actualizar el tablero" : "No se pudo crear el tablero",
         variant: "destructive"
       });
     }
@@ -87,8 +92,8 @@ export function NewBoardModal({ open, onClose, editingBoard }: NewBoardModalProp
       children={{
         header: (
           <CustomModalHeader
-            title="Nuevo Tablero de Ideas"
-            description="Crea un nuevo tablero para organizar tus tareas con listas y tarjetas"
+            title={isEditing ? "Editar Tablero" : "Nuevo Tablero de Ideas"}
+            description={isEditing ? "Edita la información del tablero" : "Crea un nuevo tablero para organizar tus tareas con listas y tarjetas"}
             onClose={handleClose}
           />
         ),
@@ -125,7 +130,7 @@ export function NewBoardModal({ open, onClose, editingBoard }: NewBoardModalProp
           <CustomModalFooter
             onCancel={handleClose}
             form="board-form"
-            saveText="Crear Tablero"
+            saveText={isEditing ? "Actualizar Tablero" : "Crear Tablero"}
             isLoading={isSubmitting}
           />
         )
