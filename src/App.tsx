@@ -173,6 +173,12 @@ function Router() {
         </ProtectedRoute>
       </Route>
 
+      <Route path="/design">
+        <ProtectedRoute>
+          <Design />
+        </ProtectedRoute>
+      </Route>
+
       {/* Rutas de administración - Solo para administradores */}
       <Route path="/admin/dashboard">
         <ProtectedRoute>
