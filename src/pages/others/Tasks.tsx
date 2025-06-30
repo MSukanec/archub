@@ -5,7 +5,8 @@ import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CheckSquare, Plus, Kanban, Edit, Trash2 } from 'lucide-react';
-import { useKanbanBoards, useKanbanLists, useKanbanCards, useMoveKanbanCard, useUpdateKanbanBoard, useDeleteKanbanBoard } from '@/hooks/use-kanban';
+import { useKanbanBoards, useKanbanLists, useKanbanCards, useMoveKanbanCard, useUpdateKanbanBoard, useDeleteKanbanBoard, useDeleteKanbanList } from '@/hooks/use-kanban';
+import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useKanbanStore } from '@/stores/kanbanStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -20,13 +21,19 @@ export default function Tasks() {
   const { currentBoardId, setCurrentBoardId } = useKanbanStore();
   
   const { data: userData } = useCurrentUser();
-  const { data: boards = [], isLoading: boardsLoading } = useKanbanBoards();
+  const { toast } = useToast();
+  
+  // Get project data from user preferences
+  const projectId = userData?.preferences?.last_project_id;
+  
+  const { data: boards = [], isLoading: boardsLoading } = useKanbanBoards(projectId);
   const { data: lists = [], isLoading: listsLoading } = useKanbanLists(currentBoardId || '');
   const { data: cards = [], isLoading: cardsLoading } = useKanbanCards(currentBoardId || '');
   
   const moveCardMutation = useMoveKanbanCard();
   const updateBoardMutation = useUpdateKanbanBoard();
   const deleteBoardMutation = useDeleteKanbanBoard();
+  const deleteListMutation = useDeleteKanbanList();
 
   // Auto-select first board if none selected
   useEffect(() => {

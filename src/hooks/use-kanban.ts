@@ -371,6 +371,48 @@ export function useUpdateKanbanList() {
   })
 }
 
+// Delete kanban list
+export function useDeleteKanbanList() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (listId: string) => {
+      // First delete all cards in the list
+      const { error: cardsError } = await supabase
+        .from('kanban_cards')
+        .delete()
+        .eq('list_id', listId)
+
+      if (cardsError) throw cardsError
+
+      // Then delete the list
+      const { data, error } = await supabase
+        .from('kanban_lists')
+        .delete()
+        .eq('id', listId)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    },
+    onSuccess: (data) => {
+      if (data?.board_id) {
+        queryClient.invalidateQueries({ queryKey: ['kanban-lists', data.board_id] })
+        queryClient.invalidateQueries({ queryKey: ['kanban-cards', data.board_id] })
+      }
+      toast({ title: "Lista eliminada exitosamente" })
+    },
+    onError: (error) => {
+      toast({
+        title: "Error al eliminar lista",
+        description: error.message,
+        variant: "destructive"
+      })
+    }
+  })
+}
+
 // Mutation to create a new card
 export function useCreateKanbanCard() {
   const queryClient = useQueryClient()
