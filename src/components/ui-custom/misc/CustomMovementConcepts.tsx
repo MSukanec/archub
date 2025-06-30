@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Trash2, Tags, Filter } from 'lucide-react';
+import { Plus, Trash2, Tags } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,7 +30,6 @@ export function CustomMovementConcepts({
 }: CustomMovementConceptsProps) {
   const [newConceptName, setNewConceptName] = useState('');
   const [selectedParentConcept, setSelectedParentConcept] = useState('');
-  const [showSystemConcepts, setShowSystemConcepts] = useState(true);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -40,19 +39,7 @@ export function CustomMovementConcepts({
   };
 
   const getChildConcepts = (parentId: string) => {
-    const children = movementConcepts.filter(concept => concept.parent_id === parentId);
-    if (!showSystemConcepts) {
-      return children.filter(concept => concept.organization_id === organizationId);
-    }
-    return children;
-  };
-
-  const getFilteredParentConcepts = () => {
-    const parents = getParentConcepts();
-    if (!showSystemConcepts) {
-      return parents.filter(concept => concept.organization_id === organizationId);
-    }
-    return parents;
+    return movementConcepts.filter(concept => concept.parent_id === parentId);
   };
 
   // Create movement concept mutation
@@ -180,26 +167,13 @@ export function CustomMovementConcepts({
             </Button>
           </div>
 
-          {/* Filter toggle */}
-          <div className="flex items-center gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-md">
-            <Checkbox
-              id="show-system-concepts"
-              checked={showSystemConcepts}
-              onCheckedChange={(checked) => setShowSystemConcepts(checked === true)}
-            />
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-muted-foreground" />
-              <Label htmlFor="show-system-concepts" className="text-sm font-medium">
-                Mostrar conceptos del sistema
-              </Label>
-            </div>
-          </div>
+
 
           {/* Concepts hierarchy display */}
           <div className="space-y-4">
             <h4 className="text-sm font-medium">Conceptos Actuales</h4>
             
-            {getFilteredParentConcepts().map((parentConcept) => (
+            {getParentConcepts().map((parentConcept) => (
               <div key={parentConcept.id} className="space-y-2">
                 <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
                   <span className="font-medium">{parentConcept.name}</span>

@@ -121,10 +121,15 @@ export default function OrganizationPreferences() {
         .or(`organization_id.is.null,organization_id.eq.${organizationId}`)
         .order('name');
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching movement concepts:', error);
+        throw error;
+      }
+      
+      console.log('Movement concepts fetched:', data);
       return data as MovementConcept[];
     },
-    enabled: !!organizationId,
+    enabled: !!organizationId && !!supabase,
   });
 
   // Load existing preferences
