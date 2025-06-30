@@ -81,8 +81,8 @@ export default function Tasks() {
     setCurrentBoardId(boardId);
   };
 
-  const handleDeleteList = (listId: string, boardId: string) => {
-    deleteListMutation.mutate({ listId, boardId });
+  const handleDeleteList = (listId: string) => {
+    deleteListMutation.mutate(listId);
   };
 
   // Current board for display

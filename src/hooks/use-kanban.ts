@@ -386,6 +386,18 @@ export function useDeleteKanbanList() {
 
   return useMutation({
     mutationFn: async (listId: string) => {
+      if (!supabase) throw new Error('Supabase not initialized')
+      
+      // Get the board_id first for cache invalidation
+      const { data: listData, error: listError } = await supabase
+        .from('kanban_lists')
+        .select('board_id')
+        .eq('id', listId)
+        .single()
+
+      if (listError) throw listError
+      const boardId = listData.board_id
+
       // First delete all cards in the list
       const { error: cardsError } = await supabase
         .from('kanban_cards')
@@ -395,21 +407,17 @@ export function useDeleteKanbanList() {
       if (cardsError) throw cardsError
 
       // Then delete the list
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('kanban_lists')
         .delete()
         .eq('id', listId)
-        .select()
-        .single()
 
       if (error) throw error
-      return data
+      return { listId, boardId }
     },
     onSuccess: (data) => {
-      if (data?.board_id) {
-        queryClient.invalidateQueries({ queryKey: ['kanban-lists', data.board_id] })
-        queryClient.invalidateQueries({ queryKey: ['kanban-cards', data.board_id] })
-      }
+      queryClient.invalidateQueries({ queryKey: ['kanban-lists', data.boardId] })
+      queryClient.invalidateQueries({ queryKey: ['kanban-cards', data.boardId] })
       toast({ title: "Lista eliminada exitosamente" })
     },
     onError: (error) => {
