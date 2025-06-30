@@ -60,8 +60,14 @@ export function NewListModal({ open, onClose, boardId, editingList }: NewListMod
 
   // Set default created_by when modal opens and members are loaded
   React.useEffect(() => {
-    if (members.length > 0 && currentUserMember && !editingList && !watchedCreatedBy) {
-      setValue('created_by', currentUserMember.id);
+    if (members.length > 0) {
+      if (editingList && editingList.created_by) {
+        // Set the creator from the editing list
+        setValue('created_by', editingList.created_by);
+      } else if (currentUserMember && !watchedCreatedBy) {
+        // Set current user as default for new lists
+        setValue('created_by', currentUserMember.id);
+      }
     }
   }, [members, currentUserMember, editingList, watchedCreatedBy, setValue]);
 

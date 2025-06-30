@@ -54,9 +54,9 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
     return acc;
   }, {} as Record<string, KanbanCard[]>);
 
-  // Sort cards by position within each list
+  // Sort cards by creation date (newest first) within each list
   Object.keys(cardsByList).forEach(listId => {
-    cardsByList[listId].sort((a, b) => a.position - b.position);
+    cardsByList[listId].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   });
 
   const handleDragEnd = (result: DropResult) => {
@@ -187,73 +187,52 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
 
                         {/* Cards Container */}
                         <div className="p-3">
+                          {/* Add Card Button - Always show first */}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setNewCardListId(list.id)}
+                            className="w-full mb-2 h-8 justify-start text-muted-foreground hover:text-foreground"
+                          >
+                            <Plus className="h-3 w-3 mr-2" />
+                            Añade una tarjeta
+                          </Button>
+
                           <Droppable droppableId={list.id} type="CARD">
                             {(provided, snapshot) => (
                               <div
                                 ref={provided.innerRef}
                                 {...provided.droppableProps}
-                                className={`space-y-2 min-h-[120px] transition-colors ${
+                                className={`space-y-2 min-h-[80px] transition-colors ${
                                   snapshot.isDraggingOver ? 'bg-accent/10' : ''
                                 }`}
                               >
-                                {(cardsByList[list.id]?.length || 0) > 0 ? (
-                                  cardsByList[list.id]?.map((card, index) => (
-                                    <Draggable key={card.id} draggableId={card.id} index={index}>
-                                      {(provided, snapshot) => (
-                                        <Card
-                                          ref={provided.innerRef}
-                                          {...provided.draggableProps}
-                                          {...provided.dragHandleProps}
-                                          className={`p-2 cursor-pointer hover:shadow-sm transition-shadow ${
-                                            snapshot.isDragging ? 'shadow-md rotate-1' : ''
-                                          }`}
-                                          onClick={() => setSelectedCard(card)}
-                                        >
-                                          <div className="text-sm font-medium">{card.title}</div>
-                                          {card.description && (
-                                            <div className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                                              {card.description}
-                                            </div>
-                                          )}
-                                        </Card>
-                                      )}
-                                    </Draggable>
-                                  ))
-                                ) : (
-                                  <div className="py-8">
-                                    <CustomEmptyState
-                                      icon={<Plus className="w-6 h-6 text-muted-foreground" />}
-                                      title="No hay tarjetas"
-                                      description="Esta lista está vacía"
-                                      action={
-                                        <Button
-                                          onClick={() => setNewCardListId(list.id)}
-                                          className="h-8 px-3 text-sm"
-                                        >
-                                          <Plus className="h-3 w-3 mr-2" />
-                                          Añade una tarjeta
-                                        </Button>
-                                      }
-                                    />
-                                  </div>
-                                )}
+                                {cardsByList[list.id]?.map((card, index) => (
+                                  <Draggable key={card.id} draggableId={card.id} index={index}>
+                                    {(provided, snapshot) => (
+                                      <Card
+                                        ref={provided.innerRef}
+                                        {...provided.draggableProps}
+                                        {...provided.dragHandleProps}
+                                        className={`p-2 cursor-pointer hover:shadow-sm transition-shadow ${
+                                          snapshot.isDragging ? 'shadow-md rotate-1' : ''
+                                        }`}
+                                        onClick={() => setSelectedCard(card)}
+                                      >
+                                        <div className="text-sm font-medium">{card.title}</div>
+                                        {card.description && (
+                                          <div className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                                            {card.description}
+                                          </div>
+                                        )}
+                                      </Card>
+                                    )}
+                                  </Draggable>
+                                ))}
                                 {provided.placeholder}
                               </div>
                             )}
                           </Droppable>
-
-                          {/* Add Card Button - Only show if list has cards */}
-                          {(cardsByList[list.id]?.length || 0) > 0 && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setNewCardListId(list.id)}
-                              className="w-full mt-2 h-8 justify-start text-muted-foreground hover:text-foreground"
-                            >
-                              <Plus className="h-3 w-3 mr-2" />
-                              Añade una tarjeta
-                            </Button>
-                          )}
                         </div>
                       </Card>
                     </div>
