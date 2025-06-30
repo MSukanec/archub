@@ -91,9 +91,10 @@ export default function Tasks() {
     ].filter(Boolean)
   };
 
+  // Loading state
   if (boardsLoading) {
     return (
-      <Layout headerProps={headerProps}>
+      <Layout headerProps={{ title: "Tareas", showSearch: false, actions: [] }}>
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="text-lg font-semibold">Cargando tableros...</div>
@@ -103,9 +104,10 @@ export default function Tasks() {
     );
   }
 
+  // Empty state with CustomEmptyState
   if (boards.length === 0) {
     return (
-      <Layout headerProps={headerProps}>
+      <Layout headerProps={{ title: "Tareas", showSearch: false, actions: [] }}>
         <CustomEmptyState
           icon={<Kanban className="w-8 h-8 text-muted-foreground" />}
           title="No hay tableros Kanban"
