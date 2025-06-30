@@ -113,6 +113,8 @@ export function useCreateTaskParameter() {
     mutationFn: async (parameterData: CreateTaskParameterData) => {
       if (!supabase) throw new Error('Supabase client not initialized');
 
+      console.log('Creating parameter with data:', parameterData);
+
       // Create the parameter directly in task_parameters table
       const { data: parameter, error: paramError } = await supabase
         .from('task_parameters')
@@ -125,7 +127,12 @@ export function useCreateTaskParameter() {
         .select()
         .single();
 
-      if (paramError) throw paramError;
+      if (paramError) {
+        console.error('Error creating parameter:', paramError);
+        throw paramError;
+      }
+      
+      console.log('Parameter created with ID:', parameter?.id);
       return parameter;
     },
     onSuccess: () => {
