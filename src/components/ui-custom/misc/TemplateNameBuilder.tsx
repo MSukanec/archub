@@ -56,27 +56,8 @@ export function TemplateNameBuilder({
   // Parse the value string into elements on mount and when value changes
   useEffect(() => {
     if (!value) {
-      // When no value but we have categoryName, show the name element
-      if (categoryName) {
-        const initialElements: TemplateElement[] = [
-          {
-            id: 'name',
-            type: 'name',
-            content: `${categoryName} de `,
-            immutable: true
-          },
-          {
-            id: 'period',
-            type: 'period',
-            content: '.',
-            immutable: true
-          }
-        ];
-        setElements(initialElements);
-        onChange(elementsToString(initialElements));
-      } else {
-        setElements([]);
-      }
+      // When no value, start with empty elements and let user select action first
+      setElements([]);
       setSelectedAction("");
       return;
     }
@@ -232,7 +213,7 @@ export function TemplateNameBuilder({
     }
 
     setElements(parsed);
-  }, [value, parameters, categoryName, onChange, actions, onActionChange]);
+  }, [value, parameters, categoryName, actions]);
 
   // Handle action change
   const handleActionChange = (actionId: string | null) => {
@@ -407,7 +388,7 @@ export function TemplateNameBuilder({
         {elements.length === 0 ? (
           <div className="text-muted-foreground text-sm flex items-center gap-2">
             <Type className="h-4 w-4" />
-            {placeholder}
+            Seleccione una Acción para comenzar a construir la plantilla
           </div>
         ) : (
           <div className="flex flex-wrap gap-2 items-center">

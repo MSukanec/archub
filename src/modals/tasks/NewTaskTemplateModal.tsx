@@ -144,8 +144,8 @@ export function NewTaskTemplateModal({
                         <Input 
                           placeholder="Nombre de la plantilla" 
                           {...field} 
-                          disabled={isEditing}
-                          className={isEditing ? "bg-muted cursor-not-allowed" : ""}
+                          disabled={true}
+                          className="bg-muted cursor-not-allowed"
                         />
                       </FormControl>
                       <FormMessage />
@@ -164,8 +164,8 @@ export function NewTaskTemplateModal({
                           placeholder="Ej: EXC, COL, INS" 
                           maxLength={4} 
                           {...field} 
-                          disabled={isEditing}
-                          className={isEditing ? "bg-muted cursor-not-allowed" : ""}
+                          disabled={true}
+                          className="bg-muted cursor-not-allowed"
                         />
                       </FormControl>
                       <FormMessage />
