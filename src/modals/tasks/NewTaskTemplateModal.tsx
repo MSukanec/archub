@@ -74,12 +74,13 @@ export function NewTaskTemplateModal({
     console.log('template:', template);
     if (templateCategory) {
       console.log('Setting form values:', templateCategory.name, templateCategory.code);
-      if (templateCategory.name) {
-        form.setValue('name', templateCategory.name);
-      }
-      if (templateCategory.code) {
-        form.setValue('code_prefix', templateCategory.code);
-      }
+      // Reset the entire form with category data
+      form.reset({
+        name: templateCategory.name || "",
+        code_prefix: templateCategory.code || "",
+        name_template: template?.name_template || "",
+        action_id: template?.action_id || null,
+      });
     }
   }, [templateCategory, template, form]);
 
