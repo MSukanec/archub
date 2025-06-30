@@ -148,6 +148,12 @@ function Router() {
         </ProtectedRoute>
       </Route>
 
+      <Route path="/organization/preferences">
+        <ProtectedRoute>
+          <OrganizationPreferences />
+        </ProtectedRoute>
+      </Route>
+
       <Route path="/project/dashboard">
         <ProtectedRoute>
           <ProjectDashboard />
