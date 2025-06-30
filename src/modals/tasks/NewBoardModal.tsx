@@ -9,7 +9,7 @@ import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayou
 import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader';
 import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
 import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter';
-import { useCreateKanbanBoard } from '@/hooks/use-kanban';
+import { useCreateKanbanBoard, useUpdateKanbanBoard } from '@/hooks/use-kanban';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { toast } from '@/hooks/use-toast';
 

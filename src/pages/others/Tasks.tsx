@@ -15,6 +15,8 @@ import { NewListModal } from '@/modals/tasks/NewListModal';
 export default function Tasks() {
   const [showNewBoardModal, setShowNewBoardModal] = useState(false);
   const [showNewListModal, setShowNewListModal] = useState(false);
+  const [showEditBoardModal, setShowEditBoardModal] = useState(false);
+  const [editingBoard, setEditingBoard] = useState<any>(null);
   const { currentBoardId, setCurrentBoardId } = useKanbanStore();
   
   const { data: userData } = useCurrentUser();
@@ -23,6 +25,8 @@ export default function Tasks() {
   const { data: cards = [], isLoading: cardsLoading } = useKanbanCards(currentBoardId || '');
   
   const moveCardMutation = useMoveKanbanCard();
+  const updateBoardMutation = useUpdateKanbanBoard();
+  const deleteBoardMutation = useDeleteKanbanBoard();
 
   // Auto-select first board if none selected
   useEffect(() => {
@@ -30,6 +34,26 @@ export default function Tasks() {
       setCurrentBoardId(boards[0].id);
     }
   }, [boards, currentBoardId, setCurrentBoardId]);
+
+  const handleEditBoard = (board: any) => {
+    setEditingBoard(board);
+    setShowEditBoardModal(true);
+  };
+
+  const handleDeleteBoard = (boardId: string) => {
+    deleteBoardMutation.mutate(boardId, {
+      onSuccess: () => {
+        if (currentBoardId === boardId) {
+          const remainingBoards = boards.filter(b => b.id !== boardId);
+          if (remainingBoards.length > 0) {
+            setCurrentBoardId(remainingBoards[0].id);
+          } else {
+            setCurrentBoardId(null);
+          }
+        }
+      }
+    });
+  };
 
   const handleCardMove = async (cardId: string, sourceListId: string, destListId: string, destIndex: number) => {
     if (!currentBoardId) return;
@@ -50,26 +74,70 @@ export default function Tasks() {
     setCurrentBoardId(boardId);
   };
 
+  // Current board for display
+  const currentBoard = boards.find(board => board.id === currentBoardId);
+
   // Header configuration following ai-page-template.md
   const headerProps = {
-    title: "Tareas",
+    title: (
+      <div className="flex items-center gap-3">
+        <span>Tareas</span>
+        {boards.length > 0 && currentBoard && (
+          <>
+            <span className="text-muted-foreground">·</span>
+            <div className="flex items-center gap-2">
+              <Select value={currentBoardId || undefined} onValueChange={handleBoardChange}>
+                <SelectTrigger className="w-[200px] h-8 border-0 bg-transparent p-0 font-medium focus:ring-0">
+                  <SelectValue>{currentBoard.name}</SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {boards.map((board) => (
+                    <SelectItem key={board.id} value={board.id}>
+                      {board.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={() => handleEditBoard(currentBoard)}
+              >
+                <Edit className="h-3 w-3" />
+              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>¿Eliminar tablero?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Esta acción eliminará permanentemente el tablero "{currentBoard.name}" y todas sus listas y tarjetas.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => handleDeleteBoard(currentBoard.id)}>
+                      Eliminar
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </>
+        )}
+      </div>
+    ),
     showSearch: false,
     actions: [
-      boards.length > 0 && (
-        <Select key="board-selector" value={currentBoardId || undefined} onValueChange={handleBoardChange}>
-          <SelectTrigger className="w-[200px] h-8">
-            <SelectValue placeholder="Seleccionar tablero..." />
-          </SelectTrigger>
-          <SelectContent>
-            {boards.map((board) => (
-              <SelectItem key={board.id} value={board.id}>
-                {board.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      ),
-
       <Button 
         key="new-board"
         className="h-8 px-3 text-sm"
@@ -78,7 +146,7 @@ export default function Tasks() {
         <Plus className="h-3 w-3 mr-1" />
         Nuevo Tablero
       </Button>
-    ].filter(Boolean)
+    ]
   };
 
   // Loading state
@@ -144,6 +212,13 @@ export default function Tasks() {
       <NewBoardModal
         open={showNewBoardModal}
         onClose={() => setShowNewBoardModal(false)}
+      />
+      
+      <NewBoardModal
+        open={showEditBoardModal}
+        onClose={() => setShowEditBoardModal(false)}
+        board={editingBoard}
+        isEditing={true}
       />
       
       {currentBoardId && (
