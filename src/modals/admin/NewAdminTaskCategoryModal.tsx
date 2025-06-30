@@ -57,6 +57,11 @@ export function NewAdminTaskCategoryModal({
   // Reset form when modal opens/closes or category changes
   useEffect(() => {
     if (category && open) {
+      console.log('Setting form values for edit:', {
+        name: category.name,
+        code: category.code || '',
+        parent_id: category.parent_id,
+      });
       form.reset({
         name: category.name,
         code: category.code || '',
@@ -136,7 +141,7 @@ export function NewAdminTaskCategoryModal({
                                 )}
                               >
                                 {field.value
-                                  ? allCategories?.find((cat) => cat.id === field.value)?.name
+                                  ? allCategories?.find((cat) => cat.id === field.value)?.name || "Cargando categoría..."
                                   : "Seleccionar categoría padre (opcional)"}
                                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                               </Button>
