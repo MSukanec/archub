@@ -3,7 +3,9 @@ import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautif
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Plus, MoreHorizontal, List, Edit, Trash2 } from 'lucide-react';
 import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState';
 import { NewCardModal } from '@/modals/tasks/NewCardModal';
@@ -16,10 +18,11 @@ interface CustomKanbanProps {
   boardId: string;
   onCardMove?: (cardId: string, sourceListId: string, destListId: string, destIndex: number) => void;
   onCreateList?: () => void;
+  onDeleteList?: (listId: string) => void;
   loading?: boolean;
 }
 
-export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, loading }: CustomKanbanProps) {
+export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, onDeleteList, loading }: CustomKanbanProps) {
   const [newCardListId, setNewCardListId] = useState<string | null>(null);
   const [editingListId, setEditingListId] = useState<string | null>(null);
 

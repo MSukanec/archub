@@ -74,63 +74,30 @@ export default function Tasks() {
     setCurrentBoardId(boardId);
   };
 
+  const handleDeleteList = async (listId: string) => {
+    try {
+      await deleteListMutation.mutateAsync(listId);
+      toast({
+        title: "Lista eliminada",
+        description: "La lista ha sido eliminada correctamente.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar la lista.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Current board for display
   const currentBoard = boards.find(board => board.id === currentBoardId);
 
   // Header configuration following ai-page-template.md
   const headerProps = {
-    title: currentBoard ? `Tareas - ${currentBoard.name}` : "Tareas",
+    title: "Tareas",
     showSearch: false,
     actions: [
-      boards.length > 0 && currentBoard && (
-        <div key="board-controls" className="flex items-center gap-2">
-          <Select value={currentBoardId || undefined} onValueChange={handleBoardChange}>
-            <SelectTrigger className="w-[200px] h-8">
-              <SelectValue placeholder="Seleccionar tablero..." />
-            </SelectTrigger>
-            <SelectContent>
-              {boards.map((board) => (
-                <SelectItem key={board.id} value={board.id}>
-                  {board.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => handleEditBoard(currentBoard)}
-          >
-            <Edit className="h-3 w-3" />
-          </Button>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-              >
-                <Trash2 className="h-3 w-3" />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>¿Eliminar tablero?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Esta acción eliminará permanentemente el tablero "{currentBoard.name}" y todas sus listas y tarjetas.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction onClick={() => handleDeleteBoard(currentBoard.id)}>
-                  Eliminar
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
-      ),
       <Button 
         key="new-board"
         className="h-8 px-3 text-sm"
@@ -139,7 +106,7 @@ export default function Tasks() {
         <Plus className="h-3 w-3 mr-1" />
         Nuevo Tablero
       </Button>
-    ].filter(Boolean)
+    ]
   };
 
   // Loading state
@@ -213,23 +180,85 @@ export default function Tasks() {
 
   return (
     <Layout headerProps={headerProps}>
-      {selectedBoard && (
-        <div className="mb-4">
-          <h2 className="text-xl font-semibold">{selectedBoard.name}</h2>
-          {selectedBoard.description && (
-            <p className="text-sm text-muted-foreground">{selectedBoard.description}</p>
+      {/* Board Title with Selector and Actions */}
+      {boards.length > 0 && (
+        <div className="mb-6">
+          <div className="flex items-center gap-3">
+            <Select value={currentBoardId || undefined} onValueChange={handleBoardChange}>
+              <SelectTrigger className="w-[300px] h-12 text-xl font-semibold border-0 bg-transparent p-0 focus:ring-0">
+                <SelectValue placeholder="Seleccionar tablero...">
+                  {selectedBoard?.name || "Seleccionar tablero..."}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {boards.map((board) => (
+                  <SelectItem key={board.id} value={board.id}>
+                    {board.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            {selectedBoard && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => handleEditBoard(selectedBoard)}
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+                
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>¿Eliminar tablero?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Esta acción eliminará permanentemente el tablero "{selectedBoard.name}" y todas sus listas y tarjetas.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction 
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        onClick={() => handleDeleteBoard(selectedBoard.id)}
+                      >
+                        Eliminar
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </>
+            )}
+          </div>
+          
+          {selectedBoard?.description && (
+            <p className="text-sm text-muted-foreground mt-2">{selectedBoard.description}</p>
           )}
         </div>
       )}
       
-      <CustomKanban 
-        lists={lists}
-        cards={cards}
-        boardId={currentBoardId || ''}
-        onCardMove={handleCardMove}
-        onCreateList={() => setShowNewListModal(true)}
-        loading={listsLoading || cardsLoading}
-      />
+      {selectedBoard && (
+        <CustomKanban 
+          lists={lists}
+          cards={cards}
+          boardId={currentBoardId || ''}
+          onCardMove={handleCardMove}
+          onCreateList={() => setShowNewListModal(true)}
+          onDeleteList={handleDeleteList}
+          loading={listsLoading || cardsLoading}
+        />
+      )}
 
       {/* Modals */}
       <NewBoardModal
