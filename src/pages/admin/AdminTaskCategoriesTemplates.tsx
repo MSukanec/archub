@@ -448,7 +448,6 @@ export default function AdminTaskCategoriesTemplates() {
           setTemplateCategoryId('');
         }}
         template={editingTemplate || undefined}
-        preselectedCategoryId={templateCategoryId}
       />
 
       {/* Delete Category Confirmation */}

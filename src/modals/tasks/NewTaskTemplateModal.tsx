@@ -42,9 +42,9 @@ export function NewTaskTemplateModal({
     name: param.name,
     label: param.label,
     type: param.type,
-    unit: param.unit,
+    unit: undefined, // Unit will be resolved from unit_id if needed
     is_required: param.is_required,
-    position: param.position
+    position: 0 // Default position since it's not in the database
   }));
 
   const form = useForm<FormData>({
@@ -81,7 +81,7 @@ export function NewTaskTemplateModal({
   if (!open) return null;
 
   return (
-    <CustomModalLayout>
+    <CustomModalLayout open={open} onClose={onClose}>
       {{
         header: (
           <CustomModalHeader
