@@ -35,6 +35,7 @@ import AdminTaskCategoriesTemplates from "@/pages/admin/AdminTaskCategoriesTempl
 import AdminTaskParameters from "@/pages/admin/AdminTaskParameters";
 import AdminMaterials from "@/pages/admin/AdminMaterials";
 import AdminMaterialCategories from "@/pages/admin/AdminMaterialCategories";
+import Tasks from "@/pages/others/Tasks";
 
 function Router() {
   return (
