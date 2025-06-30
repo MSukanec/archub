@@ -61,28 +61,38 @@ export function NewTaskTemplateModal({
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: templateCategory?.name || "",
-      code_prefix: templateCategory?.code || "",
-      name_template: template?.name_template || "",
-      action_id: template?.action_id || null,
+      name: "",
+      code_prefix: "",
+      name_template: "",
+      action_id: null,
     },
   });
 
-  // Update form values when templateCategory changes
+  // Reset form when modal opens/closes or template changes
   useEffect(() => {
-    console.log('templateCategory changed:', templateCategory);
-    console.log('template:', template);
-    if (templateCategory) {
-      console.log('Setting form values:', templateCategory.name, templateCategory.code);
-      // Reset the entire form with category data
-      form.reset({
-        name: templateCategory.name || "",
-        code_prefix: templateCategory.code || "",
-        name_template: template?.name_template || "",
-        action_id: template?.action_id || null,
-      });
+    if (open) {
+      console.log('Modal opened, resetting form');
+      console.log('template:', template);
+      console.log('templateCategory:', templateCategory);
+      
+      // Reset form with template data if editing, empty if creating
+      if (template) {
+        form.reset({
+          name: template.name || "",
+          code_prefix: template.code_prefix || "",
+          name_template: template.name_template || "",
+          action_id: template.action_id || null,
+        });
+      } else {
+        form.reset({
+          name: templateCategory?.name || "",
+          code_prefix: templateCategory?.code || "",
+          name_template: "",
+          action_id: null,
+        });
+      }
     }
-  }, [templateCategory, template, form]);
+  }, [open, template, templateCategory, form]);
 
   const onSubmit = async (data: FormData) => {
     try {
