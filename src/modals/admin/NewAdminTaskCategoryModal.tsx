@@ -5,10 +5,11 @@ import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
-import { Check, ChevronsUpDown } from 'lucide-react';
+import { Check, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
@@ -127,18 +128,31 @@ export function NewAdminTaskCategoryModal({
                           <PopoverTrigger asChild>
                             <FormControl>
                               <Button
-                                variant="outline"
+                                variant="ghost"
                                 role="combobox"
                                 aria-expanded={open}
                                 className={cn(
-                                  "w-full justify-between",
-                                  !field.value && "text-muted-foreground"
+                                  "flex w-full items-center justify-between text-xs leading-tight py-2 px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 hover:bg-[var(--input-bg)] focus:outline-none focus:ring-1 focus:ring-accent focus:ring-offset-0",
+                                  !field.value && "text-[var(--input-placeholder)]"
                                 )}
                               >
-                                {field.value
-                                  ? allCategories?.find((cat) => cat.id === field.value)?.name || "Cargando categoría..."
-                                  : "Seleccionar categoría padre (opcional)"}
-                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                <div className="flex items-center gap-2 min-w-0 flex-1">
+                                  {field.value ? (
+                                    <>
+                                      <span className="truncate">
+                                        {allCategories?.find((cat) => cat.id === field.value)?.name || "Cargando categoría..."}
+                                      </span>
+                                      {allCategories?.find((cat) => cat.id === field.value)?.code && (
+                                        <Badge variant="secondary" className="text-xs px-1.5 py-0.5 flex-shrink-0">
+                                          {allCategories.find((cat) => cat.id === field.value)?.code}
+                                        </Badge>
+                                      )}
+                                    </>
+                                  ) : (
+                                    "Seleccionar categoría padre (opcional)"
+                                  )}
+                                </div>
+                                <ChevronDown className="h-4 w-4 opacity-50 flex-shrink-0" />
                               </Button>
                             </FormControl>
                           </PopoverTrigger>
@@ -177,7 +191,14 @@ export function NewAdminTaskCategoryModal({
                                         cat.id === field.value ? "opacity-100" : "opacity-0"
                                       )}
                                     />
-                                    {cat.name}
+                                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                                      <span className="truncate">{cat.name}</span>
+                                      {cat.code && (
+                                        <Badge variant="secondary" className="text-xs px-1.5 py-0.5 flex-shrink-0">
+                                          {cat.code}
+                                        </Badge>
+                                      )}
+                                    </div>
                                   </CommandItem>
                                 ))}
                               </CommandGroup>
