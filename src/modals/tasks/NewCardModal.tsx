@@ -6,13 +6,13 @@ import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayou
 import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader';
 import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
 import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCreateKanbanCard } from '@/hooks/use-kanban';
-import { useOrganizationMembers } from '@/hooks/use-organization-members';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { toast } from '@/hooks/use-toast';
 
 const cardSchema = z.object({
   title: z.string().min(1, 'El título es requerido'),
@@ -24,25 +24,36 @@ const cardSchema = z.object({
 type CardFormData = z.infer<typeof cardSchema>;
 
 interface NewCardModalProps {
-  listId: string;
   open: boolean;
   onClose: () => void;
+  listId: string;
 }
 
-export function NewCardModal({ listId, open, onClose }: NewCardModalProps) {
-  const { data: userData } = useCurrentUser();
-  const { data: members = [] } = useOrganizationMembers(userData?.organization?.id);
+export function NewCardModal({ open, onClose, listId }: NewCardModalProps) {
   const createCardMutation = useCreateKanbanCard();
+  const { data: userData } = useCurrentUser();
 
-  const form = useForm<CardFormData>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    watch,
+    formState: { errors, isSubmitting }
+  } = useForm<CardFormData>({
     resolver: zodResolver(cardSchema),
     defaultValues: {
       title: '',
       description: '',
-      assigned_to: undefined,
-      due_date: '',
-    },
+      assigned_to: '',
+      due_date: ''
+    }
   });
+
+  const handleClose = () => {
+    reset();
+    onClose();
+  };
 
   const onSubmit = async (data: CardFormData) => {
     try {
@@ -51,124 +62,98 @@ export function NewCardModal({ listId, open, onClose }: NewCardModalProps) {
         title: data.title,
         description: data.description || undefined,
         assigned_to: data.assigned_to || undefined,
-        due_date: data.due_date || undefined,
+        due_date: data.due_date || undefined
       });
       
-      form.reset();
-      onClose();
+      handleClose();
     } catch (error) {
       console.error('Error creating card:', error);
     }
   };
 
-  const handleClose = () => {
-    form.reset();
-    onClose();
-  };
+  // Get organization members for assignment
+  const organizationMembers = userData?.memberships || [];
+
+  if (!open) return null;
 
   return (
-    <CustomModalLayout open={open} onClose={handleClose}>
+    <CustomModalLayout
+      open={open}
+      onClose={handleClose}
+    >
       {{
         header: (
           <CustomModalHeader
             title="Nueva Tarjeta"
-            description="Crear una nueva tarjeta en la lista"
+            description="Crea una nueva tarjeta para organizar tareas"
             onClose={handleClose}
           />
         ),
         body: (
-          <CustomModalBody padding="md">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                {/* Title */}
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="required-asterisk">Título</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Título de la tarjeta..." {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+          <CustomModalBody>
+            <form id="card-form" onSubmit={handleSubmit(onSubmit)}>
+              <div className="grid grid-cols-1 gap-4">
+                <div className="col-span-1">
+                  <Label htmlFor="title">Título</Label>
+                  <Input 
+                    id="title"
+                    {...register('title')}
+                    placeholder="Escribir documentación"
+                  />
+                  {errors.title && (
+                    <p className="text-sm text-red-500 mt-1">{errors.title.message}</p>
                   )}
-                />
+                </div>
 
-                {/* Description */}
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Descripción</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Descripción de la tarjeta..." 
-                          className="min-h-[100px]"
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="col-span-1">
+                  <Label htmlFor="description">Descripción (opcional)</Label>
+                  <Textarea 
+                    id="description"
+                    {...register('description')}
+                    placeholder="Detalles adicionales sobre la tarea..."
+                    rows={3}
+                  />
+                </div>
 
-                {/* Assigned To */}
-                <FormField
-                  control={form.control}
-                  name="assigned_to"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Asignar a</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar miembro..." />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="unassigned">Sin asignar</SelectItem>
-                          {members.map((member) => (
-                            <SelectItem key={member.user_id} value={member.user_id}>
-                              {member.users?.full_name || member.users?.email || 'Usuario'}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="col-span-1">
+                  <Label htmlFor="assigned_to">Asignado a (opcional)</Label>
+                  <Select onValueChange={(value) => setValue('assigned_to', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar miembro" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Sin asignar</SelectItem>
+                      {organizationMembers.map((member) => (
+                        <SelectItem key={member.organization_id} value={member.organization_id}>
+                          {member.organization_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                {/* Due Date */}
-                <FormField
-                  control={form.control}
-                  name="due_date"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Fecha límite</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="date" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </form>
-            </Form>
+                <div className="col-span-1">
+                  <Label htmlFor="due_date">Fecha límite (opcional)</Label>
+                  <Input 
+                    id="due_date"
+                    type="date"
+                    {...register('due_date')}
+                  />
+                </div>
+              </div>
+            </form>
           </CustomModalBody>
         ),
         footer: (
           <CustomModalFooter
             onCancel={handleClose}
-            onSave={form.handleSubmit(onSubmit)}
-            saveText="Crear Tarjeta"
-            saveDisabled={createCardMutation.isPending}
-            saveLoading={createCardMutation.isPending}
+            onSubmit={() => {
+              const form = document.getElementById('card-form') as HTMLFormElement;
+              if (form) {
+                form.requestSubmit();
+              }
+            }}
+            submitText="Crear Tarjeta"
           />
         )
       }}

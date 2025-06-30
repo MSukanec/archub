@@ -2,15 +2,12 @@ import React, { useState } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Calendar, User, MessageSquare, Paperclip, Plus, MoreHorizontal, List } from 'lucide-react';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Plus, MoreHorizontal, List, Edit, Trash2 } from 'lucide-react';
 import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState';
+import { NewCardModal } from '@/modals/tasks/NewCardModal';
 import type { KanbanList, KanbanCard } from '@/hooks/use-kanban';
-// import { CardDetailsModal } from '@/modals/tasks/CardDetailsModal';
-// import { NewCardModal } from '@/modals/tasks/NewCardModal';
 
 interface CustomKanbanProps {
   lists: KanbanList[];
@@ -22,7 +19,6 @@ interface CustomKanbanProps {
 }
 
 export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, loading }: CustomKanbanProps) {
-  const [selectedCard, setSelectedCard] = useState<KanbanCard | null>(null);
   const [newCardListId, setNewCardListId] = useState<string | null>(null);
 
   // Group cards by list
@@ -40,12 +36,13 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
   });
 
   const handleDragEnd = (result: DropResult) => {
-    const { destination, source, draggableId } = result;
+    const { destination, source, draggableId, type } = result;
 
     if (!destination) return;
     if (destination.droppableId === source.droppableId && destination.index === source.index) return;
 
-    if (onCardMove) {
+    // Handle card movement
+    if (type === 'CARD' && onCardMove) {
       onCardMove(
         draggableId,
         source.droppableId,
@@ -53,23 +50,10 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
         destination.index
       );
     }
-  };
 
-  const getPriorityColor = (priority?: string) => {
-    switch (priority) {
-      case 'high': return 'destructive';
-      case 'medium': return 'default';
-      case 'low': return 'secondary';
-      default: return 'outline';
-    }
-  };
-
-  const getPriorityLabel = (priority?: string) => {
-    switch (priority) {
-      case 'high': return 'Alta';
-      case 'medium': return 'Media';
-      case 'low': return 'Baja';
-      default: return 'Sin prioridad';
+    // Handle list movement - TODO: implement list reordering
+    if (type === 'LIST') {
+      console.log('List reordering not implemented yet');
     }
   };
 
@@ -102,159 +86,119 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
   return (
     <>
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="flex gap-6 h-full overflow-x-auto pb-4">
-          {lists.map((list) => (
-            <div key={list.id} className="flex-shrink-0 w-80">
-              {/* List Header */}
-              <div className="mb-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    {list.color && (
-                      <div 
-                        className="w-3 h-3 rounded-full" 
-                        style={{ backgroundColor: list.color }}
-                      />
-                    )}
-                    <h3 className="font-semibold text-sm">{list.name}</h3>
-                    <Badge variant="secondary" className="text-xs">
-                      {cardsByList[list.id]?.length || 0}
-                    </Badge>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setNewCardListId(list.id)}
-                    className="h-8 w-8 p-0"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
+        <Droppable droppableId="lists" direction="horizontal" type="LIST">
+          {(provided) => (
+            <div 
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              className="flex gap-4 h-full overflow-x-auto pb-4"
+            >
+              {lists.map((list, index) => (
+                <Draggable key={list.id} draggableId={`list-${list.id}`} index={index}>
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      className="flex-shrink-0 w-80"
+                    >
+                      <Card className={`h-fit ${snapshot.isDragging ? 'shadow-lg rotate-1' : ''}`}>
+                        {/* List Header */}
+                        <div 
+                          {...provided.dragHandleProps}
+                          className="flex items-center justify-between p-3 border-b cursor-grab active:cursor-grabbing"
+                        >
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold text-sm">{list.name}</h3>
+                            <Badge variant="secondary" className="text-xs">
+                              {cardsByList[list.id]?.length || 0}
+                            </Badge>
+                          </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                                <MoreHorizontal className="h-3 w-3" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem>
+                                <Edit className="h-3 w-3 mr-2" />
+                                Editar lista
+                              </DropdownMenuItem>
+                              <DropdownMenuItem className="text-destructive">
+                                <Trash2 className="h-3 w-3 mr-2" />
+                                Eliminar lista
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
 
-              {/* Cards Container */}
-              <Droppable droppableId={list.id}>
-                {(provided, snapshot) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className={`space-y-3 min-h-[200px] p-2 rounded-lg transition-colors ${
-                      snapshot.isDraggingOver ? 'bg-accent/20' : ''
-                    }`}
-                  >
-                    {cardsByList[list.id]?.map((card, index) => (
-                      <Draggable key={card.id} draggableId={card.id} index={index}>
-                        {(provided, snapshot) => (
-                          <Card
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className={`p-3 cursor-pointer hover:shadow-md transition-shadow ${
-                              snapshot.isDragging ? 'shadow-lg' : ''
-                            }`}
-                            onClick={() => setSelectedCard(card)}
-                          >
-                            {/* Card Title */}
-                            <div className="font-medium text-sm mb-2 line-clamp-2">
-                              {card.title}
-                            </div>
-
-                            {/* Card Description */}
-                            {card.description && (
-                              <div className="text-xs text-muted-foreground mb-3 line-clamp-2">
-                                {card.description}
+                        {/* Cards Container */}
+                        <div className="p-3">
+                          <Droppable droppableId={list.id} type="CARD">
+                            {(provided, snapshot) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.droppableProps}
+                                className={`space-y-2 min-h-[120px] transition-colors ${
+                                  snapshot.isDraggingOver ? 'bg-accent/10' : ''
+                                }`}
+                              >
+                                {cardsByList[list.id]?.map((card, index) => (
+                                  <Draggable key={card.id} draggableId={card.id} index={index}>
+                                    {(provided, snapshot) => (
+                                      <Card
+                                        ref={provided.innerRef}
+                                        {...provided.draggableProps}
+                                        {...provided.dragHandleProps}
+                                        className={`p-2 cursor-pointer hover:shadow-sm transition-shadow ${
+                                          snapshot.isDragging ? 'shadow-md rotate-1' : ''
+                                        }`}
+                                      >
+                                        <div className="text-sm font-medium">{card.title}</div>
+                                        {card.description && (
+                                          <div className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                                            {card.description}
+                                          </div>
+                                        )}
+                                      </Card>
+                                    )}
+                                  </Draggable>
+                                ))}
+                                {provided.placeholder}
                               </div>
                             )}
+                          </Droppable>
 
-                            {/* Card Metadata */}
-                            <div className="space-y-2">
-                              {/* Due Date */}
-                              {card.due_date && (
-                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                  <Calendar className="h-3 w-3" />
-                                  {format(new Date(card.due_date), 'dd MMM', { locale: es })}
-                                </div>
-                              )}
-
-                              {/* Bottom Row */}
-                              <div className="flex items-center justify-between">
-                                {/* Assigned User */}
-                                <div className="flex items-center gap-1">
-                                  {card.assigned_user ? (
-                                    <div className="flex items-center gap-1">
-                                      <Avatar className="h-5 w-5">
-                                        {card.assigned_user.avatar_url && (
-                                          <AvatarImage src={card.assigned_user.avatar_url} />
-                                        )}
-                                        <AvatarFallback className="text-xs">
-                                          {card.assigned_user.full_name.charAt(0).toUpperCase()}
-                                        </AvatarFallback>
-                                      </Avatar>
-                                      <span className="text-xs text-muted-foreground">
-                                        {card.assigned_user.full_name}
-                                      </span>
-                                    </div>
-                                  ) : (
-                                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                      <User className="h-3 w-3" />
-                                      Sin asignar
-                                    </div>
-                                  )}
-                                </div>
-
-                                {/* Action Icons */}
-                                <div className="flex items-center gap-1">
-                                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                    <MessageSquare className="h-3 w-3" />
-                                    <span>0</span>
-                                  </div>
-                                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                    <Paperclip className="h-3 w-3" />
-                                    <span>0</span>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </Card>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-
-                    {/* Add Card Button */}
-                    {cardsByList[list.id]?.length === 0 && (
-                      <Button
-                        variant="ghost"
-                        className="w-full h-12 border-2 border-dashed border-muted-foreground/20 hover:border-muted-foreground/40"
-                        onClick={() => setNewCardListId(list.id)}
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Agregar tarjeta
-                      </Button>
-                    )}
-                  </div>
-                )}
-              </Droppable>
+                          {/* Add Card Button */}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setNewCardListId(list.id)}
+                            className="w-full mt-2 h-8 justify-start text-muted-foreground hover:text-foreground"
+                          >
+                            <Plus className="h-3 w-3 mr-2" />
+                            Añade una tarjeta
+                          </Button>
+                        </div>
+                      </Card>
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
             </div>
-          ))}
-        </div>
+          )}
+        </Droppable>
       </DragDropContext>
 
-      {/* Modals - Temporarily disabled while fixing imports */}
-      {/* {selectedCard && (
-        <CardDetailsModal
-          card={selectedCard}
-          open={!!selectedCard}
-          onClose={() => setSelectedCard(null)}
-        />
-      )}
-
+      {/* Modals */}
       {newCardListId && (
         <NewCardModal
           listId={newCardListId}
           open={!!newCardListId}
           onClose={() => setNewCardListId(null)}
         />
-      )} */}
+      )}
     </>
   );
 }
