@@ -304,7 +304,9 @@ export function useCreateKanbanList() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (listData: { board_id: string; name: string }) => {
+    mutationFn: async (listData: { board_id: string; name: string; created_by: string }) => {
+      if (!supabase) throw new Error('Supabase not initialized')
+      
       // Get next position
       const { data: lists } = await supabase
         .from('kanban_lists')
@@ -320,6 +322,7 @@ export function useCreateKanbanList() {
         .insert({
           board_id: listData.board_id,
           name: listData.name,
+          created_by: listData.created_by,
           position: nextPosition
         })
         .select()
@@ -347,10 +350,15 @@ export function useUpdateKanbanList() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (listData: { id: string; name: string; board_id: string }) => {
+    mutationFn: async (listData: { id: string; name: string; board_id: string; created_by: string }) => {
+      if (!supabase) throw new Error('Supabase not initialized')
+      
       const { data, error } = await supabase
         .from('kanban_lists')
-        .update({ name: listData.name })
+        .update({ 
+          name: listData.name,
+          created_by: listData.created_by
+        })
         .eq('id', listData.id)
         .select()
         .single()

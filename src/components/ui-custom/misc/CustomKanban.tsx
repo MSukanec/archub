@@ -18,7 +18,7 @@ interface CustomKanbanProps {
   boardId: string;
   onCardMove?: (cardId: string, sourceListId: string, destListId: string, destIndex: number) => void;
   onCreateList?: () => void;
-  onDeleteList?: (listId: string) => void;
+  onDeleteList?: (listId: string, boardId: string) => void;
   loading?: boolean;
 }
 
@@ -147,7 +147,7 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
                                     <AlertDialogCancel>Cancelar</AlertDialogCancel>
                                     <AlertDialogAction 
                                       className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                      onClick={() => onDeleteList?.(list.id)}
+                                      onClick={() => onDeleteList?.(list.id, boardId)}
                                     >
                                       Eliminar
                                     </AlertDialogAction>
