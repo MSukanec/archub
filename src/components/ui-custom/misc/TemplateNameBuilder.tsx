@@ -24,6 +24,7 @@ interface TemplateNameBuilderProps {
   categoryName?: string;
   disabled?: boolean;
   placeholder?: string;
+  onActionChange?: (actionId: string | null) => void;
 }
 
 interface TemplateElement {
@@ -40,7 +41,8 @@ export function TemplateNameBuilder({
   parameters = [], 
   categoryName,
   disabled = false,
-  placeholder = "Construye tu plantilla de nombre..."
+  placeholder = "Construye tu plantilla de nombre...",
+  onActionChange
 }: TemplateNameBuilderProps) {
   const [elements, setElements] = useState<TemplateElement[]>([]);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -89,7 +91,15 @@ export function TemplateNameBuilder({
     if (actionNameMatch) {
       const actionName = actionNameMatch[1];
       const categoryNameInValue = actionNameMatch[2];
-      setSelectedAction(actionName);
+      
+      // Find the action_id by name and notify parent
+      const actionObj = actions.find(a => a.name === actionName);
+      const actionId = actionObj ? actionObj.id : null;
+      setSelectedAction(actionId || "");
+      
+      if (onActionChange && actionId) {
+        onActionChange(actionId);
+      }
       
       // Add immutable action element
       parsed.push({
@@ -114,7 +124,15 @@ export function TemplateNameBuilder({
       const actionMatch = value.match(actionPattern);
       if (actionMatch) {
         const actionName = actionMatch[1];
-        setSelectedAction(actionName);
+        
+        // Find the action_id by name and notify parent
+        const actionObj = actions.find(a => a.name === actionName);
+        const actionId = actionObj ? actionObj.id : null;
+        setSelectedAction(actionId || "");
+        
+        if (onActionChange && actionId) {
+          onActionChange(actionId);
+        }
         
         // Add immutable action element
         parsed.push({
@@ -214,13 +232,18 @@ export function TemplateNameBuilder({
     }
 
     setElements(parsed);
-  }, [value, parameters, categoryName, onChange]);
+  }, [value, parameters, categoryName, onChange, actions, onActionChange]);
 
   // Handle action change
   const handleActionChange = (actionId: string | null) => {
     const actionObj = actionId ? actions.find(a => a.id === actionId) : null;
     const actionName = actionObj ? actionObj.name : "";
     setSelectedAction(actionId || "");
+    
+    // Notify parent component about action change
+    if (onActionChange) {
+      onActionChange(actionId);
+    }
     
     // Filter out existing action and name elements and rebuild
     const elementsWithoutActionAndName = elements.filter(el => el.type !== 'action' && el.type !== 'name');

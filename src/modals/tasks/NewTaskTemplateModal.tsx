@@ -186,6 +186,9 @@ export function NewTaskTemplateModal({
                           parameters={templateParameters}
                           categoryName={template ? template.name : templateCategory?.name}
                           placeholder="Construye la plantilla de nombre usando parámetros..."
+                          onActionChange={(actionId) => {
+                            form.setValue('action_id', actionId);
+                          }}
                         />
                       </FormControl>
                       <FormMessage />
