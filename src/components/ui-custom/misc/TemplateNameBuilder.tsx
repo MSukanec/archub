@@ -21,13 +21,14 @@ interface TemplateNameBuilderProps {
   value: string;
   onChange: (newValue: string) => void;
   parameters: TaskTemplateParameter[];
+  categoryName?: string;
   disabled?: boolean;
   placeholder?: string;
 }
 
 interface TemplateElement {
   id: string;
-  type: 'text' | 'parameter' | 'action' | 'period';
+  type: 'text' | 'parameter' | 'action' | 'name' | 'period';
   content: string;
   parameter?: TaskTemplateParameter;
   immutable?: boolean;
@@ -37,6 +38,7 @@ export function TemplateNameBuilder({
   value, 
   onChange, 
   parameters = [], 
+  categoryName,
   disabled = false,
   placeholder = "Construye tu plantilla de nombre..."
 }: TemplateNameBuilderProps) {
@@ -61,11 +63,12 @@ export function TemplateNameBuilder({
     let currentText = "";
     let i = 0;
 
-    // Check if value starts with an action pattern (action " de ")
-    const actionPattern = /^(.+?) de /;
-    const actionMatch = value.match(actionPattern);
-    if (actionMatch) {
-      const actionName = actionMatch[1];
+    // Check if value starts with an action pattern (action " de " name " de ")
+    const actionNamePattern = /^(.+?) de (.+?) de /;
+    const actionNameMatch = value.match(actionNamePattern);
+    if (actionNameMatch) {
+      const actionName = actionNameMatch[1];
+      const categoryName = actionNameMatch[2];
       setSelectedAction(actionName);
       
       // Add immutable action element
@@ -76,7 +79,33 @@ export function TemplateNameBuilder({
         immutable: true
       });
       
-      i = actionMatch[0].length; // Skip past the action part
+      // Add immutable name element
+      parsed.push({
+        id: 'name',
+        type: 'name',
+        content: `${categoryName} de `,
+        immutable: true
+      });
+      
+      i = actionNameMatch[0].length; // Skip past the action and name part
+    } else {
+      // Check for just action pattern (action " de ")
+      const actionPattern = /^(.+?) de /;
+      const actionMatch = value.match(actionPattern);
+      if (actionMatch) {
+        const actionName = actionMatch[1];
+        setSelectedAction(actionName);
+        
+        // Add immutable action element
+        parsed.push({
+          id: 'action',
+          type: 'action',
+          content: `${actionName} de `,
+          immutable: true
+        });
+        
+        i = actionMatch[0].length; // Skip past the action part
+      }
     }
 
     while (i < value.length) {
@@ -153,8 +182,8 @@ export function TemplateNameBuilder({
     const actionName = actionObj ? actionObj.name : "";
     setSelectedAction(actionId || "");
     
-    // Filter out existing action element and rebuild with new action
-    const elementsWithoutAction = elements.filter(el => el.type !== 'action');
+    // Filter out existing action and name elements and rebuild
+    const elementsWithoutActionAndName = elements.filter(el => el.type !== 'action' && el.type !== 'name');
     
     const newElements: TemplateElement[] = [];
     
@@ -166,10 +195,20 @@ export function TemplateNameBuilder({
         content: `${actionName} de `,
         immutable: true
       });
+      
+      // Add category name element if categoryName is provided
+      if (categoryName) {
+        newElements.push({
+          id: 'name',
+          type: 'name',
+          content: `${categoryName} de `,
+          immutable: true
+        });
+      }
     }
     
     // Add other elements
-    newElements.push(...elementsWithoutAction);
+    newElements.push(...elementsWithoutActionAndName);
     
     // Ensure period at end if not empty
     const hasPeriod = newElements.some(el => el.type === 'period');
@@ -333,6 +372,16 @@ export function TemplateNameBuilder({
                   <Badge 
                     variant="outline" 
                     className="flex items-center gap-1 px-2 py-1 bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300"
+                  >
+                    <span className="text-xs font-medium">
+                      {element.content}
+                    </span>
+                  </Badge>
+                ) : element.type === 'name' ? (
+                  // Immutable name element (styled similarly to action)
+                  <Badge 
+                    variant="outline" 
+                    className="flex items-center gap-1 px-2 py-1 bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300"
                   >
                     <span className="text-xs font-medium">
                       {element.content}
