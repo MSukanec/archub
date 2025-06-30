@@ -78,6 +78,9 @@ export function NewBoardModal({ open, onClose }: NewBoardModalProps) {
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Nuevo Tablero Kanban</DialogTitle>
+          <DialogDescription>
+            Crea un nuevo tablero para organizar tus tareas con listas y tarjetas.
+          </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
