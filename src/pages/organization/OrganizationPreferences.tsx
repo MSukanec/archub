@@ -312,7 +312,7 @@ export default function OrganizationPreferences() {
               </div>
               <p className="text-sm text-muted-foreground">
                 Configura las monedas disponibles para esta organización. 
-                Define una moneda principal y una secundaria opcional.
+                Define una moneda principal y múltiples monedas secundarias.
               </p>
             </div>
 
@@ -336,13 +336,13 @@ export default function OrganizationPreferences() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="secondary-currency">Moneda secundaria</Label>
-                <CustomComboBox
+                <Label htmlFor="secondary-currency">Monedas secundarias</Label>
+                <CustomMultiComboBox
                   options={secondaryCurrencyOptions}
-                  value={secondaryCurrency}
-                  onValueChange={setSecondaryCurrency}
-                  placeholder="Seleccionar moneda secundaria..."
-                  searchPlaceholder="Buscar moneda..."
+                  values={secondaryCurrencies}
+                  onValuesChange={setSecondaryCurrencies}
+                  placeholder="Seleccionar monedas secundarias..."
+                  searchPlaceholder="Buscar monedas..."
                   emptyText="No se encontraron monedas."
                 />
               </div>
@@ -363,7 +363,7 @@ export default function OrganizationPreferences() {
               </div>
               <p className="text-sm text-muted-foreground">
                 Configura las billeteras disponibles para esta organización. 
-                Define una billetera principal y una secundaria opcional.
+                Define una billetera principal y múltiples billeteras secundarias.
               </p>
             </div>
 
@@ -387,13 +387,13 @@ export default function OrganizationPreferences() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="secondary-wallet">Billetera secundaria</Label>
-                <CustomComboBox
+                <Label htmlFor="secondary-wallet">Billeteras secundarias</Label>
+                <CustomMultiComboBox
                   options={secondaryWalletOptions}
-                  value={secondaryWallet}
-                  onValueChange={setSecondaryWallet}
-                  placeholder="Seleccionar billetera secundaria..."
-                  searchPlaceholder="Buscar billetera..."
+                  values={secondaryWallets}
+                  onValuesChange={setSecondaryWallets}
+                  placeholder="Seleccionar billeteras secundarias..."
+                  searchPlaceholder="Buscar billeteras..."
                   emptyText="No se encontraron billeteras."
                 />
               </div>
@@ -401,60 +401,7 @@ export default function OrganizationPreferences() {
           </div>
         </div>
 
-        <Separator />
 
-        {/* Plantillas Section */}
-        <div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Left Column - Title and Description */}
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <Settings className="h-5 w-5 text-[var(--accent)]" />
-                <h3 className="text-lg font-semibold">Plantillas</h3>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Configura las plantillas por defecto para diferentes tipos de reportes 
-                y documentos de la organización.
-              </p>
-            </div>
-
-            {/* Right Column - Form Fields */}
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="pdf-template">Plantilla de Cómputo y Presupuesto</Label>
-                <Select value={defaultPdfTemplate} onValueChange={setDefaultPdfTemplate}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar plantilla" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Sin seleccionar</SelectItem>
-                    <SelectItem value="template_1">Plantilla Estándar</SelectItem>
-                    <SelectItem value="template_2">Plantilla Moderna</SelectItem>
-                    <SelectItem value="template_3">Plantilla Corporativa</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm font-medium opacity-50">Plantilla de Movimientos</Label>
-                <Select value="none" disabled>
-                  <SelectTrigger className="opacity-50">
-                    <SelectValue placeholder="Próximamente" />
-                  </SelectTrigger>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm font-medium opacity-50">Plantilla de Bitácora</Label>
-                <Select value="none" disabled>
-                  <SelectTrigger className="opacity-50">
-                    <SelectValue placeholder="Próximamente" />
-                  </SelectTrigger>
-                </Select>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </Layout>
   );
