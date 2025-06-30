@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { useCreateTaskTemplate, useUpdateTaskTemplate, type TaskTemplate } from "@/hooks/use-task-templates-admin";
 import { useTaskParametersAdmin } from "@/hooks/use-task-parameters-admin";
 import { TemplateNameBuilder, type TaskTemplateParameter } from "@/components/ui-custom/misc/TemplateNameBuilder";
+import { type TaskCategoryAdmin } from "@/hooks/use-task-categories-admin";
 
 const formSchema = z.object({
   name: z.string().min(1, "El nombre es requerido"),
@@ -23,12 +24,14 @@ interface NewTaskTemplateModalProps {
   open: boolean;
   onClose: () => void;
   template?: TaskTemplate;
+  category?: TaskCategoryAdmin;
 }
 
 export function NewTaskTemplateModal({ 
   open, 
   onClose, 
-  template
+  template,
+  category
 }: NewTaskTemplateModalProps) {
   const isEditing = !!template;
   
@@ -50,8 +53,8 @@ export function NewTaskTemplateModal({
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: template?.name || "",
-      code_prefix: template?.code_prefix || "",
+      name: category?.name || template?.name || "",
+      code_prefix: category?.code || template?.code_prefix || "",
       name_template: template?.name_template || "",
     },
   });
@@ -101,7 +104,12 @@ export function NewTaskTemplateModal({
                     <FormItem>
                       <FormLabel className="required-asterisk">Nombre</FormLabel>
                       <FormControl>
-                        <Input placeholder="Nombre de la plantilla" {...field} />
+                        <Input 
+                          placeholder="Nombre de la plantilla" 
+                          {...field} 
+                          disabled={isEditing}
+                          className={isEditing ? "bg-muted cursor-not-allowed" : ""}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -115,7 +123,13 @@ export function NewTaskTemplateModal({
                     <FormItem>
                       <FormLabel className="required-asterisk">Prefijo de Código</FormLabel>
                       <FormControl>
-                        <Input placeholder="Ej: EXC, COL, INS" maxLength={4} {...field} />
+                        <Input 
+                          placeholder="Ej: EXC, COL, INS" 
+                          maxLength={4} 
+                          {...field} 
+                          disabled={isEditing}
+                          className={isEditing ? "bg-muted cursor-not-allowed" : ""}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

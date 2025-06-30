@@ -342,7 +342,9 @@ export default function AdminTaskParameters() {
 
                             <div className="space-y-2">
                               {parameter.options && parameter.options.length > 0 ? (
-                                parameter.options.map((option) => (
+                                parameter.options
+                                  .sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }))
+                                  .map((option) => (
                                   <Card key={option.id} className="p-3">
                                     <div className="flex items-center justify-between">
                                       <div className="flex-1">
