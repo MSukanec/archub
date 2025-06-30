@@ -54,7 +54,27 @@ export function TemplateNameBuilder({
   // Parse the value string into elements on mount and when value changes
   useEffect(() => {
     if (!value) {
-      setElements([]);
+      // When no value but we have categoryName, show the name element
+      if (categoryName) {
+        const initialElements: TemplateElement[] = [
+          {
+            id: 'name',
+            type: 'name',
+            content: `${categoryName} de `,
+            immutable: true
+          },
+          {
+            id: 'period',
+            type: 'period',
+            content: '.',
+            immutable: true
+          }
+        ];
+        setElements(initialElements);
+        onChange(elementsToString(initialElements));
+      } else {
+        setElements([]);
+      }
       setSelectedAction("");
       return;
     }
@@ -68,7 +88,7 @@ export function TemplateNameBuilder({
     const actionNameMatch = value.match(actionNamePattern);
     if (actionNameMatch) {
       const actionName = actionNameMatch[1];
-      const categoryName = actionNameMatch[2];
+      const categoryNameInValue = actionNameMatch[2];
       setSelectedAction(actionName);
       
       // Add immutable action element
@@ -83,7 +103,7 @@ export function TemplateNameBuilder({
       parsed.push({
         id: 'name',
         type: 'name',
-        content: `${categoryName} de `,
+        content: `${categoryNameInValue} de `,
         immutable: true
       });
       
@@ -104,7 +124,27 @@ export function TemplateNameBuilder({
           immutable: true
         });
         
+        // If we have categoryName, add it after action
+        if (categoryName) {
+          parsed.push({
+            id: 'name',
+            type: 'name',
+            content: `${categoryName} de `,
+            immutable: true
+          });
+        }
+        
         i = actionMatch[0].length; // Skip past the action part
+      } else {
+        // No action pattern found, but if we have categoryName, add it at the beginning
+        if (categoryName) {
+          parsed.push({
+            id: 'name',
+            type: 'name',
+            content: `${categoryName} de `,
+            immutable: true
+          });
+        }
       }
     }
 
@@ -174,7 +214,7 @@ export function TemplateNameBuilder({
     }
 
     setElements(parsed);
-  }, [value, parameters]);
+  }, [value, parameters, categoryName, onChange]);
 
   // Handle action change
   const handleActionChange = (actionId: string | null) => {
