@@ -1,181 +1,259 @@
 import React, { useState } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-
-export interface Task {
-  id: string;
-  title: string;
-  description?: string;
-  priority?: 'low' | 'medium' | 'high';
-  assignee?: string;
-}
-
-export interface TaskList {
-  id: string;
-  title: string;
-  taskIds: string[];
-  color?: string;
-}
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Calendar, User, MessageSquare, Paperclip, Plus, MoreHorizontal } from 'lucide-react';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import type { KanbanList, KanbanCard } from '@/hooks/use-kanban';
+import { CardDetailsModal } from '@/modals/tasks/CardDetailsModal';
+import { NewCardModal } from '@/modals/tasks/NewCardModal';
 
 interface CustomKanbanProps {
-  tasks: Task[];
-  taskLists: TaskList[];
-  onTaskMove?: (taskId: string, sourceListId: string, destListId: string, destIndex: number) => void;
+  lists: KanbanList[];
+  cards: KanbanCard[];
+  boardId: string;
+  onCardMove?: (cardId: string, sourceListId: string, destListId: string, destIndex: number) => void;
+  loading?: boolean;
 }
 
-export function CustomKanban({ tasks, taskLists, onTaskMove }: CustomKanbanProps) {
-  const [lists, setLists] = useState(taskLists);
-  const [taskData, setTaskData] = useState(tasks);
+export function CustomKanban({ lists, cards, boardId, onCardMove, loading }: CustomKanbanProps) {
+  const [selectedCard, setSelectedCard] = useState<KanbanCard | null>(null);
+  const [newCardListId, setNewCardListId] = useState<string | null>(null);
+
+  // Group cards by list
+  const cardsByList = cards.reduce((acc, card) => {
+    if (!acc[card.list_id]) {
+      acc[card.list_id] = [];
+    }
+    acc[card.list_id].push(card);
+    return acc;
+  }, {} as Record<string, KanbanCard[]>);
+
+  // Sort cards by position within each list
+  Object.keys(cardsByList).forEach(listId => {
+    cardsByList[listId].sort((a, b) => a.position - b.position);
+  });
 
   const handleDragEnd = (result: DropResult) => {
     const { destination, source, draggableId } = result;
 
-    // If dropped outside a droppable area
-    if (!destination) {
-      return;
+    if (!destination) return;
+    if (destination.droppableId === source.droppableId && destination.index === source.index) return;
+
+    if (onCardMove) {
+      onCardMove(
+        draggableId,
+        source.droppableId,
+        destination.droppableId,
+        destination.index
+      );
     }
-
-    // If dropped in the same position
-    if (
-      destination.droppableId === source.droppableId &&
-      destination.index === source.index
-    ) {
-      return;
-    }
-
-    const sourceListId = source.droppableId;
-    const destListId = destination.droppableId;
-
-    // Update lists state
-    const newLists = [...lists];
-    const sourceList = newLists.find(list => list.id === sourceListId);
-    const destList = newLists.find(list => list.id === destListId);
-
-    if (!sourceList || !destList) return;
-
-    // Remove task from source list
-    const newSourceTaskIds = [...sourceList.taskIds];
-    newSourceTaskIds.splice(source.index, 1);
-    sourceList.taskIds = newSourceTaskIds;
-
-    // Add task to destination list
-    const newDestTaskIds = [...destList.taskIds];
-    newDestTaskIds.splice(destination.index, 0, draggableId);
-    destList.taskIds = newDestTaskIds;
-
-    setLists(newLists);
-
-    // Call callback if provided
-    if (onTaskMove) {
-      onTaskMove(draggableId, sourceListId, destListId, destination.index);
-    }
-  };
-
-  const getTasksByListId = (listId: string) => {
-    const list = lists.find(l => l.id === listId);
-    if (!list) return [];
-    
-    return list.taskIds
-      .map(taskId => taskData.find(task => task.id === taskId))
-      .filter(Boolean) as Task[];
   };
 
   const getPriorityColor = (priority?: string) => {
     switch (priority) {
-      case 'high': return 'bg-red-100 text-red-800 border-red-200';
-      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'low': return 'bg-green-100 text-green-800 border-green-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'high': return 'destructive';
+      case 'medium': return 'default';
+      case 'low': return 'secondary';
+      default: return 'outline';
     }
   };
 
+  const getPriorityLabel = (priority?: string) => {
+    switch (priority) {
+      case 'high': return 'Alta';
+      case 'medium': return 'Media';
+      case 'low': return 'Baja';
+      default: return 'Sin prioridad';
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="text-lg font-semibold">Cargando tablero...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (lists.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center space-y-4">
+          <div className="text-lg font-semibold">No hay listas en este tablero</div>
+          <div className="text-sm text-muted-foreground">
+            Crea tu primera lista para comenzar a organizar tareas
+          </div>
+          <Button>
+            <Plus className="h-4 w-4 mr-2" />
+            Crear Lista
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <DragDropContext onDragEnd={handleDragEnd}>
-      <div className="flex gap-6 overflow-x-auto p-4 min-h-[calc(100vh-200px)]">
-        {lists.map((list) => (
-          <div key={list.id} className="flex-shrink-0 w-80">
-            <Card className="h-full bg-muted/20">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    {list.title}
-                  </CardTitle>
-                  <Badge variant="secondary" className="text-xs">
-                    {getTasksByListId(list.id).length}
-                  </Badge>
+    <>
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <div className="flex gap-6 h-full overflow-x-auto pb-4">
+          {lists.map((list) => (
+            <div key={list.id} className="flex-shrink-0 w-80">
+              {/* List Header */}
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    {list.color && (
+                      <div 
+                        className="w-3 h-3 rounded-full" 
+                        style={{ backgroundColor: list.color }}
+                      />
+                    )}
+                    <h3 className="font-semibold text-sm">{list.name}</h3>
+                    <Badge variant="secondary" className="text-xs">
+                      {cardsByList[list.id]?.length || 0}
+                    </Badge>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setNewCardListId(list.id)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
                 </div>
-              </CardHeader>
-              
+              </div>
+
+              {/* Cards Container */}
               <Droppable droppableId={list.id}>
                 {(provided, snapshot) => (
-                  <CardContent
+                  <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className={`space-y-3 min-h-[200px] transition-colors ${
+                    className={`space-y-3 min-h-[200px] p-2 rounded-lg transition-colors ${
                       snapshot.isDraggingOver ? 'bg-accent/20' : ''
                     }`}
                   >
-                    {getTasksByListId(list.id).map((task, index) => (
-                      <Draggable key={task.id} draggableId={task.id} index={index}>
+                    {cardsByList[list.id]?.map((card, index) => (
+                      <Draggable key={card.id} draggableId={card.id} index={index}>
                         {(provided, snapshot) => (
                           <Card
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
-                            className={`cursor-grab transition-all duration-200 hover:shadow-md ${
-                              snapshot.isDragging 
-                                ? 'shadow-lg rotate-1 scale-105' 
-                                : 'hover:scale-[1.02]'
+                            className={`p-3 cursor-pointer hover:shadow-md transition-shadow ${
+                              snapshot.isDragging ? 'shadow-lg' : ''
                             }`}
+                            onClick={() => setSelectedCard(card)}
                           >
-                            <CardContent className="p-3">
-                              <div className="space-y-2">
-                                <h4 className="font-medium text-sm leading-tight">
-                                  {task.title}
-                                </h4>
-                                
-                                {task.description && (
-                                  <p className="text-xs text-muted-foreground line-clamp-2">
-                                    {task.description}
-                                  </p>
-                                )}
-                                
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  {task.priority && (
-                                    <Badge 
-                                      variant="outline" 
-                                      className={`text-xs px-1.5 py-0.5 ${getPriorityColor(task.priority)}`}
-                                    >
-                                      {task.priority}
-                                    </Badge>
-                                  )}
-                                  
-                                  {task.assignee && (
+                            {/* Card Title */}
+                            <div className="font-medium text-sm mb-2 line-clamp-2">
+                              {card.title}
+                            </div>
+
+                            {/* Card Description */}
+                            {card.description && (
+                              <div className="text-xs text-muted-foreground mb-3 line-clamp-2">
+                                {card.description}
+                              </div>
+                            )}
+
+                            {/* Card Metadata */}
+                            <div className="space-y-2">
+                              {/* Due Date */}
+                              {card.due_date && (
+                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                  <Calendar className="h-3 w-3" />
+                                  {format(new Date(card.due_date), 'dd MMM', { locale: es })}
+                                </div>
+                              )}
+
+                              {/* Bottom Row */}
+                              <div className="flex items-center justify-between">
+                                {/* Assigned User */}
+                                <div className="flex items-center gap-1">
+                                  {card.assigned_user ? (
                                     <div className="flex items-center gap-1">
-                                      <div className="w-5 h-5 rounded-full bg-accent flex items-center justify-center text-xs font-medium">
-                                        {task.assignee.charAt(0).toUpperCase()}
-                                      </div>
+                                      <Avatar className="h-5 w-5">
+                                        {card.assigned_user.avatar_url && (
+                                          <AvatarImage src={card.assigned_user.avatar_url} />
+                                        )}
+                                        <AvatarFallback className="text-xs">
+                                          {card.assigned_user.full_name.charAt(0).toUpperCase()}
+                                        </AvatarFallback>
+                                      </Avatar>
                                       <span className="text-xs text-muted-foreground">
-                                        {task.assignee}
+                                        {card.assigned_user.full_name}
                                       </span>
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                      <User className="h-3 w-3" />
+                                      Sin asignar
                                     </div>
                                   )}
                                 </div>
+
+                                {/* Action Icons */}
+                                <div className="flex items-center gap-1">
+                                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                    <MessageSquare className="h-3 w-3" />
+                                    <span>0</span>
+                                  </div>
+                                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                    <Paperclip className="h-3 w-3" />
+                                    <span>0</span>
+                                  </div>
+                                </div>
                               </div>
-                            </CardContent>
+                            </div>
                           </Card>
                         )}
                       </Draggable>
                     ))}
                     {provided.placeholder}
-                  </CardContent>
+
+                    {/* Add Card Button */}
+                    {cardsByList[list.id]?.length === 0 && (
+                      <Button
+                        variant="ghost"
+                        className="w-full h-12 border-2 border-dashed border-muted-foreground/20 hover:border-muted-foreground/40"
+                        onClick={() => setNewCardListId(list.id)}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Agregar tarjeta
+                      </Button>
+                    )}
+                  </div>
                 )}
               </Droppable>
-            </Card>
-          </div>
-        ))}
-      </div>
-    </DragDropContext>
+            </div>
+          ))}
+        </div>
+      </DragDropContext>
+
+      {/* Modals */}
+      {selectedCard && (
+        <CardDetailsModal
+          card={selectedCard}
+          open={!!selectedCard}
+          onClose={() => setSelectedCard(null)}
+        />
+      )}
+
+      {newCardListId && (
+        <NewCardModal
+          listId={newCardListId}
+          open={!!newCardListId}
+          onClose={() => setNewCardListId(null)}
+        />
+      )}
+    </>
   );
 }

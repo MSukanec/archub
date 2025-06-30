@@ -1,7 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Layout } from '@/components/layout/Layout';
-import { CustomKanban, Task, TaskList } from '@/components/ui-custom/misc/CustomKanban';
-import { CheckSquare } from 'lucide-react';
+import { CustomKanban } from '@/components/ui-custom/misc/CustomKanban';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CheckSquare, Plus } from 'lucide-react';
+import { useKanbanBoards, useKanbanLists, useKanbanCards, useMoveKanbanCard, useCreateKanbanBoard, useCreateKanbanList } from '@/hooks/use-kanban';
+import { useKanbanStore } from '@/stores/kanbanStore';
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { NewBoardModal } from '@/modals/tasks/NewBoardModal';
+import { NewListModal } from '@/modals/tasks/NewListModal';
 
 // Mock data for demonstration
 const mockTasks: Task[] = [
