@@ -576,8 +576,7 @@ export function useUpdateKanbanCard() {
           title: cardData.title,
           description: cardData.description,
           assigned_to: cardData.assigned_to,
-          due_date: cardData.due_date,
-          updated_at: new Date().toISOString()
+          due_date: cardData.due_date
         })
         .eq('id', cardData.id)
         .select()
