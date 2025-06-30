@@ -75,22 +75,24 @@ export interface KanbanAttachment {
 export function useKanbanBoards() {
   const { data: userData } = useCurrentUser()
   const organizationId = userData?.organization?.id
+  const projectId = userData?.preferences?.last_project_id
 
   return useQuery({
-    queryKey: ['kanban-boards', organizationId],
+    queryKey: ['kanban-boards', organizationId, projectId],
     queryFn: async () => {
-      if (!organizationId) throw new Error('Organization ID required')
+      if (!organizationId || !projectId) throw new Error('Organization ID and Project ID required')
 
       const { data, error } = await supabase
         .from('kanban_boards')
         .select('*')
         .eq('organization_id', organizationId)
+        .eq('project_id', projectId)
         .order('created_at', { ascending: false })
 
       if (error) throw error
       return data as KanbanBoard[]
     },
-    enabled: !!organizationId
+    enabled: !!organizationId && !!projectId
   })
 }
 
@@ -203,7 +205,9 @@ export function useCreateKanbanBoard() {
 
   return useMutation({
     mutationFn: async (boardData: { name: string; description?: string }) => {
-      if (!userData?.organization?.id) throw new Error('Organization required')
+      if (!userData?.organization?.id || !userData?.preferences?.last_project_id) {
+        throw new Error('Organization and Project required')
+      }
 
       const { data, error } = await supabase
         .from('kanban_boards')
@@ -211,6 +215,7 @@ export function useCreateKanbanBoard() {
           name: boardData.name,
           description: boardData.description,
           organization_id: userData.organization.id,
+          project_id: userData.preferences.last_project_id,
           created_by: userData.user.id
         })
         .select()
@@ -226,6 +231,66 @@ export function useCreateKanbanBoard() {
     onError: (error) => {
       toast({ 
         title: "Error al crear tablero",
+        description: error.message,
+        variant: "destructive"
+      })
+    }
+  })
+}
+
+// Update kanban board
+export function useUpdateKanbanBoard() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (boardData: { id: string; name: string; description?: string }) => {
+      const { data, error } = await supabase
+        .from('kanban_boards')
+        .update({ 
+          name: boardData.name,
+          description: boardData.description 
+        })
+        .eq('id', boardData.id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['kanban-boards'] })
+      toast({ title: "Tablero actualizado exitosamente" })
+    },
+    onError: (error) => {
+      toast({
+        title: "Error al actualizar tablero",
+        description: error.message,
+        variant: "destructive"
+      })
+    }
+  })
+}
+
+// Delete kanban board
+export function useDeleteKanbanBoard() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (boardId: string) => {
+      const { error } = await supabase
+        .from('kanban_boards')
+        .delete()
+        .eq('id', boardId)
+
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['kanban-boards'] })
+      toast({ title: "Tablero eliminado exitosamente" })
+    },
+    onError: (error) => {
+      toast({
+        title: "Error al eliminar tablero",
         description: error.message,
         variant: "destructive"
       })

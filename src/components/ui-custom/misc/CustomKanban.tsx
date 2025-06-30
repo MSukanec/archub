@@ -175,10 +175,8 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
                                       description="Esta lista está vacía"
                                       action={
                                         <Button
-                                          variant="ghost"
-                                          size="sm"
                                           onClick={() => setNewCardListId(list.id)}
-                                          className="h-8 px-3 text-sm text-muted-foreground hover:text-foreground"
+                                          className="h-8 px-3 text-sm"
                                         >
                                           <Plus className="h-3 w-3 mr-2" />
                                           Añade una tarjeta
@@ -217,7 +215,7 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
                   <Button
                     variant="ghost"
                     onClick={onCreateList}
-                    className="w-full h-16 justify-center text-muted-foreground hover:text-foreground"
+                    className="w-full h-12 justify-center text-muted-foreground hover:text-foreground"
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Añade otra lista
