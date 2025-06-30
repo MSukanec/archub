@@ -10,6 +10,7 @@ import { Plus, MoreHorizontal, List, Edit, Trash2 } from 'lucide-react';
 import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState';
 import { NewCardModal } from '@/modals/tasks/NewCardModal';
 import { NewListModal } from '@/modals/tasks/NewListModal';
+import { CardDetailsModal } from '@/modals/tasks/CardDetailsModal';
 import { useOrganizationMembers } from '@/hooks/use-organization-members';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import type { KanbanList, KanbanCard } from '@/hooks/use-kanban';
@@ -27,6 +28,7 @@ interface CustomKanbanProps {
 export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, onDeleteList, loading }: CustomKanbanProps) {
   const [newCardListId, setNewCardListId] = useState<string | null>(null);
   const [editingListId, setEditingListId] = useState<string | null>(null);
+  const [selectedCard, setSelectedCard] = useState<KanbanCard | null>(null);
   
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;

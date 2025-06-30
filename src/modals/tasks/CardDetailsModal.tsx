@@ -180,9 +180,6 @@ export function CardDetailsModal({ open, onClose, card }: CardDetailsModalProps)
           <CustomModalFooter
             onSave={() => handleSubmit(onSubmit)()}
             onCancel={handleClose}
-            saveLabel="Actualizar Tarjeta"
-            cancelLabel="Cancelar"
-            disabled={isSubmitting}
           />
         )
       }}

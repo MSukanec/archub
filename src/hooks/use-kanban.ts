@@ -555,6 +555,61 @@ export function useMoveKanbanCard() {
   })
 }
 
+// Update kanban card
+export function useUpdateKanbanCard() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (cardData: { 
+      id: string;
+      title: string; 
+      description?: string; 
+      assigned_to?: string;
+      due_date?: string;
+      list_id: string;
+    }) => {
+      if (!supabase) throw new Error('Supabase not initialized')
+      
+      const { data, error } = await supabase
+        .from('kanban_cards')
+        .update({
+          title: cardData.title,
+          description: cardData.description,
+          assigned_to: cardData.assigned_to,
+          due_date: cardData.due_date,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', cardData.id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    },
+    onSuccess: (data) => {
+      // Get board_id from list to invalidate correct queries
+      supabase
+        ?.from('kanban_lists')
+        .select('board_id')
+        .eq('id', data.list_id)
+        .single()
+        .then(({ data: listData }) => {
+          if (listData?.board_id) {
+            queryClient.invalidateQueries({ queryKey: ['kanban-cards', listData.board_id] })
+          }
+        })
+      toast({ title: "Tarjeta actualizada exitosamente" })
+    },
+    onError: (error) => {
+      toast({
+        title: "Error al actualizar tarjeta",
+        description: error.message,
+        variant: "destructive"
+      })
+    }
+  })
+}
+
 // Mutation to add a comment
 export function useCreateKanbanComment() {
   const queryClient = useQueryClient()
