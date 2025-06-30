@@ -334,17 +334,17 @@ export default function OrganizationPreferences() {
         {/* Header Section */}
         <div className="space-y-2">
           <h1 className="text-2xl font-semibold">Preferencias de Finanzas</h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Configura las preferencias financieras de tu organización. Define monedas y billeteras principales y secundarias 
             para gestionar transacciones y reportes de manera eficiente.
           </p>
         </div>
 
-        <Separator />
+        <Separator className="bg-border opacity-100" />
 
         {/* Monedas Section */}
         <div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             {/* Left Column - Title and Description */}
             <div className="space-y-1">
               <div className="flex items-center gap-2">
@@ -391,11 +391,11 @@ export default function OrganizationPreferences() {
           </div>
         </div>
 
-        <Separator />
+        <Separator className="bg-border opacity-100" />
 
         {/* Billeteras Section */}
         <div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             {/* Left Column - Title and Description */}
             <div className="space-y-1">
               <div className="flex items-center gap-2">
