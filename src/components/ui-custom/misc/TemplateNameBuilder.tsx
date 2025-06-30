@@ -148,8 +148,9 @@ export function TemplateNameBuilder({
   }, [value, parameters]);
 
   // Handle action change
-  const handleActionChange = (actionName: string) => {
-    setSelectedAction(actionName);
+  const handleActionChange = (actionName: string | null) => {
+    const action = actionName || "";
+    setSelectedAction(action);
     
     // Filter out existing action element and rebuild with new action
     const elementsWithoutAction = elements.filter(el => el.type !== 'action');
@@ -157,11 +158,11 @@ export function TemplateNameBuilder({
     const newElements: TemplateElement[] = [];
     
     // Add new action element if action is selected
-    if (actionName) {
+    if (action) {
       newElements.push({
         id: 'action',
         type: 'action',
-        content: `${actionName} de `,
+        content: `${action} de `,
         immutable: true
       });
     }
@@ -326,7 +327,28 @@ export function TemplateNameBuilder({
                       </button>
                     )}
                   </Badge>
+                ) : element.type === 'action' ? (
+                  // Immutable action element (styled differently)
+                  <Badge 
+                    variant="outline" 
+                    className="flex items-center gap-1 px-2 py-1 bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300"
+                  >
+                    <span className="text-xs font-medium">
+                      {element.content}
+                    </span>
+                  </Badge>
+                ) : element.type === 'period' ? (
+                  // Immutable period element
+                  <Badge 
+                    variant="outline" 
+                    className="flex items-center gap-1 px-2 py-1 bg-gray-50 dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300"
+                  >
+                    <span className="text-xs font-medium">
+                      {element.content}
+                    </span>
+                  </Badge>
                 ) : (
+                  // Regular text element
                   <div className="flex items-center">
                     {editingText === element.id ? (
                       <Input
@@ -343,7 +365,7 @@ export function TemplateNameBuilder({
                         className={`text-sm cursor-text hover:bg-muted/50 px-1 py-0.5 rounded transition-colors ${
                           disabled ? 'cursor-default' : 'cursor-pointer'
                         }`}
-                        onClick={() => !disabled && startEditingText(element.id, element.content)}
+                        onClick={() => !disabled && !element.immutable && startEditingText(element.id, element.content)}
                       >
                         {element.content}
                       </span>
