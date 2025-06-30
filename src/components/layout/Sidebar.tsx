@@ -28,6 +28,7 @@ import {
   Shield,
   Star,
   Zap,
+  Calendar,
   Sun,
   Moon,
   PanelLeftOpen,
@@ -173,7 +174,17 @@ export function Sidebar() {
     ],
     project: [
       { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },
-      { icon: FolderOpen, label: 'Diseño', href: '#', onClick: () => { setSidebarContext('design'); navigate('/design/dashboard'); } },
+      { 
+        icon: FolderOpen, 
+        label: 'Diseño', 
+        href: '#', 
+        isAccordion: true,
+        expanded: expandedAccordion === 'diseno',
+        onToggle: () => toggleAccordion('diseno'),
+        children: [
+          { icon: Calendar, label: 'Proceso', href: '/design' },
+        ]
+      },
       { 
         icon: Building, 
         label: 'Obra', 

@@ -136,11 +136,11 @@ export function DesignGantt({ searchValue, onTaskClick }: DesignGanttProps) {
             title: 'Análisis del terreno',
             description: 'Estudiar las características del sitio',
             phase_id: '1',
-            assigned_to: null,
+            assigned_to: undefined,
             start_date: new Date().toISOString().split('T')[0],
             end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            status: 'in_progress',
-            priority: 'high',
+            status: 'in_progress' as const,
+            priority: 'high' as const,
             position: 1,
             created_by: 'user1',
             created_at: new Date().toISOString()
@@ -150,11 +150,11 @@ export function DesignGantt({ searchValue, onTaskClick }: DesignGanttProps) {
             title: 'Diseño arquitectónico inicial',
             description: 'Crear los primeros bocetos del diseño',
             phase_id: '1',
-            assigned_to: null,
+            assigned_to: undefined,
             start_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
             end_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            status: 'todo',
-            priority: 'medium',
+            status: 'todo' as const,
+            priority: 'medium' as const,
             position: 2,
             created_by: 'user1',
             created_at: new Date().toISOString()
@@ -284,7 +284,7 @@ export function DesignGantt({ searchValue, onTaskClick }: DesignGanttProps) {
                 {task.assigned_user && (
                   <div className="flex items-center gap-1">
                     <User className="h-3 w-3" />
-                    <span>{task.assigned_user.users?.full_name || task.assigned_user.users?.email}</span>
+                    <span>{task.assigned_user.full_name || task.assigned_user.email}</span>
                   </div>
                 )}
               </div>
@@ -292,9 +292,9 @@ export function DesignGantt({ searchValue, onTaskClick }: DesignGanttProps) {
             
             {task.assigned_user && (
               <Avatar className="h-8 w-8">
-                <AvatarImage src={task.assigned_user.users?.avatar_url} />
+                <AvatarImage src={task.assigned_user.avatar_url} />
                 <AvatarFallback>
-                  {task.assigned_user.users?.full_name?.charAt(0) || task.assigned_user.users?.email?.charAt(0)}
+                  {task.assigned_user.full_name?.charAt(0) || task.assigned_user.email?.charAt(0)}
                 </AvatarFallback>
               </Avatar>
             )}
