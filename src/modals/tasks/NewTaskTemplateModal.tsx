@@ -71,6 +71,7 @@ export function NewTaskTemplateModal({
   // Update form values when templateCategory changes
   useEffect(() => {
     console.log('templateCategory changed:', templateCategory);
+    console.log('template:', template);
     if (templateCategory) {
       console.log('Setting form values:', templateCategory.name, templateCategory.code);
       if (templateCategory.name) {
@@ -80,7 +81,7 @@ export function NewTaskTemplateModal({
         form.setValue('code_prefix', templateCategory.code);
       }
     }
-  }, [templateCategory, form]);
+  }, [templateCategory, template, form]);
 
   const onSubmit = async (data: FormData) => {
     try {
