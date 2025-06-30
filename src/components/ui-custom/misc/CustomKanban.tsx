@@ -148,37 +148,37 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
                                   <MoreHorizontal className="h-3 w-3" />
                                 </Button>
                               </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => setEditingListId(list.id)}>
-                                <Edit className="h-3 w-3 mr-2" />
-                                Editar lista
-                              </DropdownMenuItem>
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <DropdownMenuItem className="text-destructive" onSelect={(e) => e.preventDefault()}>
-                                    <Trash2 className="h-3 w-3 mr-2" />
-                                    Eliminar lista
-                                  </DropdownMenuItem>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>¿Eliminar lista?</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      Esta acción eliminará permanentemente la lista "{list.name}" y todas sus tarjetas.
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                    <AlertDialogAction 
-                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                      onClick={() => onDeleteList?.(list.id)}
-                                    >
-                                      Eliminar
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            </DropdownMenuContent>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => setEditingListId(list.id)}>
+                                  <Edit className="h-3 w-3 mr-2" />
+                                  Editar lista
+                                </DropdownMenuItem>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <DropdownMenuItem className="text-destructive" onSelect={(e) => e.preventDefault()}>
+                                      <Trash2 className="h-3 w-3 mr-2" />
+                                      Eliminar lista
+                                    </DropdownMenuItem>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>¿Eliminar lista?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Esta acción eliminará permanentemente la lista "{list.name}" y todas sus tarjetas.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                      <AlertDialogAction 
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                        onClick={() => onDeleteList?.(list.id)}
+                                      >
+                                        Eliminar
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </DropdownMenuContent>
                             </DropdownMenu>
                           </div>
                         </div>
