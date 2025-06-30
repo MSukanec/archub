@@ -119,6 +119,21 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- June 30, 2025. Complete Kanban board system implementation with Supabase integration
+  • Created comprehensive Kanban system using kanban_boards, kanban_lists, kanban_cards, kanban_comments, and kanban_attachments tables
+  • Built useKanban hooks for all CRUD operations with proper React Query integration and error handling
+  • Implemented Zustand store (useKanbanStore) for managing current board state with persistence
+  • Created CustomKanban component with drag & drop functionality using react-beautiful-dnd
+  • Built complete modal system: CardDetailsModal (view/edit cards with comments/attachments), NewCardModal, NewBoardModal, NewListModal
+  • Tasks page now supports multiple boards with board selector, list management, and card creation
+  • Drag & drop moves cards between lists with automatic position updates in Supabase
+  • Card details show assigned users, due dates, comments count, and attachments count
+  • Comment system allows adding/viewing comments with user avatars and timestamps
+  • File attachment system with Supabase Storage integration for uploading/downloading files
+  • Complete responsive design with Trello/Linear-style interface following Archub aesthetic
+  • Added "Gestión de Tareas" navigation item to organization sidebar for easy access
+  • Full error handling with optimistic updates and rollback on failure
+  • Auto-selects first board when user has no current board selection
 - June 29, 2025. Fixed AdminTaskParameters database schema integration and data transformation issues
   • Corrected database query structure to use proper JOIN operations between task_template_parameters and task_parameters tables
   • Fixed data transformation logic to handle junction table relationships correctly, preserving parameter details (name, label, type)

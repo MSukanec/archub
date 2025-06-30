@@ -279,7 +279,6 @@ export function CardDetailsModal({ card, open, onClose }: CardDetailsModalProps)
           <CustomModalFooter
             onCancel={onClose}
             cancelText="Cerrar"
-            showSave={false}
           />
         )
       }}

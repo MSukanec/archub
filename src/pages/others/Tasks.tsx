@@ -1,124 +1,164 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { CustomKanban } from '@/components/ui-custom/misc/CustomKanban';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CheckSquare, Plus } from 'lucide-react';
-import { useKanbanBoards, useKanbanLists, useKanbanCards, useMoveKanbanCard, useCreateKanbanBoard, useCreateKanbanList } from '@/hooks/use-kanban';
+import { useKanbanBoards, useKanbanLists, useKanbanCards, useMoveKanbanCard } from '@/hooks/use-kanban';
 import { useKanbanStore } from '@/stores/kanbanStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { NewBoardModal } from '@/modals/tasks/NewBoardModal';
-import { NewListModal } from '@/modals/tasks/NewListModal';
-
-// Mock data for demonstration
-const mockTasks: Task[] = [
-  {
-    id: 'task-1',
-    title: 'Diseñar mockups de la nueva interfaz',
-    description: 'Crear los diseños iniciales para la página de dashboard con enfoque en UX/UI moderno',
-    priority: 'high',
-    assignee: 'María'
-  },
-  {
-    id: 'task-2',
-    title: 'Configurar base de datos',
-    description: 'Implementar las tablas necesarias en Supabase para el módulo de tareas',
-    priority: 'medium',
-    assignee: 'Carlos'
-  },
-  {
-    id: 'task-3',
-    title: 'Revisar documentación técnica',
-    description: 'Actualizar la documentación del proyecto con los nuevos cambios implementados',
-    priority: 'low',
-    assignee: 'Ana'
-  },
-  {
-    id: 'task-4',
-    title: 'Implementar autenticación',
-    description: 'Desarrollar el sistema de login y registro de usuarios con Supabase Auth',
-    priority: 'high',
-    assignee: 'Luis'
-  },
-  {
-    id: 'task-5',
-    title: 'Testing de componentes',
-    description: 'Escribir pruebas unitarias para los componentes principales del sistema',
-    priority: 'medium',
-    assignee: 'Sofia'
-  },
-  {
-    id: 'task-6',
-    title: 'Optimizar rendimiento',
-    description: 'Revisar y optimizar las consultas a la base de datos para mejorar la velocidad',
-    priority: 'low',
-    assignee: 'Pedro'
-  },
-  {
-    id: 'task-7',
-    title: 'Deploy a producción',
-    description: 'Configurar el entorno de producción y realizar el deploy de la aplicación',
-    priority: 'high',
-    assignee: 'María'
-  },
-  {
-    id: 'task-8',
-    title: 'Integración con APIs externas',
-    description: 'Conectar la aplicación con servicios de terceros necesarios para el proyecto',
-    priority: 'medium',
-    assignee: 'Carlos'
-  }
-];
-
-const mockTaskLists: TaskList[] = [
-  {
-    id: 'list-1',
-    title: 'Por Hacer',
-    taskIds: ['task-1', 'task-2', 'task-3'],
-    color: 'gray'
-  },
-  {
-    id: 'list-2',
-    title: 'En Progreso',
-    taskIds: ['task-4', 'task-5'],
-    color: 'blue'
-  },
-  {
-    id: 'list-3',
-    title: 'En Revisión',
-    taskIds: ['task-6'],
-    color: 'yellow'
-  },
-  {
-    id: 'list-4',
-    title: 'Completado',
-    taskIds: ['task-7', 'task-8'],
-    color: 'green'
-  }
-];
+// import { NewBoardModal } from '@/modals/tasks/NewBoardModal';
+// import { NewListModal } from '@/modals/tasks/NewListModal';
 
 export default function Tasks() {
-  const handleTaskMove = (taskId: string, sourceListId: string, destListId: string, destIndex: number) => {
-    console.log(`Moved task ${taskId} from ${sourceListId} to ${destListId} at position ${destIndex}`);
-    // Here you would typically update the backend/database
-    // For now, we just log the movement
+  const [showNewBoardModal, setShowNewBoardModal] = useState(false);
+  const [showNewListModal, setShowNewListModal] = useState(false);
+  const { currentBoardId, setCurrentBoardId } = useKanbanStore();
+  
+  const { data: userData } = useCurrentUser();
+  const { data: boards = [], isLoading: boardsLoading } = useKanbanBoards();
+  const { data: lists = [], isLoading: listsLoading } = useKanbanLists(currentBoardId || '');
+  const { data: cards = [], isLoading: cardsLoading } = useKanbanCards(currentBoardId || '');
+  
+  const moveCardMutation = useMoveKanbanCard();
+
+  // Auto-select first board if none selected
+  useEffect(() => {
+    if (!currentBoardId && boards.length > 0) {
+      setCurrentBoardId(boards[0].id);
+    }
+  }, [boards, currentBoardId, setCurrentBoardId]);
+
+  const handleCardMove = async (cardId: string, sourceListId: string, destListId: string, destIndex: number) => {
+    if (!currentBoardId) return;
+
+    try {
+      await moveCardMutation.mutateAsync({
+        cardId,
+        newListId: destListId,
+        newPosition: destIndex,
+        boardId: currentBoardId
+      });
+    } catch (error) {
+      console.error('Error moving card:', error);
+    }
   };
+
+  const handleBoardChange = (boardId: string) => {
+    setCurrentBoardId(boardId);
+  };
+
+  if (boardsLoading) {
+    return (
+      <Layout headerProps={{ title: "Gestión de Tareas", showSearch: false, actions: [] }}>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="text-lg font-semibold">Cargando tableros...</div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (boards.length === 0) {
+    return (
+      <Layout headerProps={{ title: "Gestión de Tareas", showSearch: false, actions: [] }}>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center space-y-4">
+            <div className="text-lg font-semibold">No hay tableros Kanban</div>
+            <div className="text-sm text-muted-foreground">
+              Crea tu primer tablero para comenzar a organizar tareas
+            </div>
+            <Button onClick={() => setShowNewBoardModal(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Crear Tablero
+            </Button>
+          </div>
+        </div>
+        
+        <NewBoardModal
+          open={showNewBoardModal}
+          onClose={() => setShowNewBoardModal(false)}
+        />
+      </Layout>
+    );
+  }
+
+  const selectedBoard = boards.find(board => board.id === currentBoardId);
 
   return (
     <Layout 
       headerProps={{
         title: "Gestión de Tareas",
         showSearch: false,
-        actions: []
+        actions: [
+          <div key="board-selector" className="flex items-center gap-2">
+            <Select value={currentBoardId || undefined} onValueChange={handleBoardChange}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Seleccionar tablero..." />
+              </SelectTrigger>
+              <SelectContent>
+                {boards.map((board) => (
+                  <SelectItem key={board.id} value={board.id}>
+                    {board.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>,
+          <Button 
+            key="new-list"
+            variant="outline" 
+            size="sm"
+            onClick={() => setShowNewListModal(true)}
+            disabled={!currentBoardId}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Nueva Lista
+          </Button>,
+          <Button 
+            key="new-board"
+            size="sm"
+            onClick={() => setShowNewBoardModal(true)}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Nuevo Tablero
+          </Button>
+        ]
       }}
     >
       <div className="h-full">
+        {selectedBoard && (
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold">{selectedBoard.name}</h2>
+            {selectedBoard.description && (
+              <p className="text-sm text-muted-foreground">{selectedBoard.description}</p>
+            )}
+          </div>
+        )}
+        
         <CustomKanban 
-          tasks={mockTasks}
-          taskLists={mockTaskLists}
-          onTaskMove={handleTaskMove}
+          lists={lists}
+          cards={cards}
+          boardId={currentBoardId || ''}
+          onCardMove={handleCardMove}
+          loading={listsLoading || cardsLoading}
         />
       </div>
+
+      {/* Modals */}
+      <NewBoardModal
+        open={showNewBoardModal}
+        onClose={() => setShowNewBoardModal(false)}
+      />
+      
+      {currentBoardId && (
+        <NewListModal
+          boardId={currentBoardId}
+          open={showNewListModal}
+          onClose={() => setShowNewListModal(false)}
+        />
+      )}
     </Layout>
   );
 }

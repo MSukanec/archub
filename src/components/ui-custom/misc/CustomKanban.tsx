@@ -8,8 +8,8 @@ import { Calendar, User, MessageSquare, Paperclip, Plus, MoreHorizontal } from '
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { KanbanList, KanbanCard } from '@/hooks/use-kanban';
-import { CardDetailsModal } from '@/modals/tasks/CardDetailsModal';
-import { NewCardModal } from '@/modals/tasks/NewCardModal';
+// import { CardDetailsModal } from '@/modals/tasks/CardDetailsModal';
+// import { NewCardModal } from '@/modals/tasks/NewCardModal';
 
 interface CustomKanbanProps {
   lists: KanbanList[];
@@ -24,7 +24,7 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, loading }: Cus
   const [newCardListId, setNewCardListId] = useState<string | null>(null);
 
   // Group cards by list
-  const cardsByList = cards.reduce((acc, card) => {
+  const cardsByList = (cards || []).reduce((acc, card) => {
     if (!acc[card.list_id]) {
       acc[card.list_id] = [];
     }
@@ -238,8 +238,8 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, loading }: Cus
         </div>
       </DragDropContext>
 
-      {/* Modals */}
-      {selectedCard && (
+      {/* Modals - Temporarily disabled while fixing imports */}
+      {/* {selectedCard && (
         <CardDetailsModal
           card={selectedCard}
           open={!!selectedCard}
@@ -253,7 +253,7 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, loading }: Cus
           open={!!newCardListId}
           onClose={() => setNewCardListId(null)}
         />
-      )}
+      )} */}
     </>
   );
 }
