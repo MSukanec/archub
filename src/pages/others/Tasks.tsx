@@ -9,7 +9,7 @@ import { useKanbanBoards, useKanbanLists, useKanbanCards, useMoveKanbanCard } fr
 import { useKanbanStore } from '@/stores/kanbanStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { NewBoardModal } from '@/modals/tasks/NewBoardModal';
-// import { NewListModal } from '@/modals/tasks/NewListModal';
+import { NewListModal } from '@/modals/tasks/NewListModal';
 
 export default function Tasks() {
   const [showNewBoardModal, setShowNewBoardModal] = useState(false);
@@ -155,13 +155,13 @@ export default function Tasks() {
         onClose={() => setShowNewBoardModal(false)}
       />
       
-      {/* {currentBoardId && (
+      {currentBoardId && (
         <NewListModal
           boardId={currentBoardId}
           open={showNewListModal}
           onClose={() => setShowNewListModal(false)}
         />
-      )} */}
+      )}
     </Layout>
   );
 }

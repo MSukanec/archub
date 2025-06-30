@@ -202,13 +202,14 @@ export function useCreateKanbanBoard() {
   const { data: userData } = useCurrentUser()
 
   return useMutation({
-    mutationFn: async (boardData: { name: string; description?: string; project_id?: string }) => {
+    mutationFn: async (boardData: { name: string; description?: string }) => {
       if (!userData?.organization?.id) throw new Error('Organization required')
 
       const { data, error } = await supabase
         .from('kanban_boards')
         .insert({
-          ...boardData,
+          name: boardData.name,
+          description: boardData.description,
           organization_id: userData.organization.id,
           created_by: userData.user.id
         })

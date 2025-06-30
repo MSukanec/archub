@@ -61,8 +61,7 @@ export function NewBoardModal({ open, onClose, editingBoard }: NewBoardModalProp
     try {
       await createBoardMutation.mutateAsync({
         name: data.name,
-        description: data.description || undefined,
-        project_id: userData.preferences?.last_project_id || undefined
+        description: data.description || undefined
       });
 
       toast({
