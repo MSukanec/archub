@@ -20,6 +20,7 @@ interface CustomKanbanProps {
 
 export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, loading }: CustomKanbanProps) {
   const [newCardListId, setNewCardListId] = useState<string | null>(null);
+  const [editingListId, setEditingListId] = useState<string | null>(null);
 
   // Group cards by list
   const cardsByList = (cards || []).reduce((acc, card) => {
@@ -171,6 +172,17 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
                                       icon={<Plus className="w-6 h-6 text-muted-foreground" />}
                                       title="No hay tarjetas"
                                       description="Esta lista está vacía"
+                                      action={
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => setNewCardListId(list.id)}
+                                          className="h-8 px-3 text-sm text-muted-foreground hover:text-foreground"
+                                        >
+                                          <Plus className="h-3 w-3 mr-2" />
+                                          Añade una tarjeta
+                                        </Button>
+                                      }
                                     />
                                   </div>
                                 )}
@@ -179,22 +191,39 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
                             )}
                           </Droppable>
 
-                          {/* Add Card Button */}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setNewCardListId(list.id)}
-                            className="w-full mt-2 h-8 justify-start text-muted-foreground hover:text-foreground"
-                          >
-                            <Plus className="h-3 w-3 mr-2" />
-                            Añade una tarjeta
-                          </Button>
+                          {/* Add Card Button - Only show if list has cards */}
+                          {(cardsByList[list.id]?.length || 0) > 0 && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setNewCardListId(list.id)}
+                              className="w-full mt-2 h-8 justify-start text-muted-foreground hover:text-foreground"
+                            >
+                              <Plus className="h-3 w-3 mr-2" />
+                              Añade una tarjeta
+                            </Button>
+                          )}
                         </div>
                       </Card>
                     </div>
                   )}
                 </Draggable>
               ))}
+              
+              {/* Add New List Button */}
+              <div className="flex-shrink-0">
+                <Card className="w-80 h-fit bg-muted/20 border-dashed border-2 hover:bg-muted/30 transition-colors">
+                  <Button
+                    variant="ghost"
+                    onClick={onCreateList}
+                    className="w-full h-16 justify-center text-muted-foreground hover:text-foreground"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Añade otra lista
+                  </Button>
+                </Card>
+              </div>
+              
               {provided.placeholder}
             </div>
           )}

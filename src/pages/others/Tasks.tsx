@@ -68,18 +68,7 @@ export default function Tasks() {
           </SelectContent>
         </Select>
       ),
-      boards.length > 0 && (
-        <Button 
-          key="new-list"
-          variant="outline" 
-          className="h-8 px-3 text-sm"
-          onClick={() => setShowNewListModal(true)}
-          disabled={!currentBoardId}
-        >
-          <Plus className="h-3 w-3 mr-1" />
-          Nueva Lista
-        </Button>
-      ),
+
       <Button 
         key="new-board"
         className="h-8 px-3 text-sm"
