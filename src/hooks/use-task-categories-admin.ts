@@ -29,6 +29,27 @@ export interface UpdateTaskCategoryData extends CreateTaskCategoryData {
   id: string;
 }
 
+export function useAllTaskCategories() {
+  return useQuery({
+    queryKey: ['all-task-categories'],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase client not initialized');
+
+      const { data: categories, error } = await supabase
+        .from('task_categories')
+        .select('*')
+        .order('name');
+
+      if (error) {
+        console.error('Error fetching all categories:', error);
+        throw error;
+      }
+
+      return categories || [];
+    },
+  });
+}
+
 export function useTaskCategoriesAdmin() {
   return useQuery({
     queryKey: ['task-categories-admin'],

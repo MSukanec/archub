@@ -57,11 +57,6 @@ export function NewAdminTaskCategoryModal({
   // Reset form when modal opens/closes or category changes
   useEffect(() => {
     if (category && open) {
-      console.log('Setting form values for edit:', {
-        name: category.name,
-        code: category.code || '',
-        parent_id: category.parent_id,
-      });
       form.reset({
         name: category.name,
         code: category.code || '',
@@ -140,18 +135,9 @@ export function NewAdminTaskCategoryModal({
                                   !field.value && "text-muted-foreground"
                                 )}
                               >
-                                {(() => {
-                                  console.log('Combobox display - field.value:', field.value);
-                                  console.log('Combobox display - allCategories length:', allCategories?.length);
-                                  console.log('Combobox display - searching for category with ID:', field.value);
-                                  const foundCategory = allCategories?.find((cat) => cat.id === field.value);
-                                  console.log('Combobox display - found category:', foundCategory);
-                                  
-                                  if (field.value) {
-                                    return foundCategory?.name || "Cargando categoría...";
-                                  }
-                                  return "Seleccionar categoría padre (opcional)";
-                                })()}
+                                {field.value
+                                  ? allCategories?.find((cat) => cat.id === field.value)?.name || "Cargando categoría..."
+                                  : "Seleccionar categoría padre (opcional)"}
                                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                               </Button>
                             </FormControl>

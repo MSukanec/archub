@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 
 import { Layout } from '@/components/layout/Layout';
 
-import { useTaskCategoriesAdmin, useDeleteTaskCategory, TaskCategoryAdmin } from '@/hooks/use-task-categories-admin';
+import { useTaskCategoriesAdmin, useAllTaskCategories, useDeleteTaskCategory, TaskCategoryAdmin } from '@/hooks/use-task-categories-admin';
 import { useDeleteTaskTemplate } from '@/hooks/use-task-templates-admin';
 import { NewTaskTemplateModal } from '@/modals/tasks/NewTaskTemplateModal';
 import { NewAdminTaskCategoryModal } from '@/modals/admin/NewAdminTaskCategoryModal';
@@ -35,6 +35,7 @@ export default function AdminTaskCategoriesTemplates() {
   const [deleteTemplateId, setDeleteTemplateId] = useState<string | null>(null);
 
   const { data: categories = [], isLoading } = useTaskCategoriesAdmin();
+  const { data: allCategories = [] } = useAllTaskCategories();
   const deleteCategoryMutation = useDeleteTaskCategory();
   const deleteTemplateMutation = useDeleteTaskTemplate();
 
@@ -435,7 +436,7 @@ export default function AdminTaskCategoriesTemplates() {
           setEditingCategory(null);
         }}
         category={editingCategory || undefined}
-        allCategories={categories}
+        allCategories={allCategories}
       />
 
       {/* Template Modal */}
