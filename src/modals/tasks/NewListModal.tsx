@@ -58,6 +58,13 @@ export function NewListModal({ open, onClose, boardId, editingList }: NewListMod
 
   const watchedCreatedBy = watch('created_by');
 
+  // Set default created_by when modal opens and members are loaded
+  React.useEffect(() => {
+    if (members.length > 0 && currentUserMember && !editingList && !watchedCreatedBy) {
+      setValue('created_by', currentUserMember.id);
+    }
+  }, [members, currentUserMember, editingList, watchedCreatedBy, setValue]);
+
   const handleClose = () => {
     reset();
     onClose();
