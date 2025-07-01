@@ -50,7 +50,10 @@ export default function DesignTimeline() {
       <Button 
         key="nueva-fase"
         className="h-8 px-3 text-sm"
-        onClick={() => setIsModalOpen(true)}
+        onClick={() => {
+          setEditingPhase(null);
+          setIsModalOpen(true);
+        }}
       >
         <Plus className="w-4 h-4 mr-2" />
         Nueva Fase de Diseño
@@ -60,7 +63,7 @@ export default function DesignTimeline() {
 
   if (isLoading) {
     return (
-      <Layout headerProps={headerProps}>
+      <Layout headerProps={headerProps} wide={true}>
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
         </div>
@@ -70,7 +73,7 @@ export default function DesignTimeline() {
 
   return (
     <>
-      <Layout headerProps={headerProps}>
+      <Layout headerProps={headerProps} wide={true}>
         <div className="space-y-6">
           <CustomDesignGantt 
             phases={projectPhases}
