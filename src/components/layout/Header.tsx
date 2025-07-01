@@ -149,6 +149,13 @@ export function Header({
           <div className="md:hidden w-8 h-8"></div>
         </div>
 
+        {/* Mobile Title - visible only on mobile */}
+        <div className="md:hidden flex-1 px-2">
+          <h1 className="text-sm font-medium text-[var(--menues-fg)] truncate">
+            {title || 'Archub'}
+          </h1>
+        </div>
+
         {/* Breadcrumb - hidden on mobile */}
         <div className="hidden md:flex items-center gap-2">
           {/* Organization Button - ALWAYS visible */}

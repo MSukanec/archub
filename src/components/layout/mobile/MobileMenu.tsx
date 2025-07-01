@@ -5,6 +5,10 @@ import { useLocation } from 'wouter'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useIsAdmin } from '@/hooks/use-admin-permissions'
+import { useProjects } from '@/hooks/use-projects'
+import { useMutation } from '@tanstack/react-query'
+import { supabase } from '@/lib/supabase'
+import { queryClient } from '@/lib/queryClient'
 
 interface MobileMenuProps {
   isOpen: boolean
@@ -17,6 +21,58 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const { data: userData } = useCurrentUser()
   const isAdmin = useIsAdmin()
   const [expandedAccordion, setExpandedAccordion] = useState<string | null>(null)
+  
+  // Get projects data
+  const { data: projects = [] } = useProjects(userData?.preferences?.last_organization_id)
+  
+  // Get current organization and project
+  const currentOrganization = userData?.organizations?.find(org => org.id === userData?.preferences?.last_organization_id)
+  const currentProject = projects.find(project => project.id === userData?.preferences?.last_project_id)
+  
+  // Organization selection mutation
+  const organizationSelectMutation = useMutation({
+    mutationFn: async (organizationId: string) => {
+      if (!supabase) throw new Error('Supabase not initialized')
+      const { error } = await supabase
+        .from('user_preferences')
+        .update({ last_organization_id: organizationId })
+        .eq('user_id', userData?.user?.id)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['current-user'] })
+    }
+  })
+  
+  // Project selection mutation
+  const projectSelectMutation = useMutation({
+    mutationFn: async (projectId: string) => {
+      if (!supabase) throw new Error('Supabase not initialized')
+      const { error } = await supabase
+        .from('user_preferences')
+        .update({ last_project_id: projectId })
+        .eq('user_id', userData?.user?.id)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['current-user'] })
+      queryClient.invalidateQueries({ queryKey: ['projects'] })
+    }
+  })
+  
+  const handleOrganizationSelect = (organizationId: string) => {
+    organizationSelectMutation.mutate(organizationId)
+    setSidebarContext('organization')
+    onClose()
+    navigate('/organization/dashboard')
+  }
+  
+  const handleProjectSelect = (projectId: string) => {
+    projectSelectMutation.mutate(projectId)
+    setSidebarContext('project')
+    onClose()
+    navigate('/project/dashboard')
+  }
   
   if (!isOpen) return null
 
@@ -159,6 +215,97 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
         >
           <X className="h-5 w-5" />
         </Button>
+      </div>
+
+      {/* Organization and Project Selectors */}
+      <div className="border-b p-4 space-y-3" style={{ borderColor: 'var(--menues-border)' }}>
+        {/* Organization Selector */}
+        <div>
+          <div className="text-xs font-medium opacity-70 mb-2" style={{ color: 'var(--menues-fg)' }}>
+            Organización activa:
+          </div>
+          <button
+            onClick={() => setExpandedAccordion(expandedAccordion === 'org-selector' ? null : 'org-selector')}
+            className="flex w-full items-center justify-between px-3 py-2 text-sm font-medium rounded-lg border transition-colors hover:opacity-80"
+            style={{
+              color: 'var(--menues-fg)',
+              backgroundColor: 'transparent',
+              borderColor: 'var(--menues-border)'
+            }}
+          >
+            <div className="flex items-center gap-2">
+              <Building className="h-4 w-4" />
+              <span className="truncate">{currentOrganization?.name || 'Sin organización'}</span>
+            </div>
+            {expandedAccordion === 'org-selector' ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+          </button>
+          
+          {expandedAccordion === 'org-selector' && (
+            <div className="mt-2 max-h-32 overflow-y-auto space-y-1">
+              {userData?.organizations?.map((org) => (
+                <button
+                  key={org.id}
+                  onClick={() => handleOrganizationSelect(org.id)}
+                  className="flex w-full items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors hover:opacity-80"
+                  style={{
+                    color: 'var(--menues-fg)',
+                    backgroundColor: org.id === currentOrganization?.id ? 'var(--accent)' : 'transparent',
+                    opacity: org.id === currentOrganization?.id ? 1 : 0.8
+                  }}
+                >
+                  <span className="truncate">{org.name}</span>
+                  {org.id === currentOrganization?.id && (
+                    <div className="h-2 w-2 rounded-full bg-green-500 flex-shrink-0" />
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Project Selector */}
+        <div>
+          <div className="text-xs font-medium opacity-70 mb-2" style={{ color: 'var(--menues-fg)' }}>
+            Proyecto activo:
+          </div>
+          <button
+            onClick={() => setExpandedAccordion(expandedAccordion === 'project-selector' ? null : 'project-selector')}
+            className="flex w-full items-center justify-between px-3 py-2 text-sm font-medium rounded-lg border transition-colors hover:opacity-80"
+            style={{
+              color: 'var(--menues-fg)',
+              backgroundColor: 'transparent',
+              borderColor: 'var(--menues-border)'
+            }}
+          >
+            <div className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              <span className="truncate">{currentProject?.name || 'Sin proyecto'}</span>
+            </div>
+            {expandedAccordion === 'project-selector' ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+          </button>
+          
+          {expandedAccordion === 'project-selector' && (
+            <div className="mt-2 max-h-32 overflow-y-auto space-y-1">
+              {projects.map((project) => (
+                <button
+                  key={project.id}
+                  onClick={() => handleProjectSelect(project.id)}
+                  className="flex w-full items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors hover:opacity-80"
+                  style={{
+                    color: 'var(--menues-fg)',
+                    backgroundColor: project.id === currentProject?.id ? 'var(--accent)' : 'transparent',
+                    opacity: project.id === currentProject?.id ? 1 : 0.8
+                  }}
+                >
+                  <span className="truncate">{project.name}</span>
+                  {project.id === currentProject?.id && (
+                    <div className="h-2 w-2 rounded-full bg-green-500 flex-shrink-0" />
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Navigation Menu */}
