@@ -412,9 +412,6 @@ export default function Movements() {
           return (
             <div className="text-xs">
               <div>{format(date, "dd/MM/yyyy", { locale: es })}</div>
-              <div className="text-muted-foreground text-xs">
-                {format(date, "HH:mm", { locale: es })}
-              </div>
             </div>
           );
         } catch (error) {

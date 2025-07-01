@@ -240,7 +240,7 @@ export default function FinancesDashboard() {
         })
       );
 
-      return walletBalances.filter(wb => wb.balance > 0);
+      return walletBalances.filter(wb => wb.balance !== 0);
     },
     enabled: !!organizationId
   });
@@ -257,9 +257,9 @@ export default function FinancesDashboard() {
 
       const { data: movements, error } = await supabase
         .from('movements')
-        .select('amount, created_at, type_id')
+        .select('amount, movement_date, type_id')
         .eq('organization_id', organizationId)
-        .gte('created_at', sixMonthsAgo.toISOString());
+        .gte('movement_date', sixMonthsAgo.toISOString().split('T')[0]);
 
       if (error || !movements) return [];
 
@@ -305,7 +305,7 @@ export default function FinancesDashboard() {
       const monthlyData: Record<string, { income: number; expenses: number }> = {};
 
       movements.forEach((movement: any) => {
-        const date = new Date(movement.created_at);
+        const date = new Date(movement.movement_date + 'T00:00:00');
         const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
         
         if (!monthlyData[monthKey]) {
