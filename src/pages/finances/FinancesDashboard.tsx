@@ -61,10 +61,13 @@ export default function FinancesDashboard() {
       
       let concepts: any[] = [];
       if (uniqueTypeIds.length > 0) {
-        const { data: conceptsData } = await supabase
+        const { data: conceptsData, error: conceptsError } = await supabase
           .from('movement_concepts')
           .select('id, concept_type')
           .in('id', uniqueTypeIds);
+        
+        console.log('Concepts query error:', conceptsError);
+        console.log('Concepts query result:', conceptsData);
         concepts = conceptsData || [];
       }
 
