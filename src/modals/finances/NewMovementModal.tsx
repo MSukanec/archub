@@ -97,7 +97,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
       console.log('Setting default currency:', defaultCurrency);
       console.log('Setting default wallet:', defaultWallet);
 
-      // Reset the entire form with all default values at once
+      // Use the correct IDs - currency_id for currency, wallet_id for wallet
       form.reset({
         created_at: new Date(),
         amount: 0,
@@ -106,8 +106,8 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         type_id: '',
         category_id: '',
         subcategory_id: '',
-        currency_id: defaultCurrency?.id || '',
-        wallet_id: defaultWallet?.id || ''
+        currency_id: defaultCurrency?.currency_id || '',
+        wallet_id: defaultWallet?.wallet_id || ''
       })
     }
   }, [open, editingMovement, members, currentUser, currencies, wallets, form])
@@ -479,7 +479,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                                 </FormControl>
                                 <SelectContent>
                                   {wallets?.map((wallet: any) => (
-                                    <SelectItem key={wallet.id} value={wallet.id}>
+                                    <SelectItem key={wallet.wallet_id} value={wallet.wallet_id}>
                                       {wallet.wallets?.name || wallet.name || 'Sin nombre'}
                                     </SelectItem>
                                   ))}
@@ -507,7 +507,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                                 </FormControl>
                                 <SelectContent>
                                   {currencies?.map((currency: any) => (
-                                    <SelectItem key={currency.id} value={currency.id}>
+                                    <SelectItem key={currency.currency_id} value={currency.currency_id}>
                                       {currency.currencies?.name || currency.name || 'Sin nombre'} ({currency.currencies?.symbol || currency.symbol || '$'})
                                     </SelectItem>
                                   ))}
