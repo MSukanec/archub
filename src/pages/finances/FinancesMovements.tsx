@@ -392,14 +392,6 @@ export default function Movements() {
       render: (movement: Movement) => {
         const displayDate = movement.movement_date || movement.created_at;
         
-        // Debug logging
-        console.log('Movement date data:', {
-          id: movement.id,
-          movement_date: movement.movement_date,
-          created_at: movement.created_at,
-          displayDate
-        });
-        
         if (!displayDate) {
           return <div className="text-xs text-muted-foreground">Sin fecha</div>;
         }
@@ -605,6 +597,10 @@ export default function Movements() {
         data={filteredMovements}
         isLoading={isLoading}
         selectable={true}
+        defaultSort={{
+          key: 'movement_date',
+          direction: 'desc'
+        }}
         getRowClassName={(movement: Movement) => {
           // Determine if it's income or expense based on movement type
           const typeName = movement.movement_data?.type?.name?.toLowerCase() || '';

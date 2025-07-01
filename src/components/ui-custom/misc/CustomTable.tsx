@@ -28,6 +28,11 @@ interface CustomTableProps<T = any> {
   getRowClassName?: (item: T) => string
   // Nueva prop para click-to-edit en cards
   onCardClick?: (item: T) => void
+  // Nueva prop para ordenamiento inicial
+  defaultSort?: {
+    key: string
+    direction: 'asc' | 'desc'
+  }
 }
 
 export function CustomTable<T = any>({ 
@@ -41,10 +46,11 @@ export function CustomTable<T = any>({
   onSelectionChange,
   getItemId = (item: T) => (item as any).id,
   getRowClassName,
-  onCardClick
+  onCardClick,
+  defaultSort
 }: CustomTableProps<T>) {
-  const [sortKey, setSortKey] = useState<string | null>(null)
-  const [sortDirection, setSortDirection] = useState<SortDirection>(null)
+  const [sortKey, setSortKey] = useState<string | null>(defaultSort?.key || null)
+  const [sortDirection, setSortDirection] = useState<SortDirection>(defaultSort?.direction || null)
   const [currentPage, setCurrentPage] = useState(1)
   
   const itemsPerPage = 10

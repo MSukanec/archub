@@ -288,47 +288,17 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                               <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
                                   <SelectTrigger>
-                                    <SelectValue placeholder="Seleccionar creador">
-                                      {field.value && members ? (() => {
-                                        const selectedMember = members.find((m: any) => m.id === field.value);
-                                        if (selectedMember) {
-                                          const user = selectedMember.user;
-                                          const displayName = user?.full_name || user?.email || 'Usuario sin nombre';
-                                          const avatarFallback = user?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U';
-                                          return (
-                                            <div className="flex items-center gap-2">
-                                              <Avatar className="h-6 w-6">
-                                                <AvatarImage src={user?.avatar_url} />
-                                                <AvatarFallback>
-                                                  {avatarFallback}
-                                                </AvatarFallback>
-                                              </Avatar>
-                                              <span>{displayName}</span>
-                                            </div>
-                                          );
-                                        }
-                                        return null;
-                                      })() : 'Seleccionar creador'}
-                                    </SelectValue>
+                                    <SelectValue placeholder="Seleccionar creador" />
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
                                   {members?.map((member: any) => {
                                     const user = member.user;
                                     const displayName = user?.full_name || user?.email || 'Usuario sin nombre';
-                                    const avatarFallback = user?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U';
                                     
                                     return (
                                       <SelectItem key={member.id} value={member.id}>
-                                        <div className="flex items-center gap-2">
-                                          <Avatar className="h-6 w-6">
-                                            <AvatarImage src={user?.avatar_url} />
-                                            <AvatarFallback>
-                                              {avatarFallback}
-                                            </AvatarFallback>
-                                          </Avatar>
-                                          <span>{displayName}</span>
-                                        </div>
+                                        {displayName}
                                       </SelectItem>
                                     );
                                   })}
