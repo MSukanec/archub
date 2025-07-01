@@ -6,7 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useMovementConcepts } from '@/hooks/use-movement-concepts'
-import { useCurrencies } from '@/hooks/use-currencies'
+import { useOrganizationCurrencies, useOrganizationDefaultCurrency } from '@/hooks/use-currencies'
 import { useOrganizationWallets } from '@/hooks/use-organization-wallets'
 import { supabase } from '@/lib/supabase'
 import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout'
@@ -67,7 +67,8 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
   const { data: types } = useMovementConcepts('types')
   const { data: categories } = useMovementConcepts('categories', selectedTypeId)
   const { data: subcategories } = useMovementConcepts('categories', selectedCategoryId)
-  const { data: currencies } = useCurrencies(organizationId)
+  const { data: organizationCurrencies } = useOrganizationCurrencies(organizationId)
+  const { data: defaultCurrency } = useOrganizationDefaultCurrency(organizationId)
   const { data: wallets } = useOrganizationWallets(organizationId)
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -93,7 +94,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
     
     if (editingMovement) {
       // Wait for all data to be loaded
-      if (!members || !currencies || !wallets || !types) return
+      if (!members || !organizationCurrencies || !wallets || !types) return
       
       console.log('Initializing edit form with movement:', editingMovement)
       
@@ -102,8 +103,8 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
       setSelectedCategoryId(editingMovement.category_id || '')
       
       // Map currency_id and wallet_id to organization-specific IDs
-      const matchingCurrency = currencies?.find(c => 
-        c.currencies?.id === editingMovement.currency_id || c.currency_id === editingMovement.currency_id
+      const matchingCurrency = organizationCurrencies?.find((c: any) => 
+        c.currency?.id === editingMovement.currency_id
       )
       const matchingWallet = wallets?.find(w => 
         w.wallets?.id === editingMovement.wallet_id || w.wallet_id === editingMovement.wallet_id
@@ -118,7 +119,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         type_id: editingMovement.type_id,
         category_id: editingMovement.category_id || '',
         subcategory_id: editingMovement.subcategory_id || '',
-        currency_id: matchingCurrency?.currency_id || editingMovement.currency_id,
+        currency_id: matchingCurrency?.currency?.id || editingMovement.currency_id,
         wallet_id: matchingWallet?.wallet_id || editingMovement.wallet_id
       })
       
@@ -130,13 +131,13 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
       })
     } else {
       // New movement mode
-      if (!members || !currencies || !wallets) return
+      if (!members || !organizationCurrencies || !wallets) return
       
       setSelectedTypeId('')
       setSelectedCategoryId('')
       
       const currentMember = members?.find(m => m.user_id === currentUser?.user?.id)
-      const defaultCurrency = currencies?.find(c => c.is_default) || currencies?.[0]
+      const defaultOrgCurrency = organizationCurrencies?.find((c: any) => c.is_default) || organizationCurrencies?.[0]
       const defaultWallet = wallets?.find(w => w.is_default) || wallets?.[0]
 
       form.reset({
@@ -147,11 +148,11 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         type_id: '',
         category_id: '',
         subcategory_id: '',
-        currency_id: defaultCurrency?.currency_id || '',
+        currency_id: defaultOrgCurrency?.currency?.id || '',
         wallet_id: defaultWallet?.wallet_id || ''
       })
     }
-  }, [open, editingMovement, members, currencies, wallets, types])
+  }, [open, editingMovement, members, organizationCurrencies, wallets, types])
 
   // Effect specifically for updating categories when the type selection triggers loading
   useEffect(() => {
@@ -469,9 +470,9 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  {currencies?.map((currency: any) => (
-                                    <SelectItem key={currency.currency_id} value={currency.currency_id}>
-                                      {currency.currencies?.name || currency.name || 'Sin nombre'} ({currency.currencies?.symbol || currency.symbol || '$'})
+                                  {organizationCurrencies?.map((orgCurrency: any) => (
+                                    <SelectItem key={orgCurrency.currency.id} value={orgCurrency.currency.id}>
+                                      {orgCurrency.currency.name} ({orgCurrency.currency.symbol})
                                     </SelectItem>
                                   ))}
                                 </SelectContent>
