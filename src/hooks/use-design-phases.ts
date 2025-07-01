@@ -35,33 +35,7 @@ export function useDesignPhases(projectId: string) {
 
       if (error) {
         console.error('Error fetching design phases:', error);
-        // Return mock data for development if table doesn't exist
-        return [
-          {
-            id: 'phase-1',
-            project_id: projectId,
-            name: 'Anteproyecto',
-            description: 'Desarrollo inicial del concepto arquitectónico',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          },
-          {
-            id: 'phase-2',
-            project_id: projectId,
-            name: 'Proyecto Ejecutivo',
-            description: 'Documentación técnica detallada',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          },
-          {
-            id: 'phase-3',
-            project_id: projectId,
-            name: 'Documentación Municipal',
-            description: 'Planos y documentos para trámites',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          }
-        ] as DesignPhase[];
+        throw error;
       }
 
       return data as DesignPhase[];

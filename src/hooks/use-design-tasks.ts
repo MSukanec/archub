@@ -58,52 +58,7 @@ export function useDesignTasks(projectId: string) {
 
       if (error) {
         console.error('Error fetching design tasks:', error);
-        // Return mock data for development if table doesn't exist
-        const today = new Date();
-        const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
-        const nextMonth = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
-        
-        return [
-          {
-            id: 'task-1',
-            design_phase_id: 'phase-1',
-            name: 'Relevamiento del terreno',
-            description: 'Medición y análisis del sitio',
-            start_date: today.toISOString().split('T')[0],
-            end_date: nextWeek.toISOString().split('T')[0],
-            status: 'completed' as const,
-            assigned_to: null,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            design_phase: { id: 'phase-1', name: 'Anteproyecto' }
-          },
-          {
-            id: 'task-2',
-            design_phase_id: 'phase-1',
-            name: 'Diseño conceptual',
-            description: 'Desarrollo de la idea arquitectónica principal',
-            start_date: nextWeek.toISOString().split('T')[0],
-            end_date: nextMonth.toISOString().split('T')[0],
-            status: 'in_progress' as const,
-            assigned_to: null,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            design_phase: { id: 'phase-1', name: 'Anteproyecto' }
-          },
-          {
-            id: 'task-3',
-            design_phase_id: 'phase-2',
-            name: 'Planos estructurales',
-            description: 'Desarrollo de la documentación estructural',
-            start_date: nextMonth.toISOString().split('T')[0],
-            end_date: new Date(nextMonth.getTime() + 21 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            status: 'pending' as const,
-            assigned_to: null,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            design_phase: { id: 'phase-2', name: 'Proyecto Ejecutivo' }
-          }
-        ] as DesignTask[];
+        throw error;
       }
 
       return data as DesignTask[];
