@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
 import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState';
-import { useDeleteDesignProjectPhase } from '@/hooks/use-design-phases';
+import { useDeleteDesignProjectPhase, useDesignPhaseTasks } from '@/hooks/use-design-phases';
 import { useToast } from '@/hooks/use-toast';
 
 interface DesignProjectPhase {
@@ -43,6 +43,7 @@ export function CustomDesignGantt({
   const [openAccordions, setOpenAccordions] = useState<string[]>([]);
   const { toast } = useToast();
   const deletePhase = useDeleteDesignProjectPhase();
+  const { data: tasks = [] } = useDesignPhaseTasks(projectId);
 
   // Generate timeline header - current month with day numbers
   const generateTimelineHeader = () => {
@@ -69,6 +70,34 @@ export function CustomDesignGantt({
   };
 
   const { monthName, days, today } = generateTimelineHeader();
+
+  // Function to calculate bar position based on dates
+  const calculateBarPosition = (startDate: string | null, endDate: string | null) => {
+    if (!startDate || !endDate) return null;
+    
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+    
+    // Check if dates are in current month
+    if (start.getMonth() !== currentMonth || start.getFullYear() !== currentYear) return null;
+    
+    const startDay = start.getDate();
+    const endDay = end.getDate();
+    const duration = endDay - startDay + 1;
+    
+    return {
+      left: `${(startDay - 1) * 32}px`,
+      width: `${duration * 32}px`
+    };
+  };
+
+  // Get tasks for a specific phase
+  const getTasksForPhase = (phaseId: string) => {
+    return tasks.filter(task => task.project_phase_id === phaseId);
+  };
 
   // Filter phases based on search
   const filteredPhases = phases.filter(phase =>
@@ -252,74 +281,48 @@ export function CustomDesignGantt({
                 style={{ left: `${(today - 1) * 32 + 16}px` }}
               />
               
-              {filteredPhases.map((phase, phaseIndex) => (
-                <div key={phase.id} className="relative">
-                  {/* Phase timeline row */}
-                  <div className="h-10 flex items-center border-b relative">
-                    {days.map((day) => (
-                      <div key={day} className="w-8 h-10 border-r" />
-                    ))}
-                    
-                    {/* Phase bar (example positioning) */}
-                    <div 
-                      className="absolute top-2 h-6 bg-gray-400 rounded-sm flex items-center justify-end pr-2"
-                      style={{ 
-                        left: `${8 * 32}px`, // Starting at day 8
-                        width: `${6 * 32}px`  // Spanning 6 days
-                      }}
-                    >
-                      <div className="w-4 h-4 bg-white rounded-sm flex items-center justify-center">
-                        <span className="text-[10px] text-gray-600">👤</span>
-                      </div>
+              {filteredPhases.map((phase, phaseIndex) => {
+                const phaseTasks = getTasksForPhase(phase.id);
+                return (
+                  <div key={phase.id} className="relative">
+                    {/* Phase timeline row - NO BARS for phases */}
+                    <div className="h-10 flex items-center border-b relative">
+                      {days.map((day) => (
+                        <div key={day} className="w-8 h-10 border-r" />
+                      ))}
                     </div>
-                  </div>
 
-                  {/* Task rows (when accordion is open) */}
-                  {openAccordions.includes(phase.id) && (
-                    <>
-                      <div className="h-8 flex items-center border-b bg-gray-50">
-                        {days.map((day) => (
-                          <div key={day} className="w-8 h-8 border-r" />
-                        ))}
-                        
-                        {/* Task bar 1 */}
-                        <div 
-                          className="absolute h-4 bg-gray-500 rounded-sm flex items-center justify-end pr-1"
-                          style={{ 
-                            left: `${10 * 32}px`,
-                            width: `${4 * 32}px`,
-                            top: '2px'
-                          }}
-                        >
-                          <div className="w-3 h-3 bg-white rounded-sm flex items-center justify-center">
-                            <span className="text-[8px] text-gray-600">👤</span>
-                          </div>
+                    {/* Task rows (when accordion is open) */}
+                    {openAccordions.includes(phase.id) && phaseTasks.map((task, taskIndex) => {
+                      const barPosition = calculateBarPosition(task.start_date, task.end_date);
+                      return (
+                        <div key={task.id} className="h-8 flex items-center border-b bg-gray-50 relative">
+                          {days.map((day) => (
+                            <div key={day} className="w-8 h-8 border-r" />
+                          ))}
+                          
+                          {/* Task bar with real dates */}
+                          {barPosition && (
+                            <div 
+                              className="absolute h-4 bg-blue-500 rounded-sm flex items-center justify-end pr-1 cursor-pointer hover:bg-blue-600"
+                              style={{ 
+                                left: barPosition.left,
+                                width: barPosition.width,
+                                top: '8px'
+                              }}
+                              title={`${task.name} (${task.start_date} - ${task.end_date})`}
+                            >
+                              <div className="w-3 h-3 bg-white rounded-sm flex items-center justify-center">
+                                <span className="text-[8px] text-blue-600">👤</span>
+                              </div>
+                            </div>
+                          )}
                         </div>
-                      </div>
-                      
-                      <div className="h-8 flex items-center border-b bg-gray-50">
-                        {days.map((day) => (
-                          <div key={day} className="w-8 h-8 border-r" />
-                        ))}
-                        
-                        {/* Task bar 2 */}
-                        <div 
-                          className="absolute h-4 bg-gray-500 rounded-sm flex items-center justify-end pr-1"
-                          style={{ 
-                            left: `${12 * 32}px`,
-                            width: `${3 * 32}px`,
-                            top: '2px'
-                          }}
-                        >
-                          <div className="w-3 h-3 bg-white rounded-sm flex items-center justify-center">
-                            <span className="text-[8px] text-gray-600">👤</span>
-                          </div>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
-              ))}
+                      );
+                    })}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
