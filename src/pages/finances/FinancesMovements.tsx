@@ -102,7 +102,7 @@ export default function Movements() {
   const [selectedMovements, setSelectedMovements] = useState<Movement[]>([]);
 
   const { setSidebarContext } = useNavigationStore();
-  const { setCreateActions, setOtherActions, clearActions } = useMobileActionBar();
+  const { setActions, setShowActionBar, clearActions } = useMobileActionBar();
   const isMobile = useMobile();
 
   // Set sidebar context to project when component mounts
@@ -113,36 +113,35 @@ export default function Movements() {
   // Configure mobile action bar when page mounts
   useEffect(() => {
     if (isMobile) {
-      // Configure create actions
-      setCreateActions([
-        {
-          label: "Nuevo Movimiento",
-          icon: <Plus className="h-4 w-4" />,
-          onClick: () => setShowNewMovementModal(true)
-        }
-      ]);
-
-      // Configure other actions (search, filter, clear filters)
-      setOtherActions([
-        {
-          icon: <Search className="h-4 w-4" />,
+      setActions({
+        slot2: {
+          id: 'search',
+          icon: <Search className="h-5 w-5" />,
+          label: 'Buscar',
           onClick: () => {
-            // Toggle search functionality or focus search input
             const searchInput = document.querySelector('input[type="search"]') as HTMLInputElement;
             if (searchInput) searchInput.focus();
           },
-          tooltip: "Buscar"
         },
-        {
-          icon: <Filter className="h-4 w-4" />,
+        slot3: {
+          id: 'create',
+          icon: <Plus className="h-6 w-6" />,
+          label: 'Nuevo Movimiento',
+          onClick: () => setShowNewMovementModal(true),
+          variant: 'primary'
+        },
+        slot4: {
+          id: 'filter',
+          icon: <Filter className="h-5 w-5" />,
+          label: 'Filtros',
           onClick: () => {
-            // Here you could open a filter modal or toggle filters
             console.log("Filter clicked");
           },
-          tooltip: "Filtros"
         },
-        {
-          icon: <X className="h-4 w-4" />,
+        slot5: {
+          id: 'clear',
+          icon: <X className="h-5 w-5" />,
+          label: 'Limpiar',
           onClick: () => {
             setSearchValue("");
             setSortBy("date");
@@ -150,9 +149,9 @@ export default function Movements() {
             setFilterByCategory("all");
             setShowConversions(false);
           },
-          tooltip: "Limpiar filtros"
         }
-      ]);
+      });
+      setShowActionBar(true);
     }
 
     // Cleanup when component unmounts
@@ -161,7 +160,7 @@ export default function Movements() {
         clearActions();
       }
     };
-  }, [isMobile, setCreateActions, setOtherActions, clearActions]);
+  }, [isMobile, setActions, setShowActionBar, clearActions]);
 
   // Filter states
   const [sortBy, setSortBy] = useState("date");

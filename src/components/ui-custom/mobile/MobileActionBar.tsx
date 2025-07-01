@@ -35,8 +35,7 @@ export function MobileActionBar() {
         {/* Slot 1 - Dashboard de Proyectos (fijo) */}
         <Button
           variant="ghost"
-          size="icon"
-          className="flex flex-col items-center gap-1 h-auto py-2 px-3 hover:opacity-80"
+          className="flex flex-col items-center gap-1 h-16 w-16 hover:opacity-80"
           onClick={(actions.slot1 || defaultSlot1).onClick}
           style={{ color: 'var(--menues-fg)' }}
         >
@@ -50,8 +49,7 @@ export function MobileActionBar() {
         {actions.slot2 ? (
           <Button
             variant="ghost"
-            size="icon"
-            className="flex flex-col items-center gap-1 h-auto py-2 px-3 hover:opacity-80"
+            className="flex flex-col items-center gap-1 h-16 w-16 hover:opacity-80"
             onClick={actions.slot2.onClick}
             style={{ color: 'var(--menues-fg)' }}
           >
@@ -61,7 +59,7 @@ export function MobileActionBar() {
             </span>
           </Button>
         ) : (
-          <div className="w-12 h-12" />
+          <div className="w-16 h-16" />
         )}
 
         {/* Slot 3 - Crear (principal, verde) */}
@@ -84,8 +82,7 @@ export function MobileActionBar() {
         {actions.slot4 ? (
           <Button
             variant="ghost"
-            size="icon"
-            className="flex flex-col items-center gap-1 h-auto py-2 px-3 hover:opacity-80"
+            className="flex flex-col items-center gap-1 h-16 w-16 hover:opacity-80"
             onClick={actions.slot4.onClick}
             style={{ color: 'var(--menues-fg)' }}
           >
@@ -95,15 +92,14 @@ export function MobileActionBar() {
             </span>
           </Button>
         ) : (
-          <div className="w-12 h-12" />
+          <div className="w-16 h-16" />
         )}
 
         {/* Slot 5 - Limpiar filtros */}
         {actions.slot5 ? (
           <Button
             variant="ghost"
-            size="icon"
-            className="flex flex-col items-center gap-1 h-auto py-2 px-3 hover:opacity-80"
+            className="flex flex-col items-center gap-1 h-16 w-16 hover:opacity-80"
             onClick={actions.slot5.onClick}
             style={{ color: 'var(--menues-fg)' }}
           >
@@ -113,7 +109,7 @@ export function MobileActionBar() {
             </span>
           </Button>
         ) : (
-          <div className="w-12 h-12" />
+          <div className="w-16 h-16" />
         )}
       </div>
     </div>
