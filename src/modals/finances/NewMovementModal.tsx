@@ -86,35 +86,11 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
     }
   })
 
-  // Single effect to initialize form when modal opens
+  // Initialize form when modal opens
   useEffect(() => {
     if (!open) return
     
-    if (editingMovement) {
-      // Editing mode
-      setSelectedTypeId(editingMovement.type_id)
-      setSelectedCategoryId(editingMovement.category_id || '')
-      
-      // Map currency_id and wallet_id to organization-specific IDs
-      const matchingCurrency = currencies?.find(c => 
-        c.currencies?.id === editingMovement.currency_id || c.currency_id === editingMovement.currency_id
-      )
-      const matchingWallet = wallets?.find(w => 
-        w.wallets?.id === editingMovement.wallet_id || w.wallet_id === editingMovement.wallet_id
-      )
-      
-      form.reset({
-        created_at: new Date(editingMovement.created_at),
-        created_by: editingMovement.created_by,
-        description: editingMovement.description || '',
-        amount: editingMovement.amount,
-        type_id: editingMovement.type_id,
-        category_id: editingMovement.category_id || '',
-        subcategory_id: editingMovement.subcategory_id || '',
-        currency_id: matchingCurrency?.currency_id || editingMovement.currency_id,
-        wallet_id: matchingWallet?.wallet_id || editingMovement.wallet_id
-      })
-    } else {
+    if (!editingMovement) {
       // New movement mode
       setSelectedTypeId('')
       setSelectedCategoryId('')
@@ -135,7 +111,41 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         wallet_id: defaultWallet?.wallet_id || ''
       })
     }
-  }, [open])
+  }, [open, editingMovement, members, currencies, wallets])
+
+  // Separate effect for editing mode that waits for all data
+  useEffect(() => {
+    if (!open || !editingMovement) return
+    if (!currencies?.length || !wallets?.length) return
+    
+    // Wait for dependent data to be loaded
+    if (editingMovement.category_id && !categories?.length) return
+    if (editingMovement.subcategory_id && !subcategories?.length) return
+    
+    // Editing mode
+    setSelectedTypeId(editingMovement.type_id)
+    setSelectedCategoryId(editingMovement.category_id || '')
+    
+    // Map currency_id and wallet_id to organization-specific IDs
+    const matchingCurrency = currencies.find(c => 
+      c.currencies?.id === editingMovement.currency_id || c.currency_id === editingMovement.currency_id
+    )
+    const matchingWallet = wallets.find(w => 
+      w.wallets?.id === editingMovement.wallet_id || w.wallet_id === editingMovement.wallet_id
+    )
+    
+    form.reset({
+      created_at: new Date(editingMovement.created_at),
+      created_by: editingMovement.created_by,
+      description: editingMovement.description || '',
+      amount: editingMovement.amount,
+      type_id: editingMovement.type_id,
+      category_id: editingMovement.category_id || '',
+      subcategory_id: editingMovement.subcategory_id || '',
+      currency_id: matchingCurrency?.currency_id || editingMovement.currency_id,
+      wallet_id: matchingWallet?.wallet_id || editingMovement.wallet_id
+    })
+  }, [open, editingMovement, currencies, wallets, categories, subcategories])
 
   const createMovementMutation = useMutation({
     mutationFn: async (data: MovementForm) => {
