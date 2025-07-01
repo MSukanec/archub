@@ -255,7 +255,7 @@ export function CustomTable<T = any>({
             <div
               key={index}
               className={cn(
-                "grid gap-4 px-4 py-3 bg-[var(--card-bg)] border-[var(--card-border)] text-xs hover:bg-[var(--card-hover-bg)] transition-colors",
+                "grid gap-4 px-4 py-3 bg-[var(--card-bg)] text-xs hover:bg-[var(--card-hover-bg)] transition-colors",
                 getRowClassName?.(item)
               )}
               style={{ gridTemplateColumns: getGridTemplateColumns() }}
