@@ -21,6 +21,7 @@ import { NewOrganizationModal } from "@/modals/organization/NewOrganizationModal
 import { NewProjectModal } from "@/modals/project/NewProjectModal";
 import { MobileMenu } from "./mobile/MobileMenu";
 import { useMobileMenuStore } from "./mobile/useMobileMenuStore";
+import { useMobile } from "@/hooks/use-mobile";
 
 interface HeaderProps {
   icon?: React.ComponentType<any> | React.ReactNode;
@@ -48,6 +49,7 @@ export function Header({
   actions = [],
 }: HeaderProps = {}) {
   const [showNewOrganizationModal, setShowNewOrganizationModal] = useState(false);
+  const isMobile = useMobile();
   const [showNewProjectModal, setShowNewProjectModal] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { isOpen: isMobileMenuOpen, openMenu, closeMenu } = useMobileMenuStore();
@@ -366,98 +368,101 @@ export function Header({
         >
           <Menu className="h-4 w-4 text-[var(--menues-fg)]" />
         </Button>
-        {showSearch && (
-          <div className="relative">
-            {!isSearchOpen ? (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsSearchOpen(true)}
-                className="h-8 w-8 hover:bg-[var(--button-ghost-hover-bg)]"
-              >
-                <Search className="h-3 w-3" />
-              </Button>
-            ) : (
-              <div className="relative flex items-center">
-                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-[var(--menues-fg)] opacity-50" />
-                <Input
-                  type="text"
-                  placeholder="Buscar..."
-                  value={searchValue}
-                  onChange={(e) => onSearchChange?.(e.target.value)}
-                  className="h-8 pl-7 pr-8 text-sm w-48"
-                  autoFocus
-                  onBlur={() => {
-                    if (!searchValue) {
-                      setIsSearchOpen(false)
-                    }
-                  }}
-                />
+        {/* Search, Filters, and Actions - Hidden on mobile */}
+        <div className="hidden md:flex items-center gap-2">
+          {showSearch && (
+            <div className="relative">
+              {!isSearchOpen ? (
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => {
-                    onSearchChange?.("")
-                    setIsSearchOpen(false)
-                  }}
-                  className="absolute right-1 h-6 w-6 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
+                  onClick={() => setIsSearchOpen(true)}
+                  className="h-8 w-8 hover:bg-[var(--button-ghost-hover-bg)]"
                 >
-                  <X className="h-3 w-3" />
+                  <Search className="h-3 w-3" />
                 </Button>
-              </div>
-            )}
-          </div>
-        )}
-
-        {hasFilters && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 hover:bg-[var(--button-ghost-hover-bg)]"
-              >
-                <Filter className="h-3 w-3" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className={customFilters ? "w-72 p-2 space-y-3" : "w-48"}>
-              {customFilters ? (
-                customFilters
               ) : (
-                filters.map((filter, index) => (
-                  <DropdownMenuItem
-                    key={index}
-                    onClick={filter.onClick}
-                    className="text-sm"
+                <div className="relative flex items-center">
+                  <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-[var(--menues-fg)] opacity-50" />
+                  <Input
+                    type="text"
+                    placeholder="Buscar..."
+                    value={searchValue}
+                    onChange={(e) => onSearchChange?.(e.target.value)}
+                    className="h-8 pl-7 pr-8 text-sm w-48"
+                    autoFocus
+                    onBlur={() => {
+                      if (!searchValue) {
+                        setIsSearchOpen(false)
+                      }
+                    }}
+                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      onSearchChange?.("")
+                      setIsSearchOpen(false)
+                    }}
+                    className="absolute right-1 h-6 w-6 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
                   >
-                    {filter.label}
-                  </DropdownMenuItem>
-                ))
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
               )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+            </div>
+          )}
 
-        {onClearFilters && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClearFilters}
-            className="h-8 w-8 hover:bg-[var(--button-ghost-hover-bg)]"
-          >
-            <X className="h-3 w-3" />
-          </Button>
-        )}
+          {hasFilters && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 hover:bg-[var(--button-ghost-hover-bg)]"
+                >
+                  <Filter className="h-3 w-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className={customFilters ? "w-72 p-2 space-y-3" : "w-48"}>
+                {customFilters ? (
+                  customFilters
+                ) : (
+                  filters.map((filter, index) => (
+                    <DropdownMenuItem
+                      key={index}
+                      onClick={filter.onClick}
+                      className="text-sm"
+                    >
+                      {filter.label}
+                    </DropdownMenuItem>
+                  ))
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
 
-        {actions && actions.length > 0 && (
-          <div className="flex items-center gap-2">
-            {actions.map((action, index) => (
-              <div key={index} className="[&>button]:h-8 [&>button]:px-3 [&>button]:text-sm [&>button]:font-medium">
-                {action}
-              </div>
-            ))}
-          </div>
-        )}
+          {onClearFilters && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClearFilters}
+              className="h-8 w-8 hover:bg-[var(--button-ghost-hover-bg)]"
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          )}
+
+          {actions && actions.length > 0 && (
+            <div className="flex items-center gap-2">
+              {actions.map((action, index) => (
+                <div key={index} className="[&>button]:h-8 [&>button]:px-3 [&>button]:text-sm [&>button]:font-medium">
+                  {action}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </header>
 
