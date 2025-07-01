@@ -22,7 +22,6 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { useToast } from '@/hooks/use-toast'
 
 const movementSchema = z.object({
-  created_at: z.date(),
   movement_date: z.date(),
   created_by: z.string().min(1, 'Creador es requerido'),
   description: z.string().optional(),
@@ -76,7 +75,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
   const form = useForm<MovementForm>({
     resolver: zodResolver(movementSchema),
     defaultValues: {
-      created_at: new Date(),
+      movement_date: new Date(),
       amount: 0,
       description: '',
       created_by: '',
@@ -106,7 +105,6 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
       )
       
       form.reset({
-        created_at: new Date(editingMovement.created_at),
         movement_date: new Date(editingMovement.movement_date || editingMovement.created_at),
         created_by: editingMovement.created_by,
         description: editingMovement.description || '',
@@ -127,7 +125,6 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
       const defaultWallet = wallets?.find(w => w.is_default) || wallets?.[0]
 
       form.reset({
-        created_at: new Date(),
         movement_date: new Date(),
         amount: 0,
         description: '',
@@ -160,7 +157,6 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         ...data,
         organization_id: organizationId,
         project_id: currentUser?.preferences?.last_project_id,
-        created_at: data.created_at.toISOString(),
         movement_date: data.movement_date.toISOString()
       }
 
@@ -195,7 +191,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
       // Don't reset immediately, let the modal close first
       setTimeout(() => {
         form.reset({
-          created_at: new Date(),
+          movement_date: new Date(),
           amount: 0,
           description: '',
           created_by: '',

@@ -119,6 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 1, 2025. Fixed financial movements to use movement_date instead of created_at for all date operations
+  • Corrected NewMovementModal schema to use movement_date as primary date field, removed created_at references
+  • Fixed all form reset operations to default to movement_date with current date
+  • Updated form field mapping to properly bind movement_date in edit mode
+  • Simplified creator field SelectItems to remove avatars for consistent input heights following Lemon Squeezy aesthetic
+  • Enhanced CustomTable with defaultSort prop for configurable initial sorting (movements now sort by date descending)
+  • Fixed movement save operations to store movement_date in database correctly
+  • Cleaned up debug logging for production-ready console output
+  • All date displays in movements table now use movement_date as primary source with created_at fallback
 - July 1, 2025. Complete Gantt chart refinement with Jira-style professional features and optimized timeline display
   • Rebuilt entire Gantt system with modular architecture: Gantt.tsx, GanttGrid.tsx, GanttRow.tsx, GanttBar.tsx
   • Implemented fixed left column (250px) with sticky positioning for phase/task names, separate scrollable timeline area
