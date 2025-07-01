@@ -86,13 +86,11 @@ export function CustomDesignGantt({ phases, searchValue, projectId }: CustomDesi
 
   if (filteredPhases.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
-        <h3 className="text-lg font-semibold mb-2">No hay fases de diseño</h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Comienza agregando una nueva fase de diseño al cronograma del proyecto.
-        </p>
-      </div>
+      <CustomEmptyState
+        icon={<Calendar className="w-8 h-8 text-muted-foreground" />}
+        title="No hay fases de diseño"
+        description="Comienza agregando una nueva fase de diseño al cronograma del proyecto."
+      />
     );
   }
 

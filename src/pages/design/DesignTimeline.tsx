@@ -17,7 +17,7 @@ export default function DesignTimeline() {
   const { data: projectPhases = [], isLoading } = useDesignProjectPhases(projectId || '');
 
   const headerProps = {
-    title: "Cronograma de Diseño",
+    title: "Cronograma",
     showSearch: true,
     searchValue,
     onSearchChange: setSearchValue,
@@ -29,7 +29,7 @@ export default function DesignTimeline() {
         onClick={() => setIsModalOpen(true)}
       >
         <Plus className="w-4 h-4 mr-2" />
-        Nueva Fase
+        Nueva Fase de Diseño
       </Button>
     ]
   };
