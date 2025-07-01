@@ -1,6 +1,7 @@
 import React from 'react'
 import { X, Building, DollarSign, Hammer, Users, Calendar, FileText, Settings, CheckSquare, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useLocation } from 'wouter'
 
 interface MobileMenuProps {
   isOpen: boolean
@@ -8,11 +9,13 @@ interface MobileMenuProps {
 }
 
 export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
+  const [, navigate] = useLocation()
+  
   if (!isOpen) return null
 
   const handleNavigation = (href: string) => {
     onClose()
-    window.location.href = href
+    navigate(href)
   }
 
   const navigationItems = [
@@ -50,16 +53,10 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
             <button
               key={index}
               onClick={() => handleNavigation(item.href)}
-              className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors"
+              className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors hover:opacity-80"
               style={{
                 color: 'var(--menues-fg)',
                 backgroundColor: 'transparent'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.backgroundColor = 'var(--menues-hover-bg)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.backgroundColor = 'transparent';
               }}
             >
               <item.icon className="h-5 w-5" />
@@ -74,14 +71,8 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
         <div className="grid grid-cols-3 gap-2">
           <button
             onClick={() => handleNavigation('/admin/dashboard')}
-            className="flex flex-col items-center gap-1 p-3 rounded-lg transition-colors"
+            className="flex flex-col items-center gap-1 p-3 rounded-lg transition-colors hover:opacity-80"
             style={{ color: 'var(--menues-fg)' }}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = 'var(--menues-hover-bg)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = 'transparent';
-            }}
           >
             <Settings className="h-5 w-5" />
             <span className="text-xs">Administración</span>
@@ -89,14 +80,8 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           
           <button
             onClick={() => handleNavigation('/tasks')}
-            className="flex flex-col items-center gap-1 p-3 rounded-lg transition-colors"
+            className="flex flex-col items-center gap-1 p-3 rounded-lg transition-colors hover:opacity-80"
             style={{ color: 'var(--menues-fg)' }}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = 'var(--menues-hover-bg)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = 'transparent';
-            }}
           >
             <CheckSquare className="h-5 w-5" />
             <span className="text-xs">Tareas</span>
@@ -104,14 +89,8 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           
           <button
             onClick={() => handleNavigation('/perfil')}
-            className="flex flex-col items-center gap-1 p-3 rounded-lg transition-colors"
+            className="flex flex-col items-center gap-1 p-3 rounded-lg transition-colors hover:opacity-80"
             style={{ color: 'var(--menues-fg)' }}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = 'var(--menues-hover-bg)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = 'transparent';
-            }}
           >
             <User className="h-5 w-5" />
             <span className="text-xs">Perfil</span>
