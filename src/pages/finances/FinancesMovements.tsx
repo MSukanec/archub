@@ -160,7 +160,7 @@ export default function Movements() {
         clearActions();
       }
     };
-  }, [isMobile, setActions, setShowActionBar, clearActions]);
+  }, [isMobile]); // Removed unstable dependencies
 
   // Filter states
   const [sortBy, setSortBy] = useState("date");
@@ -619,7 +619,7 @@ export default function Movements() {
 
   const headerProps = {
     title: "Movimientos",
-    icon: <DollarSign className="h-5 w-5" />,
+    icon: DollarSign,
     showSearch: true,
     searchValue,
     onSearchChange: setSearchValue,
