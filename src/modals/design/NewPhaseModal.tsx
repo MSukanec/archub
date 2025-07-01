@@ -89,72 +89,99 @@ export function NewPhaseModal({
   };
 
   return (
-    <CustomModal
-      title="Nueva Fase de Diseño"
+    <CustomModalLayout
       open={open}
       onClose={handleClose}
-    >
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <CustomModalBody>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Fase de diseño */}
-            <div className="col-span-2">
-              <Label className="text-xs font-medium mb-1 block">
-                Fase de Diseño *
-              </Label>
-              <Select
-                value={selectedPhaseId || ''}
-                onValueChange={(value) => setValue('design_phase_id', value)}
+      children={{
+        header: (
+          <CustomModalHeader
+            title="Nueva Fase de Diseño"
+            onClose={handleClose}
+          />
+        ),
+        body: (
+          <CustomModalBody>
+            <form id="phase-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Fase de diseño */}
+                <div className="col-span-2">
+                  <Label className="text-xs font-medium mb-1 block">
+                    Fase de Diseño *
+                  </Label>
+                  <Select
+                    value={selectedPhaseId || ''}
+                    onValueChange={(value) => setValue('design_phase_id', value)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Seleccionar fase de diseño" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {designPhases.map((phase) => (
+                        <SelectItem key={phase.id} value={phase.id}>
+                          {phase.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.design_phase_id && (
+                    <p className="text-xs text-destructive mt-1">
+                      {errors.design_phase_id.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Fecha de inicio */}
+                <div className="col-span-1">
+                  <Label className="text-xs font-medium mb-1 block">
+                    Fecha de Inicio
+                  </Label>
+                  <Input
+                    type="date"
+                    value={startDate || ''}
+                    onChange={(e) => setValue('start_date', e.target.value)}
+                    placeholder="Seleccionar fecha"
+                  />
+                </div>
+
+                {/* Fecha de fin */}
+                <div className="col-span-1">
+                  <Label className="text-xs font-medium mb-1 block">
+                    Fecha de Fin
+                  </Label>
+                  <Input
+                    type="date"
+                    value={endDate || ''}
+                    onChange={(e) => setValue('end_date', e.target.value)}
+                    placeholder="Seleccionar fecha"
+                  />
+                </div>
+              </div>
+            </form>
+          </CustomModalBody>
+        ),
+        footer: (
+          <div className="p-2 border-t border-[var(--card-border)] mt-auto">
+            <div className="flex gap-2 w-full">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={handleClose}
+                className="w-1/4"
               >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Seleccionar fase de diseño" />
-                </SelectTrigger>
-                <SelectContent>
-                  {designPhases.map((phase) => (
-                    <SelectItem key={phase.id} value={phase.id}>
-                      {phase.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.design_phase_id && (
-                <p className="text-xs text-destructive mt-1">
-                  {errors.design_phase_id.message}
-                </p>
-              )}
-            </div>
-
-            {/* Fecha de inicio */}
-            <div className="col-span-1">
-              <Label className="text-xs font-medium mb-1 block">
-                Fecha de Inicio
-              </Label>
-              <DatePicker
-                value={startDate}
-                onChange={(date) => setValue('start_date', date || '')}
-                placeholder="Seleccionar fecha"
-              />
-            </div>
-
-            {/* Fecha de fin */}
-            <div className="col-span-1">
-              <Label className="text-xs font-medium mb-1 block">
-                Fecha de Fin
-              </Label>
-              <DatePicker
-                value={endDate}
-                onChange={(date) => setValue('end_date', date || '')}
-                placeholder="Seleccionar fecha"
-              />
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                form="phase-form"
+                className="w-3/4"
+                disabled={isSubmitting || createPhaseMutation.isPending}
+              >
+                {(isSubmitting || createPhaseMutation.isPending) ? 'Guardando...' : "Agregar Fase"}
+              </Button>
             </div>
           </div>
-        </CustomModalBody>
-
-        <CustomModalFooter
-          onClose={handleClose}
-          isSubmitting={isSubmitting || createPhaseMutation.isPending}
-        />
-      </form>
-    </CustomModal>
+        )
+      }}
+    />
   );
 }

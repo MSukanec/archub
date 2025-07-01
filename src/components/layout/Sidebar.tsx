@@ -18,6 +18,7 @@ import {
   FolderOpen,
   Mail,
   Activity,
+  Calendar,
   ArrowLeft,
   Tag,
   ChevronDown,
@@ -206,6 +207,7 @@ export function Sidebar() {
     ],
     design: [
       { icon: Home, label: 'Dashboard', href: '/design/dashboard' },
+      { icon: Calendar, label: 'Cronograma de Diseño', href: '/design/timeline' },
       { icon: FileText, label: 'Moodboard', href: '/design/moodboard' },
       { icon: FolderOpen, label: 'Documentación técnica', href: '/design/documentacion' },
       { icon: ArrowLeft, label: 'Volver al Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },

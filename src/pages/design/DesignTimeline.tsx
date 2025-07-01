@@ -22,15 +22,16 @@ export default function DesignTimeline() {
     searchValue,
     onSearchChange: setSearchValue,
     showFilters: false,
-    actions: (
+    actions: [
       <Button 
+        key="nueva-fase"
         className="h-8 px-3 text-sm"
         onClick={() => setIsModalOpen(true)}
       >
         <Plus className="w-4 h-4 mr-2" />
         Nueva Fase
       </Button>
-    )
+    ]
   };
 
   if (isLoading) {

@@ -161,6 +161,12 @@ function Router() {
         </ProtectedRoute>
       </Route>
 
+      <Route path="/design/timeline">
+        <ProtectedRoute>
+          <DesignTimeline />
+        </ProtectedRoute>
+      </Route>
+
       <Route path="/finance/dashboard">
         <ProtectedRoute>
           <FinancesDashboard />
