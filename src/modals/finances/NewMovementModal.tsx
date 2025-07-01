@@ -141,6 +141,16 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
     }
   }, [open])
 
+  // Effect to update categories when editing movement and types are loaded
+  useEffect(() => {
+    if (editingMovement && types && categories && subcategories) {
+      setSelectedTypeId(editingMovement.type_id)
+      if (editingMovement.category_id) {
+        setSelectedCategoryId(editingMovement.category_id)
+      }
+    }
+  }, [editingMovement, types, categories, subcategories])
+
   const createMovementMutation = useMutation({
     mutationFn: async (data: MovementForm) => {
       if (!supabase) throw new Error('Supabase no está disponible')
@@ -150,7 +160,8 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         ...data,
         organization_id: organizationId,
         project_id: currentUser?.preferences?.last_project_id,
-        created_at: data.created_at.toISOString()
+        created_at: data.created_at.toISOString(),
+        movement_date: data.movement_date.toISOString()
       }
 
       if (editingMovement) {

@@ -391,6 +391,15 @@ export default function Movements() {
       sortType: "date" as const,
       render: (movement: Movement) => {
         const displayDate = movement.movement_date || movement.created_at;
+        
+        // Debug logging
+        console.log('Movement date data:', {
+          id: movement.id,
+          movement_date: movement.movement_date,
+          created_at: movement.created_at,
+          displayDate
+        });
+        
         if (!displayDate) {
           return <div className="text-xs text-muted-foreground">Sin fecha</div>;
         }
