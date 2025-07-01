@@ -11,7 +11,7 @@ import { useDesignTasks } from '@/hooks/use-design-tasks';
 import { Layout } from '@/components/layout/Layout';
 import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState';
 import { CustomDesignGantt } from '@/components/ui-custom/gantt/CustomDesignGantt';
-import { NewDesignTaskModal } from '@/modals/design/NewDesignTaskModal';
+import { SimpleDesignTaskModal } from '@/modals/design/SimpleDesignTaskModal';
 
 export default function DesignGantt() {
   const { data: userData } = useCurrentUser();
@@ -95,14 +95,13 @@ export default function DesignGantt() {
     return (
       <Layout wide headerProps={headerProps}>
         <CustomEmptyState
-          icon={Calendar}
           title="No hay fases de diseño"
           description="Crea la primera fase de diseño para comenzar a planificar las tareas del proyecto."
           actionLabel="Crear primera fase"
           onAction={() => setShowNewTaskModal(true)}
         />
         
-        <NewDesignTaskModal
+        <SimpleDesignTaskModal
           isOpen={showNewTaskModal}
           onClose={() => setShowNewTaskModal(false)}
           phases={phases}
@@ -224,7 +223,7 @@ export default function DesignGantt() {
       </div>
 
       {/* New Task Modal */}
-      <NewDesignTaskModal
+      <SimpleDesignTaskModal
         isOpen={showNewTaskModal}
         onClose={() => setShowNewTaskModal(false)}
         phases={phases}

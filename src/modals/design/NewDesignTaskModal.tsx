@@ -102,17 +102,23 @@ export function NewDesignTaskModal({ isOpen, onClose, phases }: NewDesignTaskMod
   if (!isOpen) return null;
 
   return (
-    <CustomModalLayout>
-      <CustomModalHeader
-        title="Nueva Tarea de Diseño"
-        description="Crea una nueva tarea dentro de una fase de diseño"
-        onClose={handleClose}
-      />
-
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSave)}>
+    <CustomModalLayout
+      open={isOpen}
+      onClose={handleClose}
+    >
+      {{
+        header: (
+          <CustomModalHeader
+            title="Nueva Tarea de Diseño"
+            description="Crea una nueva tarea dentro de una fase de diseño"
+            onClose={handleClose}
+          />
+        ),
+        body: (
           <CustomModalBody padding="md">
-            <div className="space-y-6">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleSave)}>
+                <div className="space-y-6">
               {/* Phase Selection */}
               <FormField
                 control={form.control}
@@ -263,27 +269,20 @@ export function NewDesignTaskModal({ isOpen, onClose, phases }: NewDesignTaskMod
                   </FormItem>
                 )}
               />
-            </div>
+                </div>
+              </form>
+            </Form>
           </CustomModalBody>
-
-          <CustomModalFooter>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={handleClose}
-              disabled={createTaskMutation.isPending}
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              disabled={createTaskMutation.isPending}
-            >
-              {createTaskMutation.isPending ? 'Creando...' : 'Crear Tarea'}
-            </Button>
-          </CustomModalFooter>
-        </form>
-      </Form>
+        ),
+        footer: (
+          <CustomModalFooter
+            onCancel={handleClose}
+            onSave={form.handleSubmit(handleSave)}
+            disabled={createTaskMutation.isPending}
+            saveText={createTaskMutation.isPending ? 'Creando...' : 'Crear Tarea'}
+          />
+        )
+      }}
     </CustomModalLayout>
   );
 }
