@@ -199,12 +199,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: 'var(--menues-border)' }}>
         <h1 className="text-lg font-semibold" style={{ color: 'var(--menues-fg)' }}>
-          {currentSidebarContext === 'organization' && 'Organización'}
-          {currentSidebarContext === 'project' && 'Proyecto'}
-          {currentSidebarContext === 'design' && 'Diseño'}
-          {currentSidebarContext === 'construction' && 'Construcción'}
-          {currentSidebarContext === 'commercialization' && 'Comercialización'}
-          {currentSidebarContext === 'admin' && 'Administración'}
+          Archub
         </h1>
         <Button
           variant="ghost"
@@ -310,7 +305,19 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
 
       {/* Navigation Menu */}
       <div className="flex-1 overflow-y-auto p-4 h-full">
-        <nav className="space-y-2">
+        {/* Context Title */}
+        <div className="mb-4">
+          <h2 className="text-sm font-medium opacity-70" style={{ color: 'var(--menues-fg)' }}>
+            {currentSidebarContext === 'organization' && 'Organización'}
+            {currentSidebarContext === 'project' && 'Proyecto'}
+            {currentSidebarContext === 'design' && 'Diseño'}
+            {currentSidebarContext === 'construction' && 'Construcción'}
+            {currentSidebarContext === 'commercialization' && 'Comercialización'}
+            {currentSidebarContext === 'admin' && 'Administración'}
+          </h2>
+        </div>
+        
+        <nav className="space-y-1.5">
           {navigationItems.map((item: any, index: number) => (
             <div key={`${item.label}-${index}`}>
               {/* Main Button */}
@@ -319,7 +326,8 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                 className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors hover:opacity-80"
                 style={{
                   color: 'var(--menues-fg)',
-                  backgroundColor: 'transparent'
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)'
                 }}
               >
                 <item.icon className="h-5 w-5" />
@@ -333,7 +341,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
               
               {/* Accordion Children */}
               {item.isAccordion && item.expanded && (
-                <div className="ml-8 mt-2 space-y-1">
+                <div className="ml-8 mt-2 space-y-1.5">
                   {item.children?.map((child: any, childIndex: number) => (
                     <button
                       key={`${child.label}-${childIndex}`}
@@ -341,8 +349,9 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                       className="flex w-full items-center gap-3 px-4 py-2 text-sm rounded-lg transition-colors hover:opacity-80"
                       style={{
                         color: 'var(--menues-fg)',
-                        backgroundColor: 'transparent',
-                        opacity: 0.8
+                        backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                        border: '1px solid rgba(255, 255, 255, 0.08)',
+                        opacity: 0.9
                       }}
                     >
                       <child.icon className="h-4 w-4" />
@@ -396,34 +405,46 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
         
         {/* Bottom Footer Actions */}
         <div className="border-t pt-4" style={{ borderColor: 'var(--menues-border)' }}>
-          <div className="grid grid-cols-3 gap-2">
+          <div className={`flex gap-3 ${isAdmin ? 'justify-between' : 'justify-center'}`}>
             <button
               onClick={() => handleNavigation('/perfil')}
-              className="flex flex-col items-center gap-1 p-3 rounded-lg transition-colors hover:opacity-80"
-              style={{ color: 'var(--menues-fg)' }}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors hover:opacity-80"
+              style={{ 
+                color: 'var(--menues-fg)',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+              }}
             >
-              <User className="h-5 w-5" />
-              <span className="text-xs">Perfil</span>
+              <User className="h-4 w-4" />
+              <span className="text-sm">Perfil</span>
             </button>
             
             {isAdmin && (
               <button
                 onClick={() => handleNavigation('/admin/dashboard', 'admin')}
-                className="flex flex-col items-center gap-1 p-3 rounded-lg transition-colors hover:opacity-80"
-                style={{ color: 'var(--menues-fg)' }}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors hover:opacity-80"
+                style={{ 
+                  color: 'var(--menues-fg)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)'
+                }}
               >
-                <Shield className="h-5 w-5" />
-                <span className="text-xs">Admin</span>
+                <Shield className="h-4 w-4" />
+                <span className="text-sm">Admin</span>
               </button>
             )}
             
             <button
               onClick={() => handleNavigation('/tasks')}
-              className="flex flex-col items-center gap-1 p-3 rounded-lg transition-colors hover:opacity-80"
-              style={{ color: 'var(--menues-fg)' }}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors hover:opacity-80"
+              style={{ 
+                color: 'var(--menues-fg)',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+              }}
             >
-              <CheckSquare className="h-5 w-5" />
-              <span className="text-xs">Tareas</span>
+              <CheckSquare className="h-4 w-4" />
+              <span className="text-sm">Tareas</span>
             </button>
           </div>
         </div>
