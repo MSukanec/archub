@@ -36,7 +36,6 @@ import AdminTaskParameters from "@/pages/admin/AdminTaskParameters";
 import AdminMaterials from "@/pages/admin/AdminMaterials";
 import AdminMaterialCategories from "@/pages/admin/AdminMaterialCategories";
 import Tasks from "@/pages/others/Tasks";
-import DesignSchedule from "@/pages/design/DesignSchedule";
 
 function Router() {
   return (
@@ -170,12 +169,6 @@ function Router() {
       <Route path="/perfil">
         <ProtectedRoute>
           <Profile />
-        </ProtectedRoute>
-      </Route>
-
-      <Route path="/design">
-        <ProtectedRoute>
-          <DesignSchedule />
         </ProtectedRoute>
       </Route>
 

@@ -119,17 +119,6 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- June 30, 2025. Complete Design management system implementation with Gantt-style task visualization
-  • Created comprehensive Design.tsx page following ai-page-template.md structure with project-scoped task management
-  • Built DesignGantt.tsx component with collapsible phase-based task organization and hierarchical subtask support
-  • Implemented DesignTaskModal.tsx with tabs for details, comments, and attachments using kanban infrastructure
-  • Created database schema for design_phases and design_tasks tables with proper relationships and mock data fallbacks
-  • Added "Diseño > Proceso" navigation to project sidebar with Calendar icon and accordion functionality
-  • Tasks display with status badges (todo/in-progress/review/done), priority colors, assigned users, and date ranges
-  • Modal supports full CRUD operations with form validation, member assignment, and phase selection
-  • Integrated comments and attachments system reusing kanban_comments and kanban_attachments tables
-  • Component architecture supports drag-and-drop reordering, search filtering, and responsive design
-  • All components follow established Archub patterns with proper TypeScript interfaces and error handling
 - June 30, 2025. Enhanced Organization Preferences with auto-save functionality, improved UI consistency, and movement concepts management
   • Implemented automatic save with 1.5-second debounce delay eliminating the need for manual save button
   • Added page title "Configuración de la Organización" and description following reference design pattern
