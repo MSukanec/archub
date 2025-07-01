@@ -140,7 +140,7 @@ export function NewPhaseTaskModal({ open, onClose, projectPhaseId }: NewPhaseTas
                     <SelectValue placeholder="Seleccionar creador" />
                   </SelectTrigger>
                   <SelectContent>
-                    {organizationMembers.map((member) => (
+                    {organizationMembers.map((member: OrganizationMember) => (
                       <SelectItem key={member.id} value={member.id}>
                         {member.user?.full_name || member.user?.email || 'Sin nombre'}
                       </SelectItem>
@@ -166,7 +166,7 @@ export function NewPhaseTaskModal({ open, onClose, projectPhaseId }: NewPhaseTas
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="">Sin asignar</SelectItem>
-                    {organizationMembers.map((member) => (
+                    {organizationMembers.map((member: OrganizationMember) => (
                       <SelectItem key={member.id} value={member.id}>
                         {member.user?.full_name || member.user?.email || 'Sin nombre'}
                       </SelectItem>

@@ -20,12 +20,12 @@ export default function DesignTimeline() {
   
   const { data: projectPhases = [], isLoading } = useDesignProjectPhases(projectId || '');
 
-  const handleEditPhase = (phase) => {
+  const handleEditPhase = (phase: any) => {
     setEditingPhase(phase);
     setIsModalOpen(true);
   };
 
-  const handleAddTask = (phaseId) => {
+  const handleAddTask = (phaseId: string) => {
     setSelectedPhaseId(phaseId);
     setIsTaskModalOpen(true);
   };

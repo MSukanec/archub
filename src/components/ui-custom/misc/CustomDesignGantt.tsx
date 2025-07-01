@@ -78,7 +78,7 @@ export function CustomDesignGantt({
   const handleDeletePhase = async (phaseId: string, phaseName: string) => {
     if (window.confirm(`¿Estás seguro de que quieres eliminar la fase "${phaseName}"?`)) {
       try {
-        await deletePhase.mutateAsync(phaseId);
+        await deletePhase.mutateAsync({ id: phaseId, projectId });
         toast({
           title: "Fase eliminada",
           description: "La fase ha sido eliminada exitosamente.",
@@ -106,8 +106,6 @@ export function CustomDesignGantt({
       <CustomEmptyState
         title="No hay fases de diseño"
         description="Comienza creando una nueva fase de diseño para organizar las tareas del proyecto."
-        actionLabel="Nueva Fase de Diseño"
-        onAction={() => {}}
       />
     );
   }
