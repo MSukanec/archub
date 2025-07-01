@@ -59,16 +59,20 @@ export default function FinancesDashboard() {
       const typeIds = movements.map((m: any) => m.type_id).filter(Boolean);
       const uniqueTypeIds = typeIds.filter((id, index, arr) => arr.indexOf(id) === index);
       
-      const { data: concepts } = await supabase
-        .from('movement_concepts')
-        .select('id, concept_type')
-        .in('id', uniqueTypeIds);
+      let concepts: any[] = [];
+      if (uniqueTypeIds.length > 0) {
+        const { data: conceptsData } = await supabase
+          .from('movement_concepts')
+          .select('id, concept_type')
+          .in('id', uniqueTypeIds);
+        concepts = conceptsData || [];
+      }
 
       // Create a map for quick lookup
-      const conceptMap = concepts?.reduce((acc: any, concept: any) => {
+      const conceptMap = concepts.reduce((acc: any, concept: any) => {
         acc[concept.id] = concept.concept_type;
         return acc;
-      }, {}) || {};
+      }, {});
 
       console.log('Financial summary - movements:', movements.length);
       console.log('Financial summary - concepts:', concepts);
@@ -158,15 +162,19 @@ export default function FinancesDashboard() {
           const typeIds = movements.map((m: any) => m.type_id).filter(Boolean);
           const uniqueTypeIds = typeIds.filter((id, index, arr) => arr.indexOf(id) === index);
           
-          const { data: concepts } = await supabase!
-            .from('movement_concepts')
-            .select('id, concept_type')
-            .in('id', uniqueTypeIds);
+          let concepts: any[] = [];
+          if (uniqueTypeIds.length > 0) {
+            const { data: conceptsData } = await supabase!
+              .from('movement_concepts')
+              .select('id, concept_type')
+              .in('id', uniqueTypeIds);
+            concepts = conceptsData || [];
+          }
 
-          const conceptMap = concepts?.reduce((acc: any, concept: any) => {
+          const conceptMap = concepts.reduce((acc: any, concept: any) => {
             acc[concept.id] = concept.concept_type;
             return acc;
-          }, {}) || {};
+          }, {});
 
           const income = movements
             .filter((m: any) => conceptMap[m.type_id] === 'INGRESOS')
@@ -211,15 +219,19 @@ export default function FinancesDashboard() {
       const typeIds = movements.map((m: any) => m.type_id).filter(Boolean);
       const uniqueTypeIds = typeIds.filter((id, index, arr) => arr.indexOf(id) === index);
       
-      const { data: concepts } = await supabase
-        .from('movement_concepts')
-        .select('id, concept_type')
-        .in('id', uniqueTypeIds);
+      let concepts: any[] = [];
+      if (uniqueTypeIds.length > 0) {
+        const { data: conceptsData } = await supabase
+          .from('movement_concepts')
+          .select('id, concept_type')
+          .in('id', uniqueTypeIds);
+        concepts = conceptsData || [];
+      }
 
-      const conceptMap = concepts?.reduce((acc: any, concept: any) => {
+      const conceptMap = concepts.reduce((acc: any, concept: any) => {
         acc[concept.id] = concept.concept_type;
         return acc;
-      }, {}) || {};
+      }, {});
 
       // Group by month
       const monthlyData: Record<string, { income: number; expenses: number }> = {};
@@ -281,25 +293,34 @@ export default function FinancesDashboard() {
       const uniqueTypeIds = typeIds.filter((id, index, arr) => arr.indexOf(id) === index);
       const uniqueCategoryIds = categoryIds.filter((id, index, arr) => arr.indexOf(id) === index);
 
-      const { data: types } = await supabase
-        .from('movement_concepts')
-        .select('id, name, concept_type')
-        .in('id', uniqueTypeIds);
+      let types: any[] = [];
+      let categories: any[] = [];
+      
+      if (uniqueTypeIds.length > 0) {
+        const { data: typesData } = await supabase
+          .from('movement_concepts')
+          .select('id, name, concept_type')
+          .in('id', uniqueTypeIds);
+        types = typesData || [];
+      }
 
-      const { data: categories } = await supabase
-        .from('movement_concepts')
-        .select('id, name')
-        .in('id', uniqueCategoryIds);
+      if (uniqueCategoryIds.length > 0) {
+        const { data: categoriesData } = await supabase
+          .from('movement_concepts')
+          .select('id, name')
+          .in('id', uniqueCategoryIds);
+        categories = categoriesData || [];
+      }
 
-      const typeMap = types?.reduce((acc: any, type: any) => {
+      const typeMap = types.reduce((acc: any, type: any) => {
         acc[type.id] = { name: type.name, concept_type: type.concept_type };
         return acc;
-      }, {}) || {};
+      }, {});
 
-      const categoryMap = categories?.reduce((acc: any, category: any) => {
+      const categoryMap = categories.reduce((acc: any, category: any) => {
         acc[category.id] = category.name;
         return acc;
-      }, {}) || {};
+      }, {});
 
       return movements.map((m: any) => ({
         id: m.id,
