@@ -191,18 +191,38 @@ export default function FinancesDashboard() {
           const uniqueTypeIds = typeIds.filter((id, index, arr) => arr.indexOf(id) === index);
           
           let concepts: any[] = [];
+          const conceptMap: any = {};
+          
           if (uniqueTypeIds.length > 0) {
             const { data: conceptsData } = await supabase!
               .from('movement_concepts')
-              .select('id, concept_type')
+              .select('id, name, parent_id')
               .in('id', uniqueTypeIds);
             concepts = conceptsData || [];
+            
+            // Get parent concepts if needed
+            const parentIds = concepts.map(c => c.parent_id).filter(Boolean);
+            const uniqueParentIds = parentIds.filter((id, index, arr) => arr.indexOf(id) === index);
+            
+            let parentConcepts: any[] = [];
+            if (uniqueParentIds.length > 0) {
+              const { data: parentData } = await supabase!
+                .from('movement_concepts')
+                .select('id, name')
+                .in('id', uniqueParentIds);
+              parentConcepts = parentData || [];
+            }
+            
+            // Map concepts to their parent type
+            concepts.forEach((concept: any) => {
+              if (concept.parent_id) {
+                const parent = parentConcepts.find(p => p.id === concept.parent_id);
+                conceptMap[concept.id] = parent?.name?.toUpperCase() || 'UNKNOWN';
+              } else {
+                conceptMap[concept.id] = concept.name?.toUpperCase() || 'UNKNOWN';
+              }
+            });
           }
-
-          const conceptMap = concepts.reduce((acc: any, concept: any) => {
-            acc[concept.id] = concept.concept_type;
-            return acc;
-          }, {});
 
           const income = movements
             .filter((m: any) => conceptMap[m.type_id] === 'INGRESOS')
@@ -248,18 +268,38 @@ export default function FinancesDashboard() {
       const uniqueTypeIds = typeIds.filter((id, index, arr) => arr.indexOf(id) === index);
       
       let concepts: any[] = [];
+      const conceptMap: any = {};
+      
       if (uniqueTypeIds.length > 0) {
         const { data: conceptsData } = await supabase
           .from('movement_concepts')
-          .select('id, concept_type')
+          .select('id, name, parent_id')
           .in('id', uniqueTypeIds);
         concepts = conceptsData || [];
+        
+        // Get parent concepts if needed
+        const parentIds = concepts.map(c => c.parent_id).filter(Boolean);
+        const uniqueParentIds = parentIds.filter((id, index, arr) => arr.indexOf(id) === index);
+        
+        let parentConcepts: any[] = [];
+        if (uniqueParentIds.length > 0) {
+          const { data: parentData } = await supabase
+            .from('movement_concepts')
+            .select('id, name')
+            .in('id', uniqueParentIds);
+          parentConcepts = parentData || [];
+        }
+        
+        // Map concepts to their parent type
+        concepts.forEach((concept: any) => {
+          if (concept.parent_id) {
+            const parent = parentConcepts.find(p => p.id === concept.parent_id);
+            conceptMap[concept.id] = parent?.name?.toUpperCase() || 'UNKNOWN';
+          } else {
+            conceptMap[concept.id] = concept.name?.toUpperCase() || 'UNKNOWN';
+          }
+        });
       }
-
-      const conceptMap = concepts.reduce((acc: any, concept: any) => {
-        acc[concept.id] = concept.concept_type;
-        return acc;
-      }, {});
 
       // Group by month
       const monthlyData: Record<string, { income: number; expenses: number }> = {};
@@ -327,7 +367,7 @@ export default function FinancesDashboard() {
       if (uniqueTypeIds.length > 0) {
         const { data: typesData } = await supabase
           .from('movement_concepts')
-          .select('id, name, concept_type')
+          .select('id, name, parent_id')
           .in('id', uniqueTypeIds);
         types = typesData || [];
       }
@@ -340,10 +380,37 @@ export default function FinancesDashboard() {
         categories = categoriesData || [];
       }
 
-      const typeMap = types.reduce((acc: any, type: any) => {
-        acc[type.id] = { name: type.name, concept_type: type.concept_type };
-        return acc;
-      }, {});
+      // Create concept map with parent lookup
+      const conceptMap: any = {};
+      
+      // Get parent concepts if types have parent_id
+      const parentIds = types.map(c => c.parent_id).filter(Boolean);
+      const uniqueParentIds = parentIds.filter((id, index, arr) => arr.indexOf(id) === index);
+      
+      let parentConcepts: any[] = [];
+      if (uniqueParentIds.length > 0) {
+        const { data: parentData } = await supabase
+          .from('movement_concepts')
+          .select('id, name')
+          .in('id', uniqueParentIds);
+        parentConcepts = parentData || [];
+      }
+      
+      // Map concepts to their parent type
+      types.forEach((concept: any) => {
+        if (concept.parent_id) {
+          const parent = parentConcepts.find(p => p.id === concept.parent_id);
+          conceptMap[concept.id] = {
+            name: concept.name,
+            parentType: parent?.name?.toUpperCase() || 'UNKNOWN'
+          };
+        } else {
+          conceptMap[concept.id] = {
+            name: concept.name,
+            parentType: concept.name?.toUpperCase() || 'UNKNOWN'
+          };
+        }
+      });
 
       const categoryMap = categories.reduce((acc: any, category: any) => {
         acc[category.id] = category.name;
@@ -353,9 +420,9 @@ export default function FinancesDashboard() {
       return movements.map((m: any) => ({
         id: m.id,
         description: m.description || 'Sin descripción',
-        amount: Math.abs(m.amount || 0), // Always show positive amount
-        type: typeMap[m.type_id]?.concept_type === 'INGRESOS' ? 'income' : 'expense',
-        category: categoryMap[m.category_id] || typeMap[m.type_id]?.name || 'Sin categoría',
+        amount: m.amount || 0, // Keep original amount with sign
+        type: conceptMap[m.type_id]?.parentType === 'INGRESOS' ? 'income' : 'expense',
+        category: categoryMap[m.category_id] || conceptMap[m.type_id]?.name || 'Sin categoría',
         created_at: m.created_at
       }));
     },
