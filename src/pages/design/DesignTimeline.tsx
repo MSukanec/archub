@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useDesignProjectPhases } from '@/hooks/use-design-phases';
-import { CustomDesignGantt } from '@/components/ui-custom/misc/CustomDesignGantt';
+import { Gantt } from '@/components/ui-custom/gantt';
 import { NewPhaseModal } from '@/modals/design/NewPhaseModal';
 import { NewPhaseTaskModal } from '@/modals/design/NewPhaseTaskModal';
 
@@ -75,17 +75,7 @@ export default function DesignTimeline() {
     <>
       <Layout headerProps={headerProps} wide={true}>
         <div className="space-y-6">
-          <CustomDesignGantt 
-            phases={projectPhases}
-            searchValue={searchValue}
-            projectId={projectId || ''}
-            onEditPhase={handleEditPhase}
-            onAddTask={handleAddTask}
-            onCreatePhase={() => {
-              setEditingPhase(null);
-              setIsModalOpen(true);
-            }}
-          />
+          <Gantt />
         </div>
       </Layout>
 
