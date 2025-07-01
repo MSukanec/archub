@@ -95,9 +95,9 @@ export function DesignTaskModal({ open, onClose, phases, editingTask }: DesignTa
     try {
       const taskData = {
         ...data,
-        assigned_to: data.assigned_to || null,
-        start_date: data.start_date || null,
-        end_date: data.end_date || null,
+        assigned_to: data.assigned_to || undefined,
+        start_date: data.start_date || undefined,
+        end_date: data.end_date || undefined,
       };
 
       if (editingTask) {
@@ -128,142 +128,149 @@ export function DesignTaskModal({ open, onClose, phases, editingTask }: DesignTa
   };
 
   return (
-    <CustomModal
-      title={editingTask ? "Editar Tarea de Diseño" : "Nueva Tarea de Diseño"}
-      open={open}
-      onClose={handleClose}
-    >
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <CustomModalBody>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Name field - full width */}
-            <div className="col-span-2">
-              <Label htmlFor="name">Nombre *</Label>
-              <Input
-                id="name"
-                {...register("name")}
-                placeholder="Ej: Relevamiento del terreno, Diseño conceptual..."
-              />
-              {errors.name && (
-                <p className="text-sm text-destructive mt-1">{errors.name.message}</p>
-              )}
-            </div>
+    <CustomModalLayout open={open} onClose={handleClose}>
+      {{
+        header: (
+          <CustomModalHeader
+            title={editingTask ? "Editar Tarea de Diseño" : "Nueva Tarea de Diseño"}
+            onClose={handleClose}
+          />
+        ),
+        body: (
+          <CustomModalBody>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Name field - full width */}
+              <div className="col-span-2">
+                <Label htmlFor="name">Nombre *</Label>
+                <Input
+                  id="name"
+                  {...register("name")}
+                  placeholder="Ej: Relevamiento del terreno, Diseño conceptual..."
+                />
+                {errors.name && (
+                  <p className="text-sm text-destructive mt-1">{errors.name.message}</p>
+                )}
+              </div>
 
-            {/* Phase selection - half width */}
-            <div className="col-span-1">
-              <Label htmlFor="design_phase_id">Fase *</Label>
-              <Select
-                value={watch('design_phase_id')}
-                onValueChange={(value) => setValue('design_phase_id', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar fase" />
-                </SelectTrigger>
-                <SelectContent>
-                  {phases.map((phase) => (
-                    <SelectItem key={phase.id} value={phase.id}>
-                      {phase.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.design_phase_id && (
-                <p className="text-sm text-destructive mt-1">{errors.design_phase_id.message}</p>
-              )}
-            </div>
+              {/* Phase selection - half width */}
+              <div className="col-span-1">
+                <Label htmlFor="design_phase_id">Fase *</Label>
+                <Select
+                  value={watch('design_phase_id')}
+                  onValueChange={(value) => setValue('design_phase_id', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar fase" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {phases.map((phase) => (
+                      <SelectItem key={phase.id} value={phase.id}>
+                        {phase.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.design_phase_id && (
+                  <p className="text-sm text-destructive mt-1">{errors.design_phase_id.message}</p>
+                )}
+              </div>
 
-            {/* Status selection - half width */}
-            <div className="col-span-1">
-              <Label htmlFor="status">Estado *</Label>
-              <Select
-                value={watch('status')}
-                onValueChange={(value) => setValue('status', value as 'pending' | 'in_progress' | 'completed')}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pending">Pendiente</SelectItem>
-                  <SelectItem value="in_progress">En Progreso</SelectItem>
-                  <SelectItem value="completed">Completado</SelectItem>
-                </SelectContent>
-              </Select>
-              {errors.status && (
-                <p className="text-sm text-destructive mt-1">{errors.status.message}</p>
-              )}
-            </div>
+              {/* Status selection - half width */}
+              <div className="col-span-1">
+                <Label htmlFor="status">Estado *</Label>
+                <Select
+                  value={watch('status')}
+                  onValueChange={(value) => setValue('status', value as 'pending' | 'in_progress' | 'completed')}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar estado" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pendiente</SelectItem>
+                    <SelectItem value="in_progress">En Progreso</SelectItem>
+                    <SelectItem value="completed">Completado</SelectItem>
+                  </SelectContent>
+                </Select>
+                {errors.status && (
+                  <p className="text-sm text-destructive mt-1">{errors.status.message}</p>
+                )}
+              </div>
 
-            {/* Start date - half width */}
-            <div className="col-span-1">
-              <Label htmlFor="start_date">Fecha de Inicio</Label>
-              <Input
-                id="start_date"
-                type="date"
-                {...register("start_date")}
-              />
-              {errors.start_date && (
-                <p className="text-sm text-destructive mt-1">{errors.start_date.message}</p>
-              )}
-            </div>
+              {/* Start date - half width */}
+              <div className="col-span-1">
+                <Label htmlFor="start_date">Fecha de Inicio</Label>
+                <Input
+                  id="start_date"
+                  type="date"
+                  {...register("start_date")}
+                />
+                {errors.start_date && (
+                  <p className="text-sm text-destructive mt-1">{errors.start_date.message}</p>
+                )}
+              </div>
 
-            {/* End date - half width */}
-            <div className="col-span-1">
-              <Label htmlFor="end_date">Fecha de Fin</Label>
-              <Input
-                id="end_date"
-                type="date"
-                {...register("end_date")}
-              />
-              {errors.end_date && (
-                <p className="text-sm text-destructive mt-1">{errors.end_date.message}</p>
-              )}
-            </div>
+              {/* End date - half width */}
+              <div className="col-span-1">
+                <Label htmlFor="end_date">Fecha de Fin</Label>
+                <Input
+                  id="end_date"
+                  type="date"
+                  {...register("end_date")}
+                />
+                {errors.end_date && (
+                  <p className="text-sm text-destructive mt-1">{errors.end_date.message}</p>
+                )}
+              </div>
 
-            {/* Assigned to - full width */}
-            <div className="col-span-2">
-              <Label htmlFor="assigned_to">Asignado a</Label>
-              <Select
-                value={watch('assigned_to')}
-                onValueChange={(value) => setValue('assigned_to', value === 'none' ? '' : value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar contacto" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Sin asignar</SelectItem>
-                  {contacts?.map((contact) => (
-                    <SelectItem key={contact.id} value={contact.id}>
-                      {contact.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.assigned_to && (
-                <p className="text-sm text-destructive mt-1">{errors.assigned_to.message}</p>
-              )}
-            </div>
+              {/* Assigned to - full width */}
+              <div className="col-span-2">
+                <Label htmlFor="assigned_to">Asignado a</Label>
+                <Select
+                  value={watch('assigned_to')}
+                  onValueChange={(value) => setValue('assigned_to', value === 'none' ? '' : value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar contacto" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Sin asignar</SelectItem>
+                    {contacts?.map((contact) => (
+                      <SelectItem key={contact.id} value={contact.id}>
+                        {contact.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.assigned_to && (
+                  <p className="text-sm text-destructive mt-1">{errors.assigned_to.message}</p>
+                )}
+              </div>
 
-            {/* Description field - full width */}
-            <div className="col-span-2">
-              <Label htmlFor="description">Descripción</Label>
-              <Textarea
-                id="description"
-                {...register("description")}
-                placeholder="Descripción de la tarea de diseño..."
-                rows={3}
-              />
-              {errors.description && (
-                <p className="text-sm text-destructive mt-1">{errors.description.message}</p>
-              )}
+              {/* Description field - full width */}
+              <div className="col-span-2">
+                <Label htmlFor="description">Descripción</Label>
+                <Textarea
+                  id="description"
+                  {...register("description")}
+                  placeholder="Descripción de la tarea de diseño..."
+                  rows={3}
+                />
+                {errors.description && (
+                  <p className="text-sm text-destructive mt-1">{errors.description.message}</p>
+                )}
+              </div>
             </div>
-          </div>
-        </CustomModalBody>
-
-        <CustomModalFooter
-          onClose={handleClose}
-          isSubmitting={isSubmitting}
-        />
-      </form>
-    </CustomModal>
+          </CustomModalBody>
+        ),
+        footer: (
+          <CustomModalFooter
+            onCancel={handleClose}
+            onSubmit={handleSubmit(onSubmit)}
+            saveLoading={isSubmitting}
+            submitText={editingTask ? "Actualizar" : "Crear"}
+          />
+        ),
+      }}
+    </CustomModalLayout>
   );
 }

@@ -44,6 +44,29 @@ export const user_preferences = pgTable("user_preferences", {
   updated_at: timestamp("updated_at").defaultNow(),
 });
 
+// Design tables
+export const design_phases = pgTable("design_phases", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  project_id: uuid("project_id").notNull(),
+  name: text("name").notNull(),
+  description: text("description"),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+});
+
+export const design_tasks = pgTable("design_tasks", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  design_phase_id: uuid("design_phase_id").notNull(),
+  name: text("name").notNull(),
+  description: text("description"),
+  start_date: text("start_date"),
+  end_date: text("end_date"),
+  status: text("status").notNull().default("pending"), // pending, in_progress, completed
+  assigned_to: uuid("assigned_to"),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
   full_name: true,
@@ -63,6 +86,22 @@ export const insertUserPreferencesSchema = createInsertSchema(user_preferences).
   last_organization_id: true,
 });
 
+export const insertDesignPhaseSchema = createInsertSchema(design_phases).pick({
+  project_id: true,
+  name: true,
+  description: true,
+});
+
+export const insertDesignTaskSchema = createInsertSchema(design_tasks).pick({
+  design_phase_id: true,
+  name: true,
+  description: true,
+  start_date: true,
+  end_date: true,
+  status: true,
+  assigned_to: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type Country = typeof countries.$inferSelect;
@@ -70,3 +109,7 @@ export type UserData = typeof user_data.$inferSelect;
 export type UserPreferences = typeof user_preferences.$inferSelect;
 export type InsertUserData = z.infer<typeof insertUserDataSchema>;
 export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;
+export type DesignPhase = typeof design_phases.$inferSelect;
+export type DesignTask = typeof design_tasks.$inferSelect;
+export type InsertDesignPhase = z.infer<typeof insertDesignPhaseSchema>;
+export type InsertDesignTask = z.infer<typeof insertDesignTaskSchema>;

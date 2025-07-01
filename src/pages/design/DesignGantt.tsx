@@ -106,11 +106,7 @@ export default function DesignGantt() {
           }
         />
         
-        <SimpleDesignTaskModal
-          isOpen={showNewTaskModal}
-          onClose={() => setShowNewTaskModal(false)}
-          phases={phases}
-        />
+
       </Layout>
     );
   }
