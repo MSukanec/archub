@@ -350,7 +350,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
       </div>
 
       {/* Navigation Menu */}
-      <div className="flex-1 overflow-y-auto p-4 h-full">
+      <div className="flex-1 p-4">
         {/* Context Title */}
         <div className="mb-4">
           <h2 className="text-sm font-medium opacity-70" style={{ color: 'var(--menues-fg)' }}>

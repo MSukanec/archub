@@ -104,7 +104,7 @@
   --input-bg: transparent;
   --input-text: hsl(0, 0%, 0%);
   --input-border: hsl(0, 0%, 70%);
-  --input-placeholder: hsl(0, 0%, 70%);
+  --input-placeholder: hsl(90, 50%, 50%);
   --input-focus-ring: hsl(90, 50%, 50%);
   --input-focus-border: hsl(90, 50%, 50%);
 
