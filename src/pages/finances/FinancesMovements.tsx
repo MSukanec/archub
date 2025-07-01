@@ -691,58 +691,11 @@ export default function Movements() {
 
   return (
     <Layout headerProps={headerProps} wide={true}>
-      {/* Balance Cards by Currency */}
-      {currencyBalances.length > 0 && (
-        <div className="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {currencyBalances.map((balance) => (
-            <Card key={balance.currency} className="bg-[var(--card-bg)] border-[var(--card-border)]">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-[var(--card-fg)] flex items-center gap-2">
-                  <DollarSign className="h-4 w-4" />
-                  {balance.currency}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-[var(--muted-fg)]">Ingresos:</span>
-                    <span className="text-xs font-medium text-green-600">
-                      +${new Intl.NumberFormat('es-AR', { 
-                        minimumFractionDigits: 2, 
-                        maximumFractionDigits: 2 
-                      }).format(balance.income)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-[var(--muted-fg)]">Egresos:</span>
-                    <span className="text-xs font-medium text-red-600">
-                      -${new Intl.NumberFormat('es-AR', { 
-                        minimumFractionDigits: 2, 
-                        maximumFractionDigits: 2 
-                      }).format(balance.expense)}
-                    </span>
-                  </div>
-                  <div className="border-t border-[var(--card-border)] pt-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-[var(--card-fg)]">Balance:</span>
-                      <span className={`text-sm font-semibold ${
-                        balance.balance >= 0 
-                          ? 'text-green-600' 
-                          : 'text-red-600'
-                      }`}>
-                        {balance.balance >= 0 ? '+' : '-'}${new Intl.NumberFormat('es-AR', { 
-                          minimumFractionDigits: 2, 
-                          maximumFractionDigits: 2 
-                        }).format(Math.abs(balance.balance))}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+      {/* Financial Cards - Responsive */}
+      <FinancialCards 
+        balances={currencyBalances} 
+        defaultCurrency={defaultCurrency?.name}
+      />
       
       <CustomTable
         columns={tableColumns}

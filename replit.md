@@ -119,6 +119,13 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 1, 2025. Implemented responsive financial cards system with currency selection and optimized layouts
+  • Created FinancialCards component with responsive behavior: desktop shows max 3 cards full-width, mobile shows single card with currency selector
+  • Desktop adaptive grid: 1 card uses grid-cols-1, 2 cards use grid-cols-2, 3+ cards use grid-cols-3 for optimal space utilization
+  • Mobile interface features currency dropdown selector defaulting to organization's default currency setting
+  • Integrated useOrganizationDefaultCurrency hook to fetch organization's preferred currency from Supabase database
+  • Financial cards automatically adapt layout: desktop maximizes available width, mobile prioritizes single-card clarity with selection capability
+  • Replaced fixed grid layout with dynamic responsive system maintaining professional Lemon Squeezy aesthetic
 - July 1, 2025. Created MovementCard component for professional mobile movement display
   • Built MovementCard.tsx in src/components/cards/ following MercadoLibre-style design reference
   • Horizontal layout: avatar (left) + movement data (center) + amount with currency (right)
