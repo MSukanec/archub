@@ -144,9 +144,9 @@ export function NewPhaseTaskModal({ open, onClose, projectPhaseId }: NewPhaseTas
                     <SelectItem key={member.id} value={member.id}>
                       <div className="flex items-center gap-2">
                         <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center text-xs">
-                          {member.users?.full_name?.charAt(0) || member.users?.email?.charAt(0) || '?'}
+                          {member.user?.full_name?.charAt(0) || member.user?.email?.charAt(0) || '?'}
                         </div>
-                        {member.users?.full_name || member.users?.email || 'Sin nombre'}
+                        {member.user?.full_name || member.user?.email || 'Sin nombre'}
                       </div>
                     </SelectItem>
                   ))}
@@ -175,9 +175,9 @@ export function NewPhaseTaskModal({ open, onClose, projectPhaseId }: NewPhaseTas
                     <SelectItem key={member.id} value={member.id}>
                       <div className="flex items-center gap-2">
                         <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center text-xs">
-                          {member.users?.full_name?.charAt(0) || member.users?.email?.charAt(0) || '?'}
+                          {member.user?.full_name?.charAt(0) || member.user?.email?.charAt(0) || '?'}
                         </div>
-                        {member.users?.full_name || member.users?.email || 'Sin nombre'}
+                        {member.user?.full_name || member.user?.email || 'Sin nombre'}
                       </div>
                     </SelectItem>
                   ))}

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
-import { ChevronDown, ChevronRight, Calendar, Trash2, GripVertical } from 'lucide-react';
+import { ChevronDown, ChevronRight, Calendar, Trash2, GripVertical, Edit, Plus } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -17,9 +17,11 @@ interface CustomDesignGanttProps {
   phases: DesignProjectPhase[];
   searchValue: string;
   projectId: string;
+  onEditPhase?: (phase: DesignProjectPhase) => void;
+  onAddTask?: (phaseId: string) => void;
 }
 
-export function CustomDesignGantt({ phases, searchValue, projectId }: CustomDesignGanttProps) {
+export function CustomDesignGantt({ phases, searchValue, projectId, onEditPhase, onAddTask }: CustomDesignGanttProps) {
   const [expandedPhases, setExpandedPhases] = useState<string[]>([]);
   
   const updatePositionMutation = useUpdateDesignProjectPhasePosition();
@@ -169,39 +171,65 @@ export function CustomDesignGantt({ phases, searchValue, projectId }: CustomDesi
                                     <Badge variant="outline" className="text-xs">
                                       Fase de Diseño
                                     </Badge>
+                                    
+                                    {/* Action buttons */}
+                                    <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                                      {/* Add Task button */}
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-7 px-2 text-xs"
+                                        onClick={() => onAddTask?.(phase.id)}
+                                      >
+                                        <Plus className="h-3 w-3 mr-1" />
+                                        Agregar Tarea
+                                      </Button>
+                                      
+                                      {/* Edit button */}
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                                        onClick={() => onEditPhase?.(phase)}
+                                      >
+                                        <Edit className="h-3 w-3" />
+                                      </Button>
+                                      
+                                      {/* Delete button */}
+                                      <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                          <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                                          >
+                                            <Trash2 className="h-3 w-3" />
+                                          </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                          <AlertDialogHeader>
+                                            <AlertDialogTitle>¿Eliminar fase?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                              Esta acción no se puede deshacer. Se eliminará permanentemente la fase "{phase.design_phases.name}" del cronograma.
+                                            </AlertDialogDescription>
+                                          </AlertDialogHeader>
+                                          <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                            <AlertDialogAction
+                                              onClick={() => handleDeletePhase(phase.id)}
+                                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                            >
+                                              Eliminar
+                                            </AlertDialogAction>
+                                          </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                      </AlertDialog>
+                                    </div>
                                   </div>
                                 </div>
                               </AccordionTrigger>
 
-                              {/* Delete button */}
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>¿Eliminar fase?</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      Esta acción no se puede deshacer. Se eliminará permanentemente la fase "{phase.design_phases.name}" del cronograma.
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                    <AlertDialogAction
-                                      onClick={() => handleDeletePhase(phase.id)}
-                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                    >
-                                      Eliminar
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
+
                             </div>
 
                             <AccordionContent className="px-4 pb-4">
