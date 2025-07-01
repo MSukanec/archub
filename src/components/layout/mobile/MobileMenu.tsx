@@ -1,8 +1,8 @@
 import React from 'react'
 import { X, Home, Building, DollarSign, Hammer, Users, Calendar, FileText, Settings, CheckSquare, User } from 'lucide-react'
 import { Link, useLocation } from 'wouter'
-import { useAuthStore } from '@/store/auth-store'
-import { useNavigationStore } from '@/store/navigation-store'
+import { useCurrentUser } from '@/hooks/use-current-user'
+import { useNavigationStore } from '@/stores/navigationStore'
 import { useMobileMenuStore } from './useMobileMenuStore'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -15,87 +15,68 @@ interface MobileMenuProps {
 
 export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const [location] = useLocation()
-  const { currentUser } = useAuthStore()
-  const { sidebarContext, setSidebarContext } = useNavigationStore()
+  const { data: currentUser } = useCurrentUser()
+  const { currentSidebarContext, setSidebarContext } = useNavigationStore()
 
   if (!isOpen) return null
 
   const organizationId = currentUser?.preferences?.last_organization_id
   const projectId = currentUser?.preferences?.last_project_id
-  const organization = currentUser?.organizations?.find(org => org.id === organizationId)
-  const projects = currentUser?.organizations?.find(org => org.id === organizationId)?.projects || []
+  const organization = currentUser?.organizations?.find((org: any) => org.id === organizationId)
+  const projects = currentUser?.organizations?.find((org: any) => org.id === organizationId)?.projects || []
 
-  // Navigation items based on context
+  // Navigation items - simplified for mobile
   const getNavigationItems = () => {
-    if (sidebarContext === 'project' && projectId) {
-      return [
-        {
-          title: 'Resumen del Proyecto',
-          icon: Home,
-          href: '/project/dashboard',
-          isActive: location === '/project/dashboard'
-        },
-        {
-          title: 'Obra',
-          icon: Hammer,
-          items: [
-            { title: 'Presupuestos', href: '/construction/budgets' },
-            { title: 'Materiales', href: '/construction/materials' },
-            { title: 'Bitácora', href: '/construction/logs' },
-            { title: 'Personal', href: '/construction/personnel' }
-          ]
-        },
-        {
-          title: 'Cronograma',
-          icon: Calendar,
-          href: '/project/timeline',
-          isActive: location === '/project/timeline'
-        },
-        {
-          title: 'Finanzas',
-          icon: DollarSign,
-          items: [
-            { title: 'Resumen de Finanzas', href: '/finances/dashboard' },
-            { title: 'Movimientos', href: '/finances/movements' }
-          ]
-        },
-        {
-          title: 'Gestión de Tareas',
-          icon: CheckSquare,
-          href: '/tasks',
-          isActive: location === '/tasks'
-        }
-      ]
-    } else {
-      return [
-        {
-          title: 'Resumen de la Organización',
-          icon: Building,
-          href: '/organization/dashboard',
-          isActive: location === '/organization/dashboard'
-        },
-        {
-          title: 'Gestión de Proyectos',
-          icon: FileText,
-          href: '/proyectos',
-          isActive: location === '/proyectos'
-        },
-        {
-          title: 'Gestión de Contactos',
-          icon: Users,
-          href: '/organization/contactos',
-          isActive: location === '/organization/contactos'
-        },
-        {
-          title: 'Finanzas',
-          icon: DollarSign,
-          items: [
-            { title: 'Resumen de Finanzas', href: '/finances/dashboard' },
-            { title: 'Movimientos', href: '/finances/movements' }
-          ]
-        }
-      ]
-    }
+    return [
+      {
+        title: 'Resumen de la Organización',
+        icon: Building,
+        href: '/organization/dashboard',
+        isActive: location === '/organization/dashboard'
+      },
+      {
+        title: 'Gestión de Proyectos',
+        icon: FileText,
+        href: '/proyectos',
+        isActive: location === '/proyectos'
+      },
+      {
+        title: 'Gestión de Contactos',
+        icon: Users,
+        href: '/organization/contactos',
+        isActive: location === '/organization/contactos'
+      },
+      {
+        title: 'Cronograma',
+        icon: Calendar,
+        href: '/project/timeline',
+        isActive: location === '/project/timeline'
+      },
+      {
+        title: 'Finanzas',
+        icon: DollarSign,
+        items: [
+          { title: 'Resumen de Finanzas', href: '/finances/dashboard' },
+          { title: 'Movimientos', href: '/finances/movements' }
+        ]
+      },
+      {
+        title: 'Obra',
+        icon: Hammer,
+        items: [
+          { title: 'Presupuestos', href: '/construction/budgets' },
+          { title: 'Materiales', href: '/construction/materials' },
+          { title: 'Bitácora', href: '/construction/logs' },
+          { title: 'Personal', href: '/construction/personnel' }
+        ]
+      },
+      {
+        title: 'Gestión de Tareas',
+        icon: CheckSquare,
+        href: '/tasks',
+        isActive: location === '/tasks'
+      }
+    ]
   }
 
   const navigationItems = getNavigationItems()

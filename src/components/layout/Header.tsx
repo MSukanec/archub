@@ -50,6 +50,7 @@ export function Header({
   const [showNewOrganizationModal, setShowNewOrganizationModal] = useState(false);
   const [showNewProjectModal, setShowNewProjectModal] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const { isOpen: isMobileMenuOpen, openMenu, closeMenu } = useMobileMenuStore();
 
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
@@ -137,13 +138,24 @@ export function Header({
     <header className="sticky top-0 z-50 h-9 border-b border-[var(--menues-border)] bg-[var(--menues-bg)] flex items-center justify-between gap-2">
       {/* Left side - Logo + Breadcrumb */}
       <div className="flex items-center gap-2">
-        {/* Logo - exact same width as sidebar when collapsed */}
+        {/* Mobile Menu Button & Logo */}
         <div className="w-[40px] h-9 flex items-center justify-center border-r border-[var(--menues-border)]">
-          <span className="text-base font-bold leading-none text-[var(--menues-fg)]">A</span>
+          {/* Mobile Menu Button - visible on mobile only */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={openMenu}
+            className="md:hidden h-8 w-8 p-0 hover:bg-transparent"
+          >
+            <Menu className="h-4 w-4 text-[var(--menues-fg)]" />
+          </Button>
+          
+          {/* Logo - hidden on mobile, visible on desktop */}
+          <span className="hidden md:block text-base font-bold leading-none text-[var(--menues-fg)]">A</span>
         </div>
 
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2">
+        {/* Breadcrumb - hidden on mobile */}
+        <div className="hidden md:flex items-center gap-2">
           {/* Organization Button - ALWAYS visible */}
           <div className="flex items-center">
             <Button
@@ -462,6 +474,9 @@ export function Header({
         onClose={() => setShowNewProjectModal(false)}
       />
     )}
+
+    {/* Mobile Menu */}
+    <MobileMenu isOpen={isMobileMenuOpen} onClose={closeMenu} />
     </>
   );
 }
