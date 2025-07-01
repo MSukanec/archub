@@ -41,7 +41,6 @@ export function useDesignTasks(organizationId: string | undefined) {
       const { data, error } = await supabase
         .from('design_phase_tasks')
         .select('*')
-        .eq('organization_id', organizationId)
         .order('position', { ascending: true });
 
       if (error) {

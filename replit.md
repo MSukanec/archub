@@ -119,6 +119,20 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 1, 2025. Complete Gantt chart refinement with Jira-style professional features and optimized timeline display
+  • Rebuilt entire Gantt system with modular architecture: Gantt.tsx, GanttGrid.tsx, GanttRow.tsx, GanttBar.tsx
+  • Implemented fixed left column (250px) with sticky positioning for phase/task names, separate scrollable timeline area
+  • Added dynamic timeline range calculation based on project phase dates with automatic padding
+  • Created sophisticated date header system: month labels on top row, day numbers with weekday abbreviations below
+  • Built "HOY" (today) indicator system: blue background highlighting and vertical line across entire timeline height
+  • Enhanced view mode switcher (Días/Semanas/Meses) with proper column width calculations (40px/100px/160px)
+  • Added "Ir a HOY" button for automatic scroll centering on current date
+  • Implemented drag & resize handles on task bars with hover visibility and visual feedback
+  • Created comprehensive utility functions: getTimelineRange, getDateArray, getWeekday, isToday for date management
+  • Built Zustand store for view mode state management with persistence
+  • Applied professional Jira-style colors: blue for phases, gray for tasks, subtle hover effects
+  • Timeline automatically adapts to actual project date ranges instead of fixed monthly view
+  • Prepared foundation for Supabase integration with proper TypeScript interfaces
 - July 1, 2025. Enhanced design timeline with comprehensive task management and improved accordion interface
   • Updated header title from "Cronograma de Diseño" to "Cronograma" and button text to "Nueva Fase de Diseño"
   • Replaced manual empty state with CustomEmptyState component for consistency
