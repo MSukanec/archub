@@ -129,7 +129,7 @@ Changelog:
   • Color-coded amounts: green for Ingresos (+), red for Egresos (-) following financial conventions
   • Professional styling with white background, subtle borders, shadow-sm, and proper padding/spacing
   • Component designed for integration with CustomTable renderCard prop for mobile financial movement display
-- July 1, 2025. Complete mobile optimization implementation with professional navigation system
+- July 1, 2025. Complete mobile optimization implementation with professional navigation system and directional animations
   • Created comprehensive mobile navigation system with MobileMenu component and useMobileMenuStore Zustand store
   • Modified Layout.tsx to hide sidebar on mobile devices (md:hidden) with responsive margin adjustments
   • Moved hamburger button to right side of header for better mobile UX and accessibility
@@ -141,6 +141,10 @@ Changelog:
   • Mobile menu includes complete navigation to all major sections: Organization, Projects, Contacts, Timeline, Finances, Construction, Tasks
   • Footer with quick access to Administration, Tasks, and Profile sections in grid layout
   • All mobile components maintain Lemon Squeezy design consistency with proper spacing and professional typography
+  • Implemented directional animation system: left slide for advancing in hierarchy (organization→project→design), right slide for returning
+  • Fixed menu structure to match desktop sidebar EXACTLY: correct accordion organization, proper navigation order
+  • Added "General" section in all menu contexts with Profile, Tasks, and Administration buttons for consistent access
+  • Simplified mobile header: only title (left) + hamburger button (right) without problematic border elements
 - July 1, 2025. Fixed financial movements to use movement_date instead of created_at for all date operations
   • Corrected NewMovementModal schema to use movement_date as primary date field, removed created_at references
   • Fixed all form reset operations to default to movement_date with current date
