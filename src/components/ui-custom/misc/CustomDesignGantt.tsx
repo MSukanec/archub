@@ -31,6 +31,7 @@ interface CustomDesignGanttProps {
   projectId: string;
   onEditPhase: (phase: DesignProjectPhase) => void;
   onAddTask: (phaseId: string) => void;
+  onCreatePhase: () => void;
 }
 
 export function CustomDesignGantt({ 
@@ -38,7 +39,8 @@ export function CustomDesignGantt({
   searchValue, 
   projectId, 
   onEditPhase, 
-  onAddTask 
+  onAddTask,
+  onCreatePhase 
 }: CustomDesignGanttProps) {
   const [openAccordions, setOpenAccordions] = useState<string[]>([]);
   const { toast } = useToast();
@@ -237,6 +239,7 @@ export function CustomDesignGantt({
               <Button 
                 variant="ghost" 
                 className="w-full justify-start h-8 text-xs text-muted-foreground mt-2"
+                onClick={onCreatePhase}
               >
                 <Plus className="h-3 w-3 mr-2" />
                 Crear
@@ -275,11 +278,39 @@ export function CustomDesignGantt({
 
             {/* Timeline Content */}
             <div className="relative">
-              {/* Today indicator line */}
-              <div 
-                className="absolute top-0 bottom-0 w-0.5 bg-blue-400 z-10"
-                style={{ left: `${(today - 1) * 32 + 16}px` }}
-              />
+              {/* Calculate total height for lines */}
+              {(() => {
+                const totalPhaseRows = filteredPhases.length;
+                const totalTaskRows = filteredPhases.reduce((acc, phase) => {
+                  return acc + (openAccordions.includes(phase.id) ? getTasksForPhase(phase.id).length : 0);
+                }, 0);
+                const totalHeight = (totalPhaseRows * 40) + (totalTaskRows * 32);
+                
+                return (
+                  <>
+                    {/* Vertical grid lines extending full height */}
+                    {days.map((day, index) => (
+                      <div
+                        key={`vline-${day}`}
+                        className="absolute top-0 w-px bg-gray-200 z-0"
+                        style={{ 
+                          left: `${(index + 1) * 32}px`,
+                          height: `${Math.max(totalHeight, 200)}px`
+                        }}
+                      />
+                    ))}
+                    
+                    {/* Today indicator line extending full height */}
+                    <div 
+                      className="absolute top-0 w-0.5 bg-blue-400 z-10"
+                      style={{ 
+                        left: `${(today - 1) * 32 + 16}px`,
+                        height: `${Math.max(totalHeight, 200)}px`
+                      }}
+                    />
+                  </>
+                );
+              })()}
               
               {filteredPhases.map((phase, phaseIndex) => {
                 const phaseTasks = getTasksForPhase(phase.id);
@@ -288,23 +319,23 @@ export function CustomDesignGantt({
                     {/* Phase timeline row - NO BARS for phases */}
                     <div className="h-10 flex items-center border-b relative">
                       {days.map((day) => (
-                        <div key={day} className="w-8 h-10 border-r" />
+                        <div key={day} className="w-8 h-10" />
                       ))}
                     </div>
 
                     {/* Task rows (when accordion is open) */}
                     {openAccordions.includes(phase.id) && phaseTasks.map((task, taskIndex) => {
-                      const barPosition = calculateBarPosition(task.start_date, task.end_date);
+                      const barPosition = calculateBarPosition(task.start_date || null, task.end_date || null);
                       return (
-                        <div key={task.id} className="h-8 flex items-center border-b bg-gray-50 relative">
+                        <div key={task.id} className="h-8 flex items-center border-b bg-gray-50 relative group">
                           {days.map((day) => (
-                            <div key={day} className="w-8 h-8 border-r" />
+                            <div key={day} className="w-8 h-8" />
                           ))}
                           
                           {/* Task bar with real dates */}
                           {barPosition && (
                             <div 
-                              className="absolute h-4 bg-blue-500 rounded-sm flex items-center justify-end pr-1 cursor-pointer hover:bg-blue-600"
+                              className="absolute h-4 bg-blue-500 rounded-sm flex items-center justify-between px-1 cursor-pointer hover:bg-blue-600"
                               style={{ 
                                 left: barPosition.left,
                                 width: barPosition.width,
@@ -312,11 +343,40 @@ export function CustomDesignGantt({
                               }}
                               title={`${task.name} (${task.start_date} - ${task.end_date})`}
                             >
+                              <span className="text-xs text-white font-medium truncate mr-1">{task.name}</span>
                               <div className="w-3 h-3 bg-white rounded-sm flex items-center justify-center">
                                 <span className="text-[8px] text-blue-600">👤</span>
                               </div>
                             </div>
                           )}
+                          
+                          {/* Task action buttons (appear on hover) */}
+                          <div className="absolute right-2 top-1 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 w-6 p-0"
+                                >
+                                  <MoreHorizontal className="h-3 w-3" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => console.log('Edit task:', task.id)}>
+                                  <Edit className="mr-2 h-4 w-4" />
+                                  Editar
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={() => console.log('Delete task:', task.id)}
+                                  className="text-destructive"
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Eliminar
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
                         </div>
                       );
                     })}
