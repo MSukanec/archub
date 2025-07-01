@@ -138,20 +138,13 @@ export function Header({
     <header className="sticky top-0 z-50 h-9 border-b border-[var(--menues-border)] bg-[var(--menues-bg)] flex items-center justify-between gap-2">
       {/* Left side - Logo + Breadcrumb */}
       <div className="flex items-center gap-2">
-        {/* Mobile Menu Button & Logo */}
+        {/* Logo Section */}
         <div className="w-[40px] h-9 flex items-center justify-center border-r border-[var(--menues-border)]">
-          {/* Mobile Menu Button - visible on mobile only */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={openMenu}
-            className="md:hidden h-8 w-8 p-0 hover:bg-transparent"
-          >
-            <Menu className="h-4 w-4 text-[var(--menues-fg)]" />
-          </Button>
-          
-          {/* Logo - hidden on mobile, visible on desktop */}
+          {/* Logo - visible on desktop */}
           <span className="hidden md:block text-base font-bold leading-none text-[var(--menues-fg)]">A</span>
+          
+          {/* Empty space on mobile for alignment */}
+          <div className="md:hidden w-8 h-8"></div>
         </div>
 
         {/* Breadcrumb - hidden on mobile */}
@@ -364,6 +357,15 @@ export function Header({
 
       {/* Right side - Search, Filters, Actions */}
       <div className="flex items-center gap-2 ml-auto pr-4">
+        {/* Mobile Menu Button - visible on mobile only, positioned on the right */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={openMenu}
+          className="md:hidden h-8 w-8 p-0 hover:bg-transparent"
+        >
+          <Menu className="h-4 w-4 text-[var(--menues-fg)]" />
+        </Button>
         {showSearch && (
           <div className="relative">
             {!isSearchOpen ? (

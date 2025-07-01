@@ -50,13 +50,14 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   return (
     <div className="min-h-screen bg-background">
       <Header {...headerProps} />
-      <Sidebar />
+      {/* Sidebar - hidden on mobile */}
+      <div className="hidden md:block">
+        <Sidebar />
+      </div>
       <main
-        className="transition-all duration-300 ease-in-out flex-1 overflow-auto p-3"
-        style={{
-          marginLeft: isExpanded ? "240px" : "40px",
-          marginTop: "4px",
-        }}
+        className={`transition-all duration-300 ease-in-out flex-1 overflow-auto p-3 mt-1 ${
+          isExpanded ? "md:ml-[240px]" : "md:ml-[40px]"
+        } ml-0`}
       >
         <div className={wide ? "" : "max-w-[1440px] mx-auto"}>{children}</div>
       </main>
