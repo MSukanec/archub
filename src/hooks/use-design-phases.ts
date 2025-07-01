@@ -1,0 +1,205 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase';
+import { useToast } from '@/hooks/use-toast';
+import { useCurrentUser } from './use-current-user';
+
+export interface DesignPhase {
+  id: string;
+  name: string;
+  position: number;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface DesignProjectPhase {
+  id: string;
+  organization_id: string;
+  project_id: string;
+  design_phase_id: string;
+  start_date: string | null;
+  end_date: string | null;
+  position: number;
+  created_at: string;
+  design_phases: DesignPhase;
+}
+
+export interface CreateDesignProjectPhaseData {
+  organization_id: string;
+  project_id: string;
+  design_phase_id: string;
+  start_date?: string | null;
+  end_date?: string | null;
+  position: number;
+}
+
+export function useDesignPhases() {
+  return useQuery({
+    queryKey: ['design-phases'],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase not initialized');
+      
+      console.log('Fetching design phases for organization:');
+      
+      const { data, error } = await supabase
+        .from('design_phases')
+        .select('*')
+        .eq('is_active', true)
+        .order('position');
+      
+      if (error) {
+        console.error('Error fetching design phases:', error);
+        throw error;
+      }
+      
+      return data as DesignPhase[];
+    },
+    enabled: !!supabase,
+  });
+}
+
+export function useDesignProjectPhases(projectId: string) {
+  const { data: userData } = useCurrentUser();
+  const organizationId = userData?.organization?.id;
+
+  return useQuery({
+    queryKey: ['design-project-phases', projectId, organizationId],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase not initialized');
+      
+      console.log('Fetching design tasks for project:', organizationId);
+      
+      const { data, error } = await supabase
+        .from('design_project_phases')
+        .select(`
+          *,
+          design_phases (*)
+        `)
+        .eq('project_id', projectId)
+        .eq('organization_id', organizationId)
+        .order('position');
+      
+      if (error) {
+        console.error('Error fetching design tasks:', error);
+        throw error;
+      }
+      
+      return data as DesignProjectPhase[];
+    },
+    enabled: !!projectId && !!organizationId && !!supabase,
+  });
+}
+
+export function useCreateDesignProjectPhase() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (phaseData: CreateDesignProjectPhaseData) => {
+      if (!supabase) throw new Error('Supabase not initialized');
+
+      const { data, error } = await supabase
+        .from('design_project_phases')
+        .insert([phaseData])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ 
+        queryKey: ['design-project-phases', data.project_id] 
+      });
+      toast({
+        title: "Fase agregada",
+        description: "La fase de diseño se agregó correctamente al cronograma.",
+      });
+    },
+    onError: (error) => {
+      console.error('Error creating design project phase:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo agregar la fase de diseño.",
+        variant: "destructive",
+      });
+    },
+  });
+}
+
+export function useUpdateDesignProjectPhasePosition() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({ 
+      id, 
+      position, 
+      projectId 
+    }: { 
+      id: string; 
+      position: number; 
+      projectId: string; 
+    }) => {
+      if (!supabase) throw new Error('Supabase not initialized');
+
+      const { data, error } = await supabase
+        .from('design_project_phases')
+        .update({ position })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ 
+        queryKey: ['design-project-phases', data.project_id] 
+      });
+    },
+    onError: (error) => {
+      console.error('Error updating phase position:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar la posición de la fase.",
+        variant: "destructive",
+      });
+    },
+  });
+}
+
+export function useDeleteDesignProjectPhase() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({ id, projectId }: { id: string; projectId: string }) => {
+      if (!supabase) throw new Error('Supabase not initialized');
+
+      const { error } = await supabase
+        .from('design_project_phases')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      return { id, projectId };
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ 
+        queryKey: ['design-project-phases', data.projectId] 
+      });
+      toast({
+        title: "Fase eliminada",
+        description: "La fase de diseño se eliminó correctamente.",
+      });
+    },
+    onError: (error) => {
+      console.error('Error deleting design project phase:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar la fase de diseño.",
+        variant: "destructive",
+      });
+    },
+  });
+}
