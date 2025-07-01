@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useDesignPhases } from '@/hooks/use-design-phases';
 import { useDesignTasks } from '@/hooks/use-design-tasks';
-import { CustomPageLayout } from '@/components/ui-custom/layout/CustomPageLayout';
+import { Layout } from '@/components/layout/Layout';
 import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState';
 import { CustomDesignGantt } from '@/components/ui-custom/gantt/CustomDesignGantt';
 import { NewDesignTaskModal } from '@/modals/design/NewDesignTaskModal';
@@ -77,87 +77,23 @@ export default function DesignGantt() {
   const isLoading = phasesLoading || tasksLoading;
   const isEmpty = !isLoading && phases.length === 0;
 
-  const customFilters = (
-    <div className="space-y-4 w-72">
-      <div className="space-y-2">
-        <Label htmlFor="search">Buscar tareas</Label>
-        <div className="relative">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            id="search"
-            placeholder="Nombre o descripción..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8"
-          />
-        </div>
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="status">Estado</Label>
-        <select
-          id="status"
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="w-full px-3 py-2 text-sm border border-input bg-background rounded-md"
-        >
-          <option value="all">Todos los estados</option>
-          <option value="pending">Por hacer</option>
-          <option value="in_progress">En progreso</option>
-          <option value="completed">Completado</option>
-        </select>
-      </div>
-
-      {phases.length > 0 && (
-        <div className="space-y-2">
-          <Label htmlFor="phase">Fase</Label>
-          <select
-            id="phase"
-            value={selectedPhaseId}
-            onChange={(e) => setSelectedPhaseId(e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-input bg-background rounded-md"
-          >
-            <option value="">Todas las fases</option>
-            {phases.map(phase => (
-              <option key={phase.id} value={phase.id}>{phase.name}</option>
-            ))}
-          </select>
-        </div>
-      )}
-
+  const headerProps = {
+    title: "Cronograma de Diseño",
+    actions: [
       <Button
-        variant="outline"
-        size="sm"
-        onClick={() => {
-          setSearchQuery('');
-          setStatusFilter('all');
-          setSelectedPhaseId('');
-        }}
-        className="w-full"
+        key="new-task"
+        onClick={() => setShowNewTaskModal(true)}
+        className="h-8 px-3 text-sm font-medium"
       >
-        Limpiar filtros
+        <Plus className="w-4 h-4 mr-2" />
+        Nueva tarea
       </Button>
-    </div>
-  );
+    ]
+  };
 
   if (isEmpty) {
     return (
-      <CustomPageLayout
-        title="Cronograma de Diseño"
-        icon={Calendar}
-        actions={[
-          <Button
-            key="new-task"
-            onClick={() => setShowNewTaskModal(true)}
-            className="h-8 px-3 text-sm font-medium"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Nueva tarea
-          </Button>
-        ]}
-        customFilters={customFilters}
-        isWide
-      >
+      <Layout wide headerProps={headerProps}>
         <CustomEmptyState
           icon={Calendar}
           title="No hay fases de diseño"
@@ -165,27 +101,18 @@ export default function DesignGantt() {
           actionLabel="Crear primera fase"
           onAction={() => setShowNewTaskModal(true)}
         />
-      </CustomPageLayout>
+        
+        <NewDesignTaskModal
+          isOpen={showNewTaskModal}
+          onClose={() => setShowNewTaskModal(false)}
+          phases={phases}
+        />
+      </Layout>
     );
   }
 
   return (
-    <CustomPageLayout
-      title="Cronograma de Diseño"
-      icon={Calendar}
-      actions={[
-        <Button
-          key="new-task"
-          onClick={() => setShowNewTaskModal(true)}
-          className="h-8 px-3 text-sm font-medium"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Nueva tarea
-        </Button>
-      ]}
-      customFilters={customFilters}
-      isWide
-    >
+    <Layout wide headerProps={headerProps}>
       <div className="space-y-6">
         {/* Statistics Cards */}
         <div className="grid grid-cols-4 gap-4">
@@ -302,6 +229,6 @@ export default function DesignGantt() {
         onClose={() => setShowNewTaskModal(false)}
         phases={phases}
       />
-    </CustomPageLayout>
+    </Layout>
   );
 }
