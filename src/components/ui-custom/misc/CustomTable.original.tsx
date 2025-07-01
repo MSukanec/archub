@@ -55,122 +55,131 @@ export function CustomTable<T = any>({
   const [sortKey, setSortKey] = useState<string | null>(defaultSort?.key || null)
   const [sortDirection, setSortDirection] = useState<SortDirection>(defaultSort?.direction || null)
   const [currentPage, setCurrentPage] = useState(1)
+  
   const itemsPerPage = 10
   const showPagination = data.length > itemsPerPage
 
-  // Helper function to handle sort logic
-  const handleSort = (key: string, sortType: 'string' | 'number' | 'date' = 'string') => {
-    if (sortKey === key) {
-      setSortDirection(prev => {
-        if (prev === 'asc') return 'desc'
-        if (prev === 'desc') return null
-        return 'asc'
-      })
-    } else {
-      setSortKey(key)
-      setSortDirection('asc')
-    }
-
-    if (sortDirection === null) {
-      setSortKey(null)
-    }
-  }
-
-  // Sort data
-  const sortedData = useMemo(() => {
-    if (!sortKey || !sortDirection) return data
-
-    return [...data].sort((a, b) => {
-      const column = columns.find(col => col.key === sortKey)
-      const sortType = column?.sortType || 'string'
-      
-      const aValue = a[sortKey as keyof T]
-      const bValue = b[sortKey as keyof T]
-
-      // Handle null/undefined values
-      if (aValue == null && bValue == null) return 0
-      if (aValue == null) return sortDirection === 'asc' ? -1 : 1
-      if (bValue == null) return sortDirection === 'asc' ? 1 : -1
-
-      let comparison = 0
-
-      switch (sortType) {
-        case 'number':
-          comparison = (Number(aValue) || 0) - (Number(bValue) || 0)
-          break
-        case 'date':
-          const dateA = new Date(String(aValue))
-          const dateB = new Date(String(bValue))
-          comparison = dateA.getTime() - dateB.getTime()
-          break
-        case 'string':
-        default:
-          comparison = String(aValue).localeCompare(String(bValue))
-          break
-      }
-
-      return sortDirection === 'asc' ? comparison : -comparison
-    })
-  }, [data, sortKey, sortDirection, columns])
-
-  // Pagination
-  const totalPages = Math.ceil(sortedData.length / itemsPerPage)
-  const paginatedData = showPagination 
-    ? sortedData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-    : sortedData
-
-  const isItemSelected = (item: T) => {
-    return selectedItems.some(selectedItem => getItemId(selectedItem) === getItemId(item))
-  }
-
-  const handleSelectItem = (item: T, checked: boolean) => {
-    if (!onSelectionChange) return
-
-    if (checked) {
-      onSelectionChange([...selectedItems, item])
-    } else {
-      onSelectionChange(selectedItems.filter(selectedItem => getItemId(selectedItem) !== getItemId(item)))
-    }
-  }
-
+  // Selection logic
+  const isAllSelected = selectable && data.length > 0 && selectedItems.length === data.length
+  const isIndeterminate = selectable && selectedItems.length > 0 && selectedItems.length < data.length
+  
   const handleSelectAll = (checked: boolean) => {
     if (!onSelectionChange) return
-
     if (checked) {
-      onSelectionChange([...data])
+      onSelectionChange(data)
     } else {
       onSelectionChange([])
     }
   }
 
+  const handleSelectItem = (item: T, checked: boolean) => {
+    if (!onSelectionChange) return
+    const itemId = getItemId(item)
+    if (checked) {
+      onSelectionChange([...selectedItems, item])
+    } else {
+      onSelectionChange(selectedItems.filter(selected => getItemId(selected) !== itemId))
+    }
+  }
+
+  const isItemSelected = (item: T) => {
+    const itemId = getItemId(item)
+    return selectedItems.some(selected => getItemId(selected) === itemId)
+  }
+
+  const handleItemSelection = (item: T, checked: boolean) => {
+    handleSelectItem(item, checked)
+  }
+
+  // Calculate grid template columns based on widths and selection
   const getGridTemplateColumns = () => {
-    const baseColumns = columns.map(col => col.width || 'minmax(0, 1fr)').join(' ')
-    return selectable ? `40px ${baseColumns}` : baseColumns
+    const selectableColumn = selectable ? ['32px'] : []
+    const columnsWithWidths = columns.map(col => col.width || '1fr')
+    return [...selectableColumn, ...columnsWithWidths].join(' ')
   }
 
-  // Function to get sort icon for column header
-  const getSortIcon = (key: string) => {
-    if (sortKey !== key) return <ArrowUpDown className="ml-1 h-3 w-3 opacity-50" />
-    if (sortDirection === 'asc') return <ChevronUp className="ml-1 h-3 w-3 text-accent" />
-    if (sortDirection === 'desc') return <ChevronDown className="ml-1 h-3 w-3 text-accent" />
-    return <ArrowUpDown className="ml-1 h-3 w-3 opacity-50" />
+  const handleSort = (columnKey: string, sortType: 'string' | 'number' | 'date' = 'string') => {
+    if (sortKey === columnKey) {
+      // Toggle direction or reset
+      if (sortDirection === 'asc') {
+        setSortDirection('desc')
+      } else if (sortDirection === 'desc') {
+        setSortKey(null)
+        setSortDirection(null)
+      } else {
+        setSortDirection('asc')
+      }
+    } else {
+      setSortKey(columnKey)
+      setSortDirection('asc')
+    }
   }
 
-  // Handle the special case for numbers with thousands formatting (accounting for TypeScript strict mode)
-  const formatSortableValue = (key: string, value: any): any => {
-    const column = columns.find(col => col.key === key)
-    if (column?.sortType === 'number' && typeof value === 'number') {
-      return value as T[keyof T]
-    }
-    if (column?.sortType === 'number' && typeof value !== 'number') {
-      return Number(value) as T[keyof T]
-    }
-    if (column?.sortType === 'string' && typeof value !== 'string') {
-      return String(value) as T[keyof T]
-    }
-    return value
-  }
+  const sortedData = useMemo(() => {
+    if (!sortKey || !sortDirection) return data
 
+    const column = columns.find(col => col.key === sortKey)
+    if (!column) return data
+
+    return [...data].sort((a, b) => {
+      let aValue = a[sortKey as keyof T]
+      let bValue = b[sortKey as keyof T]
+
+      // Handle nested values for rendered columns
+      if (sortKey === 'type') {
+        aValue = (a as any)?.movement_data?.type?.name || ''
+        bValue = (b as any)?.movement_data?.type?.name || ''
+      } else if (sortKey === 'category') {
+        aValue = (a as any)?.movement_data?.category?.name || ''
+        bValue = (b as any)?.movement_data?.category?.name || ''
+      } else if (sortKey === 'subcategory') {
+        aValue = (a as any)?.movement_data?.subcategory?.name || ''
+        bValue = (b as any)?.movement_data?.subcategory?.name || ''
+      } else if (sortKey === 'creator') {
+        aValue = (a as any)?.creator?.full_name || (a as any)?.creator?.email || ''
+        bValue = (b as any)?.creator?.full_name || (b as any)?.creator?.email || ''
+      } else if (sortKey === 'currency') {
+        aValue = (a as any)?.movement_data?.currency?.name || (a as any)?.movement_data?.currency?.code || ''
+        bValue = (b as any)?.movement_data?.currency?.name || (b as any)?.movement_data?.currency?.code || ''
+      } else if (sortKey === 'wallet') {
+        aValue = (a as any)?.movement_data?.wallet?.name || ''
+        bValue = (b as any)?.movement_data?.wallet?.name || ''
+      }
+
+      // Convert values based on sort type
+      switch (column.sortType || 'string') {
+        case 'number':
+          aValue = Number(aValue) || 0
+          bValue = Number(bValue) || 0
+          break
+        case 'date':
+          aValue = new Date(aValue as string).getTime()
+          bValue = new Date(bValue as string).getTime()
+          break
+        default:
+          aValue = String(aValue).toLowerCase()
+          bValue = String(bValue).toLowerCase()
+      }
+
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1
+      return 0
+    })
+  }, [data, sortKey, sortDirection, columns])
+
+  // Pagination calculations
+  const totalPages = Math.ceil(sortedData.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const paginatedData = showPagination ? sortedData.slice(startIndex, endIndex) : sortedData
+
+  // Reset page when data changes
+  useMemo(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(1)
+    }
+  }, [sortedData.length, currentPage, totalPages])
+  
   if (isLoading) {
     return (
       <div className={cn("space-y-3", className)}>
@@ -182,9 +191,9 @@ export function CustomTable<T = any>({
             ))}
           </div>
           {Array.from({ length: 5 }).map((_, index) => (
-            <div key={index} className="grid gap-4 p-4 border rounded-lg" style={{ gridTemplateColumns: getGridTemplateColumns() }}>
+            <div key={index} className="grid gap-4 p-4 border rounded-lg mt-3" style={{ gridTemplateColumns: getGridTemplateColumns() }}>
               {columns.map((_, colIndex) => (
-                <div key={colIndex} className="h-4 bg-muted/50 rounded animate-pulse" />
+                <div key={colIndex} className="h-4 bg-muted rounded animate-pulse" />
               ))}
             </div>
           ))}
@@ -197,8 +206,8 @@ export function CustomTable<T = any>({
               <div className="space-y-3">
                 {columns.slice(0, 4).map((_, colIndex) => (
                   <div key={colIndex} className="space-y-1">
-                    <div className="h-3 w-16 bg-muted rounded animate-pulse" />
-                    <div className="h-4 w-24 bg-muted/50 rounded animate-pulse" />
+                    <div className="h-3 bg-muted rounded animate-pulse w-20" />
+                    <div className="h-4 bg-muted rounded animate-pulse w-full" />
                   </div>
                 ))}
               </div>
@@ -209,10 +218,10 @@ export function CustomTable<T = any>({
     )
   }
 
-  if (data.length === 0) {
-    return (
-      <div className={cn("space-y-3", className)}>
-        {emptyState}
+  if (!data || data.length === 0) {
+    return emptyState || (
+      <div className="text-center py-12">
+        <p className="text-muted-foreground">No hay datos para mostrar</p>
       </div>
     )
   }
@@ -226,7 +235,8 @@ export function CustomTable<T = any>({
           {selectable && (
             <div className="flex items-center justify-center">
               <Checkbox
-                checked={selectedItems.length === data.length && data.length > 0}
+                checked={isAllSelected}
+                {...(isIndeterminate ? { 'data-indeterminate': true } : {})}
                 onCheckedChange={handleSelectAll}
                 aria-label="Seleccionar todos"
                 className="h-3 w-3"
@@ -234,28 +244,38 @@ export function CustomTable<T = any>({
             </div>
           )}
           {columns.map((column) => (
-            <button
-              key={String(column.key)}
-              className={cn(
-                "flex items-center justify-start text-left transition-colors hover:text-accent",
-                column.sortable !== false && "cursor-pointer"
+            <div key={String(column.key)} className="flex items-center gap-1">
+              <span>{column.label}</span>
+              {column.sortable !== false && (
+                <button
+                  onClick={() => handleSort(String(column.key), column.sortType)}
+                  className="flex items-center justify-center w-4 h-4 rounded hover:bg-black/10 transition-colors"
+                  type="button"
+                >
+                  {sortKey === column.key ? (
+                    sortDirection === 'asc' ? (
+                      <ChevronUp className="w-3 h-3" />
+                    ) : (
+                      <ChevronDown className="w-3 h-3" />
+                    )
+                  ) : (
+                    <ArrowUpDown className="w-3 h-3 opacity-50" />
+                  )}
+                </button>
               )}
-              onClick={() => column.sortable !== false && handleSort(String(column.key), column.sortType)}
-              disabled={column.sortable === false}
-            >
-              {column.label}
-              {column.sortable !== false && getSortIcon(String(column.key))}
-            </button>
+            </div>
           ))}
         </div>
 
-        {/* Table Rows */}
-        <div className="divide-y divide-[var(--card-border)]">
+        {/* Data Rows */}
+        <div>
           {paginatedData.map((item, index) => (
             <div
               key={index}
               className={cn(
-                "grid gap-4 px-4 py-3 bg-[var(--card-bg)] border-[var(--card-border)] text-xs hover:bg-[var(--card-hover-bg)] transition-colors",
+                "grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] border-b border-[var(--table-row-border)] hover:bg-[var(--table-row-hover-bg)] transition-colors",
+                selectable && isItemSelected(item) && "bg-[var(--accent-bg)] border-[var(--accent)]",
+                index === paginatedData.length - 1 && "border-b-0",
                 getRowClassName?.(item)
               )}
               style={{ gridTemplateColumns: getGridTemplateColumns() }}
@@ -285,7 +305,7 @@ export function CustomTable<T = any>({
 
       {/* Mobile Card View */}
       <div className="lg:hidden">
-        {paginatedData.map((item, index) => 
+        {paginatedData.map((item, index) => (
           renderCard ? (
             // Use custom card renderer if provided
             <div key={index} onClick={() => onCardClick?.(item)}>
@@ -307,7 +327,7 @@ export function CustomTable<T = any>({
                   <Checkbox
                     checked={isItemSelected(item)}
                     onCheckedChange={(checked) => {
-                      handleSelectItem(item, checked === true)
+                      handleItemSelection(item, checked === true)
                     }}
                     aria-label="Seleccionar elemento"
                     className="h-4 w-4"
@@ -357,7 +377,7 @@ export function CustomTable<T = any>({
               )}
             </div>
           )
-        )}
+        ))}
       </div>
 
       {/* Pagination Controls */}
@@ -368,26 +388,54 @@ export function CustomTable<T = any>({
             size="sm"
             onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
             disabled={currentPage === 1}
+            className="h-8 w-8 p-0"
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="w-4 h-4" />
           </Button>
           
-          <span className="text-sm text-muted-foreground">
-            Página {currentPage} de {totalPages}
-          </span>
-          
+          <div className="flex items-center gap-1">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+              // Show first, last, current, and pages around current
+              const isFirstOrLast = page === 1 || page === totalPages
+              const isAroundCurrent = Math.abs(page - currentPage) <= 1
+              const shouldShow = isFirstOrLast || isAroundCurrent
+
+              if (!shouldShow) {
+                // Show ellipsis if needed
+                if (page === 2 && currentPage > 4) {
+                  return <span key={page} className="px-2 text-sm text-muted-foreground">...</span>
+                }
+                if (page === totalPages - 1 && currentPage < totalPages - 3) {
+                  return <span key={page} className="px-2 text-sm text-muted-foreground">...</span>
+                }
+                return null
+              }
+
+              return (
+                <Button
+                  key={page}
+                  variant={currentPage === page ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setCurrentPage(page)}
+                  className="h-8 w-8 p-0"
+                >
+                  {page}
+                </Button>
+              )
+            })}
+          </div>
+
           <Button
             variant="outline"
             size="sm"
             onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
             disabled={currentPage === totalPages}
+            className="h-8 w-8 p-0"
           >
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
       )}
     </div>
   )
 }
-
-export default CustomTable
