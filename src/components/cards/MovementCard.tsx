@@ -70,7 +70,7 @@ const MovementCard: React.FC<MovementCardProps> = ({ movement }) => {
   const cardClassName = isIngreso ? 'movement-row-income' : 'movement-row-expense';
 
   return (
-    <div className={`flex items-center justify-between gap-3 bg-[var(--card-bg)] hover:bg-[var(--card-hover-bg)] rounded-lg shadow-sm border border-[var(--card-border)] p-3 mb-2 transition-colors ${cardClassName}`}
+    <div className={`flex items-center justify-between gap-3 bg-[var(--card-bg)] hover:bg-[var(--card-hover-bg)] rounded-lg shadow-sm border border-[var(--card-border)] p-3 mb-2 transition-colors`}
          style={{ borderRight: isIngreso ? '4px solid var(--movement-income-border)' : '4px solid var(--movement-expense-border)' }}>
       {/* Left: Avatar */}
       <div className="flex-shrink-0">
