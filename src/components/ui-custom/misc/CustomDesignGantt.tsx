@@ -1,291 +1,331 @@
 import { useState } from 'react';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
-import { ChevronDown, ChevronRight, Calendar, Trash2, GripVertical, Edit, Plus } from 'lucide-react';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
-
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { ChevronDown, ChevronRight, Plus, MoreHorizontal, Edit, Trash2, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Badge } from '@/components/ui/badge';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
+import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState';
+import { useDeleteDesignProjectPhase } from '@/hooks/use-design-phases';
+import { useToast } from '@/hooks/use-toast';
 
-import { DesignProjectPhase, useUpdateDesignProjectPhasePosition, useDeleteDesignProjectPhase } from '@/hooks/use-design-phases';
-import { CustomEmptyState } from './CustomEmptyState';
+interface DesignProjectPhase {
+  id: string;
+  design_phase_id: string;
+  start_date: string | null;
+  end_date: string | null;
+  design_phases: {
+    id: string;
+    name: string;
+  };
+  tasks?: any[];
+}
 
 interface CustomDesignGanttProps {
   phases: DesignProjectPhase[];
   searchValue: string;
   projectId: string;
-  onEditPhase?: (phase: DesignProjectPhase) => void;
-  onAddTask?: (phaseId: string) => void;
+  onEditPhase: (phase: DesignProjectPhase) => void;
+  onAddTask: (phaseId: string) => void;
 }
 
-export function CustomDesignGantt({ phases, searchValue, projectId, onEditPhase, onAddTask }: CustomDesignGanttProps) {
-  const [expandedPhases, setExpandedPhases] = useState<string[]>([]);
-  
-  const updatePositionMutation = useUpdateDesignProjectPhasePosition();
-  const deletePhaseMutation = useDeleteDesignProjectPhase();
+export function CustomDesignGantt({ 
+  phases, 
+  searchValue, 
+  projectId, 
+  onEditPhase, 
+  onAddTask 
+}: CustomDesignGanttProps) {
+  const [openAccordions, setOpenAccordions] = useState<string[]>([]);
+  const { toast } = useToast();
+  const deletePhase = useDeleteDesignProjectPhase();
+
+  // Generate timeline header - current month with day numbers
+  const generateTimelineHeader = () => {
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+
+    const days = [];
+    for (let i = 1; i <= daysInMonth; i++) {
+      days.push(i);
+    }
+
+    return { 
+      monthName: monthNames[currentMonth], 
+      days,
+      today: today.getDate()
+    };
+  };
+
+  const { monthName, days, today } = generateTimelineHeader();
 
   // Filter phases based on search
   const filteredPhases = phases.filter(phase =>
     phase.design_phases.name.toLowerCase().includes(searchValue.toLowerCase())
   );
 
-  const togglePhase = (phaseId: string) => {
-    setExpandedPhases(prev =>
-      prev.includes(phaseId)
+  const handleDeletePhase = async (phaseId: string, phaseName: string) => {
+    if (window.confirm(`¿Estás seguro de que quieres eliminar la fase "${phaseName}"?`)) {
+      try {
+        await deletePhase.mutateAsync(phaseId);
+        toast({
+          title: "Fase eliminada",
+          description: "La fase ha sido eliminada exitosamente.",
+        });
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "No se pudo eliminar la fase. Inténtalo de nuevo.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const toggleAccordion = (phaseId: string) => {
+    setOpenAccordions(prev => 
+      prev.includes(phaseId) 
         ? prev.filter(id => id !== phaseId)
         : [...prev, phaseId]
     );
   };
 
-  const handleDragEnd = async (result: DropResult) => {
-    if (!result.destination) return;
-
-    const sourceIndex = result.source.index;
-    const destinationIndex = result.destination.index;
-
-    if (sourceIndex === destinationIndex) return;
-
-    // Reorder phases array
-    const reorderedPhases = Array.from(filteredPhases);
-    const [removed] = reorderedPhases.splice(sourceIndex, 1);
-    reorderedPhases.splice(destinationIndex, 0, removed);
-
-    // Update positions in database
-    const updates = reorderedPhases.map((phase, index) => ({
-      id: phase.id,
-      position: index,
-      projectId: projectId
-    }));
-
-    for (const update of updates) {
-      try {
-        await updatePositionMutation.mutateAsync(update);
-      } catch (error) {
-        console.error('Error updating phase position:', error);
-      }
-    }
-  };
-
-  const handleDeletePhase = async (phaseId: string) => {
-    try {
-      await deletePhaseMutation.mutateAsync({ id: phaseId, projectId });
-    } catch (error) {
-      console.error('Error deleting phase:', error);
-    }
-  };
-
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'Sin fecha';
-    try {
-      return format(new Date(dateString), 'dd MMM yyyy', { locale: es });
-    } catch {
-      return 'Fecha inválida';
-    }
-  };
-
   if (filteredPhases.length === 0) {
     return (
       <CustomEmptyState
-        icon={<Calendar className="w-8 h-8 text-muted-foreground" />}
         title="No hay fases de diseño"
-        description="Comienza agregando una nueva fase de diseño al cronograma del proyecto."
+        description="Comienza creando una nueva fase de diseño para organizar las tareas del proyecto."
+        actionLabel="Nueva Fase de Diseño"
+        onAction={() => {}}
       />
     );
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Cronograma de Fases de Diseño</h3>
-          <Badge variant="secondary">
-            {filteredPhases.length} fase{filteredPhases.length !== 1 ? 's' : ''}
-          </Badge>
-        </div>
-      </CardHeader>
-      
-      <CardContent>
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <Droppable droppableId="phases-list">
-            {(provided) => (
-              <div
-                {...provided.droppableProps}
-                ref={provided.innerRef}
-                className="space-y-3"
-              >
-                {filteredPhases.map((phase, index) => (
-                  <Draggable
-                    key={phase.id}
-                    draggableId={phase.id}
-                    index={index}
-                  >
-                    {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        className={`
-                          border rounded-lg bg-card transition-all duration-200
-                          ${snapshot.isDragging ? 'shadow-lg rotate-1' : 'shadow-sm'}
-                        `}
-                      >
-                        <Accordion
-                          type="single"
-                          collapsible
-                          value={expandedPhases.includes(phase.id) ? phase.id : ''}
-                          onValueChange={(value) => {
-                            if (value) {
-                              setExpandedPhases(prev => [...prev.filter(id => id !== phase.id), value]);
-                            } else {
-                              setExpandedPhases(prev => prev.filter(id => id !== phase.id));
-                            }
-                          }}
+    <div className="w-full">
+      <Card className="overflow-hidden">
+        {/* Main Container */}
+        <div className="flex">
+          {/* Left Panel - Elements */}
+          <div className="w-64 border-r bg-muted/30">
+            {/* Left Panel Header */}
+            <div className="h-12 flex items-center px-4 border-b bg-muted/50">
+              <h3 className="text-sm font-medium text-muted-foreground">Elementos</h3>
+            </div>
+            
+            {/* Phase List */}
+            <div className="p-2">
+              {filteredPhases.map((phase) => {
+                const isOpen = openAccordions.includes(phase.id);
+                
+                return (
+                  <div key={phase.id} className="mb-1">
+                    {/* Phase Header */}
+                    <div className="flex items-center justify-between group hover:bg-muted/50 rounded p-2">
+                      <div className="flex items-center gap-2 flex-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-4 w-4 p-0"
+                          onClick={() => toggleAccordion(phase.id)}
                         >
-                          <AccordionItem value={phase.id} className="border-0">
-                            <div className="flex items-center gap-2 p-4">
-                              {/* Drag handle */}
-                              <div
-                                {...provided.dragHandleProps}
-                                className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground transition-colors"
-                              >
-                                <GripVertical className="h-4 w-4" />
-                              </div>
+                          {isOpen ? (
+                            <ChevronDown className="h-3 w-3" />
+                          ) : (
+                            <ChevronRight className="h-3 w-3" />
+                          )}
+                        </Button>
+                        
+                        <div className="w-4 h-4 rounded border-2 border-blue-500 bg-blue-100 flex-shrink-0" />
+                        
+                        <span className="text-sm font-medium text-blue-700">
+                          {phase.design_phases.name}
+                        </span>
+                      </div>
 
-                              {/* Phase info */}
-                              <AccordionTrigger className="flex-1 hover:no-underline p-0">
-                                <div className="flex items-center justify-between w-full pr-2">
-                                  <div className="flex items-center gap-3">
-                                    <div className="text-left">
-                                      <div className="font-medium text-sm">
-                                        {phase.design_phases.name}
-                                      </div>
-                                      <div className="text-xs text-muted-foreground mt-1">
-                                        {formatDate(phase.start_date)} - {formatDate(phase.end_date)}
-                                      </div>
-                                    </div>
-                                  </div>
-                                  
-                                  <div className="flex items-center gap-2">
-                                    <Badge variant="outline" className="text-xs">
-                                      Fase de Diseño
-                                    </Badge>
-                                    
-                                    {/* Action buttons */}
-                                    <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                                      {/* Add Task button */}
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="h-7 px-2 text-xs"
-                                        onClick={() => onAddTask?.(phase.id)}
-                                      >
-                                        <Plus className="h-3 w-3 mr-1" />
-                                        Agregar Tarea
-                                      </Button>
-                                      
-                                      {/* Edit button */}
-                                      <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-7 w-7 text-muted-foreground hover:text-foreground"
-                                        onClick={() => onEditPhase?.(phase)}
-                                      >
-                                        <Edit className="h-3 w-3" />
-                                      </Button>
-                                      
-                                      {/* Delete button */}
-                                      <AlertDialog>
-                                        <AlertDialogTrigger asChild>
-                                          <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                                          >
-                                            <Trash2 className="h-3 w-3" />
-                                          </Button>
-                                        </AlertDialogTrigger>
-                                        <AlertDialogContent>
-                                          <AlertDialogHeader>
-                                            <AlertDialogTitle>¿Eliminar fase?</AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                              Esta acción no se puede deshacer. Se eliminará permanentemente la fase "{phase.design_phases.name}" del cronograma.
-                                            </AlertDialogDescription>
-                                          </AlertDialogHeader>
-                                          <AlertDialogFooter>
-                                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                            <AlertDialogAction
-                                              onClick={() => handleDeletePhase(phase.id)}
-                                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                            >
-                                              Eliminar
-                                            </AlertDialogAction>
-                                          </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                      </AlertDialog>
-                                    </div>
-                                  </div>
-                                </div>
-                              </AccordionTrigger>
+                      {/* Phase Actions */}
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => onAddTask(phase.id)}
+                        >
+                          <Plus className="h-3 w-3" />
+                        </Button>
+                        
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-6 w-6">
+                              <MoreHorizontal className="h-3 w-3" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => onEditPhase(phase)}>
+                              <Edit className="h-4 w-4 mr-2" />
+                              Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => handleDeletePhase(phase.id, phase.design_phases.name)}
+                              className="text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Eliminar
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
 
-
-                            </div>
-
-                            <AccordionContent className="px-4 pb-4">
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                                <div className="space-y-2">
-                                  <h4 className="text-sm font-medium">Información de la Fase</h4>
-                                  <div className="text-xs text-muted-foreground space-y-1">
-                                    <div>
-                                      <span className="font-medium">Nombre:</span> {phase.design_phases.name}
-                                    </div>
-                                    <div>
-                                      <span className="font-medium">Tipo:</span> Fase de Diseño
-                                    </div>
-                                    <div>
-                                      <span className="font-medium">Creado:</span> {formatDate(phase.created_at)}
-                                    </div>
-                                  </div>
-                                </div>
-                                
-                                <div className="space-y-2">
-                                  <h4 className="text-sm font-medium">Cronograma</h4>
-                                  <div className="text-xs text-muted-foreground space-y-1">
-                                    <div>
-                                      <span className="font-medium">Inicio:</span> {formatDate(phase.start_date)}
-                                    </div>
-                                    <div>
-                                      <span className="font-medium">Fin:</span> {formatDate(phase.end_date)}
-                                    </div>
-                                    {phase.start_date && phase.end_date && (
-                                      <div>
-                                        <span className="font-medium">Duración:</span> Calculando...
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                              
-                              {/* Future: Tasks will be added here */}
-                              <div className="mt-4 p-3 bg-muted/50 rounded border-dashed border">
-                                <div className="text-center text-xs text-muted-foreground">
-                                  Las tareas de diseño se agregarán aquí próximamente
-                                </div>
-                              </div>
-                            </AccordionContent>
-                          </AccordionItem>
-                        </Accordion>
+                    {/* Tasks (when accordion is open) */}
+                    {isOpen && (
+                      <div className="ml-6 space-y-1">
+                        {/* Example tasks - replace with real data */}
+                        <div className="flex items-center gap-2 p-1 hover:bg-muted/30 rounded">
+                          <div className="w-4 h-4 flex-shrink-0" />
+                          <span className="text-xs text-muted-foreground">📋 Tarea 1</span>
+                        </div>
+                        <div className="flex items-center gap-2 p-1 hover:bg-muted/30 rounded">
+                          <div className="w-4 h-4 flex-shrink-0" />
+                          <span className="text-xs text-muted-foreground">📋 Tarea 2</span>
+                        </div>
                       </div>
                     )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
+                  </div>
+                );
+              })}
+              
+              {/* Create Button */}
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start h-8 text-xs text-muted-foreground mt-2"
+              >
+                <Plus className="h-3 w-3 mr-2" />
+                Crear
+              </Button>
+            </div>
+          </div>
+
+          {/* Right Panel - Timeline */}
+          <div className="flex-1 overflow-x-auto">
+            {/* Timeline Header */}
+            <div className="h-12 flex">
+              {/* Month columns */}
+              <div className="flex border-b bg-muted/50">
+                {/* Current month header spanning multiple days */}
+                <div className="flex">
+                  {days.map((day, index) => (
+                    <div 
+                      key={day} 
+                      className={`w-8 h-12 flex flex-col items-center justify-center border-r text-xs ${
+                        day === today ? 'bg-blue-50 border-blue-300' : ''
+                      }`}
+                    >
+                      {index === 0 && (
+                        <span className="text-[10px] text-muted-foreground font-medium">
+                          {monthName.slice(0, 3)}
+                        </span>
+                      )}
+                      <span className={`font-medium ${day === today ? 'text-blue-600' : 'text-muted-foreground'}`}>
+                        {day}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            )}
-          </Droppable>
-        </DragDropContext>
-      </CardContent>
-    </Card>
+            </div>
+
+            {/* Timeline Content */}
+            <div className="relative">
+              {/* Today indicator line */}
+              <div 
+                className="absolute top-0 bottom-0 w-0.5 bg-blue-400 z-10"
+                style={{ left: `${(today - 1) * 32 + 16}px` }}
+              />
+              
+              {filteredPhases.map((phase, phaseIndex) => (
+                <div key={phase.id} className="relative">
+                  {/* Phase timeline row */}
+                  <div className="h-10 flex items-center border-b relative">
+                    {days.map((day) => (
+                      <div key={day} className="w-8 h-10 border-r" />
+                    ))}
+                    
+                    {/* Phase bar (example positioning) */}
+                    <div 
+                      className="absolute top-2 h-6 bg-gray-400 rounded-sm flex items-center justify-end pr-2"
+                      style={{ 
+                        left: `${8 * 32}px`, // Starting at day 8
+                        width: `${6 * 32}px`  // Spanning 6 days
+                      }}
+                    >
+                      <div className="w-4 h-4 bg-white rounded-sm flex items-center justify-center">
+                        <span className="text-[10px] text-gray-600">👤</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Task rows (when accordion is open) */}
+                  {openAccordions.includes(phase.id) && (
+                    <>
+                      <div className="h-8 flex items-center border-b bg-gray-50">
+                        {days.map((day) => (
+                          <div key={day} className="w-8 h-8 border-r" />
+                        ))}
+                        
+                        {/* Task bar 1 */}
+                        <div 
+                          className="absolute h-4 bg-gray-500 rounded-sm flex items-center justify-end pr-1"
+                          style={{ 
+                            left: `${10 * 32}px`,
+                            width: `${4 * 32}px`,
+                            top: '2px'
+                          }}
+                        >
+                          <div className="w-3 h-3 bg-white rounded-sm flex items-center justify-center">
+                            <span className="text-[8px] text-gray-600">👤</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="h-8 flex items-center border-b bg-gray-50">
+                        {days.map((day) => (
+                          <div key={day} className="w-8 h-8 border-r" />
+                        ))}
+                        
+                        {/* Task bar 2 */}
+                        <div 
+                          className="absolute h-4 bg-gray-500 rounded-sm flex items-center justify-end pr-1"
+                          style={{ 
+                            left: `${12 * 32}px`,
+                            width: `${3 * 32}px`,
+                            top: '2px'
+                          }}
+                        >
+                          <div className="w-3 h-3 bg-white rounded-sm flex items-center justify-center">
+                            <span className="text-[8px] text-gray-600">👤</span>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </Card>
+    </div>
   );
 }
