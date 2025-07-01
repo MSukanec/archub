@@ -61,7 +61,7 @@ export function WalletBalanceChart({ data, isLoading }: WalletBalanceChartProps)
           cy="50%"
           labelLine={false}
           outerRadius={80}
-          fill="#8884d8"
+          fill="hsl(var(--chart-1))"
           dataKey="balance"
           label={({ wallet, percent }) => `${wallet} ${(percent * 100).toFixed(0)}%`}
         >
