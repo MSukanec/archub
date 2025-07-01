@@ -137,11 +137,11 @@ export function Header({
 
   return (
     <>
-    <header className="sticky top-0 z-50 h-9 border-b border-[var(--menues-border)] bg-[var(--menues-bg)] flex items-center justify-between gap-2">
+    <header className="sticky top-0 z-50 h-14 md:h-9 border-b border-[var(--menues-border)] bg-[var(--menues-bg)] flex items-center justify-between gap-2">
       {/* Left side - Logo + Breadcrumb */}
       <div className="flex items-center gap-2">
         {/* Logo Section */}
-        <div className="w-[40px] h-9 flex items-center justify-center border-r border-[var(--menues-border)]">
+        <div className="w-[40px] h-14 md:h-9 flex items-center justify-center border-r border-[var(--menues-border)]">
           {/* Logo - visible on desktop */}
           <span className="hidden md:block text-base font-bold leading-none text-[var(--menues-fg)]">A</span>
           

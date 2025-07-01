@@ -55,7 +55,7 @@ export function CustomTable<T = any>({
   const [sortKey, setSortKey] = useState<string | null>(defaultSort?.key || null)
   const [sortDirection, setSortDirection] = useState<SortDirection>(defaultSort?.direction || null)
   const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 10
+  const itemsPerPage = 20
   const showPagination = data.length > itemsPerPage
 
   // Helper function to handle sort logic
@@ -362,28 +362,60 @@ export function CustomTable<T = any>({
 
       {/* Pagination Controls */}
       {showPagination && (
-        <div className="flex items-center justify-center gap-2 mt-4 pt-4 border-t">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-            disabled={currentPage === 1}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          
-          <span className="text-sm text-muted-foreground">
-            Página {currentPage} de {totalPages}
-          </span>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-            disabled={currentPage === totalPages}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
+        <div className="mt-4 pt-4 border-t border-[var(--table-border)]">
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-[var(--muted-fg)]">
+              Mostrando {Math.min((currentPage - 1) * itemsPerPage + 1, sortedData.length)} a {Math.min(currentPage * itemsPerPage, sortedData.length)} de {sortedData.length} entradas
+            </div>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              
+              {/* Page Number Buttons */}
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
+                // Show first page, last page, current page, and pages around current
+                const isVisible = 
+                  pageNum === 1 ||
+                  pageNum === totalPages ||
+                  Math.abs(pageNum - currentPage) <= 1;
+                
+                if (!isVisible && pageNum !== 2 && pageNum !== totalPages - 1) {
+                  // Show ellipsis
+                  if (pageNum === currentPage - 2 || pageNum === currentPage + 2) {
+                    return <span key={pageNum} className="px-1 text-[var(--muted-fg)]">...</span>;
+                  }
+                  return null;
+                }
+                
+                return (
+                  <Button
+                    key={pageNum}
+                    variant={pageNum === currentPage ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setCurrentPage(pageNum)}
+                    className="min-w-[32px]"
+                  >
+                    {pageNum}
+                  </Button>
+                );
+              })}
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
         </div>
       )}
     </div>
