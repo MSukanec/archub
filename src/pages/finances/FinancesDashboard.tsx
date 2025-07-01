@@ -70,6 +70,10 @@ export default function FinancesDashboard() {
         return acc;
       }, {}) || {};
 
+      console.log('Financial summary - movements:', movements.length);
+      console.log('Financial summary - concepts:', concepts);
+      console.log('Financial summary - conceptMap:', conceptMap);
+
       const currentMonth = new Date().getMonth();
       const currentYear = new Date().getFullYear();
 

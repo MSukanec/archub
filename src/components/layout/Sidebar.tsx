@@ -156,17 +156,7 @@ export function Sidebar() {
       { icon: Mail, label: 'Contactos', href: '/organization/contactos' },
       { icon: Activity, label: 'Actividad', href: '/organization/activity' },
       { icon: Users, label: 'Miembros', href: '/organization/members' },
-      { 
-        icon: Settings, 
-        label: 'Preferencias', 
-        href: '#', 
-        isAccordion: true,
-        expanded: expandedAccordion === 'preferencias',
-        onToggle: () => toggleAccordion('preferencias'),
-        children: [
-          { icon: DollarSign, label: 'Preferencias de Finanzas', href: '/preferencias' }
-        ]
-      },
+
       { icon: Building, label: 'Gestión de Organizaciones', href: '#', onClick: () => { setSidebarContext('organizations'); navigate('/organizations'); } },
     ],
     organizations: [
@@ -207,8 +197,9 @@ export function Sidebar() {
         expanded: expandedAccordion === 'finanzas',
         onToggle: () => toggleAccordion('finanzas'),
         children: [
-          { icon: Home, label: 'Resumen de Finanzas', href: '/finance/dashboard' },
-          { icon: DollarSign, label: 'Movimientos', href: '/movimientos' }
+          { icon: Home, label: 'Resumen de Finanzas', href: '/finanzas' },
+          { icon: DollarSign, label: 'Movimientos', href: '/movimientos' },
+          { icon: Settings, label: 'Preferencias de Finanzas', href: '/preferencias' }
         ]
       },
       { icon: Users, label: 'Comercialización', href: '#', onClick: () => { setSidebarContext('commercialization'); navigate('/commercialization/dashboard'); } },

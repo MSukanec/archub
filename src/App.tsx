@@ -173,6 +173,12 @@ function Router() {
         </ProtectedRoute>
       </Route>
 
+      <Route path="/finanzas">
+        <ProtectedRoute>
+          <FinancesDashboard />
+        </ProtectedRoute>
+      </Route>
+
       <Route path="/perfil">
         <ProtectedRoute>
           <Profile />

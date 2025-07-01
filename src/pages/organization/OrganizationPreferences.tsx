@@ -69,9 +69,9 @@ export default function OrganizationPreferences() {
 
   const { setSidebarContext } = useNavigationStore();
 
-  // Set sidebar context to organization when component mounts
+  // Set sidebar context to project when component mounts
   useEffect(() => {
-    setSidebarContext('organization');
+    setSidebarContext('project');
   }, [setSidebarContext]);
 
   const { data: userData } = useCurrentUser();
