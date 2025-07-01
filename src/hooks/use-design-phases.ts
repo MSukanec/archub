@@ -7,7 +7,6 @@ export interface DesignPhase {
   id: string;
   name: string;
   position: number;
-  is_active: boolean;
   created_at: string;
 }
 
@@ -43,7 +42,6 @@ export function useDesignPhases() {
       const { data, error } = await supabase
         .from('design_phases')
         .select('*')
-        .eq('is_active', true)
         .order('position');
       
       if (error) {

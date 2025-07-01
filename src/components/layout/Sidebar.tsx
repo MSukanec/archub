@@ -174,7 +174,16 @@ export function Sidebar() {
     ],
     project: [
       { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },
-      { icon: FolderOpen, label: 'Diseño', href: '#', onClick: () => { setSidebarContext('design'); navigate('/design/dashboard'); } },
+      { 
+        icon: FolderOpen, 
+        label: 'Diseño', 
+        isAccordion: true, 
+        expanded: expandedAccordion === 'project-diseno',
+        onToggle: () => toggleAccordion('project-diseno'),
+        children: [
+          { icon: Calendar, label: 'Cronograma', href: '/design/timeline' }
+        ]
+      },
       { 
         icon: Building, 
         label: 'Obra', 
