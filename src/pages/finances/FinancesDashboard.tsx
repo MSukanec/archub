@@ -53,7 +53,7 @@ export default function FinancesDashboard() {
         .from('movements')
         .select('*')
         .eq('organization_id', organizationId)
-        .eq('project_id', projectId || '');
+        .order('created_at', { ascending: false });
 
       if (error || !movements) {
         return {
@@ -67,7 +67,7 @@ export default function FinancesDashboard() {
       }
 
       // Get movement concepts separately
-      const typeIds = [...new Set(movements.map(m => m.type_id).filter(Boolean))];
+      const typeIds = movements.map(m => m.type_id).filter(Boolean).filter((id, index, arr) => arr.indexOf(id) === index);
       const { data: concepts } = await supabase
         .from('movement_concepts')
         .select('id, concept_type')
@@ -160,7 +160,7 @@ export default function FinancesDashboard() {
           }
 
           // Get concept types for these movements
-          const typeIds = [...new Set(movements.map(m => m.type_id).filter(Boolean))];
+          const typeIds = movements.map(m => m.type_id).filter(Boolean).filter((id, index, arr) => arr.indexOf(id) === index);
           const { data: concepts } = await supabase!
             .from('movement_concepts')
             .select('id, concept_type')
@@ -211,7 +211,7 @@ export default function FinancesDashboard() {
       if (error || !movements) return [];
 
       // Get concept types
-      const typeIds = [...new Set(movements.map(m => m.type_id).filter(Boolean))];
+      const typeIds = movements.map(m => m.type_id).filter(Boolean).filter((id, index, arr) => arr.indexOf(id) === index);
       const { data: concepts } = await supabase
         .from('movement_concepts')
         .select('id, concept_type')
@@ -271,15 +271,14 @@ export default function FinancesDashboard() {
         .from('movements')
         .select('id, description, amount, created_at, type_id, category_id')
         .eq('organization_id', organizationId)
-        .eq('project_id', projectId || '')
         .order('created_at', { ascending: false })
         .limit(5);
 
       if (error || !movements) return [];
 
       // Get concept names
-      const typeIds = [...new Set(movements.map(m => m.type_id).filter(Boolean))];
-      const categoryIds = [...new Set(movements.map(m => m.category_id).filter(Boolean))];
+      const typeIds = movements.map(m => m.type_id).filter(Boolean).filter((id, index, arr) => arr.indexOf(id) === index);
+      const categoryIds = movements.map(m => m.category_id).filter(Boolean).filter((id, index, arr) => arr.indexOf(id) === index);
 
       const { data: types } = await supabase
         .from('movement_concepts')
