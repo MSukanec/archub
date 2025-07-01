@@ -6,7 +6,6 @@ import { useCurrentUser } from './use-current-user';
 export interface DesignPhase {
   id: string;
   name: string;
-  position: number;
   created_at: string;
 }
 
@@ -17,7 +16,6 @@ export interface DesignProjectPhase {
   design_phase_id: string;
   start_date: string | null;
   end_date: string | null;
-  position: number;
   created_at: string;
   design_phases: DesignPhase;
 }
@@ -28,7 +26,6 @@ export interface CreateDesignProjectPhaseData {
   design_phase_id: string;
   start_date?: string | null;
   end_date?: string | null;
-  position: number;
 }
 
 export function useDesignPhases() {
@@ -42,7 +39,7 @@ export function useDesignPhases() {
       const { data, error } = await supabase
         .from('design_phases')
         .select('*')
-        .order('position');
+        .order('created_at');
       
       if (error) {
         console.error('Error fetching design phases:', error);

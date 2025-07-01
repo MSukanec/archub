@@ -74,7 +74,6 @@ export function NewPhaseModal({
         design_phase_id: data.design_phase_id,
         start_date: data.start_date || null,
         end_date: data.end_date || null,
-        position: nextPosition,
       });
       
       handleClose();

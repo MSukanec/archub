@@ -169,7 +169,7 @@ export function CustomDesignGantt({ phases, searchValue, projectId }: CustomDesi
                                   
                                   <div className="flex items-center gap-2">
                                     <Badge variant="outline" className="text-xs">
-                                      Posición {phase.position + 1}
+                                      Fase de Diseño
                                     </Badge>
                                   </div>
                                 </div>
@@ -215,7 +215,7 @@ export function CustomDesignGantt({ phases, searchValue, projectId }: CustomDesi
                                       <span className="font-medium">Nombre:</span> {phase.design_phases.name}
                                     </div>
                                     <div>
-                                      <span className="font-medium">Posición:</span> {phase.position + 1}
+                                      <span className="font-medium">Tipo:</span> Fase de Diseño
                                     </div>
                                     <div>
                                       <span className="font-medium">Creado:</span> {formatDate(phase.created_at)}
