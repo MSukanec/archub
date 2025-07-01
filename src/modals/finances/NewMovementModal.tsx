@@ -107,6 +107,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
       
       form.reset({
         created_at: new Date(editingMovement.created_at),
+        movement_date: new Date(editingMovement.movement_date || editingMovement.created_at),
         created_by: editingMovement.created_by,
         description: editingMovement.description || '',
         amount: editingMovement.amount,
@@ -127,6 +128,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
 
       form.reset({
         created_at: new Date(),
+        movement_date: new Date(),
         amount: 0,
         description: '',
         created_by: currentMember?.id || '',
@@ -246,11 +248,11 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                       <div className="grid grid-cols-2 gap-4">
                         <FormField
                           control={form.control}
-                          name="created_at"
+                          name="movement_date"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>
-                                Fecha
+                                Fecha del Movimiento
                               </FormLabel>
                               <FormControl>
                                 <Input
