@@ -20,6 +20,22 @@ export interface DesignProjectPhase {
   design_phases: DesignPhase;
 }
 
+export interface DesignPhaseTask {
+  id: string;
+  project_phase_id: string;
+  name: string;
+  description?: string;
+  start_date?: string | null;
+  end_date?: string | null;
+  assigned_to?: string | null;
+  status: string;
+  priority: string;
+  position: number;
+  is_active: boolean;
+  created_by: string;
+  created_at: string;
+}
+
 export interface CreateDesignProjectPhaseData {
   organization_id: string;
   project_id: string;
@@ -196,5 +212,38 @@ export function useDeleteDesignProjectPhase() {
         variant: "destructive",
       });
     },
+  });
+}
+export function useDesignPhaseTasks(projectId: string) {
+  const { data: userData } = useCurrentUser();
+  const organizationId = userData?.organization?.id;
+
+  return useQuery({
+    queryKey: ['design-phase-tasks', projectId],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase not initialized');
+      
+      console.log('Fetching design tasks for project:', projectId);
+      
+      const { data, error } = await supabase
+        .from('design_phase_tasks')
+        .select(`
+          *,
+          design_project_phases!inner(
+            project_id
+          )
+        `)
+        .eq('design_project_phases.project_id', projectId)
+        .eq('is_active', true)
+        .order('position');
+      
+      if (error) {
+        console.error('Error fetching design tasks:', error);
+        throw error;
+      }
+      
+      return data as DesignPhaseTask[];
+    },
+    enabled: !!projectId && !!organizationId && !!supabase,
   });
 }
