@@ -23,6 +23,7 @@ import { useToast } from '@/hooks/use-toast'
 
 const movementSchema = z.object({
   created_at: z.date(),
+  movement_date: z.date(),
   created_by: z.string().min(1, 'Creador es requerido'),
   description: z.string().optional(),
   amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0'),
@@ -38,6 +39,7 @@ type MovementForm = z.infer<typeof movementSchema>
 interface Movement {
   id: string
   created_at: string
+  movement_date: string
   created_by: string
   description?: string
   amount: number

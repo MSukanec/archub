@@ -6,6 +6,7 @@ interface Movement {
   description: string
   amount: number
   created_at: string
+  movement_date: string
   created_by: string
   organization_id: string
   project_id: string
@@ -66,6 +67,7 @@ export function useMovements(organizationId: string | undefined, projectId: stri
           description,
           amount,
           created_at,
+          movement_date,
           created_by,
           organization_id,
           project_id,

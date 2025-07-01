@@ -49,6 +49,7 @@ interface Movement {
   description: string;
   amount: number;
   created_at: string;
+  movement_date: string;
   created_by: string;
   organization_id: string;
   project_id: string;
@@ -383,23 +384,37 @@ export default function Movements() {
 
   const tableColumns = [
     {
-      key: "created_at",
+      key: "movement_date",
       label: "Fecha",
       width: "5%",
       sortable: true,
       sortType: "date" as const,
-      render: (movement: Movement) => (
-        <div className="text-xs">
-          <div>
-            {format(new Date(movement.created_at), "dd/MM/yyyy", {
-              locale: es,
-            })}
-          </div>
-          <div className="text-muted-foreground text-xs">
-            {format(new Date(movement.created_at), "HH:mm", { locale: es })}
-          </div>
-        </div>
-      ),
+      render: (movement: Movement) => {
+        const displayDate = movement.movement_date || movement.created_at;
+        if (!displayDate) {
+          return <div className="text-xs text-muted-foreground">Sin fecha</div>;
+        }
+        
+        try {
+          const date = new Date(displayDate);
+          if (isNaN(date.getTime())) {
+            return <div className="text-xs text-muted-foreground">Fecha inválida</div>;
+          }
+          
+          return (
+            <div className="text-xs">
+              <div>
+                {format(date, "dd/MM/yyyy", { locale: es })}
+              </div>
+              <div className="text-muted-foreground text-xs">
+                {format(date, "HH:mm", { locale: es })}
+              </div>
+            </div>
+          );
+        } catch (error) {
+          return <div className="text-xs text-muted-foreground">Fecha inválida</div>;
+        }
+      },
     },
     {
       key: "creator",
