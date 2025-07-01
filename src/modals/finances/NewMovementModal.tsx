@@ -86,59 +86,44 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
     }
   })
 
-  // Auto-select current user and defaults when modal opens for new movement
+  // Reset form with correct defaults when modal opens and data is available
   useEffect(() => {
-    if (!editingMovement && open && members && currencies && wallets) {
-      // Set default creator (current user)
-      if (currentUser?.user?.id) {
-        const currentMember = members.find(m => m.user_id === currentUser.user.id)
-        if (currentMember) {
-          console.log('Setting default creator:', currentMember);
-          form.setValue('created_by', currentMember.id)
-        }
-      }
+    if (!editingMovement && open && members && currencies?.length && wallets?.length) {
+      const currentMember = members.find(m => m.user_id === currentUser?.user?.id)
+      const defaultCurrency = currencies.find(c => c.is_default) || currencies[0]
+      const defaultWallet = wallets.find(w => w.is_default) || wallets[0]
 
-      // Set default currency (organization default)
-      if (currencies.length > 0) {
-        const defaultCurrency = currencies.find(c => c.is_default) || currencies[0]
-        console.log('Setting default currency:', defaultCurrency);
-        form.setValue('currency_id', defaultCurrency.id)
-      }
+      console.log('Setting default creator:', currentMember);
+      console.log('Setting default currency:', defaultCurrency);
+      console.log('Setting default wallet:', defaultWallet);
 
-      // Set default wallet (organization default)
-      if (wallets.length > 0) {
-        const defaultWallet = wallets.find(w => w.is_default) || wallets[0]
-        console.log('Setting default wallet:', defaultWallet);
-        form.setValue('wallet_id', defaultWallet.id)
-      }
+      // Reset the entire form with all default values at once
+      form.reset({
+        created_at: new Date(),
+        amount: 0,
+        description: '',
+        created_by: currentMember?.id || '',
+        type_id: '',
+        category_id: '',
+        subcategory_id: '',
+        currency_id: defaultCurrency?.id || '',
+        wallet_id: defaultWallet?.id || ''
+      })
     }
   }, [open, editingMovement, members, currentUser, currencies, wallets, form])
 
-  // Reset form and state when modal opens/closes or when switching between new/edit
+  // Set state variables when editing
   useEffect(() => {
-    if (open) {
-      if (editingMovement) {
-        // Editing mode: set state variables to match the editing movement
-        setSelectedTypeId(editingMovement.type_id)
-        setSelectedCategoryId(editingMovement.category_id || '')
-      } else {
-        // New movement mode: clear all state and form
-        setSelectedTypeId('')
-        setSelectedCategoryId('')
-        form.reset({
-          created_at: new Date(),
-          amount: 0,
-          description: '',
-          created_by: '',
-          type_id: '',
-          category_id: '',
-          subcategory_id: '',
-          currency_id: '',
-          wallet_id: ''
-        })
-      }
+    if (open && editingMovement) {
+      // Editing mode: set state variables to match the editing movement
+      setSelectedTypeId(editingMovement.type_id)
+      setSelectedCategoryId(editingMovement.category_id || '')
+    } else if (open && !editingMovement) {
+      // New movement mode: clear only state variables
+      setSelectedTypeId('')
+      setSelectedCategoryId('')
     }
-  }, [open, editingMovement, form])
+  }, [open, editingMovement])
 
   // Populate form after dependent data is loaded
   useEffect(() => {
