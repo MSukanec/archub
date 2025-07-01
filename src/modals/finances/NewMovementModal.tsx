@@ -87,12 +87,17 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
     }
   })
 
-  // Single effect to initialize form when modal opens
+  // Effect to initialize form when modal opens or data becomes available
   useEffect(() => {
     if (!open) return
     
     if (editingMovement) {
-      // Editing mode
+      // Wait for all data to be loaded
+      if (!members || !currencies || !wallets || !types) return
+      
+      console.log('Initializing edit form with movement:', editingMovement)
+      
+      // Set state first to trigger proper data loading for categories/subcategories
       setSelectedTypeId(editingMovement.type_id)
       setSelectedCategoryId(editingMovement.category_id || '')
       
@@ -104,6 +109,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         w.wallets?.id === editingMovement.wallet_id || w.wallet_id === editingMovement.wallet_id
       )
       
+      // Reset form with all values
       form.reset({
         movement_date: new Date(editingMovement.movement_date || editingMovement.created_at),
         created_by: editingMovement.created_by,
@@ -115,8 +121,17 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         currency_id: matchingCurrency?.currency_id || editingMovement.currency_id,
         wallet_id: matchingWallet?.wallet_id || editingMovement.wallet_id
       })
+      
+      console.log('Form reset with values:', {
+        type_id: editingMovement.type_id,
+        category_id: editingMovement.category_id,
+        subcategory_id: editingMovement.subcategory_id,
+        created_by: editingMovement.created_by
+      })
     } else {
       // New movement mode
+      if (!members || !currencies || !wallets) return
+      
       setSelectedTypeId('')
       setSelectedCategoryId('')
       
@@ -136,17 +151,32 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         wallet_id: defaultWallet?.wallet_id || ''
       })
     }
-  }, [open])
+  }, [open, editingMovement, members, currencies, wallets, types])
 
-  // Effect to update categories when editing movement and types are loaded
+  // Effect specifically for updating categories when the type selection triggers loading
   useEffect(() => {
-    if (editingMovement && types && categories && subcategories) {
-      setSelectedTypeId(editingMovement.type_id)
-      if (editingMovement.category_id) {
-        setSelectedCategoryId(editingMovement.category_id)
-      }
+    if (!editingMovement || !open) return
+    if (!categories || !types) return
+    
+    // Only run if we have the editing movement's type selected
+    if (selectedTypeId === editingMovement.type_id && editingMovement.category_id) {
+      console.log('Setting category from editing movement:', editingMovement.category_id)
+      form.setValue('category_id', editingMovement.category_id)
+      setSelectedCategoryId(editingMovement.category_id)
     }
-  }, [editingMovement, types, categories, subcategories])
+  }, [categories, selectedTypeId, editingMovement, open])
+
+  // Effect for updating subcategories when category selection triggers loading
+  useEffect(() => {
+    if (!editingMovement || !open) return
+    if (!subcategories || !categories) return
+    
+    // Only run if we have the editing movement's category selected
+    if (selectedCategoryId === editingMovement.category_id && editingMovement.subcategory_id) {
+      console.log('Setting subcategory from editing movement:', editingMovement.subcategory_id)
+      form.setValue('subcategory_id', editingMovement.subcategory_id)
+    }
+  }, [subcategories, selectedCategoryId, editingMovement, open])
 
   const createMovementMutation = useMutation({
     mutationFn: async (data: MovementForm) => {
