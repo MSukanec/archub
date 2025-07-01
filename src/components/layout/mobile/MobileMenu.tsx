@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { X, Building, DollarSign, Hammer, Users, Calendar, FileText, Settings, CheckSquare, User, Home, FolderOpen, Mail, Activity, Tag, Calculator, FileCode, Package, Shield, Star, Zap, Crown, ChevronDown, ChevronRight, ArrowLeft, ArrowRight } from 'lucide-react'
+import { X, Building, DollarSign, Hammer, Users, Calendar, FileText, Settings, CheckSquare, User, UserCircle, Home, FolderOpen, Mail, Activity, Tag, Calculator, FileCode, Package, Shield, Star, Zap, Crown, ChevronDown, ChevronRight, ArrowLeft, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useLocation } from 'wouter'
 import { useNavigationStore } from '@/stores/navigationStore'
@@ -131,19 +131,42 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
     organization: [
       { icon: Home, label: 'Resumen de la Organización', href: '/organization/dashboard' },
       { icon: ArrowRight, label: 'Ir al proyecto', href: '#', onClick: () => handleContextChange('project', '/project/dashboard') },
-      { icon: FileText, label: 'Gestión de Proyectos', href: '/proyectos' },
-      { icon: Users, label: 'Gestión de Contactos', href: '/organization/contactos' },
-      { icon: CheckSquare, label: 'Gestión de Tareas', href: '/tasks' }
+      { icon: FolderOpen, label: 'Proyectos', href: '/proyectos' },
+      { icon: Mail, label: 'Contactos', href: '/organization/contactos' },
+      { icon: Activity, label: 'Actividad', href: '/organization/activity' },
+      { icon: Users, label: 'Miembros', href: '/organization/members' },
+      { icon: Building, label: 'Gestión de Organizaciones', href: '#', onClick: () => handleContextChange('organizations', '/organizations') },
     ],
     project: [
       { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },
-      { icon: Calendar, label: 'Cronograma', href: '/project/timeline' },
-      { icon: Activity, label: 'Actividad', href: '/project/activity' },
-      { icon: Users, label: 'Personal', href: '/construction/personnel' },
+      { 
+        icon: FolderOpen, 
+        label: 'Diseño', 
+        isAccordion: true, 
+        expanded: expandedAccordion === 'project-diseno',
+        onToggle: () => toggleAccordion('project-diseno'),
+        children: [
+          { icon: Calendar, label: 'Cronograma', href: '/design/timeline' }
+        ]
+      },
+      { 
+        icon: Building, 
+        label: 'Obra', 
+        isAccordion: true,
+        expanded: expandedAccordion === 'obra',
+        onToggle: () => toggleAccordion('obra'),
+        children: [
+          { icon: Home, label: 'Resumen de Obra', href: '/construction/dashboard' },
+          { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
+          { icon: Package, label: 'Materiales', href: '/construction/materials' },
+          { icon: FileText, label: 'Bitácora', href: '/construction/logs' },
+          { icon: Users, label: 'Personal', href: '/construction/personnel' }
+        ]
+      },
       { 
         icon: DollarSign, 
         label: 'Finanzas', 
-        isAccordion: true, 
+        isAccordion: true,
         expanded: expandedAccordion === 'finanzas',
         onToggle: () => toggleAccordion('finanzas'),
         children: [
@@ -152,22 +175,6 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           { icon: Settings, label: 'Preferencias de Finanzas', href: '/preferencias' }
         ]
       },
-      {
-        icon: Hammer,
-        label: 'Obra',
-        isAccordion: true,
-        expanded: expandedAccordion === 'obra',
-        onToggle: () => toggleAccordion('obra'),
-        children: [
-          { icon: Home, label: 'Resumen de Obra', href: '/construction/dashboard' },
-          { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
-          { icon: Package, label: 'Materiales', href: '/construction/materials' },
-          { icon: FileText, label: 'Bitácora', href: '/bitacora' },
-          { icon: Users, label: 'Personal', href: '/construction/personnel' }
-        ]
-      },
-      { icon: Users, label: 'Diseño', href: '#', onClick: () => handleContextChange('design', '/design/dashboard') },
-      { icon: Hammer, label: 'Construcción', href: '#', onClick: () => handleContextChange('construction', '/construction/dashboard') },
       { icon: Users, label: 'Comercialización', href: '#', onClick: () => handleContextChange('commercialization', '/commercialization/dashboard') },
       { icon: ArrowLeft, label: 'Volver a Organización', href: '#', onClick: () => handleContextChange('organization', '/organization/dashboard') },
     ],
@@ -406,6 +413,55 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
             </div>
           ))}
         </nav>
+
+        {/* General Section - Always visible */}
+        <div className="mt-6 pt-4 border-t" style={{ borderColor: 'var(--menues-border)' }}>
+          <div className="mb-4">
+            <h3 className="text-sm font-medium opacity-70" style={{ color: 'var(--menues-fg)' }}>
+              General
+            </h3>
+          </div>
+          
+          <div className="space-y-1.5">
+            <button
+              onClick={() => handleNavigation('/perfil')}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors hover:opacity-80"
+              style={{ 
+                color: 'var(--menues-fg)',
+                backgroundColor: location === '/perfil' ? 'rgba(255, 255, 255, 0.1)' : 'transparent'
+              }}
+            >
+              <UserCircle className="h-4 w-4" />
+              <span className="text-sm">Mi Perfil</span>
+            </button>
+            
+            <button
+              onClick={() => handleNavigation('/tasks')}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors hover:opacity-80"
+              style={{ 
+                color: 'var(--menues-fg)',
+                backgroundColor: location === '/tasks' ? 'rgba(255, 255, 255, 0.1)' : 'transparent'
+              }}
+            >
+              <CheckSquare className="h-4 w-4" />
+              <span className="text-sm">Tareas</span>
+            </button>
+            
+            {isAdmin && (
+              <button
+                onClick={() => handleNavigation('/admin/dashboard', 'admin')}
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors hover:opacity-80"
+                style={{ 
+                  color: 'var(--menues-fg)',
+                  backgroundColor: currentSidebarContext === 'admin' ? 'rgba(255, 255, 255, 0.1)' : 'transparent'
+                }}
+              >
+                <Shield className="h-4 w-4" />
+                <span className="text-sm">Administración</span>
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Context Switcher - Bottom */}
