@@ -1,12 +1,6 @@
 import React from 'react'
-import { X, Home, Building, DollarSign, Hammer, Users, Calendar, FileText, Settings, CheckSquare, User } from 'lucide-react'
-import { Link, useLocation } from 'wouter'
-import { useCurrentUser } from '@/hooks/use-current-user'
-import { useNavigationStore } from '@/stores/navigationStore'
-import { useMobileMenuStore } from './useMobileMenuStore'
+import { X, Building, DollarSign, Hammer, Users, Calendar, FileText, Settings, CheckSquare, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
 
 interface MobileMenuProps {
   isOpen: boolean
@@ -14,198 +8,77 @@ interface MobileMenuProps {
 }
 
 export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
-  const [location] = useLocation()
-  const { data: currentUser } = useCurrentUser()
-  const { currentSidebarContext, setSidebarContext } = useNavigationStore()
-
   if (!isOpen) return null
-
-  const organizationId = currentUser?.preferences?.last_organization_id
-  const projectId = currentUser?.preferences?.last_project_id
-  const organization = currentUser?.organizations?.find((org: any) => org.id === organizationId)
-  const projects = currentUser?.organizations?.find((org: any) => org.id === organizationId)?.projects || []
-
-  // Navigation items - simplified for mobile
-  const getNavigationItems = () => {
-    return [
-      {
-        title: 'Resumen de la Organización',
-        icon: Building,
-        href: '/organization/dashboard',
-        isActive: location === '/organization/dashboard'
-      },
-      {
-        title: 'Gestión de Proyectos',
-        icon: FileText,
-        href: '/proyectos',
-        isActive: location === '/proyectos'
-      },
-      {
-        title: 'Gestión de Contactos',
-        icon: Users,
-        href: '/organization/contactos',
-        isActive: location === '/organization/contactos'
-      },
-      {
-        title: 'Cronograma',
-        icon: Calendar,
-        href: '/project/timeline',
-        isActive: location === '/project/timeline'
-      },
-      {
-        title: 'Finanzas',
-        icon: DollarSign,
-        items: [
-          { title: 'Resumen de Finanzas', href: '/finances/dashboard' },
-          { title: 'Movimientos', href: '/finances/movements' }
-        ]
-      },
-      {
-        title: 'Obra',
-        icon: Hammer,
-        items: [
-          { title: 'Presupuestos', href: '/construction/budgets' },
-          { title: 'Materiales', href: '/construction/materials' },
-          { title: 'Bitácora', href: '/construction/logs' },
-          { title: 'Personal', href: '/construction/personnel' }
-        ]
-      },
-      {
-        title: 'Gestión de Tareas',
-        icon: CheckSquare,
-        href: '/tasks',
-        isActive: location === '/tasks'
-      }
-    ]
-  }
-
-  const navigationItems = getNavigationItems()
 
   const handleNavigation = (href: string) => {
     onClose()
     window.location.href = href
   }
 
+  const navigationItems = [
+    { title: 'Resumen de la Organización', icon: Building, href: '/organization/dashboard' },
+    { title: 'Gestión de Proyectos', icon: FileText, href: '/proyectos' },
+    { title: 'Gestión de Contactos', icon: Users, href: '/organization/contactos' },
+    { title: 'Cronograma', icon: Calendar, href: '/project/timeline' },
+    { title: 'Resumen de Finanzas', icon: DollarSign, href: '/finances/dashboard' },
+    { title: 'Movimientos', icon: DollarSign, href: '/finances/movements' },
+    { title: 'Presupuestos', icon: Hammer, href: '/construction/budgets' },
+    { title: 'Bitácora', icon: Hammer, href: '/construction/logs' },
+    { title: 'Gestión de Tareas', icon: CheckSquare, href: '/tasks' }
+  ]
+
   return (
     <div className="fixed inset-0 z-50 bg-background">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b">
-        <h1 className="text-lg font-semibold">Menú</h1>
+        <h1 className="text-lg font-semibold">Menú de Navegación</h1>
         <Button variant="ghost" size="icon" onClick={onClose}>
           <X className="h-5 w-5" />
         </Button>
       </div>
 
-      {/* Selectors */}
-      <div className="p-4 space-y-3 border-b">
-        {/* Organization Selector */}
-        <div className="space-y-1">
-          <label className="text-xs text-muted-foreground">Organización</label>
-          <Select value={organizationId || ''}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Seleccionar organización" />
-            </SelectTrigger>
-            <SelectContent>
-              {currentUser?.organizations?.map((org: any) => (
-                <SelectItem key={org.id} value={org.id}>
-                  <div className="flex items-center gap-2">
-                    <span>{org.name}</span>
-                    <Badge variant="outline" className="text-xs">
-                      {org.plan?.name || 'FREE'}
-                    </Badge>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Project Selector */}
-        {projects.length > 0 && (
-          <div className="space-y-1">
-            <label className="text-xs text-muted-foreground">Proyecto</label>
-            <Select value={projectId || ''}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Seleccionar proyecto" />
-              </SelectTrigger>
-              <SelectContent>
-                {projects.map((project: any) => (
-                  <SelectItem key={project.id} value={project.id}>
-                    {project.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-      </div>
-
       {/* Navigation Menu */}
-      <div className="flex-1 overflow-y-auto p-4" style={{ paddingBottom: '100px' }}>
+      <div className="flex-1 overflow-y-auto p-4">
         <nav className="space-y-2">
           {navigationItems.map((item, index) => (
-            <div key={index}>
-              {item.items ? (
-                // Accordion style for items with subitems
-                <div className="space-y-1">
-                  <div className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-muted-foreground">
-                    <item.icon className="h-4 w-4" />
-                    {item.title}
-                  </div>
-                  <div className="ml-7 space-y-1">
-                    {item.items.map((subItem, subIndex) => (
-                      <button
-                        key={subIndex}
-                        onClick={() => handleNavigation(subItem.href)}
-                        className="flex w-full items-center px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-colors"
-                      >
-                        {subItem.title}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                // Single navigation item
-                <button
-                  onClick={() => handleNavigation(item.href!)}
-                  className={`flex w-full items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                    item.isActive
-                      ? 'bg-accent text-accent-foreground'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-accent'
-                  }`}
-                >
-                  <item.icon className="h-4 w-4" />
-                  {item.title}
-                </button>
-              )}
-            </div>
+            <button
+              key={index}
+              onClick={() => handleNavigation(item.href)}
+              className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-accent"
+            >
+              <item.icon className="h-5 w-5" />
+              {item.title}
+            </button>
           ))}
         </nav>
       </div>
 
       {/* Bottom Footer */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4">
-        <div className="flex justify-around items-center">
-          <Link href="/admin/dashboard">
-            <Button variant="ghost" size="sm" className="flex flex-col items-center gap-1" onClick={onClose}>
-              <Settings className="h-4 w-4" />
-              <span className="text-xs">Administración</span>
-            </Button>
-          </Link>
+      <div className="border-t p-4">
+        <div className="grid grid-cols-3 gap-2">
+          <button
+            onClick={() => handleNavigation('/admin/dashboard')}
+            className="flex flex-col items-center gap-1 p-3 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+          >
+            <Settings className="h-5 w-5" />
+            <span className="text-xs">Administración</span>
+          </button>
           
-          <Link href="/tasks">
-            <Button variant="ghost" size="sm" className="flex flex-col items-center gap-1" onClick={onClose}>
-              <CheckSquare className="h-4 w-4" />
-              <span className="text-xs">Tareas</span>
-            </Button>
-          </Link>
+          <button
+            onClick={() => handleNavigation('/tasks')}
+            className="flex flex-col items-center gap-1 p-3 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+          >
+            <CheckSquare className="h-5 w-5" />
+            <span className="text-xs">Tareas</span>
+          </button>
           
-          <Link href="/perfil">
-            <Button variant="ghost" size="sm" className="flex flex-col items-center gap-1" onClick={onClose}>
-              <User className="h-4 w-4" />
-              <span className="text-xs">Perfil</span>
-            </Button>
-          </Link>
+          <button
+            onClick={() => handleNavigation('/perfil')}
+            className="flex flex-col items-center gap-1 p-3 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+          >
+            <User className="h-5 w-5" />
+            <span className="text-xs">Perfil</span>
+          </button>
         </div>
       </div>
     </div>
