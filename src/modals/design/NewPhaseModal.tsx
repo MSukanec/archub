@@ -27,6 +27,7 @@ interface NewPhaseModalProps {
   projectId: string;
   organizationId: string;
   nextPosition: number;
+  editingPhase?: any;
 }
 
 export function NewPhaseModal({

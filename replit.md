@@ -119,6 +119,20 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 1, 2025. Enhanced design timeline with comprehensive task management and improved accordion interface
+  • Updated header title from "Cronograma de Diseño" to "Cronograma" and button text to "Nueva Fase de Diseño"
+  • Replaced manual empty state with CustomEmptyState component for consistency
+  • Eliminated non-existent database column references (is_active, position) from design_phases queries
+  • Created NewPhaseTaskModal.tsx for task creation within design phases with proper field structure
+  • Added comprehensive form fields: Creador (defaults to current user), Asignada a (optional), name, description, dates, status, priority
+  • Built backend endpoint /api/design-phase-tasks for creating tasks with automatic position handling
+  • Enhanced CustomDesignGantt with edit/delete/add task action buttons in accordion headers
+  • Redesigned phase cards as full-width accordions with all content contained within
+  • Action buttons now positioned in header right side: "Agregar Tarea", Edit, Delete with proper click event handling
+  • Integrated drag handle, edit functionality, and task creation workflow
+  • Added edit mode support to NewPhaseModal with editingPhase prop for phase modification
+  • All database operations use correct table structure: design_phase_tasks with proper foreign key relationships
+  • Modal system follows established pattern with CustomModalLayout components and proper form validation
 - June 30, 2025. Enhanced Organization Preferences with auto-save functionality, improved UI consistency, and movement concepts management
   • Implemented automatic save with 1.5-second debounce delay eliminating the need for manual save button
   • Added page title "Configuración de la Organización" and description following reference design pattern

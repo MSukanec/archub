@@ -6,15 +6,39 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useDesignProjectPhases } from '@/hooks/use-design-phases';
 import { CustomDesignGantt } from '@/components/ui-custom/misc/CustomDesignGantt';
 import { NewPhaseModal } from '@/modals/design/NewPhaseModal';
+import { NewPhaseTaskModal } from '@/modals/design/NewPhaseTaskModal';
 
 export default function DesignTimeline() {
   const [searchValue, setSearchValue] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [editingPhase, setEditingPhase] = useState(null);
+  const [selectedPhaseId, setSelectedPhaseId] = useState("");
   
   const { data: userData } = useCurrentUser();
   const projectId = userData?.preferences?.last_project_id;
   
   const { data: projectPhases = [], isLoading } = useDesignProjectPhases(projectId || '');
+
+  const handleEditPhase = (phase) => {
+    setEditingPhase(phase);
+    setIsModalOpen(true);
+  };
+
+  const handleAddTask = (phaseId) => {
+    setSelectedPhaseId(phaseId);
+    setIsTaskModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingPhase(null);
+  };
+
+  const handleCloseTaskModal = () => {
+    setIsTaskModalOpen(false);
+    setSelectedPhaseId("");
+  };
 
   const headerProps = {
     title: "Cronograma",
@@ -52,16 +76,25 @@ export default function DesignTimeline() {
             phases={projectPhases}
             searchValue={searchValue}
             projectId={projectId || ''}
+            onEditPhase={handleEditPhase}
+            onAddTask={handleAddTask}
           />
         </div>
       </Layout>
 
       <NewPhaseModal
         open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleCloseModal}
         projectId={projectId || ''}
         organizationId={userData?.organization?.id || ''}
         nextPosition={projectPhases.length}
+        editingPhase={editingPhase}
+      />
+
+      <NewPhaseTaskModal
+        open={isTaskModalOpen}
+        onClose={handleCloseTaskModal}
+        projectPhaseId={selectedPhaseId}
       />
     </>
   );
