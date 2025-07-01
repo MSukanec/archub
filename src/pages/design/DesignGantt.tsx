@@ -96,17 +96,46 @@ export default function DesignGantt() {
   if (isEmpty) {
     return (
       <Layout wide headerProps={headerProps}>
-        <CustomEmptyState
-          title="No hay fases de diseño"
-          description="Crea la primera fase de diseño para comenzar a planificar las tareas del proyecto."
-          action={
-            <Button onClick={() => setShowNewTaskModal(true)}>
-              Crear primera fase
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="max-w-md text-center space-y-4">
+            <div className="w-16 h-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center">
+              <Calendar className="w-8 h-8 text-blue-600" />
+            </div>
+            <h3 className="text-lg font-semibold">Configuración requerida</h3>
+            <p className="text-sm text-muted-foreground">
+              Para usar el sistema de diseño, necesitas crear las tablas en Supabase.
+            </p>
+            <div className="p-4 border rounded-lg bg-muted/50 text-left text-sm">
+              <p className="font-medium mb-2">Instrucciones:</p>
+              <ol className="space-y-1 list-decimal list-inside">
+                <li>Ve a tu panel de Supabase</li>
+                <li>Abre el "SQL Editor"</li>
+                <li>Ejecuta el archivo <code>design_tables.sql</code> del proyecto</li>
+                <li>Recarga esta página</li>
+              </ol>
+            </div>
+            <Button 
+              onClick={() => window.location.reload()}
+              variant="outline"
+            >
+              Recargar página
             </Button>
-          }
-        />
-        
+          </div>
+        </div>
 
+        {/* New Phase Modal */}
+        <DesignPhaseModal
+          open={showNewPhaseModal}
+          onClose={() => setShowNewPhaseModal(false)}
+          projectId={projectId || ''}
+        />
+
+        {/* New Task Modal */}
+        <DesignTaskModal
+          open={showNewTaskModal}
+          onClose={() => setShowNewTaskModal(false)}
+          phases={phases}
+        />
       </Layout>
     );
   }
