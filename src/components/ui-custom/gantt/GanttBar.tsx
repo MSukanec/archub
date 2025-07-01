@@ -7,6 +7,7 @@ interface GanttBarProps {
   endDate: string;
   title: string;
   assignee: string;
+  timelineStart: string;
   onDateChange?: (startDate: string, endDate: string) => void;
 }
 
@@ -14,7 +15,8 @@ export const GanttBar = ({
   startDate, 
   endDate, 
   title, 
-  assignee, 
+  assignee,
+  timelineStart, 
   onDateChange 
 }: GanttBarProps) => {
   const { viewMode } = useGanttStore();
@@ -22,7 +24,7 @@ export const GanttBar = ({
   const [dragType, setDragType] = useState<'move' | 'resize-left' | 'resize-right' | null>(null);
   const barRef = useRef<HTMLDivElement>(null);
 
-  const position = getBarPosition(startDate, endDate, viewMode);
+  const position = getBarPosition(startDate, endDate, timelineStart, viewMode);
   
   if (!position) return null;
 
