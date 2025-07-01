@@ -482,26 +482,45 @@ export default function Movements() {
     {
       key: "creator",
       label: "Creador",
-      width: "10%",
+      width: "5%",
       sortable: true,
       sortType: "string" as const,
-      render: (movement: Movement) => (
-        <div className="flex items-center gap-2">
-          <Avatar className="h-6 w-6">
-            <AvatarImage src={movement.creator?.avatar_url} />
-            <AvatarFallback className="text-xs">
-              {movement.creator?.full_name?.charAt(0) ||
-                movement.creator?.email?.charAt(0) ||
-                "U"}
-            </AvatarFallback>
-          </Avatar>
-          <span className="text-xs truncate">
-            {movement.creator?.full_name ||
-              movement.creator?.email ||
-              "Usuario"}
-          </span>
-        </div>
-      ),
+      render: (movement: Movement) => {
+        const creatorName = movement.creator?.full_name || movement.creator?.email || "Usuario";
+        
+        return (
+          <div className="flex items-center gap-2">
+            {/* Desktop: Solo avatar con tooltip */}
+            <div className="hidden lg:flex">
+              <div title={creatorName} className="cursor-help">
+                <Avatar className="h-6 w-6">
+                  <AvatarImage src={movement.creator?.avatar_url} />
+                  <AvatarFallback className="text-xs">
+                    {movement.creator?.full_name?.charAt(0) ||
+                      movement.creator?.email?.charAt(0) ||
+                      "U"}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+            </div>
+            
+            {/* Mobile: Avatar + texto */}
+            <div className="flex lg:hidden items-center gap-2">
+              <Avatar className="h-6 w-6">
+                <AvatarImage src={movement.creator?.avatar_url} />
+                <AvatarFallback className="text-xs">
+                  {movement.creator?.full_name?.charAt(0) ||
+                    movement.creator?.email?.charAt(0) ||
+                    "U"}
+                </AvatarFallback>
+              </Avatar>
+              <span className="text-xs truncate">
+                {creatorName}
+              </span>
+            </div>
+          </div>
+        );
+      },
     },
     {
       key: "type",
