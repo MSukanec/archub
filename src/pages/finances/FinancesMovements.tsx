@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { DollarSign, Plus, Edit, Trash2, Heart } from "lucide-react";
+import { DollarSign, Plus, Edit, Trash2, Heart, Search, Filter, X } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -43,6 +43,8 @@ import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { useNavigationStore } from "@/stores/navigationStore";
+import { useMobileActionBar } from "@/contexts/MobileActionBarContext";
+import { useMobile } from "@/hooks/use-mobile";
 
 interface Movement {
   id: string;
@@ -100,11 +102,66 @@ export default function Movements() {
   const [selectedMovements, setSelectedMovements] = useState<Movement[]>([]);
 
   const { setSidebarContext } = useNavigationStore();
+  const { setCreateActions, setOtherActions, clearActions } = useMobileActionBar();
+  const isMobile = useMobile();
 
   // Set sidebar context to project when component mounts
   useEffect(() => {
     setSidebarContext("project");
   }, [setSidebarContext]);
+
+  // Configure mobile action bar when page mounts
+  useEffect(() => {
+    if (isMobile) {
+      // Configure create actions
+      setCreateActions([
+        {
+          label: "Nuevo Movimiento",
+          icon: <Plus className="h-4 w-4" />,
+          onClick: () => setShowNewMovementModal(true)
+        }
+      ]);
+
+      // Configure other actions (search, filter, clear filters)
+      setOtherActions([
+        {
+          icon: <Search className="h-4 w-4" />,
+          onClick: () => {
+            // Toggle search functionality or focus search input
+            const searchInput = document.querySelector('input[type="search"]') as HTMLInputElement;
+            if (searchInput) searchInput.focus();
+          },
+          tooltip: "Buscar"
+        },
+        {
+          icon: <Filter className="h-4 w-4" />,
+          onClick: () => {
+            // Here you could open a filter modal or toggle filters
+            console.log("Filter clicked");
+          },
+          tooltip: "Filtros"
+        },
+        {
+          icon: <X className="h-4 w-4" />,
+          onClick: () => {
+            setSearchValue("");
+            setSortBy("date");
+            setFilterByType("all");
+            setFilterByCategory("all");
+            setShowConversions(false);
+          },
+          tooltip: "Limpiar filtros"
+        }
+      ]);
+    }
+
+    // Cleanup when component unmounts
+    return () => {
+      if (isMobile) {
+        clearActions();
+      }
+    };
+  }, [isMobile, setCreateActions, setOtherActions, clearActions]);
 
   // Filter states
   const [sortBy, setSortBy] = useState("date");
