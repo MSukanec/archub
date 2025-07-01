@@ -8,6 +8,7 @@ import { Layout } from "@/components/layout/Layout";
 import { ProtectedRoute } from "@/components/ui-custom/misc/ProtectedRoute";
 import { AdminProtectedRoute } from "@/components/ui-custom/misc/AdminProtectedRoute";
 import { useAuthStore } from "@/stores/authStore";
+import { MobileActionBarProvider } from "@/contexts/MobileActionBarContext";
 
 // Páginas
 import OrganizationManagement from "@/pages/organization/OrganizationList";
@@ -293,8 +294,10 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Router />
+        <MobileActionBarProvider>
+          <Toaster />
+          <Router />
+        </MobileActionBarProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

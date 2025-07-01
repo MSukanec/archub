@@ -1,0 +1,77 @@
+Quiero implementar un **Bottom Action Bar para mobile** como se ve en el diseño de referencia (tipo botón central "+", con acciones flotantes).  
+
+📱 Componente principal:  
+Crea un componente llamado `MobileActionBar.tsx` en `src/components/ui-custom/mobile`.
+
+📦 OBJETIVO:
+
+1. Este bar solo debe aparecer en **mobile (`md:hidden`)** y debe estar **fijo al fondo de la pantalla** (`fixed bottom-0 w-full z-50 bg-white border-t`).
+
+2. Debe contener **5 espacios** para botones alineados horizontalmente:
+   - El botón **central** es un botón redondo de color destacado (`+`) tipo FAB.
+     - Si hay **una sola acción de creación** (ej. “Nuevo Proyecto”), este botón la ejecuta directamente.
+     - Si hay **más de una acción posible**, debe mostrar un menú flotante con opciones al hacer clic (estilo Speed Dial).
+       - Las opciones deben animarse desde el botón central hacia arriba, con ícono + texto.
+
+3. El **primer botón (izquierda)** debe ser siempre el de "🏠 Inicio" que redirige a `/project/dashboard`.
+
+4. Los botones **2, 3 y 5** deben ser dinámicos según la página. Normalmente incluyen:
+   - Filtro (`icon: filter`)
+   - Limpiar filtros (`icon: x`)
+   - Buscar (`icon: search`)
+   - Pero en otras vistas podrían ser distintos.
+
+5. Debe recibir las acciones dinámicas por props:
+```tsx
+type MobileActionBarProps = {
+  createActions: { label: string; icon: ReactNode; onClick: () => void }[]; // 1 o más
+  otherActions: { icon: ReactNode; onClick: () => void }[]; // máx 4 (ya que 1 slot es fijo para "home")
+};
+Asegurate de que los íconos estén bien alineados y accesibles. Agregá tooltip si hay espacio limitado.
+
+📐 ESTILO
+
+El botón central debe estar levemente más arriba (translate-y-[-20%]) y tener sombra.
+
+Si se despliega el menú de acciones, que lo haga hacia arriba con animación (transition, scale, opacity).
+
+Botones laterales pueden estar con ícono simple (w-10 h-10 rounded-full).
+
+📤 FUNCIONALIDAD EXTRA (opcional si hay tiempo)
+
+Si hay acciones nuevas no usadas, mostrar un punto o badge encima del botón.
+
+Recordar última acción clickeada si tiene sentido para UX.
+
+📦 UBICACIÓN
+Este componente debe ser usado dentro del layout general, solo cuando isMobile === true.
+
+📌 PÁGINAS A MIGRAR AL NUEVO SISTEMA
+
+Actualmente hay muchas páginas que tienen botones en el header como:
+
++ Crear Proyecto
+
+Filtrar
+
+Limpiar filtros
+
+Buscar
+
+Estos deben moverse al MobileActionBar cuando se visualiza desde mobile, y quitarse del header. El header solo debe mostrar:
+
+El título de la página
+
+El botón de hamburguesa para abrir el menú lateral
+
+yaml
+Copiar
+Editar
+
+---
+
+### Ejemplo visual deseado
+
+[🏠] [🔍] [ ＋ ] [🔘] [❌]
+↳ Crear Proyecto
+Crear Carpeta
