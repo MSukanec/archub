@@ -78,6 +78,12 @@ function Router() {
         </ProtectedRoute>
       </Route>
 
+      <Route path="/construction/dashboard">
+        <ProtectedRoute>
+          <ConstructionDashboard />
+        </ProtectedRoute>
+      </Route>
+
       <Route path="/construction/budgets">
         <ProtectedRoute>
           <ConstructionBudgets />
