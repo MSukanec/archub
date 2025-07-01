@@ -1,0 +1,110 @@
+import React from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
+type MovementCardProps = {
+  movement: {
+    id: string;
+    date: string;
+    creator?: {
+      name: string;
+      avatar_url?: string;
+    };
+    type: 'Ingreso' | 'Egreso';
+    category: string;
+    subcategory?: string;
+    description?: string;
+    wallet: string;
+    currency: string;
+    amount: number;
+  };
+};
+
+// Utility function to format amount with thousands separators
+const formatAmount = (amount: number): string => {
+  return new Intl.NumberFormat('es-AR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(Math.abs(amount));
+};
+
+// Utility function to get initials from name
+const getInitials = (name: string): string => {
+  if (!name) return '?';
+  return name
+    .split(' ')
+    .map(word => word.charAt(0))
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+};
+
+const MovementCard: React.FC<MovementCardProps> = ({ movement }) => {
+  const {
+    creator,
+    type,
+    category,
+    subcategory,
+    description,
+    currency,
+    amount
+  } = movement;
+
+  // Format the category line
+  const categoryLine = subcategory 
+    ? `${type} / ${category} / ${subcategory}`
+    : `${type} / ${category}`;
+
+  // Truncate description to 30 characters
+  const truncatedDescription = description 
+    ? description.length > 30 
+      ? `${description.slice(0, 30)}...`
+      : description
+    : 'Sin descripción';
+
+  // Format amount with sign and color
+  const isIngreso = type === 'Ingreso';
+  const amountPrefix = isIngreso ? '+' : '-';
+  const amountColor = isIngreso ? 'text-green-600' : 'text-red-600';
+
+  return (
+    <div className="flex items-center justify-between gap-3 bg-white rounded-lg shadow-sm border p-3 mb-2">
+      {/* Left: Avatar */}
+      <div className="flex-shrink-0">
+        <Avatar className="w-10 h-10">
+          <AvatarImage 
+            src={creator?.avatar_url || ''} 
+            alt={creator?.name || 'Usuario'} 
+          />
+          <AvatarFallback className="bg-gray-100 text-gray-600 text-sm font-medium">
+            {getInitials(creator?.name || 'Usuario')}
+          </AvatarFallback>
+        </Avatar>
+      </div>
+
+      {/* Center: Data */}
+      <div className="flex-1 min-w-0">
+        <div className="text-sm text-gray-600">
+          {categoryLine}
+        </div>
+        <div 
+          className="text-gray-900 font-medium text-sm mt-1 truncate"
+          title={description || 'Sin descripción'}
+        >
+          {truncatedDescription}
+        </div>
+      </div>
+
+      {/* Right: Amount + Currency */}
+      <div className="flex-shrink-0 text-right">
+        <div className={`font-semibold text-sm ${amountColor}`}>
+          {amountPrefix}${formatAmount(amount)}
+        </div>
+        <div className="text-xs text-gray-500 mt-0.5">
+          {currency}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default MovementCard;

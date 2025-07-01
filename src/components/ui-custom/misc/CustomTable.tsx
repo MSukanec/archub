@@ -33,6 +33,8 @@ interface CustomTableProps<T = any> {
     key: string
     direction: 'asc' | 'desc'
   }
+  // Nueva prop para renderizado de cards en mobile
+  renderCard?: (item: T) => React.ReactNode
 }
 
 export function CustomTable<T = any>({ 
@@ -47,7 +49,8 @@ export function CustomTable<T = any>({
   getItemId = (item: T) => (item as any).id,
   getRowClassName,
   onCardClick,
-  defaultSort
+  defaultSort,
+  renderCard
 }: CustomTableProps<T>) {
   const [sortKey, setSortKey] = useState<string | null>(defaultSort?.key || null)
   const [sortDirection, setSortDirection] = useState<SortDirection>(defaultSort?.direction || null)
@@ -303,69 +306,77 @@ export function CustomTable<T = any>({
       {/* Mobile Card View */}
       <div className="lg:hidden">
         {paginatedData.map((item, index) => (
-          <div
-            key={index}
-            className={cn(
-              "p-3 border rounded-lg mb-2 bg-background hover:bg-muted/40 transition-colors cursor-pointer",
-              getRowClassName?.(item)
-            )}
-            onClick={() => onCardClick?.(item)}
-          >
-            {selectable && (
-              <div className="flex items-center justify-between mb-2 pb-2 border-b">
-                <span className="text-xs font-medium text-muted-foreground">Seleccionar</span>
-                <Checkbox
-                  checked={isItemSelected(item)}
-                  onCheckedChange={(checked) => {
-                    handleItemSelection(item, checked === true)
-                  }}
-                  aria-label="Seleccionar elemento"
-                  className="h-4 w-4"
-                  onClick={(e) => e.stopPropagation()}
-                />
-              </div>
-            )}
-            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-              {columns.filter((_, idx) => idx < 6).map((column) => {
-                const value = column.render 
-                  ? column.render(item)
-                  : String(item[column.key as keyof T] || '-')
-                
-                return (
-                  <div key={String(column.key)} className="flex flex-col min-w-0">
-                    <span className="text-xs font-medium text-muted-foreground truncate">
-                      {column.label}
-                    </span>
-                    <div className="text-sm font-medium truncate">
-                      {value}
-                    </div>
-                  </div>
-                )
-              })}
+          renderCard ? (
+            // Use custom card renderer if provided
+            <div key={index} onClick={() => onCardClick?.(item)}>
+              {renderCard(item)}
             </div>
-            {columns.length > 6 && (
-              <div className="mt-2 pt-2 border-t">
-                <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                  {columns.slice(6).map((column) => {
-                    const value = column.render 
-                      ? column.render(item)
-                      : String(item[column.key as keyof T] || '-')
-                    
-                    return (
-                      <div key={String(column.key)} className="flex flex-col min-w-0">
-                        <span className="text-xs font-medium text-muted-foreground truncate">
-                          {column.label}
-                        </span>
-                        <div className="text-sm font-medium truncate">
-                          {value}
-                        </div>
-                      </div>
-                    )
-                  })}
+          ) : (
+            // Default card layout
+            <div
+              key={index}
+              className={cn(
+                "p-3 border rounded-lg mb-2 bg-background hover:bg-muted/40 transition-colors cursor-pointer",
+                getRowClassName?.(item)
+              )}
+              onClick={() => onCardClick?.(item)}
+            >
+              {selectable && (
+                <div className="flex items-center justify-between mb-2 pb-2 border-b">
+                  <span className="text-xs font-medium text-muted-foreground">Seleccionar</span>
+                  <Checkbox
+                    checked={isItemSelected(item)}
+                    onCheckedChange={(checked) => {
+                      handleItemSelection(item, checked === true)
+                    }}
+                    aria-label="Seleccionar elemento"
+                    className="h-4 w-4"
+                    onClick={(e) => e.stopPropagation()}
+                  />
                 </div>
+              )}
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                {columns.filter((_, idx) => idx < 6).map((column) => {
+                  const value = column.render 
+                    ? column.render(item)
+                    : String(item[column.key as keyof T] || '-')
+                  
+                  return (
+                    <div key={String(column.key)} className="flex flex-col min-w-0">
+                      <span className="text-xs font-medium text-muted-foreground truncate">
+                        {column.label}
+                      </span>
+                      <div className="text-sm font-medium truncate">
+                        {value}
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
-            )}
-          </div>
+              {columns.length > 6 && (
+                <div className="mt-2 pt-2 border-t">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                    {columns.slice(6).map((column) => {
+                      const value = column.render 
+                        ? column.render(item)
+                        : String(item[column.key as keyof T] || '-')
+                      
+                      return (
+                        <div key={String(column.key)} className="flex flex-col min-w-0">
+                          <span className="text-xs font-medium text-muted-foreground truncate">
+                            {column.label}
+                          </span>
+                          <div className="text-sm font-medium truncate">
+                            {value}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          )
         ))}
       </div>
 

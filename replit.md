@@ -119,6 +119,16 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 1, 2025. Created MovementCard component for professional mobile movement display
+  • Built MovementCard.tsx in src/components/cards/ following MercadoLibre-style design reference
+  • Horizontal layout: avatar (left) + movement data (center) + amount with currency (right)
+  • Avatar shows creator image or initials fallback with circular design (w-10 h-10)
+  • Category display in format "Tipo / Categoría / Subcategoría" with proper text sizing
+  • Description truncated to 30 characters with full tooltip on hover for better UX
+  • Amount formatting with thousands separators using Intl.NumberFormat for Argentine locale
+  • Color-coded amounts: green for Ingresos (+), red for Egresos (-) following financial conventions
+  • Professional styling with white background, subtle borders, shadow-sm, and proper padding/spacing
+  • Component designed for integration with CustomTable renderCard prop for mobile financial movement display
 - July 1, 2025. Complete mobile optimization implementation with professional navigation system
   • Created comprehensive mobile navigation system with MobileMenu component and useMobileMenuStore Zustand store
   • Modified Layout.tsx to hide sidebar on mobile devices (md:hidden) with responsive margin adjustments
