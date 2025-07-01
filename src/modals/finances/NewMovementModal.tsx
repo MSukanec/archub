@@ -86,18 +86,35 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
     }
   })
 
-  // Reset form with correct defaults when modal opens and data is available
+  // Single effect to initialize form when modal opens
   useEffect(() => {
-    if (!editingMovement && open && members && currencies?.length && wallets?.length) {
-      const currentMember = members.find(m => m.user_id === currentUser?.user?.id)
-      const defaultCurrency = currencies.find(c => c.is_default) || currencies[0]
-      const defaultWallet = wallets.find(w => w.is_default) || wallets[0]
+    if (!open) return
+    
+    if (editingMovement) {
+      // Editing mode
+      setSelectedTypeId(editingMovement.type_id)
+      setSelectedCategoryId(editingMovement.category_id || '')
+      
+      form.reset({
+        created_at: new Date(editingMovement.created_at),
+        created_by: editingMovement.created_by,
+        description: editingMovement.description || '',
+        amount: editingMovement.amount,
+        type_id: editingMovement.type_id,
+        category_id: editingMovement.category_id || '',
+        subcategory_id: editingMovement.subcategory_id || '',
+        currency_id: editingMovement.currency_id,
+        wallet_id: editingMovement.wallet_id
+      })
+    } else {
+      // New movement mode
+      setSelectedTypeId('')
+      setSelectedCategoryId('')
+      
+      const currentMember = members?.find(m => m.user_id === currentUser?.user?.id)
+      const defaultCurrency = currencies?.find(c => c.is_default) || currencies?.[0]
+      const defaultWallet = wallets?.find(w => w.is_default) || wallets?.[0]
 
-      console.log('Setting default creator:', currentMember);
-      console.log('Setting default currency:', defaultCurrency);
-      console.log('Setting default wallet:', defaultWallet);
-
-      // Use the correct IDs - currency_id for currency, wallet_id for wallet
       form.reset({
         created_at: new Date(),
         amount: 0,
@@ -110,70 +127,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         wallet_id: defaultWallet?.wallet_id || ''
       })
     }
-  }, [open, editingMovement, members, currentUser, currencies, wallets, form])
-
-  // Set state variables when editing
-  useEffect(() => {
-    if (open && editingMovement) {
-      // Editing mode: set state variables to match the editing movement
-      setSelectedTypeId(editingMovement.type_id)
-      setSelectedCategoryId(editingMovement.category_id || '')
-    } else if (open && !editingMovement) {
-      // New movement mode: clear only state variables
-      setSelectedTypeId('')
-      setSelectedCategoryId('')
-    }
-  }, [open, editingMovement])
-
-  // Populate form after dependent data is loaded
-  useEffect(() => {
-    if (editingMovement && types && currencies && wallets) {
-
-      
-      // Map currency_id to the correct organization-currency ID
-      const matchingCurrency = currencies.find(c => 
-        c.currencies?.id === editingMovement.currency_id || c.id === editingMovement.currency_id
-      )
-      const currencyId = matchingCurrency?.id || editingMovement.currency_id
-      
-      // Map wallet_id to the correct organization-wallet ID  
-      const matchingWallet = wallets.find(w => 
-        w.wallets?.id === editingMovement.wallet_id || w.id === editingMovement.wallet_id
-      )
-      const walletId = matchingWallet?.id || editingMovement.wallet_id
-      
-      console.log('Mapped currency ID:', currencyId)
-      console.log('Mapped wallet ID:', walletId)
-      
-      // Set parent selections first to enable dependent dropdowns
-      setSelectedTypeId(editingMovement.type_id)
-      setSelectedCategoryId(editingMovement.category_id || '')
-      
-      form.reset({
-        created_at: new Date(editingMovement.created_at),
-        created_by: editingMovement.created_by,
-        description: editingMovement.description || '',
-        amount: editingMovement.amount,
-        type_id: editingMovement.type_id,
-        category_id: editingMovement.category_id || '',
-        subcategory_id: editingMovement.subcategory_id || '',
-        currency_id: currencyId,
-        wallet_id: walletId
-      })
-    } else if (!editingMovement) {
-      form.reset({
-        created_at: new Date(),
-        amount: 0,
-        description: '',
-        created_by: '',
-        type_id: '',
-        category_id: '',
-        subcategory_id: '',
-        currency_id: '',
-        wallet_id: ''
-      })
-    }
-  }, [editingMovement, types, currencies, wallets, categories, subcategories, form])
+  }, [open])
 
   const createMovementMutation = useMutation({
     mutationFn: async (data: MovementForm) => {
