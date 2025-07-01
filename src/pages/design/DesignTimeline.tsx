@@ -81,6 +81,10 @@ export default function DesignTimeline() {
             projectId={projectId || ''}
             onEditPhase={handleEditPhase}
             onAddTask={handleAddTask}
+            onCreatePhase={() => {
+              setEditingPhase(null);
+              setIsModalOpen(true);
+            }}
           />
         </div>
       </Layout>
