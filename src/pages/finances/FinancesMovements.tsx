@@ -192,14 +192,16 @@ export default function Movements() {
     try {
       await toggleFavoriteMutation.mutateAsync({
         movementId: movement.id,
-        isFavorite: !movement.is_favorite
+        isFavorite: !movement.is_favorite,
       });
       toast({
-        title: movement.is_favorite ? "Eliminado de favoritos" : "Agregado a favoritos",
+        title: movement.is_favorite
+          ? "Eliminado de favoritos"
+          : "Agregado a favoritos",
         description: "El movimiento se ha actualizado correctamente.",
       });
     } catch (error) {
-      console.error('Error toggling favorite:', error);
+      console.error("Error toggling favorite:", error);
       toast({
         title: "Error",
         description: "No se pudo actualizar el estado de favorito.",
@@ -224,27 +226,19 @@ export default function Movements() {
 
   // Get unique types, categories, and subcategories from actual data
   const availableTypes = Array.from(
-    new Set(
-      movements
-        .map((m) => m.movement_data?.type?.name)
-        .filter(Boolean)
-    )
+    new Set(movements.map((m) => m.movement_data?.type?.name).filter(Boolean)),
   );
 
   const availableCategories = Array.from(
     new Set(
-      movements
-        .map((m) => m.movement_data?.category?.name)
-        .filter(Boolean)
-    )
+      movements.map((m) => m.movement_data?.category?.name).filter(Boolean),
+    ),
   );
 
   const availableSubcategories = Array.from(
     new Set(
-      movements
-        .map((m) => m.movement_data?.subcategory?.name)
-        .filter(Boolean)
-    )
+      movements.map((m) => m.movement_data?.subcategory?.name).filter(Boolean),
+    ),
   );
 
   // Filter movements
@@ -390,37 +384,50 @@ export default function Movements() {
       sortable: true,
       sortType: "date" as const,
       render: (movement: Movement) => {
-        const displayDate = movement.movement_date || movement.created_at;
-        
+        const displayDate = movement.movement_date;
+
         if (!displayDate) {
           return <div className="text-xs text-muted-foreground">Sin fecha</div>;
         }
-        
+
         try {
-          const date = new Date(displayDate);
-          if (isNaN(date.getTime())) {
-            return <div className="text-xs text-muted-foreground">Fecha inválida</div>;
+          // Handle different date formats properly
+          let date;
+          if (displayDate.includes('T')) {
+            // ISO format with time - parse normally but format as local date
+            date = new Date(displayDate);
+          } else {
+            // Date only format - force local timezone to avoid UTC shift
+            date = new Date(displayDate + 'T00:00:00');
           }
           
+          if (isNaN(date.getTime())) {
+            return (
+              <div className="text-xs text-muted-foreground">
+                Fecha inválida
+              </div>
+            );
+          }
+
           return (
             <div className="text-xs">
-              <div>
-                {format(date, "dd/MM/yyyy", { locale: es })}
-              </div>
+              <div>{format(date, "dd/MM/yyyy", { locale: es })}</div>
               <div className="text-muted-foreground text-xs">
                 {format(date, "HH:mm", { locale: es })}
               </div>
             </div>
           );
         } catch (error) {
-          return <div className="text-xs text-muted-foreground">Fecha inválida</div>;
+          return (
+            <div className="text-xs text-muted-foreground">Fecha inválida</div>
+          );
         }
       },
     },
     {
       key: "creator",
       label: "Creador",
-      width: "5%",
+      width: "10%",
       sortable: true,
       sortType: "string" as const,
       render: (movement: Movement) => (
@@ -529,10 +536,12 @@ export default function Movements() {
           <Button
             variant="ghost"
             size="sm"
-            className={`h-6 w-6 p-0 hover:bg-[var(--button-ghost-hover-bg)] ${movement.is_favorite ? 'text-red-500' : 'text-muted-foreground'}`}
+            className={`h-6 w-6 p-0 hover:bg-[var(--button-ghost-hover-bg)] ${movement.is_favorite ? "text-red-500" : "text-muted-foreground"}`}
             onClick={() => handleToggleFavorite(movement)}
           >
-            <Heart className={`h-3 w-3 ${movement.is_favorite ? 'fill-current' : ''}`} />
+            <Heart
+              className={`h-3 w-3 ${movement.is_favorite ? "fill-current" : ""}`}
+            />
           </Button>
           <Button
             variant="ghost"
@@ -598,28 +607,29 @@ export default function Movements() {
         isLoading={isLoading}
         selectable={true}
         defaultSort={{
-          key: 'movement_date',
-          direction: 'desc'
+          key: "movement_date",
+          direction: "desc",
         }}
         getRowClassName={(movement: Movement) => {
           // Determine if it's income or expense based on movement type
-          const typeName = movement.movement_data?.type?.name?.toLowerCase() || '';
-          const isIncome = typeName.includes('ingreso');
-          const isExpense = typeName.includes('egreso');
-          
+          const typeName =
+            movement.movement_data?.type?.name?.toLowerCase() || "";
+          const isIncome = typeName.includes("ingreso");
+          const isExpense = typeName.includes("egreso");
+
           if (isIncome) {
-            return 'movement-row-income';
+            return "movement-row-income";
           } else if (isExpense) {
-            return 'movement-row-expense';
+            return "movement-row-expense";
           }
-          return '';
+          return "";
         }}
         selectedItems={selectedMovements}
         onSelectionChange={setSelectedMovements}
         getItemId={(movement) => movement.id}
         onCardClick={(movement: Movement) => handleEdit(movement)}
         emptyState={
-          <CustomEmptyState 
+          <CustomEmptyState
             title="No hay movimientos registrados"
             description="Crea el primer movimiento del proyecto"
             action={

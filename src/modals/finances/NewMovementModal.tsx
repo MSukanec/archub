@@ -157,7 +157,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         ...data,
         organization_id: organizationId,
         project_id: currentUser?.preferences?.last_project_id,
-        movement_date: data.movement_date.toISOString()
+        movement_date: data.movement_date.toISOString().split('T')[0]
       }
 
       if (editingMovement) {
@@ -265,7 +265,11 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                                 <Input
                                   type="date"
                                   value={field.value ? field.value.toISOString().split('T')[0] : ''}
-                                  onChange={(e) => field.onChange(new Date(e.target.value))}
+                                  onChange={(e) => {
+                                    // Parse as local date to avoid UTC timezone shifts
+                                    const localDate = new Date(e.target.value + 'T00:00:00');
+                                    field.onChange(localDate);
+                                  }}
                                 />
                               </FormControl>
                               <FormMessage />
