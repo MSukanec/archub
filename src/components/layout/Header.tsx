@@ -140,18 +140,14 @@ export function Header({
     <header className="sticky top-0 z-50 h-14 md:h-9 border-b border-[var(--menues-border)] bg-[var(--menues-bg)] flex items-center justify-between gap-2">
       {/* Left side - Logo + Breadcrumb */}
       <div className="flex items-center gap-2">
-        {/* Logo Section */}
-        <div className="w-[40px] h-14 md:h-9 flex items-center justify-center border-r border-[var(--menues-border)]">
-          {/* Logo - visible on desktop */}
-          <span className="hidden md:block text-base font-bold leading-none text-[var(--menues-fg)]">A</span>
-          
-          {/* Empty space on mobile for alignment */}
-          <div className="md:hidden w-8 h-8"></div>
+        {/* Logo Section - Desktop only */}
+        <div className="hidden md:flex w-[40px] h-9 items-center justify-center border-r border-[var(--menues-border)]">
+          <span className="text-base font-bold leading-none text-[var(--menues-fg)]">A</span>
         </div>
 
-        {/* Mobile Title - visible only on mobile */}
-        <div className="md:hidden flex-1 px-2">
-          <h1 className="text-sm font-medium text-[var(--menues-fg)] truncate">
+        {/* Mobile Title - visible only on mobile, positioned left */}
+        <div className="md:hidden pl-4">
+          <h1 className="text-lg font-semibold text-[var(--menues-fg)]">
             {title || 'Archub'}
           </h1>
         </div>
