@@ -63,7 +63,7 @@ export default function FinancesDashboard() {
       if (uniqueTypeIds.length > 0) {
         const { data: conceptsData, error: conceptsError } = await supabase
           .from('movement_concepts')
-          .select('id, concept_type')
+          .select('id, name, parent_id')
           .in('id', uniqueTypeIds);
         
         console.log('Concepts query error:', conceptsError);
@@ -71,11 +71,34 @@ export default function FinancesDashboard() {
         concepts = conceptsData || [];
       }
 
-      // Create a map for quick lookup
-      const conceptMap = concepts.reduce((acc: any, concept: any) => {
-        acc[concept.id] = concept.concept_type;
-        return acc;
-      }, {});
+      // Create a map for quick lookup - need to get parent concepts to determine type
+      const conceptMap: any = {};
+      
+      if (concepts.length > 0) {
+        // Get parent concepts if current concepts have parent_id
+        const parentIds = concepts.map(c => c.parent_id).filter(Boolean);
+        const uniqueParentIds = parentIds.filter((id, index, arr) => arr.indexOf(id) === index);
+        
+        let parentConcepts: any[] = [];
+        if (uniqueParentIds.length > 0) {
+          const { data: parentData } = await supabase
+            .from('movement_concepts')
+            .select('id, name')
+            .in('id', uniqueParentIds);
+          parentConcepts = parentData || [];
+        }
+        
+        // Map concepts to their parent type
+        concepts.forEach((concept: any) => {
+          if (concept.parent_id) {
+            const parent = parentConcepts.find(p => p.id === concept.parent_id);
+            conceptMap[concept.id] = parent?.name?.toUpperCase() || 'UNKNOWN';
+          } else {
+            // If no parent, use the concept name itself
+            conceptMap[concept.id] = concept.name?.toUpperCase() || 'UNKNOWN';
+          }
+        });
+      }
 
       console.log('Financial summary - movements:', movements.length);
       console.log('Financial summary - movement type_ids:', typeIds);
