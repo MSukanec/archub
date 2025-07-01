@@ -65,21 +65,21 @@ export function MonthlyFlowChart({ data, isLoading }: MonthlyFlowChartProps) {
         <Line 
           type="monotone" 
           dataKey="income" 
-          stroke="#22c55e" 
+          stroke="hsl(var(--chart-1))" 
           strokeWidth={2}
           name="Ingresos"
         />
         <Line 
           type="monotone" 
           dataKey="expenses" 
-          stroke="#ef4444" 
+          stroke="hsl(var(--chart-2))" 
           strokeWidth={2}
           name="Gastos"
         />
         <Line 
           type="monotone" 
           dataKey="net" 
-          stroke="#3b82f6" 
+          stroke="hsl(var(--chart-3))" 
           strokeWidth={3}
           name="Flujo neto"
         />

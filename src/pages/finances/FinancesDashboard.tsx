@@ -48,18 +48,10 @@ export default function FinancesDashboard() {
     queryFn: async () => {
       if (!organizationId || !supabase) return null;
 
-      // Get movements for this organization and project
+      // Get all movements for this organization and project
       const { data: movements, error } = await supabase
         .from('movements')
-        .select(`
-          id,
-          amount,
-          created_at,
-          movement_concepts!type_id (
-            name,
-            concept_type
-          )
-        `)
+        .select('*')
         .eq('organization_id', organizationId)
         .eq('project_id', projectId || '');
 
@@ -74,30 +66,45 @@ export default function FinancesDashboard() {
         };
       }
 
+      // Get movement concepts separately
+      const typeIds = [...new Set(movements.map(m => m.type_id).filter(Boolean))];
+      const { data: concepts } = await supabase
+        .from('movement_concepts')
+        .select('id, concept_type')
+        .in('id', typeIds);
+
+      // Create a map for quick lookup
+      const conceptMap = concepts?.reduce((acc: any, concept: any) => {
+        acc[concept.id] = concept.concept_type;
+        return acc;
+      }, {}) || {};
+
       const currentMonth = new Date().getMonth();
       const currentYear = new Date().getFullYear();
 
-      const income = movements.filter(m => 
-        m.movement_concepts?.concept_type === 'INGRESOS'
-      ).reduce((sum, m) => sum + (m.amount || 0), 0);
+      // Calculate totals
+      const income = movements
+        .filter(m => conceptMap[m.type_id] === 'INGRESOS')
+        .reduce((sum, m) => sum + (m.amount || 0), 0);
 
-      const expenses = movements.filter(m => 
-        m.movement_concepts?.concept_type === 'EGRESOS'
-      ).reduce((sum, m) => sum + (m.amount || 0), 0);
+      const expenses = movements
+        .filter(m => conceptMap[m.type_id] === 'EGRESOS')
+        .reduce((sum, m) => sum + (m.amount || 0), 0);
 
+      // Calculate this month's data
       const thisMonthMovements = movements.filter(m => {
         const movementDate = new Date(m.created_at);
         return movementDate.getMonth() === currentMonth && 
                movementDate.getFullYear() === currentYear;
       });
 
-      const thisMonthIncome = thisMonthMovements.filter(m => 
-        m.movement_concepts?.concept_type === 'INGRESOS'
-      ).reduce((sum, m) => sum + (m.amount || 0), 0);
+      const thisMonthIncome = thisMonthMovements
+        .filter(m => conceptMap[m.type_id] === 'INGRESOS')
+        .reduce((sum, m) => sum + (m.amount || 0), 0);
 
-      const thisMonthExpenses = thisMonthMovements.filter(m => 
-        m.movement_concepts?.concept_type === 'EGRESOS'
-      ).reduce((sum, m) => sum + (m.amount || 0), 0);
+      const thisMonthExpenses = thisMonthMovements
+        .filter(m => conceptMap[m.type_id] === 'EGRESOS')
+        .reduce((sum, m) => sum + (m.amount || 0), 0);
 
       return {
         totalIncome: income,
@@ -117,41 +124,65 @@ export default function FinancesDashboard() {
     queryFn: async () => {
       if (!organizationId || !supabase) return [];
 
-      const { data: wallets, error } = await supabase
+      // Get organization wallets
+      const { data: orgWallets, error } = await supabase
         .from('organization_wallets')
-        .select(`
-          wallets (
-            id,
-            name
-          ),
-          is_active
-        `)
+        .select('wallet_id')
         .eq('organization_id', organizationId)
         .eq('is_active', true);
 
-      if (error || !wallets) return [];
+      if (error || !orgWallets) return [];
 
-      // Get actual wallet balances from movements
+      // Get wallet details
+      const walletIds = orgWallets.map(ow => ow.wallet_id);
+      const { data: wallets } = await supabase
+        .from('wallets')
+        .select('id, name')
+        .in('id', walletIds);
+
+      if (!wallets) return [];
+
+      // Calculate balance for each wallet
       const walletBalances = await Promise.all(
-        wallets.map(async (wallet) => {
+        wallets.map(async (wallet, index) => {
           const { data: movements } = await supabase!
             .from('movements')
-            .select('amount, movement_concepts!type_id(concept_type)')
+            .select('amount, type_id')
             .eq('organization_id', organizationId)
-            .eq('wallet_id', wallet.wallets?.id);
+            .eq('wallet_id', wallet.id);
 
-          const income = movements?.filter(m => 
-            m.movement_concepts?.concept_type === 'INGRESOS'
-          ).reduce((sum, m) => sum + (m.amount || 0), 0) || 0;
+          if (!movements) {
+            return {
+              wallet: wallet.name,
+              balance: 0,
+              color: `hsl(var(--chart-${(index % 5) + 1}))`
+            };
+          }
 
-          const expenses = movements?.filter(m => 
-            m.movement_concepts?.concept_type === 'EGRESOS'
-          ).reduce((sum, m) => sum + (m.amount || 0), 0) || 0;
+          // Get concept types for these movements
+          const typeIds = [...new Set(movements.map(m => m.type_id).filter(Boolean))];
+          const { data: concepts } = await supabase!
+            .from('movement_concepts')
+            .select('id, concept_type')
+            .in('id', typeIds);
+
+          const conceptMap = concepts?.reduce((acc: any, concept: any) => {
+            acc[concept.id] = concept.concept_type;
+            return acc;
+          }, {}) || {};
+
+          const income = movements
+            .filter(m => conceptMap[m.type_id] === 'INGRESOS')
+            .reduce((sum, m) => sum + (m.amount || 0), 0);
+
+          const expenses = movements
+            .filter(m => conceptMap[m.type_id] === 'EGRESOS')
+            .reduce((sum, m) => sum + (m.amount || 0), 0);
 
           return {
-            wallet: wallet.wallets?.name || 'Billetera',
+            wallet: wallet.name,
             balance: income - expenses,
-            color: `hsl(var(--chart-${wallets.indexOf(wallet) + 1}))`
+            color: `hsl(var(--chart-${(index % 5) + 1}))`
           };
         })
       );
@@ -173,17 +204,23 @@ export default function FinancesDashboard() {
 
       const { data: movements, error } = await supabase
         .from('movements')
-        .select(`
-          amount,
-          created_at,
-          movement_concepts!type_id (
-            concept_type
-          )
-        `)
+        .select('amount, created_at, type_id')
         .eq('organization_id', organizationId)
         .gte('created_at', sixMonthsAgo.toISOString());
 
       if (error || !movements) return [];
+
+      // Get concept types
+      const typeIds = [...new Set(movements.map(m => m.type_id).filter(Boolean))];
+      const { data: concepts } = await supabase
+        .from('movement_concepts')
+        .select('id, concept_type')
+        .in('id', typeIds);
+
+      const conceptMap = concepts?.reduce((acc: any, concept: any) => {
+        acc[concept.id] = concept.concept_type;
+        return acc;
+      }, {}) || {};
 
       // Group by month
       const monthlyData: Record<string, { income: number; expenses: number }> = {};
@@ -197,9 +234,9 @@ export default function FinancesDashboard() {
         }
 
         const amount = movement.amount || 0;
-        if (movement.movement_concepts?.concept_type === 'INGRESOS') {
+        if (conceptMap[movement.type_id] === 'INGRESOS') {
           monthlyData[monthKey].income += amount;
-        } else if (movement.movement_concepts?.concept_type === 'EGRESOS') {
+        } else if (conceptMap[movement.type_id] === 'EGRESOS') {
           monthlyData[monthKey].expenses += amount;
         }
       });
@@ -230,34 +267,46 @@ export default function FinancesDashboard() {
     queryFn: async () => {
       if (!organizationId || !supabase) return [];
 
-      const { data, error } = await supabase
+      const { data: movements, error } = await supabase
         .from('movements')
-        .select(`
-          id,
-          description,
-          amount,
-          created_at,
-          movement_concepts!type_id (
-            name,
-            concept_type
-          ),
-          movement_concepts!category_id (
-            name
-          )
-        `)
+        .select('id, description, amount, created_at, type_id, category_id')
         .eq('organization_id', organizationId)
         .eq('project_id', projectId || '')
         .order('created_at', { ascending: false })
         .limit(5);
 
-      if (error || !data) return [];
+      if (error || !movements) return [];
 
-      return data.map(m => ({
+      // Get concept names
+      const typeIds = [...new Set(movements.map(m => m.type_id).filter(Boolean))];
+      const categoryIds = [...new Set(movements.map(m => m.category_id).filter(Boolean))];
+
+      const { data: types } = await supabase
+        .from('movement_concepts')
+        .select('id, name, concept_type')
+        .in('id', typeIds);
+
+      const { data: categories } = await supabase
+        .from('movement_concepts')
+        .select('id, name')
+        .in('id', categoryIds);
+
+      const typeMap = types?.reduce((acc: any, type: any) => {
+        acc[type.id] = { name: type.name, concept_type: type.concept_type };
+        return acc;
+      }, {}) || {};
+
+      const categoryMap = categories?.reduce((acc: any, category: any) => {
+        acc[category.id] = category.name;
+        return acc;
+      }, {}) || {};
+
+      return movements.map(m => ({
         id: m.id,
         description: m.description || 'Sin descripción',
         amount: m.amount || 0,
-        type: m.movement_concepts?.concept_type === 'INGRESOS' ? 'income' : 'expense',
-        category: m.movement_concepts?.name || 'Sin categoría',
+        type: typeMap[m.type_id]?.concept_type === 'INGRESOS' ? 'income' : 'expense',
+        category: categoryMap[m.category_id] || typeMap[m.type_id]?.name || 'Sin categoría',
         created_at: m.created_at
       }));
     },
