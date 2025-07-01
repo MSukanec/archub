@@ -176,20 +176,20 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
       { icon: Calendar, label: 'Cronograma de Diseño', href: '/design/timeline' },
       { icon: FileText, label: 'Moodboard', href: '/design/moodboard' },
       { icon: FolderOpen, label: 'Documentación técnica', href: '/design/documentacion' },
-      { icon: ArrowLeft, label: 'Volver al Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
+      { icon: ArrowLeft, label: 'Volver al Proyecto', href: '#', onClick: () => handleContextChange('project', '/project/dashboard') },
     ],
     construction: [
       { icon: Home, label: 'Resumen', href: '/construction/dashboard' },
       { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
       { icon: FileText, label: 'Bitácora', href: '/bitacora' },
-      { icon: ArrowLeft, label: 'Volver al Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
+      { icon: ArrowLeft, label: 'Volver al Proyecto', href: '#', onClick: () => handleContextChange('project', '/project/dashboard') },
     ],
     commercialization: [
       { icon: Home, label: 'Dashboard', href: '/commercialization/dashboard' },
       { icon: Building, label: 'Listado de unidades', href: '/commercialization/unidades' },
       { icon: Users, label: 'Clientes interesados', href: '/commercialization/clientes' },
       { icon: FileText, label: 'Estadísticas de venta', href: '/commercialization/estadisticas' },
-      { icon: ArrowLeft, label: 'Volver al Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
+      { icon: ArrowLeft, label: 'Volver al Proyecto', href: '#', onClick: () => handleContextChange('project', '/project/dashboard') },
     ],
     admin: [
       { icon: Home, label: 'Resumen de Administración', href: '/admin/dashboard' },
@@ -356,7 +356,11 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           </h2>
         </div>
         
-        <nav className="space-y-1.5">
+        <nav className={`space-y-1.5 transition-transform duration-300 ${
+          isAnimating && animationDirection === 'left' ? 'transform -translate-x-full' :
+          isAnimating && animationDirection === 'right' ? 'transform translate-x-full' :
+          'transform translate-x-0'
+        }`}>
           {navigationItems.map((item: any, index: number) => (
             <div key={`${item.label}-${index}`}>
               {/* Main Button */}
