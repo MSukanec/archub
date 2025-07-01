@@ -326,12 +326,33 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                               <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
                                   <SelectTrigger>
-                                    <SelectValue placeholder="Seleccionar creador" />
+                                    <SelectValue placeholder="Seleccionar creador">
+                                      {field.value && members ? (() => {
+                                        const selectedMember = members.find((m: any) => m.id === field.value);
+                                        if (selectedMember) {
+                                          const user = selectedMember.user;
+                                          const displayName = user?.full_name || user?.email || 'Usuario sin nombre';
+                                          const avatarFallback = user?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U';
+                                          return (
+                                            <div className="flex items-center gap-2">
+                                              <Avatar className="h-6 w-6">
+                                                <AvatarImage src={user?.avatar_url} />
+                                                <AvatarFallback>
+                                                  {avatarFallback}
+                                                </AvatarFallback>
+                                              </Avatar>
+                                              <span>{displayName}</span>
+                                            </div>
+                                          );
+                                        }
+                                        return null;
+                                      })() : 'Seleccionar creador'}
+                                    </SelectValue>
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
                                   {members?.map((member: any) => {
-                                    const user = member.users;
+                                    const user = member.user;
                                     const displayName = user?.full_name || user?.email || 'Usuario sin nombre';
                                     const avatarFallback = user?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U';
                                     
@@ -366,10 +387,13 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                             <FormItem>
                               <FormLabel>Tipo</FormLabel>
                               <Select onValueChange={(value) => {
+                                // Only clear dependent fields if the type actually changed
+                                const previousValue = field.value;
                                 field.onChange(value)
                                 setSelectedTypeId(value)
-                                // Clear dependent fields when type changes
-                                if (value !== field.value) {
+                                
+                                if (value !== previousValue && previousValue) {
+                                  // Only clear if we had a previous value and it's different
                                   form.setValue('category_id', '', { shouldValidate: false })
                                   form.setValue('subcategory_id', '', { shouldValidate: false })
                                   setSelectedCategoryId('')
@@ -400,10 +424,13 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                             <FormItem>
                               <FormLabel>Categoría</FormLabel>
                               <Select onValueChange={(value) => {
+                                // Only clear subcategory if the category actually changed
+                                const previousValue = field.value;
                                 field.onChange(value)
                                 setSelectedCategoryId(value)
-                                // Clear subcategory when category changes
-                                if (value !== field.value) {
+                                
+                                if (value !== previousValue && previousValue) {
+                                  // Only clear if we had a previous value and it's different
                                   form.setValue('subcategory_id', '', { shouldValidate: false })
                                 }
                               }} value={field.value}>
