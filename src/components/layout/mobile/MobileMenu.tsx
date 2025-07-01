@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { X, Building, DollarSign, Hammer, Users, Calendar, FileText, Settings, CheckSquare, User, Home, FolderOpen, Mail, Activity, Tag, Calculator, FileCode, Package, Shield, Star, Zap, Crown, ChevronDown, ChevronRight, ArrowLeft } from 'lucide-react'
+import { X, Building, DollarSign, Hammer, Users, Calendar, FileText, Settings, CheckSquare, User, Home, FolderOpen, Mail, Activity, Tag, Calculator, FileCode, Package, Shield, Star, Zap, Crown, ChevronDown, ChevronRight, ArrowLeft, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useLocation } from 'wouter'
 import { useNavigationStore } from '@/stores/navigationStore'
@@ -21,6 +21,8 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const { data: userData } = useCurrentUser()
   const isAdmin = useIsAdmin()
   const [expandedAccordion, setExpandedAccordion] = useState<string | null>(null)
+  const [animationDirection, setAnimationDirection] = useState<'left' | 'right' | null>(null)
+  const [isAnimating, setIsAnimating] = useState(false)
   
   // Get projects data
   const { data: projects = [] } = useProjects(userData?.preferences?.last_organization_id)
@@ -88,10 +90,47 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
     setExpandedAccordion(prev => prev === accordionId ? null : accordionId)
   }
 
+  // Define menu hierarchy for animations
+  const getMenuDirection = (fromContext: string, toContext: string) => {
+    const hierarchy = ['organization', 'project', 'design', 'construction', 'commercialization']
+    const fromIndex = hierarchy.indexOf(fromContext)
+    const toIndex = hierarchy.indexOf(toContext)
+    
+    if (fromIndex < toIndex) return 'left' // Going deeper (forward)
+    if (fromIndex > toIndex) return 'right' // Going back
+    return null // Same level or admin
+  }
+
+  // Enhanced navigation with animations
+  const handleContextChange = (newContext: string, url: string) => {
+    const direction = getMenuDirection(currentSidebarContext, newContext)
+    
+    if (direction) {
+      setAnimationDirection(direction)
+      setIsAnimating(true)
+      
+      // Wait for animation to start, then change context
+      setTimeout(() => {
+        setSidebarContext(newContext as any)
+        navigate(url)
+        
+        // Reset animation after context change
+        setTimeout(() => {
+          setIsAnimating(false)
+          setAnimationDirection(null)
+        }, 150)
+      }, 150)
+    } else {
+      setSidebarContext(newContext as any)
+      navigate(url)
+    }
+  }
+
   // Define the same sidebar contexts as in Sidebar.tsx
   const sidebarContexts = {
     organization: [
       { icon: Home, label: 'Resumen de la Organización', href: '/organization/dashboard' },
+      { icon: ArrowRight, label: 'Ir al proyecto', href: '#', onClick: () => handleContextChange('project', '/project/dashboard') },
       { icon: FileText, label: 'Gestión de Proyectos', href: '/proyectos' },
       { icon: Users, label: 'Gestión de Contactos', href: '/organization/contactos' },
       { icon: CheckSquare, label: 'Gestión de Tareas', href: '/tasks' }
@@ -127,10 +166,10 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           { icon: Users, label: 'Personal', href: '/construction/personnel' }
         ]
       },
-      { icon: Users, label: 'Diseño', href: '#', onClick: () => { setSidebarContext('design'); navigate('/design/dashboard'); } },
-      { icon: Hammer, label: 'Construcción', href: '#', onClick: () => { setSidebarContext('construction'); navigate('/construction/dashboard'); } },
-      { icon: Users, label: 'Comercialización', href: '#', onClick: () => { setSidebarContext('commercialization'); navigate('/commercialization/dashboard'); } },
-      { icon: ArrowLeft, label: 'Volver a Organización', href: '#', onClick: () => { setSidebarContext('organization'); navigate('/organization/dashboard'); } },
+      { icon: Users, label: 'Diseño', href: '#', onClick: () => handleContextChange('design', '/design/dashboard') },
+      { icon: Hammer, label: 'Construcción', href: '#', onClick: () => handleContextChange('construction', '/construction/dashboard') },
+      { icon: Users, label: 'Comercialización', href: '#', onClick: () => handleContextChange('commercialization', '/commercialization/dashboard') },
+      { icon: ArrowLeft, label: 'Volver a Organización', href: '#', onClick: () => handleContextChange('organization', '/organization/dashboard') },
     ],
     design: [
       { icon: Home, label: 'Dashboard', href: '/design/dashboard' },

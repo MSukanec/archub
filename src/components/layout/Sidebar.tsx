@@ -20,6 +20,7 @@ import {
   Activity,
   Calendar,
   ArrowLeft,
+  ArrowRight,
   Tag,
   ChevronDown,
   ChevronRight,
