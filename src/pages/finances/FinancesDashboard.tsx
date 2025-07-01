@@ -13,29 +13,10 @@ import { supabase } from "@/lib/supabase";
 import { WalletBalanceChart } from "@/components/graphics/WalletBalanceChart";
 import { MonthlyFlowChart } from "@/components/graphics/MonthlyFlowChart";
 
-interface FinancialSummary {
-  totalIncome: number;
-  totalExpenses: number;
-  netBalance: number;
-  recentMovementsCount: number;
-  thisMonthIncome: number;
-  thisMonthExpenses: number;
-}
-
-interface RecentMovement {
-  id: string;
-  description: string;
-  amount: number;
-  type: 'income' | 'expense';
-  category: string;
-  created_at: string;
-}
-
 export default function FinancesDashboard() {
   const { data: userData } = useCurrentUser();
   const { setSidebarContext } = useNavigationStore();
   const organizationId = userData?.preferences?.last_organization_id;
-  const projectId = userData?.preferences?.last_project_id;
 
   // Set sidebar context to project when component mounts
   useEffect(() => {
@@ -44,11 +25,18 @@ export default function FinancesDashboard() {
 
   // Fetch financial summary
   const { data: financialSummary, isLoading: loadingSummary } = useQuery({
-    queryKey: ['financial-summary', organizationId, projectId],
+    queryKey: ['financial-summary', organizationId],
     queryFn: async () => {
-      if (!organizationId || !supabase) return null;
+      if (!organizationId || !supabase) return {
+        totalIncome: 0,
+        totalExpenses: 0,
+        netBalance: 0,
+        recentMovementsCount: 0,
+        thisMonthIncome: 0,
+        thisMonthExpenses: 0
+      };
 
-      // Get all movements for this organization and project
+      // Get all movements for this organization
       const { data: movements, error } = await supabase
         .from('movements')
         .select('*')
@@ -56,6 +44,7 @@ export default function FinancesDashboard() {
         .order('created_at', { ascending: false });
 
       if (error || !movements) {
+        console.error('Error fetching movements:', error);
         return {
           totalIncome: 0,
           totalExpenses: 0,
@@ -67,11 +56,13 @@ export default function FinancesDashboard() {
       }
 
       // Get movement concepts separately
-      const typeIds = movements.map(m => m.type_id).filter(Boolean).filter((id, index, arr) => arr.indexOf(id) === index);
+      const typeIds = movements.map((m: any) => m.type_id).filter(Boolean);
+      const uniqueTypeIds = typeIds.filter((id, index, arr) => arr.indexOf(id) === index);
+      
       const { data: concepts } = await supabase
         .from('movement_concepts')
         .select('id, concept_type')
-        .in('id', typeIds);
+        .in('id', uniqueTypeIds);
 
       // Create a map for quick lookup
       const conceptMap = concepts?.reduce((acc: any, concept: any) => {
@@ -84,27 +75,27 @@ export default function FinancesDashboard() {
 
       // Calculate totals
       const income = movements
-        .filter(m => conceptMap[m.type_id] === 'INGRESOS')
-        .reduce((sum, m) => sum + (m.amount || 0), 0);
+        .filter((m: any) => conceptMap[m.type_id] === 'INGRESOS')
+        .reduce((sum: number, m: any) => sum + (m.amount || 0), 0);
 
       const expenses = movements
-        .filter(m => conceptMap[m.type_id] === 'EGRESOS')
-        .reduce((sum, m) => sum + (m.amount || 0), 0);
+        .filter((m: any) => conceptMap[m.type_id] === 'EGRESOS')
+        .reduce((sum: number, m: any) => sum + (m.amount || 0), 0);
 
       // Calculate this month's data
-      const thisMonthMovements = movements.filter(m => {
+      const thisMonthMovements = movements.filter((m: any) => {
         const movementDate = new Date(m.created_at);
         return movementDate.getMonth() === currentMonth && 
                movementDate.getFullYear() === currentYear;
       });
 
       const thisMonthIncome = thisMonthMovements
-        .filter(m => conceptMap[m.type_id] === 'INGRESOS')
-        .reduce((sum, m) => sum + (m.amount || 0), 0);
+        .filter((m: any) => conceptMap[m.type_id] === 'INGRESOS')
+        .reduce((sum: number, m: any) => sum + (m.amount || 0), 0);
 
       const thisMonthExpenses = thisMonthMovements
-        .filter(m => conceptMap[m.type_id] === 'EGRESOS')
-        .reduce((sum, m) => sum + (m.amount || 0), 0);
+        .filter((m: any) => conceptMap[m.type_id] === 'EGRESOS')
+        .reduce((sum: number, m: any) => sum + (m.amount || 0), 0);
 
       return {
         totalIncome: income,
@@ -144,7 +135,7 @@ export default function FinancesDashboard() {
 
       // Calculate balance for each wallet
       const walletBalances = await Promise.all(
-        wallets.map(async (wallet, index) => {
+        wallets.map(async (wallet: any, index: number) => {
           const { data: movements } = await supabase!
             .from('movements')
             .select('amount, type_id')
@@ -160,11 +151,13 @@ export default function FinancesDashboard() {
           }
 
           // Get concept types for these movements
-          const typeIds = movements.map(m => m.type_id).filter(Boolean).filter((id, index, arr) => arr.indexOf(id) === index);
+          const typeIds = movements.map((m: any) => m.type_id).filter(Boolean);
+          const uniqueTypeIds = typeIds.filter((id, index, arr) => arr.indexOf(id) === index);
+          
           const { data: concepts } = await supabase!
             .from('movement_concepts')
             .select('id, concept_type')
-            .in('id', typeIds);
+            .in('id', uniqueTypeIds);
 
           const conceptMap = concepts?.reduce((acc: any, concept: any) => {
             acc[concept.id] = concept.concept_type;
@@ -172,12 +165,12 @@ export default function FinancesDashboard() {
           }, {}) || {};
 
           const income = movements
-            .filter(m => conceptMap[m.type_id] === 'INGRESOS')
-            .reduce((sum, m) => sum + (m.amount || 0), 0);
+            .filter((m: any) => conceptMap[m.type_id] === 'INGRESOS')
+            .reduce((sum: number, m: any) => sum + (m.amount || 0), 0);
 
           const expenses = movements
-            .filter(m => conceptMap[m.type_id] === 'EGRESOS')
-            .reduce((sum, m) => sum + (m.amount || 0), 0);
+            .filter((m: any) => conceptMap[m.type_id] === 'EGRESOS')
+            .reduce((sum: number, m: any) => sum + (m.amount || 0), 0);
 
           return {
             wallet: wallet.name,
@@ -211,11 +204,13 @@ export default function FinancesDashboard() {
       if (error || !movements) return [];
 
       // Get concept types
-      const typeIds = movements.map(m => m.type_id).filter(Boolean).filter((id, index, arr) => arr.indexOf(id) === index);
+      const typeIds = movements.map((m: any) => m.type_id).filter(Boolean);
+      const uniqueTypeIds = typeIds.filter((id, index, arr) => arr.indexOf(id) === index);
+      
       const { data: concepts } = await supabase
         .from('movement_concepts')
         .select('id, concept_type')
-        .in('id', typeIds);
+        .in('id', uniqueTypeIds);
 
       const conceptMap = concepts?.reduce((acc: any, concept: any) => {
         acc[concept.id] = concept.concept_type;
@@ -225,7 +220,7 @@ export default function FinancesDashboard() {
       // Group by month
       const monthlyData: Record<string, { income: number; expenses: number }> = {};
 
-      movements.forEach(movement => {
+      movements.forEach((movement: any) => {
         const date = new Date(movement.created_at);
         const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
         
@@ -263,7 +258,7 @@ export default function FinancesDashboard() {
 
   // Fetch recent movements
   const { data: recentMovements = [], isLoading: loadingMovements } = useQuery({
-    queryKey: ['recent-movements', organizationId, projectId],
+    queryKey: ['recent-movements', organizationId],
     queryFn: async () => {
       if (!organizationId || !supabase) return [];
 
@@ -277,18 +272,20 @@ export default function FinancesDashboard() {
       if (error || !movements) return [];
 
       // Get concept names
-      const typeIds = movements.map(m => m.type_id).filter(Boolean).filter((id, index, arr) => arr.indexOf(id) === index);
-      const categoryIds = movements.map(m => m.category_id).filter(Boolean).filter((id, index, arr) => arr.indexOf(id) === index);
+      const typeIds = movements.map((m: any) => m.type_id).filter(Boolean);
+      const categoryIds = movements.map((m: any) => m.category_id).filter(Boolean);
+      const uniqueTypeIds = typeIds.filter((id, index, arr) => arr.indexOf(id) === index);
+      const uniqueCategoryIds = categoryIds.filter((id, index, arr) => arr.indexOf(id) === index);
 
       const { data: types } = await supabase
         .from('movement_concepts')
         .select('id, name, concept_type')
-        .in('id', typeIds);
+        .in('id', uniqueTypeIds);
 
       const { data: categories } = await supabase
         .from('movement_concepts')
         .select('id, name')
-        .in('id', categoryIds);
+        .in('id', uniqueCategoryIds);
 
       const typeMap = types?.reduce((acc: any, type: any) => {
         acc[type.id] = { name: type.name, concept_type: type.concept_type };
@@ -300,10 +297,10 @@ export default function FinancesDashboard() {
         return acc;
       }, {}) || {};
 
-      return movements.map(m => ({
+      return movements.map((m: any) => ({
         id: m.id,
         description: m.description || 'Sin descripción',
-        amount: m.amount || 0,
+        amount: Math.abs(m.amount || 0), // Always show positive amount
         type: typeMap[m.type_id]?.concept_type === 'INGRESOS' ? 'income' : 'expense',
         category: categoryMap[m.category_id] || typeMap[m.type_id]?.name || 'Sin categoría',
         created_at: m.created_at
@@ -466,7 +463,7 @@ export default function FinancesDashboard() {
           <CardContent>
             <div className="space-y-3">
               {recentMovements.length > 0 ? (
-                recentMovements.map((movement) => (
+                recentMovements.map((movement: any) => (
                   <div key={movement.id} className="flex items-center justify-between p-3 border rounded-lg">
                     <div className="flex items-center gap-3">
                       <div className={`p-2 rounded-lg`} style={{
@@ -495,7 +492,7 @@ export default function FinancesDashboard() {
                         ? 'hsl(var(--chart-1))' 
                         : 'hsl(var(--chart-2))'
                     }}>
-                      {movement.type === 'income' ? '+' : '-'}{formatCurrency(Math.abs(movement.amount))}
+                      {movement.type === 'income' ? '+' : '-'}{formatCurrency(movement.amount)}
                     </div>
                   </div>
                 ))
