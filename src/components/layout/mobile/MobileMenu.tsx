@@ -249,16 +249,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
         
         {/* Bottom Footer Actions */}
         <div className="border-t pt-4" style={{ borderColor: 'var(--menues-border)' }}>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={() => handleNavigation('/tasks')}
-              className="flex flex-col items-center gap-1 p-3 rounded-lg transition-colors hover:opacity-80"
-              style={{ color: 'var(--menues-fg)' }}
-            >
-              <CheckSquare className="h-5 w-5" />
-              <span className="text-xs">Tareas</span>
-            </button>
-            
+          <div className="grid grid-cols-3 gap-2">
             <button
               onClick={() => handleNavigation('/perfil')}
               className="flex flex-col items-center gap-1 p-3 rounded-lg transition-colors hover:opacity-80"
@@ -266,6 +257,26 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
             >
               <User className="h-5 w-5" />
               <span className="text-xs">Perfil</span>
+            </button>
+            
+            {isAdmin && (
+              <button
+                onClick={() => handleNavigation('/admin/dashboard', 'admin')}
+                className="flex flex-col items-center gap-1 p-3 rounded-lg transition-colors hover:opacity-80"
+                style={{ color: 'var(--menues-fg)' }}
+              >
+                <Shield className="h-5 w-5" />
+                <span className="text-xs">Admin</span>
+              </button>
+            )}
+            
+            <button
+              onClick={() => handleNavigation('/tasks')}
+              className="flex flex-col items-center gap-1 p-3 rounded-lg transition-colors hover:opacity-80"
+              style={{ color: 'var(--menues-fg)' }}
+            >
+              <CheckSquare className="h-5 w-5" />
+              <span className="text-xs">Tareas</span>
             </button>
           </div>
         </div>
