@@ -667,14 +667,11 @@ export default function Movements() {
         }}
         getRowClassName={(movement: Movement) => {
           // Determine if it's income or expense based on movement type
-          const typeName =
-            movement.movement_data?.type?.name?.toLowerCase() || "";
-          const isIncome = typeName.includes("ingreso");
-          const isExpense = typeName.includes("egreso");
-
-          if (isIncome) {
+          const typeName = movement.movement_data?.type?.name || "";
+          
+          if (typeName === "Ingresos" || typeName.toLowerCase().includes("ingreso")) {
             return "movement-row-income";
-          } else if (isExpense) {
+          } else if (typeName === "Egresos" || typeName.toLowerCase().includes("egreso")) {
             return "movement-row-expense";
           }
           return "";

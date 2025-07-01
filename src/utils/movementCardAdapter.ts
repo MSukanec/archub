@@ -7,7 +7,7 @@ export function transformMovementToCard(movement: any) {
       name: movement.creator?.full_name || 'Usuario desconocido',
       avatar_url: movement.creator?.avatar_url
     },
-    type: movement.movement_data?.type?.name === 'Ingreso' ? 'Ingreso' as const : 'Egreso' as const,
+    type: movement.movement_data?.type?.name === 'Ingresos' ? 'Ingreso' as const : 'Egreso' as const,
     category: movement.movement_data?.category?.name || 'Sin categoría',
     subcategory: movement.movement_data?.subcategory?.name,
     description: movement.description,

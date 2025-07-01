@@ -49,10 +49,10 @@ const MovementCard: React.FC<MovementCardProps> = ({ movement }) => {
     amount
   } = movement;
 
-  // Format the category line
+  // Format the category line without type (user will know by color)
   const categoryLine = subcategory 
-    ? `${type} / ${category} / ${subcategory}`
-    : `${type} / ${category}`;
+    ? `${category} / ${subcategory}`
+    : category;
 
   // Truncate description to 30 characters
   const truncatedDescription = description 
@@ -65,9 +65,13 @@ const MovementCard: React.FC<MovementCardProps> = ({ movement }) => {
   const isIngreso = type === 'Ingreso';
   const amountPrefix = isIngreso ? '+' : '-';
   const amountColor = isIngreso ? 'text-green-600' : 'text-red-600';
+  
+  // Apply same CSS classes as desktop table rows
+  const cardClassName = isIngreso ? 'movement-row-income' : 'movement-row-expense';
 
   return (
-    <div className="flex items-center justify-between gap-3 bg-white rounded-lg shadow-sm border p-3 mb-2">
+    <div className={`flex items-center justify-between gap-3 bg-[var(--card-bg)] hover:bg-[var(--card-hover-bg)] rounded-lg shadow-sm border border-[var(--card-border)] p-3 mb-2 transition-colors ${cardClassName}`}
+         style={{ borderRight: isIngreso ? '4px solid var(--movement-income-border)' : '4px solid var(--movement-expense-border)' }}>
       {/* Left: Avatar */}
       <div className="flex-shrink-0">
         <Avatar className="w-10 h-10">
@@ -83,11 +87,14 @@ const MovementCard: React.FC<MovementCardProps> = ({ movement }) => {
 
       {/* Center: Data */}
       <div className="flex-1 min-w-0">
-        <div className="text-sm text-gray-600">
+        <div 
+          className="text-[var(--card-fg)] font-medium text-sm"
+          title={subcategory ? `${category} / ${subcategory}` : category}
+        >
           {categoryLine}
         </div>
         <div 
-          className="text-gray-900 font-medium text-sm mt-1 truncate"
+          className="text-[var(--muted-fg)] text-sm mt-1 truncate"
           title={description || 'Sin descripción'}
         >
           {truncatedDescription}
