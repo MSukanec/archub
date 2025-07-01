@@ -4,35 +4,35 @@ import { useCurrentUser } from './use-current-user';
 
 export interface DesignPhase {
   id: string;
-  project_id: string;
+  organization_id: string;
   name: string;
-  description: string | null;
+  position: string | null;
+  is_active: boolean;
   created_at: string;
-  updated_at: string;
 }
 
 export interface CreateDesignPhaseData {
-  project_id: string;
+  organization_id: string;
   name: string;
-  description?: string;
+  position?: string;
 }
 
 export interface UpdateDesignPhaseData extends CreateDesignPhaseData {
   id: string;
 }
 
-export function useDesignPhases(projectId: string) {
+export function useDesignPhases(organizationId: string) {
   return useQuery({
-    queryKey: ['design-phases', projectId],
+    queryKey: ['design-phases', organizationId],
     queryFn: async () => {
-      console.log('Fetching design phases for project:', projectId);
+      console.log('Fetching design phases for organization:', organizationId);
       
       if (!supabase) throw new Error('Supabase not initialized')
       
       const { data, error } = await supabase
         .from('design_phases')
         .select('*')
-        .eq('project_id', projectId)
+        .eq('organization_id', organizationId)
         .order('created_at', { ascending: true });
 
       if (error) {
@@ -46,7 +46,7 @@ export function useDesignPhases(projectId: string) {
 
       return data as DesignPhase[];
     },
-    enabled: !!projectId
+    enabled: !!organizationId
   });
 }
 

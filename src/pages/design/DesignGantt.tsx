@@ -16,10 +16,10 @@ import { DesignTaskModal } from '@/modals/design/DesignTaskModal';
 
 export default function DesignGantt() {
   const { data: userData } = useCurrentUser();
-  const projectId = userData?.preferences?.last_project_id;
+  const organizationId = userData?.preferences?.last_organization_id;
   
-  const { data: phases = [], isLoading: phasesLoading } = useDesignPhases(projectId || '');
-  const { data: tasks = [], isLoading: tasksLoading } = useDesignTasks(projectId || '');
+  const { data: phases = [], isLoading: phasesLoading } = useDesignPhases(organizationId || '');
+  const { data: tasks = [], isLoading: tasksLoading } = useDesignTasks(organizationId || '');
   
   const [showNewPhaseModal, setShowNewPhaseModal] = useState(false);
   const [showNewTaskModal, setShowNewTaskModal] = useState(false);
