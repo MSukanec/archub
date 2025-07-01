@@ -32,7 +32,7 @@ export function useDesignPhases(organizationId: string) {
       const { data, error } = await supabase
         .from('design_phases')
         .select('*')
-        .eq('organization_id', organizationId)
+        .eq('is_active', true)
         .order('created_at', { ascending: true });
 
       if (error) {

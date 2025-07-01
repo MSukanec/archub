@@ -127,7 +127,7 @@ export default function DesignGantt() {
         <DesignPhaseModal
           open={showNewPhaseModal}
           onClose={() => setShowNewPhaseModal(false)}
-          projectId={projectId || ''}
+          organizationId={organizationId || ''}
         />
 
         {/* New Task Modal */}
@@ -256,7 +256,7 @@ export default function DesignGantt() {
       <DesignPhaseModal
         open={showNewPhaseModal}
         onClose={() => setShowNewPhaseModal(false)}
-        projectId={projectId || ''}
+        organizationId={organizationId || ''}
       />
 
       {/* New Task Modal */}
