@@ -1,43 +1,47 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react'
 
-interface CreateAction {
-  label: string
+interface ActionBarAction {
+  id: string
   icon: ReactNode
+  label: string
   onClick: () => void
+  variant?: 'primary' | 'secondary'
 }
 
-interface OtherAction {
-  icon: ReactNode
-  onClick: () => void
-  tooltip?: string
+interface ActionBarActions {
+  slot1?: ActionBarAction  // Dashboard de proyectos (fijo)
+  slot2?: ActionBarAction  // Search
+  slot3?: ActionBarAction  // Crear (verde, principal)
+  slot4?: ActionBarAction  // Filtros
+  slot5?: ActionBarAction  // Limpiar filtros
 }
 
 interface MobileActionBarContextType {
-  createActions: CreateAction[]
-  otherActions: OtherAction[]
-  setCreateActions: (actions: CreateAction[]) => void
-  setOtherActions: (actions: OtherAction[]) => void
+  actions: ActionBarActions
+  setActions: (actions: ActionBarActions) => void
   clearActions: () => void
+  showActionBar: boolean
+  setShowActionBar: (show: boolean) => void
 }
 
 const MobileActionBarContext = createContext<MobileActionBarContextType | undefined>(undefined)
 
 export function MobileActionBarProvider({ children }: { children: ReactNode }) {
-  const [createActions, setCreateActions] = useState<CreateAction[]>([])
-  const [otherActions, setOtherActions] = useState<OtherAction[]>([])
+  const [actions, setActions] = useState<ActionBarActions>({})
+  const [showActionBar, setShowActionBar] = useState(false)
 
   const clearActions = () => {
-    setCreateActions([])
-    setOtherActions([])
+    setActions({})
+    setShowActionBar(false)
   }
 
   return (
     <MobileActionBarContext.Provider value={{
-      createActions,
-      otherActions,
-      setCreateActions,
-      setOtherActions,
-      clearActions
+      actions,
+      setActions,
+      clearActions,
+      showActionBar,
+      setShowActionBar
     }}>
       {children}
     </MobileActionBarContext.Provider>

@@ -1,160 +1,121 @@
-import React, { useState } from 'react'
-import { Home, Plus, X } from 'lucide-react'
+import React from 'react'
 import { Button } from '@/components/ui/button'
+import { useMobileActionBar } from '@/contexts/MobileActionBarContext'
+import { useMobile } from '@/hooks/use-mobile'
+import { Home } from 'lucide-react'
 import { useLocation } from 'wouter'
 
-interface CreateAction {
-  label: string
-  icon: React.ReactNode
-  onClick: () => void
-}
-
-interface OtherAction {
-  icon: React.ReactNode
-  onClick: () => void
-  tooltip?: string
-}
-
-interface MobileActionBarProps {
-  createActions: CreateAction[]
-  otherActions: OtherAction[]
-}
-
-export function MobileActionBar({ createActions, otherActions }: MobileActionBarProps) {
+export function MobileActionBar() {
+  const { actions, showActionBar } = useMobileActionBar()
+  const isMobile = useMobile()
   const [, navigate] = useLocation()
-  const [showSpeedDial, setShowSpeedDial] = useState(false)
-
-  const handleCentralButton = () => {
-    if (createActions.length === 1) {
-      // Ejecutar directamente si solo hay una acción
-      createActions[0].onClick()
-    } else if (createActions.length > 1) {
-      // Mostrar speed dial si hay múltiples acciones
-      setShowSpeedDial(!showSpeedDial)
-    }
+  
+  if (!isMobile || !showActionBar) {
+    return null
   }
 
-  const handleSpeedDialAction = (action: CreateAction) => {
-    action.onClick()
-    setShowSpeedDial(false)
-  }
-
-  const goHome = () => {
-    navigate('/project/dashboard')
+  // Slot 1 siempre es el dashboard de proyectos
+  const defaultSlot1 = {
+    id: 'project-dashboard',
+    icon: <Home className="h-5 w-5" />,
+    label: 'Proyectos',
+    onClick: () => navigate('/project/dashboard'),
+    variant: 'secondary' as const
   }
 
   return (
-    <>
-      {/* Speed Dial Overlay */}
-      {showSpeedDial && (
-        <div 
-          className="fixed inset-0 bg-black/20 z-40 md:hidden"
-          onClick={() => setShowSpeedDial(false)}
-        />
-      )}
-
-      {/* Speed Dial Actions */}
-      {showSpeedDial && createActions.length > 1 && (
-        <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50 md:hidden">
-          <div className="flex flex-col-reverse items-center space-y-reverse space-y-3">
-            {createActions.map((action, index) => (
-              <div
-                key={index}
-                className="flex items-center space-x-3 animate-in slide-in-from-bottom-2 duration-200"
-                style={{ animationDelay: `${index * 50}ms` }}
-              >
-                <span className="bg-white px-3 py-2 rounded-lg shadow-lg text-sm font-medium whitespace-nowrap">
-                  {action.label}
-                </span>
-                <Button
-                  onClick={() => handleSpeedDialAction(action)}
-                  className="w-12 h-12 rounded-full shadow-lg"
-                  style={{
-                    backgroundColor: 'var(--accent)',
-                    color: 'var(--accent-foreground)'
-                  }}
-                >
-                  {action.icon}
-                </Button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Bottom Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
-        <div 
-          className="flex items-center justify-between px-4 py-3 border-t"
-          style={{
-            backgroundColor: 'var(--card-bg)',
-            borderColor: 'var(--card-border)'
-          }}
+    <div 
+      className="fixed bottom-0 left-0 right-0 z-50 border-t"
+      style={{ 
+        backgroundColor: 'var(--menues-bg)',
+        borderColor: 'var(--menues-border)'
+      }}
+    >
+      <div className="flex items-center justify-around px-4 py-3">
+        {/* Slot 1 - Dashboard de Proyectos (fijo) */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="flex flex-col items-center gap-1 h-auto py-2 px-3 hover:opacity-80"
+          onClick={(actions.slot1 || defaultSlot1).onClick}
+          style={{ color: 'var(--menues-fg)' }}
         >
-          {/* Botón Home (fijo) */}
+          {(actions.slot1 || defaultSlot1).icon}
+          <span className="text-xs font-medium">
+            {(actions.slot1 || defaultSlot1).label}
+          </span>
+        </Button>
+
+        {/* Slot 2 - Search */}
+        {actions.slot2 ? (
           <Button
-            onClick={goHome}
             variant="ghost"
             size="icon"
-            className="w-10 h-10 rounded-full"
+            className="flex flex-col items-center gap-1 h-auto py-2 px-3 hover:opacity-80"
+            onClick={actions.slot2.onClick}
+            style={{ color: 'var(--menues-fg)' }}
           >
-            <Home className="h-5 w-5" />
+            {actions.slot2.icon}
+            <span className="text-xs font-medium">
+              {actions.slot2.label}
+            </span>
           </Button>
+        ) : (
+          <div className="w-12 h-12" />
+        )}
 
-          {/* Botones dinámicos (2 a la izquierda, 2 a la derecha del central) */}
-          <div className="flex items-center space-x-4">
-            {/* Botones izquierda del central */}
-            {otherActions.slice(0, 2).map((action, index) => (
-              <Button
-                key={`left-${index}`}
-                onClick={action.onClick}
-                variant="ghost"
-                size="icon"
-                className="w-10 h-10 rounded-full"
-                title={action.tooltip}
-              >
-                {action.icon}
-              </Button>
-            ))}
+        {/* Slot 3 - Crear (principal, verde) */}
+        {actions.slot3 ? (
+          <Button
+            className="h-14 w-14 rounded-full shadow-lg flex flex-col items-center justify-center"
+            style={{ 
+              backgroundColor: 'var(--accent)',
+              color: 'white'
+            }}
+            onClick={actions.slot3.onClick}
+          >
+            {actions.slot3.icon}
+          </Button>
+        ) : (
+          <div className="w-14 h-14" />
+        )}
 
-            {/* Botón central (+) */}
-            <div className="relative">
-              <Button
-                onClick={handleCentralButton}
-                className="w-14 h-14 rounded-full shadow-lg transform -translate-y-1 transition-all duration-200 hover:scale-105"
-                style={{
-                  backgroundColor: 'var(--accent)',
-                  color: 'var(--accent-foreground)'
-                }}
-                disabled={createActions.length === 0}
-              >
-                <Plus 
-                  className={`h-6 w-6 transition-transform duration-200 ${
-                    showSpeedDial ? 'rotate-45' : 'rotate-0'
-                  }`} 
-                />
-              </Button>
-            </div>
+        {/* Slot 4 - Filtros */}
+        {actions.slot4 ? (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="flex flex-col items-center gap-1 h-auto py-2 px-3 hover:opacity-80"
+            onClick={actions.slot4.onClick}
+            style={{ color: 'var(--menues-fg)' }}
+          >
+            {actions.slot4.icon}
+            <span className="text-xs font-medium">
+              {actions.slot4.label}
+            </span>
+          </Button>
+        ) : (
+          <div className="w-12 h-12" />
+        )}
 
-            {/* Botones derecha del central */}
-            {otherActions.slice(2, 4).map((action, index) => (
-              <Button
-                key={`right-${index}`}
-                onClick={action.onClick}
-                variant="ghost"
-                size="icon"
-                className="w-10 h-10 rounded-full"
-                title={action.tooltip}
-              >
-                {action.icon}
-              </Button>
-            ))}
-          </div>
-
-          {/* Espacio para balance visual */}
-          <div className="w-10" />
-        </div>
+        {/* Slot 5 - Limpiar filtros */}
+        {actions.slot5 ? (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="flex flex-col items-center gap-1 h-auto py-2 px-3 hover:opacity-80"
+            onClick={actions.slot5.onClick}
+            style={{ color: 'var(--menues-fg)' }}
+          >
+            {actions.slot5.icon}
+            <span className="text-xs font-medium">
+              {actions.slot5.label}
+            </span>
+          </Button>
+        ) : (
+          <div className="w-12 h-12" />
+        )}
       </div>
-    </>
+    </div>
   )
 }
