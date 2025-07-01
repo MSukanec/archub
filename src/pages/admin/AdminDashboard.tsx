@@ -77,6 +77,17 @@ function useRecentOrganizations() {
 export default function AdminDashboard() {
   const { data: stats, isLoading: statsLoading } = useSystemStats();
   const { data: recentOrganizations, isLoading: orgsLoading } = useRecentOrganizations();
+  const { setSidebarContext } = useNavigationStore();
+  const { setShowActionBar } = useMobileActionBar();
+  const isMobile = useMobile();
+
+  // Set sidebar context and hide mobile action bar on dashboards
+  useEffect(() => {
+    setSidebarContext('admin');
+    if (isMobile) {
+      setShowActionBar(false);
+    }
+  }, [setSidebarContext, setShowActionBar, isMobile]);
 
   const headerProps = {
     title: "Resumen de Administración",
