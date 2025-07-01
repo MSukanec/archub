@@ -36,12 +36,14 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { CustomTable } from "@/components/ui-custom/misc/CustomTable";
 import { CustomEmptyState } from "@/components/ui-custom/misc/CustomEmptyState";
+import { FinancialCards } from "@/components/ui-custom/misc/FinancialCards";
 import MovementCard from "@/components/cards/MovementCard";
 import { transformMovementToCard } from "@/utils/movementCardAdapter";
 
 import { NewMovementModal } from "@/modals/finances/NewMovementModal";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMovements, useToggleMovementFavorite } from "@/hooks/use-movements";
+import { useOrganizationDefaultCurrency } from "@/hooks/use-currencies";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
@@ -180,6 +182,9 @@ export default function Movements() {
     organizationId,
     projectId,
   );
+
+  // Get organization's default currency
+  const { data: defaultCurrency } = useOrganizationDefaultCurrency(organizationId);
 
   // Toggle favorite mutation
   const toggleFavoriteMutation = useToggleMovementFavorite();

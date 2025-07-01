@@ -1,63 +1,69 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 
-interface OrganizationCurrency {
+export interface Currency {
   id: string
-  organization_id: string
-  currency_id: string
-  is_active: boolean
-  is_default: boolean
-  created_at: string
-  currencies: {
-    id: string
-    name: string
-    code: string
-    symbol: string
-    country: string
-    is_default: boolean
-    created_at: string
-  }
+  name: string
+  symbol: string
+  code: string
 }
 
-export function useCurrencies(organizationId: string | undefined) {
+export interface OrganizationCurrency {
+  currency: Currency
+}
+
+export const useCurrencies = () => {
+  return useQuery({
+    queryKey: ['currencies'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('currencies')
+        .select('*')
+        .order('name')
+      
+      if (error) throw error
+      return data as Currency[]
+    },
+  })
+}
+
+export const useOrganizationCurrencies = (organizationId?: string) => {
   return useQuery({
     queryKey: ['organization-currencies', organizationId],
     queryFn: async () => {
-      if (!supabase) {
-        throw new Error('Supabase client not initialized')
-      }
-
-      console.log('Fetching currencies for organization:', organizationId)
-
+      if (!organizationId) return []
+      
       const { data, error } = await supabase
         .from('organization_currencies')
         .select(`
-          *,
-          currencies:currency_id (
-            id,
-            name,
-            code,
-            symbol,
-            country,
-            is_default,
-            created_at
-          )
+          currency:currencies(*)
         `)
         .eq('organization_id', organizationId)
-        .eq('is_active', true)
-        .order('is_default', { ascending: false })
-        .order('created_at', { ascending: true })
-
-      if (error) {
-        console.error('Error fetching currencies:', error)
-        throw error
-      }
-
-      console.log('Currencies fetched:', data)
-      console.log('First currency structure:', data?.[0])
       
-      return data as OrganizationCurrency[] || []
+      if (error) throw error
+      return data as OrganizationCurrency[]
     },
-    enabled: !!organizationId
+    enabled: !!organizationId,
+  })
+}
+
+export const useOrganizationDefaultCurrency = (organizationId?: string) => {
+  return useQuery({
+    queryKey: ['organization-default-currency', organizationId],
+    queryFn: async () => {
+      if (!organizationId) return null
+      
+      const { data, error } = await supabase
+        .from('organization_preferences')
+        .select(`
+          default_currency:currencies(*)
+        `)
+        .eq('organization_id', organizationId)
+        .single()
+      
+      if (error) throw error
+      return data?.default_currency as Currency | null
+    },
+    enabled: !!organizationId,
   })
 }
