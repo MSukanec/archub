@@ -9,6 +9,8 @@ import { useProjects } from '@/hooks/use-projects'
 import { useBudgets } from '@/hooks/use-budgets'
 import { useMovements } from '@/hooks/use-movements'
 import { useNavigationStore } from '@/stores/navigationStore'
+import { useMobileActionBar } from '@/contexts/MobileActionBarContext'
+import { useMobile } from '@/hooks/use-mobile'
 import { 
   Folder, 
   Calendar, 
@@ -39,6 +41,8 @@ export default function ProjectDashboard() {
   const { data: userData, isLoading } = useCurrentUser()
   const { data: projects = [], isLoading: projectsLoading } = useProjects(userData?.organization?.id)
   const { setSidebarContext } = useNavigationStore()
+  const { setShowActionBar } = useMobileActionBar()
+  const isMobile = useMobile()
   const [, navigate] = useLocation()
 
   const currentProject = projects.find(p => p.id === userData?.preferences?.last_project_id)
@@ -86,10 +90,13 @@ export default function ProjectDashboard() {
     enabled: !!currentProject?.id && !!supabase && budgets.length > 0
   })
 
-  // Ensure we're in project sidebar context when this page loads
+  // Ensure we're in project sidebar context and hide mobile action bar on dashboards
   useEffect(() => {
     setSidebarContext('project')
-  }, [setSidebarContext])
+    if (isMobile) {
+      setShowActionBar(false)
+    }
+  }, [setSidebarContext, setShowActionBar, isMobile])
 
   const headerProps = {
     title: "Dashboard del Proyecto",

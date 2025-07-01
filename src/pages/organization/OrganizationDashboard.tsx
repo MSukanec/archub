@@ -28,6 +28,9 @@ import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigationStore } from '@/stores/navigationStore';
+import { useMobileActionBar } from '@/contexts/MobileActionBarContext';
+import { useMobile } from '@/hooks/use-mobile';
+import { useEffect } from 'react';
 
 interface ActivityItem {
   type: string;
@@ -43,8 +46,18 @@ export default function OrganizationDashboard() {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const { setSidebarContext } = useNavigationStore();
+  const { setShowActionBar } = useMobileActionBar();
+  const isMobile = useMobile();
   
   const currentOrganization = userData?.organization;
+
+  // Set sidebar context and hide mobile action bar on dashboards
+  useEffect(() => {
+    setSidebarContext('organization');
+    if (isMobile) {
+      setShowActionBar(false);
+    }
+  }, [setSidebarContext, setShowActionBar, isMobile]);
 
   // Fetch recent projects
   const { data: recentProjects = [] } = useQuery({
