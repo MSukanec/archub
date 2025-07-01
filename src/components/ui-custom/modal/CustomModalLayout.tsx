@@ -53,7 +53,10 @@ export function CustomModalLayout({
       <div
         className={cn(
           "relative z-10 flex flex-col bg-[var(--card-bg)] shadow-2xl transition-all duration-300 ease-in-out border border-[var(--card-border)]",
+          // Mobile: fullscreen
           "w-full h-full",
+          // Desktop: normal modal size with max width and rounded corners
+          "md:w-auto md:h-auto md:max-w-2xl md:min-w-[600px] md:max-h-[90vh] md:rounded-lg",
           className,
         )}
       >
