@@ -75,6 +75,8 @@ export default function FinancesDashboard() {
       }, {});
 
       console.log('Financial summary - movements:', movements.length);
+      console.log('Financial summary - movement type_ids:', typeIds);
+      console.log('Financial summary - unique type_ids:', uniqueTypeIds);
       console.log('Financial summary - concepts:', concepts);
       console.log('Financial summary - conceptMap:', conceptMap);
 
