@@ -95,6 +95,14 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
       setSelectedTypeId(editingMovement.type_id)
       setSelectedCategoryId(editingMovement.category_id || '')
       
+      // Map currency_id and wallet_id to organization-specific IDs
+      const matchingCurrency = currencies?.find(c => 
+        c.currencies?.id === editingMovement.currency_id || c.currency_id === editingMovement.currency_id
+      )
+      const matchingWallet = wallets?.find(w => 
+        w.wallets?.id === editingMovement.wallet_id || w.wallet_id === editingMovement.wallet_id
+      )
+      
       form.reset({
         created_at: new Date(editingMovement.created_at),
         created_by: editingMovement.created_by,
@@ -103,8 +111,8 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         type_id: editingMovement.type_id,
         category_id: editingMovement.category_id || '',
         subcategory_id: editingMovement.subcategory_id || '',
-        currency_id: editingMovement.currency_id,
-        wallet_id: editingMovement.wallet_id
+        currency_id: matchingCurrency?.currency_id || editingMovement.currency_id,
+        wallet_id: matchingWallet?.wallet_id || editingMovement.wallet_id
       })
     } else {
       // New movement mode
