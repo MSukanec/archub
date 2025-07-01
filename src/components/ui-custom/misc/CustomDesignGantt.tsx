@@ -10,7 +10,6 @@ import {
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
 import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState';
-import { TaskBar } from '@/components/ui-custom/misc/TaskBar';
 import { useDeleteDesignProjectPhase, useDesignPhaseTasks } from '@/hooks/use-design-phases';
 import { useToast } from '@/hooks/use-toast';
 
@@ -33,8 +32,6 @@ interface CustomDesignGanttProps {
   onEditPhase: (phase: DesignProjectPhase) => void;
   onAddTask: (phaseId: string) => void;
   onCreatePhase: () => void;
-  onEditTask: (taskId: string) => void;
-  onDeleteTask: (taskId: string) => void;
 }
 
 export function CustomDesignGantt({ 
@@ -43,9 +40,7 @@ export function CustomDesignGantt({
   projectId, 
   onEditPhase, 
   onAddTask,
-  onCreatePhase,
-  onEditTask,
-  onDeleteTask
+  onCreatePhase 
 }: CustomDesignGanttProps) {
   const [openAccordions, setOpenAccordions] = useState<string[]>([]);
   const { toast } = useToast();
@@ -222,51 +217,18 @@ export function CustomDesignGantt({
                       </div>
                     </div>
 
-                    {/* Tasks (when accordion is open) - REAL Supabase data */}
+                    {/* Tasks (when accordion is open) */}
                     {isOpen && (
                       <div className="ml-6 space-y-1">
-                        {getTasksForPhase(phase.id).length > 0 ? (
-                          getTasksForPhase(phase.id).map((task) => (
-                            <div key={task.id} className="flex items-center gap-2 p-1 hover:bg-muted/30 rounded group">
-                              <div className="w-4 h-4 flex-shrink-0">
-                                <span className="text-xs">
-                                  {task.status === 'completed' ? '✅' : 
-                                   task.status === 'in_progress' ? '🔄' : 
-                                   task.status === 'on_hold' ? '⏸️' : '📋'}
-                                </span>
-                              </div>
-                              <span className="text-xs text-muted-foreground flex-1 truncate">
-                                {task.name}
-                              </span>
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
-                                      <MoreHorizontal className="h-2 w-2" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                    <DropdownMenuItem onClick={() => onEditTask(task.id)}>
-                                      <Edit className="mr-2 h-3 w-3" />
-                                      Editar
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem 
-                                      onClick={() => onDeleteTask(task.id)}
-                                      className="text-destructive"
-                                    >
-                                      <Trash2 className="mr-2 h-3 w-3" />
-                                      Eliminar
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              </div>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="text-xs text-muted-foreground italic pl-6">
-                            No hay tareas en esta fase
-                          </div>
-                        )}
+                        {/* Example tasks - replace with real data */}
+                        <div className="flex items-center gap-2 p-1 hover:bg-muted/30 rounded">
+                          <div className="w-4 h-4 flex-shrink-0" />
+                          <span className="text-xs text-muted-foreground">📋 Tarea 1</span>
+                        </div>
+                        <div className="flex items-center gap-2 p-1 hover:bg-muted/30 rounded">
+                          <div className="w-4 h-4 flex-shrink-0" />
+                          <span className="text-xs text-muted-foreground">📋 Tarea 2</span>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -361,38 +323,63 @@ export function CustomDesignGantt({
                       ))}
                     </div>
 
-                    {/* Task rows (when accordion is open) - using REAL Supabase data */}
-                    {openAccordions.includes(phase.id) && phaseTasks.length > 0 && phaseTasks.map((task) => {
+                    {/* Task rows (when accordion is open) */}
+                    {openAccordions.includes(phase.id) && phaseTasks.map((task, taskIndex) => {
                       const barPosition = calculateBarPosition(task.start_date || null, task.end_date || null);
                       return (
-                        <div key={task.id} className="h-8 flex items-center border-b bg-gray-50 relative">
-                          {/* Day grid cells */}
+                        <div key={task.id} className="h-8 flex items-center border-b bg-gray-50 relative group">
                           {days.map((day) => (
                             <div key={day} className="w-8 h-8" />
                           ))}
                           
-                          {/* TaskBar component with real data */}
-                          <TaskBar 
-                            task={task}
-                            position={barPosition}
-                            onEdit={onEditTask}
-                            onDelete={onDeleteTask}
-                          />
+                          {/* Task bar with real dates */}
+                          {barPosition && (
+                            <div 
+                              className="absolute h-4 bg-blue-500 rounded-sm flex items-center justify-between px-1 cursor-pointer hover:bg-blue-600"
+                              style={{ 
+                                left: barPosition.left,
+                                width: barPosition.width,
+                                top: '8px'
+                              }}
+                              title={`${task.name} (${task.start_date} - ${task.end_date})`}
+                            >
+                              <span className="text-xs text-white font-medium truncate mr-1">{task.name}</span>
+                              <div className="w-3 h-3 bg-white rounded-sm flex items-center justify-center">
+                                <span className="text-[8px] text-blue-600">👤</span>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Task action buttons (appear on hover) */}
+                          <div className="absolute right-2 top-1 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 w-6 p-0"
+                                >
+                                  <MoreHorizontal className="h-3 w-3" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => console.log('Edit task:', task.id)}>
+                                  <Edit className="mr-2 h-4 w-4" />
+                                  Editar
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={() => console.log('Delete task:', task.id)}
+                                  className="text-destructive"
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Eliminar
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
                         </div>
                       );
                     })}
-                    
-                    {/* Show empty state if no tasks in opened phase */}
-                    {openAccordions.includes(phase.id) && phaseTasks.length === 0 && (
-                      <div className="h-8 flex items-center border-b bg-gray-50 relative">
-                        {days.map((day) => (
-                          <div key={day} className="w-8 h-8" />
-                        ))}
-                        <div className="absolute left-4 top-1 text-xs text-muted-foreground">
-                          No hay tareas en esta fase
-                        </div>
-                      </div>
-                    )}
                   </div>
                 );
               })}

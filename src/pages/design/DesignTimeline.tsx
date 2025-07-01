@@ -40,16 +40,6 @@ export default function DesignTimeline() {
     setSelectedPhaseId("");
   };
 
-  const handleEditTask = (taskId: string) => {
-    console.log('Edit task:', taskId);
-    // TODO: Implement task editing
-  };
-
-  const handleDeleteTask = (taskId: string) => {
-    console.log('Delete task:', taskId);
-    // TODO: Implement task deletion
-  };
-
   const headerProps = {
     title: "Cronograma",
     showSearch: true,
@@ -95,8 +85,6 @@ export default function DesignTimeline() {
               setEditingPhase(null);
               setIsModalOpen(true);
             }}
-            onEditTask={handleEditTask}
-            onDeleteTask={handleDeleteTask}
           />
         </div>
       </Layout>
