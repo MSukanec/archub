@@ -57,15 +57,10 @@ export function NewPhaseTaskModal({ open, onClose, projectPhaseId }: NewPhaseTas
 
   // Set default creator when user data loads
   useEffect(() => {
-    if (userData?.organization && organizationMembers.length > 0) {
-      const currentMember = organizationMembers.find(
-        (member: OrganizationMember) => member.user_id === userData.user?.id
-      );
-      if (currentMember) {
-        form.setValue('created_by', currentMember.id);
-      }
+    if (userData?.user?.id) {
+      form.setValue('created_by', userData.user.id);
     }
-  }, [userData, organizationMembers, form]);
+  }, [userData, form]);
 
   const createTaskMutation = useMutation({
     mutationFn: async (taskData: NewPhaseTaskFormData) => {
@@ -77,6 +72,9 @@ export function NewPhaseTaskModal({ open, onClose, projectPhaseId }: NewPhaseTas
         body: JSON.stringify({
           ...taskData,
           project_phase_id: projectPhaseId,
+          assigned_to: taskData.assigned_to || null,
+          start_date: taskData.start_date || null,
+          end_date: taskData.end_date || null,
         }),
       });
 

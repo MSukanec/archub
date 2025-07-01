@@ -35,7 +35,8 @@ export function NewPhaseModal({
   onClose,
   projectId,
   organizationId,
-  nextPosition
+  nextPosition,
+  editingPhase
 }: NewPhaseModalProps) {
   const { data: designPhases = [] } = useDesignPhases();
   const createPhaseMutation = useCreateDesignProjectPhase();
@@ -57,13 +58,23 @@ export function NewPhaseModal({
 
   useEffect(() => {
     if (open) {
-      reset({
-        design_phase_id: '',
-        start_date: '',
-        end_date: '',
-      });
+      if (editingPhase) {
+        // Modo edición: precargar datos existentes
+        reset({
+          design_phase_id: editingPhase.design_phase_id,
+          start_date: editingPhase.start_date ? editingPhase.start_date.split('T')[0] : '',
+          end_date: editingPhase.end_date ? editingPhase.end_date.split('T')[0] : '',
+        });
+      } else {
+        // Modo creación: campos vacíos
+        reset({
+          design_phase_id: '',
+          start_date: '',
+          end_date: '',
+        });
+      }
     }
-  }, [open, reset]);
+  }, [open, reset, editingPhase]);
 
   const onSubmit = async (data: NewPhaseFormData) => {
     if (!projectId || !organizationId) return;
@@ -95,7 +106,7 @@ export function NewPhaseModal({
       children={{
         header: (
           <CustomModalHeader
-            title="Nueva Fase de Diseño"
+            title={editingPhase ? "Editar Fase de Diseño" : "Nueva Fase de Diseño"}
             onClose={handleClose}
           />
         ),
@@ -176,7 +187,7 @@ export function NewPhaseModal({
                 className="w-3/4"
                 disabled={isSubmitting || createPhaseMutation.isPending}
               >
-                {(isSubmitting || createPhaseMutation.isPending) ? 'Guardando...' : "Agregar Fase"}
+                {(isSubmitting || createPhaseMutation.isPending) ? 'Guardando...' : (editingPhase ? "Actualizar Fase" : "Agregar Fase")}
               </Button>
             </div>
           </div>
