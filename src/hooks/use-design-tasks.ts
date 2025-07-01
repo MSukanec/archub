@@ -46,6 +46,8 @@ export function useDesignTasks(projectId: string) {
     queryFn: async () => {
       console.log('Fetching design tasks for project:', projectId);
       
+      if (!supabase) throw new Error('Supabase not initialized')
+      
       const { data, error } = await supabase
         .from('design_tasks')
         .select(`
@@ -58,6 +60,10 @@ export function useDesignTasks(projectId: string) {
 
       if (error) {
         console.error('Error fetching design tasks:', error);
+        // Si las tablas no existen o hay error de columna, retornar array vacío
+        if (error.code === '42P01' || error.code === '42703') {
+          return [];
+        }
         throw error;
       }
 

@@ -27,6 +27,8 @@ export function useDesignPhases(projectId: string) {
     queryFn: async () => {
       console.log('Fetching design phases for project:', projectId);
       
+      if (!supabase) throw new Error('Supabase not initialized')
+      
       const { data, error } = await supabase
         .from('design_phases')
         .select('*')
@@ -35,6 +37,10 @@ export function useDesignPhases(projectId: string) {
 
       if (error) {
         console.error('Error fetching design phases:', error);
+        // Si las tablas no existen o hay error de columna, retornar array vacío
+        if (error.code === '42P01' || error.code === '42703') {
+          return [];
+        }
         throw error;
       }
 
@@ -49,6 +55,8 @@ export function useCreateDesignPhase() {
 
   return useMutation({
     mutationFn: async (phaseData: CreateDesignPhaseData) => {
+      if (!supabase) throw new Error('Supabase not initialized')
+      
       const { data, error } = await supabase
         .from('design_phases')
         .insert([phaseData])
@@ -73,6 +81,8 @@ export function useUpdateDesignPhase() {
 
   return useMutation({
     mutationFn: async ({ id, ...updateData }: UpdateDesignPhaseData) => {
+      if (!supabase) throw new Error('Supabase not initialized')
+      
       const { data, error } = await supabase
         .from('design_phases')
         .update(updateData)
@@ -98,6 +108,8 @@ export function useDeleteDesignPhase() {
 
   return useMutation({
     mutationFn: async (id: string) => {
+      if (!supabase) throw new Error('Supabase not initialized')
+      
       const { error } = await supabase
         .from('design_phases')
         .delete()
