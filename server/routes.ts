@@ -219,6 +219,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create design phase task endpoint
+  app.post("/api/design-phase-tasks", async (req, res) => {
+    try {
+      const {
+        project_phase_id,
+        name,
+        description,
+        start_date,
+        end_date,
+        assigned_to,
+        status,
+        priority,
+        created_by
+      } = req.body;
+
+      if (!project_phase_id || !name || !created_by) {
+        return res.status(400).json({ error: "Missing required fields: project_phase_id, name, created_by" });
+      }
+
+      // Get the highest position for ordering
+      const { data: existingTasks } = await supabase
+        .from('design_phase_tasks')
+        .select('position')
+        .eq('project_phase_id', project_phase_id)
+        .order('position', { ascending: false })
+        .limit(1);
+
+      const nextPosition = existingTasks && existingTasks.length > 0 ? existingTasks[0].position + 1 : 1;
+
+      const { data, error } = await supabase
+        .from('design_phase_tasks')
+        .insert({
+          project_phase_id,
+          name,
+          description,
+          start_date,
+          end_date,
+          assigned_to,
+          status: status || 'pendiente',
+          priority: priority || 'media',
+          position: nextPosition,
+          is_active: true,
+          created_by
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error creating design phase task:", error);
+        return res.status(500).json({ error: "Failed to create design phase task" });
+      }
+
+      res.json(data);
+    } catch (error) {
+      console.error("Error creating design phase task:", error);
+      res.status(500).json({ error: "Failed to create design phase task" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
