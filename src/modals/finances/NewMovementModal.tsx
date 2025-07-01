@@ -86,41 +86,59 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
     }
   })
 
-  // Auto-select current user and defaults
+  // Auto-select current user and defaults when modal opens for new movement
   useEffect(() => {
-    if (!editingMovement && open) {
-      const currentValues = form.getValues();
-      
-      if (members && currentUser?.user?.id && !currentValues.created_by) {
+    if (!editingMovement && open && members && currencies && wallets) {
+      // Set default creator (current user)
+      if (currentUser?.user?.id) {
         const currentMember = members.find(m => m.user_id === currentUser.user.id)
         if (currentMember) {
           console.log('Setting default creator:', currentMember);
-          form.setValue('created_by', currentMember.id, { shouldValidate: false, shouldDirty: false })
+          form.setValue('created_by', currentMember.id)
         }
       }
-      if (currencies && currencies.length > 0 && !currentValues.currency_id) {
+
+      // Set default currency (organization default)
+      if (currencies.length > 0) {
         const defaultCurrency = currencies.find(c => c.is_default) || currencies[0]
         console.log('Setting default currency:', defaultCurrency);
-        form.setValue('currency_id', defaultCurrency.id, { shouldValidate: false, shouldDirty: false })
+        form.setValue('currency_id', defaultCurrency.id)
       }
-      if (wallets && wallets.length > 0 && !currentValues.wallet_id) {
+
+      // Set default wallet (organization default)
+      if (wallets.length > 0) {
         const defaultWallet = wallets.find(w => w.is_default) || wallets[0]
         console.log('Setting default wallet:', defaultWallet);
-        form.setValue('wallet_id', defaultWallet.id, { shouldValidate: false, shouldDirty: false })
+        form.setValue('wallet_id', defaultWallet.id)
       }
     }
-  }, [members, currentUser, currencies, wallets, form, editingMovement, open])
+  }, [open, editingMovement, members, currentUser, currencies, wallets, form])
 
-  // Load editing data - set state variables first
+  // Reset form and state when modal opens/closes or when switching between new/edit
   useEffect(() => {
-    if (editingMovement) {
-      setSelectedTypeId(editingMovement.type_id)
-      setSelectedCategoryId(editingMovement.category_id || '')
-    } else {
-      setSelectedTypeId('')
-      setSelectedCategoryId('')
+    if (open) {
+      if (editingMovement) {
+        // Editing mode: set state variables to match the editing movement
+        setSelectedTypeId(editingMovement.type_id)
+        setSelectedCategoryId(editingMovement.category_id || '')
+      } else {
+        // New movement mode: clear all state and form
+        setSelectedTypeId('')
+        setSelectedCategoryId('')
+        form.reset({
+          created_at: new Date(),
+          amount: 0,
+          description: '',
+          created_by: '',
+          type_id: '',
+          category_id: '',
+          subcategory_id: '',
+          currency_id: '',
+          wallet_id: ''
+        })
+      }
     }
-  }, [editingMovement])
+  }, [open, editingMovement, form])
 
   // Populate form after dependent data is loaded
   useEffect(() => {
@@ -350,9 +368,12 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                               <Select onValueChange={(value) => {
                                 field.onChange(value)
                                 setSelectedTypeId(value)
-                                form.setValue('category_id', '')
-                                form.setValue('subcategory_id', '')
-                                setSelectedCategoryId('')
+                                // Clear dependent fields when type changes
+                                if (value !== field.value) {
+                                  form.setValue('category_id', '', { shouldValidate: false })
+                                  form.setValue('subcategory_id', '', { shouldValidate: false })
+                                  setSelectedCategoryId('')
+                                }
                               }} value={field.value}>
                                 <FormControl>
                                   <SelectTrigger>
@@ -381,7 +402,10 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                               <Select onValueChange={(value) => {
                                 field.onChange(value)
                                 setSelectedCategoryId(value)
-                                form.setValue('subcategory_id', '')
+                                // Clear subcategory when category changes
+                                if (value !== field.value) {
+                                  form.setValue('subcategory_id', '', { shouldValidate: false })
+                                }
                               }} value={field.value}>
                                 <FormControl>
                                   <SelectTrigger>
@@ -444,7 +468,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                                 <SelectContent>
                                   {wallets?.map((wallet: any) => (
                                     <SelectItem key={wallet.id} value={wallet.id}>
-                                      {wallet.name || 'Sin nombre'}
+                                      {wallet.wallets?.name || wallet.name || 'Sin nombre'}
                                     </SelectItem>
                                   ))}
                                 </SelectContent>
@@ -472,7 +496,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                                 <SelectContent>
                                   {currencies?.map((currency: any) => (
                                     <SelectItem key={currency.id} value={currency.id}>
-                                      {currency.name || 'Sin nombre'} ({currency.symbol || '$'})
+                                      {currency.currencies?.name || currency.name || 'Sin nombre'} ({currency.currencies?.symbol || currency.symbol || '$'})
                                     </SelectItem>
                                   ))}
                                 </SelectContent>
