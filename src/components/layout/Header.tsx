@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ChevronDown, Plus, Filter, X, Search, Building, Folder } from "lucide-react";
+import { ChevronDown, Plus, Filter, X, Search, Building, Folder, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -19,6 +19,8 @@ import { useNavigationStore } from "@/stores/navigationStore";
 import { useLocation } from "wouter";
 import { NewOrganizationModal } from "@/modals/organization/NewOrganizationModal";
 import { NewProjectModal } from "@/modals/project/NewProjectModal";
+import { MobileMenu } from "./mobile/MobileMenu";
+import { useMobileMenuStore } from "./mobile/useMobileMenuStore";
 
 interface HeaderProps {
   icon?: React.ComponentType<any> | React.ReactNode;
