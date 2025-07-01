@@ -97,48 +97,55 @@ export function DesignPhaseModal({ open, onClose, projectId, editingPhase }: Des
   };
 
   return (
-    <CustomModal
-      title={editingPhase ? "Editar Fase de Diseño" : "Nueva Fase de Diseño"}
-      open={open}
-      onClose={handleClose}
-    >
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <CustomModalBody>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Name field - full width */}
-            <div className="col-span-2">
-              <Label htmlFor="name">Nombre *</Label>
-              <Input
-                id="name"
-                {...register("name")}
-                placeholder="Ej: Anteproyecto, Proyecto Ejecutivo..."
-              />
-              {errors.name && (
-                <p className="text-sm text-destructive mt-1">{errors.name.message}</p>
-              )}
-            </div>
+    <CustomModalLayout open={open} onClose={handleClose}>
+      {{
+        header: (
+          <CustomModalHeader
+            title={editingPhase ? "Editar Fase de Diseño" : "Nueva Fase de Diseño"}
+            onClose={handleClose}
+          />
+        ),
+        body: (
+          <CustomModalBody>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Name field - full width */}
+              <div className="col-span-2">
+                <Label htmlFor="name">Nombre *</Label>
+                <Input
+                  id="name"
+                  {...register("name")}
+                  placeholder="Ej: Anteproyecto, Proyecto Ejecutivo..."
+                />
+                {errors.name && (
+                  <p className="text-sm text-destructive mt-1">{errors.name.message}</p>
+                )}
+              </div>
 
-            {/* Description field - full width */}
-            <div className="col-span-2">
-              <Label htmlFor="description">Descripción</Label>
-              <Textarea
-                id="description"
-                {...register("description")}
-                placeholder="Descripción de la fase de diseño..."
-                rows={3}
-              />
-              {errors.description && (
-                <p className="text-sm text-destructive mt-1">{errors.description.message}</p>
-              )}
+              {/* Description field - full width */}
+              <div className="col-span-2">
+                <Label htmlFor="description">Descripción</Label>
+                <Textarea
+                  id="description"
+                  {...register("description")}
+                  placeholder="Descripción de la fase de diseño..."
+                  rows={3}
+                />
+                {errors.description && (
+                  <p className="text-sm text-destructive mt-1">{errors.description.message}</p>
+                )}
+              </div>
             </div>
-          </div>
-        </CustomModalBody>
-
-        <CustomModalFooter
-          onClose={handleClose}
-          isSubmitting={isSubmitting}
-        />
-      </form>
-    </CustomModal>
+          </CustomModalBody>
+        ),
+        footer: (
+          <CustomModalFooter
+            onCancel={handleClose}
+            onSubmit={handleSubmit(onSubmit)}
+            saveLoading={isSubmitting}
+            submitText={editingPhase ? "Actualizar" : "Crear"}
+          />
+        ),
+      }}
+    </CustomModalLayout>
   );
 }

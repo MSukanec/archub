@@ -11,7 +11,8 @@ import { useDesignTasks } from '@/hooks/use-design-tasks';
 import { Layout } from '@/components/layout/Layout';
 import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState';
 import { CustomDesignGantt } from '@/components/ui-custom/gantt/CustomDesignGantt';
-import { SimpleDesignTaskModal } from '@/modals/design/SimpleDesignTaskModal';
+import { DesignPhaseModal } from '@/modals/design/DesignPhaseModal';
+import { DesignTaskModal } from '@/modals/design/DesignTaskModal';
 
 export default function DesignGantt() {
   const { data: userData } = useCurrentUser();
@@ -20,6 +21,7 @@ export default function DesignGantt() {
   const { data: phases = [], isLoading: phasesLoading } = useDesignPhases(projectId || '');
   const { data: tasks = [], isLoading: tasksLoading } = useDesignTasks(projectId || '');
   
+  const [showNewPhaseModal, setShowNewPhaseModal] = useState(false);
   const [showNewTaskModal, setShowNewTaskModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -225,9 +227,16 @@ export default function DesignGantt() {
         </div>
       </div>
 
+      {/* New Phase Modal */}
+      <DesignPhaseModal
+        open={showNewPhaseModal}
+        onClose={() => setShowNewPhaseModal(false)}
+        projectId={projectId || ''}
+      />
+
       {/* New Task Modal */}
-      <SimpleDesignTaskModal
-        isOpen={showNewTaskModal}
+      <DesignTaskModal
+        open={showNewTaskModal}
         onClose={() => setShowNewTaskModal(false)}
         phases={phases}
       />
