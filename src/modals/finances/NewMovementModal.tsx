@@ -372,17 +372,10 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                             <FormItem>
                               <FormLabel>Tipo</FormLabel>
                               <Select onValueChange={(value) => {
-                                // Only clear dependent fields if the type actually changed
-                                const previousValue = field.value;
                                 field.onChange(value)
                                 setSelectedTypeId(value)
-                                
-                                if (value !== previousValue && previousValue) {
-                                  // Only clear if we had a previous value and it's different
-                                  form.setValue('category_id', '', { shouldValidate: false })
-                                  form.setValue('subcategory_id', '', { shouldValidate: false })
-                                  setSelectedCategoryId('')
-                                }
+                                // Clear dependent fields when type changes
+                                setSelectedCategoryId('')
                               }} value={field.value}>
                                 <FormControl>
                                   <SelectTrigger>
@@ -409,15 +402,8 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                             <FormItem>
                               <FormLabel>Categoría</FormLabel>
                               <Select onValueChange={(value) => {
-                                // Only clear subcategory if the category actually changed
-                                const previousValue = field.value;
                                 field.onChange(value)
                                 setSelectedCategoryId(value)
-                                
-                                if (value !== previousValue && previousValue) {
-                                  // Only clear if we had a previous value and it's different
-                                  form.setValue('subcategory_id', '', { shouldValidate: false })
-                                }
                               }} value={field.value}>
                                 <FormControl>
                                   <SelectTrigger>
