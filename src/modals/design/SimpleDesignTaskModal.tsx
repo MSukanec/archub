@@ -163,8 +163,8 @@ export function SimpleDesignTaskModal({ isOpen, onClose, phases }: SimpleDesignT
             <Label htmlFor="status">Estado</Label>
             <Select
               value={formData.status}
-              onValueChange={(value: 'pending' | 'in_progress' | 'completed') => 
-                setFormData({ ...formData, status: value })
+              onValueChange={(value: string) => 
+                setFormData({ ...formData, status: value as 'pending' | 'in_progress' | 'completed' })
               }
             >
               <SelectTrigger>

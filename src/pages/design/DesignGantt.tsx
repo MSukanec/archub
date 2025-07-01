@@ -97,8 +97,11 @@ export default function DesignGantt() {
         <CustomEmptyState
           title="No hay fases de diseño"
           description="Crea la primera fase de diseño para comenzar a planificar las tareas del proyecto."
-          actionLabel="Crear primera fase"
-          onAction={() => setShowNewTaskModal(true)}
+          action={
+            <Button onClick={() => setShowNewTaskModal(true)}>
+              Crear primera fase
+            </Button>
+          }
         />
         
         <SimpleDesignTaskModal
