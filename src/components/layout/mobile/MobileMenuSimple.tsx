@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import {
   X,
@@ -40,6 +40,14 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const { data: userData } = useCurrentUser();
   const { currentSidebarContext, setSidebarContext } = useNavigationStore();
   const [expandedAccordion, setExpandedAccordion] = useState<string | null>(null);
+
+  // Bloquear scroll del body cuando el menú está abierto
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
   const [expandedOrgSelector, setExpandedOrgSelector] = useState(false);
   const [expandedProjectSelector, setExpandedProjectSelector] = useState(false);
   const queryClient = useQueryClient();
