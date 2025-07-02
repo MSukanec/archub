@@ -628,7 +628,45 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           ))}
         </nav>
 
-
+        {/* General Section */}
+        <div className="mt-6 pt-4 border-t" style={{ borderColor: 'var(--menues-border)' }}>
+          <div className="mb-4">
+            <h3 className="text-sm font-medium opacity-70" style={{ color: 'var(--menues-fg)' }}>
+              General
+            </h3>
+          </div>
+          
+          <div className="space-y-0.5">
+            <button
+              onClick={() => handleNavigation('/perfil')}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors hover:bg-[var(--sidebar-hover-bg)]"
+              style={{ color: 'var(--menues-fg)' }}
+            >
+              <UserCircle className="h-4 w-4" />
+              <span className="text-sm">Mi Perfil</span>
+            </button>
+            
+            <button
+              onClick={() => handleNavigation('/tasks')}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors hover:bg-[var(--sidebar-hover-bg)]"
+              style={{ color: 'var(--menues-fg)' }}
+            >
+              <CheckSquare className="h-4 w-4" />
+              <span className="text-sm">Tareas</span>
+            </button>
+            
+            {isAdmin && (
+              <button
+                onClick={() => handleNavigation('/admin/dashboard', 'admin')}
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors hover:bg-[var(--sidebar-hover-bg)]"
+                style={{ color: 'var(--menues-fg)' }}
+              >
+                <Shield className="h-4 w-4" />
+                <span className="text-sm">Administración</span>
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Context Switcher - Bottom */}
