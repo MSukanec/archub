@@ -49,6 +49,18 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
   
   // Fetch real projects data
   const { data: projectsData } = useProjects(currentOrganization?.id);
+  
+  // Sort organizations: current first, then others
+  const sortedOrganizations = userData?.organizations ? [
+    ...userData.organizations.filter(org => org.id === userData?.preferences?.last_organization_id),
+    ...userData.organizations.filter(org => org.id !== userData?.preferences?.last_organization_id)
+  ] : [];
+  
+  // Sort projects: current first, then others
+  const sortedProjects = projectsData ? [
+    ...projectsData.filter(p => p.id === userData?.preferences?.last_project_id),
+    ...projectsData.filter(p => p.id !== userData?.preferences?.last_project_id)
+  ] : [];
 
   // Organization selection mutation
   const organizationMutation = useMutation({
@@ -102,6 +114,10 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
 
   const handleOrganizationSelect = (organizationId: string) => {
     organizationMutation.mutate(organizationId);
+    // Clear project selection when organization changes (like desktop header)
+    if (userData?.preferences?.id) {
+      projectMutation.mutate('');
+    }
   };
 
   const handleProjectSelect = (projectId: string) => {
@@ -356,7 +372,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
 
           {expandedOrgSelector && (
             <div className="mt-2 max-h-32 overflow-y-auto space-y-1">
-              {userData?.organizations?.map((org: any) => (
+              {sortedOrganizations.map((org: any) => (
                 <button
                   key={org.id}
                   onClick={() => handleOrganizationSelect(org.id)}
@@ -402,7 +418,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
 
           {expandedProjectSelector && (
             <div className="mt-2 max-h-32 overflow-y-auto space-y-1">
-              {projectsData && projectsData.length > 0 ? projectsData.map((project: any) => (
+              {sortedProjects && sortedProjects.length > 0 ? sortedProjects.map((project: any) => (
                 <button
                   key={project.id}
                   onClick={() => handleProjectSelect(project.id)}
