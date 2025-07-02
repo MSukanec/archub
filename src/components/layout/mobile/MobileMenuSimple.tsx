@@ -28,6 +28,7 @@ import { useNavigationStore } from "@/stores/navigationStore";
 import { useLocation } from "wouter";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import { useProjects } from "@/hooks/use-projects";
 
 interface MobileMenuProps {
   onClose: () => void;
@@ -45,6 +46,9 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
   const currentOrganization = userData?.organization;
   const currentProject = userData?.preferences?.last_project_id;
   const isAdmin = userData?.role?.name === "super_admin" || false;
+  
+  // Fetch real projects data
+  const { data: projectsData } = useProjects(currentOrganization?.id);
 
   // Organization selection mutation
   const organizationMutation = useMutation({
@@ -67,6 +71,27 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
     }
   });
 
+  // Project selection mutation
+  const projectMutation = useMutation({
+    mutationFn: async (projectId: string) => {
+      if (!supabase || !userData?.preferences?.id) {
+        throw new Error('No user preferences available');
+      }
+
+      const { error } = await supabase
+        .from('user_preferences')
+        .update({ last_project_id: projectId })
+        .eq('id', userData.preferences.id);
+
+      if (error) throw error;
+      return projectId;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      setExpandedProjectSelector(false);
+    }
+  });
+
   const handleNavigation = (href: string, newContext?: string) => {
     if (newContext) {
       setSidebarContext(newContext as any);
@@ -79,6 +104,10 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
     organizationMutation.mutate(organizationId);
   };
 
+  const handleProjectSelect = (projectId: string) => {
+    projectMutation.mutate(projectId);
+  };
+
   const toggleAccordion = (key: string) => {
     setExpandedAccordion(prev => prev === key ? null : key);
   };
@@ -87,12 +116,12 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
   const sidebarContexts = {
     organization: [
       { icon: Home, label: 'Resumen de la Organización', href: '/organization/dashboard' },
-      { icon: ArrowRight, label: 'Ir al proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); onClose(); } },
+      { icon: ArrowRight, label: 'Ir al proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
       { icon: FolderOpen, label: 'Proyectos', href: '/proyectos' },
       { icon: Mail, label: 'Contactos', href: '/organization/contactos' },
       { icon: Activity, label: 'Actividad', href: '/organization/activity' },
       { icon: Users, label: 'Miembros', href: '/organization/members' },
-      { icon: Building, label: 'Gestión de Organizaciones', href: '#', onClick: () => { setSidebarContext('organizations'); navigate('/organizations'); onClose(); } },
+      { icon: Building, label: 'Gestión de Organizaciones', href: '#', onClick: () => { setSidebarContext('organizations'); navigate('/organizations'); } },
     ],
     project: [
       { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },
@@ -365,7 +394,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
             <div className="flex items-center gap-2">
               <FolderOpen className="h-4 w-4" />
               <span className="truncate">
-                {userData?.projects?.find((p: any) => p.id === currentProject)?.name || 'Sin proyecto'}
+                {projectsData?.find((p: any) => p.id === currentProject)?.name || 'Sin proyecto'}
               </span>
             </div>
             <ChevronDown className={cn("h-4 w-4 transition-transform", expandedProjectSelector && "rotate-180")} />
@@ -373,13 +402,10 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
 
           {expandedProjectSelector && (
             <div className="mt-2 max-h-32 overflow-y-auto space-y-1">
-              {userData?.projects?.map((project: any) => (
+              {projectsData && projectsData.length > 0 ? projectsData.map((project: any) => (
                 <button
                   key={project.id}
-                  onClick={() => {
-                    // Here we would handle project selection - for now just close the selector
-                    setExpandedProjectSelector(false);
-                  }}
+                  onClick={() => handleProjectSelect(project.id)}
                   className="flex w-full items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors hover:opacity-80"
                   style={{
                     color: 'var(--menues-fg)',
@@ -392,7 +418,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
                     <div className="h-2 w-2 rounded-full bg-green-500 flex-shrink-0" />
                   )}
                 </button>
-              )) || (
+              )) : (
                 <div className="px-3 py-2 text-sm opacity-70" style={{ color: 'var(--menues-fg)' }}>
                   No hay proyectos disponibles
                 </div>
