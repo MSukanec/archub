@@ -420,13 +420,13 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
             </h3>
           </div>
           
-          <div className="space-y-1.5">
+          <div className="space-y-0.5">
             <button
               onClick={() => handleNavigation('/perfil')}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors hover:opacity-80"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors hover:bg-gray-100 hover:bg-opacity-10 active:bg-gray-100 active:bg-opacity-20"
               style={{ 
                 color: 'var(--menues-fg)',
-                backgroundColor: location === '/perfil' ? 'rgba(255, 255, 255, 0.1)' : 'transparent'
+                backgroundColor: 'transparent'
               }}
             >
               <UserCircle className="h-4 w-4" />
@@ -435,10 +435,10 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
             
             <button
               onClick={() => handleNavigation('/tasks')}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors hover:opacity-80"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors hover:bg-gray-100 hover:bg-opacity-10 active:bg-gray-100 active:bg-opacity-20"
               style={{ 
                 color: 'var(--menues-fg)',
-                backgroundColor: location === '/tasks' ? 'rgba(255, 255, 255, 0.1)' : 'transparent'
+                backgroundColor: 'transparent'
               }}
             >
               <CheckSquare className="h-4 w-4" />
@@ -448,10 +448,10 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
             {isAdmin && (
               <button
                 onClick={() => handleNavigation('/admin/dashboard', 'admin')}
-                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors hover:opacity-80"
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors hover:bg-gray-100 hover:bg-opacity-10 active:bg-gray-100 active:bg-opacity-20"
                 style={{ 
                   color: 'var(--menues-fg)',
-                  backgroundColor: currentSidebarContext === 'admin' ? 'rgba(255, 255, 255, 0.1)' : 'transparent'
+                  backgroundColor: 'transparent'
                 }}
               >
                 <Shield className="h-4 w-4" />
