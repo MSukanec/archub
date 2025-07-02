@@ -242,7 +242,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
       </div>
 
       {/* Navigation Menu */}
-      <div className="flex-1 px-4 py-3 overflow-y-auto">
+      <div className="flex-1 px-4 py-3 overflow-y-auto scrollbar-hide">
         {/* Context Title */}
         <div className="mb-4">
           <h2 className="text-sm font-medium opacity-70" style={{ color: 'var(--menues-fg)' }}>
@@ -371,7 +371,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
           </button>
 
           {expandedOrgSelector && (
-            <div className="mt-2 max-h-32 overflow-y-auto space-y-1">
+            <div className="mt-2 max-h-32 overflow-y-auto scrollbar-hide space-y-1">
               {sortedOrganizations.map((org: any) => (
                 <button
                   key={org.id}
@@ -417,7 +417,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
           </button>
 
           {expandedProjectSelector && (
-            <div className="mt-2 max-h-32 overflow-y-auto space-y-1">
+            <div className="mt-2 max-h-32 overflow-y-auto scrollbar-hide space-y-1">
               {sortedProjects && sortedProjects.length > 0 ? sortedProjects.map((project: any) => (
                 <button
                   key={project.id}

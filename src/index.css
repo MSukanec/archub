@@ -317,6 +317,16 @@
   .scrollbar-thumb-rounded {
     scrollbar-color: hsl(var(--muted-foreground)) transparent;
   }
+
+  /* Hide scrollbars completely */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 /* Global styling for required field asterisks */
