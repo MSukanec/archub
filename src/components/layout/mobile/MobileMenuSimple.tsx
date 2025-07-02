@@ -50,12 +50,9 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
   // Fetch real projects data
   const { data: projectsData } = useProjects(currentOrganization?.id);
   
-  // Debug log
-  console.log('Mobile Menu Debug:', {
-    currentProject,
-    projectsData,
-    foundProject: projectsData?.find((p: any) => p.id === currentProject)
-  });
+  // Find current project or fall back to first available project
+  const foundCurrentProject = projectsData?.find((p: any) => p.id === currentProject);
+  const effectiveCurrentProject = foundCurrentProject ? currentProject : projectsData?.[0]?.id;
   
   // Sort organizations: current first, then others
   const sortedOrganizations = userData?.organizations ? [
@@ -63,10 +60,10 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
     ...userData.organizations.filter(org => org.id !== userData?.preferences?.last_organization_id)
   ] : [];
   
-  // Sort projects: current first, then others
+  // Sort projects: effective current first, then others
   const sortedProjects = projectsData ? [
-    ...projectsData.filter(p => p.id === userData?.preferences?.last_project_id),
-    ...projectsData.filter(p => p.id !== userData?.preferences?.last_project_id)
+    ...projectsData.filter(p => p.id === effectiveCurrentProject),
+    ...projectsData.filter(p => p.id !== effectiveCurrentProject)
   ] : [];
 
   // Organization selection mutation
@@ -249,7 +246,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
       </div>
 
       {/* Navigation Menu */}
-      <div className="flex-1 px-4 py-3 overflow-y-auto scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+      <div className="px-4 py-3 overflow-hidden" style={{ height: 'calc(100vh - 120px)' }}>
         {/* Context Title */}
         <div className="mb-4">
           <h2 className="text-sm font-medium opacity-70" style={{ color: 'var(--menues-fg)' }}>
@@ -417,7 +414,10 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
             <div className="flex items-center gap-2">
               <FolderOpen className="h-4 w-4" />
               <span className="truncate">
-                {projectsData?.find((p: any) => p.id === currentProject)?.name || 'Sin proyecto'}
+                {effectiveCurrentProject 
+                  ? projectsData?.find((p: any) => p.id === effectiveCurrentProject)?.name || 'Sin proyecto'
+                  : 'Sin proyecto'
+                }
               </span>
             </div>
             <ChevronDown className={cn("h-4 w-4 transition-transform", expandedProjectSelector && "rotate-180")} />
@@ -432,12 +432,12 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
                   className="flex w-full items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
                   style={{
                     color: 'var(--menues-fg)',
-                    backgroundColor: project.id === currentProject ? 'var(--accent)' : 'transparent',
-                    opacity: project.id === currentProject ? 1 : 0.8,
+                    backgroundColor: project.id === effectiveCurrentProject ? 'var(--accent)' : 'transparent',
+                    opacity: project.id === effectiveCurrentProject ? 1 : 0.8,
                   }}
                 >
                   <span className="truncate">{project.name}</span>
-                  {project.id === currentProject && (
+                  {project.id === effectiveCurrentProject && (
                     <div className="h-2 w-2 rounded-full bg-green-500 flex-shrink-0" />
                   )}
                 </button>
