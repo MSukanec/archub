@@ -241,9 +241,9 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const navigationItems = sidebarContexts[currentSidebarContext as keyof typeof sidebarContexts] || sidebarContexts.organization
 
   return (
-    <div className="fixed inset-0 z-50 w-full h-full" style={{ backgroundColor: 'var(--menues-bg)' }}>
+    <div className="fixed inset-0 z-50 flex flex-col w-full h-full" style={{ backgroundColor: 'var(--menues-bg)' }}>
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: 'var(--menues-border)' }}>
+      <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--menues-border)' }}>
         <h1 className="text-lg font-semibold" style={{ color: 'var(--menues-fg)' }}>
           Archub
         </h1>
@@ -349,8 +349,8 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
         </div>
       </div>
 
-      {/* Navigation Menu */}
-      <div className="flex-1 p-4">
+      {/* Navigation Menu - Scrollable */}
+      <div className="flex-1 overflow-y-auto px-4 py-3">
         {/* Context Title */}
         <div className="mb-4">
           <h2 className="text-sm font-medium opacity-70" style={{ color: 'var(--menues-fg)' }}>
@@ -363,7 +363,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           </h2>
         </div>
         
-        <nav className={`space-y-1.5 transition-transform duration-300 ${
+        <nav className={`space-y-0.5 transition-transform duration-300 ${
           isAnimating && animationDirection === 'left' ? 'transform -translate-x-full' :
           isAnimating && animationDirection === 'right' ? 'transform translate-x-full' :
           'transform translate-x-0'
@@ -373,11 +373,10 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
               {/* Main Button */}
               <button
                 onClick={item.isAccordion ? item.onToggle : (item.onClick || (() => handleNavigation(item.href)))}
-                className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors hover:opacity-80"
+                className="flex w-full items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md transition-colors hover:bg-gray-100 hover:bg-opacity-10 active:bg-gray-100 active:bg-opacity-20"
                 style={{
                   color: 'var(--menues-fg)',
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)'
+                  backgroundColor: 'transparent'
                 }}
               >
                 <item.icon className="h-5 w-5" />
@@ -391,16 +390,15 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
               
               {/* Accordion Children */}
               {item.isAccordion && item.expanded && (
-                <div className="ml-8 mt-2 space-y-1.5">
+                <div className="ml-6 mt-1 space-y-0.5">
                   {item.children?.map((child: any, childIndex: number) => (
                     <button
                       key={`${child.label}-${childIndex}`}
                       onClick={() => handleNavigation(child.href)}
-                      className="flex w-full items-center gap-3 px-4 py-2 text-sm rounded-lg transition-colors hover:opacity-80"
+                      className="flex w-full items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors hover:bg-gray-100 hover:bg-opacity-10 active:bg-gray-100 active:bg-opacity-20"
                       style={{
                         color: 'var(--menues-fg)',
-                        backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                        border: '1px solid rgba(255, 255, 255, 0.08)',
+                        backgroundColor: 'transparent',
                         opacity: 0.9
                       }}
                     >
