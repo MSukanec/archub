@@ -50,6 +50,13 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
   // Fetch real projects data
   const { data: projectsData } = useProjects(currentOrganization?.id);
   
+  // Debug log
+  console.log('Mobile Menu Debug:', {
+    currentProject,
+    projectsData,
+    foundProject: projectsData?.find((p: any) => p.id === currentProject)
+  });
+  
   // Sort organizations: current first, then others
   const sortedOrganizations = userData?.organizations ? [
     ...userData.organizations.filter(org => org.id === userData?.preferences?.last_organization_id),
@@ -242,7 +249,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
       </div>
 
       {/* Navigation Menu */}
-      <div className="flex-1 px-4 py-3 overflow-y-auto scrollbar-hide">
+      <div className="flex-1 px-4 py-3 overflow-y-auto scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
         {/* Context Title */}
         <div className="mb-4">
           <h2 className="text-sm font-medium opacity-70" style={{ color: 'var(--menues-fg)' }}>
