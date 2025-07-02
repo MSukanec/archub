@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { createPortal } from "react-dom";
 import {
   X,
   Building,
@@ -227,8 +228,8 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
 
   const navigationItems = sidebarContexts[currentSidebarContext as keyof typeof sidebarContexts] || sidebarContexts.organization;
 
-  return (
-    <div className="fixed inset-0 z-50 flex flex-col w-full h-full" style={{ backgroundColor: 'var(--menues-bg)' }}>
+  const menuContent = (
+    <div className="fixed inset-0 flex flex-col w-full h-full" style={{ backgroundColor: 'var(--menues-bg)', zIndex: 9999 }}>
       {/* Header */}
       <div className="h-14 flex items-center justify-between px-4 border-b" style={{ borderColor: 'var(--menues-border)' }}>
         <h1 className="text-lg font-semibold" style={{ color: 'var(--menues-fg)' }}>
@@ -452,4 +453,6 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
       </div>
     </div>
   );
+
+  return createPortal(menuContent, document.body);
 }
