@@ -35,7 +35,7 @@ interface MobileMenuProps {
   onClose: () => void;
 }
 
-export function MobileMenu({ onClose }: MobileMenuProps) {
+export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const { currentSidebarContext, setSidebarContext } = useNavigationStore();
