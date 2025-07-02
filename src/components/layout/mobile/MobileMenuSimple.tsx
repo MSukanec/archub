@@ -198,6 +198,15 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
 
       {/* Navigation Menu */}
       <div className="flex-1 px-4 py-3 overflow-y-auto">
+        {/* Context Title */}
+        <div className="mb-4">
+          <h2 className="text-sm font-medium opacity-70" style={{ color: 'var(--menues-fg)' }}>
+            {currentSidebarContext === 'organization' && 'Organización'}
+            {currentSidebarContext === 'project' && 'Proyecto'}
+            {currentSidebarContext === 'admin' && 'Administración'}
+          </h2>
+        </div>
+
         <nav className="space-y-0.5">
           {navigationItems.map((item: any, index: number) => (
             <div key={`${item.label}-${index}`}>
@@ -242,6 +251,55 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
             </div>
           ))}
         </nav>
+
+        {/* General Section - After navigation */}
+        <div className="mt-6 pt-4 border-t" style={{ borderColor: 'var(--menues-border)' }}>
+          <div className="mb-4">
+            <h3 className="text-sm font-medium opacity-70" style={{ color: 'var(--menues-fg)' }}>
+              General
+            </h3>
+          </div>
+          
+          <div className="space-y-0.5">
+            <button
+              onClick={() => handleNavigation('/perfil')}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors hover:bg-[var(--sidebar-hover-bg)]"
+              style={{ 
+                color: 'var(--menues-fg)',
+                backgroundColor: 'transparent'
+              }}
+            >
+              <UserCircle className="h-5 w-5" />
+              <span className="text-sm font-medium">Mi Perfil</span>
+            </button>
+            
+            <button
+              onClick={() => handleNavigation('/tasks')}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors hover:bg-[var(--sidebar-hover-bg)]"
+              style={{ 
+                color: 'var(--menues-fg)',
+                backgroundColor: 'transparent'
+              }}
+            >
+              <CheckSquare className="h-5 w-5" />
+              <span className="text-sm font-medium">Tareas</span>
+            </button>
+            
+            {isAdmin && (
+              <button
+                onClick={() => handleNavigation('/admin/dashboard', 'admin')}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors hover:bg-[var(--sidebar-hover-bg)]"
+                style={{ 
+                  color: 'var(--menues-fg)',
+                  backgroundColor: 'transparent'
+                }}
+              >
+                <Shield className="h-5 w-5" />
+                <span className="text-sm font-medium">Administración</span>
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Organization and Project Selectors - At the bottom */}
@@ -290,44 +348,56 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
           )}
         </div>
 
-        {/* General Section */}
-        <div className="space-y-1">
+        {/* Project Selector */}
+        <div>
+          <div className="text-xs font-medium opacity-70 mb-2" style={{ color: 'var(--menues-fg)' }}>
+            Proyecto activo:
+          </div>
           <button
-            onClick={() => handleNavigation('/perfil')}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors hover:bg-[var(--sidebar-hover-bg)]"
-            style={{ 
+            onClick={() => setExpandedProjectSelector(!expandedProjectSelector)}
+            className="flex w-full items-center justify-between px-3 py-2 text-sm font-medium rounded-lg border transition-colors hover:bg-[var(--sidebar-hover-bg)]"
+            style={{
               color: 'var(--menues-fg)',
-              backgroundColor: 'transparent'
+              backgroundColor: 'transparent',
+              borderColor: 'var(--menues-border)'
             }}
           >
-            <UserCircle className="h-5 w-5" />
-            <span className="text-sm font-medium">Mi Perfil</span>
+            <div className="flex items-center gap-2">
+              <FolderOpen className="h-4 w-4" />
+              <span className="truncate">
+                {userData?.projects?.find((p: any) => p.id === currentProject)?.name || 'Sin proyecto'}
+              </span>
+            </div>
+            <ChevronDown className={cn("h-4 w-4 transition-transform", expandedProjectSelector && "rotate-180")} />
           </button>
-          
-          <button
-            onClick={() => handleNavigation('/tasks')}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors hover:bg-[var(--sidebar-hover-bg)]"
-            style={{ 
-              color: 'var(--menues-fg)',
-              backgroundColor: 'transparent'
-            }}
-          >
-            <CheckSquare className="h-5 w-5" />
-            <span className="text-sm font-medium">Tareas</span>
-          </button>
-          
-          {isAdmin && (
-            <button
-              onClick={() => handleNavigation('/admin/dashboard', 'admin')}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors hover:bg-[var(--sidebar-hover-bg)]"
-              style={{ 
-                color: 'var(--menues-fg)',
-                backgroundColor: 'transparent'
-              }}
-            >
-              <Shield className="h-5 w-5" />
-              <span className="text-sm font-medium">Administración</span>
-            </button>
+
+          {expandedProjectSelector && (
+            <div className="mt-2 max-h-32 overflow-y-auto space-y-1">
+              {userData?.projects?.map((project: any) => (
+                <button
+                  key={project.id}
+                  onClick={() => {
+                    // Here we would handle project selection - for now just close the selector
+                    setExpandedProjectSelector(false);
+                  }}
+                  className="flex w-full items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors hover:opacity-80"
+                  style={{
+                    color: 'var(--menues-fg)',
+                    backgroundColor: project.id === currentProject ? 'var(--accent)' : 'transparent',
+                    opacity: project.id === currentProject ? 1 : 0.8,
+                  }}
+                >
+                  <span className="truncate">{project.name}</span>
+                  {project.id === currentProject && (
+                    <div className="h-2 w-2 rounded-full bg-green-500 flex-shrink-0" />
+                  )}
+                </button>
+              )) || (
+                <div className="px-3 py-2 text-sm opacity-70" style={{ color: 'var(--menues-fg)' }}>
+                  No hay proyectos disponibles
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>
