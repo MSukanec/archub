@@ -163,7 +163,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
         ]
       },
       { icon: CheckSquare, label: 'Gestión de Tareas', href: '/tasks' },
-      { icon: ArrowLeft, label: 'Volver a Organización', href: '#', onClick: () => { setSidebarContext('organization'); navigate('/organization/dashboard'); onClose(); } },
+      { icon: ArrowLeft, label: 'Volver a Organización', href: '#', onClick: () => { setSidebarContext('organization'); navigate('/organization/dashboard'); } },
     ],
     admin: [
       { icon: Home, label: 'Resumen de Administración', href: '/admin/dashboard' },
@@ -242,7 +242,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
               {/* Main Button */}
               <button
                 onClick={item.isAccordion ? item.onToggle : (item.onClick || (() => handleNavigation(item.href)))}
-                className="flex w-full items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md transition-colors hover:bg-[var(--sidebar-hover-bg)]"
+                className="flex w-full items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
                 style={{
                   color: 'var(--menues-fg)',
                   backgroundColor: 'transparent'
@@ -264,7 +264,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
                     <button
                       key={`${child.label}-${childIndex}`}
                       onClick={() => handleNavigation(child.href)}
-                      className="flex w-full items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors hover:bg-[var(--sidebar-hover-bg)]"
+                      className="flex w-full items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
                       style={{
                         color: 'var(--menues-fg)',
                         backgroundColor: 'transparent',
@@ -292,7 +292,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
           <div className="space-y-0.5">
             <button
               onClick={() => handleNavigation('/perfil')}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors hover:bg-[var(--sidebar-hover-bg)]"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
               style={{ 
                 color: 'var(--menues-fg)',
                 backgroundColor: 'transparent'
@@ -304,7 +304,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
             
             <button
               onClick={() => handleNavigation('/tasks')}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors hover:bg-[var(--sidebar-hover-bg)]"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
               style={{ 
                 color: 'var(--menues-fg)',
                 backgroundColor: 'transparent'
@@ -317,7 +317,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
             {isAdmin && (
               <button
                 onClick={() => handleNavigation('/admin/dashboard', 'admin')}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors hover:bg-[var(--sidebar-hover-bg)]"
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
                 style={{ 
                   color: 'var(--menues-fg)',
                   backgroundColor: 'transparent'
@@ -340,7 +340,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
           </div>
           <button
             onClick={() => setExpandedOrgSelector(!expandedOrgSelector)}
-            className="flex w-full items-center justify-between px-3 py-2 text-sm font-medium rounded-lg border transition-colors hover:bg-[var(--sidebar-hover-bg)]"
+            className="flex w-full items-center justify-between px-3 py-2 text-sm font-medium rounded-lg border transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
             style={{
               color: 'var(--menues-fg)',
               backgroundColor: 'transparent',
@@ -384,7 +384,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
           </div>
           <button
             onClick={() => setExpandedProjectSelector(!expandedProjectSelector)}
-            className="flex w-full items-center justify-between px-3 py-2 text-sm font-medium rounded-lg border transition-colors hover:bg-[var(--sidebar-hover-bg)]"
+            className="flex w-full items-center justify-between px-3 py-2 text-sm font-medium rounded-lg border transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
             style={{
               color: 'var(--menues-fg)',
               backgroundColor: 'transparent',
