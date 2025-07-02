@@ -22,10 +22,11 @@ interface CustomKanbanProps {
   onCardMove?: (cardId: string, sourceListId: string, destListId: string, destIndex: number) => void;
   onCreateList?: () => void;
   onDeleteList?: (listId: string) => void;
+  onDeleteCard?: (cardId: string) => void;
   loading?: boolean;
 }
 
-export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, onDeleteList, loading }: CustomKanbanProps) {
+export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, onDeleteList, onDeleteCard, loading }: CustomKanbanProps) {
   const [newCardListId, setNewCardListId] = useState<string | null>(null);
   const [editingListId, setEditingListId] = useState<string | null>(null);
   const [selectedCard, setSelectedCard] = useState<KanbanCard | null>(null);
@@ -214,11 +215,37 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
                                           ref={provided.innerRef}
                                           {...provided.draggableProps}
                                           {...provided.dragHandleProps}
-                                          className={`p-3 cursor-pointer hover:shadow-sm transition-shadow ${
+                                          className={`p-3 cursor-pointer hover:shadow-sm transition-shadow relative group ${
                                             snapshot.isDragging ? 'shadow-md rotate-1' : ''
                                           }`}
                                           onClick={() => setSelectedCard(card)}
                                         >
+                                          {/* Hover Action Buttons */}
+                                          <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              className="h-6 w-6 p-0 bg-white/90 shadow-sm hover:bg-white"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSelectedCard(card);
+                                              }}
+                                            >
+                                              <Edit className="h-3 w-3" />
+                                            </Button>
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              className="h-6 w-6 p-0 bg-white/90 shadow-sm hover:bg-white text-red-500 hover:text-red-600"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                onDeleteCard?.(card.id);
+                                              }}
+                                            >
+                                              <Trash2 className="h-3 w-3" />
+                                            </Button>
+                                          </div>
+
                                           {/* Creator Info Header */}
                                           <div className="flex items-center justify-between mb-2">
                                             <div className="flex items-center gap-2">

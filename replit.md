@@ -119,17 +119,17 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- July 2, 2025. Complete mobile menu scrollbar fix and authentication modal redesign with modal confirmation button improvements
-  • Fixed mobile menu background scrollbar by implementing document.body overflow blocking using useEffect cleanup
-  • Applied createPortal rendering to move MobileMenu outside layout hierarchy and prevent page scrollbar visibility
-  • Completely redesigned AuthModal with professional two-column layout following Supabase design reference
-  • Left column features dark gradient background with Archub branding, product features, and decorative elements
-  • Right column contains clean authentication forms with improved spacing, better button styling, and professional appearance
-  • Enhanced Google OAuth buttons with black background and improved typography following modern SaaS design patterns
-  • Fixed AlertDialogAction component to use destructive variant by default instead of accent color for confirmation modals
-  • All logout and delete confirmation dialogs now display proper red destructive buttons instead of green accent buttons
-  • Authentication modal now uses max-w-5xl for optimal two-column layout with proper responsive behavior
-  • Enhanced form styling with consistent heights (h-11), better borders, and improved placeholder text
+- July 2, 2025. Complete mobile optimization, file restructuring, and Kanban hover interactions
+  • Cleaned up mobile menu structure: deleted old MobileMenu.tsx and renamed MobileMenuSimple.tsx to MobileMenu.tsx
+  • Made authentication modal fully responsive: hidden branding column on mobile, added mobile header with Archub logo
+  • Mobile login now shows single-column layout with proper logo, titles, and form spacing optimized for mobile screens
+  • Authentication modal maintains professional two-column desktop layout while adapting perfectly to mobile viewports
+  • Added hover action buttons to Kanban cards: Edit and Delete buttons appear on card hover with opacity transition
+  • Kanban action buttons positioned top-right with white background and shadow for clear visibility over card content
+  • Fixed mobile menu TypeScript interface by adding required isOpen property and updating Header.tsx implementation
+  • Enhanced Kanban UX with stopPropagation on action buttons to prevent card selection when using edit/delete actions
+  • Authentication modal supports responsive padding (p-6 on mobile, p-12 on desktop) for optimal spacing across devices
+  • All changes maintain existing functionality while significantly improving mobile experience and task management workflow
 - July 1, 2025. Implemented responsive financial cards system with currency selection and optimized layouts
   • Created FinancialCards component with responsive behavior: desktop shows max 3 cards full-width, mobile shows single card with currency selector
   • Desktop adaptive grid: 1 card uses grid-cols-1, 2 cards use grid-cols-2, 3+ cards use grid-cols-3 for optimal space utilization

@@ -121,9 +121,9 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl w-full h-[90vh] p-0 overflow-hidden">
-        <div className="flex h-full">
-          {/* Columna izquierda - Branding */}
-          <div className="flex-1 bg-gradient-to-br from-slate-900 to-slate-800 p-12 flex flex-col justify-center relative overflow-hidden">
+        <div className="flex flex-col md:flex-row h-full">
+          {/* Columna izquierda - Branding (oculta en mobile) */}
+          <div className="hidden md:flex flex-1 bg-gradient-to-br from-slate-900 to-slate-800 p-12 flex-col justify-center relative overflow-hidden">
             {/* Logo */}
             <div className="absolute top-8 left-8">
               <div className="flex items-center space-x-2">
@@ -166,10 +166,20 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
           </div>
 
           {/* Columna derecha - Formulario */}
-          <div className="flex-1 bg-white p-12 flex flex-col justify-center max-w-lg">
+          <div className="flex-1 bg-white p-6 md:p-12 flex flex-col justify-center w-full md:max-w-lg">
             <div className="w-full max-w-sm mx-auto">
-              {/* Header */}
-              <div className="text-center mb-8">
+              {/* Mobile Header con logo */}
+              <div className="md:hidden text-center mb-8">
+                <div className="flex items-center justify-center space-x-2 mb-4">
+                  <Building className="w-8 h-8 text-emerald-600" />
+                  <span className="text-2xl font-bold text-gray-900">Archub</span>
+                </div>
+                <h2 className="text-xl font-bold text-gray-900 mb-2">Bienvenido de vuelta</h2>
+                <p className="text-gray-600">Inicia sesión en tu cuenta</p>
+              </div>
+              
+              {/* Desktop Header */}
+              <div className="hidden md:block text-center mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Bienvenido de vuelta</h2>
                 <p className="text-gray-600">Inicia sesión en tu cuenta</p>
               </div>

@@ -19,7 +19,7 @@ import { useNavigationStore } from "@/stores/navigationStore";
 import { useLocation } from "wouter";
 import { NewOrganizationModal } from "@/modals/organization/NewOrganizationModal";
 import { NewProjectModal } from "@/modals/project/NewProjectModal";
-import { MobileMenu } from "./mobile/MobileMenuSimple";
+import { MobileMenu } from "./mobile/MobileMenu";
 import { useMobileMenuStore } from "./mobile/useMobileMenuStore";
 import { useMobile } from "@/hooks/use-mobile";
 
@@ -486,7 +486,7 @@ export function Header({
     )}
 
     {/* Mobile Menu */}
-    {isMobileMenuOpen && <MobileMenu onClose={closeMenu} />}
+    {isMobileMenuOpen && <MobileMenu onClose={closeMenu} isOpen={isMobileMenuOpen} />}
     </>
   );
 }
