@@ -376,7 +376,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
                 <button
                   key={org.id}
                   onClick={() => handleOrganizationSelect(org.id)}
-                  className="flex w-full items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors hover:opacity-80"
+                  className="flex w-full items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
                   style={{
                     color: 'var(--menues-fg)',
                     backgroundColor: org.id === currentOrganization?.id ? 'var(--accent)' : 'transparent',
@@ -422,7 +422,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
                 <button
                   key={project.id}
                   onClick={() => handleProjectSelect(project.id)}
-                  className="flex w-full items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors hover:opacity-80"
+                  className="flex w-full items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
                   style={{
                     color: 'var(--menues-fg)',
                     backgroundColor: project.id === currentProject ? 'var(--accent)' : 'transparent',
