@@ -401,7 +401,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
     >
       {/* Header */}
       <div
-        className="flex items-center justify-between px-4 py-3 border-b"
+        className="h-14 flex items-center justify-between px-4 border-b"
         style={{ borderColor: "var(--menues-border)" }}
       >
         <h1
