@@ -119,6 +119,13 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 3, 2025. Enhanced CustomModalBody component with dynamic column layout control
+  • Added columns prop (1 | 2) with default value of 2 for backward compatibility
+  • Implemented responsive grid system: columns=1 uses grid-cols-1, columns=2 uses grid-cols-1 md:grid-cols-2
+  • Added grid layout with gap-4 spacing to base component classes
+  • Enables centralized column control without manual grid classes in individual modals
+  • Mobile-first approach: always single column on mobile, optional two columns on desktop (md+)
+  • Maintains existing modal functionality while providing flexible layout options
 - July 3, 2025. Implemented Google Tasks-style completed tasks system for Kanban and Design Phase Tasks
   • Created TaskListWithCompleted.tsx component with active/completed task separation and accordion interface for completed tasks
   • Added is_completed and completed_at fields to KanbanCard and DesignPhaseTask interfaces for completion tracking

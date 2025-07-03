@@ -5,12 +5,14 @@ interface CustomModalBodyProps {
   children: React.ReactNode;
   className?: string;
   padding?: "none" | "sm" | "md" | "lg";
+  columns?: 1 | 2;
 }
 
 export function CustomModalBody({
   children,
   className,
   padding = "md",
+  columns = 2,
 }: CustomModalBodyProps) {
   const paddingClasses = {
     none: "",
@@ -19,10 +21,13 @@ export function CustomModalBody({
     lg: "p-3",
   };
 
+  const gridCols = columns === 1 ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2";
+
   return (
     <div
       className={cn(
-        "flex-1 overflow-y-auto w-full",
+        "flex-1 overflow-y-auto w-full grid gap-4",
+        gridCols,
         paddingClasses[padding],
         className,
       )}
