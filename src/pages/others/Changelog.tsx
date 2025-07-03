@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button'
 import { useState, useEffect } from 'react'
 import { Plus, History, Search, Filter, X } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { useIsAdmin } from '@/hooks/use-is-admin'
 import { useChangelogEntries } from '@/hooks/use-changelog'
 import { NewChangelogEntryModal } from '@/modals/others/NewChangelogEntryModal'
 import { useDeleteChangelogEntry } from '@/hooks/use-changelog'
@@ -40,7 +39,6 @@ export default function Changelog() {
   const [showNewEntryModal, setShowNewEntryModal] = useState(false)
   const [editingEntry, setEditingEntry] = useState<any>(null)
   const { data: userData } = useCurrentUser()
-  const { data: isAdmin, isLoading: isLoadingAdmin } = useIsAdmin()
   const { data: entries, isLoading } = useChangelogEntries()
   const { setActions, setShowActionBar, clearActions } = useMobileActionBar()
   const deleteEntryMutation = useDeleteChangelogEntry()
@@ -48,8 +46,9 @@ export default function Changelog() {
   // Configure mobile action bar
   useEffect(() => {
     console.log('User data:', userData)
-    console.log('Is admin from hook:', isAdmin)
-    console.log('Is loading admin:', isLoadingAdmin)
+    console.log('User role:', userData?.role?.name)
+    const isAdmin = userData?.role?.name === "super_admin"
+    console.log('Is admin:', isAdmin)
     
     setActions({
       slot2: {
@@ -93,7 +92,7 @@ export default function Changelog() {
     return () => {
       clearActions()
     }
-  }, [isAdmin, setActions, setShowActionBar, clearActions])
+  }, [userData?.role?.name, setActions, setShowActionBar, clearActions])
 
   // Handle edit entry
   const handleEditEntry = (entry: any) => {
@@ -123,7 +122,7 @@ export default function Changelog() {
     onSearchChange: setSearchValue,
     showFilters: false,
     onClearFilters: () => setSearchValue(""),
-    actions: isAdmin ? [
+    actions: userData?.role?.name === "super_admin" ? [
       <Button 
         key="new-entry"
         className="h-8 px-3 text-sm"

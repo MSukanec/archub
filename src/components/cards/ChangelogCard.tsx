@@ -2,7 +2,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Star, Bug, Wrench, Plus as PlusIcon, Edit, Trash2 } from 'lucide-react'
-import { useIsAdmin } from '@/hooks/use-is-admin'
+import { useCurrentUser } from '@/hooks/use-current-user'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 
@@ -38,7 +38,8 @@ const getChangelogIcon = (type: string) => {
 }
 
 export function ChangelogCard({ entry, onEdit, onDelete }: ChangelogCardProps) {
-  const { data: isAdmin } = useIsAdmin()
+  const { data: userData } = useCurrentUser()
+  const isAdmin = userData?.role?.name === "super_admin"
 
   return (
     <Card className="overflow-hidden">
