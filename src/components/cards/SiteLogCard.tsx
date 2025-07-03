@@ -65,10 +65,16 @@ export default function SiteLogCard({ siteLog, onEdit, onDelete, onToggleFavorit
       onClick={() => onEdit(siteLog)}
     >
       <CardContent className="p-3">
-        {/* Header Row - Action buttons */}
-        <div className="flex items-center justify-between mb-2">
-          <div className="opacity-0">
-            {/* Invisible spacer */}
+        {/* First Row: Type | Date Time + Action Buttons */}
+        <div className="flex items-center justify-between text-sm mb-2">
+          <div className="flex items-center gap-2">
+            <span className="text-[var(--card-fg)] font-medium">
+              {entryTypeConfig.label}
+            </span>
+            <span className="text-muted-foreground">|</span>
+            <span className="text-[var(--card-fg)] font-medium">
+              {format(new Date(siteLog.log_date), 'dd/MM/yyyy HH:mm', { locale: es })}
+            </span>
           </div>
           
           <div className="flex items-center gap-1">
@@ -104,20 +110,7 @@ export default function SiteLogCard({ siteLog, onEdit, onDelete, onToggleFavorit
           </div>
         </div>
 
-        {/* Type and Date - Single Row */}
-        <div className="flex items-center justify-between text-sm mb-2">
-          <div className="flex items-center gap-2">
-            <Badge variant={getEntryTypeVariant(siteLog.entry_type)} className="text-xs">
-              {React.createElement(entryTypeConfig.icon, { className: "h-3 w-3 mr-1" })}
-              {entryTypeConfig.label}
-            </Badge>
-            <span className="text-[var(--card-fg)] font-medium">
-              {format(new Date(siteLog.log_date), 'dd/MM/yyyy HH:mm', { locale: es })}
-            </span>
-          </div>
-        </div>
-
-        {/* Creator Row */}
+        {/* Second Row: Avatar + Creator */}
         <div className="flex items-center gap-2">
           <Avatar className="w-6 h-6">
             <AvatarImage 
@@ -132,30 +125,6 @@ export default function SiteLogCard({ siteLog, onEdit, onDelete, onToggleFavorit
             {siteLog.creator?.full_name || 'Usuario'}
           </span>
         </div>
-        
-        {/* Comments preview if available */}
-        {siteLog.comments && siteLog.comments.trim() && (
-          <div className="mt-2 pt-2 border-t border-border">
-            <p className="text-xs text-muted-foreground line-clamp-2">
-              {siteLog.comments}
-            </p>
-          </div>
-        )}
-
-        {/* Related data counts */}
-        {(siteLog.events?.length > 0 || siteLog.attendees?.length > 0 || siteLog.equipment?.length > 0) && (
-          <div className="mt-2 pt-2 border-t border-border flex items-center gap-3 text-xs text-muted-foreground">
-            {siteLog.events?.length > 0 && (
-              <span>{siteLog.events.length} eventos</span>
-            )}
-            {siteLog.attendees?.length > 0 && (
-              <span>{siteLog.attendees.length} asistentes</span>
-            )}
-            {siteLog.equipment?.length > 0 && (
-              <span>{siteLog.equipment.length} equipos</span>
-            )}
-          </div>
-        )}
       </CardContent>
     </Card>
   );
