@@ -11,6 +11,7 @@ import { format } from 'date-fns';
 
 interface GanttProps {
   phasesWithTasks: any[];
+  projectCreatedAt?: string;
   onCreatePhase?: () => void;
   onEditPhase?: (phase: any) => void;
   onAddTask?: (phaseId: string) => void;
@@ -19,7 +20,7 @@ interface GanttProps {
   onTaskDateChange?: (taskId: string, startDate: string, endDate: string) => void;
 }
 
-export const Gantt = ({ phasesWithTasks, onCreatePhase, onEditPhase, onAddTask, onEditTask, onTaskClick, onTaskDateChange }: GanttProps) => {
+export const Gantt = ({ phasesWithTasks, projectCreatedAt, onCreatePhase, onEditPhase, onAddTask, onEditTask, onTaskClick, onTaskDateChange }: GanttProps) => {
   console.log('Gantt phasesWithTasks:', phasesWithTasks);
   
   const { viewMode, setViewMode, timelineStart, timelineEnd, setTimelineRange } = useGanttStore();
@@ -93,14 +94,21 @@ export const Gantt = ({ phasesWithTasks, onCreatePhase, onEditPhase, onAddTask, 
     }
   };
 
-  // Configurar fechas por defecto basadas en los datos
+  // Configurar fechas por defecto basadas en la fecha de creación del proyecto
   React.useEffect(() => {
-    if (!startDate && !endDate && validPhasesWithTasks.length > 0) {
-      const range = getTimelineRange(validPhasesWithTasks);
-      setStartDate(range.start);
-      setEndDate(range.end);
+    if (!startDate && !endDate && projectCreatedAt) {
+      const projectDate = new Date(projectCreatedAt);
+      const startYear = projectDate.getFullYear() - 3;
+      const endYear = projectDate.getFullYear() + 3;
+      
+      const rangeStart = `${startYear}-01-01`;
+      const rangeEnd = `${endYear}-12-31`;
+      
+      setStartDate(rangeStart);
+      setEndDate(rangeEnd);
+      setTimelineRange(rangeStart, rangeEnd);
     }
-  }, [validPhasesWithTasks, startDate, endDate]);
+  }, [projectCreatedAt, startDate, endDate, setTimelineRange]);
 
   const viewModeOptions: { value: ViewMode; label: string; icon: React.ReactNode }[] = [
     { value: 'weeks', label: 'Semanas', icon: <Clock className="w-4 h-4" /> },
@@ -145,42 +153,7 @@ export const Gantt = ({ phasesWithTasks, onCreatePhase, onEditPhase, onAddTask, 
               ))}
             </div>
           </div>
-          
-          {/* Controles de fechas */}
-          <div className="flex items-center space-x-2">
-            <div className="flex items-center space-x-1">
-              <Label htmlFor="start-date" className="text-xs text-gray-600">Desde:</Label>
-              <Input
-                id="start-date"
-                type="date"
-                value={timelineStart || startDate}
-                onChange={(e) => {
-                  const newStart = e.target.value;
-                  setStartDate(newStart);
-                  if (newStart && (timelineEnd || endDate)) {
-                    setTimelineRange(newStart, timelineEnd || endDate);
-                  }
-                }}
-                className="h-8 text-xs w-36"
-              />
-            </div>
-            <div className="flex items-center space-x-1">
-              <Label htmlFor="end-date" className="text-xs text-gray-600">Hasta:</Label>
-              <Input
-                id="end-date"
-                type="date"
-                value={timelineEnd || endDate}
-                onChange={(e) => {
-                  const newEnd = e.target.value;
-                  setEndDate(newEnd);
-                  if ((timelineStart || startDate) && newEnd) {
-                    setTimelineRange(timelineStart || startDate, newEnd);
-                  }
-                }}
-                className="h-8 text-xs w-36"
-              />
-            </div>
-          </div>
+
         </div>
 
       </div>
@@ -200,7 +173,7 @@ export const Gantt = ({ phasesWithTasks, onCreatePhase, onEditPhase, onAddTask, 
               <div key={phase.id}>
                 {/* Fase */}
                 <div 
-                  className="h-10 border-b border-gray-100 px-4 flex items-center justify-between hover:bg-gray-100 cursor-pointer group"
+                  className="h-10 px-4 flex items-center justify-between hover:bg-gray-100 cursor-pointer group"
                   data-id={`phase-${phase.id}`}
                 >
                   <span className="text-sm font-medium text-gray-900">
@@ -238,7 +211,7 @@ export const Gantt = ({ phasesWithTasks, onCreatePhase, onEditPhase, onAddTask, 
                 {phase.tasks?.map((task: any) => (
                   <div 
                     key={task.id}
-                    className="h-10 border-b border-gray-100 px-8 flex items-center justify-between hover:bg-gray-100 cursor-pointer group"
+                    className="h-10 px-8 flex items-center justify-between hover:bg-gray-100 cursor-pointer group"
                     data-id={`task-${task.id}`}
                   >
                     <span className="text-sm text-gray-700">

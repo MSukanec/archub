@@ -115,3 +115,85 @@ export function useProjects(organizationId: string | undefined) {
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
 }
+
+// Hook para obtener un proyecto específico
+export function useProject(projectId: string | undefined) {
+  return useQuery<Project>({
+    queryKey: ['project', projectId],
+    queryFn: async () => {
+      if (!supabase || !projectId) {
+        throw new Error('Project ID required')
+      }
+
+      const { data, error } = await supabase
+        .from('projects')
+        .select(`
+          *,
+          project_data (
+            project_type_id,
+            modality_id,
+            project_types!project_type_id (
+              id,
+              name
+            ),
+            project_modalities!modality_id (
+              id,
+              name
+            )
+          ),
+          organization_members!created_by (
+            id,
+            users (
+              id,
+              full_name,
+              email,
+              avatar_url,
+              user_data (
+                first_name,
+                last_name
+              )
+            )
+          )
+        `)
+        .eq('id', projectId)
+        .eq('is_active', true)
+        .single()
+      
+      if (error) {
+        throw error
+      }
+      
+      // Transform the data to match our interface
+      let projectData = null
+      if (data.project_data) {
+        const pd = Array.isArray(data.project_data) ? data.project_data[0] : data.project_data
+        if (pd) {
+          projectData = {
+            project_type_id: pd.project_type_id,
+            modality_id: pd.modality_id,
+            project_type: pd.project_types,
+            modality: pd.project_modalities
+          }
+        }
+      }
+      
+      const transformedProject = {
+        ...data,
+        project_data: projectData,
+        creator: data.organization_members?.users ? {
+          id: data.organization_members.users.id,
+          full_name: data.organization_members.users.full_name,
+          email: data.organization_members.users.email,
+          avatar_url: data.organization_members.users.avatar_url,
+          first_name: data.organization_members.users.user_data?.[0]?.first_name,
+          last_name: data.organization_members.users.user_data?.[0]?.last_name
+        } : undefined
+      }
+
+      return transformedProject
+    },
+    enabled: !!projectId && !!supabase,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  })
+}
+

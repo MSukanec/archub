@@ -92,9 +92,9 @@ export const GanttGrid = ({ timelineRange }: GanttGridProps) => {
             <div
               key={column.key}
               data-date={column.key}
-              className={`border-r border-gray-100 flex flex-col items-center justify-center relative ${
+              className={`flex flex-col items-center justify-center relative ${
                 column.isToday ? 'bg-blue-50' : 'hover:bg-gray-50'
-              }`}
+              } ${column.showBorder ? 'border-r border-gray-100' : ''}`}
               style={{ width: `${columnWidth}px` }}
             >
               <span className={`text-xs font-medium ${

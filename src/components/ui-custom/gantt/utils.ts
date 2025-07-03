@@ -104,6 +104,7 @@ export interface TimelineColumn {
   label: string;
   date: Date;
   isToday?: boolean;
+  showBorder?: boolean;
 }
 
 // Genera columnas del timeline según el modo de visualización
@@ -119,11 +120,14 @@ export const getTimelineColumns = (start: string, end: string, mode: ViewMode): 
       const currentDate = new Date(startDate);
       while (currentDate <= endDate) {
         const dateStr = currentDate.toISOString().split('T')[0];
+        // Mostrar línea divisoria solo los domingos (0 = domingo)
+        const isEndOfWeek = currentDate.getDay() === 0;
         columns.push({
           key: dateStr,
           label: currentDate.getDate().toString(),
           date: new Date(currentDate),
-          isToday: currentDate.toDateString() === today.toDateString()
+          isToday: currentDate.toDateString() === today.toDateString(),
+          showBorder: isEndOfWeek
         });
         currentDate.setDate(currentDate.getDate() + 1);
       }
@@ -140,7 +144,8 @@ export const getTimelineColumns = (start: string, end: string, mode: ViewMode): 
           label: currentDate.toLocaleDateString('es-ES', { month: 'short' }).toUpperCase(),
           date: new Date(currentDate),
           isToday: today.getFullYear() === currentDate.getFullYear() && 
-                   today.getMonth() === currentDate.getMonth()
+                   today.getMonth() === currentDate.getMonth(),
+          showBorder: true
         });
         currentDate.setMonth(currentDate.getMonth() + 1);
       }
@@ -169,7 +174,8 @@ export const getTimelineColumns = (start: string, end: string, mode: ViewMode): 
             key: `quarter-${year}-${quarter}`,
             label: `${quarterMonthRanges[quarter]} ${year}`,
             date: quarterStart,
-            isToday: today >= quarterStart && today <= quarterEnd
+            isToday: today >= quarterStart && today <= quarterEnd,
+            showBorder: true
           });
         }
       }

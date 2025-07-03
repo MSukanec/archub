@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useDesignProjectPhases, useGanttPhasesWithTasks } from '@/hooks/use-design-phases';
+import { useProject } from '@/hooks/use-projects';
 import { Gantt } from '@/components/ui-custom/gantt';
 import { NewPhaseModal } from '@/modals/design/NewPhaseModal';
 import { NewPhaseTaskModal } from '@/modals/design/NewPhaseTaskModal';
@@ -20,6 +21,7 @@ export default function DesignTimeline() {
   const { data: userData } = useCurrentUser();
   const projectId = userData?.preferences?.last_project_id;
   
+  const { data: project } = useProject(projectId || '');
   const { data: projectPhases = [], isLoading } = useDesignProjectPhases(projectId || '');
   const { data: phasesWithTasks = [], isLoading: isGanttLoading } = useGanttPhasesWithTasks(projectId || '');
   
@@ -111,7 +113,8 @@ export default function DesignTimeline() {
       <Layout headerProps={headerProps} wide={true}>
         <div className="space-y-6">
           <Gantt 
-            phasesWithTasks={phasesWithTasks} 
+            phasesWithTasks={phasesWithTasks}
+            projectCreatedAt={project?.created_at}
             onCreatePhase={() => setIsModalOpen(true)}
             onEditPhase={handleEditPhase}
             onAddTask={handleAddTask}

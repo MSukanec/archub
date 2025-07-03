@@ -46,9 +46,9 @@ export const GanttRow = ({
           return (
             <div
               key={column.key}
-              className={`border-r border-gray-100 h-10 relative ${
+              className={`h-10 relative ${
                 column.isToday ? 'bg-blue-50' : ''
-              }`}
+              } ${column.showBorder ? 'border-r border-gray-100' : ''}`}
               style={{ width: `${columnWidth}px` }}
             >
               {/* Today indicator line */}
