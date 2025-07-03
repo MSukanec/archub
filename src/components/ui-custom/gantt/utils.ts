@@ -38,63 +38,20 @@ export const getColumnWidth = (mode: ViewMode): number => {
 };
 
 // Calcula el rango de días entre fecha mínima y máxima
-export const getTimelineRange = (phases: Phase[]): { start: string; end: string } => {
-  if (phases.length === 0) {
-    const today = new Date();
-    const start = new Date(today);
-    start.setDate(today.getDate() - 7);
-    const end = new Date(today);
-    end.setDate(today.getDate() + 30);
-    
-    return {
-      start: start.toISOString().split('T')[0],
-      end: end.toISOString().split('T')[0]
-    };
-  }
-
-  let minDate: Date | null = null;
-  let maxDate: Date | null = null;
-
-  phases.forEach(phase => {
-    // Check phase dates
-    if (phase.start_date) {
-      const phaseStart = new Date(phase.start_date);
-      if (!minDate || phaseStart < minDate) minDate = phaseStart;
-    }
-    if (phase.end_date) {
-      const phaseEnd = new Date(phase.end_date);
-      if (!maxDate || phaseEnd > maxDate) maxDate = phaseEnd;
-    }
-
-    // Check task dates
-    if (phase.tasks) {
-      phase.tasks.forEach(task => {
-        if (task.start_date) {
-          const taskStart = new Date(task.start_date);
-          if (!minDate || taskStart < minDate) minDate = taskStart;
-        }
-        if (task.end_date) {
-          const taskEnd = new Date(task.end_date);
-          if (!maxDate || taskEnd > maxDate) maxDate = taskEnd;
-        }
-      });
-    }
-  });
-
-  // Fallback to reasonable defaults
-  if (!minDate || !maxDate) {
-    const today = new Date();
-    minDate = minDate || new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-    maxDate = maxDate || new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
-  }
-
-  // Add some padding
-  const paddedStart = new Date(minDate.getTime() - 3 * 24 * 60 * 60 * 1000);
-  const paddedEnd = new Date(maxDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+export const getTimelineRange = (phases: Phase[], projectCreatedAt?: string): { start: string; end: string } => {
+  // Use project creation date as base, or today if not available
+  const baseDate = projectCreatedAt ? new Date(projectCreatedAt) : new Date();
+  
+  // 3 years before and after project creation
+  const start = new Date(baseDate);
+  start.setFullYear(baseDate.getFullYear() - 3);
+  
+  const end = new Date(baseDate);
+  end.setFullYear(baseDate.getFullYear() + 3);
 
   return {
-    start: paddedStart.toISOString().split('T')[0],
-    end: paddedEnd.toISOString().split('T')[0]
+    start: start.toISOString().split('T')[0],
+    end: end.toISOString().split('T')[0]
   };
 };
 
