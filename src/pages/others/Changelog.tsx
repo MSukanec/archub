@@ -5,6 +5,7 @@ import { Plus, History, Search, Filter, X } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useChangelogEntries } from '@/hooks/use-changelog'
 import { NewChangelogEntryModal } from '@/modals/others/NewChangelogEntryModal'
+import { useDeleteChangelogEntry } from '@/hooks/use-changelog'
 import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState'
 import { ChangelogCard } from '@/components/cards/ChangelogCard'
 import { useMobileActionBar } from '@/contexts/MobileActionBarContext'
@@ -36,9 +37,11 @@ const groupEntriesByDate = (entries: any[]): [string, any[]][] => {
 export default function Changelog() {
   const [searchValue, setSearchValue] = useState("")
   const [showNewEntryModal, setShowNewEntryModal] = useState(false)
+  const [editingEntry, setEditingEntry] = useState<any>(null)
   const { data: userData } = useCurrentUser()
   const { data: entries, isLoading } = useChangelogEntries()
   const { setActions, setShowActionBar, clearActions } = useMobileActionBar()
+  const deleteEntryMutation = useDeleteChangelogEntry()
 
   // Configure mobile action bar
   useEffect(() => {
@@ -91,6 +94,19 @@ export default function Changelog() {
     }
   }, [userData?.role?.name, setActions, setShowActionBar, clearActions])
 
+  // Handle edit entry
+  const handleEditEntry = (entry: any) => {
+    setEditingEntry(entry)
+    setShowNewEntryModal(true)
+  }
+
+  // Handle delete entry
+  const handleDeleteEntry = (entryId: string) => {
+    if (confirm('¿Estás seguro de que quieres eliminar esta entrada?')) {
+      deleteEntryMutation.mutate(entryId)
+    }
+  }
+
   // Filter entries based on search
   const filteredEntries = entries?.filter((entry: any) =>
     entry.title.toLowerCase().includes(searchValue.toLowerCase()) ||
@@ -106,7 +122,7 @@ export default function Changelog() {
     onSearchChange: setSearchValue,
     showFilters: false,
     onClearFilters: () => setSearchValue(""),
-    actions: [
+    actions: userData?.role?.name === "super_admin" ? [
       <Button 
         key="new-entry"
         className="h-8 px-3 text-sm"
@@ -115,7 +131,7 @@ export default function Changelog() {
         <Plus className="h-4 w-4 mr-2" />
         Nueva Entrada
       </Button>
-    ]
+    ] : []
   }
 
   if (isLoading) {
@@ -157,7 +173,12 @@ export default function Changelog() {
             {/* Entries for this date */}
             <div className="space-y-3">
               {dateEntries.map((entry: any) => (
-                <ChangelogCard key={entry.id} entry={entry} />
+                <ChangelogCard 
+                  key={entry.id} 
+                  entry={entry} 
+                  onEdit={handleEditEntry}
+                  onDelete={handleDeleteEntry}
+                />
               ))}
             </div>
           </div>
@@ -167,7 +188,11 @@ export default function Changelog() {
       {/* New Entry Modal */}
       {showNewEntryModal && (
         <NewChangelogEntryModal
-          onClose={() => setShowNewEntryModal(false)}
+          onClose={() => {
+            setShowNewEntryModal(false)
+            setEditingEntry(null)
+          }}
+          editingEntry={editingEntry}
         />
       )}
     </Layout>

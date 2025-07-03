@@ -48,7 +48,7 @@ export function NewChangelogEntryModal({ onClose, editingEntry }: NewChangelogEn
       title: '',
       description: '',
       type: 'Novedad',
-      date: new Date().toISOString().split('T')[0], // Today's date
+      date: new Date().toLocaleDateString('en-CA'), // Today's date in local timezone (YYYY-MM-DD format)
       is_public: true,
     }
   })
@@ -63,7 +63,7 @@ export function NewChangelogEntryModal({ onClose, editingEntry }: NewChangelogEn
         title: editingEntry.title || '',
         description: editingEntry.description || '',
         type: editingEntry.type || 'Novedad',
-        date: editingEntry.date || new Date().toISOString().split('T')[0],
+        date: editingEntry.date ? new Date(editingEntry.date).toLocaleDateString('en-CA') : new Date().toLocaleDateString('en-CA'),
         is_public: editingEntry.is_public ?? true,
       })
     }

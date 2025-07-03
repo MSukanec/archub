@@ -58,9 +58,7 @@ export function MobileActionBar() {
               {actions.slot2.label}
             </span>
           </Button>
-        ) : (
-          <div className="w-16 h-16" />
-        )}
+        ) : null}
 
         {/* Slot 3 - Crear (principal, verde) */}
         {actions.slot3 ? (
@@ -74,9 +72,7 @@ export function MobileActionBar() {
           >
             {actions.slot3.icon}
           </Button>
-        ) : (
-          <div className="w-14 h-14" />
-        )}
+        ) : null}
 
         {/* Slot 4 - Filtros */}
         {actions.slot4 ? (
@@ -91,9 +87,7 @@ export function MobileActionBar() {
               {actions.slot4.label}
             </span>
           </Button>
-        ) : (
-          <div className="w-16 h-16" />
-        )}
+        ) : null}
 
         {/* Slot 5 - Limpiar filtros */}
         {actions.slot5 ? (
@@ -108,9 +102,7 @@ export function MobileActionBar() {
               {actions.slot5.label}
             </span>
           </Button>
-        ) : (
-          <div className="w-16 h-16" />
-        )}
+        ) : null}
       </div>
     </div>
   )
