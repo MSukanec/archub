@@ -4,7 +4,7 @@ import { CustomKanban } from '@/components/ui-custom/misc/CustomKanban';
 import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CheckSquare, Plus, Kanban, Edit, Trash2, List } from 'lucide-react';
+import { CheckSquare, Plus, Kanban, Edit, Trash2, List, Search, Filter, X } from 'lucide-react';
 import { useKanbanBoards, useKanbanLists, useKanbanCards, useMoveKanbanCard, useUpdateKanbanBoard, useDeleteKanbanBoard, useDeleteKanbanList, useUpdateLastKanbanBoard } from '@/hooks/use-kanban';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -57,20 +57,34 @@ function TasksContent() {
 
   // Configure mobile action bar
   useEffect(() => {
-    if (currentBoardId) {
-      setActions({
-        slot3: {
-          id: 'new-list',
-          icon: <List className="h-6 w-6" />,
-          label: 'Nueva Lista',
-          onClick: () => setShowNewListModal(true)
-        }
-      });
-      setShowActionBar(true);
-    } else {
-      setShowActionBar(false);
-    }
-  }, [currentBoardId, setActions, setShowActionBar]);
+    setActions({
+      slot1: {
+        id: 'search',
+        icon: <Search className="h-5 w-5" />,
+        label: 'Buscar',
+        onClick: () => {} // TODO: implement search
+      },
+      slot2: {
+        id: 'filter',
+        icon: <Filter className="h-5 w-5" />,
+        label: 'Filtros',
+        onClick: () => {} // TODO: implement filters
+      },
+      slot3: {
+        id: 'clear-filters',
+        icon: <X className="h-5 w-5" />,
+        label: 'Limpiar',
+        onClick: () => {} // TODO: implement clear filters
+      },
+      slot4: {
+        id: 'create',
+        icon: <Plus className="h-5 w-5" />,
+        label: 'Crear',
+        onClick: () => setShowNewListModal(true)
+      }
+    });
+    setShowActionBar(true);
+  }, [setActions, setShowActionBar]);
 
   const handleEditBoard = (board: any) => {
     setEditingBoard(board);
