@@ -4,7 +4,10 @@ import { supabase } from "@/lib/supabase";
 export interface TaskTemplate {
   id: string;
   name: string;
-  description: string;
+  code_prefix: string;
+  name_template: string;
+  category_id: string;
+  action_id?: string;
   created_at: string;
 }
 
@@ -50,14 +53,38 @@ export function useTaskTemplateParameters(templateId: string | null) {
     queryFn: async () => {
       if (!supabase || !templateId) return [];
       
+      // Get parameters through the junction table
       const { data, error } = await supabase
         .from('task_template_parameters')
-        .select('*')
+        .select(`
+          *,
+          task_parameters(
+            id,
+            name,
+            label,
+            type,
+            unit,
+            is_required
+          )
+        `)
         .eq('template_id', templateId)
         .order('position');
       
       if (error) throw error;
-      return data as TaskTemplateParameter[];
+      
+      // Transform the data to match the expected interface
+      const transformedData = data?.map(item => ({
+        id: item.task_parameters.id,
+        template_id: templateId,
+        name: item.task_parameters.name,
+        label: item.task_parameters.label,
+        type: item.task_parameters.type as 'text' | 'number' | 'select' | 'boolean',
+        unit: item.task_parameters.unit,
+        is_required: item.task_parameters.is_required,
+        position: item.position
+      })) || [];
+      
+      return transformedData as TaskTemplateParameter[];
     },
     enabled: !!templateId && !!supabase
   });

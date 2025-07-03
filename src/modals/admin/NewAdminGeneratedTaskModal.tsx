@@ -32,9 +32,9 @@ interface NewAdminGeneratedTaskModalProps {
   generatedTask?: GeneratedTask | null
 }
 
-const baseSchema = z.object({
+const formSchema = z.object({
   template_id: z.string().min(1, "Debe seleccionar una plantilla")
-});
+}).catchall(z.any());
 
 export function NewAdminGeneratedTaskModal({ 
   open, 
@@ -52,54 +52,8 @@ export function NewAdminGeneratedTaskModal({
   const { data: parameters, isLoading: parametersLoading } = useTaskTemplateParameters(selectedTemplateId || null);
   const createGeneratedTask = useCreateGeneratedTask();
 
-  // Create dynamic schema based on parameters
-  const createFormSchema = () => {
-    let schema = baseSchema;
-    
-    if (parameters) {
-      const paramFields: Record<string, z.ZodTypeAny> = {};
-      
-      parameters.forEach(param => {
-        let fieldSchema: z.ZodTypeAny;
-        
-        switch (param.type) {
-          case 'text':
-            fieldSchema = z.string();
-            break;
-          case 'number':
-            fieldSchema = z.coerce.number();
-            break;
-          case 'select':
-            fieldSchema = z.string();
-            break;
-          case 'boolean':
-            fieldSchema = z.boolean();
-            break;
-          default:
-            fieldSchema = z.string();
-        }
-        
-        if (param.is_required) {
-          fieldSchema = fieldSchema.refine(val => {
-            if (param.type === 'boolean') return val !== undefined;
-            if (param.type === 'number') return val !== undefined && !isNaN(val);
-            return val !== undefined && val !== '';
-          }, { message: `${param.label} es requerido` });
-        } else {
-          fieldSchema = fieldSchema.optional();
-        }
-        
-        paramFields[param.name] = fieldSchema;
-      });
-      
-      schema = schema.extend(paramFields);
-    }
-    
-    return schema;
-  };
-
-  const form = useForm({
-    resolver: zodResolver(createFormSchema() as any),
+  const form = useForm<any>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       template_id: "",
       ...paramValues
@@ -145,10 +99,33 @@ export function NewAdminGeneratedTaskModal({
     }
   }, [isEditing, generatedTask, open, form]);
 
+  // Generate description from template and parameters
+  const generateDescription = (templateNameTemplate: string, paramValues: Record<string, any>) => {
+    let description = templateNameTemplate;
+    
+    // Replace parameter placeholders with actual values
+    parameters?.forEach(param => {
+      const value = paramValues[param.name];
+      if (value !== undefined && value !== '') {
+        const placeholder = `{{${param.name}}}`;
+        const displayValue = value.toString();
+        description = description.replace(new RegExp(placeholder, 'g'), displayValue);
+      }
+    });
+    
+    return description;
+  };
+
   const handleSubmit = async (data: any) => {
     if (!userData?.organization?.id) return;
     
     const { template_id, ...params } = data;
+    
+    // Find the selected template to get its name_template
+    const selectedTemplate = templates?.find(t => t.id === template_id);
+    const generatedDescription = selectedTemplate?.name_template 
+      ? generateDescription(selectedTemplate.name_template, params)
+      : "Tarea generada";
     
     try {
       const result = await createGeneratedTask.mutateAsync({
@@ -296,7 +273,7 @@ export function NewAdminGeneratedTaskModal({
           />
         ),
         body: (
-          <CustomModalBody>
+          <CustomModalBody columns={1}>
             {existingTask ? (
               <div className="space-y-4">
                 <div className="rounded-lg border p-4 bg-yellow-50 dark:bg-yellow-900/20">
@@ -357,8 +334,23 @@ export function NewAdminGeneratedTaskModal({
                         <h3 className="text-sm font-medium mb-3">Parámetros de la Plantilla</h3>
                         <div className="space-y-4">
                           {parameters.map((param) => (
-                            <ParameterField key={param.name} param={param} />
+                            <ParameterField key={`${param.id}-${param.name}`} param={param} />
                           ))}
+                        </div>
+                      </div>
+                      
+                      {/* Preview of generated description */}
+                      <div className="border-t pt-4">
+                        <h3 className="text-sm font-medium mb-2">Vista previa de la descripción</h3>
+                        <div className="p-3 bg-muted/20 rounded border text-sm">
+                          {(() => {
+                            const selectedTemplate = templates?.find(t => t.id === selectedTemplateId);
+                            const currentValues = form.getValues();
+                            const { template_id, ...params } = currentValues;
+                            return selectedTemplate?.name_template 
+                              ? generateDescription(selectedTemplate.name_template, params)
+                              : "Seleccione los parámetros para ver la vista previa";
+                          })()}
                         </div>
                       </div>
                     </div>

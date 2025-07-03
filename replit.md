@@ -119,6 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 3, 2025. Completed dynamic task generation modal with parameter loading and description generation
+  • Fixed useTaskTemplateParameters hook to properly JOIN with task_parameters table through task_template_parameters junction
+  • Enhanced TaskTemplate interface to include name_template, code_prefix, category_id, and action_id fields
+  • Added columns={1} prop to NewAdminGeneratedTaskModal for single-column layout consistency
+  • Implemented generateDescription function to replace {{parameter}} placeholders with actual user values
+  • Added real-time preview of generated description showing how final task will appear
+  • Fixed React key warnings by using composite keys for parameter fields
+  • Simplified form schema using z.catchall(z.any()) for dynamic parameter validation
+  • Modal now properly loads parameters from database, renders dynamic form fields, and generates descriptions
 - July 3, 2025. Fixed task category and template modal layout issues and z-index problem in TemplateNameBuilder
   • Added columns={1} prop to CustomModalBody in NewAdminTaskCategoryModal.tsx for single-column layout
   • Added columns={1} prop to CustomModalBody in NewTaskTemplateModal.tsx for single-column layout  
