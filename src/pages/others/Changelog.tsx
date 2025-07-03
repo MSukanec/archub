@@ -42,7 +42,10 @@ export default function Changelog() {
 
   // Configure mobile action bar
   useEffect(() => {
+    console.log('User data:', userData)
+    console.log('User role:', userData?.role?.name)
     const isAdmin = userData?.role?.name === "super_admin"
+    console.log('Is admin:', isAdmin)
     
     setActions({
       slot2: {
@@ -103,7 +106,7 @@ export default function Changelog() {
     onSearchChange: setSearchValue,
     showFilters: false,
     onClearFilters: () => setSearchValue(""),
-    actions: userData?.role?.name === "super_admin" ? [
+    actions: [
       <Button 
         key="new-entry"
         className="h-8 px-3 text-sm"
@@ -112,7 +115,7 @@ export default function Changelog() {
         <Plus className="h-4 w-4 mr-2" />
         Nueva Entrada
       </Button>
-    ] : []
+    ]
   }
 
   if (isLoading) {
