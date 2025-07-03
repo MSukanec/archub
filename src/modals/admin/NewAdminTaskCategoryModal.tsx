@@ -106,7 +106,7 @@ export function NewAdminTaskCategoryModal({
           />
         ),
         body: (
-          <CustomModalBody padding="md">
+          <CustomModalBody padding="md" columns={1}>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 {/* Simplified form without accordion - only essential category fields */}

@@ -495,7 +495,7 @@ export function TemplateNameBuilder({
                 Insertar Parámetro
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-64 p-2" align="start">
+            <PopoverContent className="w-64 p-2 z-[9999]" align="start">
               <div className="space-y-1">
                 <div className="text-xs font-medium text-muted-foreground mb-2">
                   Parámetros disponibles:

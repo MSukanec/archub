@@ -119,6 +119,11 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 3, 2025. Fixed task category and template modal layout issues and z-index problem in TemplateNameBuilder
+  • Added columns={1} prop to CustomModalBody in NewAdminTaskCategoryModal.tsx for single-column layout
+  • Added columns={1} prop to CustomModalBody in NewTaskTemplateModal.tsx for single-column layout  
+  • Fixed z-index issue in TemplateNameBuilder PopoverContent with z-[9999] class for "Insertar Parámetro" button visibility
+  • All modals now display correctly with proper single-column form layout and working parameter insertion dropdown
 - July 3, 2025. Implemented minimalist SiteLogCard mobile component with inline action buttons and optimized layout
   • Created ultra-minimalist SiteLogCard.tsx with 3-row compact design: action buttons (top-right), type+date (inline), creator (bottom)
   • Removed weather display, public/private badges for cleaner mobile interface
