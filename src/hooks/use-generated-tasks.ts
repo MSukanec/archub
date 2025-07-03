@@ -18,7 +18,8 @@ export interface TaskMaterial {
   id: string
   task_id: string
   material_id: string
-  quantity: number
+  amount: number
+  organization_id: string
   created_at: string
   material?: {
     id: string
@@ -162,7 +163,7 @@ export function useCreateTaskMaterial() {
   const { toast } = useToast();
   
   return useMutation({
-    mutationFn: async (data: { task_id: string; material_id: string; quantity: number }) => {
+    mutationFn: async (data: { task_id: string; material_id: string; amount: number; organization_id: string }) => {
       if (!supabase) throw new Error('Supabase not initialized');
       
       const { data: result, error } = await supabase

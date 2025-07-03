@@ -119,6 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 3, 2025. Fixed bitácora modal structure and completed materials management system for generated tasks
+  • Corrected bitácora modal by removing problematic padding="md" parameter from CustomModalBody
+  • Fixed materials management to use correct database table structure: task_materials with amount (not quantity), organization_id
+  • Updated TaskMaterial interface and all hooks to match actual database schema (task_id, material_id, amount, organization_id)
+  • Implemented complete materials workflow: view existing materials, add new materials with quantity selection, delete materials
+  • Added proper state management: materials reset when creating new tasks, task ID captured for materials association
+  • Enhanced accordion with dynamic material count display showing actual material count from database
+  • Materials section only enables after task creation, preventing orphaned material records
+  • Fixed all TypeScript errors for proper amount field usage throughout materials management system
 - July 3, 2025. Completed dynamic task generation modal with parameter loading and description generation
   • Fixed useTaskTemplateParameters hook to properly JOIN with task_parameters table through task_template_parameters junction
   • Enhanced TaskTemplate interface to include name_template, code_prefix, category_id, and action_id fields

@@ -50,9 +50,9 @@ export function NewAdminGeneratedTaskModal({
   const [paramValues, setParamValues] = useState<Record<string, any>>({});
   const [existingTask, setExistingTask] = useState<any>(null);
   const [createdTaskId, setCreatedTaskId] = useState<string | null>(null);
-  const [newMaterial, setNewMaterial] = useState<{ material_id: string; quantity: number }>({
+  const [newMaterial, setNewMaterial] = useState<{ material_id: string; amount: number }>({
     material_id: "",
-    quantity: 1
+    amount: 1
   });
   
   const isEditing = !!generatedTask;
@@ -138,6 +138,7 @@ export function NewAdminGeneratedTaskModal({
     if (isEditing && generatedTask && open) {
       setSelectedTemplateId(generatedTask.template_id);
       setParamValues(generatedTask.param_values || {});
+      setCreatedTaskId(generatedTask.id);
       form.reset({
         template_id: generatedTask.template_id,
         ...generatedTask.param_values
@@ -146,6 +147,8 @@ export function NewAdminGeneratedTaskModal({
       setSelectedTemplateId("");
       setParamValues({});
       setExistingTask(null);
+      setCreatedTaskId(null);
+      setNewMaterial({ material_id: "", amount: 1 });
       form.reset({
         template_id: ""
       });
@@ -211,7 +214,7 @@ export function NewAdminGeneratedTaskModal({
 
   // Función para agregar material
   const handleAddMaterial = async () => {
-    if (!newMaterial.material_id || newMaterial.quantity <= 0) return;
+    if (!newMaterial.material_id || newMaterial.amount <= 0 || !userData?.organization?.id) return;
     
     const taskId = createdTaskId || generatedTask?.id;
     if (!taskId) return;
@@ -220,10 +223,11 @@ export function NewAdminGeneratedTaskModal({
       await createTaskMaterial.mutateAsync({
         task_id: taskId,
         material_id: newMaterial.material_id,
-        quantity: newMaterial.quantity
+        amount: newMaterial.amount,
+        organization_id: userData.organization.id
       });
       
-      setNewMaterial({ material_id: "", quantity: 1 });
+      setNewMaterial({ material_id: "", amount: 1 });
     } catch (error) {
       console.error("Error adding material:", error);
     }
@@ -511,7 +515,7 @@ export function NewAdminGeneratedTaskModal({
                                     {taskMaterial.material?.name}
                                   </div>
                                   <div className="text-xs text-muted-foreground">
-                                    Cantidad: {taskMaterial.quantity} {taskMaterial.material?.unit?.name}
+                                    Cantidad: {taskMaterial.amount} {taskMaterial.material?.unit?.name}
                                   </div>
                                 </div>
                                 <Button
@@ -563,8 +567,8 @@ export function NewAdminGeneratedTaskModal({
                                   type="number"
                                   min="1"
                                   step="0.01"
-                                  value={newMaterial.quantity}
-                                  onChange={(e) => setNewMaterial(prev => ({ ...prev, quantity: parseFloat(e.target.value) || 1 }))}
+                                  value={newMaterial.amount}
+                                  onChange={(e) => setNewMaterial(prev => ({ ...prev, amount: parseFloat(e.target.value) || 1 }))}
                                   placeholder="1"
                                 />
                               </div>
@@ -573,7 +577,7 @@ export function NewAdminGeneratedTaskModal({
                             <Button
                               type="button"
                               onClick={handleAddMaterial}
-                              disabled={!newMaterial.material_id || newMaterial.quantity <= 0 || createTaskMaterial.isPending}
+                              disabled={!newMaterial.material_id || newMaterial.amount <= 0 || createTaskMaterial.isPending}
                               size="sm"
                               className="w-full"
                             >
