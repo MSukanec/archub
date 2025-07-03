@@ -89,7 +89,10 @@ export function NewPhaseTaskModal({ open, onClose, projectPhaseId }: NewPhaseTas
         title: "Tarea creada",
         description: "La tarea ha sido creada exitosamente.",
       });
+      // Invalidate both query keys to refresh the data
       queryClient.invalidateQueries({ queryKey: ['design-project-phases'] });
+      queryClient.invalidateQueries({ queryKey: ['gantt-phases-tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['design-phase-tasks'] });
       onClose();
       form.reset();
     },
