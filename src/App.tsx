@@ -37,6 +37,7 @@ import AdminTaskParameters from "@/pages/admin/AdminTaskParameters";
 import AdminMaterials from "@/pages/admin/AdminMaterials";
 import AdminMaterialCategories from "@/pages/admin/AdminMaterialCategories";
 import Tasks from "@/pages/others/Tasks";
+import Changelog from "@/pages/others/Changelog";
 import DesignTimeline from "@/pages/design/DesignTimeline";
 
 function Router() {
@@ -268,6 +269,12 @@ function Router() {
       <Route path="/tasks">
         <ProtectedRoute>
           <Tasks />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/changelog">
+        <ProtectedRoute>
+          <Changelog />
         </ProtectedRoute>
       </Route>
 

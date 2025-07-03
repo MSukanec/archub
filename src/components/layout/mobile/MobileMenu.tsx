@@ -21,6 +21,7 @@ import {
   ChevronRight,
   ArrowRight,
   ArrowLeft,
+  History,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -343,6 +344,18 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
               <CheckSquare className="h-5 w-5" />
               <span className="text-sm font-medium">Tareas</span>
             </button>
+
+            <button
+              onClick={() => handleNavigation('/changelog')}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+              style={{ 
+                color: 'var(--menues-fg)',
+                backgroundColor: 'transparent'
+              }}
+            >
+              <History className="h-5 w-5" />
+              <span className="text-sm font-medium">Changelog</span>
+            </button>
             
             {isAdmin && (
               <button
@@ -359,107 +372,109 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
             )}
           </div>
         </div>
+
+        {/* Organization and Project Selectors - Inside scrollable area */}
+        <div className="mt-6 pt-4 border-t space-y-3" style={{ borderColor: 'var(--menues-border)' }}>
+          {/* Organization Selector */}
+          <div>
+            <div className="text-xs font-medium opacity-70 mb-2" style={{ color: 'var(--menues-fg)' }}>
+              Organización activa:
+            </div>
+            <button
+              onClick={() => setExpandedOrgSelector(!expandedOrgSelector)}
+              className="flex w-full items-center justify-between px-3 py-2 text-sm font-medium rounded-lg border transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+              style={{
+                color: 'var(--menues-fg)',
+                backgroundColor: 'transparent',
+                borderColor: 'var(--menues-border)'
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <Building className="h-4 w-4" />
+                <span className="truncate">{currentOrganization?.name || 'Sin organización'}</span>
+              </div>
+              <ChevronDown className={cn("h-4 w-4 transition-transform", expandedOrgSelector && "rotate-180")} />
+            </button>
+
+            {expandedOrgSelector && (
+              <div className="mt-2 max-h-32 overflow-y-auto scrollbar-hide space-y-1">
+                {sortedOrganizations.map((org: any) => (
+                  <button
+                    key={org.id}
+                    onClick={() => handleOrganizationSelect(org.id)}
+                    className="flex w-full items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+                    style={{
+                      color: 'var(--menues-fg)',
+                      backgroundColor: org.id === currentOrganization?.id ? 'var(--accent)' : 'transparent',
+                      opacity: org.id === currentOrganization?.id ? 1 : 0.8,
+                    }}
+                  >
+                    <span className="truncate">{org.name}</span>
+                    {org.id === currentOrganization?.id && (
+                      <div className="h-2 w-2 rounded-full bg-green-500 flex-shrink-0" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Project Selector */}
+          <div>
+            <div className="text-xs font-medium opacity-70 mb-2" style={{ color: 'var(--menues-fg)' }}>
+              Proyecto activo:
+            </div>
+            <button
+              onClick={() => setExpandedProjectSelector(!expandedProjectSelector)}
+              className="flex w-full items-center justify-between px-3 py-2 text-sm font-medium rounded-lg border transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+              style={{
+                color: 'var(--menues-fg)',
+                backgroundColor: 'transparent',
+                borderColor: 'var(--menues-border)'
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <FolderOpen className="h-4 w-4" />
+                <span className="truncate">
+                  {effectiveCurrentProject 
+                    ? projectsData?.find((p: any) => p.id === effectiveCurrentProject)?.name || 'Sin proyecto'
+                    : 'Sin proyecto'
+                  }
+                </span>
+              </div>
+              <ChevronDown className={cn("h-4 w-4 transition-transform", expandedProjectSelector && "rotate-180")} />
+            </button>
+
+            {expandedProjectSelector && (
+              <div className="mt-2 max-h-32 overflow-y-auto scrollbar-hide space-y-1">
+                {sortedProjects && sortedProjects.length > 0 ? sortedProjects.map((project: any) => (
+                  <button
+                    key={project.id}
+                    onClick={() => handleProjectSelect(project.id)}
+                    className="flex w-full items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+                    style={{
+                      color: 'var(--menues-fg)',
+                      backgroundColor: project.id === effectiveCurrentProject ? 'var(--accent)' : 'transparent',
+                      opacity: project.id === effectiveCurrentProject ? 1 : 0.8,
+                    }}
+                  >
+                    <span className="truncate">{project.name}</span>
+                    {project.id === effectiveCurrentProject && (
+                      <div className="h-2 w-2 rounded-full bg-green-500 flex-shrink-0" />
+                    )}
+                  </button>
+                )) : (
+                  <div className="px-3 py-2 text-sm opacity-60" style={{ color: 'var(--menues-fg)' }}>
+                    No hay proyectos disponibles
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Organization and Project Selectors - At the bottom */}
-      <div className="border-t px-4 py-4 space-y-3" style={{ borderColor: 'var(--menues-border)' }}>
-        {/* Organization Selector */}
-        <div>
-          <div className="text-xs font-medium opacity-70 mb-2" style={{ color: 'var(--menues-fg)' }}>
-            Organización activa:
-          </div>
-          <button
-            onClick={() => setExpandedOrgSelector(!expandedOrgSelector)}
-            className="flex w-full items-center justify-between px-3 py-2 text-sm font-medium rounded-lg border transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
-            style={{
-              color: 'var(--menues-fg)',
-              backgroundColor: 'transparent',
-              borderColor: 'var(--menues-border)'
-            }}
-          >
-            <div className="flex items-center gap-2">
-              <Building className="h-4 w-4" />
-              <span className="truncate">{currentOrganization?.name || 'Sin organización'}</span>
-            </div>
-            <ChevronDown className={cn("h-4 w-4 transition-transform", expandedOrgSelector && "rotate-180")} />
-          </button>
 
-          {expandedOrgSelector && (
-            <div className="mt-2 max-h-32 overflow-y-auto scrollbar-hide space-y-1">
-              {sortedOrganizations.map((org: any) => (
-                <button
-                  key={org.id}
-                  onClick={() => handleOrganizationSelect(org.id)}
-                  className="flex w-full items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
-                  style={{
-                    color: 'var(--menues-fg)',
-                    backgroundColor: org.id === currentOrganization?.id ? 'var(--accent)' : 'transparent',
-                    opacity: org.id === currentOrganization?.id ? 1 : 0.8,
-                  }}
-                >
-                  <span className="truncate">{org.name}</span>
-                  {org.id === currentOrganization?.id && (
-                    <div className="h-2 w-2 rounded-full bg-green-500 flex-shrink-0" />
-                  )}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Project Selector */}
-        <div>
-          <div className="text-xs font-medium opacity-70 mb-2" style={{ color: 'var(--menues-fg)' }}>
-            Proyecto activo:
-          </div>
-          <button
-            onClick={() => setExpandedProjectSelector(!expandedProjectSelector)}
-            className="flex w-full items-center justify-between px-3 py-2 text-sm font-medium rounded-lg border transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
-            style={{
-              color: 'var(--menues-fg)',
-              backgroundColor: 'transparent',
-              borderColor: 'var(--menues-border)'
-            }}
-          >
-            <div className="flex items-center gap-2">
-              <FolderOpen className="h-4 w-4" />
-              <span className="truncate">
-                {effectiveCurrentProject 
-                  ? projectsData?.find((p: any) => p.id === effectiveCurrentProject)?.name || 'Sin proyecto'
-                  : 'Sin proyecto'
-                }
-              </span>
-            </div>
-            <ChevronDown className={cn("h-4 w-4 transition-transform", expandedProjectSelector && "rotate-180")} />
-          </button>
-
-          {expandedProjectSelector && (
-            <div className="mt-2 max-h-32 overflow-y-auto scrollbar-hide space-y-1">
-              {sortedProjects && sortedProjects.length > 0 ? sortedProjects.map((project: any) => (
-                <button
-                  key={project.id}
-                  onClick={() => handleProjectSelect(project.id)}
-                  className="flex w-full items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
-                  style={{
-                    color: 'var(--menues-fg)',
-                    backgroundColor: project.id === effectiveCurrentProject ? 'var(--accent)' : 'transparent',
-                    opacity: project.id === effectiveCurrentProject ? 1 : 0.8,
-                  }}
-                >
-                  <span className="truncate">{project.name}</span>
-                  {project.id === effectiveCurrentProject && (
-                    <div className="h-2 w-2 rounded-full bg-green-500 flex-shrink-0" />
-                  )}
-                </button>
-              )) : (
-                <div className="px-3 py-2 text-sm opacity-70" style={{ color: 'var(--menues-fg)' }}>
-                  No hay proyectos disponibles
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
     </div>
   );
 

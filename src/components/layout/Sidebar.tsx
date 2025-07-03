@@ -36,7 +36,8 @@ import {
   PanelLeftClose,
   CheckSquare,
   Calculator,
-  FileCode
+  FileCode,
+  History
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -420,6 +421,15 @@ export function Sidebar() {
             isActive={location === '/tasks'}
             isExpanded={isExpanded}
             onClick={() => navigate('/tasks')}
+          />
+
+          {/* Changelog */}
+          <SidebarButton
+            icon={<History className="w-[18px] h-[18px]" />}
+            label="Changelog"
+            isActive={location === '/changelog'}
+            isExpanded={isExpanded}
+            onClick={() => navigate('/changelog')}
           />
 
           {/* Profile */}
