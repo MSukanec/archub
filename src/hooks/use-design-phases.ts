@@ -32,6 +32,8 @@ export interface DesignPhaseTask {
   priority: string;
   position: number;
   is_active: boolean;
+  is_completed: boolean;
+  completed_at?: string | null;
   created_by: string;
   created_at: string;
 }
@@ -300,4 +302,58 @@ export function useGanttPhasesWithTasks(projectId: string) {
     },
     enabled: !!projectId && !!organizationId && !!supabase,
   });
+}
+
+// Toggle completed status for design phase task
+export function useToggleDesignPhaseTaskCompleted() {
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
+
+  return useMutation({
+    mutationFn: async ({ 
+      taskId, 
+      isCompleted, 
+      projectId 
+    }: { 
+      taskId: string; 
+      isCompleted: boolean;
+      projectId: string;
+    }) => {
+      if (!supabase) throw new Error('Supabase not initialized')
+      
+      const updateData: { is_completed: boolean; completed_at?: string | null } = {
+        is_completed: isCompleted,
+      }
+      
+      if (isCompleted) {
+        updateData.completed_at = new Date().toISOString()
+      } else {
+        updateData.completed_at = null
+      }
+
+      const { data, error } = await supabase
+        .from('design_phase_tasks')
+        .update(updateData)
+        .eq('id', taskId)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['gantt-phases-tasks', variables.projectId] })
+      queryClient.invalidateQueries({ queryKey: ['design-phase-tasks', variables.projectId] })
+      toast({ 
+        title: variables.isCompleted ? "Tarea completada" : "Tarea reactivada"
+      })
+    },
+    onError: (error) => {
+      toast({
+        title: "Error al actualizar tarea",
+        description: error.message,
+        variant: "destructive"
+      })
+    }
+  })
 }

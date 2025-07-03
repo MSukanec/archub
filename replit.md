@@ -119,6 +119,16 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 3, 2025. Implemented Google Tasks-style completed tasks system for Kanban and Design Phase Tasks
+  • Created TaskListWithCompleted.tsx component with active/completed task separation and accordion interface for completed tasks
+  • Added is_completed and completed_at fields to KanbanCard and DesignPhaseTask interfaces for completion tracking
+  • Implemented useToggleKanbanCardCompleted and useToggleDesignPhaseTaskCompleted mutation hooks for database persistence
+  • Enhanced CustomKanban component with completion checkboxes (CheckCircle/Circle icons) and visual completion states
+  • Tasks auto-sort with active tasks first, completed tasks last, plus visual separators between sections
+  • Completed tasks display with line-through text, reduced opacity, and completion date information
+  • Added hover states and smooth transitions for completion status changes with toast notifications
+  • Maintained drag & drop functionality while adding completion features without breaking existing Kanban workflow
+  • Both Kanban cards and Design Phase tasks now support Google Tasks-style completion with consistent UX patterns
 - July 3, 2025. Enhanced Kanban mobile UX with snap scrolling and fixed user data display
   • Implemented mobile-first snap scrolling for Kanban lists: each list centers on screen with snap-x snap-mandatory CSS
   • Lists now use full viewport width minus margin on mobile (calc(100vw-2rem)) and snap to center when scrolling

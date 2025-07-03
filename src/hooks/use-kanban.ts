@@ -40,6 +40,8 @@ export interface KanbanCard {
   assigned_to?: string
   due_date?: string
   position: number
+  is_completed: boolean
+  completed_at?: string
   created_by: string
   created_at: string
   updated_at: string
@@ -819,6 +821,58 @@ export function useUpdateLastKanbanBoard() {
     },
     onError: (error) => {
       console.error('Error updating last kanban board:', error)
+    }
+  })
+}
+
+// Toggle completed status for kanban card
+export function useToggleKanbanCardCompleted() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ 
+      cardId, 
+      isCompleted, 
+      boardId 
+    }: { 
+      cardId: string; 
+      isCompleted: boolean;
+      boardId: string;
+    }) => {
+      if (!supabase) throw new Error('Supabase not initialized')
+      
+      const updateData: { is_completed: boolean; completed_at?: string } = {
+        is_completed: isCompleted,
+      }
+      
+      if (isCompleted) {
+        updateData.completed_at = new Date().toISOString()
+      } else {
+        updateData.completed_at = undefined
+      }
+
+      const { data, error } = await supabase
+        .from('kanban_cards')
+        .update(updateData)
+        .eq('id', cardId)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['kanban-cards', variables.boardId] })
+      toast({ 
+        title: variables.isCompleted ? "Tarea completada" : "Tarea reactivada"
+      })
+    },
+    onError: (error) => {
+      toast({
+        title: "Error al actualizar tarea",
+        description: error.message,
+        variant: "destructive"
+      })
     }
   })
 }

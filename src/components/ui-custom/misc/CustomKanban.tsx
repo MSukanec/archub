@@ -6,13 +6,15 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Plus, MoreHorizontal, List, Edit, Trash2 } from 'lucide-react';
+import { Plus, MoreHorizontal, List, Edit, Trash2, CheckCircle, Circle } from 'lucide-react';
 import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState';
 import { NewCardModal } from '@/modals/tasks/NewCardModal';
 import { NewListModal } from '@/modals/tasks/NewListModal';
 import { CardDetailsModal } from '@/modals/tasks/CardDetailsModal';
 import { useOrganizationMembers } from '@/hooks/use-organization-members';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { TaskListWithCompleted } from '@/components/ui-custom/misc/TaskListWithCompleted';
+import { useToggleKanbanCardCompleted } from '@/hooks/use-kanban';
 import type { KanbanList, KanbanCard } from '@/hooks/use-kanban';
 
 interface CustomKanbanProps {
@@ -34,6 +36,7 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
   const { data: members = [] } = useOrganizationMembers(organizationId);
+  const toggleCompletedMutation = useToggleKanbanCardCompleted();
   
   // Function to get creator info for a list
   const getCreatorInfo = (createdBy: string) => {
@@ -62,10 +65,28 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
     loading
   });
 
-  // Sort cards by creation date (newest first) within each list
+  // Sort cards by completion status first, then by creation date within each list
   Object.keys(cardsByList).forEach(listId => {
-    cardsByList[listId].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    cardsByList[listId].sort((a, b) => {
+      // Active tasks first, completed tasks last
+      if (a.is_completed !== b.is_completed) {
+        return a.is_completed ? 1 : -1;
+      }
+      // Within each group, sort by creation date (newest first)
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
   });
+
+  // Function to handle toggle completed
+  const handleToggleCompleted = (cardId: string, isCompleted: boolean) => {
+    if (!boardId) return;
+    
+    toggleCompletedMutation.mutate({
+      cardId,
+      isCompleted,
+      boardId
+    });
+  };
 
   const handleDragEnd = (result: DropResult) => {
     const { destination, source, draggableId, type } = result;
@@ -225,9 +246,26 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
                                     avatar: undefined,
                                     initials: 'U'
                                   };
+                                  
+                                  // Check if this is the first completed task and add separator
+                                  const previousCard = index > 0 ? cardsByList[list.id][index - 1] : null;
+                                  const showCompletedSeparator = card.is_completed && (!previousCard || !previousCard.is_completed);
+                                  
                                   return (
-                                    <Draggable key={card.id} draggableId={card.id} index={index}>
-                                      {(provided, snapshot) => (
+                                    <div key={card.id}>
+                                      {/* Completed tasks separator */}
+                                      {showCompletedSeparator && (
+                                        <div className="flex items-center gap-2 py-2 mb-2">
+                                          <div className="flex-1 h-px bg-border"></div>
+                                          <span className="text-xs text-muted-foreground font-medium">
+                                            Completadas
+                                          </span>
+                                          <div className="flex-1 h-px bg-border"></div>
+                                        </div>
+                                      )}
+                                      
+                                      <Draggable draggableId={card.id} index={index}>
+                                        {(provided, snapshot) => (
                                         <Card
                                           ref={provided.innerRef}
                                           {...provided.draggableProps}
@@ -263,37 +301,77 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
                                             </Button>
                                           </div>
 
-                                          {/* Creator Info Header */}
-                                          <div className="flex items-center justify-between mb-2">
-                                            <div className="flex items-center gap-2">
-                                              <Avatar className="h-6 w-6">
-                                                <AvatarImage src={creatorInfo?.avatar} />
-                                                <AvatarFallback className="text-xs">
-                                                  {creatorInfo?.initials || 'U'}
-                                                </AvatarFallback>
-                                              </Avatar>
-                                              <span className="text-xs text-muted-foreground font-medium">
-                                                {creatorInfo?.name || 'Usuario'}
+                                          {/* Completion Status and Creator Info Header */}
+                                          <div className="flex items-start gap-2 mb-2">
+                                            {/* Completion Checkbox */}
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              className="h-5 w-5 p-0 flex-shrink-0 mt-0.5"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleToggleCompleted(card.id, !card.is_completed);
+                                              }}
+                                            >
+                                              {card.is_completed ? (
+                                                <CheckCircle className="h-4 w-4 text-primary" />
+                                              ) : (
+                                                <Circle className="h-4 w-4 text-muted-foreground hover:text-primary" />
+                                              )}
+                                            </Button>
+
+                                            {/* Creator Info and Date */}
+                                            <div className="flex items-center justify-between flex-1 min-w-0">
+                                              <div className="flex items-center gap-2 min-w-0">
+                                                <Avatar className="h-6 w-6 flex-shrink-0">
+                                                  <AvatarImage src={creatorInfo?.avatar} />
+                                                  <AvatarFallback className="text-xs">
+                                                    {creatorInfo?.initials || 'U'}
+                                                  </AvatarFallback>
+                                                </Avatar>
+                                                <span className="text-xs text-muted-foreground font-medium truncate">
+                                                  {creatorInfo?.name || 'Usuario'}
+                                                </span>
+                                              </div>
+                                              <span className="text-xs text-muted-foreground flex-shrink-0">
+                                                {new Date(card.created_at).toLocaleDateString('es-ES', {
+                                                  month: 'short',
+                                                  day: 'numeric'
+                                                })}
                                               </span>
                                             </div>
-                                            <span className="text-xs text-muted-foreground">
-                                              {new Date(card.created_at).toLocaleDateString('es-ES', {
-                                                month: 'short',
-                                                day: 'numeric'
-                                              })}
-                                            </span>
                                           </div>
                                           
                                           {/* Card Content */}
-                                          <div className="text-sm font-medium mb-1">{card.title}</div>
+                                          <div className={`text-sm font-medium mb-1 ${
+                                            card.is_completed 
+                                              ? 'line-through text-muted-foreground opacity-60' 
+                                              : ''
+                                          }`}>
+                                            {card.title}
+                                          </div>
                                           {card.description && (
-                                            <div className="text-xs text-muted-foreground line-clamp-2">
+                                            <div className={`text-xs text-muted-foreground line-clamp-2 ${
+                                              card.is_completed ? 'opacity-50' : ''
+                                            }`}>
                                               {card.description}
+                                            </div>
+                                          )}
+
+                                          {/* Completed Date */}
+                                          {card.is_completed && card.completed_at && (
+                                            <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground opacity-60">
+                                              <CheckCircle className="h-3 w-3" />
+                                              <span>Completado el {new Date(card.completed_at).toLocaleDateString('es-ES', {
+                                                day: 'numeric',
+                                                month: 'short'
+                                              })}</span>
                                             </div>
                                           )}
                                         </Card>
                                       )}
-                                    </Draggable>
+                                      </Draggable>
+                                    </div>
                                   );
                                 })}
                                 {provided.placeholder}
