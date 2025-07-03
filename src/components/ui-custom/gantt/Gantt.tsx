@@ -1,28 +1,41 @@
-import { Button } from '@/components/ui/button';
+import React, { useMemo, useRef, useState } from 'react';
 import { GanttGrid } from './GanttGrid';
 import { GanttRow } from './GanttRow';
 import { useGanttStore, ViewMode } from './store';
-import { getTimelineRange } from './utils';
-import { useGanttPhasesWithTasks } from '@/hooks/use-design-phases';
-import { useCurrentUser } from '@/hooks/use-current-user';
-import { useMemo, useRef } from 'react';
+import { getTimelineRange, getDateArray, getColumnWidth } from './utils';
+import { Button } from '@/components/ui/button';
+import { CalendarDays, Clock, Calendar } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { format } from 'date-fns';
 
-export const Gantt = () => {
+interface GanttProps {
+  phasesWithTasks: any[];
+}
+
+export const Gantt = ({ phasesWithTasks }: GanttProps) => {
+  console.log('Gantt phasesWithTasks:', phasesWithTasks);
+  
   const { viewMode, setViewMode } = useGanttStore();
-  const { data: userData } = useCurrentUser();
-  const projectId = userData?.preferences?.last_project_id;
   const timelineRef = useRef<HTMLDivElement>(null);
-
-  // Cargar datos reales de Supabase
-  const { data: phasesWithTasks = [], isLoading } = useGanttPhasesWithTasks(projectId || '');
-
-  // Calculate timeline range based on real phases data
+  
+  // Estados para fechas manuales del timeline
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
+  
+  // Validar que phasesWithTasks sea un array
+  const validPhasesWithTasks = Array.isArray(phasesWithTasks) ? phasesWithTasks : [];
+  
+  // Calculate timeline range based on real phases data or manual dates
   const timelineRange = useMemo(() => {
-    if (!phasesWithTasks.length) {
-      // Default range if no data
+    if (startDate && endDate) {
+      return { start: startDate, end: endDate };
+    }
+    
+    if (!validPhasesWithTasks || validPhasesWithTasks.length === 0) {
       const today = new Date();
       const start = new Date(today);
-      start.setDate(today.getDate() - 15);
+      start.setDate(today.getDate() - 30);
       const end = new Date(today);
       end.setDate(today.getDate() + 30);
       return {
@@ -30,142 +43,153 @@ export const Gantt = () => {
         end: end.toISOString().split('T')[0]
       };
     }
-    return getTimelineRange(phasesWithTasks);
-  }, [phasesWithTasks]);
+    
+    return getTimelineRange(validPhasesWithTasks);
+  }, [validPhasesWithTasks, startDate, endDate]);
 
-  // Function to scroll to today
+  const columnWidth = getColumnWidth(viewMode);
+
+  // Función para ir al día de hoy
   const scrollToToday = () => {
     if (timelineRef.current) {
-      const today = new Date();
-      const todayString = today.toISOString().split('T')[0];
-      const startDate = new Date(timelineRange.start);
-      const targetDate = new Date(todayString);
-      const daysDiff = Math.floor((targetDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-      
-      let columnWidth = 40; // days
-      if (viewMode === 'weeks') columnWidth = 100;
-      if (viewMode === 'months') columnWidth = 160;
-      
-      const scrollPosition = daysDiff * columnWidth - (timelineRef.current.offsetWidth / 2);
-      timelineRef.current.scrollLeft = Math.max(0, scrollPosition);
+      const today = new Date().toISOString().split('T')[0];
+      const todayElement = timelineRef.current.querySelector(`[data-date="${today}"]`);
+      if (todayElement) {
+        todayElement.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+      }
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="p-4 text-center text-gray-500">
-        Cargando cronograma...
-      </div>
-    );
-  }
+  // Configurar fechas por defecto basadas en los datos
+  React.useEffect(() => {
+    if (!startDate && !endDate && validPhasesWithTasks.length > 0) {
+      const range = getTimelineRange(validPhasesWithTasks);
+      setStartDate(range.start);
+      setEndDate(range.end);
+    }
+  }, [validPhasesWithTasks, startDate, endDate]);
+
+  const viewModeOptions: { value: ViewMode; label: string; icon: React.ReactNode }[] = [
+    { value: 'days', label: 'Días', icon: <CalendarDays className="w-4 h-4" /> },
+    { value: 'weeks', label: 'Semanas', icon: <Clock className="w-4 h-4" /> },
+    { value: 'months', label: 'Meses', icon: <Calendar className="w-4 h-4" /> }
+  ];
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg">
-      {/* Header with view controls */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-gray-700">Vista:</span>
-          <div className="flex rounded-md border border-gray-200">
-            {(['days', 'weeks', 'months'] as ViewMode[]).map((mode) => (
-              <Button
-                key={mode}
-                variant={viewMode === mode ? 'default' : 'ghost'}
-                size="sm"
-                className="rounded-none first:rounded-l-md last:rounded-r-md px-3 h-8"
-                onClick={() => setViewMode(mode)}
-              >
-                {mode === 'days' && 'Días'}
-                {mode === 'weeks' && 'Semanas'}
-                {mode === 'months' && 'Meses'}
-              </Button>
-            ))}
+    <div className="w-full h-full bg-white border border-gray-200 rounded-lg overflow-hidden">
+      {/* Header con controles */}
+      <div className="h-16 border-b border-gray-200 bg-gray-50 px-4 flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          {/* Selector de vista */}
+          <div className="flex items-center space-x-2">
+            <span className="text-sm font-medium text-gray-700">Vista:</span>
+            <div className="flex bg-white border border-gray-300 rounded-md p-1">
+              {viewModeOptions.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => setViewMode(option.value)}
+                  className={`px-3 py-1 text-xs font-medium rounded transition-colors flex items-center space-x-1 ${
+                    viewMode === option.value
+                      ? 'bg-blue-500 text-white'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  {option.icon}
+                  <span>{option.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          {/* Controles de fechas */}
+          <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1">
+              <Label htmlFor="start-date" className="text-xs text-gray-600">Desde:</Label>
+              <Input
+                id="start-date"
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="h-8 text-xs w-36"
+              />
+            </div>
+            <div className="flex items-center space-x-1">
+              <Label htmlFor="end-date" className="text-xs text-gray-600">Hasta:</Label>
+              <Input
+                id="end-date"
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="h-8 text-xs w-36"
+              />
+            </div>
           </div>
         </div>
+        
+        {/* Botón ir a hoy */}
         <Button
+          onClick={scrollToToday}
           variant="outline"
           size="sm"
-          onClick={scrollToToday}
-          className="h-8 px-3"
+          className="text-xs"
         >
           Ir a HOY
         </Button>
       </div>
 
-      {/* Gantt chart content */}
-      <div className="flex h-96">
-        {/* Fixed left column - elementos */}
-        <div className="min-w-[250px] bg-gray-50 border-r border-gray-200 flex flex-col">
-          {/* Header - altura fija h-20 para sincronizar */}
-          <div className="h-20 flex items-center px-4 border-b border-gray-200 bg-gray-100">
-            <span className="text-sm font-medium text-gray-700">Elementos</span>
+      {/* Contenedor principal del Gantt */}
+      <div className="flex h-full">
+        {/* Columna izquierda fija para nombres */}
+        <div className="w-64 bg-gray-50 border-r border-gray-200 flex-shrink-0 sticky left-0 z-10">
+          {/* Header de la columna izquierda */}
+          <div className="h-20 border-b border-gray-200 bg-white flex items-center px-4">
+            <span className="text-sm font-semibold text-gray-700">Elementos</span>
           </div>
           
-          {/* Scrollable content area */}
-          <div className="flex-1 overflow-y-auto">
-            {phasesWithTasks.length === 0 ? (
-              <div className="p-4 text-center text-gray-500">
-                No hay fases de diseño configuradas
-              </div>
-            ) : (
-              phasesWithTasks.map((phase: any) => (
-                <div key={phase.id}>
-                  {/* Fase row - altura fija h-10 */}
-                  <div 
-                    className="h-10 flex items-center px-4 border-b border-gray-100 hover:bg-gray-50"
-                    data-id={`phase-${phase.id}`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded border-2 border-blue-500 bg-blue-100 flex-shrink-0" />
-                      <span className="text-sm font-medium text-blue-700">
-                        {phase.design_phases?.name || 'Sin nombre'}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  {/* Tareas rows - altura fija h-10 cada una */}
-                  {phase.tasks?.map((task: any) => (
-                    <div 
-                      key={task.id} 
-                      className="h-10 flex items-center px-4 border-b border-gray-100 hover:bg-gray-50"
-                      data-id={`task-${task.id}`}
-                    >
-                      <div className="flex items-center gap-2 pl-4">
-                        <div className="w-3 h-3 rounded border border-gray-400 bg-gray-100 flex-shrink-0" />
-                        <span className="text-sm text-gray-600 truncate">
-                          {task.name}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+          {/* Lista de fases y tareas */}
+          <div className="overflow-y-auto">
+            {validPhasesWithTasks.map((phase) => (
+              <div key={phase.id}>
+                {/* Fase */}
+                <div 
+                  className="h-10 border-b border-gray-100 px-4 flex items-center hover:bg-gray-100 cursor-pointer"
+                  data-id={`phase-${phase.id}`}
+                >
+                  <span className="text-sm font-medium text-gray-900">
+                    {phase.design_phases?.name || 'Sin nombre'}
+                  </span>
                 </div>
-              ))
-            )}
+                
+                {/* Tareas de la fase */}
+                {phase.tasks?.map((task: any) => (
+                  <div 
+                    key={task.id}
+                    className="h-10 border-b border-gray-100 px-8 flex items-center hover:bg-gray-100 cursor-pointer"
+                    data-id={`task-${task.id}`}
+                  >
+                    <span className="text-sm text-gray-700">
+                      {task.name}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Scrollable timeline area */}
-        <div className="flex-1 flex flex-col">
-          {/* Timeline grid header - altura fija h-20 para sincronizar */}
-          <div className="h-20 border-b border-gray-200">
+        {/* Area del timeline con scroll horizontal */}
+        <div className="flex-1 overflow-x-auto" ref={timelineRef}>
+          <div className="min-w-fit">
+            {/* Header del timeline */}
             <GanttGrid timelineRange={timelineRange} />
-          </div>
-          
-          {/* Scrollable timeline content */}
-          <div 
-            ref={timelineRef}
-            className="flex-1 overflow-x-auto overflow-y-auto"
-            style={{ paddingBottom: '16px' }} // Espacio para separar scroll de contenido
-          >
-            {phasesWithTasks.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-gray-500">
-                No hay datos para mostrar
-              </div>
-            ) : (
-              phasesWithTasks.map((phase: any) => (
+            
+            {/* Filas del timeline */}
+            <div>
+              {validPhasesWithTasks.map((phase) => (
                 <div key={phase.id}>
-                  {/* Fase timeline row - altura fija h-10 */}
-                  <GanttRow 
-                    type="phase" 
+                  {/* Fila de la fase */}
+                  <GanttRow
+                    type="phase"
                     title={phase.design_phases?.name || 'Sin nombre'}
                     startDate={phase.start_date}
                     endDate={phase.end_date}
@@ -174,7 +198,7 @@ export const Gantt = () => {
                     dataId={`phase-${phase.id}`}
                   />
                   
-                  {/* Tareas timeline rows - altura fija h-10 cada una */}
+                  {/* Filas de las tareas */}
                   {phase.tasks?.map((task: any) => (
                     <GanttRow
                       key={task.id}
@@ -182,15 +206,15 @@ export const Gantt = () => {
                       title={task.name}
                       startDate={task.start_date}
                       endDate={task.end_date}
-                      assignee={task.assigned_to || 'Sin asignar'}
+                      assignee={task.assigned_to}
                       level={1}
                       timelineRange={timelineRange}
                       dataId={`task-${task.id}`}
                     />
                   ))}
                 </div>
-              ))
-            )}
+              ))}
+            </div>
           </div>
         </div>
       </div>

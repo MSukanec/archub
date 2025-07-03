@@ -30,9 +30,9 @@ export interface Task {
 
 export const getColumnWidth = (mode: ViewMode): number => {
   switch (mode) {
-    case 'day': return 40;
-    case 'week': return 100;
-    case 'month': return 160;
+    case 'days': return 40;
+    case 'weeks': return 100;
+    case 'months': return 160;
     default: return 40;
   }
 };
@@ -148,13 +148,13 @@ export const getBarPosition = (
 
 export const formatDateForMode = (date: Date, mode: ViewMode): string => {
   switch (mode) {
-    case 'day':
+    case 'days':
       return date.getDate().toString();
-    case 'week':
+    case 'weeks':
       const weekStart = new Date(date);
       weekStart.setDate(date.getDate() - date.getDay());
       return `S${Math.floor(date.getDate() / 7) + 1}`;
-    case 'month':
+    case 'months':
       return date.toLocaleDateString('es-ES', { month: 'short' });
     default:
       return date.getDate().toString();

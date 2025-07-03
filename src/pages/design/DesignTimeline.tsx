@@ -3,7 +3,7 @@ import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useDesignProjectPhases } from '@/hooks/use-design-phases';
+import { useDesignProjectPhases, useGanttPhasesWithTasks } from '@/hooks/use-design-phases';
 import { Gantt } from '@/components/ui-custom/gantt';
 import { NewPhaseModal } from '@/modals/design/NewPhaseModal';
 import { NewPhaseTaskModal } from '@/modals/design/NewPhaseTaskModal';
@@ -19,6 +19,11 @@ export default function DesignTimeline() {
   const projectId = userData?.preferences?.last_project_id;
   
   const { data: projectPhases = [], isLoading } = useDesignProjectPhases(projectId || '');
+  const { data: phasesWithTasks = [], isLoading: isGanttLoading } = useGanttPhasesWithTasks(projectId || '');
+  
+  console.log('DesignTimeline - projectId:', projectId);
+  console.log('DesignTimeline - phasesWithTasks:', phasesWithTasks);
+  console.log('DesignTimeline - isLoading:', isLoading, 'isGanttLoading:', isGanttLoading);
 
   const handleEditPhase = (phase: any) => {
     setEditingPhase(phase);
@@ -61,7 +66,7 @@ export default function DesignTimeline() {
     ]
   };
 
-  if (isLoading) {
+  if (isLoading || isGanttLoading) {
     return (
       <Layout headerProps={headerProps} wide={true}>
         <div className="flex items-center justify-center h-64">
@@ -75,7 +80,7 @@ export default function DesignTimeline() {
     <>
       <Layout headerProps={headerProps} wide={true}>
         <div className="space-y-6">
-          <Gantt />
+          <Gantt phasesWithTasks={phasesWithTasks} />
         </div>
       </Layout>
 
