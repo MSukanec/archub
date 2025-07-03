@@ -30,11 +30,10 @@ export interface Task {
 
 export const getColumnWidth = (mode: ViewMode): number => {
   switch (mode) {
-    case 'days': return 32;
-    case 'weeks': return 80;
+    case 'weeks': return 120; // Más ancho para mostrar días individuales
     case 'months': return 120;
     case 'quarters': return 200;
-    default: return 32;
+    default: return 120;
   }
 };
 
@@ -115,7 +114,8 @@ export const getTimelineColumns = (start: string, end: string, mode: ViewMode): 
   const today = new Date();
   
   switch (mode) {
-    case 'days': {
+    case 'weeks': {
+      // En modo semanas, mostrar días individuales
       const currentDate = new Date(startDate);
       while (currentDate <= endDate) {
         const dateStr = currentDate.toISOString().split('T')[0];
@@ -126,27 +126,6 @@ export const getTimelineColumns = (start: string, end: string, mode: ViewMode): 
           isToday: currentDate.toDateString() === today.toDateString()
         });
         currentDate.setDate(currentDate.getDate() + 1);
-      }
-      break;
-    }
-    
-    case 'weeks': {
-      const currentDate = new Date(startDate);
-      // Ajustar al lunes de la semana
-      currentDate.setDate(currentDate.getDate() - currentDate.getDay() + 1);
-      
-      while (currentDate <= endDate) {
-        const weekEnd = new Date(currentDate);
-        weekEnd.setDate(weekEnd.getDate() + 6);
-        
-        const weekNum = Math.ceil(currentDate.getDate() / 7);
-        columns.push({
-          key: `week-${currentDate.getFullYear()}-${currentDate.getMonth()}-${weekNum}`,
-          label: `S${weekNum}`,
-          date: new Date(currentDate),
-          isToday: today >= currentDate && today <= weekEnd
-        });
-        currentDate.setDate(currentDate.getDate() + 7);
       }
       break;
     }
@@ -181,10 +160,14 @@ export const getTimelineColumns = (start: string, end: string, mode: ViewMode): 
           const quarterStart = new Date(year, quarter * 3, 1);
           const quarterEnd = new Date(year, quarter * 3 + 3, 0);
           
-          const quarterNames = ['T1', 'T2', 'T3', 'T4'];
+          // Crear etiquetas con rangos de meses (ej: "Ene-Mar", "Abr-Jun")
+          const quarterMonthRanges = [
+            'Ene-Mar', 'Abr-Jun', 'Jul-Sep', 'Oct-Dic'
+          ];
+          
           columns.push({
             key: `quarter-${year}-${quarter}`,
-            label: `${quarterNames[quarter]} ${year}`,
+            label: `${quarterMonthRanges[quarter]} ${year}`,
             date: quarterStart,
             isToday: today >= quarterStart && today <= quarterEnd
           });
@@ -199,7 +182,7 @@ export const getTimelineColumns = (start: string, end: string, mode: ViewMode): 
 
 // Devuelve array de fechas entre dos fechas (mantenido para compatibilidad)
 export const getDateArray = (start: string, end: string): string[] => {
-  const columns = getTimelineColumns(start, end, 'days');
+  const columns = getTimelineColumns(start, end, 'weeks');
   return columns.map(col => col.key);
 };
 
@@ -234,15 +217,9 @@ export const getBarPosition = (
     // Check if start date falls in this column
     if (startColumnIndex === -1) {
       switch (mode) {
-        case 'days':
-          if (column.date.toDateString() === start.toDateString()) {
-            startColumnIndex = i;
-          }
-          break;
         case 'weeks':
-          const weekEnd = new Date(column.date);
-          weekEnd.setDate(weekEnd.getDate() + 6);
-          if (start >= column.date && start <= weekEnd) {
+          // En modo semanas, las columnas son días individuales
+          if (column.date.toDateString() === start.toDateString()) {
             startColumnIndex = i;
           }
           break;
@@ -265,15 +242,9 @@ export const getBarPosition = (
     
     // Check if end date falls in this column
     switch (mode) {
-      case 'days':
-        if (column.date.toDateString() === end.toDateString()) {
-          endColumnIndex = i;
-        }
-        break;
       case 'weeks':
-        const weekEnd = new Date(column.date);
-        weekEnd.setDate(weekEnd.getDate() + 6);
-        if (end >= column.date && end <= weekEnd) {
+        // En modo semanas, las columnas son días individuales
+        if (column.date.toDateString() === end.toDateString()) {
           endColumnIndex = i;
         }
         break;
@@ -307,14 +278,14 @@ export const getBarPosition = (
 
 export const formatDateForMode = (date: Date, mode: ViewMode): string => {
   switch (mode) {
-    case 'days':
-      return date.getDate().toString();
     case 'weeks':
-      const weekStart = new Date(date);
-      weekStart.setDate(date.getDate() - date.getDay());
-      return `S${Math.floor(date.getDate() / 7) + 1}`;
+      return date.getDate().toString();
     case 'months':
       return date.toLocaleDateString('es-ES', { month: 'short' });
+    case 'quarters':
+      const quarter = Math.floor(date.getMonth() / 3);
+      const quarterRanges = ['Ene-Mar', 'Abr-Jun', 'Jul-Sep', 'Oct-Dic'];
+      return quarterRanges[quarter];
     default:
       return date.getDate().toString();
   }

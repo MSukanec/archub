@@ -19,26 +19,8 @@ export const GanttGrid = ({ timelineRange }: GanttGridProps) => {
 
   // Group columns by higher level units for top header
   const groupedColumns = useMemo(() => {
-    if (viewMode === 'days') {
-      // Group by months for days view
-      const monthsMap = new Map<string, TimelineColumn[]>();
-      
-      timelineColumns.forEach(column => {
-        const monthKey = format(column.date, 'yyyy-MM');
-        if (!monthsMap.has(monthKey)) {
-          monthsMap.set(monthKey, []);
-        }
-        monthsMap.get(monthKey)?.push(column);
-      });
-      
-      return Array.from(monthsMap.entries()).map(([monthKey, columns]) => ({
-        key: monthKey,
-        label: format(columns[0].date, 'MMM yyyy', { locale: es }).toUpperCase(),
-        columns,
-        width: columns.length * columnWidth
-      }));
-    } else if (viewMode === 'weeks') {
-      // Group by months for weeks view
+    if (viewMode === 'weeks') {
+      // Group by months for weeks view (showing individual days)
       const monthsMap = new Map<string, TimelineColumn[]>();
       
       timelineColumns.forEach(column => {

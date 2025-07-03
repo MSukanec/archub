@@ -103,7 +103,6 @@ export const Gantt = ({ phasesWithTasks, onCreatePhase, onEditPhase, onAddTask, 
   }, [validPhasesWithTasks, startDate, endDate]);
 
   const viewModeOptions: { value: ViewMode; label: string; icon: React.ReactNode }[] = [
-    { value: 'days', label: 'Días', icon: <CalendarDays className="w-4 h-4" /> },
     { value: 'weeks', label: 'Semanas', icon: <Clock className="w-4 h-4" /> },
     { value: 'months', label: 'Meses', icon: <Calendar className="w-4 h-4" /> },
     { value: 'quarters', label: 'Trimestres', icon: <Calendar className="w-4 h-4" /> }
@@ -116,8 +115,20 @@ export const Gantt = ({ phasesWithTasks, onCreatePhase, onEditPhase, onAddTask, 
         <div className="flex items-center space-x-4">
           {/* Selector de vista */}
           <div className="flex items-center space-x-2">
-            <span className="text-sm font-medium text-gray-700">Vista:</span>
             <div className="flex bg-white border border-gray-300 rounded-md p-1">
+              {/* Botón HOY */}
+              <button
+                onClick={scrollToToday}
+                className="px-3 py-1 text-xs font-medium rounded transition-colors flex items-center space-x-1 text-gray-600 hover:bg-gray-100"
+              >
+                <CalendarDays className="w-4 h-4" />
+                <span>HOY</span>
+              </button>
+              
+              {/* Separador */}
+              <div className="w-px bg-gray-300 mx-1"></div>
+              
+              {/* Opciones de vista */}
               {viewModeOptions.map((option) => (
                 <button
                   key={option.value}
@@ -171,16 +182,7 @@ export const Gantt = ({ phasesWithTasks, onCreatePhase, onEditPhase, onAddTask, 
             </div>
           </div>
         </div>
-        
-        {/* Botón ir a hoy */}
-        <Button
-          onClick={scrollToToday}
-          variant="outline"
-          size="sm"
-          className="text-xs"
-        >
-          Ir a HOY
-        </Button>
+
       </div>
 
       {/* Contenedor principal del Gantt */}
