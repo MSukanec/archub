@@ -43,13 +43,7 @@ export function useTaskTemplates() {
       
       if (error) throw error;
       
-      // Add demo name_template for testing if missing
-      const templatesWithDemo = data?.map(template => ({
-        ...template,
-        name_template: template.name_template || `${template.name} de {{largo}} x {{ancho}} metros en {{material}}, incluye instalación: {{incluye_instalacion}}`
-      })) || [];
-      
-      return templatesWithDemo as TaskTemplate[];
+      return data as TaskTemplate[];
     }
   });
 }
@@ -120,15 +114,7 @@ export function useTaskTemplateParameterOptions(parameterId: string | null) {
     queryFn: async () => {
       if (!supabase || !parameterId) return [];
       
-      // Return demo options for the material parameter
-      if (parameterId === 'demo-3') {
-        return [
-          { id: 'opt-1', parameter_id: parameterId, value: 'concreto', label: 'Concreto', position: 1 },
-          { id: 'opt-2', parameter_id: parameterId, value: 'ladrillo', label: 'Ladrillo', position: 2 },
-          { id: 'opt-3', parameter_id: parameterId, value: 'metal', label: 'Metal', position: 3 },
-          { id: 'opt-4', parameter_id: parameterId, value: 'madera', label: 'Madera', position: 4 }
-        ] as TaskTemplateParameterOption[];
-      }
+      console.log('Fetching real options for parameter:', parameterId);
       
       const { data, error } = await supabase
         .from('task_template_parameter_options')
@@ -136,7 +122,12 @@ export function useTaskTemplateParameterOptions(parameterId: string | null) {
         .eq('parameter_id', parameterId)
         .order('position');
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching parameter options:', error);
+        throw error;
+      }
+      
+      console.log('Real parameter options from DB:', data);
       return data as TaskTemplateParameterOption[];
     },
     enabled: !!parameterId && !!supabase

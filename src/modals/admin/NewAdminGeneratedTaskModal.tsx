@@ -369,8 +369,25 @@ export function NewAdminGeneratedTaskModal({
                   )}
 
                   {selectedTemplateId && !parametersLoading && parameters && parameters.length === 0 && (
-                    <div className="text-center py-4 text-sm text-muted-foreground">
-                      Esta plantilla no tiene parámetros configurados
+                    <div className="space-y-4">
+                      <div className="border-t pt-4">
+                        <div className="p-4 border border-dashed rounded text-center text-sm text-muted-foreground">
+                          Esta plantilla no tiene parámetros configurados.
+                          <br />
+                          La tarea se creará con la información básica de la plantilla.
+                        </div>
+                      </div>
+                      
+                      {/* Preview for templates without parameters */}
+                      <div className="border-t pt-4">
+                        <h3 className="text-sm font-medium mb-2">Vista previa de la descripción</h3>
+                        <div className="p-3 bg-muted/20 rounded border text-sm">
+                          {(() => {
+                            const selectedTemplate = templates?.find(t => t.id === selectedTemplateId);
+                            return selectedTemplate?.name_template || selectedTemplate?.name || "Vista previa no disponible";
+                          })()}
+                        </div>
+                      </div>
                     </div>
                   )}
                 </form>
