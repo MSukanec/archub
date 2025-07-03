@@ -2,25 +2,23 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { FileText, Plus, Star, Globe, Lock, ChevronDown, ChevronRight, Edit, Trash2, MoreHorizontal, Flame, Package, StickyNote, Sun, Cloud, CloudRain, CloudSnow, Wind, CloudDrizzle, CloudLightning, Thermometer, TrendingUp, Users, AlertTriangle, CloudSun, CheckCircle, Search, Camera, Eye, Calendar } from "lucide-react";
+import { FileText, Plus, Star, Edit, Trash2, TrendingUp, Users, AlertTriangle, Package, Cloud, CloudRain, CloudSnow, Wind, Zap, Sun, Search, Camera, Eye, Calendar, ClipboardCheck } from "lucide-react";
 
 import { Layout } from '@/components/layout/Layout';
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { CustomEmptyState } from "@/components/ui-custom/misc/CustomEmptyState";
+import { CustomTable } from "@/components/ui-custom/misc/CustomTable";
+import SiteLogCard from "@/components/cards/SiteLogCard";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useOrganizationMembers } from "@/hooks/use-organization-members";
 import { NewSiteLogModal } from "@/modals/construction/NewSiteLogModal";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
+
 
 // Entry types enum with their icons and labels
 const entryTypes = {
@@ -29,20 +27,20 @@ const entryTypes = {
   problema_detectado: { icon: AlertTriangle, label: "Problema detectado", color: "bg-red-100 text-red-800" },
   pedido_material: { icon: Package, label: "Pedido material", color: "bg-orange-100 text-orange-800" },
   nota_climatica: { icon: Sun, label: "Nota climática", color: "bg-yellow-100 text-yellow-800" },
-  decision: { icon: CheckCircle, label: "Decisión", color: "bg-purple-100 text-purple-800" },
+  decision: { icon: ClipboardCheck, label: "Decisión", color: "bg-purple-100 text-purple-800" },
   inspeccion: { icon: Search, label: "Inspección", color: "bg-indigo-100 text-indigo-800" },
   foto_diaria: { icon: Camera, label: "Foto diaria", color: "bg-gray-100 text-gray-800" },
-  registro_general: { icon: StickyNote, label: "Registro general", color: "bg-teal-100 text-teal-800" }
+  registro_general: { icon: FileText, label: "Registro general", color: "bg-teal-100 text-teal-800" }
 };
 
 const weatherTypes = {
   sunny: { icon: Sun, label: "Soleado" },
-  partly_cloudy: { icon: CloudSun, label: "Parcialmente nublado" },
+  partly_cloudy: { icon: Cloud, label: "Parcialmente nublado" },
   cloudy: { icon: Cloud, label: "Nublado" },
   rain: { icon: CloudRain, label: "Lluvia" },
-  storm: { icon: CloudLightning, label: "Tormenta" },
+  storm: { icon: Zap, label: "Tormenta" },
   snow: { icon: CloudSnow, label: "Nieve" },
-  fog: { icon: CloudDrizzle, label: "Niebla" },
+  fog: { icon: Cloud, label: "Niebla" },
   windy: { icon: Wind, label: "Ventoso" },
   hail: { icon: CloudSnow, label: "Granizo" }
 };
@@ -154,8 +152,6 @@ export default function ConstructionLogs() {
   const [editingSiteLog, setEditingSiteLog] = useState<any>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [siteLogToDelete, setSiteLogToDelete] = useState<any>(null);
-  const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
-
   const { data: userData, isLoading } = useCurrentUser();
   const { data: siteLogs = [], isLoading: siteLogsLoading } = useSiteLogs(
     userData?.preferences?.last_project_id,
@@ -163,13 +159,6 @@ export default function ConstructionLogs() {
   );
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
-  // Auto-expand the most recent entry when data loads
-  useEffect(() => {
-    if (siteLogs && siteLogs.length > 0 && !expandedLogId) {
-      setExpandedLogId(siteLogs[0].id);
-    }
-  }, [siteLogs, expandedLogId]);
 
   // Filtrar bitácoras según los criterios
   let filteredSiteLogs = siteLogs?.filter((log: any) => {
@@ -413,220 +402,173 @@ export default function ConstructionLogs() {
 
 
 
-        {filteredSiteLogs.length === 0 ? (
-          <CustomEmptyState
-            icon={<FileText className="w-12 h-12 text-muted-foreground" />}
-            title={searchValue || filterByType !== 'all' || favoritesOnly || publicOnly ? "No se encontraron entradas" : "No hay entradas de bitácora"}
-            description={searchValue || filterByType !== 'all' || favoritesOnly || publicOnly 
-              ? 'Prueba ajustando los filtros de búsqueda' 
-              : 'Comienza creando tu primera entrada de bitácora para documentar el progreso'
-            }
-            action={
-              !searchValue && filterByType === 'all' && !favoritesOnly && !publicOnly && (
-                <Button onClick={() => setShowNewSiteLogModal(true)}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Crear Primera Entrada
-                </Button>
+        <CustomTable
+          data={filteredSiteLogs}
+          columns={[
+            {
+              key: 'log_date',
+              label: 'Fecha',
+              sortable: true,
+              sortType: 'date',
+              width: '15%',
+              render: (siteLog: any) => (
+                <span className="text-xs">
+                  {format(new Date(siteLog.log_date), 'dd/MM/yyyy', { locale: es })}
+                </span>
+              )
+            },
+            {
+              key: 'entry_type',
+              label: 'Tipo',
+              sortable: true,
+              sortType: 'string',
+              width: '20%',
+              render: (siteLog: any) => {
+                const entryTypeConfig = entryTypes[siteLog.entry_type as keyof typeof entryTypes];
+                return (
+                  <div className="flex items-center gap-2">
+                    {entryTypeConfig?.icon && (
+                      <entryTypeConfig.icon className="h-3 w-3 text-muted-foreground" />
+                    )}
+                    <span className="text-xs">{entryTypeConfig?.label || 'Sin tipo'}</span>
+                  </div>
+                );
+              }
+            },
+            {
+              key: 'creator',
+              label: 'Creador',
+              sortable: true,
+              sortType: 'string',
+              width: '20%',
+              render: (siteLog: any) => (
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-4 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
+                    <span className="text-[10px] font-medium text-primary">
+                      {siteLog.creator?.full_name?.charAt(0) || 'U'}
+                    </span>
+                  </div>
+                  <span className="text-xs truncate">
+                    {siteLog.creator?.full_name || 'Usuario'}
+                  </span>
+                </div>
+              )
+            },
+            {
+              key: 'weather',
+              label: 'Clima',
+              sortable: true,
+              sortType: 'string',
+              width: '15%',
+              render: (siteLog: any) => {
+                const weatherConfig = weatherTypes[siteLog.weather as keyof typeof weatherTypes];
+                return weatherConfig ? (
+                  <div className="flex items-center gap-1">
+                    <weatherConfig.icon className="h-3 w-3 text-muted-foreground" />
+                    <span className="text-xs">{weatherConfig.label}</span>
+                  </div>
+                ) : null;
+              }
+            },
+            {
+              key: 'comments',
+              label: 'Comentarios',
+              sortable: false,
+              width: '20%',
+              render: (siteLog: any) => (
+                <span className="text-xs text-muted-foreground">
+                  {siteLog.comments ? (siteLog.comments.length > 30 ? `${siteLog.comments.substring(0, 30)}...` : siteLog.comments) : 'Sin comentarios'}
+                </span>
+              )
+            },
+            {
+              key: 'actions',
+              label: 'Acciones',
+              sortable: false,
+              width: '10%',
+              render: (siteLog: any) => (
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleFavorite(siteLog.id);
+                    }}
+                    className="h-6 w-6 p-0 hover:bg-transparent group"
+                  >
+                    <Star className={`h-3 w-3 transition-colors ${siteLog.is_favorite ? 'text-yellow-500 fill-yellow-500' : 'text-muted-foreground group-hover:text-yellow-500'}`} />
+                  </Button>
+                  
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditingSiteLog(siteLog);
+                      setShowNewSiteLogModal(true);
+                    }}
+                    className="h-6 w-6 p-0 hover:bg-transparent group"
+                  >
+                    <Edit className="h-3 w-3 text-muted-foreground group-hover:text-blue-500 transition-colors" />
+                  </Button>
+                  
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeleteDialogOpen(true);
+                      setSiteLogToDelete(siteLog);
+                    }}
+                    className="h-6 w-6 p-0 hover:bg-transparent group"
+                  >
+                    <Trash2 className="h-3 w-3 text-muted-foreground group-hover:text-red-500 transition-colors" />
+                  </Button>
+                </div>
               )
             }
-          />
-        ) : (
-          <div className="space-y-3">
-            {filteredSiteLogs.map((siteLog: any) => {
-              const entryTypeConfig = entryTypes[siteLog.entry_type as keyof typeof entryTypes];
-              const weatherConfig = weatherTypes[siteLog.weather as keyof typeof weatherTypes];
-              const isExpanded = expandedLogId === siteLog.id;
-              
-              return (
-                <Collapsible 
-                  key={siteLog.id}
-                  open={isExpanded}
-                  onOpenChange={(open) => setExpandedLogId(open ? siteLog.id : null)}
-                >
-                  <Card className="w-full transition-all hover:shadow-sm">
-                    <div className="flex items-center justify-between p-4">
-                      {/* Lado izquierdo: Información principal */}
-                      <CollapsibleTrigger asChild>
-                        <div className="flex-1 cursor-pointer">
-                          <div className="flex items-center gap-4">
-                            {isExpanded ? (
-                              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                            ) : (
-                              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                            )}
-                            
-                            {/* Fecha y Hora */}
-                            <span className="text-sm text-muted-foreground">
-                              {format(new Date(siteLog.log_date), 'dd/MM/yyyy HH:mm', { locale: es })}
-                            </span>
-
-                            {/* Clima */}
-                            {weatherConfig && (
-                              <div className="flex items-center gap-1">
-                                <weatherConfig.icon className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-sm text-muted-foreground">
-                                  {weatherConfig.label}
-                                </span>
-                              </div>
-                            )}
-
-                            {/* Creador */}
-                            <div className="flex items-center gap-2">
-                              <div className="h-5 w-5 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
-                                <span className="text-xs font-medium text-primary">
-                                  {siteLog.creator?.full_name?.charAt(0) || 'U'}
-                                </span>
-                              </div>
-                              <span className="text-sm text-muted-foreground">
-                                {siteLog.creator?.full_name || 'Usuario desconocido'}
-                              </span>
-                            </div>
-
-                            {/* Tipo de Entrada */}
-                            <span className="text-sm font-bold">
-                              {entryTypeConfig?.label || 'Sin tipo'}
-                            </span>
-
-
-                          </div>
-                        </div>
-                      </CollapsibleTrigger>
-
-                      {/* Lado derecho: Botones de acción */}
-                      <div className="flex items-center gap-2 ml-4">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleFavorite(siteLog.id);
-                          }}
-                          className="h-8 w-8 p-0 hover:bg-transparent group"
-                        >
-                          <Star className={`h-4 w-4 transition-colors ${siteLog.is_favorite ? 'text-yellow-500 fill-yellow-500' : 'text-muted-foreground group-hover:text-yellow-500'}`} />
-                        </Button>
-                        
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setEditingSiteLog(siteLog);
-                            setShowNewSiteLogModal(true);
-                          }}
-                          className="h-8 w-8 p-0 hover:bg-transparent group"
-                        >
-                          <Edit className="h-4 w-4 text-muted-foreground group-hover:text-blue-500 transition-colors" />
-                        </Button>
-                        
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDeleteDialogOpen(true);
-                            setSiteLogToDelete(siteLog);
-                          }}
-                          className="h-8 w-8 p-0 hover:bg-transparent group"
-                        >
-                          <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500 transition-colors" />
-                        </Button>
-                      </div>
-                    </div>
-
-                    <CollapsibleContent>
-                      <div className="px-4 pb-4 pt-2 border-t bg-muted/30">
-                        <div className="grid grid-cols-4 gap-4 text-sm">
-                          {/* Comentario Completo */}
-                          <div>
-                            <span className="font-medium text-muted-foreground block mb-2">Comentario Completo</span>
-                            <p className="text-sm">{siteLog.comments || 'Sin comentarios adicionales'}</p>
-                          </div>
-
-                          {/* Eventos */}
-                          <div>
-                            <span className="font-medium text-muted-foreground block mb-2">Eventos</span>
-                            <div className="space-y-2">
-                              {siteLog.events && Array.isArray(siteLog.events) && siteLog.events.length > 0 ? (
-                                siteLog.events.map((event: any, index: number) => (
-                                  <Card key={index} className="p-2 bg-blue-50/50 border-blue-200">
-                                    <div className="flex items-center justify-between mb-1">
-                                      <span className="text-xs font-medium text-blue-800">
-                                        {event.event_type?.name || event.type || 'Evento'}
-                                      </span>
-                                    </div>
-                                    <p className="text-xs text-gray-700">{event.description || 'Sin descripción'}</p>
-                                  </Card>
-                                ))
-                              ) : (
-                                <p className="text-xs text-muted-foreground">Sin eventos registrados</p>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Personal */}
-                          <div>
-                            <span className="font-medium text-muted-foreground block mb-2">Personal</span>
-                            <div className="space-y-2">
-                              {siteLog.attendees && Array.isArray(siteLog.attendees) && siteLog.attendees.length > 0 ? (
-                                siteLog.attendees.map((attendee: any, index: number) => (
-                                  <Card key={index} className="p-2 bg-green-50/50 border-green-200">
-                                    <div className="flex items-center justify-between mb-1">
-                                      <span className="text-xs font-medium text-green-800">
-                                        {attendee.contact ? 
-                                          `${attendee.contact.first_name || ''} ${attendee.contact.last_name || ''}`.trim() || 'Personal' 
-                                          : 'Personal'
-                                        }
-                                      </span>
-                                      <span className="text-xs px-1 py-0.5 bg-green-100 text-green-700 rounded">
-                                        {attendee.attendance_type || 'Presente'}
-                                      </span>
-                                    </div>
-                                    {attendee.description && (
-                                      <p className="text-xs text-gray-700">{attendee.description}</p>
-                                    )}
-                                  </Card>
-                                ))
-                              ) : (
-                                <p className="text-xs text-muted-foreground">Sin personal registrado</p>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Maquinaria */}
-                          <div>
-                            <span className="font-medium text-muted-foreground block mb-2">Maquinaria</span>
-                            <div className="space-y-2">
-                              {siteLog.equipment && siteLog.equipment.length > 0 ? (
-                                siteLog.equipment.map((equipment: any, index: number) => (
-                                  <Card key={index} className="p-2 bg-orange-50/50 border-orange-200">
-                                    <div className="flex items-center justify-between mb-1">
-                                      <span className="text-xs font-medium text-orange-800">
-                                        {equipment.equipment?.name || 'Equipo'}
-                                      </span>
-                                      <span className="text-xs px-1 py-0.5 bg-orange-100 text-orange-700 rounded">
-                                        x{equipment.quantity || 1}
-                                      </span>
-                                    </div>
-                                    {equipment.description && (
-                                      <p className="text-xs text-gray-700">{equipment.description}</p>
-                                    )}
-                                  </Card>
-                                ))
-                              ) : (
-                                <p className="text-xs text-muted-foreground">Sin maquinaria registrada</p>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </CollapsibleContent>
-                  </Card>
-                </Collapsible>
-              );
-            })}
-          </div>
-        )}
+          ]}
+          emptyState={
+            <CustomEmptyState
+              icon={<FileText className="w-12 h-12 text-muted-foreground" />}
+              title={searchValue || filterByType !== 'all' || favoritesOnly || publicOnly ? "No se encontraron entradas" : "No hay entradas de bitácora"}
+              description={searchValue || filterByType !== 'all' || favoritesOnly || publicOnly 
+                ? 'Prueba ajustando los filtros de búsqueda' 
+                : 'Comienza creando tu primera entrada de bitácora para documentar el progreso'
+              }
+              action={
+                !searchValue && filterByType === 'all' && !favoritesOnly && !publicOnly && (
+                  <Button onClick={() => setShowNewSiteLogModal(true)}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Crear Primera Entrada
+                  </Button>
+                )
+              }
+            />
+          }
+          renderCard={(siteLog: any) => (
+            <SiteLogCard 
+              siteLog={siteLog}
+              onEdit={(log) => {
+                setEditingSiteLog(log);
+                setShowNewSiteLogModal(true);
+              }}
+              onDelete={(logId) => {
+                const log = filteredSiteLogs.find(l => l.id === logId);
+                if (log) {
+                  setDeleteDialogOpen(true);
+                  setSiteLogToDelete(log);
+                }
+              }}
+              onToggleFavorite={toggleFavorite}
+            />
+          )}
+          defaultSort={{
+            key: 'log_date',
+            direction: 'desc'
+          }}
+        />
       </div>
 
       {/* Modal para nueva entrada */}
