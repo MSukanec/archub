@@ -14,9 +14,10 @@ interface GanttProps {
   onCreatePhase?: () => void;
   onEditPhase?: (phase: any) => void;
   onAddTask?: (phaseId: string) => void;
+  onEditTask?: (task: any) => void;
 }
 
-export const Gantt = ({ phasesWithTasks, onCreatePhase, onEditPhase, onAddTask }: GanttProps) => {
+export const Gantt = ({ phasesWithTasks, onCreatePhase, onEditPhase, onAddTask, onEditTask }: GanttProps) => {
   console.log('Gantt phasesWithTasks:', phasesWithTasks);
   
   const { viewMode, setViewMode, timelineStart, timelineEnd, setTimelineRange } = useGanttStore();
@@ -232,12 +233,27 @@ export const Gantt = ({ phasesWithTasks, onCreatePhase, onEditPhase, onAddTask }
                 {phase.tasks?.map((task: any) => (
                   <div 
                     key={task.id}
-                    className="h-10 border-b border-gray-100 px-8 flex items-center hover:bg-gray-100 cursor-pointer"
+                    className="h-10 border-b border-gray-100 px-8 flex items-center justify-between hover:bg-gray-100 cursor-pointer group"
                     data-id={`task-${task.id}`}
                   >
                     <span className="text-sm text-gray-700">
                       {task.name}
                     </span>
+                    
+                    {/* Edit button - shown on hover */}
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEditTask?.(task);
+                        }}
+                        className="h-6 w-6 p-0"
+                      >
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -254,7 +270,14 @@ export const Gantt = ({ phasesWithTasks, onCreatePhase, onEditPhase, onAddTask }
         </div>
 
         {/* Area del timeline con scroll horizontal */}
-        <div className="flex-1 overflow-x-auto overflow-y-hidden" ref={timelineRef}>
+        <div 
+          className="flex-1 overflow-x-scroll overflow-y-hidden gantt-timeline-scroll" 
+          ref={timelineRef}
+          style={{ 
+            scrollbarWidth: 'thin',
+            scrollbarColor: '#cbd5e1 #f1f5f9'
+          }}
+        >
           <div className="min-w-max" style={{ minWidth: '1200px' }}>
             {/* Header del timeline */}
             <GanttGrid timelineRange={timelineRange} />

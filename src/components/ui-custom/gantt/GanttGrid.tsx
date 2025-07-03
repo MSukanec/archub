@@ -85,7 +85,7 @@ export const GanttGrid = ({ timelineRange }: GanttGridProps) => {
               
               {/* Indicador de hoy */}
               {today && (
-                <div className="absolute top-0 bottom-0 left-1/2 w-0.5 bg-blue-500 z-10 pointer-events-none -translate-x-0.5" />
+                <div className="absolute top-0 bottom-0 left-1/2 w-0.5 bg-blue-500 z-5 pointer-events-none -translate-x-0.5" />
               )}
             </div>
           );

@@ -33,9 +33,10 @@ interface NewPhaseTaskModalProps {
   open: boolean;
   onClose: () => void;
   projectPhaseId: string;
+  editingTask?: any;
 }
 
-export function NewPhaseTaskModal({ open, onClose, projectPhaseId }: NewPhaseTaskModalProps) {
+export function NewPhaseTaskModal({ open, onClose, projectPhaseId, editingTask }: NewPhaseTaskModalProps) {
   const { data: userData } = useCurrentUser();
   const { data: organizationMembers = [] } = useOrganizationMembers(userData?.organization?.id || '');
   const { toast } = useToast();
@@ -57,15 +58,29 @@ export function NewPhaseTaskModal({ open, onClose, projectPhaseId }: NewPhaseTas
 
   // Set default creator when user data loads
   useEffect(() => {
-    if (userData?.user?.id) {
+    if (editingTask) {
+      // Pre-populate form when editing
+      form.setValue('name', editingTask.name || '');
+      form.setValue('description', editingTask.description || '');
+      form.setValue('created_by', editingTask.created_by || userData?.user?.id || '');
+      form.setValue('assigned_to', editingTask.assigned_to || '');
+      form.setValue('start_date', editingTask.start_date || '');
+      form.setValue('end_date', editingTask.end_date || '');
+      form.setValue('status', editingTask.status || 'pending');
+      form.setValue('priority', editingTask.priority || 'medium');
+    } else if (userData?.user?.id) {
       form.setValue('created_by', userData.user.id);
     }
-  }, [userData, form]);
+  }, [editingTask, userData, form]);
 
-  const createTaskMutation = useMutation({
+  const taskMutation = useMutation({
     mutationFn: async (taskData: NewPhaseTaskFormData) => {
-      const response = await fetch('/api/design-phase-tasks', {
-        method: 'POST',
+      const isEditing = Boolean(editingTask);
+      const url = isEditing ? `/api/design-phase-tasks/${editingTask.id}` : '/api/design-phase-tasks';
+      const method = isEditing ? 'PUT' : 'POST';
+      
+      const response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
         },
@@ -79,17 +94,18 @@ export function NewPhaseTaskModal({ open, onClose, projectPhaseId }: NewPhaseTas
       });
 
       if (!response.ok) {
-        throw new Error('Error al crear la tarea');
+        throw new Error(isEditing ? 'Error al actualizar la tarea' : 'Error al crear la tarea');
       }
 
       return response.json();
     },
     onSuccess: () => {
+      const isEditing = Boolean(editingTask);
       toast({
-        title: "Tarea creada",
-        description: "La tarea ha sido creada exitosamente.",
+        title: isEditing ? "Tarea actualizada" : "Tarea creada",
+        description: isEditing ? "La tarea ha sido actualizada exitosamente." : "La tarea ha sido creada exitosamente.",
       });
-      // Invalidate both query keys to refresh the data
+      // Invalidate all relevant query keys to refresh the data
       queryClient.invalidateQueries({ queryKey: ['design-project-phases'] });
       queryClient.invalidateQueries({ queryKey: ['gantt-phases-tasks'] });
       queryClient.invalidateQueries({ queryKey: ['design-phase-tasks'] });
@@ -97,17 +113,18 @@ export function NewPhaseTaskModal({ open, onClose, projectPhaseId }: NewPhaseTas
       form.reset();
     },
     onError: (error) => {
+      const isEditing = Boolean(editingTask);
       toast({
         title: "Error",
-        description: "No se pudo crear la tarea. Inténtalo de nuevo.",
+        description: isEditing ? "No se pudo actualizar la tarea. Inténtalo de nuevo." : "No se pudo crear la tarea. Inténtalo de nuevo.",
         variant: "destructive",
       });
-      console.error('Error creating task:', error);
+      console.error('Error with task:', error);
     },
   });
 
   const onSubmit = (data: NewPhaseTaskFormData) => {
-    createTaskMutation.mutate(data);
+    taskMutation.mutate(data);
   };
 
   const handleClose = () => {
@@ -120,8 +137,8 @@ export function NewPhaseTaskModal({ open, onClose, projectPhaseId }: NewPhaseTas
       {{
         header: (
           <CustomModalHeader 
-            title="Nueva Tarea de Fase"
-            description="Crear una nueva tarea dentro de la fase de diseño"
+            title={editingTask ? "Editar Tarea de Fase" : "Nueva Tarea de Fase"}
+            description={editingTask ? "Editar la tarea de la fase de diseño" : "Crear una nueva tarea dentro de la fase de diseño"}
             onClose={handleClose}
           />
         ),
@@ -284,8 +301,8 @@ export function NewPhaseTaskModal({ open, onClose, projectPhaseId }: NewPhaseTas
           <CustomModalFooter
             onCancel={handleClose}
             onSave={form.handleSubmit(onSubmit)}
-            isLoading={createTaskMutation.isPending}
-            saveText="Crear Tarea"
+            isLoading={taskMutation.isPending}
+            saveText={editingTask ? "Actualizar Tarea" : "Crear Tarea"}
           />
         ),
       }}

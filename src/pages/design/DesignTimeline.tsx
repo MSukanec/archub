@@ -12,7 +12,9 @@ export default function DesignTimeline() {
   const [searchValue, setSearchValue] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [isEditTaskModalOpen, setIsEditTaskModalOpen] = useState(false);
   const [editingPhase, setEditingPhase] = useState(null);
+  const [editingTask, setEditingTask] = useState<any>(null);
   const [selectedPhaseId, setSelectedPhaseId] = useState("");
   
   const { data: userData } = useCurrentUser();
@@ -40,9 +42,19 @@ export default function DesignTimeline() {
     setEditingPhase(null);
   };
 
+  const handleEditTask = (task: any) => {
+    setEditingTask(task);
+    setIsEditTaskModalOpen(true);
+  };
+
   const handleCloseTaskModal = () => {
     setIsTaskModalOpen(false);
     setSelectedPhaseId("");
+  };
+
+  const handleCloseEditTaskModal = () => {
+    setIsEditTaskModalOpen(false);
+    setEditingTask(null);
   };
 
   const headerProps = {
@@ -85,6 +97,7 @@ export default function DesignTimeline() {
             onCreatePhase={() => setIsModalOpen(true)}
             onEditPhase={handleEditPhase}
             onAddTask={handleAddTask}
+            onEditTask={handleEditTask}
           />
         </div>
       </Layout>
@@ -102,6 +115,13 @@ export default function DesignTimeline() {
         open={isTaskModalOpen}
         onClose={handleCloseTaskModal}
         projectPhaseId={selectedPhaseId}
+      />
+
+      <NewPhaseTaskModal
+        open={isEditTaskModalOpen}
+        onClose={handleCloseEditTaskModal}
+        projectPhaseId={editingTask?.project_phase_id || selectedPhaseId}
+        editingTask={editingTask}
       />
     </>
   );

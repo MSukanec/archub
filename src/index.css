@@ -2,6 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Gantt Timeline Scrollbar Styling */
+.gantt-timeline-scroll::-webkit-scrollbar {
+  height: 12px;
+}
+
+.gantt-timeline-scroll::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 6px;
+}
+
+.gantt-timeline-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 6px;
+  border: 2px solid #f1f5f9;
+}
+
+.gantt-timeline-scroll::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
 @keyframes fadeInUp {
   from {
     opacity: 0;
