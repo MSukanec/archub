@@ -76,3 +76,36 @@ export function useCreateGeneratedTask() {
     }
   });
 }
+
+export function useDeleteGeneratedTask() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (taskId: string) => {
+      if (!supabase) throw new Error('Supabase not initialized');
+      
+      const { error } = await supabase
+        .from('generated_tasks')
+        .delete()
+        .eq('id', taskId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['generated-tasks'] });
+      toast({
+        title: "Tarea Eliminada",
+        description: "La tarea generada se ha eliminado exitosamente",
+        variant: "default"
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Error al eliminar la tarea generada",
+        variant: "destructive"
+      });
+    }
+  });
+}

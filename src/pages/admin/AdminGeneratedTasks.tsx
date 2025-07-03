@@ -13,7 +13,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Layout } from '@/components/layout/Layout'
 import { CustomTable } from '@/components/ui-custom/misc/CustomTable'
 import { NewAdminGeneratedTaskModal } from '@/modals/admin/NewAdminGeneratedTaskModal'
-import { useGeneratedTasks } from '@/hooks/use-generated-tasks'
+import { useGeneratedTasks, useDeleteGeneratedTask } from '@/hooks/use-generated-tasks'
 
 import { Plus, Edit, Trash2, CheckSquare, Clock, Target, Zap } from 'lucide-react'
 
@@ -37,6 +37,7 @@ export default function AdminGeneratedTasks() {
 
   // Real data from useGeneratedTasks hook
   const { data: generatedTasks = [], isLoading } = useGeneratedTasks()
+  const deleteGeneratedTaskMutation = useDeleteGeneratedTask()
 
   // Statistics calculations
   const totalGeneratedTasks = generatedTasks.length
@@ -71,12 +72,8 @@ export default function AdminGeneratedTasks() {
     if (!deletingGeneratedTask) return
 
     try {
-      // Temporary placeholder for delete functionality
       console.log('Delete generated task:', deletingGeneratedTask.id)
-      toast({
-        title: "Función pendiente",
-        description: "La eliminación de tareas generadas estará disponible próximamente"
-      })
+      deleteGeneratedTaskMutation.mutate(deletingGeneratedTask.id)
       setDeletingGeneratedTask(null)
     } catch (error) {
       console.error('Error al eliminar tarea generada:', error)
