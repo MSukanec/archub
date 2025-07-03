@@ -1,29 +1,18 @@
 import { Layout } from '@/components/layout/Layout'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { useState } from 'react'
-import { Plus, Star, Bug, Wrench, Plus as PlusIcon, History } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Plus, History, Search, Filter, X } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useChangelogEntries } from '@/hooks/use-changelog'
-// import { NewChangelogEntryModal } from '@/modals/others/NewChangelogEntryModal'
+import { NewChangelogEntryModal } from '@/modals/others/NewChangelogEntryModal'
 import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState'
+import { ChangelogCard } from '@/components/cards/ChangelogCard'
+import { useMobileActionBar } from '@/contexts/MobileActionBarContext'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 
 // Icon mapping for changelog types
-const getChangelogIcon = (type: string) => {
-  switch (type) {
-    case 'Novedad':
-      return <Star className="h-4 w-4 text-blue-500" />
-    case 'Mejora':
-      return <Wrench className="h-4 w-4 text-green-500" />
-    case 'Arreglo de Errores':
-      return <Bug className="h-4 w-4 text-red-500" />
-    default:
-      return <PlusIcon className="h-4 w-4 text-purple-500" />
-  }
-}
+
 
 // Group entries by date
 const groupEntriesByDate = (entries: any[]): [string, any[]][] => {
@@ -41,14 +30,63 @@ const groupEntriesByDate = (entries: any[]): [string, any[]][] => {
     const dateA = new Date(grouped[a][0]?.date || a)
     const dateB = new Date(grouped[b][0]?.date || b)
     return dateB.getTime() - dateA.getTime()
-  })
+  }) as [string, any[]][]
 }
 
 export default function Changelog() {
   const [searchValue, setSearchValue] = useState("")
-  // const [showNewEntryModal, setShowNewEntryModal] = useState(false)
+  const [showNewEntryModal, setShowNewEntryModal] = useState(false)
   const { data: userData } = useCurrentUser()
   const { data: entries, isLoading } = useChangelogEntries()
+  const { setActions, setShowActionBar, clearActions } = useMobileActionBar()
+
+  // Configure mobile action bar
+  useEffect(() => {
+    const isAdmin = userData?.role?.name === "super_admin"
+    
+    setActions({
+      slot2: {
+        id: 'search',
+        icon: <Search className="h-4 w-4" />,
+        label: 'Buscar',
+        onClick: () => {
+          // Focus search in header if available
+          const searchInput = document.querySelector('input[type="search"]') as HTMLInputElement
+          if (searchInput) {
+            searchInput.focus()
+          }
+        }
+      },
+      ...(isAdmin && {
+        slot3: {
+          id: 'create',
+          icon: <Plus className="h-4 w-4" />,
+          label: 'Crear',
+          onClick: () => setShowNewEntryModal(true),
+          variant: 'primary' as const
+        }
+      }),
+      slot4: {
+        id: 'filter',
+        icon: <Filter className="h-4 w-4" />,
+        label: 'Filtrar',
+        onClick: () => {
+          // Future: implement filter functionality
+        }
+      },
+      slot5: {
+        id: 'clear',
+        icon: <X className="h-4 w-4" />,
+        label: 'Limpiar',
+        onClick: () => setSearchValue("")
+      }
+    })
+    setShowActionBar(true)
+
+    return () => {
+      clearActions()
+    }
+  }, [userData?.role?.name, setActions, setShowActionBar, clearActions])
 
   // Filter entries based on search
   const filteredEntries = entries?.filter((entry: any) =>
@@ -65,7 +103,16 @@ export default function Changelog() {
     onSearchChange: setSearchValue,
     showFilters: false,
     onClearFilters: () => setSearchValue(""),
-    actions: []
+    actions: userData?.role?.name === "super_admin" ? [
+      <Button 
+        key="new-entry"
+        className="h-8 px-3 text-sm"
+        onClick={() => setShowNewEntryModal(true)}
+      >
+        <Plus className="h-4 w-4 mr-2" />
+        Nueva Entrada
+      </Button>
+    ] : []
   }
 
   if (isLoading) {
@@ -107,47 +154,19 @@ export default function Changelog() {
             {/* Entries for this date */}
             <div className="space-y-3">
               {dateEntries.map((entry: any) => (
-                <Card key={entry.id} className="overflow-hidden">
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
-                      {/* Icon */}
-                      <div className="mt-0.5">
-                        {getChangelogIcon(entry.type)}
-                      </div>
-
-                      {/* Content */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex-1">
-                            <h3 className="font-medium text-sm leading-5 mb-1">
-                              {entry.title}
-                            </h3>
-                            <p className="text-sm text-muted-foreground leading-5 line-clamp-2">
-                              {entry.description}
-                            </p>
-                          </div>
-                          
-                          {/* Type Badge and Date */}
-                          <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                            <Badge variant="secondary" className="text-xs">
-                              {entry.type}
-                            </Badge>
-                            <span className="text-xs text-muted-foreground">
-                              {format(new Date(entry.date), 'dd/MM/yyyy')}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <ChangelogCard key={entry.id} entry={entry} />
               ))}
             </div>
           </div>
         ))}
       </div>
 
-
+      {/* New Entry Modal */}
+      {showNewEntryModal && (
+        <NewChangelogEntryModal
+          onClose={() => setShowNewEntryModal(false)}
+        />
+      )}
     </Layout>
   )
 }
