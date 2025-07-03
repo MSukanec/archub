@@ -103,14 +103,9 @@ export const GanttGrid = ({ timelineRange }: GanttGridProps) => {
                 {column.label}
               </span>
               
-              {/* Indicador de hoy - se extiende más allá del header */}
+              {/* Indicador de hoy */}
               {column.isToday && (
-                <div className="absolute top-0 left-1/2 w-0.5 bg-blue-500 z-10 pointer-events-none -translate-x-0.5" style={{ height: '200vh' }} />
-              )}
-              
-              {/* Línea divisoria vertical que se extiende más allá del header */}
-              {column.showBorder && (
-                <div className="absolute top-0 right-0 w-px bg-gray-100 pointer-events-none" style={{ height: '200vh' }} />
+                <div className="absolute top-0 bottom-0 left-1/2 w-0.5 bg-blue-500 z-5 pointer-events-none -translate-x-0.5" />
               )}
             </div>
           );

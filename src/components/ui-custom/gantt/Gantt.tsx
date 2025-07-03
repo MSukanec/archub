@@ -2,7 +2,7 @@ import React, { useMemo, useRef, useState } from 'react';
 import { GanttGrid } from './GanttGrid';
 import { GanttRow } from './GanttRow';
 import { useGanttStore, ViewMode } from './store';
-import { getTimelineRange, getDateArray, getColumnWidth, getTimelineColumns } from './utils';
+import { getTimelineRange, getDateArray, getColumnWidth } from './utils';
 import { Button } from '@/components/ui/button';
 import { CalendarDays, Clock, Calendar, Edit, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -58,8 +58,8 @@ export const Gantt = ({ phasesWithTasks, projectCreatedAt, onCreatePhase, onEdit
       };
     }
     
-    return getTimelineRange(validPhasesWithTasks, projectCreatedAt);
-  }, [validPhasesWithTasks, startDate, endDate, timelineStart, timelineEnd, projectCreatedAt]);
+    return getTimelineRange(validPhasesWithTasks);
+  }, [validPhasesWithTasks, startDate, endDate, timelineStart, timelineEnd]);
 
   const columnWidth = getColumnWidth(viewMode);
 
@@ -256,11 +256,9 @@ export const Gantt = ({ phasesWithTasks, projectCreatedAt, onCreatePhase, onEdit
             scrollbarColor: '#cbd5e1 #f1f5f9'
           }}
         >
-          <div className="min-w-max relative" style={{ minWidth: '1200px' }}>
+          <div className="min-w-max" style={{ minWidth: '1200px' }}>
             {/* Header del timeline */}
             <GanttGrid timelineRange={timelineRange} />
-            
-
             
             {/* Filas del timeline */}
             <div className="pb-16">
