@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Plus, MoreHorizontal, List, Edit, Trash2, CheckCircle, Circle } from 'lucide-react';
+import { Plus, MoreHorizontal, List, Edit, Trash2, CheckCircle, Circle, ChevronRight } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState';
 import { NewCardModal } from '@/modals/tasks/NewCardModal';
 import { NewListModal } from '@/modals/tasks/NewListModal';
@@ -32,6 +33,7 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
   const [newCardListId, setNewCardListId] = useState<string | null>(null);
   const [editingListId, setEditingListId] = useState<string | null>(null);
   const [selectedCard, setSelectedCard] = useState<KanbanCard | null>(null);
+  const [completedAccordionState, setCompletedAccordionState] = useState<Record<string, boolean>>({});
   
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
@@ -163,7 +165,7 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
                           <div className="flex items-center gap-2">
                             <h3 className="font-semibold text-sm">{list.name}</h3>
                             <Badge variant="secondary" className="text-xs">
-                              {cardsByList[list.id]?.length || 0}
+                              {cardsByList[list.id]?.filter(card => !card.is_completed).length || 0}
                             </Badge>
                           </div>
                           <div className="flex items-center gap-2">
@@ -236,7 +238,8 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
                                   snapshot.isDraggingOver ? 'bg-accent/10' : ''
                                 }`}
                               >
-                                {cardsByList[list.id]?.map((card, index) => {
+                                {/* Active (non-completed) tasks */}
+                                {cardsByList[list.id]?.filter(card => !card.is_completed).map((card, index) => {
                                   const creatorInfo = card.creator ? {
                                     name: card.creator.full_name || card.creator.email || 'Usuario',
                                     avatar: card.creator.avatar_url || undefined,
@@ -247,23 +250,8 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
                                     initials: 'U'
                                   };
                                   
-                                  // Check if this is the first completed task and add separator
-                                  const previousCard = index > 0 ? cardsByList[list.id][index - 1] : null;
-                                  const showCompletedSeparator = card.is_completed && (!previousCard || !previousCard.is_completed);
-                                  
                                   return (
                                     <div key={card.id}>
-                                      {/* Completed tasks separator */}
-                                      {showCompletedSeparator && (
-                                        <div className="flex items-center gap-2 py-2 mb-2">
-                                          <div className="flex-1 h-px bg-border"></div>
-                                          <span className="text-xs text-muted-foreground font-medium">
-                                            Completadas
-                                          </span>
-                                          <div className="flex-1 h-px bg-border"></div>
-                                        </div>
-                                      )}
-                                      
                                       <Draggable draggableId={card.id} index={index}>
                                         {(provided, snapshot) => (
                                         <Card
@@ -374,6 +362,156 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
                                     </div>
                                   );
                                 })}
+
+                                {/* Completed tasks accordion */}
+                                {cardsByList[list.id]?.filter(card => card.is_completed).length > 0 && (
+                                  <div className="pt-4">
+                                    <Collapsible 
+                                      open={completedAccordionState[list.id] || false} 
+                                      onOpenChange={(open) => setCompletedAccordionState(prev => ({ ...prev, [list.id]: open }))}
+                                    >
+                                      <CollapsibleTrigger asChild>
+                                        <Button
+                                          variant="ghost"
+                                          className="h-auto p-2 w-full justify-start text-sm text-muted-foreground hover:text-foreground data-[state=open]:text-foreground"
+                                        >
+                                          <ChevronRight className={`h-4 w-4 transition-transform ${completedAccordionState[list.id] ? 'rotate-90' : ''}`} />
+                                          <span className="ml-1">Completadas ({cardsByList[list.id]?.filter(card => card.is_completed).length})</span>
+                                        </Button>
+                                      </CollapsibleTrigger>
+                                      <CollapsibleContent className="mt-2">
+                                        <div className="space-y-2">
+                                          {cardsByList[list.id]?.filter(card => card.is_completed).map((card, completedIndex) => {
+                                            const creatorInfo = card.creator ? {
+                                              name: card.creator.full_name || card.creator.email || 'Usuario',
+                                              avatar: card.creator.avatar_url || undefined,
+                                              initials: card.creator.full_name?.split(' ').map(n => n[0]).join('') || 'U'
+                                            } : {
+                                              name: 'Usuario',
+                                              avatar: undefined,
+                                              initials: 'U'
+                                            };
+                                            
+                                            const actualIndex = cardsByList[list.id]?.findIndex(c => c.id === card.id) || 0;
+                                            
+                                            return (
+                                              <div key={card.id}>
+                                                <Draggable draggableId={card.id} index={actualIndex}>
+                                                  {(provided, snapshot) => (
+                                                    <Card
+                                                      ref={provided.innerRef}
+                                                      {...provided.draggableProps}
+                                                      {...provided.dragHandleProps}
+                                                      className={`p-3 cursor-pointer hover:shadow-sm transition-shadow relative group ${
+                                                        snapshot.isDragging ? 'shadow-md rotate-1' : ''
+                                                      }`}
+                                                      onClick={() => setSelectedCard(card)}
+                                                    >
+                                                      {/* Hover Action Buttons */}
+                                                      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <Button
+                                                          variant="ghost"
+                                                          size="sm"
+                                                          className="h-6 w-6 p-0 bg-white/90 shadow-sm hover:bg-white"
+                                                          onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setSelectedCard(card);
+                                                          }}
+                                                        >
+                                                          <Edit className="h-3 w-3" />
+                                                        </Button>
+                                                        <Button
+                                                          variant="ghost"
+                                                          size="sm"
+                                                          className="h-6 w-6 p-0 bg-white/90 shadow-sm hover:bg-white text-red-500 hover:text-red-600"
+                                                          onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            onDeleteCard?.(card.id);
+                                                          }}
+                                                        >
+                                                          <Trash2 className="h-3 w-3" />
+                                                        </Button>
+                                                      </div>
+
+                                                      {/* Completion Status and Creator Info Header */}
+                                                      <div className="flex items-start gap-2 mb-2">
+                                                        {/* Completion Checkbox */}
+                                                        <Button
+                                                          variant="ghost"
+                                                          size="sm"
+                                                          className="h-5 w-5 p-0 flex-shrink-0 mt-0.5"
+                                                          onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleToggleCompleted(card.id, !card.is_completed);
+                                                          }}
+                                                        >
+                                                          {card.is_completed ? (
+                                                            <CheckCircle className="h-4 w-4 text-primary" />
+                                                          ) : (
+                                                            <Circle className="h-4 w-4 text-muted-foreground hover:text-primary" />
+                                                          )}
+                                                        </Button>
+
+                                                        {/* Creator Info and Date */}
+                                                        <div className="flex items-center justify-between flex-1 min-w-0">
+                                                          <div className="flex items-center gap-2 min-w-0">
+                                                            <Avatar className="h-6 w-6 flex-shrink-0">
+                                                              <AvatarImage src={creatorInfo?.avatar} />
+                                                              <AvatarFallback className="text-xs">
+                                                                {creatorInfo?.initials || 'U'}
+                                                              </AvatarFallback>
+                                                            </Avatar>
+                                                            <span className="text-xs text-muted-foreground font-medium truncate">
+                                                              {creatorInfo?.name || 'Usuario'}
+                                                            </span>
+                                                          </div>
+                                                          <span className="text-xs text-muted-foreground flex-shrink-0">
+                                                            {new Date(card.created_at).toLocaleDateString('es-ES', {
+                                                              month: 'short',
+                                                              day: 'numeric'
+                                                            })}
+                                                          </span>
+                                                        </div>
+                                                      </div>
+                                                      
+                                                      {/* Card Content */}
+                                                      <div className={`text-sm font-medium mb-1 ${
+                                                        card.is_completed 
+                                                          ? 'line-through text-muted-foreground opacity-60' 
+                                                          : ''
+                                                      }`}>
+                                                        {card.title}
+                                                      </div>
+                                                      {card.description && (
+                                                        <div className={`text-xs text-muted-foreground line-clamp-2 ${
+                                                          card.is_completed ? 'opacity-50' : ''
+                                                        }`}>
+                                                          {card.description}
+                                                        </div>
+                                                      )}
+
+                                                      {/* Completed Date */}
+                                                      {card.is_completed && card.completed_at && (
+                                                        <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground opacity-60">
+                                                          <CheckCircle className="h-3 w-3" />
+                                                          <span>Completado el {new Date(card.completed_at).toLocaleDateString('es-ES', {
+                                                            day: 'numeric',
+                                                            month: 'short'
+                                                          })}</span>
+                                                        </div>
+                                                      )}
+                                                    </Card>
+                                                  )}
+                                                </Draggable>
+                                              </div>
+                                            );
+                                          })}
+                                        </div>
+                                      </CollapsibleContent>
+                                    </Collapsible>
+                                  </div>
+                                )}
+
                                 {provided.placeholder}
                               </div>
                             )}
