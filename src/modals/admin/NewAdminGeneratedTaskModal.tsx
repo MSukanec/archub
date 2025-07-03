@@ -10,9 +10,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useTaskTemplates, useTaskTemplateParameters, useTaskTemplateParameterOptions } from "@/hooks/use-task-templates";
 import { useCreateGeneratedTask } from "@/hooks/use-generated-tasks";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { supabase } from "@/lib/supabase";
 import { Loader2 } from "lucide-react";
 
 interface GeneratedTask {
@@ -51,6 +53,42 @@ export function NewAdminGeneratedTaskModal({
   const { data: templates, isLoading: templatesLoading } = useTaskTemplates();
   const { data: parameters, isLoading: parametersLoading } = useTaskTemplateParameters(selectedTemplateId || null);
   const createGeneratedTask = useCreateGeneratedTask();
+  
+  // Load parameter options for each parameter
+  const [parameterOptions, setParameterOptions] = useState<Record<string, any[]>>({});
+  
+  // Load options for select type parameters
+  useEffect(() => {
+    if (parameters?.length) {
+      const loadOptions = async () => {
+        const optionsMap: Record<string, any[]> = {};
+        
+        for (const param of parameters) {
+          if (param.type === 'select') {
+            try {
+              if (supabase) {
+                const { data: options, error } = await supabase
+                  .from('task_template_parameter_options')
+                  .select('*')
+                  .eq('parameter_id', param.id);
+                
+                if (!error) {
+                  optionsMap[param.id] = options || [];
+                }
+              }
+            } catch (error) {
+              console.error(`Error loading options for parameter ${param.id}:`, error);
+              optionsMap[param.id] = [];
+            }
+          }
+        }
+        
+        setParameterOptions(optionsMap);
+      };
+      
+      loadOptions();
+    }
+  }, [parameters]);
 
   const form = useForm<any>({
     resolver: zodResolver(formSchema),
@@ -111,7 +149,16 @@ export function NewAdminGeneratedTaskModal({
       const value = paramValues[param.name];
       if (value !== undefined && value !== '') {
         const placeholder = `{{${param.name}}}`;
-        const displayValue = value.toString();
+        let displayValue = value.toString();
+        
+        // For select parameters, find the label instead of using raw value
+        if (param.type === 'select') {
+          const option = parameterOptions[param.id]?.find(opt => opt.value === value);
+          if (option) {
+            displayValue = option.label;
+          }
+        }
+        
         description = description.replace(new RegExp(placeholder, 'g'), displayValue);
       }
     });
@@ -292,104 +339,122 @@ export function NewAdminGeneratedTaskModal({
             ) : (
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="template_id"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="required-asterisk">Plantilla de Tarea</FormLabel>
-                        <Select 
-                          onValueChange={(value) => {
-                            field.onChange(value);
-                            setSelectedTemplateId(value);
-                          }} 
-                          value={field.value}
-                          disabled={templatesLoading}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Seleccionar plantilla..." />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {templates?.map((template) => (
-                              <SelectItem key={template.id} value={template.id}>
-                                {template.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <Accordion type="single" collapsible defaultValue="task-info" className="w-full">
+                    {/* Primer acordeón: Información de la Tarea */}
+                    <AccordionItem value="task-info">
+                      <AccordionTrigger>Información de la Tarea</AccordionTrigger>
+                      <AccordionContent className="space-y-4">
+                        <FormField
+                          control={form.control}
+                          name="template_id"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="required-asterisk">Plantilla de Tarea</FormLabel>
+                              <Select 
+                                onValueChange={(value) => {
+                                  field.onChange(value);
+                                  setSelectedTemplateId(value);
+                                }} 
+                                value={field.value}
+                                disabled={templatesLoading}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Seleccionar plantilla..." />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {templates?.map((template) => (
+                                    <SelectItem key={template.id} value={template.id}>
+                                      {template.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                  {selectedTemplateId && parametersLoading && (
-                    <div className="flex items-center justify-center py-4">
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      <span className="text-sm text-muted-foreground">Cargando parámetros...</span>
-                    </div>
-                  )}
+                        {selectedTemplateId && parametersLoading && (
+                          <div className="flex items-center justify-center py-4">
+                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                            <span className="text-sm text-muted-foreground">Cargando parámetros...</span>
+                          </div>
+                        )}
 
-                  {selectedTemplateId && !parametersLoading && parameters && parameters.length > 0 && (
-                    <div className="space-y-4">
-                      <div className="border-t pt-4">
-                        <h3 className="text-sm font-medium mb-3">Parámetros de la Plantilla</h3>
-                        <div className="space-y-4">
-                          {parameters.map((param) => (
-                            <ParameterField key={`${param.id}-${param.name}`} param={param} />
-                          ))}
-                        </div>
-                      </div>
-                      
-                      {/* Preview of generated description */}
-                      <div className="border-t pt-4">
-                        <h3 className="text-sm font-medium mb-2">Vista previa de la descripción</h3>
-                        <div className="p-3 bg-muted/20 rounded border text-sm">
-                          {(() => {
-                            const selectedTemplate = templates?.find(t => t.id === selectedTemplateId);
-                            const { template_id, ...params } = watchedValues || {};
+                        {selectedTemplateId && !parametersLoading && parameters && parameters.length > 0 && (
+                          <div className="space-y-4">
+                            <div className="border-t pt-4">
+                              <h3 className="text-sm font-medium mb-3">Parámetros de la Plantilla</h3>
+                              <div className="space-y-4">
+                                {parameters.map((param) => (
+                                  <ParameterField key={`${param.id}-${param.name}`} param={param} />
+                                ))}
+                              </div>
+                            </div>
                             
-                            // Convert boolean values to "Sí"/"No" for display
-                            const displayParams = { ...params };
-                            Object.keys(displayParams).forEach(key => {
-                              const param = parameters?.find(p => p.name === key);
-                              if (param?.type === 'boolean') {
-                                displayParams[key] = displayParams[key] ? 'Sí' : 'No';
-                              }
-                            });
-                            
-                            return selectedTemplate?.name_template 
-                              ? generateDescription(selectedTemplate.name_template, displayParams)
-                              : "Seleccione los parámetros para ver la vista previa";
-                          })()}
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                            {/* Preview of generated description */}
+                            <div className="border-t pt-4">
+                              <h3 className="text-sm font-medium mb-2">Vista previa de la descripción</h3>
+                              <div className="p-3 bg-muted/20 rounded border text-sm">
+                                {(() => {
+                                  const selectedTemplate = templates?.find(t => t.id === selectedTemplateId);
+                                  const { template_id, ...params } = watchedValues || {};
+                                  
+                                  // Convert boolean values to "Sí"/"No" for display
+                                  const displayParams = { ...params };
+                                  Object.keys(displayParams).forEach(key => {
+                                    const param = parameters?.find(p => p.name === key);
+                                    if (param?.type === 'boolean') {
+                                      displayParams[key] = displayParams[key] ? 'Sí' : 'No';
+                                    }
+                                  });
+                                  
+                                  return selectedTemplate?.name_template 
+                                    ? generateDescription(selectedTemplate.name_template, displayParams)
+                                    : "Seleccione los parámetros para ver la vista previa";
+                                })()}
+                              </div>
+                            </div>
+                          </div>
+                        )}
 
-                  {selectedTemplateId && !parametersLoading && parameters && parameters.length === 0 && (
-                    <div className="space-y-4">
-                      <div className="border-t pt-4">
-                        <div className="p-4 border border-dashed rounded text-center text-sm text-muted-foreground">
-                          Esta plantilla no tiene parámetros configurados.
-                          <br />
-                          La tarea se creará con la información básica de la plantilla.
+                        {selectedTemplateId && !parametersLoading && parameters && parameters.length === 0 && (
+                          <div className="space-y-4">
+                            <div className="border-t pt-4">
+                              <div className="p-4 border border-dashed rounded text-center text-sm text-muted-foreground">
+                                Esta plantilla no tiene parámetros configurados.
+                                <br />
+                                La tarea se creará con la información básica de la plantilla.
+                              </div>
+                            </div>
+                            
+                            {/* Preview for templates without parameters */}
+                            <div className="border-t pt-4">
+                              <h3 className="text-sm font-medium mb-2">Vista previa de la descripción</h3>
+                              <div className="p-3 bg-muted/20 rounded border text-sm">
+                                {(() => {
+                                  const selectedTemplate = templates?.find(t => t.id === selectedTemplateId);
+                                  return selectedTemplate?.name_template || selectedTemplate?.name || "Vista previa no disponible";
+                                })()}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    {/* Segundo acordeón: Materiales */}
+                    <AccordionItem value="materials">
+                      <AccordionTrigger>Materiales</AccordionTrigger>
+                      <AccordionContent className="space-y-4">
+                        <div className="text-center text-muted-foreground text-sm py-8">
+                          Funcionalidad de materiales en desarrollo
                         </div>
-                      </div>
-                      
-                      {/* Preview for templates without parameters */}
-                      <div className="border-t pt-4">
-                        <h3 className="text-sm font-medium mb-2">Vista previa de la descripción</h3>
-                        <div className="p-3 bg-muted/20 rounded border text-sm">
-                          {(() => {
-                            const selectedTemplate = templates?.find(t => t.id === selectedTemplateId);
-                            return selectedTemplate?.name_template || selectedTemplate?.name || "Vista previa no disponible";
-                          })()}
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
                 </form>
               </Form>
             )}
