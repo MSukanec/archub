@@ -16,7 +16,7 @@ interface GanttProps {
 export const Gantt = ({ phasesWithTasks }: GanttProps) => {
   console.log('Gantt phasesWithTasks:', phasesWithTasks);
   
-  const { viewMode, setViewMode } = useGanttStore();
+  const { viewMode, setViewMode, timelineStart, timelineEnd, setTimelineRange } = useGanttStore();
   const timelineRef = useRef<HTMLDivElement>(null);
   
   // Estados para fechas manuales del timeline
@@ -26,12 +26,19 @@ export const Gantt = ({ phasesWithTasks }: GanttProps) => {
   // Validar que phasesWithTasks sea un array
   const validPhasesWithTasks = Array.isArray(phasesWithTasks) ? phasesWithTasks : [];
   
-  // Calculate timeline range based on real phases data or manual dates
+  // Calculate timeline range based on store, manual dates, or real phases data
   const timelineRange = useMemo(() => {
+    // Prioridad 1: Fechas del store (controladas por los inputs)
+    if (timelineStart && timelineEnd) {
+      return { start: timelineStart, end: timelineEnd };
+    }
+    
+    // Prioridad 2: Fechas manuales locales
     if (startDate && endDate) {
       return { start: startDate, end: endDate };
     }
     
+    // Prioridad 3: Calcular desde datos de fases
     if (!validPhasesWithTasks || validPhasesWithTasks.length === 0) {
       const today = new Date();
       const start = new Date(today);
@@ -45,7 +52,7 @@ export const Gantt = ({ phasesWithTasks }: GanttProps) => {
     }
     
     return getTimelineRange(validPhasesWithTasks);
-  }, [validPhasesWithTasks, startDate, endDate]);
+  }, [validPhasesWithTasks, startDate, endDate, timelineStart, timelineEnd]);
 
   const columnWidth = getColumnWidth(viewMode);
 
@@ -53,10 +60,30 @@ export const Gantt = ({ phasesWithTasks }: GanttProps) => {
   const scrollToToday = () => {
     if (timelineRef.current) {
       const today = new Date().toISOString().split('T')[0];
-      const todayElement = timelineRef.current.querySelector(`[data-date="${today}"]`);
-      if (todayElement) {
-        todayElement.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-      }
+      
+      // Primero actualizar el rango para incluir hoy si no está visible
+      const todayDate = new Date();
+      const startRange = new Date(todayDate);
+      startRange.setDate(todayDate.getDate() - 15);
+      const endRange = new Date(todayDate);
+      endRange.setDate(todayDate.getDate() + 45);
+      
+      setTimelineRange(
+        startRange.toISOString().split('T')[0],
+        endRange.toISOString().split('T')[0]
+      );
+      
+      // Esperar un momento para que se renderice el nuevo rango, luego scrollear
+      setTimeout(() => {
+        const todayElement = timelineRef.current?.querySelector(`[data-date="${today}"]`);
+        if (todayElement) {
+          todayElement.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'nearest', 
+            inline: 'center' 
+          });
+        }
+      }, 100);
     }
   };
 
@@ -108,8 +135,14 @@ export const Gantt = ({ phasesWithTasks }: GanttProps) => {
               <Input
                 id="start-date"
                 type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                value={timelineStart || startDate}
+                onChange={(e) => {
+                  const newStart = e.target.value;
+                  setStartDate(newStart);
+                  if (newStart && (timelineEnd || endDate)) {
+                    setTimelineRange(newStart, timelineEnd || endDate);
+                  }
+                }}
                 className="h-8 text-xs w-36"
               />
             </div>
@@ -118,8 +151,14 @@ export const Gantt = ({ phasesWithTasks }: GanttProps) => {
               <Input
                 id="end-date"
                 type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
+                value={timelineEnd || endDate}
+                onChange={(e) => {
+                  const newEnd = e.target.value;
+                  setEndDate(newEnd);
+                  if ((timelineStart || startDate) && newEnd) {
+                    setTimelineRange(timelineStart || startDate, newEnd);
+                  }
+                }}
                 className="h-8 text-xs w-36"
               />
             </div>
@@ -147,7 +186,7 @@ export const Gantt = ({ phasesWithTasks }: GanttProps) => {
           </div>
           
           {/* Lista de fases y tareas */}
-          <div className="overflow-y-auto">
+          <div className="overflow-y-auto pb-16">
             {validPhasesWithTasks.map((phase) => (
               <div key={phase.id}>
                 {/* Fase */}
@@ -174,6 +213,11 @@ export const Gantt = ({ phasesWithTasks }: GanttProps) => {
                 ))}
               </div>
             ))}
+            
+            {/* Botón para crear nueva fase */}
+            <button className="mt-6 px-4 text-sm text-muted-foreground hover:underline">
+              + Crear nueva fase
+            </button>
           </div>
         </div>
 
@@ -184,7 +228,7 @@ export const Gantt = ({ phasesWithTasks }: GanttProps) => {
             <GanttGrid timelineRange={timelineRange} />
             
             {/* Filas del timeline */}
-            <div>
+            <div className="pb-16">
               {validPhasesWithTasks.map((phase) => (
                 <div key={phase.id}>
                   {/* Fila de la fase */}
