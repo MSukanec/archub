@@ -166,13 +166,20 @@ export function useCreateTaskMaterial() {
     mutationFn: async (data: { task_id: string; material_id: string; amount: number; organization_id: string }) => {
       if (!supabase) throw new Error('Supabase not initialized');
       
+      console.log('Attempting to create task material with data:', data);
+      
       const { data: result, error } = await supabase
         .from('task_materials')
         .insert([data])
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error creating task material:', error);
+        throw error;
+      }
+      
+      console.log('Task material created successfully:', result);
       return result;
     },
     onSuccess: (_, variables) => {

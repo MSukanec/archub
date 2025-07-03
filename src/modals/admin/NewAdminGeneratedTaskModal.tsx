@@ -214,18 +214,40 @@ export function NewAdminGeneratedTaskModal({
 
   // Función para agregar material
   const handleAddMaterial = async () => {
-    if (!newMaterial.material_id || newMaterial.amount <= 0 || !userData?.organization?.id) return;
+    console.log('handleAddMaterial called with:', {
+      material_id: newMaterial.material_id,
+      amount: newMaterial.amount,
+      organization_id: userData?.organization?.id,
+      createdTaskId,
+      generatedTaskId: generatedTask?.id
+    });
+    
+    if (!newMaterial.material_id || newMaterial.amount <= 0 || !userData?.organization?.id) {
+      console.log('Validation failed:', {
+        hasMaterialId: !!newMaterial.material_id,
+        validAmount: newMaterial.amount > 0,
+        hasOrganization: !!userData?.organization?.id
+      });
+      return;
+    }
     
     const taskId = createdTaskId || generatedTask?.id;
-    if (!taskId) return;
+    if (!taskId) {
+      console.log('No task ID available');
+      return;
+    }
+    
+    const materialData = {
+      task_id: taskId,
+      material_id: newMaterial.material_id,
+      amount: newMaterial.amount,
+      organization_id: userData.organization.id
+    };
+    
+    console.log('About to create material with data:', materialData);
     
     try {
-      await createTaskMaterial.mutateAsync({
-        task_id: taskId,
-        material_id: newMaterial.material_id,
-        amount: newMaterial.amount,
-        organization_id: userData.organization.id
-      });
+      await createTaskMaterial.mutateAsync(materialData);
       
       setNewMaterial({ material_id: "", amount: 1 });
     } catch (error) {
