@@ -58,29 +58,30 @@ function TasksContent() {
   // Configure mobile action bar
   useEffect(() => {
     setActions({
-      slot1: {
+      slot2: {
         id: 'search',
         icon: <Search className="h-5 w-5" />,
         label: 'Buscar',
         onClick: () => {} // TODO: implement search
       },
-      slot2: {
+      slot3: {
+        id: 'create',
+        icon: <Plus className="h-6 w-6" />,
+        label: 'Nueva Lista',
+        onClick: () => setShowNewListModal(true),
+        variant: 'primary'
+      },
+      slot4: {
         id: 'filter',
         icon: <Filter className="h-5 w-5" />,
         label: 'Filtros',
         onClick: () => {} // TODO: implement filters
       },
-      slot3: {
-        id: 'clear-filters',
+      slot5: {
+        id: 'clear',
         icon: <X className="h-5 w-5" />,
         label: 'Limpiar',
         onClick: () => {} // TODO: implement clear filters
-      },
-      slot4: {
-        id: 'create',
-        icon: <Plus className="h-5 w-5" />,
-        label: 'Crear',
-        onClick: () => setShowNewListModal(true)
       }
     });
     setShowActionBar(true);
