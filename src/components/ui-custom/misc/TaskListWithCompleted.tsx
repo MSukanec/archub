@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { CheckCircle, Circle, Calendar } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { CheckCircle, Circle, Calendar, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -91,6 +91,7 @@ function TaskCard({ task, onToggleCompleted }: { task: Task; onToggleCompleted: 
 }
 
 export function TaskListWithCompleted({ tasks, onToggleCompleted, isLoading = false }: Props) {
+  const [isCompletedOpen, setIsCompletedOpen] = useState(false);
   const activeTasks = tasks.filter(t => !t.is_completed);
   const completedTasks = tasks.filter(t => t.is_completed);
 
@@ -135,24 +136,25 @@ export function TaskListWithCompleted({ tasks, onToggleCompleted, isLoading = fa
 
       {/* Completed Tasks Section */}
       {completedTasks.length > 0 && (
-        <div className="pt-2">
-          <Accordion type="single" collapsible className="border-none">
-            <AccordionItem value="completed" className="border-none">
-              <AccordionTrigger className="text-sm text-muted-foreground hover:text-foreground py-2 px-0 hover:no-underline">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4" />
-                  <span>Completadas ({completedTasks.length})</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="pb-2 pt-0">
-                <div className="space-y-2">
-                  {completedTasks.map(task => (
-                    <TaskCard key={task.id} task={task} onToggleCompleted={onToggleCompleted} />
-                  ))}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+        <div className="pt-4">
+          <Collapsible open={isCompletedOpen} onOpenChange={setIsCompletedOpen}>
+            <CollapsibleTrigger asChild>
+              <Button
+                variant="ghost"
+                className="h-auto p-2 w-full justify-start text-sm text-muted-foreground hover:text-foreground data-[state=open]:text-foreground"
+              >
+                <ChevronRight className={`h-4 w-4 transition-transform ${isCompletedOpen ? 'rotate-90' : ''}`} />
+                <span className="ml-1">Completadas ({completedTasks.length})</span>
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-2">
+              <div className="space-y-2">
+                {completedTasks.map(task => (
+                  <TaskCard key={task.id} task={task} onToggleCompleted={onToggleCompleted} />
+                ))}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
         </div>
       )}
 
