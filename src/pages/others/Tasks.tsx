@@ -4,7 +4,7 @@ import { CustomKanban } from '@/components/ui-custom/misc/CustomKanban';
 import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CheckSquare, Plus, Kanban, Edit, Trash2 } from 'lucide-react';
+import { CheckSquare, Plus, Kanban, Edit, Trash2, List } from 'lucide-react';
 import { useKanbanBoards, useKanbanLists, useKanbanCards, useMoveKanbanCard, useUpdateKanbanBoard, useDeleteKanbanBoard, useDeleteKanbanList, useUpdateLastKanbanBoard } from '@/hooks/use-kanban';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -13,13 +13,16 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { NewBoardModal } from '@/modals/tasks/NewBoardModal';
 import { NewListModal } from '@/modals/tasks/NewListModal';
 import { CustomRestricted } from '@/components/ui-custom/CustomRestricted';
+import { MobileActionBarProvider, useMobileActionBar } from '@/contexts/MobileActionBarContext';
+import { MobileActionBar } from '@/components/ui-custom/mobile/MobileActionBar';
 
-export default function Tasks() {
+function TasksContent() {
   const [showNewBoardModal, setShowNewBoardModal] = useState(false);
   const [showNewListModal, setShowNewListModal] = useState(false);
   const [showEditBoardModal, setShowEditBoardModal] = useState(false);
   const [editingBoard, setEditingBoard] = useState<any>(null);
   const { currentBoardId, setCurrentBoardId } = useKanbanStore();
+  const { setActions, setShowActionBar } = useMobileActionBar();
   
   const { data: userData } = useCurrentUser();
   const { toast } = useToast();
@@ -48,6 +51,23 @@ export default function Tasks() {
       }
     }
   }, [boards, currentBoardId, setCurrentBoardId, userData?.preferences?.last_kanban_board_id]);
+
+  // Configure mobile action bar
+  useEffect(() => {
+    if (currentBoardId) {
+      setActions({
+        slot3: {
+          id: 'new-list',
+          icon: <List className="h-6 w-6" />,
+          label: 'Nueva Lista',
+          onClick: () => setShowNewListModal(true)
+        }
+      });
+      setShowActionBar(true);
+    } else {
+      setShowActionBar(false);
+    }
+  }, [currentBoardId, setActions, setShowActionBar]);
 
   const handleEditBoard = (board: any) => {
     setEditingBoard(board);
@@ -298,5 +318,14 @@ export default function Tasks() {
         />
       )}
     </Layout>
+  );
+}
+
+export default function Tasks() {
+  return (
+    <MobileActionBarProvider>
+      <TasksContent />
+      <MobileActionBar />
+    </MobileActionBarProvider>
   );
 }
