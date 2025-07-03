@@ -26,7 +26,7 @@ export function CustomModalBody({
   return (
     <div
       className={cn(
-        "flex-1 overflow-y-auto w-full",
+        "flex-1 overflow-y-auto w-full min-h-0",
         paddingClasses[padding],
         className,
       )}
