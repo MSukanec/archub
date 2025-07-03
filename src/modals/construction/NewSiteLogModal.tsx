@@ -503,7 +503,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
           />
         ),
         body: (
-          <CustomModalBody padding="md">
+          <CustomModalBody padding="md" columns={1}>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id="site-log-form">
                 <Accordion type="single" defaultValue="informacion-basica" collapsible>
