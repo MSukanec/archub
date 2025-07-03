@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { FileText, Plus, Star, Globe, Lock, ChevronDown, ChevronRight, Edit, Trash2, MoreHorizontal, Flame, Package, StickyNote, Sun, Cloud, CloudRain, CloudSnow, Wind, CloudDrizzle, CloudLightning, Thermometer, TrendingUp, Users, AlertTriangle, CloudSun, CheckCircle, Search, Camera, Eye, Calendar } from "lucide-react";
+import { FileText, Plus, Star, Globe, Lock, ChevronDown, ChevronRight, Edit, Trash2, MoreHorizontal, Flame, Package, StickyNote, Sun, Cloud, CloudRain, CloudSnow, Wind, CloudDrizzle, CloudLightning, Thermometer, TrendingUp, Users, AlertTriangle, CloudSun, CheckCircle, Search, Camera, Eye, Calendar, Filter, X } from "lucide-react";
 
 import { Layout } from '@/components/layout/Layout';
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,9 @@ import { useOrganizationMembers } from "@/hooks/use-organization-members";
 import { NewSiteLogModal } from "@/modals/construction/NewSiteLogModal";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
+import { useMobile } from "@/hooks/use-mobile";
+import { useMobileActionBar } from "@/contexts/MobileActionBarContext";
+import SiteLogCard from "@/components/cards/SiteLogCard";
 
 // Entry types enum with their icons and labels
 const entryTypes = {
@@ -155,6 +158,9 @@ export default function ConstructionLogs() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [siteLogToDelete, setSiteLogToDelete] = useState<any>(null);
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
+  
+  const isMobile = useMobile();
+  const { setActions, setShowActionBar } = useMobileActionBar();
 
   const { data: userData, isLoading } = useCurrentUser();
   const { data: siteLogs = [], isLoading: siteLogsLoading } = useSiteLogs(
@@ -170,6 +176,51 @@ export default function ConstructionLogs() {
       setExpandedLogId(siteLogs[0].id);
     }
   }, [siteLogs, expandedLogId]);
+
+  // Configure Mobile Action Bar
+  useEffect(() => {
+    if (isMobile) {
+      setActions({
+        slot2: {
+          id: 'search',
+          icon: <Search className="h-5 w-5" />,
+          label: 'Buscar',
+          onClick: () => {
+            // Focus search in header (if visible) or show search modal
+          }
+        },
+        slot3: {
+          id: 'create-log',
+          icon: <Plus className="h-6 w-6" />,
+          label: 'Nueva Entrada',
+          onClick: () => setShowNewSiteLogModal(true)
+        },
+        slot4: {
+          id: 'filters',
+          icon: <Filter className="h-5 w-5" />,
+          label: 'Filtros',
+          onClick: () => {
+            // Toggle filter panel or show filter modal
+          }
+        },
+        slot5: {
+          id: 'clear-filters',
+          icon: <X className="h-5 w-5" />,
+          label: 'Limpiar',
+          onClick: clearFilters
+        }
+      });
+      setShowActionBar(true);
+    } else {
+      setShowActionBar(false);
+    }
+
+    return () => {
+      if (isMobile) {
+        setShowActionBar(false);
+      }
+    };
+  }, [isMobile, setActions, setShowActionBar]);
 
   // Filtrar bitácoras según los criterios
   let filteredSiteLogs = siteLogs?.filter((log: any) => {
@@ -436,6 +487,19 @@ export default function ConstructionLogs() {
               const entryTypeConfig = entryTypes[siteLog.entry_type as keyof typeof entryTypes];
               const weatherConfig = weatherTypes[siteLog.weather as keyof typeof weatherTypes];
               const isExpanded = expandedLogId === siteLog.id;
+
+              // Render mobile card or desktop collapsible
+              if (isMobile) {
+                return (
+                  <SiteLogCard
+                    key={siteLog.id}
+                    siteLog={siteLog}
+                    onEdit={handleEditSiteLog}
+                    onDelete={handleDeleteSiteLog}
+                    onToggleFavorite={toggleFavorite}
+                  />
+                );
+              }
               
               return (
                 <Collapsible 
