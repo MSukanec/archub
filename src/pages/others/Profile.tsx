@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Upload, Link as LinkIcon, LogOut, Crown, MessageCircle } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQuery } from '@tanstack/react-query'
@@ -39,6 +39,9 @@ export default function Profile() {
   const [showAvatarUpload, setShowAvatarUpload] = useState(false)
   const [avatarUrlInput, setAvatarUrlInput] = useState('')
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
+
+  // Auto-save with debounce
+  const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null)
 
   // Load countries
   const { data: countries = [] } = useQuery({
@@ -124,8 +127,8 @@ export default function Profile() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['current-user'] })
       toast({
-        title: "Profile updated",
-        description: "Your profile has been updated successfully"
+        title: "Cambios guardados automáticamente",
+        description: "Tu perfil se ha actualizado correctamente"
       })
     },
     onError: (error) => {
@@ -190,6 +193,55 @@ export default function Profile() {
     }
   })
 
+  // Auto-save function with debounce
+  const triggerAutoSave = useCallback(() => {
+    // Clear existing timeout
+    if (autoSaveTimeout) {
+      clearTimeout(autoSaveTimeout)
+    }
+
+    // Set new timeout for auto-save (1.5 seconds delay)
+    const newTimeout = setTimeout(() => {
+      updateProfileMutation.mutate({
+        firstName,
+        lastName,
+        country,
+        birthdate,
+        avatarUrl,
+        sidebarDocked
+      })
+    }, 1500)
+
+    setAutoSaveTimeout(newTimeout)
+  }, [firstName, lastName, country, birthdate, avatarUrl, sidebarDocked, autoSaveTimeout, updateProfileMutation])
+
+  // Wrapper functions for setters that trigger auto-save
+  const handleFirstNameChange = (value: string) => {
+    setFirstName(value)
+    triggerAutoSave()
+  }
+
+  const handleLastNameChange = (value: string) => {
+    setLastName(value)
+    triggerAutoSave()
+  }
+
+  const handleCountryChange = (value: string) => {
+    setCountry(value)
+    triggerAutoSave()
+  }
+
+  const handleBirthdateChange = (value: string) => {
+    setBirthdate(value)
+    triggerAutoSave()
+  }
+
+  const handleSidebarDockedChange = (value: boolean) => {
+    setSidebarDocked(value)
+    setDocked(value)
+    triggerAutoSave()
+  }
+
   const handleSaveProfile = () => {
     updateProfileMutation.mutate({
       firstName,
@@ -237,18 +289,10 @@ export default function Profile() {
   }
 
   const headerProps = {
-    title: 'Configuración de la cuenta',
+    title: 'Mi Perfil',
     showSearch: false,
     showFilters: false,
-    actions: [
-      <Button 
-        key="save"
-        onClick={handleSaveProfile}
-        disabled={updateProfileMutation.isPending}
-      >
-        {updateProfileMutation.isPending ? 'Guardando...' : 'Guardar cambios'}
-      </Button>
-    ]
+    actions: []
   }
 
   if (isLoading) {
@@ -409,14 +453,14 @@ export default function Profile() {
                 <Label className="text-sm font-medium">Nombre</Label>
                 <Input
                   value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
+                  onChange={(e) => handleFirstNameChange(e.target.value)}
                 />
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Apellido</Label>
                 <Input
                   value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
+                  onChange={(e) => handleLastNameChange(e.target.value)}
                 />
               </div>
             </div>
@@ -424,7 +468,7 @@ export default function Profile() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-sm font-medium">País</Label>
-                <Select value={country} onValueChange={setCountry}>
+                <Select value={country} onValueChange={handleCountryChange}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecciona un país" />
                   </SelectTrigger>
@@ -442,7 +486,7 @@ export default function Profile() {
                 <Input
                   type="date"
                   value={birthdate}
-                  onChange={(e) => setBirthdate(e.target.value)}
+                  onChange={(e) => handleBirthdateChange(e.target.value)}
                 />
               </div>
             </div>
@@ -488,21 +532,7 @@ export default function Profile() {
               </div>
               <Switch
                 checked={userData?.preferences?.sidebar_docked || false}
-                onCheckedChange={(newValue) => {
-                  setSidebarDocked(newValue);
-                  setDocked(newValue);
-                  // Guardar inmediatamente en la base de datos
-                  if (userData?.preferences?.id) {
-                    updateProfileMutation.mutate({
-                      firstName,
-                      lastName,
-                      country,
-                      birthdate,
-                      avatarUrl,
-                      sidebarDocked: newValue
-                    });
-                  }
-                }}
+                onCheckedChange={handleSidebarDockedChange}
               />
             </div>
           </div>
