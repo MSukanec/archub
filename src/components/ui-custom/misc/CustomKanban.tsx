@@ -55,6 +55,13 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
     return acc;
   }, {} as Record<string, KanbanCard[]>);
 
+  console.log('CustomKanban render:', {
+    listsCount: lists.length,
+    cardsCount: cards.length,
+    cardsByList,
+    loading
+  });
+
   // Sort cards by creation date (newest first) within each list
   Object.keys(cardsByList).forEach(listId => {
     cardsByList[listId].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());

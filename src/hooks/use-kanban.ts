@@ -117,15 +117,7 @@ export function useKanbanLists(boardId: string) {
 
       const { data, error } = await supabase
         .from('kanban_lists')
-        .select(`
-          *,
-          creator:users!kanban_lists_created_by_fkey(
-            id,
-            full_name,
-            email,
-            avatar_url
-          )
-        `)
+        .select('*')
         .eq('board_id', boardId)
         .order('position', { ascending: true })
 
@@ -142,34 +134,42 @@ export function useKanbanCards(boardId: string) {
     queryKey: ['kanban-cards', boardId],
     queryFn: async () => {
       if (!boardId) throw new Error('Board ID required')
+      if (!supabase) throw new Error('Supabase not initialized')
 
+      console.log('Fetching cards for board:', boardId)
+
+      // First get all list IDs for this board
+      const { data: lists, error: listsError } = await supabase
+        .from('kanban_lists')
+        .select('id')
+        .eq('board_id', boardId)
+
+      if (listsError) {
+        console.error('Error fetching lists:', listsError)
+        throw listsError
+      }
+
+      const listIds = lists?.map(list => list.id) || []
+      console.log('List IDs found:', listIds)
+
+      if (listIds.length === 0) {
+        console.log('No lists found for board, returning empty array')
+        return []
+      }
+
+      // Then get all cards for those lists (without relations for now)
       const { data, error } = await supabase
         .from('kanban_cards')
-        .select(`
-          *,
-          assigned_user:users!kanban_cards_assigned_to_fkey(
-            id,
-            full_name,
-            email,
-            avatar_url
-          ),
-          creator:users!kanban_cards_created_by_fkey(
-            id,
-            full_name,
-            email,
-            avatar_url
-          )
-        `)
-        .in('list_id', 
-          await supabase
-            .from('kanban_lists')
-            .select('id')
-            .eq('board_id', boardId)
-            .then(({ data }) => data?.map(list => list.id) || [])
-        )
+        .select('*')
+        .in('list_id', listIds)
         .order('position', { ascending: true })
 
-      if (error) throw error
+      if (error) {
+        console.error('Error fetching cards:', error)
+        throw error
+      }
+
+      console.log('Cards fetched:', data?.length || 0, 'cards', data)
       return data as KanbanCard[]
     },
     enabled: !!boardId
