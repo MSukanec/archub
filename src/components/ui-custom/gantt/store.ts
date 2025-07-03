@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type ViewMode = 'days' | 'weeks' | 'months';
+export type ViewMode = 'days' | 'weeks' | 'months' | 'quarters';
 
 interface GanttStore {
   viewMode: ViewMode;

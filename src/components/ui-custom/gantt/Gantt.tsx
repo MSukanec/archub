@@ -103,7 +103,8 @@ export const Gantt = ({ phasesWithTasks, onCreatePhase, onEditPhase, onAddTask, 
   const viewModeOptions: { value: ViewMode; label: string; icon: React.ReactNode }[] = [
     { value: 'days', label: 'Días', icon: <CalendarDays className="w-4 h-4" /> },
     { value: 'weeks', label: 'Semanas', icon: <Clock className="w-4 h-4" /> },
-    { value: 'months', label: 'Meses', icon: <Calendar className="w-4 h-4" /> }
+    { value: 'months', label: 'Meses', icon: <Calendar className="w-4 h-4" /> },
+    { value: 'quarters', label: 'Trimestres', icon: <Calendar className="w-4 h-4" /> }
   ];
 
   return (

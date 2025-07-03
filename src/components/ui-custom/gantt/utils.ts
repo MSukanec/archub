@@ -30,10 +30,11 @@ export interface Task {
 
 export const getColumnWidth = (mode: ViewMode): number => {
   switch (mode) {
-    case 'days': return 40;
-    case 'weeks': return 100;
-    case 'months': return 160;
-    default: return 40;
+    case 'days': return 32;
+    case 'weeks': return 80;
+    case 'months': return 120;
+    case 'quarters': return 200;
+    default: return 32;
   }
 };
 
@@ -98,19 +99,108 @@ export const getTimelineRange = (phases: Phase[]): { start: string; end: string 
   };
 };
 
-// Devuelve array de fechas entre dos fechas
-export const getDateArray = (start: string, end: string): string[] => {
-  const dates: string[] = [];
+// Interfaz para columnas del timeline
+export interface TimelineColumn {
+  key: string;
+  label: string;
+  date: Date;
+  isToday?: boolean;
+}
+
+// Genera columnas del timeline según el modo de visualización
+export const getTimelineColumns = (start: string, end: string, mode: ViewMode): TimelineColumn[] => {
+  const columns: TimelineColumn[] = [];
   const startDate = new Date(start);
   const endDate = new Date(end);
+  const today = new Date();
   
-  const currentDate = new Date(startDate);
-  while (currentDate <= endDate) {
-    dates.push(currentDate.toISOString().split('T')[0]);
-    currentDate.setDate(currentDate.getDate() + 1);
+  switch (mode) {
+    case 'days': {
+      const currentDate = new Date(startDate);
+      while (currentDate <= endDate) {
+        const dateStr = currentDate.toISOString().split('T')[0];
+        columns.push({
+          key: dateStr,
+          label: currentDate.getDate().toString(),
+          date: new Date(currentDate),
+          isToday: currentDate.toDateString() === today.toDateString()
+        });
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+      break;
+    }
+    
+    case 'weeks': {
+      const currentDate = new Date(startDate);
+      // Ajustar al lunes de la semana
+      currentDate.setDate(currentDate.getDate() - currentDate.getDay() + 1);
+      
+      while (currentDate <= endDate) {
+        const weekEnd = new Date(currentDate);
+        weekEnd.setDate(weekEnd.getDate() + 6);
+        
+        const weekNum = Math.ceil(currentDate.getDate() / 7);
+        columns.push({
+          key: `week-${currentDate.getFullYear()}-${currentDate.getMonth()}-${weekNum}`,
+          label: `S${weekNum}`,
+          date: new Date(currentDate),
+          isToday: today >= currentDate && today <= weekEnd
+        });
+        currentDate.setDate(currentDate.getDate() + 7);
+      }
+      break;
+    }
+    
+    case 'months': {
+      const currentDate = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+      
+      while (currentDate <= endDate) {
+        const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+        columns.push({
+          key: `month-${currentDate.getFullYear()}-${currentDate.getMonth()}`,
+          label: currentDate.toLocaleDateString('es-ES', { month: 'short' }).toUpperCase(),
+          date: new Date(currentDate),
+          isToday: today.getFullYear() === currentDate.getFullYear() && 
+                   today.getMonth() === currentDate.getMonth()
+        });
+        currentDate.setMonth(currentDate.getMonth() + 1);
+      }
+      break;
+    }
+    
+    case 'quarters': {
+      const startYear = startDate.getFullYear();
+      const endYear = endDate.getFullYear();
+      const startQuarter = Math.floor(startDate.getMonth() / 3);
+      
+      for (let year = startYear; year <= endYear; year++) {
+        const maxQuarter = year === endYear ? Math.floor(endDate.getMonth() / 3) : 3;
+        const minQuarter = year === startYear ? startQuarter : 0;
+        
+        for (let quarter = minQuarter; quarter <= maxQuarter; quarter++) {
+          const quarterStart = new Date(year, quarter * 3, 1);
+          const quarterEnd = new Date(year, quarter * 3 + 3, 0);
+          
+          const quarterNames = ['T1', 'T2', 'T3', 'T4'];
+          columns.push({
+            key: `quarter-${year}-${quarter}`,
+            label: `${quarterNames[quarter]} ${year}`,
+            date: quarterStart,
+            isToday: today >= quarterStart && today <= quarterEnd
+          });
+        }
+      }
+      break;
+    }
   }
   
-  return dates;
+  return columns;
+};
+
+// Devuelve array de fechas entre dos fechas (mantenido para compatibilidad)
+export const getDateArray = (start: string, end: string): string[] => {
+  const columns = getTimelineColumns(start, end, 'days');
+  return columns.map(col => col.key);
 };
 
 // Devuelve el día de la semana en formato corto
@@ -122,6 +212,7 @@ export const getBarPosition = (
   startDate: string, 
   endDate: string, 
   timelineStart: string,
+  timelineEnd: string,
   mode: ViewMode
 ): { left: number; width: number } | null => {
   if (!startDate || !endDate) return null;
@@ -131,18 +222,86 @@ export const getBarPosition = (
   const timelineStartDate = new Date(timelineStart);
   
   const columnWidth = getColumnWidth(mode);
+  const columns = getTimelineColumns(timelineStart, timelineEnd, mode);
   
-  // Calculate days from timeline start
-  const startDayOffset = Math.floor((start.getTime() - timelineStartDate.getTime()) / (24 * 60 * 60 * 1000));
-  const endDayOffset = Math.floor((end.getTime() - timelineStartDate.getTime()) / (24 * 60 * 60 * 1000));
+  // Find start and end column indices
+  let startColumnIndex = -1;
+  let endColumnIndex = -1;
   
-  if (startDayOffset < 0) return null; // Task starts before timeline
+  for (let i = 0; i < columns.length; i++) {
+    const column = columns[i];
+    
+    // Check if start date falls in this column
+    if (startColumnIndex === -1) {
+      switch (mode) {
+        case 'days':
+          if (column.date.toDateString() === start.toDateString()) {
+            startColumnIndex = i;
+          }
+          break;
+        case 'weeks':
+          const weekEnd = new Date(column.date);
+          weekEnd.setDate(weekEnd.getDate() + 6);
+          if (start >= column.date && start <= weekEnd) {
+            startColumnIndex = i;
+          }
+          break;
+        case 'months':
+          if (start.getFullYear() === column.date.getFullYear() && 
+              start.getMonth() === column.date.getMonth()) {
+            startColumnIndex = i;
+          }
+          break;
+        case 'quarters':
+          const quarter = Math.floor(column.date.getMonth() / 3);
+          const startQuarter = Math.floor(start.getMonth() / 3);
+          if (start.getFullYear() === column.date.getFullYear() && 
+              startQuarter === quarter) {
+            startColumnIndex = i;
+          }
+          break;
+      }
+    }
+    
+    // Check if end date falls in this column
+    switch (mode) {
+      case 'days':
+        if (column.date.toDateString() === end.toDateString()) {
+          endColumnIndex = i;
+        }
+        break;
+      case 'weeks':
+        const weekEnd = new Date(column.date);
+        weekEnd.setDate(weekEnd.getDate() + 6);
+        if (end >= column.date && end <= weekEnd) {
+          endColumnIndex = i;
+        }
+        break;
+      case 'months':
+        if (end.getFullYear() === column.date.getFullYear() && 
+            end.getMonth() === column.date.getMonth()) {
+          endColumnIndex = i;
+        }
+        break;
+      case 'quarters':
+        const quarter = Math.floor(column.date.getMonth() / 3);
+        const endQuarter = Math.floor(end.getMonth() / 3);
+        if (end.getFullYear() === column.date.getFullYear() && 
+            endQuarter === quarter) {
+          endColumnIndex = i;
+        }
+        break;
+    }
+  }
   
-  const duration = endDayOffset - startDayOffset + 1;
+  if (startColumnIndex === -1) return null; // Task starts before timeline
+  if (endColumnIndex === -1) endColumnIndex = columns.length - 1; // Task extends beyond timeline
+  
+  const width = Math.max((endColumnIndex - startColumnIndex + 1) * columnWidth, columnWidth);
   
   return {
-    left: startDayOffset * columnWidth,
-    width: Math.max(duration * columnWidth, columnWidth) // Minimum 1 day width
+    left: startColumnIndex * columnWidth,
+    width: width
   };
 };
 

@@ -1,6 +1,6 @@
 import { GanttBar } from './GanttBar';
 import { useGanttStore } from './store';
-import { getColumnWidth, getDateArray, isToday } from './utils';
+import { getColumnWidth, getTimelineColumns } from './utils';
 
 interface GanttRowProps {
   type: 'phase' | 'task';
@@ -26,8 +26,8 @@ export const GanttRow = ({
   const { viewMode } = useGanttStore();
   const columnWidth = getColumnWidth(viewMode);
   
-  // Generate array of dates for the timeline
-  const dates = getDateArray(timelineRange.start, timelineRange.end);
+  // Generate timeline columns based on view mode
+  const timelineColumns = getTimelineColumns(timelineRange.start, timelineRange.end, viewMode);
 
   return (
     <div 
@@ -36,19 +36,17 @@ export const GanttRow = ({
     >
       {/* Timeline area - only the timeline part scrolls */}
       <div className="flex relative">
-        {dates.map((date) => {
-          const today = isToday(date);
-          
+        {timelineColumns.map((column) => {
           return (
             <div
-              key={date}
+              key={column.key}
               className={`border-r border-gray-100 h-10 relative ${
-                today ? 'bg-blue-50' : ''
+                column.isToday ? 'bg-blue-50' : ''
               }`}
               style={{ width: `${columnWidth}px` }}
             >
               {/* Today indicator line */}
-              {today && (
+              {column.isToday && (
                 <div className="absolute top-0 bottom-0 left-1/2 w-0.5 bg-blue-500 z-5 pointer-events-none -translate-x-0.5" />
               )}
             </div>
@@ -63,6 +61,7 @@ export const GanttRow = ({
             title={title}
             assignee={assignee || 'Sin asignar'}
             timelineStart={timelineRange.start}
+            timelineEnd={timelineRange.end}
           />
         )}
         
