@@ -54,55 +54,42 @@ export function useTaskTemplateParameters(templateId: string | null) {
     queryFn: async () => {
       if (!supabase || !templateId) return [];
       
-      console.log('Fetching parameters for template:', templateId);
+      console.log('Fetching real parameters for template:', templateId);
       
-      // TODO: Replace with real data when available in Supabase
-      // For now, return demo parameters for testing the modal functionality
-      const demoParameters: TaskTemplateParameter[] = [
-        {
-          id: 'demo-1',
-          template_id: templateId,
-          name: 'largo',
-          label: 'Largo (metros)',
-          type: 'number',
-          unit: 'm',
-          is_required: true,
-          position: 1
-        },
-        {
-          id: 'demo-2',
-          template_id: templateId,
-          name: 'ancho',
-          label: 'Ancho (metros)',
-          type: 'number',
-          unit: 'm',
-          is_required: true,
-          position: 2
-        },
-        {
-          id: 'demo-3',
-          template_id: templateId,
-          name: 'material',
-          label: 'Tipo de Material',
-          type: 'select',
-          unit: undefined,
-          is_required: true,
-          position: 3
-        },
-        {
-          id: 'demo-4',
-          template_id: templateId,
-          name: 'incluye_instalacion',
-          label: 'Incluye Instalación',
-          type: 'boolean',
-          unit: undefined,
-          is_required: false,
-          position: 4
-        }
-      ];
+      const { data, error } = await supabase
+        .from('task_template_parameters')
+        .select(`
+          *,
+          task_parameters (
+            id,
+            name,
+            label,
+            type
+          )
+        `)
+        .eq('template_id', templateId)
+        .order('position');
       
-      console.log('Demo parameters for template:', demoParameters);
-      return demoParameters;
+      if (error) {
+        console.error('Error fetching parameters:', error);
+        throw error;
+      }
+      
+      console.log('Raw parameter data from DB:', data);
+      
+      // Transform the data to match our interface - only real data
+      const parameters = data?.map(item => ({
+        id: item.parameter_id,
+        template_id: item.template_id,
+        name: item.task_parameters?.name || '',
+        label: item.task_parameters?.label || '',
+        type: item.task_parameters?.type || 'text',
+        is_required: true, // Default since we don't have this field in current DB
+        position: item.position
+      })) || [];
+      
+      console.log('Transformed real parameters:', parameters);
+      return parameters as TaskTemplateParameter[];
     },
     enabled: !!templateId && !!supabase
   });
@@ -119,8 +106,7 @@ export function useTaskTemplateParameterOptions(parameterId: string | null) {
       const { data, error } = await supabase
         .from('task_template_parameter_options')
         .select('*')
-        .eq('parameter_id', parameterId)
-        .order('position');
+        .eq('parameter_id', parameterId);
       
       if (error) {
         console.error('Error fetching parameter options:', error);
