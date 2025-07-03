@@ -122,6 +122,35 @@ export function useKanbanLists(boardId: string) {
         .order('position', { ascending: true })
 
       if (error) throw error
+      
+      // If we have lists, fetch user data for creators
+      if (data && data.length > 0) {
+        const userIds = new Set<string>()
+        data.forEach(list => {
+          if (list.created_by) userIds.add(list.created_by)
+        })
+
+        if (userIds.size > 0) {
+          const { data: users, error: usersError } = await supabase
+            .from('users')
+            .select('id, full_name, email, avatar_url')
+            .in('id', Array.from(userIds))
+
+          if (!usersError && users) {
+            const userMap = users.reduce((acc, user) => {
+              acc[user.id] = user
+              return acc
+            }, {} as Record<string, any>)
+
+            // Attach user data to lists
+            return data.map(list => ({
+              ...list,
+              creator: list.created_by ? userMap[list.created_by] : undefined
+            })) as KanbanList[]
+          }
+        }
+      }
+
       return data as KanbanList[]
     },
     enabled: !!boardId
@@ -169,7 +198,38 @@ export function useKanbanCards(boardId: string) {
         throw error
       }
 
-      console.log('Cards fetched:', data?.length || 0, 'cards', data)
+      console.log('Cards fetched:', data?.length || 0, 'cards')
+      
+      // If we have cards, fetch user data for creators and assigned users
+      if (data && data.length > 0) {
+        const userIds = new Set<string>()
+        data.forEach(card => {
+          if (card.created_by) userIds.add(card.created_by)
+          if (card.assigned_to) userIds.add(card.assigned_to)
+        })
+
+        if (userIds.size > 0) {
+          const { data: users, error: usersError } = await supabase
+            .from('users')
+            .select('id, full_name, email, avatar_url')
+            .in('id', Array.from(userIds))
+
+          if (!usersError && users) {
+            const userMap = users.reduce((acc, user) => {
+              acc[user.id] = user
+              return acc
+            }, {} as Record<string, any>)
+
+            // Attach user data to cards
+            return data.map(card => ({
+              ...card,
+              creator: card.created_by ? userMap[card.created_by] : undefined,
+              assigned_user: card.assigned_to ? userMap[card.assigned_to] : undefined
+            })) as KanbanCard[]
+          }
+        }
+      }
+
       return data as KanbanCard[]
     },
     enabled: !!boardId

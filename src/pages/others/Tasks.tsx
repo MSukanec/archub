@@ -44,13 +44,17 @@ function TasksContent() {
       const savedBoardId = userData?.preferences?.last_kanban_board_id;
       const boardExists = savedBoardId && boards.some(board => board.id === savedBoardId);
       
-      if (!currentBoardId) {
+      // Always reset when organization changes or if no board is selected
+      if (!currentBoardId || (savedBoardId && !boardExists)) {
         // Set to saved board if it exists, otherwise first board
         const selectedBoardId = boardExists ? savedBoardId : boards[0].id;
         setCurrentBoardId(selectedBoardId);
       }
+    } else {
+      // Clear selection if no boards available
+      setCurrentBoardId(null);
     }
-  }, [boards, currentBoardId, setCurrentBoardId, userData?.preferences?.last_kanban_board_id]);
+  }, [boards, userData?.organization?.id, setCurrentBoardId, userData?.preferences?.last_kanban_board_id]);
 
   // Configure mobile action bar
   useEffect(() => {
