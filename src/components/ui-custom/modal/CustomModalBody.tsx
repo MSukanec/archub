@@ -26,13 +26,14 @@ export function CustomModalBody({
   return (
     <div
       className={cn(
-        "flex-1 overflow-y-auto w-full grid gap-4",
-        gridCols,
+        "flex-1 overflow-y-auto w-full",
         paddingClasses[padding],
         className,
       )}
     >
-      {children}
+      <div className={cn("grid gap-4", gridCols)}>
+        {children}
+      </div>
     </div>
   );
 }

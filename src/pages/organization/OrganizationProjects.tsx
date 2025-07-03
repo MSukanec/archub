@@ -403,18 +403,6 @@ export default function OrganizationProjects() {
           />
         )}
 
-        {/* New Project Modal */}
-        {showNewProjectModal && (
-          <NewProjectModal
-            open={showNewProjectModal}
-            onClose={() => {
-              setShowNewProjectModal(false)
-              setEditingProject(null)
-            }}
-            editingProject={editingProject}
-          />
-        )}
-
         {/* Dialog de confirmación para eliminar */}
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
           <AlertDialogContent>
@@ -487,6 +475,18 @@ export default function OrganizationProjects() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* New Project Modal */}
+        {showNewProjectModal && (
+          <NewProjectModal
+            open={showNewProjectModal}
+            onClose={() => {
+              setShowNewProjectModal(false)
+              setEditingProject(null)
+            }}
+            editingProject={editingProject}
+          />
+        )}
       </div>
     </Layout>
   )
