@@ -247,3 +247,57 @@ export function useDesignPhaseTasks(projectId: string) {
     enabled: !!projectId && !!organizationId && !!supabase,
   });
 }
+
+// Hook combinado que devuelve fases con sus tareas para el Gantt
+export function useGanttPhasesWithTasks(projectId: string) {
+  const { data: userData } = useCurrentUser();
+  const organizationId = userData?.organization?.id;
+
+  return useQuery({
+    queryKey: ['gantt-phases-tasks', projectId, organizationId],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase not initialized');
+      
+      // Obtener fases del proyecto
+      const { data: phases, error: phasesError } = await supabase
+        .from('design_project_phases')
+        .select(`
+          *,
+          design_phases (*)
+        `)
+        .eq('project_id', projectId)
+        .eq('organization_id', organizationId)
+        .order('position');
+      
+      if (phasesError) {
+        console.error('Error fetching design project phases:', phasesError);
+        throw phasesError;
+      }
+
+      // Obtener todas las tareas para estas fases
+      const phaseIds = phases.map(phase => phase.id);
+      if (phaseIds.length === 0) return [];
+
+      const { data: tasks, error: tasksError } = await supabase
+        .from('design_phase_tasks')
+        .select('*')
+        .in('project_phase_id', phaseIds)
+        .eq('is_active', true)
+        .order('position');
+      
+      if (tasksError) {
+        console.error('Error fetching design phase tasks:', tasksError);
+        throw tasksError;
+      }
+
+      // Combinar fases con sus tareas
+      const phasesWithTasks = phases.map(phase => ({
+        ...phase,
+        tasks: tasks.filter(task => task.project_phase_id === phase.id)
+      }));
+
+      return phasesWithTasks;
+    },
+    enabled: !!projectId && !!organizationId && !!supabase,
+  });
+}

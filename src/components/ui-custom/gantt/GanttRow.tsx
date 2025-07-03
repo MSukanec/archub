@@ -10,6 +10,7 @@ interface GanttRowProps {
   endDate?: string | null;
   assignee?: string;
   timelineRange: { start: string; end: string };
+  dataId?: string;
 }
 
 export const GanttRow = ({ 
@@ -19,7 +20,8 @@ export const GanttRow = ({
   startDate, 
   endDate, 
   assignee,
-  timelineRange
+  timelineRange,
+  dataId
 }: GanttRowProps) => {
   const { viewMode } = useGanttStore();
   const columnWidth = getColumnWidth(viewMode);
@@ -28,7 +30,10 @@ export const GanttRow = ({
   const dates = getDateArray(timelineRange.start, timelineRange.end);
 
   return (
-    <div className="h-10 border-b border-gray-100 hover:bg-gray-50 relative">
+    <div 
+      className="h-10 border-b border-gray-100 hover:bg-gray-50 relative"
+      data-id={dataId}
+    >
       {/* Timeline area - only the timeline part scrolls */}
       <div className="flex min-w-fit relative">
         {dates.map((date) => {

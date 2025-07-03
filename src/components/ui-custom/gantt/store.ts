@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type ViewMode = 'day' | 'week' | 'month';
+export type ViewMode = 'days' | 'weeks' | 'months';
 
 interface GanttStore {
   viewMode: ViewMode;
@@ -8,6 +8,6 @@ interface GanttStore {
 }
 
 export const useGanttStore = create<GanttStore>((set) => ({
-  viewMode: 'day',
+  viewMode: 'days',
   setViewMode: (mode) => set({ viewMode: mode }),
 }));
