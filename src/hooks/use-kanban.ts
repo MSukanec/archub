@@ -23,6 +23,13 @@ export interface KanbanList {
   created_by: string
   created_at: string
   updated_at: string
+  // Relations
+  creator?: {
+    id: string
+    full_name: string
+    email: string
+    avatar_url?: string
+  }
 }
 
 export interface KanbanCard {
@@ -38,6 +45,12 @@ export interface KanbanCard {
   updated_at: string
   // Relations
   assigned_user?: {
+    id: string
+    full_name: string
+    email: string
+    avatar_url?: string
+  }
+  creator?: {
     id: string
     full_name: string
     email: string
@@ -104,7 +117,15 @@ export function useKanbanLists(boardId: string) {
 
       const { data, error } = await supabase
         .from('kanban_lists')
-        .select('*')
+        .select(`
+          *,
+          creator:users!kanban_lists_created_by_fkey(
+            id,
+            full_name,
+            email,
+            avatar_url
+          )
+        `)
         .eq('board_id', boardId)
         .order('position', { ascending: true })
 
@@ -127,6 +148,12 @@ export function useKanbanCards(boardId: string) {
         .select(`
           *,
           assigned_user:users!kanban_cards_assigned_to_fkey(
+            id,
+            full_name,
+            email,
+            avatar_url
+          ),
+          creator:users!kanban_cards_created_by_fkey(
             id,
             full_name,
             email,

@@ -119,17 +119,17 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- July 2, 2025. Complete mobile optimization, file restructuring, and Kanban hover interactions
-  • Cleaned up mobile menu structure: deleted old MobileMenu.tsx and renamed MobileMenuSimple.tsx to MobileMenu.tsx
-  • Made authentication modal fully responsive: hidden branding column on mobile, added mobile header with Archub logo
-  • Mobile login now shows single-column layout with proper logo, titles, and form spacing optimized for mobile screens
-  • Authentication modal maintains professional two-column desktop layout while adapting perfectly to mobile viewports
-  • Added hover action buttons to Kanban cards: Edit and Delete buttons appear on card hover with opacity transition
-  • Kanban action buttons positioned top-right with white background and shadow for clear visibility over card content
-  • Fixed mobile menu TypeScript interface by adding required isOpen property and updating Header.tsx implementation
-  • Enhanced Kanban UX with stopPropagation on action buttons to prevent card selection when using edit/delete actions
-  • Authentication modal supports responsive padding (p-6 on mobile, p-12 on desktop) for optimal spacing across devices
-  • All changes maintain existing functionality while significantly improving mobile experience and task management workflow
+- July 3, 2025. Enhanced Kanban mobile UX with snap scrolling and fixed user data display
+  • Implemented mobile-first snap scrolling for Kanban lists: each list centers on screen with snap-x snap-mandatory CSS
+  • Lists now use full viewport width minus margin on mobile (calc(100vw-2rem)) and snap to center when scrolling
+  • Fixed Kanban user data display by adding JOIN queries to fetch creator information from users table
+  • Enhanced useKanbanCards and useKanbanLists hooks to include creator data with proper TypeScript interfaces
+  • Cards and lists now display actual user names and avatars instead of showing "Usuario" for all items
+  • Updated KanbanCard and KanbanList interfaces to include optional creator object with user details
+  • Mobile Kanban navigation now provides Instagram-style horizontal scrolling that snaps between lists
+  • Desktop maintains standard smooth scrolling while mobile gets optimized snap-to-center user experience
+  • All user avatars and names throughout Kanban system now display authentic data from Supabase database
+  • Fixed TypeScript issues with nullable avatar URLs and proper optional chaining for user data access
 - July 1, 2025. Implemented responsive financial cards system with currency selection and optimized layouts
   • Created FinancialCards component with responsive behavior: desktop shows max 3 cards full-width, mobile shows single card with currency selector
   • Desktop adaptive grid: 1 card uses grid-cols-1, 2 cards use grid-cols-2, 3+ cards use grid-cols-3 for optimal space utilization

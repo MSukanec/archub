@@ -116,7 +116,7 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
             <div 
               ref={provided.innerRef}
               {...provided.droppableProps}
-              className="flex gap-4 h-full overflow-x-auto pb-4"
+              className="flex gap-4 h-full overflow-x-auto pb-4 md:gap-4 snap-x snap-mandatory md:snap-none"
             >
               {lists.map((list, index) => (
                 <Draggable key={list.id} draggableId={`list-${list.id}`} index={index}>
@@ -124,7 +124,7 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
                     <div
                       ref={provided.innerRef}
                       {...provided.draggableProps}
-                      className="flex-shrink-0 w-80"
+                      className="flex-shrink-0 w-[calc(100vw-2rem)] md:w-80 snap-center md:snap-align-none"
                     >
                       <Card className={`h-fit ${snapshot.isDragging ? 'shadow-lg rotate-1' : ''}`}>
                         {/* List Header */}
@@ -139,10 +139,12 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
                             </Badge>
                           </div>
                           <div className="flex items-center gap-2">
-                            {list.created_by && getCreatorInfo(list.created_by) && (
+                            {list.creator && (
                               <Avatar className="h-5 w-5">
-                                {getCreatorInfo(list.created_by)?.avatar && <AvatarImage src={getCreatorInfo(list.created_by)?.avatar} />}
-                                <AvatarFallback className="text-xs">{getCreatorInfo(list.created_by)?.initials}</AvatarFallback>
+                                {list.creator.avatar_url && <AvatarImage src={list.creator.avatar_url} />}
+                                <AvatarFallback className="text-xs">
+                                  {list.creator.full_name?.split(' ').map(n => n[0]).join('') || 'U'}
+                                </AvatarFallback>
                               </Avatar>
                             )}
                             <DropdownMenu>
@@ -207,7 +209,15 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
                                 }`}
                               >
                                 {cardsByList[list.id]?.map((card, index) => {
-                                  const creatorInfo = getCreatorInfo(card.created_by);
+                                  const creatorInfo = card.creator ? {
+                                    name: card.creator.full_name || card.creator.email || 'Usuario',
+                                    avatar: card.creator.avatar_url || undefined,
+                                    initials: card.creator.full_name?.split(' ').map(n => n[0]).join('') || 'U'
+                                  } : {
+                                    name: 'Usuario',
+                                    avatar: undefined,
+                                    initials: 'U'
+                                  };
                                   return (
                                     <Draggable key={card.id} draggableId={card.id} index={index}>
                                       {(provided, snapshot) => (
@@ -291,8 +301,8 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
               ))}
               
               {/* Add New List Button */}
-              <div className="flex-shrink-0">
-                <Card className="w-80 h-fit bg-muted/20 border-dashed border-2 hover:bg-muted/30 transition-colors">
+              <div className="flex-shrink-0 w-[calc(100vw-2rem)] md:w-80 snap-center md:snap-align-none">
+                <Card className="w-full md:w-80 h-fit bg-muted/20 border-dashed border-2 hover:bg-muted/30 transition-colors">
                   <Button
                     variant="ghost"
                     onClick={onCreateList}
