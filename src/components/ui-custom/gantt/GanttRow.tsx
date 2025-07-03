@@ -35,7 +35,7 @@ export const GanttRow = ({
       data-id={dataId}
     >
       {/* Timeline area - only the timeline part scrolls */}
-      <div className="flex min-w-fit relative">
+      <div className="flex relative">
         {dates.map((date) => {
           const today = isToday(date);
           
@@ -55,15 +55,22 @@ export const GanttRow = ({
           );
         })}
         
-        {/* Render bar only for tasks with dates */}
-        {type === 'task' && startDate && endDate && assignee && (
+        {/* Render bar for tasks with dates */}
+        {type === 'task' && startDate && endDate && (
           <GanttBar
             startDate={startDate}
             endDate={endDate}
             title={title}
-            assignee={assignee}
+            assignee={assignee || 'Sin asignar'}
             timelineStart={timelineRange.start}
           />
+        )}
+        
+        {/* Show placeholder for tasks without dates */}
+        {type === 'task' && (!startDate || !endDate) && (
+          <div className="absolute left-2 top-2 bottom-2 w-16 bg-gray-300 rounded text-xs flex items-center justify-center text-gray-600">
+            Sin fechas
+          </div>
         )}
       </div>
     </div>
