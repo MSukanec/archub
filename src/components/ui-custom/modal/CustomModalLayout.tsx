@@ -52,23 +52,26 @@ export function CustomModalLayout({
       {/* Modal */}
       <div
         className={cn(
-          "relative z-10 bg-[var(--card-bg)] shadow-2xl transition-all duration-300 ease-in-out border border-[var(--card-border)]",
+          "relative z-10 flex flex-col bg-[var(--card-bg)] shadow-2xl transition-all duration-300 ease-in-out border border-[var(--card-border)]",
           // Mobile: fullscreen
-          "w-full h-full flex flex-col",
+          "w-full h-full",
           // Desktop: normal modal size with max width and rounded corners
-          "md:w-auto md:h-auto md:max-w-2xl md:min-w-[600px] md:max-h-[90vh] md:rounded-lg md:flex md:flex-col",
+          "md:w-auto md:h-auto md:max-w-2xl md:min-w-[600px] md:max-h-[90vh] md:rounded-lg",
           className,
         )}
       >
-        {children?.header && (
-          <div className="flex-shrink-0">{children.header}</div>
-        )}
-        {children?.body && (
-          <div className="flex-1 overflow-y-auto min-h-0">{children.body}</div>
-        )}
-        {children?.footer && (
-          <div className="flex-shrink-0">{children.footer}</div>
-        )}
+        {/* Layout vertical con header/footer fijos */}
+        <div className="flex flex-col h-full">
+          {children?.header && (
+            <div className="shrink-0">{children.header}</div>
+          )}
+          {children?.body && (
+            <div className="flex-1 min-h-0 overflow-y-auto">{children.body}</div>
+          )}
+          {children?.footer && (
+            <div className="shrink-0">{children.footer}</div>
+          )}
+        </div>
       </div>
     </div>
   );

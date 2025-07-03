@@ -119,19 +119,6 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- July 3, 2025. Created SiteLogCard component for mobile-optimized site logs display
-  • Built SiteLogCard.tsx in src/components/cards/ following established card patterns from MovementCard and ChangelogCard
-  • Horizontal layout with avatar, entry details, and action buttons optimized for mobile viewing
-  • Entry type badges with icons and colors for visual identification (avance_de_obra, visita_tecnica, problema_detectado, etc.)
-  • Weather indicators with appropriate icons and colors (sunny, cloudy, rain, storm, etc.)
-  • Summary counts showing events, attendees, and equipment with corresponding icons
-  • Action buttons for favorite toggle, edit, and delete functionality with hover states
-  • Comments display with truncation (60 chars) and full text tooltip on hover
-  • Public/private indicators with Eye/EyeOff icons for visibility status
-  • Avatar with initials fallback and proper date/time formatting using date-fns
-  • Card follows Lemon Squeezy aesthetic with consistent spacing, rounded corners, and CSS variable theming
-  • Designed for integration with CustomTable renderCard prop for mobile site logs display
-  • Component handles all site log data types: basic info, related events, attendees, equipment, and creator information
 - July 3, 2025. Enhanced CustomModalBody component with dynamic column layout control
   • Added columns prop (1 | 2) with default value of 2 for backward compatibility
   • Implemented responsive grid system: columns=1 uses grid-cols-1, columns=2 uses grid-cols-1 md:grid-cols-2
