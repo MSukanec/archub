@@ -57,6 +57,24 @@ export default function DesignTimeline() {
     setEditingTask(null);
   };
 
+  const handleTaskClick = (taskId: string) => {
+    // Buscar la tarea en los datos
+    const task = phasesWithTasks
+      .flatMap(phase => phase.tasks || [])
+      .find((t: any) => t.id === taskId);
+    
+    if (task) {
+      setEditingTask(task);
+      setIsEditTaskModalOpen(true);
+    }
+  };
+
+  const handleTaskDateChange = (taskId: string, startDate: string, endDate: string) => {
+    console.log('Task date change:', { taskId, startDate, endDate });
+    // Aquí implementarías la lógica para actualizar las fechas en la base de datos
+    // Por ahora solo logeamos para debug
+  };
+
   const headerProps = {
     title: "Cronograma",
     showSearch: true,
@@ -98,6 +116,8 @@ export default function DesignTimeline() {
             onEditPhase={handleEditPhase}
             onAddTask={handleAddTask}
             onEditTask={handleEditTask}
+            onTaskClick={handleTaskClick}
+            onTaskDateChange={handleTaskDateChange}
           />
         </div>
       </Layout>

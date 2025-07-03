@@ -15,9 +15,11 @@ interface GanttProps {
   onEditPhase?: (phase: any) => void;
   onAddTask?: (phaseId: string) => void;
   onEditTask?: (task: any) => void;
+  onTaskClick?: (taskId: string) => void;
+  onTaskDateChange?: (taskId: string, startDate: string, endDate: string) => void;
 }
 
-export const Gantt = ({ phasesWithTasks, onCreatePhase, onEditPhase, onAddTask, onEditTask }: GanttProps) => {
+export const Gantt = ({ phasesWithTasks, onCreatePhase, onEditPhase, onAddTask, onEditTask, onTaskClick, onTaskDateChange }: GanttProps) => {
   console.log('Gantt phasesWithTasks:', phasesWithTasks);
   
   const { viewMode, setViewMode, timelineStart, timelineEnd, setTimelineRange } = useGanttStore();
@@ -310,6 +312,9 @@ export const Gantt = ({ phasesWithTasks, onCreatePhase, onEditPhase, onAddTask, 
                       level={1}
                       timelineRange={timelineRange}
                       dataId={`task-${task.id}`}
+                      taskId={task.id}
+                      onTaskClick={onTaskClick}
+                      onDateChange={onTaskDateChange}
                     />
                   ))}
                 </div>

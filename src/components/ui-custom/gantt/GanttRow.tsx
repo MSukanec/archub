@@ -11,6 +11,9 @@ interface GanttRowProps {
   assignee?: string;
   timelineRange: { start: string; end: string };
   dataId?: string;
+  taskId?: string;
+  onTaskClick?: (taskId: string) => void;
+  onDateChange?: (taskId: string, startDate: string, endDate: string) => void;
 }
 
 export const GanttRow = ({ 
@@ -21,7 +24,10 @@ export const GanttRow = ({
   endDate, 
   assignee,
   timelineRange,
-  dataId
+  dataId,
+  taskId,
+  onTaskClick,
+  onDateChange
 }: GanttRowProps) => {
   const { viewMode } = useGanttStore();
   const columnWidth = getColumnWidth(viewMode);
@@ -62,6 +68,13 @@ export const GanttRow = ({
             assignee={assignee || 'Sin asignar'}
             timelineStart={timelineRange.start}
             timelineEnd={timelineRange.end}
+            taskId={taskId}
+            onTaskClick={onTaskClick}
+            onDateChange={(newStartDate, newEndDate) => {
+              if (taskId && onDateChange) {
+                onDateChange(taskId, newStartDate, newEndDate);
+              }
+            }}
           />
         )}
         
