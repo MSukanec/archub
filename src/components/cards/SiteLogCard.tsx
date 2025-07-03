@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { 
@@ -13,7 +14,9 @@ import {
   StickyNote, 
   CheckCircle, 
   TrendingUp, 
-  Flame 
+  Flame,
+  Star,
+  Trash2
 } from 'lucide-react';
 
 // Entry type configurations
@@ -62,34 +65,72 @@ export default function SiteLogCard({ siteLog, onEdit, onDelete, onToggleFavorit
       onClick={() => onEdit(siteLog)}
     >
       <CardContent className="p-3">
-        {/* Entry Type Badge - Single Row */}
-        <div className="mb-2">
-          <Badge variant={getEntryTypeVariant(siteLog.entry_type)} className="text-xs">
-            {React.createElement(entryTypeConfig.icon, { className: "h-3 w-3 mr-1" })}
-            {entryTypeConfig.label}
-          </Badge>
+        {/* Header Row - Action buttons */}
+        <div className="flex items-center justify-between mb-2">
+          <div className="opacity-0">
+            {/* Invisible spacer */}
+          </div>
+          
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleFavorite(siteLog.id, !siteLog.is_favorite);
+              }}
+              className="h-6 w-6 p-0 hover:bg-transparent"
+            >
+              <Star 
+                className={`h-3 w-3 transition-colors ${
+                  siteLog.is_favorite 
+                    ? 'fill-yellow-400 text-yellow-400' 
+                    : 'text-muted-foreground hover:text-yellow-400'
+                }`} 
+              />
+            </Button>
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(siteLog);
+              }}
+              className="h-6 w-6 p-0 hover:bg-transparent"
+            >
+              <Trash2 className="h-3 w-3 text-muted-foreground hover:text-red-500 transition-colors" />
+            </Button>
+          </div>
         </div>
 
-        {/* Date and Creator - Single Row */}
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-[var(--card-fg)] font-medium">
-            {format(new Date(siteLog.log_date), 'dd/MM/yyyy HH:mm', { locale: es })}
-          </span>
-          
+        {/* Type and Date - Single Row */}
+        <div className="flex items-center justify-between text-sm mb-2">
           <div className="flex items-center gap-2">
-            <Avatar className="w-6 h-6">
-              <AvatarImage 
-                src={siteLog.creator?.avatar_url || ''} 
-                alt={siteLog.creator?.full_name || 'Usuario'} 
-              />
-              <AvatarFallback className="bg-gray-100 text-gray-600 text-xs font-medium">
-                {getInitials(siteLog.creator?.full_name || 'Usuario')}
-              </AvatarFallback>
-            </Avatar>
-            <span className="text-sm text-muted-foreground">
-              {siteLog.creator?.full_name || 'Usuario'}
+            <Badge variant={getEntryTypeVariant(siteLog.entry_type)} className="text-xs">
+              {React.createElement(entryTypeConfig.icon, { className: "h-3 w-3 mr-1" })}
+              {entryTypeConfig.label}
+            </Badge>
+            <span className="text-[var(--card-fg)] font-medium">
+              {format(new Date(siteLog.log_date), 'dd/MM/yyyy HH:mm', { locale: es })}
             </span>
           </div>
+        </div>
+
+        {/* Creator Row */}
+        <div className="flex items-center gap-2">
+          <Avatar className="w-6 h-6">
+            <AvatarImage 
+              src={siteLog.creator?.avatar_url || ''} 
+              alt={siteLog.creator?.full_name || 'Usuario'} 
+            />
+            <AvatarFallback className="bg-gray-100 text-gray-600 text-xs font-medium">
+              {getInitials(siteLog.creator?.full_name || 'Usuario')}
+            </AvatarFallback>
+          </Avatar>
+          <span className="text-sm text-muted-foreground">
+            {siteLog.creator?.full_name || 'Usuario'}
+          </span>
         </div>
         
         {/* Comments preview if available */}

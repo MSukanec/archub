@@ -1066,46 +1066,16 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
           </CustomModalBody>
         ),
         footer: (
-          <div className="flex items-center justify-between px-3 py-3">
-            {/* Left side - Delete button (only when editing) */}
-            <div>
-              {editingSiteLog && (
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="sm"
-                  onClick={handleDelete}
-                  disabled={deleteSiteLogMutation.isPending}
-                  className="gap-2"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  {deleteSiteLogMutation.isPending ? 'Eliminando...' : 'Eliminar'}
-                </Button>
-              )}
-            </div>
-
-            {/* Right side - Cancel and Save buttons */}
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={onClose}
-                disabled={createSiteLogMutation.isPending || deleteSiteLogMutation.isPending}
-              >
-                Cancelar
-              </Button>
-              <Button
-                form="site-log-form"
-                type="submit"
-                size="sm"
-                disabled={createSiteLogMutation.isPending || deleteSiteLogMutation.isPending}
-              >
-                {createSiteLogMutation.isPending ? 'Guardando...' : 
-                 editingSiteLog ? 'Actualizar entrada' : 'Crear entrada'}
-              </Button>
-            </div>
-          </div>
+          <CustomModalFooter
+            onCancel={onClose}
+            onSave={() => {}}
+            saveText={editingSiteLog ? 'Actualizar entrada' : 'Crear entrada'}
+            saveProps={{
+              form: "site-log-form",
+              type: "submit",
+              disabled: createSiteLogMutation.isPending
+            }}
+          />
         )
       }}
     </CustomModalLayout>

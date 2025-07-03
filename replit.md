@@ -119,16 +119,17 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- July 3, 2025. Implemented SiteLogCard mobile component and MobileActionBar integration for bitácora page
-  • Created SiteLogCard.tsx component in src/components/cards/ following MovementCard pattern with comprehensive site log display
+- July 3, 2025. Implemented minimalist SiteLogCard mobile component with inline action buttons and optimized layout
+  • Created ultra-minimalist SiteLogCard.tsx with 3-row compact design: action buttons (top-right), type+date (inline), creator (bottom)
+  • Removed weather display, public/private badges for cleaner mobile interface
+  • Added Star (favorite) and Trash2 (delete) buttons positioned inline with card header for easy access
+  • Reorganized layout: entry type badge and date/time on same line for space efficiency
   • Integrated MobileActionBar with 5 action slots: Home, Search, Create Entry (green button), Filters, Clear Filters
   • Added conditional rendering in ConstructionLogs.tsx: SiteLogCard for mobile, Collapsible for desktop
   • Fixed modal scrolling issues by removing duplicate overflow-y-auto from CustomModalBody and enhancing CustomModalLayout
-  • Applied scrollbar-thin styling to modal body container for visible scrollbars
-  • Completed grid-cols-2 to grid-cols-1 conversion in NewSiteLogModal.tsx ensuring single column layout on all devices
-  • SiteLogCard displays entry type badge, date/weather, creator avatar, comments, and related items count
+  • Reverted modal footer to standard CustomModalFooter removing delete button per user request
+  • Cards now clickable for editing with separate action buttons for favorites and deletion
   • MobileActionBar auto-configures on mobile with contextual actions and clears on component unmount
-  • Mobile users can now create, filter, and manage site logs through bottom action bar interface
 - July 3, 2025. Enhanced CustomModalBody component with dynamic column layout control
   • Added columns prop (1 | 2) with default value of 2 for backward compatibility
   • Implemented responsive grid system: columns=1 uses grid-cols-1, columns=2 uses grid-cols-1 md:grid-cols-2
