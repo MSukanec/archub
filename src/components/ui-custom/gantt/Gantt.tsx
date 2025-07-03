@@ -4,16 +4,19 @@ import { GanttRow } from './GanttRow';
 import { useGanttStore, ViewMode } from './store';
 import { getTimelineRange, getDateArray, getColumnWidth } from './utils';
 import { Button } from '@/components/ui/button';
-import { CalendarDays, Clock, Calendar } from 'lucide-react';
+import { CalendarDays, Clock, Calendar, Edit, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { format } from 'date-fns';
 
 interface GanttProps {
   phasesWithTasks: any[];
+  onCreatePhase?: () => void;
+  onEditPhase?: (phase: any) => void;
+  onAddTask?: (phaseId: string) => void;
 }
 
-export const Gantt = ({ phasesWithTasks }: GanttProps) => {
+export const Gantt = ({ phasesWithTasks, onCreatePhase, onEditPhase, onAddTask }: GanttProps) => {
   console.log('Gantt phasesWithTasks:', phasesWithTasks);
   
   const { viewMode, setViewMode, timelineStart, timelineEnd, setTimelineRange } = useGanttStore();
@@ -191,12 +194,38 @@ export const Gantt = ({ phasesWithTasks }: GanttProps) => {
               <div key={phase.id}>
                 {/* Fase */}
                 <div 
-                  className="h-10 border-b border-gray-100 px-4 flex items-center hover:bg-gray-100 cursor-pointer"
+                  className="h-10 border-b border-gray-100 px-4 flex items-center justify-between hover:bg-gray-100 cursor-pointer group"
                   data-id={`phase-${phase.id}`}
                 >
                   <span className="text-sm font-medium text-gray-900">
                     {phase.design_phases?.name || 'Sin nombre'}
                   </span>
+                  
+                  {/* Action buttons - shown on hover */}
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center space-x-1">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onAddTask?.(phase.id);
+                      }}
+                      className="h-6 w-6 p-0"
+                    >
+                      <Plus className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEditPhase?.(phase);
+                      }}
+                      className="h-6 w-6 p-0"
+                    >
+                      <Edit className="h-3 w-3" />
+                    </Button>
+                  </div>
                 </div>
                 
                 {/* Tareas de la fase */}
@@ -215,15 +244,18 @@ export const Gantt = ({ phasesWithTasks }: GanttProps) => {
             ))}
             
             {/* Botón para crear nueva fase */}
-            <button className="mt-6 px-4 text-sm text-muted-foreground hover:underline">
+            <button 
+              onClick={onCreatePhase}
+              className="mt-6 px-4 text-sm text-muted-foreground hover:underline"
+            >
               + Crear nueva fase
             </button>
           </div>
         </div>
 
         {/* Area del timeline con scroll horizontal */}
-        <div className="flex-1 overflow-x-auto" ref={timelineRef}>
-          <div className="min-w-fit">
+        <div className="flex-1 overflow-x-auto overflow-y-hidden" ref={timelineRef}>
+          <div className="min-w-max" style={{ minWidth: '1200px' }}>
             {/* Header del timeline */}
             <GanttGrid timelineRange={timelineRange} />
             

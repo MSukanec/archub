@@ -80,7 +80,12 @@ export default function DesignTimeline() {
     <>
       <Layout headerProps={headerProps} wide={true}>
         <div className="space-y-6">
-          <Gantt phasesWithTasks={phasesWithTasks} />
+          <Gantt 
+            phasesWithTasks={phasesWithTasks} 
+            onCreatePhase={() => setIsModalOpen(true)}
+            onEditPhase={handleEditPhase}
+            onAddTask={handleAddTask}
+          />
         </div>
       </Layout>
 
