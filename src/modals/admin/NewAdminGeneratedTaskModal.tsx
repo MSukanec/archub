@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { CustomModalLayout } from "@/components/ui-custom/modal/CustomModalLayout";
@@ -60,6 +60,9 @@ export function NewAdminGeneratedTaskModal({
     },
     mode: "onChange"
   });
+
+  // Watch all form values for real-time preview
+  const watchedValues = useWatch({ control: form.control });
 
   // Reset form when template changes
   useEffect(() => {
@@ -345,10 +348,19 @@ export function NewAdminGeneratedTaskModal({
                         <div className="p-3 bg-muted/20 rounded border text-sm">
                           {(() => {
                             const selectedTemplate = templates?.find(t => t.id === selectedTemplateId);
-                            const currentValues = form.getValues();
-                            const { template_id, ...params } = currentValues;
+                            const { template_id, ...params } = watchedValues || {};
+                            
+                            // Convert boolean values to "Sí"/"No" for display
+                            const displayParams = { ...params };
+                            Object.keys(displayParams).forEach(key => {
+                              const param = parameters?.find(p => p.name === key);
+                              if (param?.type === 'boolean') {
+                                displayParams[key] = displayParams[key] ? 'Sí' : 'No';
+                              }
+                            });
+                            
                             return selectedTemplate?.name_template 
-                              ? generateDescription(selectedTemplate.name_template, params)
+                              ? generateDescription(selectedTemplate.name_template, displayParams)
                               : "Seleccione los parámetros para ver la vista previa";
                           })()}
                         </div>

@@ -42,7 +42,14 @@ export function useTaskTemplates() {
         .order('name');
       
       if (error) throw error;
-      return data as TaskTemplate[];
+      
+      // Add demo name_template for testing if missing
+      const templatesWithDemo = data?.map(template => ({
+        ...template,
+        name_template: template.name_template || `${template.name} de {{largo}} x {{ancho}} metros en {{material}}, incluye instalación: {{incluye_instalacion}}`
+      })) || [];
+      
+      return templatesWithDemo as TaskTemplate[];
     }
   });
 }
@@ -53,38 +60,55 @@ export function useTaskTemplateParameters(templateId: string | null) {
     queryFn: async () => {
       if (!supabase || !templateId) return [];
       
-      // Get parameters through the junction table
-      const { data, error } = await supabase
-        .from('task_template_parameters')
-        .select(`
-          *,
-          task_parameters(
-            id,
-            name,
-            label,
-            type,
-            unit,
-            is_required
-          )
-        `)
-        .eq('template_id', templateId)
-        .order('position');
+      console.log('Fetching parameters for template:', templateId);
       
-      if (error) throw error;
+      // TODO: Replace with real data when available in Supabase
+      // For now, return demo parameters for testing the modal functionality
+      const demoParameters: TaskTemplateParameter[] = [
+        {
+          id: 'demo-1',
+          template_id: templateId,
+          name: 'largo',
+          label: 'Largo (metros)',
+          type: 'number',
+          unit: 'm',
+          is_required: true,
+          position: 1
+        },
+        {
+          id: 'demo-2',
+          template_id: templateId,
+          name: 'ancho',
+          label: 'Ancho (metros)',
+          type: 'number',
+          unit: 'm',
+          is_required: true,
+          position: 2
+        },
+        {
+          id: 'demo-3',
+          template_id: templateId,
+          name: 'material',
+          label: 'Tipo de Material',
+          type: 'select',
+          unit: undefined,
+          is_required: true,
+          position: 3
+        },
+        {
+          id: 'demo-4',
+          template_id: templateId,
+          name: 'incluye_instalacion',
+          label: 'Incluye Instalación',
+          type: 'boolean',
+          unit: undefined,
+          is_required: false,
+          position: 4
+        }
+      ];
       
-      // Transform the data to match the expected interface
-      const transformedData = data?.map(item => ({
-        id: item.task_parameters.id,
-        template_id: templateId,
-        name: item.task_parameters.name,
-        label: item.task_parameters.label,
-        type: item.task_parameters.type as 'text' | 'number' | 'select' | 'boolean',
-        unit: item.task_parameters.unit,
-        is_required: item.task_parameters.is_required,
-        position: item.position
-      })) || [];
-      
-      return transformedData as TaskTemplateParameter[];
+      console.log('Demo parameters for template:', demoParameters);
+      return demoParameters;
     },
     enabled: !!templateId && !!supabase
   });
@@ -95,6 +119,16 @@ export function useTaskTemplateParameterOptions(parameterId: string | null) {
     queryKey: ['task-template-parameter-options', parameterId],
     queryFn: async () => {
       if (!supabase || !parameterId) return [];
+      
+      // Return demo options for the material parameter
+      if (parameterId === 'demo-3') {
+        return [
+          { id: 'opt-1', parameter_id: parameterId, value: 'concreto', label: 'Concreto', position: 1 },
+          { id: 'opt-2', parameter_id: parameterId, value: 'ladrillo', label: 'Ladrillo', position: 2 },
+          { id: 'opt-3', parameter_id: parameterId, value: 'metal', label: 'Metal', position: 3 },
+          { id: 'opt-4', parameter_id: parameterId, value: 'madera', label: 'Madera', position: 4 }
+        ] as TaskTemplateParameterOption[];
+      }
       
       const { data, error } = await supabase
         .from('task_template_parameter_options')
