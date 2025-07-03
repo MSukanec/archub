@@ -22,7 +22,7 @@ import { Switch } from '@/components/ui/switch'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { useToast } from '@/hooks/use-toast'
-import { Calendar, User, FileText, Cloud, MessageSquare, Star, Eye, Calendar as CalendarIcon, Plus, X, Settings, Truck } from 'lucide-react'
+import { Calendar, User, FileText, Cloud, MessageSquare, Star, Eye, Calendar as CalendarIcon, Plus, X, Settings, Truck, Trash2 } from 'lucide-react'
 
 // ContactOptions component for rendering contact options
 interface ContactOptionsProps {
@@ -458,6 +458,61 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
       })
     }
   })
+
+  // Mutación para eliminar site log
+  const deleteSiteLogMutation = useMutation({
+    mutationFn: async (siteLogId: string) => {
+      if (!supabase) {
+        throw new Error('Error de conexión con la base de datos')
+      }
+
+      // Delete related data first
+      await supabase.from('site_log_events').delete().eq('site_log_id', siteLogId)
+      await supabase.from('site_log_attendees').delete().eq('site_log_id', siteLogId)
+      await supabase.from('site_log_equipment').delete().eq('site_log_id', siteLogId)
+
+      // Delete the site log
+      const result = await supabase
+        .from('site_logs')
+        .delete()
+        .eq('id', siteLogId)
+
+      if (result.error) {
+        throw result.error
+      }
+
+      return result
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['site-logs'] })
+      queryClient.removeQueries({ queryKey: ['site-logs'] })
+      queryClient.refetchQueries({ queryKey: ['site-logs'] })
+      
+      queryClient.invalidateQueries({ queryKey: ['personnel-attendance'] })
+      queryClient.removeQueries({ queryKey: ['personnel-attendance'] })
+      queryClient.refetchQueries({ queryKey: ['personnel-attendance'] })
+      
+      toast({
+        title: 'Entrada eliminada',
+        description: 'La entrada de bitácora ha sido eliminada correctamente'
+      })
+      onClose()
+    },
+    onError: (error: any) => {
+      console.error('Error al eliminar:', error)
+      toast({
+        title: 'Error',
+        description: error.message || 'No se pudo eliminar la entrada de bitácora',
+        variant: 'destructive'
+      })
+    }
+  })
+
+  const handleDelete = () => {
+    if (editingSiteLog && editingSiteLog.id) {
+      deleteSiteLogMutation.mutate(editingSiteLog.id)
+    }
+  }
 
   const onSubmit = (data: SiteLogForm) => {
     console.log('Submitting site log data:', data)
@@ -1011,16 +1066,46 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
           </CustomModalBody>
         ),
         footer: (
-          <CustomModalFooter
-            onCancel={onClose}
-            onSave={() => {}}
-            saveText={editingSiteLog ? 'Actualizar entrada' : 'Crear entrada'}
-            saveProps={{
-              form: "site-log-form",
-              type: "submit",
-              disabled: createSiteLogMutation.isPending
-            }}
-          />
+          <div className="flex items-center justify-between px-3 py-3">
+            {/* Left side - Delete button (only when editing) */}
+            <div>
+              {editingSiteLog && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleDelete}
+                  disabled={deleteSiteLogMutation.isPending}
+                  className="gap-2"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  {deleteSiteLogMutation.isPending ? 'Eliminando...' : 'Eliminar'}
+                </Button>
+              )}
+            </div>
+
+            {/* Right side - Cancel and Save buttons */}
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={onClose}
+                disabled={createSiteLogMutation.isPending || deleteSiteLogMutation.isPending}
+              >
+                Cancelar
+              </Button>
+              <Button
+                form="site-log-form"
+                type="submit"
+                size="sm"
+                disabled={createSiteLogMutation.isPending || deleteSiteLogMutation.isPending}
+              >
+                {createSiteLogMutation.isPending ? 'Guardando...' : 
+                 editingSiteLog ? 'Actualizar entrada' : 'Crear entrada'}
+              </Button>
+            </div>
+          </div>
         )
       }}
     </CustomModalLayout>

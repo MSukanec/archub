@@ -1,240 +1,121 @@
 import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { 
-  Star, 
-  Edit, 
-  Trash2, 
-  Sun, 
-  Cloud, 
-  CloudRain, 
-  CloudSnow, 
-  Wind, 
-  CloudDrizzle, 
-  CloudLightning, 
-  CloudSun,
-  TrendingUp,
-  Users,
-  AlertTriangle,
-  Package,
-  CheckCircle,
-  Search,
-  Camera,
-  StickyNote
+  FileText, 
+  Camera, 
+  Eye, 
+  AlertTriangle, 
+  Package, 
+  StickyNote, 
+  CheckCircle, 
+  TrendingUp, 
+  Flame 
 } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 
-// Entry types with icons and colors
+// Entry type configurations
 const entryTypes = {
-  avance_de_obra: { icon: TrendingUp, label: "Avance de obra", color: "bg-green-100 text-green-800" },
-  visita_tecnica: { icon: Users, label: "Visita técnica", color: "bg-blue-100 text-blue-800" },
-  problema_detectado: { icon: AlertTriangle, label: "Problema detectado", color: "bg-red-100 text-red-800" },
-  pedido_material: { icon: Package, label: "Pedido material", color: "bg-orange-100 text-orange-800" },
-  nota_climatica: { icon: Sun, label: "Nota climática", color: "bg-yellow-100 text-yellow-800" },
-  decision: { icon: CheckCircle, label: "Decisión", color: "bg-purple-100 text-purple-800" },
-  inspeccion: { icon: Search, label: "Inspección", color: "bg-indigo-100 text-indigo-800" },
-  foto_diaria: { icon: Camera, label: "Foto diaria", color: "bg-gray-100 text-gray-800" },
-  registro_general: { icon: StickyNote, label: "Registro general", color: "bg-teal-100 text-teal-800" }
+  avance_de_obra: { label: 'Avance de Obra', icon: TrendingUp, variant: 'default' as const },
+  visita_tecnica: { label: 'Visita Técnica', icon: Eye, variant: 'secondary' as const },
+  problema_detectado: { label: 'Problema', icon: AlertTriangle, variant: 'destructive' as const },
+  pedido_material: { label: 'Pedido Material', icon: Package, variant: 'outline' as const },
+  nota_climatica: { label: 'Nota Climática', icon: StickyNote, variant: 'secondary' as const },
+  decision: { label: 'Decisión', icon: CheckCircle, variant: 'default' as const },
+  inspeccion: { label: 'Inspección', icon: Eye, variant: 'secondary' as const },
+  foto_diaria: { label: 'Foto Diaria', icon: Camera, variant: 'outline' as const },
+  registro_general: { label: 'Registro General', icon: FileText, variant: 'default' as const }
 };
 
-const weatherTypes = {
-  sunny: { icon: Sun, label: "Soleado" },
-  partly_cloudy: { icon: CloudSun, label: "Parcialmente nublado" },
-  cloudy: { icon: Cloud, label: "Nublado" },
-  rain: { icon: CloudRain, label: "Lluvia" },
-  storm: { icon: CloudLightning, label: "Tormenta" },
-  snow: { icon: CloudSnow, label: "Nieve" },
-  fog: { icon: CloudDrizzle, label: "Niebla" },
-  windy: { icon: Wind, label: "Ventoso" },
-  hail: { icon: CloudSnow, label: "Granizo" }
-};
-
-type SiteLogCardProps = {
-  siteLog: {
-    id: string;
-    log_date: string;
-    entry_type: string;
-    weather?: string;
-    comments?: string;
-    is_favorite: boolean;
-    is_public: boolean;
-    creator?: {
-      id: string;
-      full_name: string;
-      avatar_url?: string;
-    };
-    events?: any[];
-    attendees?: any[];
-    equipment?: any[];
-  };
+interface SiteLogCardProps {
+  siteLog: any;
   onEdit: (siteLog: any) => void;
   onDelete: (siteLog: any) => void;
-  onToggleFavorite: (siteLogId: string) => void;
-};
+  onToggleFavorite: (id: string, isFavorite: boolean) => void;
+}
 
-// Utility function to get initials from name
-const getInitials = (name: string): string => {
-  if (!name) return '?';
+function getInitials(name: string): string {
   return name
     .split(' ')
-    .map(word => word.charAt(0))
+    .map(n => n[0])
     .join('')
     .toUpperCase()
     .slice(0, 2);
-};
+}
 
-const SiteLogCard: React.FC<SiteLogCardProps> = ({ 
-  siteLog, 
-  onEdit, 
-  onDelete, 
-  onToggleFavorite 
-}) => {
+function getEntryTypeVariant(entryType: string) {
+  return entryTypes[entryType as keyof typeof entryTypes]?.variant || 'default';
+}
+
+export default function SiteLogCard({ siteLog, onEdit, onDelete, onToggleFavorite }: SiteLogCardProps) {
   const entryTypeConfig = entryTypes[siteLog.entry_type as keyof typeof entryTypes];
-  const weatherConfig = siteLog.weather ? weatherTypes[siteLog.weather as keyof typeof weatherTypes] : null;
-  const EntryTypeIcon = entryTypeConfig?.icon;
 
-  // Truncate comments to 60 characters for mobile
-  const truncatedComments = siteLog.comments 
-    ? siteLog.comments.length > 60 
-      ? `${siteLog.comments.slice(0, 60)}...`
-      : siteLog.comments
-    : 'Sin comentarios';
-
-  // Count related items
-  const eventsCount = siteLog.events?.length || 0;
-  const attendeesCount = siteLog.attendees?.length || 0;
-  const equipmentCount = siteLog.equipment?.length || 0;
+  if (!entryTypeConfig) {
+    return null;
+  }
 
   return (
-    <div className="bg-[var(--card-bg)] hover:bg-[var(--card-hover-bg)] rounded-lg shadow-sm border border-[var(--card-border)] p-4 mb-3 transition-colors">
-      {/* Header Row */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          {/* Entry Type Badge */}
-          <Badge className={`${entryTypeConfig?.color} text-xs px-2 py-1`}>
-            {EntryTypeIcon && <EntryTypeIcon className="w-3 h-3 mr-1" />}
-            {entryTypeConfig?.label || 'Sin tipo'}
+    <Card 
+      className="bg-[var(--card-bg)] border-[var(--card-border)] shadow-sm hover:bg-[var(--card-hover-bg)] transition-colors cursor-pointer"
+      onClick={() => onEdit(siteLog)}
+    >
+      <CardContent className="p-3">
+        {/* Entry Type Badge - Single Row */}
+        <div className="mb-2">
+          <Badge variant={getEntryTypeVariant(siteLog.entry_type)} className="text-xs">
+            {React.createElement(entryTypeConfig.icon, { className: "h-3 w-3 mr-1" })}
+            {entryTypeConfig.label}
           </Badge>
-          
-          {/* Favorite Star */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleFavorite(siteLog.id);
-            }}
-            className="h-6 w-6 p-0 hover:bg-transparent"
-          >
-            <Star className={`h-3 w-3 ${siteLog.is_favorite ? 'text-yellow-500 fill-yellow-500' : 'text-muted-foreground'}`} />
-          </Button>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit(siteLog);
-            }}
-            className="h-6 w-6 p-0 hover:bg-transparent"
-          >
-            <Edit className="h-3 w-3 text-muted-foreground hover:text-blue-500 transition-colors" />
-          </Button>
-          
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete(siteLog);
-            }}
-            className="h-6 w-6 p-0 hover:bg-transparent"
-          >
-            <Trash2 className="h-3 w-3 text-muted-foreground hover:text-red-500 transition-colors" />
-          </Button>
-        </div>
-      </div>
-
-      {/* Content Row */}
-      <div className="space-y-2">
-        {/* Date and Weather */}
+        {/* Date and Creator - Single Row */}
         <div className="flex items-center justify-between text-sm">
-          <div className="flex items-center gap-2">
-            <span className="text-[var(--card-fg)] font-medium">
-              {format(new Date(siteLog.log_date), 'dd/MM/yyyy HH:mm', { locale: es })}
-            </span>
-            {weatherConfig && (
-              <div className="flex items-center gap-1">
-                {React.createElement(weatherConfig.icon, { className: "h-3 w-3 text-muted-foreground" })}
-                <span className="text-xs text-muted-foreground">
-                  {weatherConfig.label}
-                </span>
-              </div>
-            )}
-          </div>
-          
-          {/* Public/Private indicator */}
-          <div className="flex items-center gap-1">
-            {siteLog.is_public ? (
-              <Badge variant="outline" className="text-xs">Público</Badge>
-            ) : (
-              <Badge variant="secondary" className="text-xs">Privado</Badge>
-            )}
-          </div>
-        </div>
-
-        {/* Creator */}
-        <div className="flex items-center gap-2">
-          <Avatar className="w-6 h-6">
-            <AvatarImage 
-              src={siteLog.creator?.avatar_url || ''} 
-              alt={siteLog.creator?.full_name || 'Usuario'} 
-            />
-            <AvatarFallback className="bg-gray-100 text-gray-600 text-xs font-medium">
-              {getInitials(siteLog.creator?.full_name || 'Usuario')}
-            </AvatarFallback>
-          </Avatar>
-          <span className="text-sm text-muted-foreground">
-            {siteLog.creator?.full_name || 'Usuario desconocido'}
+          <span className="text-[var(--card-fg)] font-medium">
+            {format(new Date(siteLog.log_date), 'dd/MM/yyyy HH:mm', { locale: es })}
           </span>
+          
+          <div className="flex items-center gap-2">
+            <Avatar className="w-6 h-6">
+              <AvatarImage 
+                src={siteLog.creator?.avatar_url || ''} 
+                alt={siteLog.creator?.full_name || 'Usuario'} 
+              />
+              <AvatarFallback className="bg-gray-100 text-gray-600 text-xs font-medium">
+                {getInitials(siteLog.creator?.full_name || 'Usuario')}
+              </AvatarFallback>
+            </Avatar>
+            <span className="text-sm text-muted-foreground">
+              {siteLog.creator?.full_name || 'Usuario'}
+            </span>
+          </div>
         </div>
+        
+        {/* Comments preview if available */}
+        {siteLog.comments && siteLog.comments.trim() && (
+          <div className="mt-2 pt-2 border-t border-border">
+            <p className="text-xs text-muted-foreground line-clamp-2">
+              {siteLog.comments}
+            </p>
+          </div>
+        )}
 
-        {/* Comments */}
-        <div className="text-sm text-[var(--card-fg)]" title={siteLog.comments || 'Sin comentarios'}>
-          {truncatedComments}
-        </div>
-
-        {/* Related Items Count */}
-        {(eventsCount > 0 || attendeesCount > 0 || equipmentCount > 0) && (
-          <div className="flex items-center gap-3 text-xs text-muted-foreground pt-2 border-t border-[var(--card-border)]">
-            {eventsCount > 0 && (
-              <span className="flex items-center gap-1">
-                <CheckCircle className="h-3 w-3" />
-                {eventsCount} evento{eventsCount > 1 ? 's' : ''}
-              </span>
+        {/* Related data counts */}
+        {(siteLog.events?.length > 0 || siteLog.attendees?.length > 0 || siteLog.equipment?.length > 0) && (
+          <div className="mt-2 pt-2 border-t border-border flex items-center gap-3 text-xs text-muted-foreground">
+            {siteLog.events?.length > 0 && (
+              <span>{siteLog.events.length} eventos</span>
             )}
-            {attendeesCount > 0 && (
-              <span className="flex items-center gap-1">
-                <Users className="h-3 w-3" />
-                {attendeesCount} persona{attendeesCount > 1 ? 's' : ''}
-              </span>
+            {siteLog.attendees?.length > 0 && (
+              <span>{siteLog.attendees.length} asistentes</span>
             )}
-            {equipmentCount > 0 && (
-              <span className="flex items-center gap-1">
-                <Package className="h-3 w-3" />
-                {equipmentCount} equipo{equipmentCount > 1 ? 's' : ''}
-              </span>
+            {siteLog.equipment?.length > 0 && (
+              <span>{siteLog.equipment.length} equipos</span>
             )}
           </div>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
-};
-
-export default SiteLogCard;
+}
