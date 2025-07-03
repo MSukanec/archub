@@ -13,6 +13,22 @@ export interface GeneratedTask {
   created_at: string;
 }
 
+// Interface for task materials
+export interface TaskMaterial {
+  id: string
+  task_id: string
+  material_id: string
+  quantity: number
+  created_at: string
+  material?: {
+    id: string
+    name: string
+    unit: {
+      name: string
+    }
+  }
+}
+
 export function useGeneratedTasks() {
   return useQuery({
     queryKey: ['generated-tasks'],
@@ -104,6 +120,104 @@ export function useDeleteGeneratedTask() {
       toast({
         title: "Error",
         description: error.message || "Error al eliminar la tarea generada",
+        variant: "destructive"
+      });
+    }
+  });
+}
+
+// Hook para obtener materiales de una tarea generada
+export function useTaskMaterials(taskId: string | null) {
+  return useQuery({
+    queryKey: ['task-materials', taskId],
+    queryFn: async () => {
+      if (!supabase || !taskId) return [];
+      
+      const { data, error } = await supabase
+        .from('task_materials')
+        .select(`
+          *,
+          material:materials (
+            id,
+            name,
+            unit:units(name)
+          )
+        `)
+        .eq('task_id', taskId);
+      
+      if (error) {
+        console.error('Error fetching task materials:', error);
+        throw error;
+      }
+      
+      return data as TaskMaterial[];
+    },
+    enabled: !!taskId && !!supabase
+  });
+}
+
+// Hook para crear material de tarea
+export function useCreateTaskMaterial() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  
+  return useMutation({
+    mutationFn: async (data: { task_id: string; material_id: string; quantity: number }) => {
+      if (!supabase) throw new Error('Supabase not initialized');
+      
+      const { data: result, error } = await supabase
+        .from('task_materials')
+        .insert([data])
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return result;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['task-materials', variables.task_id] });
+      toast({
+        title: "Material Agregado",
+        description: "El material se ha agregado a la tarea exitosamente"
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Error al agregar el material",
+        variant: "destructive"
+      });
+    }
+  });
+}
+
+// Hook para eliminar material de tarea
+export function useDeleteTaskMaterial() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  
+  return useMutation({
+    mutationFn: async (id: string) => {
+      if (!supabase) throw new Error('Supabase not initialized');
+      
+      const { error } = await supabase
+        .from('task_materials')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['task-materials'] });
+      toast({
+        title: "Material Eliminado",
+        description: "El material se ha eliminado de la tarea"
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Error al eliminar el material",
         variant: "destructive"
       });
     }

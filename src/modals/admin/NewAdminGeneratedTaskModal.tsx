@@ -8,14 +8,17 @@ import { CustomModalBody } from "@/components/ui-custom/modal/CustomModalBody";
 import { CustomModalFooter } from "@/components/ui-custom/modal/CustomModalFooter";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useTaskTemplates, useTaskTemplateParameters, useTaskTemplateParameterOptions } from "@/hooks/use-task-templates";
-import { useCreateGeneratedTask } from "@/hooks/use-generated-tasks";
+import { useCreateGeneratedTask, useTaskMaterials, useCreateTaskMaterial, useDeleteTaskMaterial } from "@/hooks/use-generated-tasks";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useMaterials } from "@/hooks/use-materials";
 import { supabase } from "@/lib/supabase";
-import { Loader2 } from "lucide-react";
+import { Loader2, Package, Plus, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface GeneratedTask {
   id: string
@@ -46,13 +49,22 @@ export function NewAdminGeneratedTaskModal({
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
   const [paramValues, setParamValues] = useState<Record<string, any>>({});
   const [existingTask, setExistingTask] = useState<any>(null);
+  const [createdTaskId, setCreatedTaskId] = useState<string | null>(null);
+  const [newMaterial, setNewMaterial] = useState<{ material_id: string; quantity: number }>({
+    material_id: "",
+    quantity: 1
+  });
   
   const isEditing = !!generatedTask;
   
   const { data: userData } = useCurrentUser();
   const { data: templates, isLoading: templatesLoading } = useTaskTemplates();
   const { data: parameters, isLoading: parametersLoading } = useTaskTemplateParameters(selectedTemplateId || null);
+  const { data: materials } = useMaterials();
+  const { data: taskMaterials } = useTaskMaterials(createdTaskId || generatedTask?.id || null);
   const createGeneratedTask = useCreateGeneratedTask();
+  const createTaskMaterial = useCreateTaskMaterial();
+  const deleteTaskMaterial = useDeleteTaskMaterial();
   
   // Load parameter options for each parameter
   const [parameterOptions, setParameterOptions] = useState<Record<string, any[]>>({});
@@ -186,11 +198,43 @@ export function NewAdminGeneratedTaskModal({
       
       if (result.existing_task) {
         setExistingTask(result.existing_task);
+      } else if (result.task_id) {
+        // Capturar el ID de la tarea creada para habilitar la gestión de materiales
+        setCreatedTaskId(result.task_id);
       } else {
         onClose();
       }
     } catch (error) {
       console.error("Error creating generated task:", error);
+    }
+  };
+
+  // Función para agregar material
+  const handleAddMaterial = async () => {
+    if (!newMaterial.material_id || newMaterial.quantity <= 0) return;
+    
+    const taskId = createdTaskId || generatedTask?.id;
+    if (!taskId) return;
+    
+    try {
+      await createTaskMaterial.mutateAsync({
+        task_id: taskId,
+        material_id: newMaterial.material_id,
+        quantity: newMaterial.quantity
+      });
+      
+      setNewMaterial({ material_id: "", quantity: 1 });
+    } catch (error) {
+      console.error("Error adding material:", error);
+    }
+  };
+
+  // Función para eliminar material
+  const handleDeleteMaterial = async (materialId: string) => {
+    try {
+      await deleteTaskMaterial.mutateAsync(materialId);
+    } catch (error) {
+      console.error("Error deleting material:", error);
     }
   };
 
@@ -447,11 +491,113 @@ export function NewAdminGeneratedTaskModal({
 
                     {/* Segundo acordeón: Materiales */}
                     <AccordionItem value="materials">
-                      <AccordionTrigger>Materiales</AccordionTrigger>
-                      <AccordionContent className="space-y-4">
-                        <div className="text-center text-muted-foreground text-sm py-8">
-                          Funcionalidad de materiales en desarrollo
+                      <AccordionTrigger>
+                        <div className="flex items-center gap-2">
+                          <Package className="h-4 w-4" />
+                          Materiales ({taskMaterials?.length || 0})
                         </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="space-y-4">
+                        {/* Lista de materiales existentes */}
+                        {taskMaterials && taskMaterials.length > 0 && (
+                          <div className="space-y-2">
+                            {taskMaterials.map((taskMaterial) => (
+                              <div
+                                key={taskMaterial.id}
+                                className="flex items-center justify-between p-3 border border-border rounded-md bg-card"
+                              >
+                                <div className="flex-1">
+                                  <div className="font-medium text-sm">
+                                    {taskMaterial.material?.name}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground">
+                                    Cantidad: {taskMaterial.quantity} {taskMaterial.material?.unit?.name}
+                                  </div>
+                                </div>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteMaterial(taskMaterial.id)}
+                                  className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Formulario para agregar nuevo material */}
+                        {(createdTaskId || generatedTask?.id) && (
+                          <div className="space-y-3 border border-border rounded-md p-3 bg-muted/30">
+                            <div className="flex items-center gap-2 mb-3">
+                              <Plus className="h-4 w-4" />
+                              <span className="text-sm font-medium">Agregar Material</span>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <Label htmlFor="material-select" className="text-xs">Material</Label>
+                                <Select
+                                  value={newMaterial.material_id}
+                                  onValueChange={(value) => setNewMaterial(prev => ({ ...prev, material_id: value }))}
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Seleccionar material" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {materials?.map((material: any) => (
+                                      <SelectItem key={material.id} value={material.id}>
+                                        {material.name} ({material.unit?.name})
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              
+                              <div>
+                                <Label htmlFor="quantity-input" className="text-xs">Cantidad</Label>
+                                <Input
+                                  id="quantity-input"
+                                  type="number"
+                                  min="1"
+                                  step="0.01"
+                                  value={newMaterial.quantity}
+                                  onChange={(e) => setNewMaterial(prev => ({ ...prev, quantity: parseFloat(e.target.value) || 1 }))}
+                                  placeholder="1"
+                                />
+                              </div>
+                            </div>
+                            
+                            <Button
+                              type="button"
+                              onClick={handleAddMaterial}
+                              disabled={!newMaterial.material_id || newMaterial.quantity <= 0 || createTaskMaterial.isPending}
+                              size="sm"
+                              className="w-full"
+                            >
+                              {createTaskMaterial.isPending ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  Agregando...
+                                </>
+                              ) : (
+                                <>
+                                  <Plus className="h-4 w-4 mr-2" />
+                                  Agregar Material
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        )}
+
+                        {/* Mensaje cuando no hay tarea creada aún */}
+                        {!createdTaskId && !generatedTask?.id && (
+                          <div className="text-center text-muted-foreground text-sm py-4 border border-dashed border-border rounded-md">
+                            Crea la tarea primero para poder agregar materiales
+                          </div>
+                        )}
                       </AccordionContent>
                     </AccordionItem>
                   </Accordion>

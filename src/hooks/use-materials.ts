@@ -3,12 +3,10 @@ import { supabase } from '@/lib/supabase'
 import { useCurrentUser } from './use-current-user'
 
 export function useMaterials() {
-  const { data: userData } = useCurrentUser()
-  
   return useQuery({
-    queryKey: ['materials', userData?.organization?.id],
+    queryKey: ['materials'],
     queryFn: async () => {
-      if (!supabase || !userData?.organization?.id) {
+      if (!supabase) {
         return []
       }
 
@@ -19,7 +17,6 @@ export function useMaterials() {
           unit:units(name),
           category:material_categories(name)
         `)
-        .eq('organization_id', userData.organization.id)
         .order('name')
 
       if (error) {
@@ -29,6 +26,6 @@ export function useMaterials() {
 
       return data || []
     },
-    enabled: !!userData?.organization?.id && !!supabase
+    enabled: !!supabase
   })
 }
