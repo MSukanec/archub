@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useTaskTemplates, useTaskTemplateParameters, useTaskTemplateParameterOptions } from "@/hooks/use-task-templates";
-import { useCreateGeneratedTask, useTaskMaterials, useCreateTaskMaterial, useDeleteTaskMaterial } from "@/hooks/use-generated-tasks";
+import { useCreateGeneratedTask, useUpdateGeneratedTask, useTaskMaterials, useCreateTaskMaterial, useDeleteTaskMaterial } from "@/hooks/use-generated-tasks";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMaterials } from "@/hooks/use-materials";
 import { supabase } from "@/lib/supabase";
@@ -63,6 +63,7 @@ export function NewAdminGeneratedTaskModal({
   const { data: materials } = useMaterials();
   const { data: taskMaterials } = useTaskMaterials(createdTaskId || generatedTask?.id || null);
   const createGeneratedTask = useCreateGeneratedTask();
+  const updateGeneratedTask = useUpdateGeneratedTask();
   const createTaskMaterial = useCreateTaskMaterial();
   const deleteTaskMaterial = useDeleteTaskMaterial();
   
@@ -193,22 +194,34 @@ export function NewAdminGeneratedTaskModal({
       : "Tarea generada";
     
     try {
-      const result = await createGeneratedTask.mutateAsync({
-        input_template_id: template_id,
-        input_param_values: params,
-        input_organization_id: userData.organization.id
-      });
-      
-      if (result.existing_task) {
-        setExistingTask(result.existing_task);
-      } else if (result.task_id) {
-        // Capturar el ID de la tarea creada para habilitar la gestión de materiales
-        setCreatedTaskId(result.task_id);
-      } else {
+      if (isEditing && generatedTask?.id) {
+        // Actualizar tarea existente
+        await updateGeneratedTask.mutateAsync({
+          task_id: generatedTask.id,
+          input_param_values: params,
+          input_description: generatedDescription
+        });
         onClose();
+      } else {
+        // Crear nueva tarea
+        const result = await createGeneratedTask.mutateAsync({
+          input_template_id: template_id,
+          input_param_values: params,
+          input_organization_id: userData.organization.id,
+          input_description: generatedDescription
+        });
+        
+        if (result.existing_task) {
+          setExistingTask(result.existing_task);
+        } else if (result.task_id) {
+          // Capturar el ID de la tarea creada para habilitar la gestión de materiales
+          setCreatedTaskId(result.task_id);
+        } else {
+          onClose();
+        }
       }
     } catch (error) {
-      console.error("Error creating generated task:", error);
+      console.error("Error handling task:", error);
     }
   };
 
@@ -637,8 +650,8 @@ export function NewAdminGeneratedTaskModal({
             onCancel={onClose}
             onSave={existingTask ? onClose : form.handleSubmit(handleSubmit)}
             saveText={existingTask ? "Cerrar" : (isEditing ? "Actualizar Tarea Generada" : "Crear Tarea Generada")}
-            saveDisabled={!selectedTemplateId || createGeneratedTask.isPending}
-            saveLoading={createGeneratedTask.isPending}
+            saveDisabled={!selectedTemplateId || createGeneratedTask.isPending || updateGeneratedTask.isPending}
+            saveLoading={createGeneratedTask.isPending || updateGeneratedTask.isPending}
           />
         )
       }}

@@ -56,6 +56,7 @@ export function useCreateGeneratedTask() {
       input_template_id: string;
       input_param_values: Record<string, any>;
       input_organization_id: string;
+      input_description?: string;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
       
@@ -226,6 +227,56 @@ export function useDeleteTaskMaterial() {
       toast({
         title: "Error",
         description: error.message || "Error al eliminar el material",
+        variant: "destructive"
+      });
+    }
+  });
+}
+
+// Hook para actualizar tarea generada
+export function useUpdateGeneratedTask() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (payload: {
+      task_id: string;
+      input_param_values: Record<string, any>;
+      input_description: string;
+    }) => {
+      if (!supabase) throw new Error('Supabase not initialized');
+      
+      console.log('Updating generated task with data:', payload);
+      
+      const { data, error } = await supabase
+        .from('generated_tasks')
+        .update({
+          param_values: payload.input_param_values,
+          description: payload.input_description
+        })
+        .eq('id', payload.task_id)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Error updating task:', error);
+        throw error;
+      }
+      
+      console.log('Task updated successfully:', data);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['generated-tasks'] });
+      toast({
+        title: "Tarea Actualizada",
+        description: "La tarea se ha actualizada exitosamente"
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Error al actualizar la tarea",
         variant: "destructive"
       });
     }
