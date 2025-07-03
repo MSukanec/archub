@@ -66,7 +66,9 @@ export function CustomModalLayout({
             <div className="shrink-0">{children.header}</div>
           )}
           {children?.body && (
-            <div className="flex-1 min-h-0 overflow-y-auto">{children.body}</div>
+            <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+              {children.body}
+            </div>
           )}
           {children?.footer && (
             <div className="shrink-0">{children.footer}</div>
