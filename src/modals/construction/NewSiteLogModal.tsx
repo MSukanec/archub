@@ -517,7 +517,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                     </AccordionTrigger>
                     <AccordionContent className="space-y-3 pt-3">
                       {/* Primera fila: Entrada Pública y Favorito */}
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 gap-4">
                         <FormField
                           control={form.control}
                           name="is_public"
@@ -560,7 +560,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                       </div>
 
                       {/* Segunda fila: Fecha y Creador */}
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 gap-4">
                         <FormField
                           control={form.control}
                           name="log_date"
@@ -623,8 +623,8 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                         />
                       </div>
 
-                      {/* Segunda fila: Tipo de entrada y Clima */}
-                      <div className="grid grid-cols-2 gap-4">
+                      {/* Tipo de entrada y Clima */}
+                      <div className="grid grid-cols-1 gap-4">
                         <FormField
                           control={form.control}
                           name="entry_type"
@@ -824,7 +824,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                             </Button>
                           </div>
 
-                          <div className="grid grid-cols-2 gap-3">
+                          <div className="grid grid-cols-1 gap-3">
                             <div>
                               <label className="text-xs font-medium text-muted-foreground">Contacto</label>
                               <Select
@@ -929,7 +929,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                             </Button>
                           </div>
 
-                          <div className="grid grid-cols-2 gap-3">
+                          <div className="grid grid-cols-1 gap-3">
                             <div>
                               <label className="text-xs font-medium text-muted-foreground">Equipo</label>
                               <Select
