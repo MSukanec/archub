@@ -27,9 +27,8 @@ export async function uploadGalleryFiles(
       file_name: title,
       file_type: file.type.startsWith('image/') ? 'image' : 'video',
       file_size: file.size,
+      description: description || null,
       user_id: userId,
-      organization_id: organizationId,
-      project_id: projectId,
       // No site_log_id for independent gallery uploads
     };
 

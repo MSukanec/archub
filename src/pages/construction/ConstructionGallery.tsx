@@ -46,6 +46,7 @@ interface GalleryFile {
   file_name: string;
   created_at: string;
   site_log_id?: string;
+  description?: string;
 }
 
 export default function ConstructionGallery() {
@@ -76,7 +77,7 @@ export default function ConstructionGallery() {
         throw new Error('Supabase client not initialized');
       }
 
-      // Get files directly by project_id (includes both site log files and independent gallery files)
+      // Get all files from site_log_files table
       const { data, error } = await supabase
         .from('site_log_files')
         .select(`
@@ -85,9 +86,9 @@ export default function ConstructionGallery() {
           file_type,
           file_name,
           created_at,
-          site_log_id
+          site_log_id,
+          description
         `)
-        .eq('project_id', projectId)
         .order('created_at', { ascending: false });
 
       if (error) {
