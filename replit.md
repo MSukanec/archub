@@ -119,6 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 4, 2025. Implemented scalable floating actions system for data tables with TableRowActions component
+  • Created TableRowActions.tsx component with group hover functionality and action variants (default, destructive, primary, muted)
+  • Enhanced CustomTable.tsx with getRowActions prop for configurable floating actions on each row
+  • Eliminated manual ACCIONES column from all tables - now using floating actions that appear on hover
+  • Implemented vertical centering for floating actions using top-1/2 -translate-y-1/2 positioning
+  • Applied to FinancesMovements.tsx with three actions: favorite toggle, edit, and delete with proper icons and variants
+  • Removed all hardcoded grid classes from NewMovementModal.tsx - now managed centrally by CustomModalBody
+  • Actions appear only on desktop (md:flex) with smooth opacity transitions and proper z-index stacking
+  • System provides scalable solution for adding contextual actions to any data table throughout the application
 - July 4, 2025. Complete SwipeableCard integration across all mobile cards with iOS-style swipe functionality
   • Successfully integrated SwipeableCard component with all 4 card types: ProjectCard, SiteLogCard, MovementCard, and ChangelogCard
   • Removed action buttons from all cards since swipe actions now replace them for mobile interface consistency

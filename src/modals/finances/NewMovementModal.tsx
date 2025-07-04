@@ -283,7 +283,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                     </AccordionTrigger>
                     <AccordionContent className="space-y-3 pt-3">
                       {/* Primera fila: Fecha y Creador */}
-                      <div className="grid grid-cols-2 gap-4">
+                      <div>
                         <FormField
                           control={form.control}
                           name="movement_date"
@@ -342,7 +342,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                       </div>
 
                       {/* Segunda fila: Tipo y Categoría */}
-                      <div className="grid grid-cols-2 gap-4">
+                      <div>
                         <FormField
                           control={form.control}
                           name="type_id"
@@ -456,7 +456,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                       </div>
 
                       {/* Cuarta fila: Moneda y Cantidad - misma altura */}
-                      <div className="grid grid-cols-2 gap-4">
+                      <div>
                         <FormField
                           control={form.control}
                           name="currency_id"
