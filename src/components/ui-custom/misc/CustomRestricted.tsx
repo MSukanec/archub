@@ -33,7 +33,7 @@ export function CustomRestricted({
   const { data: userData } = useCurrentUser();
 
   // Verificar si el usuario es administrador
-  const isAdmin = useIsAdmin();
+  const { isAdmin } = useIsAdmin();
 
   // Determinar si está restringido
   let isRestricted = false;
@@ -147,9 +147,7 @@ export function CustomRestricted({
 
         <PopoverContent
           className="w-80 p-4 bg-[var(--card-bg)] border shadow-lg"
-          side="bottom"
-          align="center"
-          sideOffset={8}
+          side="top"
         >
           <div className="space-y-3">
             <div className="flex items-start gap-3">

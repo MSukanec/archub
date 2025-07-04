@@ -39,14 +39,6 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     if (user && userData && !userDataLoading && location !== '/select-mode') {
       const hasUserType = userData.preferences?.last_user_type;
       
-      console.log('Checking user type:', { 
-        hasUser: !!user, 
-        hasUserData: !!userData, 
-        userDataLoading, 
-        hasUserType: !!hasUserType, 
-        currentLocation: location 
-      });
-      
       if (!hasUserType) {
         console.log('User has no type selected, redirecting to select-mode');
         navigate('/select-mode');

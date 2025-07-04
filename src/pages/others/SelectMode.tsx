@@ -155,7 +155,7 @@ export function SelectMode() {
                   ${isAvailable ? 'cursor-pointer hover:scale-105 hover:shadow-lg' : 'cursor-not-allowed opacity-60'}
                   transition-all duration-300 transform
                   ${isSelected ? 'ring-2 ring-blue-500' : ''}
-                  ${isCurrent ? 'ring-2 ring-[var(--accent)]' : ''}
+                  ${isCurrent ? 'ring-2 ring-green-500' : ''}
                   ${isLoading ? 'opacity-75' : ''}
                 `}
                 onClick={() => isAvailable && !isLoading && handleModeSelect(mode.type)}
@@ -166,7 +166,7 @@ export function SelectMode() {
                       <Icon className="h-6 w-6" />
                     </div>
                     {isCurrent && !isLoading && (
-                      <div className="flex items-center text-[var(--accent)]">
+                      <div className="flex items-center text-green-600 dark:text-green-400">
                         <CheckCircle className="h-5 w-5 mr-1" />
                         <span className="text-sm font-medium">Actual</span>
                       </div>
