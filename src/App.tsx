@@ -19,11 +19,11 @@ import OrganizationMembers from "@/pages/organization/OrganizationMembers";
 import OrganizationActivity from "@/pages/organization/OrganizationActivity";
 import ProjectDashboard from "@/pages/project/ProjectDashboard";
 import FinancesDashboard from "@/pages/finances/FinancesDashboard";
+import FinancesPreferences from "@/pages/finances/FinancesPreferences";
 import Profile from "@/pages/others/Profile";
 import Movements from "@/pages/finances/FinancesMovements";
 import ConstructionLogs from "@/pages/construction/ConstructionLogs";
 import ConstructionPersonnel from "@/pages/construction/ConstructionPersonnel";
-import OrganizationPreferences from "@/pages/organization/OrganizationPreferences";
 import ConstructionDashboard from "@/pages/construction/ConstructionDashboard";
 import ConstructionBudgets from "@/pages/construction/ConstructionBudgets";
 import ConstructionMaterials from "@/pages/construction/ConstructionMaterials";
@@ -64,6 +64,18 @@ function Router() {
       <Route path="/finanzas/movimientos">
         <ProtectedRoute>
           <Movements />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/finances/dashboard">
+        <ProtectedRoute>
+          <FinancesDashboard />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/finances/preferences">
+        <ProtectedRoute>
+          <FinancesPreferences />
         </ProtectedRoute>
       </Route>
 
@@ -121,11 +133,7 @@ function Router() {
         </ProtectedRoute>
       </Route>
 
-      <Route path="/preferencias">
-        <ProtectedRoute>
-          <OrganizationPreferences />
-        </ProtectedRoute>
-      </Route>
+
 
       <Route path="/proyectos">
         <ProtectedRoute>
@@ -157,11 +165,7 @@ function Router() {
         </ProtectedRoute>
       </Route>
 
-      <Route path="/organization/preferences">
-        <ProtectedRoute>
-          <OrganizationPreferences />
-        </ProtectedRoute>
-      </Route>
+
 
       <Route path="/project/dashboard">
         <ProtectedRoute>

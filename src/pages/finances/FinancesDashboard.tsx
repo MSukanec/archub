@@ -1,631 +1,125 @@
-import { useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
-import { DollarSign, TrendingUp, TrendingDown, CreditCard, Calendar, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { useEffect } from 'react';
+import { DollarSign, TrendingUp, TrendingDown, CreditCard } from 'lucide-react';
 
-import { Layout } from "@/components/layout/desktop/Layout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-import { useCurrentUser } from "@/hooks/use-current-user";
-import { useNavigationStore } from "@/stores/navigationStore";
-import { supabase } from "@/lib/supabase";
-import { WalletBalanceChart } from "@/components/graphics/WalletBalanceChart";
-import { MonthlyFlowChart } from "@/components/graphics/MonthlyFlowChart";
+import { Layout } from '@/components/layout/desktop/Layout';
+import { Card } from '@/components/ui/card';
+import { useNavigationStore } from '@/stores/navigationStore';
+import { useCurrentUser } from '@/hooks/use-current-user';
 
 export default function FinancesDashboard() {
-  const { data: userData } = useCurrentUser();
   const { setSidebarContext } = useNavigationStore();
-  const organizationId = userData?.preferences?.last_organization_id;
+  const { data: userData } = useCurrentUser();
 
-  // Set sidebar context to project when component mounts
+  // Set sidebar context on component mount
   useEffect(() => {
-    setSidebarContext('project');
+    setSidebarContext('finances');
   }, [setSidebarContext]);
 
-  // Fetch financial summary
-  const { data: financialSummary, isLoading: loadingSummary } = useQuery({
-    queryKey: ['financial-summary', organizationId],
-    queryFn: async () => {
-      if (!organizationId || !supabase) return {
-        totalIncome: 0,
-        totalExpenses: 0,
-        netBalance: 0,
-        recentMovementsCount: 0,
-        thisMonthIncome: 0,
-        thisMonthExpenses: 0
-      };
-
-      // Get all movements for this organization
-      const { data: movements, error } = await supabase
-        .from('movements')
-        .select('*')
-        .eq('organization_id', organizationId)
-        .order('created_at', { ascending: false });
-
-      if (error || !movements) {
-        console.error('Error fetching movements:', error);
-        return {
-          totalIncome: 0,
-          totalExpenses: 0,
-          netBalance: 0,
-          recentMovementsCount: 0,
-          thisMonthIncome: 0,
-          thisMonthExpenses: 0
-        };
-      }
-
-      // Get movement concepts separately
-      const typeIds = movements.map((m: any) => m.type_id).filter(Boolean);
-      const uniqueTypeIds = typeIds.filter((id, index, arr) => arr.indexOf(id) === index);
-      
-      let concepts: any[] = [];
-      if (uniqueTypeIds.length > 0) {
-        const { data: conceptsData, error: conceptsError } = await supabase
-          .from('movement_concepts')
-          .select('id, name, parent_id')
-          .in('id', uniqueTypeIds);
-        
-        console.log('Concepts query error:', conceptsError);
-        console.log('Concepts query result:', conceptsData);
-        concepts = conceptsData || [];
-      }
-
-      // Create a map for quick lookup - need to get parent concepts to determine type
-      const conceptMap: any = {};
-      
-      if (concepts.length > 0) {
-        // Get parent concepts if current concepts have parent_id
-        const parentIds = concepts.map(c => c.parent_id).filter(Boolean);
-        const uniqueParentIds = parentIds.filter((id, index, arr) => arr.indexOf(id) === index);
-        
-        let parentConcepts: any[] = [];
-        if (uniqueParentIds.length > 0) {
-          const { data: parentData } = await supabase
-            .from('movement_concepts')
-            .select('id, name')
-            .in('id', uniqueParentIds);
-          parentConcepts = parentData || [];
-        }
-        
-        // Map concepts to their parent type
-        concepts.forEach((concept: any) => {
-          if (concept.parent_id) {
-            const parent = parentConcepts.find(p => p.id === concept.parent_id);
-            conceptMap[concept.id] = parent?.name?.toUpperCase() || 'UNKNOWN';
-          } else {
-            // If no parent, use the concept name itself
-            conceptMap[concept.id] = concept.name?.toUpperCase() || 'UNKNOWN';
-          }
-        });
-      }
-
-      console.log('Financial summary - movements:', movements.length);
-      console.log('Financial summary - movement type_ids:', typeIds);
-      console.log('Financial summary - unique type_ids:', uniqueTypeIds);
-      console.log('Financial summary - concepts:', concepts);
-      console.log('Financial summary - conceptMap:', conceptMap);
-
-      const currentMonth = new Date().getMonth();
-      const currentYear = new Date().getFullYear();
-
-      // Calculate totals
-      const income = movements
-        .filter((m: any) => conceptMap[m.type_id] === 'INGRESOS')
-        .reduce((sum: number, m: any) => sum + (m.amount || 0), 0);
-
-      const expenses = movements
-        .filter((m: any) => conceptMap[m.type_id] === 'EGRESOS')
-        .reduce((sum: number, m: any) => sum + (m.amount || 0), 0);
-
-      // Calculate this month's data
-      const thisMonthMovements = movements.filter((m: any) => {
-        const movementDate = new Date(m.created_at);
-        return movementDate.getMonth() === currentMonth && 
-               movementDate.getFullYear() === currentYear;
-      });
-
-      const thisMonthIncome = thisMonthMovements
-        .filter((m: any) => conceptMap[m.type_id] === 'INGRESOS')
-        .reduce((sum: number, m: any) => sum + (m.amount || 0), 0);
-
-      const thisMonthExpenses = thisMonthMovements
-        .filter((m: any) => conceptMap[m.type_id] === 'EGRESOS')
-        .reduce((sum: number, m: any) => sum + (m.amount || 0), 0);
-
-      return {
-        totalIncome: income,
-        totalExpenses: expenses,
-        netBalance: income - expenses,
-        recentMovementsCount: movements.length,
-        thisMonthIncome,
-        thisMonthExpenses
-      };
-    },
-    enabled: !!organizationId
-  });
-
-  // Fetch wallet balance data for pie chart
-  const { data: walletBalanceData = [], isLoading: loadingWallets } = useQuery({
-    queryKey: ['wallet-balance', organizationId],
-    queryFn: async () => {
-      if (!organizationId || !supabase) return [];
-
-      // Get organization wallets
-      const { data: orgWallets, error } = await supabase
-        .from('organization_wallets')
-        .select('wallet_id')
-        .eq('organization_id', organizationId)
-        .eq('is_active', true);
-
-      if (error || !orgWallets) return [];
-
-      // Get wallet details
-      const walletIds = orgWallets.map(ow => ow.wallet_id);
-      const { data: wallets } = await supabase
-        .from('wallets')
-        .select('id, name')
-        .in('id', walletIds);
-
-      if (!wallets) return [];
-
-      // Calculate balance for each wallet
-      const walletBalances = await Promise.all(
-        wallets.map(async (wallet: any, index: number) => {
-          const { data: movements } = await supabase!
-            .from('movements')
-            .select('amount, type_id')
-            .eq('organization_id', organizationId)
-            .eq('wallet_id', wallet.id);
-
-          if (!movements) {
-            return {
-              wallet: wallet.name,
-              balance: 0,
-              color: `hsl(var(--chart-${(index % 5) + 1}))`
-            };
-          }
-
-          // Get concept types for these movements
-          const typeIds = movements.map((m: any) => m.type_id).filter(Boolean);
-          const uniqueTypeIds = typeIds.filter((id, index, arr) => arr.indexOf(id) === index);
-          
-          let concepts: any[] = [];
-          const conceptMap: any = {};
-          
-          if (uniqueTypeIds.length > 0) {
-            const { data: conceptsData } = await supabase!
-              .from('movement_concepts')
-              .select('id, name, parent_id')
-              .in('id', uniqueTypeIds);
-            concepts = conceptsData || [];
-            
-            // Get parent concepts if needed
-            const parentIds = concepts.map(c => c.parent_id).filter(Boolean);
-            const uniqueParentIds = parentIds.filter((id, index, arr) => arr.indexOf(id) === index);
-            
-            let parentConcepts: any[] = [];
-            if (uniqueParentIds.length > 0) {
-              const { data: parentData } = await supabase!
-                .from('movement_concepts')
-                .select('id, name')
-                .in('id', uniqueParentIds);
-              parentConcepts = parentData || [];
-            }
-            
-            // Map concepts to their parent type
-            concepts.forEach((concept: any) => {
-              if (concept.parent_id) {
-                const parent = parentConcepts.find(p => p.id === concept.parent_id);
-                conceptMap[concept.id] = parent?.name?.toUpperCase() || 'UNKNOWN';
-              } else {
-                conceptMap[concept.id] = concept.name?.toUpperCase() || 'UNKNOWN';
-              }
-            });
-          }
-
-          const income = movements
-            .filter((m: any) => conceptMap[m.type_id] === 'INGRESOS')
-            .reduce((sum: number, m: any) => sum + (m.amount || 0), 0);
-
-          const expenses = movements
-            .filter((m: any) => conceptMap[m.type_id] === 'EGRESOS')
-            .reduce((sum: number, m: any) => sum + (m.amount || 0), 0);
-
-          return {
-            wallet: wallet.name,
-            balance: income - expenses,
-            color: `hsl(var(--chart-${(index % 5) + 1}))`
-          };
-        })
-      );
-
-      return walletBalances.filter(wb => wb.balance !== 0);
-    },
-    enabled: !!organizationId
-  });
-
-  // Fetch monthly flow data for line chart
-  const { data: monthlyFlowData = [], isLoading: loadingFlow } = useQuery({
-    queryKey: ['monthly-flow', organizationId],
-    queryFn: async () => {
-      if (!organizationId || !supabase) return [];
-
-      // Get last 6 months of movements
-      const sixMonthsAgo = new Date();
-      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-
-      const { data: movements, error } = await supabase
-        .from('movements')
-        .select('amount, movement_date, type_id')
-        .eq('organization_id', organizationId)
-        .gte('movement_date', sixMonthsAgo.toISOString().split('T')[0]);
-
-      if (error || !movements) return [];
-
-      // Get concept types
-      const typeIds = movements.map((m: any) => m.type_id).filter(Boolean);
-      const uniqueTypeIds = typeIds.filter((id, index, arr) => arr.indexOf(id) === index);
-      
-      let concepts: any[] = [];
-      const conceptMap: any = {};
-      
-      if (uniqueTypeIds.length > 0) {
-        const { data: conceptsData } = await supabase
-          .from('movement_concepts')
-          .select('id, name, parent_id')
-          .in('id', uniqueTypeIds);
-        concepts = conceptsData || [];
-        
-        // Get parent concepts if needed
-        const parentIds = concepts.map(c => c.parent_id).filter(Boolean);
-        const uniqueParentIds = parentIds.filter((id, index, arr) => arr.indexOf(id) === index);
-        
-        let parentConcepts: any[] = [];
-        if (uniqueParentIds.length > 0) {
-          const { data: parentData } = await supabase
-            .from('movement_concepts')
-            .select('id, name')
-            .in('id', uniqueParentIds);
-          parentConcepts = parentData || [];
-        }
-        
-        // Map concepts to their parent type
-        concepts.forEach((concept: any) => {
-          if (concept.parent_id) {
-            const parent = parentConcepts.find(p => p.id === concept.parent_id);
-            conceptMap[concept.id] = parent?.name?.toUpperCase() || 'UNKNOWN';
-          } else {
-            conceptMap[concept.id] = concept.name?.toUpperCase() || 'UNKNOWN';
-          }
-        });
-      }
-
-      // Group by month
-      const monthlyData: Record<string, { income: number; expenses: number }> = {};
-
-      movements.forEach((movement: any) => {
-        const date = new Date(movement.movement_date + 'T00:00:00');
-        const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
-        
-        if (!monthlyData[monthKey]) {
-          monthlyData[monthKey] = { income: 0, expenses: 0 };
-        }
-
-        const amount = movement.amount || 0;
-        if (conceptMap[movement.type_id] === 'INGRESOS') {
-          monthlyData[monthKey].income += amount;
-        } else if (conceptMap[movement.type_id] === 'EGRESOS') {
-          monthlyData[monthKey].expenses += amount;
-        }
-      });
-
-      // Convert to chart format
-      return Object.keys(monthlyData)
-        .sort()
-        .slice(-6)
-        .map(monthKey => {
-          const [year, month] = monthKey.split('-');
-          const date = new Date(parseInt(year), parseInt(month));
-          const monthName = date.toLocaleDateString('es-AR', { month: 'short' });
-          
-          return {
-            month: monthName,
-            income: monthlyData[monthKey].income,
-            expenses: monthlyData[monthKey].expenses,
-            net: monthlyData[monthKey].income - monthlyData[monthKey].expenses
-          };
-        });
-    },
-    enabled: !!organizationId
-  });
-
-  // Fetch recent movements
-  const { data: recentMovements = [], isLoading: loadingMovements } = useQuery({
-    queryKey: ['recent-movements', organizationId],
-    queryFn: async () => {
-      if (!organizationId || !supabase) return [];
-
-      const { data: movements, error } = await supabase
-        .from('movements')
-        .select('id, description, amount, created_at, type_id, category_id')
-        .eq('organization_id', organizationId)
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-      if (error || !movements) return [];
-
-      // Get concept names
-      const typeIds = movements.map((m: any) => m.type_id).filter(Boolean);
-      const categoryIds = movements.map((m: any) => m.category_id).filter(Boolean);
-      const uniqueTypeIds = typeIds.filter((id, index, arr) => arr.indexOf(id) === index);
-      const uniqueCategoryIds = categoryIds.filter((id, index, arr) => arr.indexOf(id) === index);
-
-      let types: any[] = [];
-      let categories: any[] = [];
-      
-      if (uniqueTypeIds.length > 0) {
-        const { data: typesData } = await supabase
-          .from('movement_concepts')
-          .select('id, name, parent_id')
-          .in('id', uniqueTypeIds);
-        types = typesData || [];
-      }
-
-      if (uniqueCategoryIds.length > 0) {
-        const { data: categoriesData } = await supabase
-          .from('movement_concepts')
-          .select('id, name')
-          .in('id', uniqueCategoryIds);
-        categories = categoriesData || [];
-      }
-
-      // Create concept map with parent lookup
-      const conceptMap: any = {};
-      
-      // Get parent concepts if types have parent_id
-      const parentIds = types.map(c => c.parent_id).filter(Boolean);
-      const uniqueParentIds = parentIds.filter((id, index, arr) => arr.indexOf(id) === index);
-      
-      let parentConcepts: any[] = [];
-      if (uniqueParentIds.length > 0) {
-        const { data: parentData } = await supabase
-          .from('movement_concepts')
-          .select('id, name')
-          .in('id', uniqueParentIds);
-        parentConcepts = parentData || [];
-      }
-      
-      // Map concepts to their parent type
-      types.forEach((concept: any) => {
-        if (concept.parent_id) {
-          const parent = parentConcepts.find(p => p.id === concept.parent_id);
-          conceptMap[concept.id] = {
-            name: concept.name,
-            parentType: parent?.name?.toUpperCase() || 'UNKNOWN'
-          };
-        } else {
-          conceptMap[concept.id] = {
-            name: concept.name,
-            parentType: concept.name?.toUpperCase() || 'UNKNOWN'
-          };
-        }
-      });
-
-      const categoryMap = categories.reduce((acc: any, category: any) => {
-        acc[category.id] = category.name;
-        return acc;
-      }, {});
-
-      return movements.map((m: any) => ({
-        id: m.id,
-        description: m.description || 'Sin descripción',
-        amount: m.amount || 0, // Keep original amount with sign
-        type: conceptMap[m.type_id]?.parentType === 'INGRESOS' ? 'income' : 'expense',
-        category: categoryMap[m.category_id] || conceptMap[m.type_id]?.name || 'Sin categoría',
-        created_at: m.created_at
-      }));
-    },
-    enabled: !!organizationId
-  });
-
-  const headerProps = {
-    title: "Resumen de Finanzas",
-    icon: DollarSign,
-    showSearch: false,
-    actions: []
-  };
-
-  const isLoading = loadingSummary || loadingMovements || loadingWallets || loadingFlow;
-
-  if (isLoading) {
-    return (
-      <Layout headerProps={headerProps}>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-sm text-muted-foreground">Cargando resumen financiero...</div>
-        </div>
-      </Layout>
-    );
-  }
-
-  const summary = financialSummary || {
-    totalIncome: 0,
-    totalExpenses: 0,
-    netBalance: 0,
-    recentMovementsCount: 0,
-    thisMonthIncome: 0,
-    thisMonthExpenses: 0
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: 'ARS',
-      minimumFractionDigits: 0
-    }).format(amount);
-  };
-
   return (
-    <Layout headerProps={headerProps}>
+    <Layout wide>
       <div className="space-y-6">
+        {/* Header */}
+        <div className="space-y-2">
+          <h1 className="text-2xl font-semibold">Resumen de Finanzas</h1>
+          <p className="text-sm text-muted-foreground">
+            Vista general del estado financiero de {userData?.organization?.name || 'la organización'}
+          </p>
+        </div>
+
         {/* Financial Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Total Income */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Ingresos Totales</CardTitle>
-              <TrendingUp className="h-4 w-4" style={{ color: 'hsl(var(--accent))' }} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold" style={{ color: 'hsl(var(--chart-1))' }}>
-                {formatCurrency(summary.totalIncome)}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Este mes: {formatCurrency(summary.thisMonthIncome)}
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Total Expenses */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Gastos Totales</CardTitle>
-              <TrendingDown className="h-4 w-4" style={{ color: 'hsl(var(--accent))' }} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold" style={{ color: 'hsl(var(--chart-2))' }}>
-                {formatCurrency(summary.totalExpenses)}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Este mes: {formatCurrency(summary.thisMonthExpenses)}
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Net Balance */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Balance Neto</CardTitle>
-              <DollarSign className="h-4 w-4" style={{ color: 'hsl(var(--accent))' }} />
-            </CardHeader>
-            <CardContent>
-              <div className={`text-2xl font-bold`} style={{ 
-                color: summary.netBalance >= 0 ? 'hsl(var(--chart-1))' : 'hsl(var(--chart-2))'
-              }}>
-                {formatCurrency(summary.netBalance)}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {summary.netBalance >= 0 ? 'Ganancia' : 'Pérdida'} del período
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Recent Movements Count */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Movimientos</CardTitle>
-              <Calendar className="h-4 w-4" style={{ color: 'hsl(var(--accent))' }} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {summary.recentMovementsCount}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Total de movimientos registrados
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Financial Graphics Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Wallet Balance Chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CreditCard className="h-5 w-5" style={{ color: 'hsl(var(--accent))' }} />
-                Balance por Billetera
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <WalletBalanceChart 
-                data={walletBalanceData} 
-                isLoading={loadingWallets} 
-              />
-            </CardContent>
-          </Card>
-
-          {/* Monthly Flow Chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5" style={{ color: 'hsl(var(--accent))' }} />
-                Flujo Mensual
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <MonthlyFlowChart 
-                data={monthlyFlowData} 
-                isLoading={loadingFlow} 
-              />
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Recent Movements */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" style={{ color: 'hsl(var(--accent))' }} />
-              Movimientos Recientes
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {recentMovements.length > 0 ? (
-                recentMovements.map((movement: any) => (
-                  <div key={movement.id} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-lg`} style={{
-                        backgroundColor: movement.type === 'income' 
-                          ? 'hsl(var(--chart-1) / 0.1)' 
-                          : 'hsl(var(--chart-2) / 0.1)',
-                        color: movement.type === 'income' 
-                          ? 'hsl(var(--chart-1))' 
-                          : 'hsl(var(--chart-2))'
-                      }}>
-                        {movement.type === 'income' ? (
-                          <ArrowUpRight className="h-4 w-4" />
-                        ) : (
-                          <ArrowDownRight className="h-4 w-4" />
-                        )}
-                      </div>
-                      <div>
-                        <p className="font-medium text-sm">{movement.description}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {movement.category} • {format(new Date(movement.created_at), 'dd MMM', { locale: es })}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="font-bold" style={{
-                      color: movement.type === 'income' 
-                        ? 'hsl(var(--chart-1))' 
-                        : 'hsl(var(--chart-2))'
-                    }}>
-                      {movement.type === 'income' ? '+' : '-'}{formatCurrency(movement.amount)}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  <DollarSign className="h-12 w-12 mx-auto mb-4 opacity-20" />
-                  <p className="text-sm">No hay movimientos financieros registrados.</p>
-                  <p className="text-xs">Los movimientos aparecerán aquí cuando se registren.</p>
-                </div>
-              )}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="p-6">
+            <div className="flex items-center justify-between space-y-0 pb-2">
+              <div className="text-sm font-medium">Ingresos Totales</div>
+              <TrendingUp className="h-4 w-4 text-green-600" />
             </div>
-          </CardContent>
-        </Card>
+            <div className="text-2xl font-bold text-green-600">$45,231.89</div>
+            <p className="text-xs text-muted-foreground">
+              +20.1% respecto al mes anterior
+            </p>
+          </Card>
+
+          <Card className="p-6">
+            <div className="flex items-center justify-between space-y-0 pb-2">
+              <div className="text-sm font-medium">Egresos Totales</div>
+              <TrendingDown className="h-4 w-4 text-red-600" />
+            </div>
+            <div className="text-2xl font-bold text-red-600">$23,456.78</div>
+            <p className="text-xs text-muted-foreground">
+              +4.1% respecto al mes anterior
+            </p>
+          </Card>
+
+          <Card className="p-6">
+            <div className="flex items-center justify-between space-y-0 pb-2">
+              <div className="text-sm font-medium">Balance Neto</div>
+              <DollarSign className="h-4 w-4 text-blue-600" />
+            </div>
+            <div className="text-2xl font-bold text-blue-600">$21,775.11</div>
+            <p className="text-xs text-muted-foreground">
+              +15.3% respecto al mes anterior
+            </p>
+          </Card>
+
+          <Card className="p-6">
+            <div className="flex items-center justify-between space-y-0 pb-2">
+              <div className="text-sm font-medium">Movimientos</div>
+              <CreditCard className="h-4 w-4 text-purple-600" />
+            </div>
+            <div className="text-2xl font-bold">127</div>
+            <p className="text-xs text-muted-foreground">
+              Este mes
+            </p>
+          </Card>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card className="p-6">
+            <h3 className="text-lg font-semibold mb-4">Acciones Rápidas</h3>
+            <div className="space-y-3">
+              <button className="w-full text-left p-3 rounded-lg border hover:bg-accent transition-colors">
+                <div className="font-medium">Registrar Ingreso</div>
+                <div className="text-sm text-muted-foreground">Agregar un nuevo movimiento de ingreso</div>
+              </button>
+              <button className="w-full text-left p-3 rounded-lg border hover:bg-accent transition-colors">
+                <div className="font-medium">Registrar Egreso</div>
+                <div className="text-sm text-muted-foreground">Agregar un nuevo movimiento de egreso</div>
+              </button>
+              <button className="w-full text-left p-3 rounded-lg border hover:bg-accent transition-colors">
+                <div className="font-medium">Ver Reportes</div>
+                <div className="text-sm text-muted-foreground">Generar reportes financieros detallados</div>
+              </button>
+            </div>
+          </Card>
+
+          <Card className="p-6">
+            <h3 className="text-lg font-semibold mb-4">Movimientos Recientes</h3>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 rounded-lg border">
+                <div>
+                  <div className="font-medium">Pago de materiales</div>
+                  <div className="text-sm text-muted-foreground">Hoy</div>
+                </div>
+                <div className="text-red-600 font-medium">-$2,500.00</div>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-lg border">
+                <div>
+                  <div className="font-medium">Facturación cliente</div>
+                  <div className="text-sm text-muted-foreground">Ayer</div>
+                </div>
+                <div className="text-green-600 font-medium">+$8,750.00</div>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-lg border">
+                <div>
+                  <div className="font-medium">Servicios profesionales</div>
+                  <div className="text-sm text-muted-foreground">2 días</div>
+                </div>
+                <div className="text-red-600 font-medium">-$1,200.00</div>
+              </div>
+            </div>
+          </Card>
+        </div>
       </div>
     </Layout>
   );

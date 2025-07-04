@@ -167,7 +167,9 @@ export function Sidebar() {
     organization: [
       { icon: Home, label: 'Resumen de la Organización', href: '/organization/dashboard' },
       { type: 'divider' },
+      { icon: FolderOpen, label: 'Proyectos', href: '/organization/projects' },
       { icon: Activity, label: 'Actividad', href: '/organization/activity' },
+      { icon: Users, label: 'Contactos', href: '/organization/contacts' },
       { icon: Users, label: 'Miembros', href: '/organization/members' },
       { icon: CheckSquare, label: 'Tareas', href: '/tasks' },
     ],
@@ -179,7 +181,7 @@ export function Sidebar() {
       { type: 'divider' },
       { icon: FolderOpen, label: 'Diseño', href: '#', onClick: () => { setSidebarContext('design'); navigate('/design/timeline'); } },
       { icon: Building, label: 'Obra', href: '#', onClick: () => { setSidebarContext('construction'); navigate('/construction/dashboard'); } },
-      { icon: DollarSign, label: 'Finanzas', href: '#', onClick: () => { setSidebarContext('finances'); navigate('/finances/movements'); } },
+      { icon: DollarSign, label: 'Finanzas', href: '#', onClick: () => { setSidebarContext('finances'); navigate('/finances/dashboard'); } },
       { icon: Users, label: 'Comercialización', href: '#', onClick: () => { setSidebarContext('commercialization'); navigate('/commercialization/dashboard'); } },
       { icon: ArrowLeft, label: 'Volver a Organización', href: '#', onClick: () => { setSidebarContext('organization'); navigate('/organization/dashboard'); } },
     ],
@@ -415,14 +417,7 @@ export function Sidebar() {
             />
           )}
 
-          {/* Tareas - Always visible above profile */}
-          <SidebarButton
-            icon={<CheckSquare className="w-[18px] h-[18px]" />}
-            label="Tareas"
-            isActive={location === '/tasks'}
-            isExpanded={isExpanded}
-            onClick={() => navigate('/tasks')}
-          />
+
 
           {/* Changelog */}
           <SidebarButton

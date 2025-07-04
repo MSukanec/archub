@@ -160,7 +160,9 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     organization: [
       { icon: Home, label: 'Resumen de la Organización', href: '/organization/dashboard' },
       { type: 'divider' },
+      { icon: FolderOpen, label: 'Proyectos', href: '/organization/projects' },
       { icon: Activity, label: 'Actividad', href: '/organization/activity' },
+      { icon: Users, label: 'Contactos', href: '/organization/contacts' },
       { icon: Users, label: 'Miembros', href: '/organization/members' },
       { icon: CheckSquare, label: 'Tareas', href: '/tasks' },
     ],
@@ -169,7 +171,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { type: 'divider' },
       { icon: FolderOpen, label: 'Diseño', href: '#', onClick: () => { setSidebarContext('design'); navigate('/design/timeline'); } },
       { icon: Building, label: 'Obra', href: '#', onClick: () => { setSidebarContext('construction'); navigate('/construction/dashboard'); } },
-      { icon: DollarSign, label: 'Finanzas', href: '#', onClick: () => { setSidebarContext('finances'); navigate('/finances/movements'); } },
+      { icon: DollarSign, label: 'Finanzas', href: '#', onClick: () => { setSidebarContext('finances'); navigate('/finances/dashboard'); } },
       { icon: Users, label: 'Comercialización', href: '#', onClick: () => { setSidebarContext('commercialization'); navigate('/commercialization/dashboard'); } },
       { icon: ArrowLeft, label: 'Volver a Organización', href: '#', onClick: () => { setSidebarContext('organization'); navigate('/organization/dashboard'); } },
     ],
@@ -195,7 +197,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
       { type: 'divider' },
       { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
-      { icon: Settings, label: 'Preferencias de Finanzas', href: '/organization/preferences' },
+      { icon: Settings, label: 'Preferencias de Finanzas', href: '/finances/preferences' },
       { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
     ],
     commercialization: [
@@ -366,17 +368,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
               <span className="text-sm font-medium">Mi Perfil</span>
             </button>
             
-            <button
-              onClick={() => handleNavigation('/tasks')}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
-              style={{ 
-                color: 'var(--menues-fg)',
-                backgroundColor: 'transparent'
-              }}
-            >
-              <CheckSquare className="h-5 w-5" />
-              <span className="text-sm font-medium">Tareas</span>
-            </button>
+
 
             <button
               onClick={() => handleNavigation('/changelog')}
