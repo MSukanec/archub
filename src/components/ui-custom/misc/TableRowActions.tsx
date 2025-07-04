@@ -19,8 +19,8 @@ export function TableRowActions({
     <div
       className={cn(
         "absolute top-1/2 -translate-y-1/2 right-2 hidden md:flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200 z-20",
-        // Fondo como card normal
-        "bg-card border border-border shadow-sm backdrop-blur-sm",
+        // Fondo usando las mismas variables CSS que Cards
+        "bg-[var(--card-bg)] border border-[var(--card-border)] shadow-sm backdrop-blur-sm",
         "px-3 py-1 rounded-md",
         className
       )}
