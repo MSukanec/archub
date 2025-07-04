@@ -43,17 +43,17 @@ export default function SwipeableCard({
   const defaultActions: SwipeAction[] = [
     {
       label: "Favorito",
-      icon: <Star className="w-4 h-4" />,
+      icon: <Star className="w-2 h-2" />,
       onClick: onFavorite || (() => {}),
     },
     {
       label: "Editar",
-      icon: <Edit className="w-4 h-4" />,
+      icon: <Edit className="w-2 h-2" />,
       onClick: onEdit || (() => {}),
     },
     {
       label: "Eliminar",
-      icon: <Trash2 className="w-4 h-4" />,
+      icon: <Trash2 className="w-2 h-2" />,
       variant: "destructive",
       onClick: onDelete || (() => {}),
     },
@@ -65,7 +65,7 @@ export default function SwipeableCard({
   const actionOpacity = useTransform(x, [-totalActionWidth, 0], [1, 0]);
   const actionScale = useTransform(x, [-totalActionWidth, 0], [1, 0.8]);
 
-  const handleDragEnd = (event: any, info: PanInfo) => {
+  const handleDragEnd = (_: any, info: PanInfo) => {
     if (!isMobile) return;
 
     const velocity = info.velocity.x;
@@ -124,7 +124,7 @@ export default function SwipeableCard({
         ))}
       </motion.div>
 
-      {/* Contenido principal (ya no tiene onClick) */}
+      {/* Contenido principal (sin onClick externo) */}
       <motion.div
         drag="x"
         dragConstraints={{ left: -totalActionWidth, right: 0 }}
