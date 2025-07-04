@@ -46,6 +46,7 @@ import { Input } from "@/components/ui/input";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
 import SidebarButton from "./SidebarButton";
+import CustomRestricted from "@/components/ui-custom/misc/CustomRestricted";
 
 export function Sidebar() {
   const [location, navigate] = useLocation();
@@ -202,7 +203,7 @@ export function Sidebar() {
     design: [
       { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' },
       { type: 'divider' },
-      { icon: Calendar, label: 'Cronograma', href: '/design/timeline' },
+      { icon: Calendar, label: 'Cronograma', href: '/design/timeline', restricted: true },
       { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
     ],
     construction: [
@@ -304,19 +305,36 @@ export function Sidebar() {
                   <div className="mx-2 my-1 border-t border-[var(--menues-border)]" />
                 ) : (
                   <div>
-                    {/* Main Button */}
-                    <SidebarButton
-                      icon={<item.icon className="w-[18px] h-[18px]" />}
-                      label={item.label}
-                      isActive={location === item.href}
-                      isExpanded={isExpanded}
-                      onClick={item.isAccordion ? item.onToggle : (item.onClick || (() => navigate(item.href)))}
-                      rightIcon={item.isAccordion && isExpanded ? (
-                        item.expanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />
-                      ) : item.rightIcon && isExpanded ? (
-                        <item.rightIcon className="w-4 h-4" />
-                      ) : undefined}
-                    />
+                    {/* Main Button with potential restriction */}
+                    {item.restricted ? (
+                      <CustomRestricted reason="coming_soon">
+                        <SidebarButton
+                          icon={<item.icon className="w-[18px] h-[18px]" />}
+                          label={item.label}
+                          isActive={location === item.href}
+                          isExpanded={isExpanded}
+                          onClick={item.isAccordion ? item.onToggle : (item.onClick || (() => navigate(item.href)))}
+                          rightIcon={item.isAccordion && isExpanded ? (
+                            item.expanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />
+                          ) : item.rightIcon && isExpanded ? (
+                            <item.rightIcon className="w-4 h-4" />
+                          ) : undefined}
+                        />
+                      </CustomRestricted>
+                    ) : (
+                      <SidebarButton
+                        icon={<item.icon className="w-[18px] h-[18px]" />}
+                        label={item.label}
+                        isActive={location === item.href}
+                        isExpanded={isExpanded}
+                        onClick={item.isAccordion ? item.onToggle : (item.onClick || (() => navigate(item.href)))}
+                        rightIcon={item.isAccordion && isExpanded ? (
+                          item.expanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />
+                        ) : item.rightIcon && isExpanded ? (
+                          <item.rightIcon className="w-4 h-4" />
+                        ) : undefined}
+                      />
+                    )}
                 
                     {/* Accordion Children */}
                     {item.isAccordion && item.expanded && isExpanded && (

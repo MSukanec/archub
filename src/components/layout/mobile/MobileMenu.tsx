@@ -32,6 +32,7 @@ import { useLocation } from "wouter";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useProjects } from "@/hooks/use-projects";
+import CustomRestricted from "@/components/ui-custom/misc/CustomRestricted";
 
 interface MobileMenuProps {
   onClose: () => void;
@@ -183,7 +184,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     design: [
       { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' },
       { type: 'divider' },
-      { icon: Calendar, label: 'Cronograma', href: '/design/timeline' },
+      { icon: Calendar, label: 'Cronograma', href: '/design/timeline', restricted: true },
       { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
     ],
     construction: [
@@ -301,27 +302,52 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                 <div className="mx-3 my-3 border-t border-[var(--menues-border)]" />
               ) : (
                 <>
-                  {/* Main Button */}
-                  <button
-                    onClick={item.isAccordion ? item.onToggle : (item.onClick || (() => handleNavigation(item.href)))}
-                    className="flex w-full items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
-                    style={{
-                      color: 'var(--menues-fg)',
-                      backgroundColor: 'transparent'
-                    }}
-                  >
-                    <item.icon className="h-5 w-5" />
-                    {item.label}
-                    {item.isAccordion ? (
-                      <div className="ml-auto">
-                        {item.expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                      </div>
-                    ) : item.hasChevron ? (
-                      <div className="ml-auto">
-                        <ChevronRight className="h-4 w-4" />
-                      </div>
-                    ) : null}
-                  </button>
+                  {/* Main Button with potential restriction */}
+                  {item.restricted ? (
+                    <CustomRestricted reason="coming_soon">
+                      <button
+                        onClick={item.isAccordion ? item.onToggle : (item.onClick || (() => handleNavigation(item.href)))}
+                        className="flex w-full items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+                        style={{
+                          color: 'var(--menues-fg)',
+                          backgroundColor: 'transparent'
+                        }}
+                      >
+                        <item.icon className="h-5 w-5" />
+                        {item.label}
+                        {item.isAccordion ? (
+                          <div className="ml-auto">
+                            {item.expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                          </div>
+                        ) : item.hasChevron ? (
+                          <div className="ml-auto">
+                            <ChevronRight className="h-4 w-4" />
+                          </div>
+                        ) : null}
+                      </button>
+                    </CustomRestricted>
+                  ) : (
+                    <button
+                      onClick={item.isAccordion ? item.onToggle : (item.onClick || (() => handleNavigation(item.href)))}
+                      className="flex w-full items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+                      style={{
+                        color: 'var(--menues-fg)',
+                        backgroundColor: 'transparent'
+                      }}
+                    >
+                      <item.icon className="h-5 w-5" />
+                      {item.label}
+                      {item.isAccordion ? (
+                        <div className="ml-auto">
+                          {item.expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                        </div>
+                      ) : item.hasChevron ? (
+                        <div className="ml-auto">
+                          <ChevronRight className="h-4 w-4" />
+                        </div>
+                      ) : null}
+                    </button>
+                  )}
                   
                   {/* Accordion Children */}
                   {item.isAccordion && item.expanded && (
