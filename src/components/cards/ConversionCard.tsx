@@ -61,7 +61,8 @@ const ConversionCard = ({ conversion, onEdit, onDelete, onToggleFavorite }: Conv
         }
       ]}
     >
-      <div className="flex items-center justify-between gap-3 bg-background hover:bg-muted/40 rounded-lg shadow-sm border border-blue-500 p-3 mb-2 transition-colors cursor-pointer"
+      <div className="flex items-center justify-between gap-3 bg-background hover:bg-muted/40 rounded-lg shadow-sm border border-muted p-3 mb-2 transition-colors cursor-pointer"
+           style={{ borderRight: '4px solid rgb(59, 130, 246)' }}
            onClick={() => onEdit?.(conversion)}>
         {/* Left: Avatar */}
         <div className="flex-shrink-0">
@@ -76,7 +77,7 @@ const ConversionCard = ({ conversion, onEdit, onDelete, onToggleFavorite }: Conv
           </Avatar>
         </div>
 
-        {/* Center: Data - Two rows layout matching MovementCard */}
+        {/* Center: Data - Two rows layout matching MovementCard exactly */}
         <div className="flex-1 min-w-0 flex flex-col justify-center">
           <div className="flex items-center justify-between">
             <div className="text-foreground font-medium text-sm">
