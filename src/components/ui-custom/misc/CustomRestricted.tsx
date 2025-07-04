@@ -92,8 +92,8 @@ export function CustomRestricted({
             onMouseEnter={() => setIsPopoverOpen(true)}
             onMouseLeave={() => setIsPopoverOpen(false)}
           >
-            <div className="bg-accent rounded-full p-1.5 shadow-sm border border-accent group-hover:shadow-md transition-shadow">
-              <Lock className="h-3 w-3 text-accent-foreground" />
+            <div className="bg-pink-100 rounded-full p-1.5 shadow-sm border border-pink-200 group-hover:shadow-md transition-shadow">
+              <Lock className="h-3 w-3 text-pink-600" />
             </div>
           </div>
         </PopoverTrigger>
@@ -101,8 +101,8 @@ export function CustomRestricted({
         <PopoverContent className="w-80 p-4 bg-[var(--card-bg)] border shadow-lg" side="top">
           <div className="space-y-3">
             <div className="flex items-start gap-3">
-              <div className="bg-orange-100 rounded-full p-2 flex-shrink-0">
-                <Lock className="h-4 w-4 text-gray-500" />
+              <div className="bg-accent/10 rounded-full p-2 flex-shrink-0">
+                <Lock className="h-4 w-4 text-accent" />
               </div>
               <div className="flex-1">
                 <h4 className="font-medium text-sm">Función bloqueada</h4>

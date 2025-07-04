@@ -44,6 +44,8 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const { data: userData } = useCurrentUser();
   const { currentSidebarContext, setSidebarContext } = useNavigationStore();
   const [expandedAccordion, setExpandedAccordion] = useState<string | null>(null);
+  const [expandedOrgSelector, setExpandedOrgSelector] = useState(false);
+  const [expandedProjectSelector, setExpandedProjectSelector] = useState(false);
 
   // Bloquear scroll del body cuando el menú está abierto
   useEffect(() => {
@@ -52,32 +54,15 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       document.body.style.overflow = 'unset';
     };
   }, []);
-  const [expandedOrgSelector, setExpandedOrgSelector] = useState(false);
-  const [expandedProjectSelector, setExpandedProjectSelector] = useState(false);
+
   const queryClient = useQueryClient();
 
+  // Obtener organizaciones y proyectos
   const currentOrganization = userData?.organization;
-  const currentProject = userData?.preferences?.last_project_id;
-  const isAdmin = userData?.role?.name === "super_admin" || false;
-  
-  // Fetch real projects data
-  const { data: projectsData } = useProjects(currentOrganization?.id);
-  
-  // Find current project or fall back to first available project
-  const foundCurrentProject = projectsData?.find((p: any) => p.id === currentProject);
-  const effectiveCurrentProject = foundCurrentProject ? currentProject : projectsData?.[0]?.id;
-  
-  // Sort organizations: current first, then others
-  const sortedOrganizations = userData?.organizations ? [
-    ...userData.organizations.filter(org => org.id === userData?.preferences?.last_organization_id),
-    ...userData.organizations.filter(org => org.id !== userData?.preferences?.last_organization_id)
-  ] : [];
-  
-  // Sort projects: effective current first, then others
-  const sortedProjects = projectsData ? [
-    ...projectsData.filter(p => p.id === effectiveCurrentProject),
-    ...projectsData.filter(p => p.id !== effectiveCurrentProject)
-  ] : [];
+  const sortedOrganizations = userData?.organizations || [];
+  const { data: projectsData } = useProjects();
+  const effectiveCurrentProject = userData?.preferences?.last_project_id;
+  const isAdmin = userData?.organization?.is_admin || false;
 
   // Organization selection mutation
   const organizationMutation = useMutation({
@@ -97,6 +82,8 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
       setExpandedOrgSelector(false);
+      setSidebarContext('organization');
+      navigate('/organization/dashboard');
     }
   });
 
@@ -178,18 +165,13 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: Users, label: 'Comercialización', href: '#', onClick: () => { setSidebarContext('commercialization'); navigate('/commercialization/dashboard'); }, restricted: true },
       { icon: ArrowLeft, label: 'Volver a Organización', href: '#', onClick: () => { setSidebarContext('organization'); navigate('/organization/dashboard'); } },
     ],
-    organizations: [
-      // Minimal sidebar - only bottom section buttons
-    ],
     design: [
       { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' },
-      { type: 'divider' },
-      { icon: Calendar, label: 'Cronograma', href: '/design/timeline', restricted: true },
+      { icon: Calendar, label: 'Cronograma', href: '#', restricted: true },
       { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
     ],
     construction: [
       { icon: Home, label: 'Resumen de Obra', href: '/construction/dashboard' },
-      { type: 'divider' },
       { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
       { icon: Package, label: 'Materiales', href: '/construction/materials' },
       { icon: FileText, label: 'Bitácora', href: '/construction/logs' },
@@ -198,56 +180,49 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     ],
     finances: [
       { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
-      { type: 'divider' },
       { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
       { icon: Settings, label: 'Preferencias de Finanzas', href: '/finances/preferences' },
       { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
     ],
     commercialization: [
       { icon: Home, label: 'Resumen de Comercialización', href: '/commercialization/dashboard' },
-      { type: 'divider' },
-      { icon: Building, label: 'Listado de unidades', href: '/commercialization/unidades' },
-      { icon: Users, label: 'Clientes interesados', href: '/commercialization/clientes' },
-      { icon: FileText, label: 'Estadísticas de venta', href: '/commercialization/estadisticas' },
       { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
     ],
     admin: [
       { icon: Home, label: 'Resumen de Administración', href: '/admin/dashboard' },
-      { 
-        icon: Users, 
-        label: 'Comunidad', 
-        isAccordion: true, 
-        expanded: expandedAccordion === 'admin-comunidad',
-        onToggle: () => toggleAccordion('admin-comunidad'),
-        children: [
+      { type: 'divider' },
+      {
+        label: 'Comunidad',
+        isAccordion: true,
+        expanded: expandedAccordion === 'comunidad',
+        onToggle: () => toggleAccordion('comunidad'),
+        items: [
           { icon: Building, label: 'Organizaciones', href: '/admin/organizations' },
-          { icon: Users, label: 'Usuarios', href: '/admin/users' }
+          { icon: Users, label: 'Usuarios', href: '/admin/users' },
         ]
       },
-      { 
-        icon: CheckSquare, 
-        label: 'Tareas', 
-        isAccordion: true, 
-        expanded: expandedAccordion === 'admin-tareas',
-        onToggle: () => toggleAccordion('admin-tareas'),
-        children: [
+      {
+        label: 'Tareas',
+        isAccordion: true,
+        expanded: expandedAccordion === 'tareas',
+        onToggle: () => toggleAccordion('tareas'),
+        items: [
           { icon: CheckSquare, label: 'Tareas', href: '/admin/tasks' },
           { icon: CheckSquare, label: 'Tareas Generadas', href: '/admin/generated-tasks' },
-          { icon: CheckSquare, label: 'Plantillas de Tareas', href: '/admin/task-templates' },
-          { icon: Settings, label: 'Parámetros', href: '/admin/task-parameters' }
+          { icon: FileText, label: 'Plantillas de Tareas', href: '/admin/task-templates' },
+          { icon: Settings, label: 'Parámetros', href: '/admin/task-parameters' },
         ]
       },
-      { 
-        icon: Package, 
-        label: 'Materiales', 
-        isAccordion: true, 
-        expanded: expandedAccordion === 'admin-materiales',
-        onToggle: () => toggleAccordion('admin-materiales'),
-        children: [
+      {
+        label: 'Materiales',
+        isAccordion: true,
+        expanded: expandedAccordion === 'materiales',
+        onToggle: () => toggleAccordion('materiales'),
+        items: [
           { icon: Package, label: 'Materiales', href: '/admin/materials' },
-          { icon: Settings, label: 'Categorías de Materiales', href: '/admin/material-categories' }
+          { icon: FileText, label: 'Categorías de Materiales', href: '/admin/material-categories' },
         ]
-      }
+      },
     ]
   };
 
@@ -258,7 +233,13 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       {/* Header */}
       <div className="h-14 flex items-center justify-between px-4 border-b" style={{ borderColor: 'var(--menues-border)' }}>
         <h1 className="text-lg font-semibold" style={{ color: 'var(--menues-fg)' }}>
-          Archub
+          {currentSidebarContext === 'organization' && 'Organización'}
+          {currentSidebarContext === 'project' && 'Proyecto'}
+          {currentSidebarContext === 'design' && 'Diseño'}
+          {currentSidebarContext === 'construction' && 'Obra'}
+          {currentSidebarContext === 'finances' && 'Finanzas'}
+          {currentSidebarContext === 'commercialization' && 'Comercialización'}
+          {currentSidebarContext === 'admin' && 'Administración'}
         </h1>
         <Button
           variant="ghost"
@@ -271,21 +252,8 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         </Button>
       </div>
 
-      {/* Navigation Menu */}
-      <div className="px-4 py-3 overflow-y-auto" style={{ height: 'calc(100vh - 120px)' }}>
-        {/* Context Title */}
-        <div className="mb-4">
-          <h2 className="text-sm font-medium opacity-70" style={{ color: 'var(--menues-fg)' }}>
-            {currentSidebarContext === 'organization' && 'Organización'}
-            {currentSidebarContext === 'project' && 'Proyecto'}
-            {currentSidebarContext === 'design' && 'Diseño'}
-            {currentSidebarContext === 'construction' && 'Obra'}
-            {currentSidebarContext === 'finances' && 'Finanzas'}
-            {currentSidebarContext === 'commercialization' && 'Comercialización'}
-            {currentSidebarContext === 'admin' && 'Administración'}
-          </h2>
-        </div>
-
+      {/* Navigation Menu - Flex grow para ocupar el espacio disponible */}
+      <div className="flex-1 px-4 py-3 overflow-y-auto">
         <nav className="space-y-0.5">
           {/* Context Title */}
           {sidebarContextTitles[currentSidebarContext] && (
@@ -348,23 +316,22 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                       ) : null}
                     </button>
                   )}
-                  
-                  {/* Accordion Children */}
-                  {item.isAccordion && item.expanded && (
-                    <div className="ml-6 mt-1 space-y-0.5">
-                      {item.children?.map((child: any, childIndex: number) => (
+
+                  {/* Accordion content */}
+                  {item.isAccordion && item.expanded && item.items && (
+                    <div className="ml-6 mt-1 space-y-1">
+                      {item.items.map((subItem: any, subIndex: number) => (
                         <button
-                          key={`${child.label}-${childIndex}`}
-                          onClick={() => handleNavigation(child.href)}
-                          className="flex w-full items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+                          key={subIndex}
+                          onClick={() => handleNavigation(subItem.href)}
+                          className="flex w-full items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
                           style={{
                             color: 'var(--menues-fg)',
-                            backgroundColor: 'transparent',
-                            opacity: 0.9
+                            backgroundColor: 'transparent'
                           }}
                         >
-                          <child.icon className="h-4 w-4" />
-                          {child.label}
+                          <subItem.icon className="h-4 w-4" />
+                          {subItem.label}
                         </button>
                       ))}
                     </div>
@@ -374,62 +341,14 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
             </div>
           ))}
         </nav>
+      </div>
 
-        {/* General Section - After navigation */}
-        <div className="mt-6 pt-4 border-t" style={{ borderColor: 'var(--menues-border)' }}>
-          <div className="mb-4">
-            <h3 className="text-sm font-medium opacity-70" style={{ color: 'var(--menues-fg)' }}>
-              General
-            </h3>
-          </div>
-          
-          <div className="space-y-0.5">
-            <button
-              onClick={() => handleNavigation('/perfil')}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
-              style={{ 
-                color: 'var(--menues-fg)',
-                backgroundColor: 'transparent'
-              }}
-            >
-              <UserCircle className="h-5 w-5" />
-              <span className="text-sm font-medium">Mi Perfil</span>
-            </button>
-            
-
-
-            <button
-              onClick={() => handleNavigation('/changelog')}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
-              style={{ 
-                color: 'var(--menues-fg)',
-                backgroundColor: 'transparent'
-              }}
-            >
-              <History className="h-5 w-5" />
-              <span className="text-sm font-medium">Changelog</span>
-            </button>
-            
-            {isAdmin && (
-              <button
-                onClick={() => handleNavigation('/admin/dashboard', 'admin')}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
-                style={{ 
-                  color: 'var(--menues-fg)',
-                  backgroundColor: 'transparent'
-                }}
-              >
-                <Shield className="h-5 w-5" />
-                <span className="text-sm font-medium">Administración</span>
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Organization and Project Selectors - Inside scrollable area */}
-        <div className="mt-6 pt-4 border-t space-y-3" style={{ borderColor: 'var(--menues-border)' }}>
+      {/* Footer - Fijo en la parte inferior */}
+      <div className="px-4 py-3 border-t relative" style={{ borderColor: 'var(--menues-border)' }}>
+        {/* Organization and Project Selectors */}
+        <div className="space-y-3 mb-4">
           {/* Organization Selector */}
-          <div>
+          <div className="relative">
             <div className="text-xs font-medium opacity-70 mb-2" style={{ color: 'var(--menues-fg)' }}>
               Organización activa:
             </div>
@@ -450,7 +369,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
             </button>
 
             {expandedOrgSelector && (
-              <div className="mt-2 max-h-32 overflow-y-auto scrollbar-hide space-y-1">
+              <div className="absolute bottom-full left-0 right-0 mb-2 max-h-32 overflow-y-auto scrollbar-hide space-y-1 bg-[var(--card-bg)] border border-[var(--menues-border)] rounded-lg p-2 shadow-lg" style={{ zIndex: 10000 }}>
                 {sortedOrganizations.map((org: any) => (
                   <button
                     key={org.id}
@@ -473,7 +392,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
           </div>
 
           {/* Project Selector */}
-          <div>
+          <div className="relative">
             <div className="text-xs font-medium opacity-70 mb-2" style={{ color: 'var(--menues-fg)' }}>
               Proyecto activo:
             </div>
@@ -499,8 +418,8 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
             </button>
 
             {expandedProjectSelector && (
-              <div className="mt-2 max-h-32 overflow-y-auto scrollbar-hide space-y-1">
-                {sortedProjects && sortedProjects.length > 0 ? sortedProjects.map((project: any) => (
+              <div className="absolute bottom-full left-0 right-0 mb-2 max-h-32 overflow-y-auto scrollbar-hide space-y-1 bg-[var(--card-bg)] border border-[var(--menues-border)] rounded-lg p-2 shadow-lg" style={{ zIndex: 10000 }}>
+                {projectsData?.map((project: any) => (
                   <button
                     key={project.id}
                     onClick={() => handleProjectSelect(project.id)}
@@ -516,18 +435,53 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                       <div className="h-2 w-2 rounded-full bg-green-500 flex-shrink-0" />
                     )}
                   </button>
-                )) : (
-                  <div className="px-3 py-2 text-sm opacity-60" style={{ color: 'var(--menues-fg)' }}>
-                    No hay proyectos disponibles
-                  </div>
-                )}
+                ))}
               </div>
             )}
           </div>
         </div>
+
+        {/* Action Buttons Grid */}
+        <div className={cn("grid gap-2", isAdmin ? "grid-cols-3" : "grid-cols-2")}>
+          <button
+            onClick={() => handleNavigation('/profile')}
+            className="flex flex-col items-center gap-1 px-3 py-2 rounded-md text-center transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+            style={{ 
+              color: 'var(--menues-fg)',
+              backgroundColor: 'transparent'
+            }}
+          >
+            <UserCircle className="h-5 w-5" />
+            <span className="text-xs font-medium">Mi Perfil</span>
+          </button>
+          
+          <button
+            onClick={() => handleNavigation('/changelog')}
+            className="flex flex-col items-center gap-1 px-3 py-2 rounded-md text-center transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+            style={{ 
+              color: 'var(--menues-fg)',
+              backgroundColor: 'transparent'
+            }}
+          >
+            <History className="h-5 w-5" />
+            <span className="text-xs font-medium">Changelog</span>
+          </button>
+          
+          {isAdmin && (
+            <button
+              onClick={() => handleNavigation('/admin/dashboard', 'admin')}
+              className="flex flex-col items-center gap-1 px-3 py-2 rounded-md text-center transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+              style={{ 
+                color: 'var(--menues-fg)',
+                backgroundColor: 'transparent'
+              }}
+            >
+              <Shield className="h-5 w-5" />
+              <span className="text-xs font-medium">Admin</span>
+            </button>
+          )}
+        </div>
       </div>
-
-
     </div>
   );
 

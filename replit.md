@@ -119,6 +119,14 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 4, 2025. Enhanced mobile menu design with footer navigation and corrected restriction styling - COMPLETED
+  • Changed MobileMenu header title from "ARCHUB·" to current context name (Organización, Proyecto, Diseño, etc.)
+  • Redesigned mobile menu with flex layout: header (fixed top), navigation (flex-grow), footer (fixed bottom)
+  • Moved organization and project selectors from navigation area to footer with compact design
+  • Added responsive footer grid with Mi Perfil, Changelog, and Admin buttons (2-3 columns based on admin status)
+  • Fixed CustomRestricted popover icon color from pink to accent while keeping badge pink as requested
+  • Footer selectors appear above content with proper z-index positioning for better mobile UX
+  • Navigation area now has maximum space for menu items without distractions
 - July 4, 2025. Enhanced navigation and UI improvements with real data dashboards - COMPLETED
   • Changed DISEÑO context default navigation from timeline to dashboard in both desktop and mobile navigation
   • Updated CustomRestricted icon color from pink to --accent background with accent-foreground text
