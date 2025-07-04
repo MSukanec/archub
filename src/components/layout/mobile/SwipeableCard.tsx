@@ -71,8 +71,8 @@ export default function SwipeableCard({
     const velocity = info.velocity.x;
     const offset = info.offset.x;
 
-    const swipeToOpen = offset < -totalActionWidth / 2 || velocity < -500;
-    const swipeToClose = offset > -totalActionWidth / 2 || velocity > 500;
+    // Más sensible: solo requiere 25% del ancho o velocidad moderada
+    const swipeToOpen = offset < -totalActionWidth * 0.25 || velocity < -300;
 
     if (swipeToOpen) {
       x.set(-totalActionWidth);
@@ -132,7 +132,7 @@ export default function SwipeableCard({
         onDragEnd={handleDragEnd}
         style={{ x }}
         className="relative bg-background z-10"
-        transition={{ type: "spring", damping: 20, stiffness: 300 }}
+        transition={{ type: "spring", damping: 30, stiffness: 600, duration: 0.2 }}
       >
         {children}
       </motion.div>

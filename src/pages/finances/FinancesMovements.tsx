@@ -1039,7 +1039,7 @@ export default function Movements() {
                 onClick: () => {
                   handleEditConversion(item);
                 },
-                variant: "default"
+                variant: "primary"
               },
               {
                 icon: <Trash2 className="h-4 w-4" />,
@@ -1063,7 +1063,7 @@ export default function Movements() {
               icon: <Pencil className="h-4 w-4" />,
               label: "Editar",
               onClick: () => handleEdit(item),
-              variant: "default"
+              variant: "primary"
             },
             {
               icon: <Trash2 className="h-4 w-4" />,

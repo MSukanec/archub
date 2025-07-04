@@ -37,7 +37,7 @@ export function TableRowActions({
               "text-destructive/70 hover:text-destructive hover:bg-destructive/10"
             ],
             action.variant === "primary" && [
-              "text-primary/70 hover:text-primary hover:bg-primary/10"
+              "text-blue-500/70 hover:text-blue-500 hover:bg-blue-500/10"
             ],
             action.variant === "muted" && [
               "text-muted-foreground hover:text-foreground hover:bg-muted/50"
