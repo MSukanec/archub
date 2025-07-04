@@ -61,38 +61,38 @@ const ConversionCard = ({ conversion, onEdit, onDelete, onToggleFavorite }: Conv
         }
       ]}
     >
-      <div className="flex items-center justify-between gap-3 bg-background hover:bg-muted/40 rounded-lg shadow-sm border border-muted p-3 mb-2 transition-colors cursor-pointer"
+      <div className="flex items-center justify-between gap-3 bg-[var(--card-bg)] hover:bg-[var(--card-hover-bg)] rounded-lg shadow-sm border border-[var(--card-border)] p-3 mb-2 transition-colors cursor-pointer"
            style={{ borderRight: '4px solid rgb(59, 130, 246)' }}
            onClick={() => onEdit?.(conversion)}>
         {/* Left: Avatar */}
         <div className="flex-shrink-0">
-          <Avatar className="w-10 h-10 border border-primary/20">
+          <Avatar className="w-10 h-10">
             <AvatarImage 
               src={creator?.avatar_url || ''} 
               alt={creator?.full_name || creator?.email || 'Usuario'} 
             />
-            <AvatarFallback className="bg-muted text-foreground text-sm font-medium">
+            <AvatarFallback className="bg-gray-100 text-gray-600 text-sm font-medium">
               {getInitials(creator?.full_name || creator?.email || 'Usuario')}
             </AvatarFallback>
           </Avatar>
         </div>
 
-        {/* Center: Data - Two rows layout matching MovementCard exactly */}
+        {/* Center: Data - Two rows layout exactly like MovementCard */}
         <div className="flex-1 min-w-0 flex flex-col justify-center">
           <div className="flex items-center justify-between">
-            <div className="text-foreground font-medium text-sm">
+            <div className="text-[var(--card-fg)] font-medium text-sm">
               Conversión
             </div>
-            <div className="font-semibold text-sm ml-4 text-blue-600">
+            <div className="font-semibold text-sm text-blue-600 ml-4">
               ${formatAmount(from_amount)} → ${formatAmount(to_amount)}
             </div>
           </div>
           
           <div className="flex items-center justify-between mt-1">
-            <div className="text-muted-foreground text-sm">
+            <div className="text-[var(--muted-fg)] text-sm">
               {from_currency} - {to_currency}
             </div>
-            <div className="text-sm font-medium ml-4 text-blue-600">
+            <div className="text-xs text-gray-500 ml-4">
               {from_currency} → {to_currency}
             </div>
           </div>
