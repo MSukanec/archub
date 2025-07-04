@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layout } from '@/components/layout/Layout';
+import { Layout } from '@/components/layout/desktop/Layout';
 import { CustomKanban } from '@/components/ui-custom/misc/CustomKanban';
 import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState';
 import { Button } from '@/components/ui/button';
@@ -12,8 +12,8 @@ import { useKanbanStore } from '@/stores/kanbanStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { NewBoardModal } from '@/modals/tasks/NewBoardModal';
 import { NewListModal } from '@/modals/tasks/NewListModal';
-import { CustomRestricted } from '@/components/ui-custom/CustomRestricted';
-import { MobileActionBarProvider, useMobileActionBar } from '@/contexts/MobileActionBarContext';
+import { CustomRestricted } from '@/components/ui-custom/misc/CustomRestricted';
+import { MobileActionBarProvider, useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext';
 import { MobileActionBar } from '@/components/ui-custom/mobile/MobileActionBar';
 
 function TasksContent() {

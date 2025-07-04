@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { FileText, Plus, Star, Globe, Lock, ChevronDown, ChevronRight, Edit, Trash2, MoreHorizontal, Flame, Package, StickyNote, Sun, Cloud, CloudRain, CloudSnow, Wind, CloudDrizzle, CloudLightning, Thermometer, TrendingUp, Users, AlertTriangle, CloudSun, CheckCircle, Search, Camera, Eye, Calendar, Filter, X } from "lucide-react";
 
-import { Layout } from '@/components/layout/Layout';
+import { Layout } from '@/components/layout/desktop/Layout';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -22,7 +22,7 @@ import { NewSiteLogModal } from "@/modals/construction/NewSiteLogModal";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { useMobile } from "@/hooks/use-mobile";
-import { useMobileActionBar } from "@/contexts/MobileActionBarContext";
+import { useMobileActionBar } from "@/components/layout/mobile/MobileActionBarContext";
 import SiteLogCard from "@/components/cards/SiteLogCard";
 
 // Entry types enum with their icons and labels

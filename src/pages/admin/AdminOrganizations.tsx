@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Layout } from '@/components/layout/Layout';
+import { Layout } from '@/components/layout/desktop/Layout';
 import { CustomTable } from '@/components/ui-custom/misc/CustomTable';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';

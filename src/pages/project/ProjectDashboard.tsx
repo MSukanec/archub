@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Layout } from '@/components/layout/Layout'
+import { Layout } from '@/components/layout/desktop/Layout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -9,7 +9,7 @@ import { useProjects } from '@/hooks/use-projects'
 import { useBudgets } from '@/hooks/use-budgets'
 import { useMovements } from '@/hooks/use-movements'
 import { useNavigationStore } from '@/stores/navigationStore'
-import { useMobileActionBar } from '@/contexts/MobileActionBarContext'
+import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
 import { useMobile } from '@/hooks/use-mobile'
 import { 
   Folder, 

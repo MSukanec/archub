@@ -6,7 +6,7 @@ import { useThemeStore } from "@/stores/themeStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { MobileActionBar } from "@/components/ui-custom/mobile/MobileActionBar";
-import { useMobileActionBar } from "@/contexts/MobileActionBarContext";
+import { useMobileActionBar } from "@/components/layout/mobile/MobileActionBarContext";
 import { useMobile } from "@/hooks/use-mobile";
 
 interface LayoutProps {

@@ -143,6 +143,18 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     setExpandedAccordion(prev => prev === key ? null : key);
   };
 
+  // Context titles
+  const sidebarContextTitles = {
+    organization: null, // No title for organization context
+    organizations: null,
+    project: null,
+    design: 'Menu',
+    construction: 'Menu',
+    finances: 'Menu',
+    commercialization: 'Menu',
+    admin: 'Menu'
+  };
+
   // Exact sidebar structure from Sidebar.tsx
   const sidebarContexts = {
     organization: [
@@ -153,7 +165,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: Building, label: 'Obra', href: '#', onClick: () => { setSidebarContext('construction'); navigate('/construction/dashboard'); }, hasChevron: true },
       { icon: DollarSign, label: 'Finanzas', href: '#', onClick: () => { setSidebarContext('finances'); navigate('/finances/dashboard'); }, hasChevron: true },
       { icon: Users, label: 'Comercialización', href: '#', onClick: () => { setSidebarContext('commercialization'); navigate('/commercialization/dashboard'); }, hasChevron: true },
-      ...(isAdmin ? [{ icon: Shield, label: 'Administración', href: '#', onClick: () => { setSidebarContext('admin'); navigate('/admin/dashboard'); }, hasChevron: true }] : []),
     ],
     project: [
       { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },
@@ -279,6 +290,14 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         </div>
 
         <nav className="space-y-0.5">
+          {/* Context Title */}
+          {sidebarContextTitles[currentSidebarContext] && (
+            <div className="px-3 py-2 mb-2">
+              <span className="text-xs font-medium text-[var(--menues-fg)] opacity-60">
+                {sidebarContextTitles[currentSidebarContext]}
+              </span>
+            </div>
+          )}
           {navigationItems.map((item: any, index: number) => (
             <div key={`${item.label || 'divider'}-${index}`}>
               {/* Divider */}

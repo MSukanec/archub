@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { DollarSign, TrendingUp, TrendingDown, CreditCard, Calendar, ArrowUpRight, ArrowDownRight } from "lucide-react";
 
-import { Layout } from "@/components/layout/Layout";
+import { Layout } from "@/components/layout/desktop/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { useCurrentUser } from "@/hooks/use-current-user";

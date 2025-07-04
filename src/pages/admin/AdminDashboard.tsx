@@ -1,12 +1,12 @@
 import { useEffect } from 'react';
-import { Layout } from '@/components/layout/Layout';
+import { Layout } from '@/components/layout/desktop/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Building, Users, Crown, Activity } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
-import { useMobileActionBar } from '@/contexts/MobileActionBarContext';
+import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext';
 import { useMobile } from '@/hooks/use-mobile';
 
 // Hook para obtener estadísticas del sistema

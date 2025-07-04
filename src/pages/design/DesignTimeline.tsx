@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Layout } from '@/components/layout/Layout';
+import { Layout } from '@/components/layout/desktop/Layout';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';

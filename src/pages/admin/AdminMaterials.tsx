@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 
-import { Layout } from '@/components/layout/Layout'
+import { Layout } from '@/components/layout/desktop/Layout'
 import { CustomTable } from '@/components/ui-custom/misc/CustomTable'
 import { NewAdminMaterialModal } from '@/modals/admin/NewAdminMaterialModal'
 

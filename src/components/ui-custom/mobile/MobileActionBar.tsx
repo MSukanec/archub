@@ -1,6 +1,6 @@
 import React from 'react'
 import { Button } from '@/components/ui/button'
-import { useMobileActionBar } from '@/contexts/MobileActionBarContext'
+import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
 import { useMobile } from '@/hooks/use-mobile'
 import { Home } from 'lucide-react'
 import { useLocation } from 'wouter'

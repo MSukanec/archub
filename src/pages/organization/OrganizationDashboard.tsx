@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { useLocation } from 'wouter';
 
-import { Layout } from '@/components/layout/Layout';
+import { Layout } from '@/components/layout/desktop/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -28,7 +28,7 @@ import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigationStore } from '@/stores/navigationStore';
-import { useMobileActionBar } from '@/contexts/MobileActionBarContext';
+import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext';
 import { useMobile } from '@/hooks/use-mobile';
 import { useEffect } from 'react';
 

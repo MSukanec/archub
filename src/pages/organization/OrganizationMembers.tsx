@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Users, Plus, MoreHorizontal, UserCheck, UserX, Clock, Mail } from "lucide-react";
 
-import { Layout } from "@/components/layout/Layout";
+import { Layout } from "@/components/layout/desktop/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -16,7 +16,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
-import { CustomRestricted } from "@/components/ui-custom/CustomRestricted";
+import { CustomRestricted } from "@/components/ui-custom/misc/CustomRestricted";
 import { NewMemberModal } from "@/modals/organization/NewMemberModal";
 
 interface OrganizationMember {

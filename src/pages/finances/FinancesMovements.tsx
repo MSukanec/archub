@@ -4,7 +4,7 @@ import { DollarSign, Plus, Edit, Trash2, Heart, Search, Filter, X } from "lucide
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
-import { Layout } from "@/components/layout/Layout";
+import { Layout } from "@/components/layout/desktop/Layout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,7 +48,7 @@ import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { useNavigationStore } from "@/stores/navigationStore";
-import { useMobileActionBar } from "@/contexts/MobileActionBarContext";
+import { useMobileActionBar } from "@/components/layout/mobile/MobileActionBarContext";
 import { useMobile } from "@/hooks/use-mobile";
 
 interface Movement {

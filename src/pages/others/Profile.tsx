@@ -1,4 +1,4 @@
-import { Layout } from '@/components/layout/Layout'
+import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'

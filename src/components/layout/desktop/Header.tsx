@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { CustomRestricted } from "@/components/ui-custom/CustomRestricted";
+import { CustomRestricted } from "@/components/ui-custom/misc/CustomRestricted";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjects } from "@/hooks/use-projects";
 import { useMutation } from "@tanstack/react-query";
@@ -19,8 +19,8 @@ import { useNavigationStore } from "@/stores/navigationStore";
 import { useLocation } from "wouter";
 import { NewOrganizationModal } from "@/modals/organization/NewOrganizationModal";
 import { NewProjectModal } from "@/modals/project/NewProjectModal";
-import { MobileMenu } from "./mobile/MobileMenu";
-import { useMobileMenuStore } from "./mobile/useMobileMenuStore";
+import { MobileMenu } from "../mobile/MobileMenu";
+import { useMobileMenuStore } from "../mobile/useMobileMenuStore";
 import { useMobile } from "@/hooks/use-mobile";
 
 interface HeaderProps {

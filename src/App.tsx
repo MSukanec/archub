@@ -4,11 +4,11 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Layout } from "@/components/layout/Layout";
+import { Layout } from "@/components/layout/desktop/Layout";
 import { ProtectedRoute } from "@/components/ui-custom/misc/ProtectedRoute";
 import { AdminProtectedRoute } from "@/components/ui-custom/misc/AdminProtectedRoute";
 import { useAuthStore } from "@/stores/authStore";
-import { MobileActionBarProvider } from "@/contexts/MobileActionBarContext";
+import { MobileActionBarProvider } from "@/components/layout/mobile/MobileActionBarContext";
 
 // Páginas
 import OrganizationManagement from "@/pages/organization/OrganizationList";
