@@ -190,52 +190,22 @@ export default function Movements() {
   // Toggle favorite mutation
   const toggleFavoriteMutation = useToggleMovementFavorite();
 
-  // Delete movement mutation (with conversion group support)
+  // Delete movement mutation
   const deleteMovementMutation = useMutation({
     mutationFn: async (movementId: string) => {
-      if (!supabase) throw new Error('Supabase no está disponible')
-      
-      // Primero, obtener el movimiento para verificar si es una conversión
-      const { data: movement, error: fetchError } = await supabase
+      const { error } = await supabase
         .from("movements")
-        .select("*, conversion_group_id")
-        .eq("id", movementId)
-        .single();
+        .delete()
+        .eq("id", movementId);
 
-      if (fetchError) throw fetchError;
-      
-      // Si tiene conversion_group_id, eliminar todos los movimientos del grupo
-      if (movement.conversion_group_id) {
-        const { error } = await supabase
-          .from("movements")
-          .delete()
-          .eq("conversion_group_id", movement.conversion_group_id);
-        
-        if (error) throw error;
-      } else {
-        // Si no es conversión, eliminar solo el movimiento individual
-        const { error } = await supabase
-          .from("movements")
-          .delete()
-          .eq("id", movementId);
-
-        if (error) throw error;
-      }
+      if (error) throw error;
     },
-    onSuccess: (_, movementId) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["movements"] });
       setDeletingMovement(null);
-      
-      // Verificar si era una conversión para mostrar mensaje apropiado
-      const movement = movements.find(m => m.id === movementId);
-      const isConversion = movement?.description?.includes('Conversión') || 
-                           movement?.description?.includes('conversion');
-      
       toast({
-        title: isConversion ? "Conversión eliminada" : "Movimiento eliminado",
-        description: isConversion 
-          ? "La conversión y ambos movimientos han sido eliminados correctamente"
-          : "El movimiento ha sido eliminado correctamente",
+        title: "Movimiento eliminado",
+        description: "El movimiento ha sido eliminado correctamente",
       });
     },
     onError: (error: any) => {
@@ -487,14 +457,6 @@ export default function Movements() {
       const amount = movement.amount || 0;
       const typeName = movement.movement_data?.type?.name || "";
       
-      // Detectar si es una conversión y excluir del cálculo de balance
-      const isConversion = movement.description?.includes('Conversión') || 
-                           movement.description?.includes('conversion');
-      
-      if (isConversion) {
-        return; // Skip conversions in balance calculation
-      }
-      
       if (!balanceMap.has(currency)) {
         balanceMap.set(currency, { income: 0, expense: 0, balance: 0, currency });
       }
@@ -590,25 +552,11 @@ export default function Movements() {
       width: "5%",
       sortable: true,
       sortType: "string" as const,
-      render: (movement: Movement) => {
-        // Detectar si es una conversión por la descripción o conversion_group_id
-        const isConversion = movement.description?.includes('Conversión') || 
-                           movement.description?.includes('conversion') ||
-                           (movement.description?.includes('Salida') && movement.description?.includes('Entrada'));
-        
-        return (
-          <Badge 
-            variant={isConversion ? "outline" : "secondary"} 
-            className={`text-xs font-medium ${
-              isConversion 
-                ? "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300" 
-                : ""
-            }`}
-          >
-            {isConversion ? "Conversión" : (movement.movement_data?.type?.name || "Sin tipo")}
-          </Badge>
-        );
-      },
+      render: (movement: Movement) => (
+        <span className="text-xs font-medium">
+          {movement.movement_data?.type?.name || "Sin tipo"}
+        </span>
+      ),
     },
     {
       key: "category",
@@ -670,30 +618,11 @@ export default function Movements() {
       width: "5%",
       sortable: true,
       sortType: "number" as const,
-      render: (movement: Movement) => {
-        // Detectar si es una conversión
-        const isConversion = movement.description?.includes('Conversión') || 
-                           movement.description?.includes('conversion') ||
-                           (movement.description?.includes('Salida') && movement.description?.includes('Entrada'));
-        
-        let colorClass = "";
-        if (isConversion) {
-          colorClass = "text-blue-700";
-        } else {
-          const typeName = movement.movement_data?.type?.name || "";
-          if (typeName === "Ingresos" || typeName.toLowerCase().includes("ingreso")) {
-            colorClass = "text-green-700";
-          } else if (typeName === "Egresos" || typeName.toLowerCase().includes("egreso")) {
-            colorClass = "text-red-700";
-          }
-        }
-        
-        return (
-          <span className={`text-xs font-medium ${colorClass}`}>
-            ${movement.amount?.toLocaleString() || "0"}
-          </span>
-        );
-      },
+      render: (movement: Movement) => (
+        <span className="text-xs font-medium">
+          ${movement.amount?.toLocaleString() || "0"}
+        </span>
+      ),
     },
   ];
 
