@@ -119,6 +119,17 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 4, 2025. File upload system implementation and bitácora card expansion with styling fixes
+  • Reorganized "Fotos y Videos" accordion to second position in NewSiteLogModal with proper icon and styling matching other sections
+  • Fixed accordion styling consistency: added gap-2 for icon spacing, proper text-sm font-medium, and Folder icon
+  • Removed duplicate "Fotos y Videos" accordion that was appearing at the end of modal
+  • Added 5th column "Archivos Adjuntos" to expanded bitácora card view in second position after "Comentario Completo"
+  • Changed grid from grid-cols-4 to grid-cols-5 for proper layout with file attachments display
+  • Integrated Image and Video icons for different file types with color coding (blue for images, purple for videos)
+  • Temporarily disabled database operations for site_log_files table until proper Supabase table structure is created
+  • File upload to Supabase Storage still functional - only database record persistence temporarily disabled
+  • Enhanced file upload UI shows "Sin archivos adjuntos" when no files present in expanded card view
+  • System prepared for full functionality once site_log_files table with proper RLS policies is implemented
 - July 4, 2025. Complete AdminChangelogs system implementation with professional admin interface for changelog_entries management
   • Created AdminChangelogs.tsx page in src/pages/admin/ following ai-page-template.md structure with comprehensive table interface
   • Built NewAdminChangelogEntryModal.tsx in src/modals/admin/ with proper form validation and single-column layout

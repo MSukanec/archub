@@ -60,6 +60,11 @@ export async function saveSiteLogFiles(
 ): Promise<void> {
   if (uploadedFiles.length === 0) return
 
+  // Temporalmente deshabilitado hasta crear la tabla site_log_files
+  console.log('Files would be saved to site_log_files table:', uploadedFiles)
+  return
+
+  /* TODO: Uncomment when site_log_files table is created
   const fileRecords = uploadedFiles.map(file => ({
     site_log_id: siteLogId,
     file_url: file.file_url,
@@ -75,9 +80,15 @@ export async function saveSiteLogFiles(
     console.error('Error saving file records:', error)
     throw error
   }
+  */
 }
 
 export async function getSiteLogFiles(siteLogId: string) {
+  // Temporalmente deshabilitado hasta crear la tabla site_log_files
+  console.log('Getting site log files for:', siteLogId)
+  return []
+
+  /* TODO: Uncomment when site_log_files table is created
   const { data, error } = await supabase
     .from('site_log_files')
     .select('*')
@@ -89,6 +100,7 @@ export async function getSiteLogFiles(siteLogId: string) {
   }
 
   return data || []
+  */
 }
 
 export async function deleteSiteLogFile(fileId: string, fileUrl: string): Promise<void> {

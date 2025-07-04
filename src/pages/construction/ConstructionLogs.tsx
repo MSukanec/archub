@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { FileText, Plus, Star, Globe, Lock, ChevronDown, ChevronRight, Edit, Trash2, MoreHorizontal, Flame, Package, StickyNote, Sun, Cloud, CloudRain, CloudSnow, Wind, CloudDrizzle, CloudLightning, Thermometer, TrendingUp, Users, AlertTriangle, CloudSun, CheckCircle, Search, Camera, Eye, Calendar, Filter, X } from "lucide-react";
+import { FileText, Plus, Star, Globe, Lock, ChevronDown, ChevronRight, Edit, Trash2, MoreHorizontal, Flame, Package, StickyNote, Sun, Cloud, CloudRain, CloudSnow, Wind, CloudDrizzle, CloudLightning, Thermometer, TrendingUp, Users, AlertTriangle, CloudSun, CheckCircle, Search, Camera, Eye, Calendar, Filter, X, Image, Video } from "lucide-react";
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { Button } from "@/components/ui/button";
@@ -600,11 +600,36 @@ export default function ConstructionLogs() {
 
                     <CollapsibleContent>
                       <div className="px-4 pb-4 pt-2 border-t bg-muted/30">
-                        <div className="grid grid-cols-4 gap-4 text-sm">
+                        <div className="grid grid-cols-5 gap-4 text-sm">
                           {/* Comentario Completo */}
                           <div>
                             <span className="font-medium text-muted-foreground block mb-2">Comentario Completo</span>
                             <p className="text-sm">{siteLog.comments || 'Sin comentarios adicionales'}</p>
+                          </div>
+
+                          {/* Archivos Adjuntos */}
+                          <div>
+                            <span className="font-medium text-muted-foreground block mb-2">Archivos Adjuntos</span>
+                            <div className="space-y-2">
+                              {siteLog.files && Array.isArray(siteLog.files) && siteLog.files.length > 0 ? (
+                                siteLog.files.map((file: any, index: number) => (
+                                  <Card key={index} className="p-2 bg-gray-50/50 border-gray-200">
+                                    <div className="flex items-center gap-2">
+                                      {file.file_type === 'image' ? (
+                                        <Image className="h-4 w-4 text-blue-600" />
+                                      ) : (
+                                        <Video className="h-4 w-4 text-purple-600" />
+                                      )}
+                                      <span className="text-xs text-gray-700 truncate">
+                                        {file.original_name}
+                                      </span>
+                                    </div>
+                                  </Card>
+                                ))
+                              ) : (
+                                <span className="text-xs text-muted-foreground">Sin archivos adjuntos</span>
+                              )}
+                            </div>
                           </div>
 
                           {/* Eventos */}

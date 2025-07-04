@@ -797,7 +797,82 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                     </AccordionContent>
                   </AccordionItem>
 
-                  {/* Sección 2: Eventos */}
+                  {/* Sección 2: Fotos y Videos */}
+                  <AccordionItem value="fotos-videos">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <Folder className="w-4 h-4" />
+                        Fotos y Videos ({files.length + existingFiles.length})
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="space-y-3 pt-3">
+                      <div className="space-y-3">
+                        <div>
+                          <Label className="text-xs text-muted-foreground mb-1 block">
+                            Subir nuevos archivos
+                          </Label>
+                          <FileUploader
+                            value={files}
+                            onChange={setFiles}
+                            accept={['image/*', 'video/*']}
+                            maxSizeMB={10}
+                            multiple={true}
+                          />
+                        </div>
+                        
+                        {existingFiles.length > 0 && (
+                          <div>
+                            <Label className="text-xs text-muted-foreground mb-1 block">
+                              Archivos existentes
+                            </Label>
+                            <div className="grid grid-cols-2 gap-2">
+                              {existingFiles.map((file, index) => (
+                                <div key={index} className="relative group">
+                                  {file.file_type === 'image' ? (
+                                    <img 
+                                      src={file.file_url} 
+                                      alt={file.original_name}
+                                      className="w-full h-24 object-cover rounded-md border"
+                                    />
+                                  ) : (
+                                    <div className="w-full h-24 bg-gray-100 rounded-md border flex items-center justify-center">
+                                      <span className="text-xs text-gray-600">{file.original_name}</span>
+                                    </div>
+                                  )}
+                                  <Button
+                                    type="button"
+                                    variant="destructive"
+                                    size="sm"
+                                    className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
+                                    onClick={async () => {
+                                      try {
+                                        await deleteSiteLogFile(file.id, file.file_url)
+                                        setExistingFiles(prev => prev.filter(f => f.id !== file.id))
+                                        toast({
+                                          title: 'Archivo eliminado',
+                                          description: 'El archivo se eliminó correctamente'
+                                        })
+                                      } catch (error) {
+                                        toast({
+                                          title: 'Error',
+                                          description: 'No se pudo eliminar el archivo',
+                                          variant: 'destructive'
+                                        })
+                                      }
+                                    }}
+                                  >
+                                    ×
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  {/* Sección 3: Eventos */}
                   <AccordionItem value="eventos">
                     <AccordionTrigger>
                       <div className="flex items-center gap-2">
@@ -1086,78 +1161,6 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                         <Plus className="h-4 w-4 mr-2" />
                         Agregar Maquinaria
                       </Button>
-                    </AccordionContent>
-                  </AccordionItem>
-
-                  {/* Fotos y Videos */}
-                  <AccordionItem value="fotos-videos">
-                    <AccordionTrigger className="text-sm font-medium">
-                      Fotos y Videos ({files.length + existingFiles.length})
-                    </AccordionTrigger>
-                    <AccordionContent className="space-y-3">
-                      <div className="space-y-3">
-                        <div>
-                          <Label className="text-xs text-muted-foreground mb-1 block">
-                            Subir nuevos archivos
-                          </Label>
-                          <FileUploader
-                            value={files}
-                            onChange={setFiles}
-                            accept={['image/*', 'video/*']}
-                            maxSizeMB={10}
-                            multiple={true}
-                          />
-                        </div>
-                        
-                        {existingFiles.length > 0 && (
-                          <div>
-                            <Label className="text-xs text-muted-foreground mb-1 block">
-                              Archivos existentes
-                            </Label>
-                            <div className="grid grid-cols-2 gap-2">
-                              {existingFiles.map((file, index) => (
-                                <div key={index} className="relative group">
-                                  {file.file_type === 'image' ? (
-                                    <img 
-                                      src={file.file_url} 
-                                      alt={file.original_name}
-                                      className="w-full h-24 object-cover rounded-md border"
-                                    />
-                                  ) : (
-                                    <div className="w-full h-24 bg-gray-100 rounded-md border flex items-center justify-center">
-                                      <span className="text-xs text-gray-600">{file.original_name}</span>
-                                    </div>
-                                  )}
-                                  <Button
-                                    type="button"
-                                    variant="destructive"
-                                    size="sm"
-                                    className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
-                                    onClick={async () => {
-                                      try {
-                                        await deleteSiteLogFile(file.id, file.file_url)
-                                        setExistingFiles(prev => prev.filter(f => f.id !== file.id))
-                                        toast({
-                                          title: 'Archivo eliminado',
-                                          description: 'El archivo se eliminó correctamente'
-                                        })
-                                      } catch (error) {
-                                        toast({
-                                          title: 'Error',
-                                          description: 'No se pudo eliminar el archivo',
-                                          variant: 'destructive'
-                                        })
-                                      }
-                                    }}
-                                  >
-                                    ×
-                                  </Button>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
                     </AccordionContent>
                   </AccordionItem>
 
