@@ -37,7 +37,8 @@ import {
   CheckSquare,
   Calculator,
   FileCode,
-  History
+  History,
+  Contact
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -169,9 +170,10 @@ export function Sidebar() {
       { type: 'divider' },
       { icon: FolderOpen, label: 'Proyectos', href: '/organization/projects' },
       { icon: Activity, label: 'Actividad', href: '/organization/activity' },
-      { icon: Users, label: 'Contactos', href: '/organization/contacts' },
+      { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
       { icon: Users, label: 'Miembros', href: '/organization/members' },
       { icon: CheckSquare, label: 'Tareas', href: '/tasks' },
+      { icon: Building, label: 'Gestión de Organizaciones', href: '/organizations' },
     ],
     organizations: [
       // Minimal sidebar - only bottom section buttons
@@ -204,7 +206,7 @@ export function Sidebar() {
       { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
       { type: 'divider' },
       { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
-      { icon: Settings, label: 'Preferencias de Finanzas', href: '/organization/preferences' },
+      { icon: Settings, label: 'Preferencias de Finanzas', href: '/finances/preferences' },
       { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
     ],
     commercialization: [

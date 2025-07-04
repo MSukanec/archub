@@ -141,6 +141,18 @@ function Router() {
         </ProtectedRoute>
       </Route>
 
+      <Route path="/organization/projects">
+        <ProtectedRoute>
+          <OrganizationProjects />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/organization/contacts">
+        <ProtectedRoute>
+          <OrganizationContacts />
+        </ProtectedRoute>
+      </Route>
+
       <Route path="/organization/contactos">
         <ProtectedRoute>
           <OrganizationContacts />

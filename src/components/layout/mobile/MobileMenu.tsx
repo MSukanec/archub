@@ -22,6 +22,7 @@ import {
   ArrowRight,
   ArrowLeft,
   History,
+  Contact,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -162,9 +163,10 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { type: 'divider' },
       { icon: FolderOpen, label: 'Proyectos', href: '/organization/projects' },
       { icon: Activity, label: 'Actividad', href: '/organization/activity' },
-      { icon: Users, label: 'Contactos', href: '/organization/contacts' },
+      { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
       { icon: Users, label: 'Miembros', href: '/organization/members' },
       { icon: CheckSquare, label: 'Tareas', href: '/tasks' },
+      { icon: Building, label: 'Gestión de Organizaciones', href: '/organizations' },
     ],
     project: [
       { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },

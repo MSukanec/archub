@@ -266,7 +266,7 @@ export function Header({
           )}
 
           {/* Stage Breadcrumb - Show ONLY if in stage context (not project context) */}
-          {['design', 'construction', 'commercialization'].includes(currentSidebarContext) && (
+          {['design', 'construction', 'finances', 'commercialization'].includes(currentSidebarContext) && (
             <>
               <span className="text-[var(--menues-fg)] opacity-70">/</span>
               
@@ -278,11 +278,13 @@ export function Header({
                     // Navigate to current stage dashboard
                     if (currentSidebarContext === 'design') navigate('/design/dashboard');
                     else if (currentSidebarContext === 'construction') navigate('/construction/dashboard');
+                    else if (currentSidebarContext === 'finances') navigate('/finances/dashboard');
                     else if (currentSidebarContext === 'commercialization') navigate('/commercialization/dashboard');
                   }}
                 >
-                  {currentSidebarContext === 'design' && 'Proyecto'}
+                  {currentSidebarContext === 'design' && 'Diseño'}
                   {currentSidebarContext === 'construction' && 'Obra'}
+                  {currentSidebarContext === 'finances' && 'Finanzas'}
                   {currentSidebarContext === 'commercialization' && 'Comercialización'}
                 </Button>
                 
@@ -307,7 +309,7 @@ export function Header({
                         navigate('/design/dashboard');
                       }}
                     >
-                      Proyecto
+                      Diseño
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => {
@@ -317,7 +319,14 @@ export function Header({
                     >
                       Obra
                     </DropdownMenuItem>
-
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSidebarContext('finances');
+                        navigate('/finances/dashboard');
+                      }}
+                    >
+                      Finanzas
+                    </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => {
                         setSidebarContext('commercialization');

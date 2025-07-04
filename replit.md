@@ -119,6 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 4, 2025. Fixed navigation synchronization and breadcrumb improvements
+  • Added missing routes /organization/projects and /organization/contacts to App.tsx for OrganizationProjects.tsx and OrganizationContacts.tsx
+  • Changed contact icon from Users to Contact in both desktop sidebar and mobile menu to avoid duplication with members
+  • Enhanced stage selector in header breadcrumb to include all project phases: design, construction, finances, commercialization
+  • Added "Gestión de Organizaciones" button to organization context in both desktop and mobile menus linking to /organizations
+  • Fixed breadcrumb stage selector with proper context switching and navigation to all phase dashboards
+  • Corrected finanzas preferences route from /organization/preferences to /finances/preferences in both navigation systems
+  • Stage breadcrumb now correctly displays "Diseño", "Obra", "Finanzas", "Comercialización" labels matching sidebar contexts
+  • Enhanced dropdown stage selector to include all phases with proper navigation and context switching functionality
 - July 4, 2025. Complete sidebar navigation updates and finances module restructuring
   • Eliminated "Tareas" access from sidebar footer as requested
   • Added "Proyectos" button to ORGANIZACIÓN context above "Actividad" linking to /organization/projects
