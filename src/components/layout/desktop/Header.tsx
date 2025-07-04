@@ -118,8 +118,8 @@ export function Header({
       '/construction/budgets': 'Obra',
       '/construction/materials': 'Obra',
       '/construction/personnel': 'Obra',
-      // Galería debe mostrar "Galería"
-      '/construction/gallery': 'Galería',
+      // Galería NO debe tener accordion parent - el breadcrumb se forma con ORGANIZACIÓN / PROYECTO / ETAPA (Obra) / Galería
+      // '/construction/gallery': removed - no accordion parent
       
       // Proyecto accordion (Design)
       '/design/dashboard': 'Proyecto',

@@ -119,6 +119,12 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 4, 2025. UI constants cleanup and breadcrumb navigation fixes - COMPLETED
+  • Eliminated src/lib/constants/ui.ts file and replaced constant usage with direct CSS values
+  • Updated sidebar-button.tsx to use h-9 and w-[18px] h-[18px] classes instead of BUTTON_SIZE and ICON_SIZE constants
+  • Fixed Gallery breadcrumb to follow correct order: ORGANIZACIÓN / PROYECTO / ETAPA / Galería by removing accordion parent mapping
+  • Breadcrumb now properly shows organization name, project name, stage context (Obra), and page title (Galería)
+  • Removed hardcoded constants throughout application in favor of standard CSS/Tailwind classes
 - July 4, 2025. Complete DesignDocumentation page with document management system and file upload capabilities - COMPLETED
   • Added design_documents table to shared/schema.ts with complete fields for document management
   • Created DesignDocumentation.tsx page following ai-page-template.md structure with document grid and filtering

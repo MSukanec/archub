@@ -1,6 +1,5 @@
 import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { BUTTON_SIZE, ICON_SIZE } from "@/lib/constants/ui";
 
 interface SidebarButtonProps {
   icon?: LucideIcon;
@@ -23,34 +22,23 @@ export function SidebarButton({
     <button
       onClick={onClick}
       className={cn(
-        "flex items-center w-full h-auto transition-colors px-2",
+        "flex items-center w-full h-9 transition-colors px-2",
         "hover:bg-[var(--sidebar-hover-bg)]",
         isActive
           ? "bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-text)]"
           : "text-[var(--sidebar-text)]",
         className,
       )}
-      style={{
-        height: `${BUTTON_SIZE}px`,
-      }}
     >
       {/* Icono siempre visible */}
       {Icon && (
         <Icon
-          className="flex-shrink-0"
-          style={{
-            width: `${ICON_SIZE}px`,
-            height: `${ICON_SIZE}px`,
-          }}
+          className="flex-shrink-0 w-[18px] h-[18px]"
         />
       )}
       {!Icon && (
         <div
-          className="flex-shrink-0"
-          style={{
-            width: `${ICON_SIZE}px`,
-            height: `${ICON_SIZE}px`,
-          }}
+          className="flex-shrink-0 w-[18px] h-[18px]"
         />
       )}
 
