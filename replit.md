@@ -119,15 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- July 4, 2025. Enhanced floating actions system with Gmail-style background masking and improved hover effects
-  • Added Gmail-style background gradient with backdrop-blur-sm to TableRowActions for content masking
-  • Implemented sophisticated hover effects with background colors and state management for all action variants
-  • Enhanced favorite button with isActive prop and proper yellow coloring when active (is_favorite: true)
+- July 4, 2025. Enhanced floating actions system with card-style background and red heart favorites
+  • Changed TableRowActions background to use standard card styling (bg-card, border-border) instead of gradient
+  • Implemented red heart icon for favorite button when active - text-red-500 with hover:text-red-600
+  • Enhanced favorite button with isActive prop controlling red color state when is_favorite is true
   • Added scroll capability to CustomModalBody with overflow-y-auto and max-height constraints for long content
-  • Floating actions now have proper backdrop masking preventing content overlap with rounded border styling
+  • Floating actions now have proper card-style background with shadow-sm and border styling
   • Button hover states include background color changes and improved visual feedback for all variants
-  • Fixed favorite button state visualization - now properly shows yellow when favorited and muted when not
-  • System provides complete visual hierarchy with proper z-index (z-20) and smooth transitions
+  • Fixed favorite button to use red heart icon instead of yellow background when favorited
+  • System provides complete visual hierarchy with card styling and intuitive red heart favorites
 - July 4, 2025. Complete SwipeableCard integration across all mobile cards with iOS-style swipe functionality
   • Successfully integrated SwipeableCard component with all 4 card types: ProjectCard, SiteLogCard, MovementCard, and ChangelogCard
   • Removed action buttons from all cards since swipe actions now replace them for mobile interface consistency
