@@ -6,6 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@supabase/supabase-js';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useToast } from '@/hooks/use-toast';
+import { uploadGalleryFiles, type GalleryFileInput } from '@/utils/uploadGalleryFiles';
 import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout';
 import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader';
 import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
@@ -25,7 +26,6 @@ const supabase = createClient(
 const gallerySchema = z.object({
   title: z.string().min(1, 'El título es obligatorio'),
   description: z.string().optional(),
-  entry_type: z.string().min(1, 'El tipo de entrada es obligatorio'),
 });
 
 type GalleryFormData = z.infer<typeof gallerySchema>;
@@ -47,7 +47,6 @@ export function NewGalleryModal({ open, onClose, editingFile }: NewGalleryModalP
     defaultValues: {
       title: '',
       description: '',
-      entry_type: '',
     },
   });
 
@@ -59,13 +58,11 @@ export function NewGalleryModal({ open, onClose, editingFile }: NewGalleryModalP
       reset({
         title: editingFile.title || '',
         description: editingFile.description || '',
-        entry_type: editingFile.entry_type || '',
       });
     } else {
       reset({
         title: '',
         description: '',
-        entry_type: '',
       });
       setFiles([]);
     }
@@ -77,25 +74,17 @@ export function NewGalleryModal({ open, onClose, editingFile }: NewGalleryModalP
         throw new Error('Datos de usuario incompletos');
       }
 
+      const userId = userData.user.id;
       const projectId = userData.preferences.last_project_id;
       const organizationId = userData.preferences.last_organization_id;
-
-      if (!editingFile && files.length === 0) {
-        throw new Error('Debes seleccionar al menos un archivo');
-      }
-
-      if (!supabase) {
-        throw new Error('Supabase client not initialized');
-      }
 
       if (editingFile) {
         // Update existing gallery entry
         const { error: updateError } = await supabase
           .from('site_log_files')
           .update({
-            title: data.title,
+            file_name: data.title,
             description: data.description,
-            entry_type: data.entry_type,
           })
           .eq('id', editingFile.id);
 
@@ -106,49 +95,17 @@ export function NewGalleryModal({ open, onClose, editingFile }: NewGalleryModalP
         return { message: 'Archivo actualizado correctamente' };
       } else {
         // Create new gallery entries
-        const uploadPromises = files.map(async (file) => {
-          // Upload file to storage
-          const fileExt = file.name.split('.').pop();
-          const fileName = `${crypto.randomUUID()}.${fileExt}`;
-          const filePath = `gallery/${fileName}`;
+        if (files.length === 0) {
+          throw new Error('Debes seleccionar al menos un archivo');
+        }
 
-          const { error: uploadError } = await supabase.storage
-            .from('site-log-files')
-            .upload(filePath, file);
+        const galleryFiles: GalleryFileInput[] = files.map(file => ({
+          file,
+          title: data.title,
+          description: data.description,
+        }));
 
-          if (uploadError) {
-            throw uploadError;
-          }
-
-          // Get public URL
-          const { data: { publicUrl } } = supabase.storage
-            .from('site-log-files')
-            .getPublicUrl(filePath);
-
-          // Create database record
-          const { error: insertError } = await supabase
-            .from('site_log_files')
-            .insert({
-              file_path: filePath,
-              file_url: publicUrl,
-              file_name: file.name,
-              file_type: file.type.startsWith('image/') ? 'image' : 'video',
-              file_size: file.size,
-              title: data.title,
-              description: data.description,
-              entry_type: data.entry_type,
-              created_by: userData.user.id,
-              organization_id: organizationId,
-              project_id: projectId,
-              // No site_log_id for independent gallery uploads
-            });
-
-          if (insertError) {
-            throw insertError;
-          }
-        });
-
-        await Promise.all(uploadPromises);
+        await uploadGalleryFiles(galleryFiles, userId, organizationId, projectId);
         return { message: 'Archivos subidos correctamente' };
       }
     },
@@ -189,17 +146,7 @@ export function NewGalleryModal({ open, onClose, editingFile }: NewGalleryModalP
     setFiles(files.filter((_, i) => i !== index));
   };
 
-  const entryTypes = [
-    { value: 'avance_de_obra', label: 'Avance de Obra' },
-    { value: 'visita_tecnica', label: 'Visita Técnica' },
-    { value: 'problema_detectado', label: 'Problema Detectado' },
-    { value: 'pedido_material', label: 'Pedido Material' },
-    { value: 'nota_climatica', label: 'Nota Climática' },
-    { value: 'decision', label: 'Decisión' },
-    { value: 'inspeccion', label: 'Inspección' },
-    { value: 'foto_diaria', label: 'Foto Diaria' },
-    { value: 'registro_general', label: 'Registro General' },
-  ];
+
 
   if (!open) return null;
 
@@ -228,31 +175,6 @@ export function NewGalleryModal({ open, onClose, editingFile }: NewGalleryModalP
                         <FormControl>
                           <Input placeholder="Título del archivo" {...field} />
                         </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="entry_type"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tipo de Entrada</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecciona el tipo" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {entryTypes.map((type) => (
-                              <SelectItem key={type.value} value={type.value}>
-                                {type.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
