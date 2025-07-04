@@ -105,6 +105,7 @@ export default function Movements() {
     null,
   );
   const [selectedMovements, setSelectedMovements] = useState<Movement[]>([]);
+  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
 
   const { setSidebarContext } = useNavigationStore();
   const { setActions, setShowActionBar, clearActions } = useMobileActionBar();
@@ -282,9 +283,16 @@ export default function Movements() {
 
   const handleDeleteSelected = () => {
     if (selectedMovements.length > 0) {
+      setShowBulkDeleteDialog(true);
+    }
+  };
+
+  const confirmBulkDelete = () => {
+    if (selectedMovements.length > 0) {
       deleteMultipleMovementsMutation.mutate(
         selectedMovements.map((m) => m.id),
       );
+      setShowBulkDeleteDialog(false);
     }
   };
 
@@ -760,6 +768,31 @@ export default function Movements() {
               disabled={deleteMovementMutation.isPending}
             >
               {deleteMovementMutation.isPending ? "Eliminando..." : "Eliminar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bulk Delete Confirmation Dialog */}
+      <AlertDialog
+        open={showBulkDeleteDialog}
+        onOpenChange={() => setShowBulkDeleteDialog(false)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar {selectedMovements.length} movimientos?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. Los {selectedMovements.length} movimientos seleccionados serán eliminados
+              permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmBulkDelete}
+              disabled={deleteMultipleMovementsMutation.isPending}
+            >
+              {deleteMultipleMovementsMutation.isPending ? "Eliminando..." : "Eliminar"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
