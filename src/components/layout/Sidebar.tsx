@@ -154,13 +154,11 @@ export function Sidebar() {
   const sidebarContexts = {
     organization: [
       { icon: Home, label: 'Resumen de la Organización', href: '/organization/dashboard' },
-      { icon: ArrowRight, label: 'Ir al proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
-      { icon: FolderOpen, label: 'Proyectos', href: '/proyectos' },
-      { icon: Mail, label: 'Contactos', href: '/organization/contactos' },
-      { icon: Activity, label: 'Actividad', href: '/organization/activity' },
-      { icon: Users, label: 'Miembros', href: '/organization/members' },
-
-      { icon: Building, label: 'Gestión de Organizaciones', href: '#', onClick: () => { setSidebarContext('organizations'); navigate('/organizations'); } },
+      { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },
+      { icon: FolderOpen, label: 'Diseño', href: '#', onClick: () => { setSidebarContext('design'); navigate('/design/timeline'); } },
+      { icon: Building, label: 'Obra', href: '#', onClick: () => { setSidebarContext('construction'); navigate('/construction/dashboard'); } },
+      { icon: DollarSign, label: 'Finanzas', href: '#', onClick: () => { setSidebarContext('finances'); navigate('/finances/dashboard'); } },
+      { icon: Users, label: 'Comercialización', href: '#', onClick: () => { setSidebarContext('commercialization'); navigate('/commercialization/dashboard'); } },
     ],
     organizations: [
       // Minimal sidebar - only bottom section buttons
@@ -219,9 +217,14 @@ export function Sidebar() {
       { icon: Home, label: 'Resumen', href: '/construction/dashboard' },
       { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
       { icon: FileText, label: 'Bitácora', href: '/bitacora' },
-      { icon: ArrowLeft, label: 'Volver al Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
+      { icon: ArrowLeft, label: 'Volver a Organización', href: '#', onClick: () => { setSidebarContext('organization'); navigate('/organization/dashboard'); } },
     ],
-
+    finances: [
+      { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
+      { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
+      { icon: Settings, label: 'Preferencias de Finanzas', href: '/finances/preferences' },
+      { icon: ArrowLeft, label: 'Volver a Organización', href: '#', onClick: () => { setSidebarContext('organization'); navigate('/organization/dashboard'); } },
+    ],
     commercialization: [
       { icon: Home, label: 'Dashboard', href: '/commercialization/dashboard' },
       { icon: Building, label: 'Listado de unidades', href: '/commercialization/unidades' },

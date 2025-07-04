@@ -119,6 +119,14 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 3, 2025. Reorganized sidebar navigation structure with simplified organization context and direct access to all main sections
+  • Modified organization context in useNavigationStore to show streamlined navigation: Resumen de Organización, Resumen del Proyecto, and direct access buttons
+  • Added direct navigation buttons in organization context for Diseño, Obra, Finanzas, and Comercialización sections
+  • Created dedicated finances context with Resumen de Finanzas, Movimientos, and Preferencias pages
+  • Updated both desktop Sidebar.tsx and mobile MobileMenu.tsx to maintain consistent navigation structure
+  • Added finances context type to SidebarContext with proper context switching functionality
+  • Navigation now provides single-click access to all major sections from organization level without deep accordion navigation
+  • Enhanced context titles in mobile menu to include all navigation contexts (Diseño, Obra, Finanzas, Comercialización)
 - July 3, 2025. Fixed generated task system with proper description handling and edit/create separation
   • Fixed task description generation by sending processed description (not template) to database via input_description parameter
   • Separated task creation and editing workflows: useCreateGeneratedTask for new tasks, useUpdateGeneratedTask for existing
