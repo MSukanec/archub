@@ -119,6 +119,18 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 4, 2025. Complete DesignDocumentation page with document management system and file upload capabilities - COMPLETED
+  • Added design_documents table to shared/schema.ts with complete fields for document management
+  • Created DesignDocumentation.tsx page following ai-page-template.md structure with document grid and filtering
+  • Built NewDesignDocumentModal.tsx with file upload, metadata forms, and CRUD operations
+  • Implemented document grouping by folder or design phase with switch toggle interface
+  • Added file type detection, status management (pendiente/en_revision/aprobado/rechazado), and visibility controls
+  • Created comprehensive document cards with download, edit, delete actions and proper badge styling
+  • Integrated with Supabase Storage for design-documents bucket with proper file handling
+  • Added /design/documentation route to App.tsx with proper ProtectedRoute wrapper
+  • Enhanced modal system to use proper CustomModalLayout structure with header/body/footer components
+  • Fixed userData structure access for user.id in authentication flow
+  • Moved prompts folder from src/ to root level following project structure requirements
 - July 4, 2025. Comprehensive sidebar reorganization and DISEÑO section expansion with consistent layout patterns - COMPLETED
   • Repositioned "Volver a..." navigation buttons below "Resumen de..." buttons and above dividers in all sidebar contexts
   • Expanded DISEÑO sidebar with 6 new items: Documentación (unrestricted), Datos (restricted), Cronograma (timeline), Tablero (board), Cómputo (compute), Preferencias de Diseño (restricted)

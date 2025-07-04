@@ -63,6 +63,42 @@ export const insertUserPreferencesSchema = createInsertSchema(user_preferences).
   last_organization_id: true,
 });
 
+// Design Documents Table
+export const design_documents = pgTable("design_documents", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  description: text("description"),
+  file_path: text("file_path").notNull(),
+  file_url: text("file_url").notNull(),
+  file_type: text("file_type").notNull(),
+  version_number: integer("version_number").default(1),
+  project_id: uuid("project_id").notNull(),
+  organization_id: uuid("organization_id").notNull(),
+  design_phase_id: uuid("design_phase_id"),
+  folder: text("folder").notNull(),
+  status: text("status").default("pendiente"), // pendiente, en_revision, aprobado, rechazado
+  visibility: text("visibility").default("equipo"), // equipo, cliente
+  created_by: uuid("created_by").notNull(),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+});
+
+export const insertDesignDocumentSchema = createInsertSchema(design_documents).pick({
+  name: true,
+  description: true,
+  file_path: true,
+  file_url: true,
+  file_type: true,
+  version_number: true,
+  project_id: true,
+  organization_id: true,
+  design_phase_id: true,
+  folder: true,
+  status: true,
+  visibility: true,
+  created_by: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type Country = typeof countries.$inferSelect;
@@ -70,3 +106,5 @@ export type UserData = typeof user_data.$inferSelect;
 export type UserPreferences = typeof user_preferences.$inferSelect;
 export type InsertUserData = z.infer<typeof insertUserDataSchema>;
 export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;
+export type DesignDocument = typeof design_documents.$inferSelect;
+export type InsertDesignDocument = z.infer<typeof insertDesignDocumentSchema>;
