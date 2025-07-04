@@ -8,15 +8,11 @@ interface UploadedFile {
 
 export async function uploadSiteLogFiles(
   files: File[],
-  siteLogId: string
+  siteLogId: string,
+  userId: string,
+  organizationId: string
 ): Promise<UploadedFile[]> {
   const uploadedFiles: UploadedFile[] = []
-
-  // Get current user for file path prefix
-  const { data: { user }, error: userError } = await supabase.auth.getUser()
-  if (userError || !user) {
-    throw new Error('User not authenticated')
-  }
 
   for (const file of files) {
     try {
@@ -26,14 +22,39 @@ export async function uploadSiteLogFiles(
         continue
       }
 
-      // Generate unique filename with user prefix as required by RLS
+      // Generate unique filename without user prefix
       const extension = file.name.split('.').pop()
-      const filePath = `${user.id}/${crypto.randomUUID()}.${extension}`
+      const filePath = `${crypto.randomUUID()}.${extension}`
 
       console.log('Subiendo archivo:', filePath, file)
 
-      // Upload to Supabase Storage with upsert: true
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      // First, create the database record to satisfy RLS
+      const { data: urlData } = supabase.storage
+        .from('site-log-files')
+        .getPublicUrl(filePath)
+
+      const fileType: 'image' | 'video' = file.type.startsWith('image/') ? 'image' : 'video'
+
+      const { error: dbError } = await supabase
+        .from('site_log_files')
+        .insert({
+          site_log_id: siteLogId,
+          file_path: filePath,
+          file_name: file.name,
+          file_type: fileType,
+          file_url: urlData.publicUrl,
+          user_id: userId, // Use real user.id from context, not auth.uid()
+          organization_id: organizationId,
+          visibility: 'organization'
+        })
+
+      if (dbError) {
+        console.error('Error creating file record:', dbError)
+        throw dbError
+      }
+
+      // Now upload to Supabase Storage - RLS should allow it
+      const { error: uploadError } = await supabase.storage
         .from('site-log-files')
         .upload(filePath, file, {
           cacheControl: '3600',
@@ -42,16 +63,13 @@ export async function uploadSiteLogFiles(
 
       if (uploadError) {
         console.error('Error uploading file:', uploadError)
+        // Clean up database record if upload fails
+        await supabase
+          .from('site_log_files')
+          .delete()
+          .eq('file_path', filePath)
         throw uploadError
       }
-
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from('site-log-files')
-        .getPublicUrl(filePath)
-
-      // Determine file type
-      const fileType: 'image' | 'video' = file.type.startsWith('image/') ? 'image' : 'video'
 
       uploadedFiles.push({
         file_url: urlData.publicUrl,
@@ -67,42 +85,7 @@ export async function uploadSiteLogFiles(
   return uploadedFiles
 }
 
-export async function saveSiteLogFiles(
-  siteLogId: string,
-  uploadedFiles: UploadedFile[],
-  userId: string,
-  organizationId: string
-): Promise<void> {
-  if (uploadedFiles.length === 0) return
 
-  const fileRecords = uploadedFiles.map(file => {
-    // Extract file path from URL
-    const url = new URL(file.file_url)
-    const pathSegments = url.pathname.split('/')
-    const bucketIndex = pathSegments.findIndex(segment => segment === 'site-log-files')
-    const filePath = bucketIndex !== -1 ? pathSegments.slice(bucketIndex + 1).join('/') : file.original_name
-
-    return {
-      site_log_id: siteLogId,
-      file_path: filePath,
-      file_name: file.original_name,
-      file_type: file.file_type,
-      file_url: file.file_url,
-      user_id: userId,
-      organization_id: organizationId,
-      visibility: 'organization' as const
-    }
-  })
-
-  const { error } = await supabase
-    .from('site_log_files')
-    .insert(fileRecords)
-
-  if (error) {
-    console.error('Error saving file records:', error)
-    throw error
-  }
-}
 
 export async function getSiteLogFiles(siteLogId: string) {
   const { data, error } = await supabase

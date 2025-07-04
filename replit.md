@@ -119,6 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 4, 2025. Fixed file upload system with proper RLS policy compliance and corrected authentication flow
+  • Implemented proper file upload sequence: create database record first, then upload to Storage to satisfy RLS
+  • Removed user.id prefix from file paths - now uses crypto.randomUUID() for unique filenames only
+  • Fixed authentication to use real user.id from context (users table) instead of auth.uid() for RLS compliance
+  • Updated uploadSiteLogFiles function to handle database insertion and Storage upload in correct order
+  • Enhanced error handling with database record cleanup if Storage upload fails
+  • Eliminated saveSiteLogFiles function - all operations now handled in single uploadSiteLogFiles call
+  • Fixed NewSiteLogModal to pass required userId and organizationId parameters from userData context
+  • System now properly respects Supabase RLS policies requiring site_log_files table entries for Storage access
 - July 4, 2025. Complete gallery system implementation with mobile-first design and file upload restoration
   • Restored site-log-files bucket usage after user fixed RLS policies - files now upload to correct bucket
   • Re-enabled all database operations for site_log_files table with proper site_log_id relationships

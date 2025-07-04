@@ -25,7 +25,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { useToast } from '@/hooks/use-toast'
 import { Calendar, User, FileText, Cloud, MessageSquare, Star, Eye, Calendar as CalendarIcon, Plus, X, Settings, Truck, Trash2, Folder } from 'lucide-react'
 import { FileUploader } from '@/components/ui-custom/FileUploader'
-import { uploadSiteLogFiles, saveSiteLogFiles, getSiteLogFiles, deleteSiteLogFile } from '@/lib/storage/uploadSiteLogFiles'
+import { uploadSiteLogFiles, getSiteLogFiles, deleteSiteLogFile } from '@/lib/storage/uploadSiteLogFiles'
 
 // ContactOptions component for rendering contact options
 interface ContactOptionsProps {
@@ -436,10 +436,9 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
       // Handle file uploads
       if (siteLogResult.data && files.length > 0) {
         try {
-          const uploadedFiles = await uploadSiteLogFiles(files, siteLogResult.data.id)
-          await saveSiteLogFiles(
+          await uploadSiteLogFiles(
+            files, 
             siteLogResult.data.id, 
-            uploadedFiles, 
             userData.user.id, 
             userData.preferences.last_organization_id
           )
