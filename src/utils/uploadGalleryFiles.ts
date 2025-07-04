@@ -28,7 +28,7 @@ export async function uploadGalleryFiles(
       file_type: file.type.startsWith('image/') ? 'image' : 'video',
       file_size: file.size,
       description: description || null,
-      created_by: userId,
+      user_id: userId,
       organization_id: organizationId,
       project_id: projectId,
       entry_type: 'registro_general', // Default for gallery uploads

@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Upload, X } from 'lucide-react';
+import { Upload, X, File } from 'lucide-react';
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -229,19 +229,55 @@ export function NewGalleryModal({ open, onClose, editingFile }: NewGalleryModalP
                       {files.length > 0 && (
                         <div className="space-y-2">
                           <p className="text-sm font-medium">Archivos seleccionados:</p>
-                          {files.map((file, index) => (
-                            <div key={index} className="flex items-center justify-between p-2 border rounded">
-                              <span className="text-sm truncate">{file.name}</span>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => removeFile(index)}
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          ))}
+                          {files.map((file, index) => {
+                            const isImage = file.type.startsWith('image/');
+                            const isVideo = file.type.startsWith('video/');
+                            const fileUrl = URL.createObjectURL(file);
+
+                            return (
+                              <div key={index} className="flex items-center gap-3 p-3 border rounded">
+                                {/* Preview */}
+                                <div className="flex-shrink-0 w-12 h-12 rounded border overflow-hidden bg-muted">
+                                  {isImage ? (
+                                    <img 
+                                      src={fileUrl} 
+                                      alt={file.name}
+                                      className="w-full h-full object-cover"
+                                      onLoad={() => URL.revokeObjectURL(fileUrl)}
+                                    />
+                                  ) : isVideo ? (
+                                    <div className="w-full h-full flex items-center justify-center bg-muted">
+                                      <video className="w-full h-full object-cover" muted>
+                                        <source src={fileUrl} type={file.type} />
+                                      </video>
+                                    </div>
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center">
+                                      <File className="h-6 w-6 text-muted-foreground" />
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* File Info */}
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium truncate">{file.name}</p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {(file.size / 1024 / 1024).toFixed(2)} MB
+                                  </p>
+                                </div>
+
+                                {/* Remove Button */}
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => removeFile(index)}
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
                     </div>
