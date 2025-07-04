@@ -147,24 +147,25 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const sidebarContextTitles = {
     organization: null, // No title for organization context
     organizations: null,
-    project: null,
-    design: 'Menu',
-    construction: 'Menu',
-    finances: 'Menu',
-    commercialization: 'Menu',
-    admin: 'Menu'
+    project: 'PROYECTO',
+    design: 'DISEÑO',
+    construction: 'OBRA',
+    finances: 'FINANZAS',
+    commercialization: 'COMERCIALIZACIÓN',
+    admin: 'ADMINISTRACIÓN'
   };
 
   // Exact sidebar structure from Sidebar.tsx
   const sidebarContexts = {
     organization: [
       { icon: Home, label: 'Resumen de la Organización', href: '/organization/dashboard' },
-      { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },
+      { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard', onClick: () => navigate('/project/dashboard') },
       { type: 'divider' },
       { icon: FolderOpen, label: 'Diseño', href: '#', onClick: () => { setSidebarContext('design'); navigate('/design/timeline'); }, hasChevron: true },
       { icon: Building, label: 'Obra', href: '#', onClick: () => { setSidebarContext('construction'); navigate('/construction/dashboard'); }, hasChevron: true },
       { icon: DollarSign, label: 'Finanzas', href: '#', onClick: () => { setSidebarContext('finances'); navigate('/finances/dashboard'); }, hasChevron: true },
       { icon: Users, label: 'Comercialización', href: '#', onClick: () => { setSidebarContext('commercialization'); navigate('/commercialization/dashboard'); }, hasChevron: true },
+      { icon: ArrowLeft, label: 'Volver a Organización', href: '#', onClick: () => { setSidebarContext('organizations'); navigate('/organization/dashboard'); } },
     ],
     project: [
       { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },

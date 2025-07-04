@@ -154,24 +154,25 @@ export function Sidebar() {
   const sidebarContextTitles = {
     organization: null, // No title for organization context
     organizations: null,
-    project: null,
-    design: 'Menu',
-    construction: 'Menu',
-    finances: 'Menu',
-    commercialization: 'Menu',
-    admin: 'Menu'
+    project: 'PROYECTO',
+    design: 'DISEÑO',
+    construction: 'OBRA',
+    finances: 'FINANZAS',
+    commercialization: 'COMERCIALIZACIÓN',
+    admin: 'ADMINISTRACIÓN'
   };
 
   // Different navigation items based on context
   const sidebarContexts = {
     organization: [
       { icon: Home, label: 'Resumen de la Organización', href: '/organization/dashboard' },
-      { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },
+      { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard', onClick: () => navigate('/project/dashboard') },
       { type: 'divider' },
       { icon: FolderOpen, label: 'Diseño', href: '#', onClick: () => { setSidebarContext('design'); navigate('/design/timeline'); }, hasChevron: true },
       { icon: Building, label: 'Obra', href: '#', onClick: () => { setSidebarContext('construction'); navigate('/construction/dashboard'); }, hasChevron: true },
       { icon: DollarSign, label: 'Finanzas', href: '#', onClick: () => { setSidebarContext('finances'); navigate('/finances/dashboard'); }, hasChevron: true },
       { icon: Users, label: 'Comercialización', href: '#', onClick: () => { setSidebarContext('commercialization'); navigate('/commercialization/dashboard'); }, hasChevron: true },
+      { icon: ArrowLeft, label: 'Volver a Organización', href: '#', onClick: () => { setSidebarContext('organizations'); navigate('/organization/dashboard'); } },
     ],
     organizations: [
       // Minimal sidebar - only bottom section buttons
@@ -304,8 +305,8 @@ export function Sidebar() {
           <div className={`flex-1 transition-opacity duration-150 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
             {/* Context Title */}
             {sidebarContextTitles[currentSidebarContext] && isExpanded && (
-              <div className="px-3 py-2 mb-2">
-                <span className="text-xs font-medium text-[var(--menues-fg)] opacity-60">
+              <div className="px-3 py-1 mb-1">
+                <span className="text-sm text-[var(--menues-fg)] opacity-60">
                   {sidebarContextTitles[currentSidebarContext]}
                 </span>
               </div>
