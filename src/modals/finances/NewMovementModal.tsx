@@ -19,7 +19,10 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
+import { Plus, X, Folder, FileText, Trash2 } from 'lucide-react'
+import { uploadMovementFiles, getMovementFiles, deleteMovementFile } from '@/lib/storage/uploadMovementFiles'
 
 const movementSchema = z.object({
   movement_date: z.date(),
@@ -82,6 +85,9 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
   const [selectedTypeId, setSelectedTypeId] = useState('')
   const [selectedCategoryId, setSelectedCategoryId] = useState('')
   const [isConversion, setIsConversion] = useState(false)
+  const [files, setFiles] = useState<{file: File | null, name: string, id: string}[]>([])
+  const [existingFiles, setExistingFiles] = useState<any[]>([])
+  const [accordionValue, setAccordionValue] = useState<string>("informacion-basica")
   
   const { data: types } = useMovementConcepts('types')
   const { data: categories } = useMovementConcepts('categories', selectedTypeId)
@@ -279,6 +285,61 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
     }
   }, [subcategories, selectedCategoryId, editingMovement, open])
 
+  // Load existing files when editing
+  const loadMovementFiles = async (movementId: string) => {
+    const files = await getMovementFiles(movementId)
+    setExistingFiles(files)
+  }
+
+  useEffect(() => {
+    if (editingMovement && open) {
+      loadMovementFiles(editingMovement.id)
+    } else {
+      // Clear files for new movement
+      setFiles([])
+      setExistingFiles([])
+    }
+  }, [editingMovement, open])
+
+  // File management functions
+  const addFileEntry = () => {
+    const newFile = {
+      id: crypto.randomUUID(),
+      name: '',
+      file: null
+    }
+    setFiles([...files, newFile])
+  }
+
+  const updateFileName = (id: string, name: string) => {
+    setFiles(files.map(f => f.id === id ? { ...f, name } : f))
+  }
+
+  const updateFile = (id: string, file: File) => {
+    setFiles(files.map(f => f.id === id ? { ...f, file, name: f.name || file.name } : f))
+  }
+
+  const removeFileEntry = (id: string) => {
+    setFiles(files.filter(f => f.id !== id))
+  }
+
+  const removeExistingFile = async (fileId: string, filePath: string) => {
+    const success = await deleteMovementFile(fileId, filePath)
+    if (success) {
+      setExistingFiles(existingFiles.filter(f => f.id !== fileId))
+      toast({
+        title: 'Archivo eliminado',
+        description: 'El archivo se ha eliminado correctamente.'
+      })
+    } else {
+      toast({
+        title: 'Error',
+        description: 'No se pudo eliminar el archivo.',
+        variant: 'destructive'
+      })
+    }
+  }
+
   const createMovementMutation = useMutation({
     mutationFn: async (data: MovementForm) => {
       if (!supabase) throw new Error('Supabase no está disponible')
@@ -312,7 +373,29 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         return result
       }
     },
-    onSuccess: () => {
+    onSuccess: async (result) => {
+      // Upload files if any
+      if (files.length > 0 && result) {
+        try {
+          const filesToUpload = files.filter(f => f.file).map(f => f.file!)
+          if (filesToUpload.length > 0) {
+            await uploadMovementFiles(
+              filesToUpload,
+              result.id,
+              currentUser?.user?.id || '',
+              organizationId || ''
+            )
+          }
+        } catch (error) {
+          console.error('Error uploading files:', error)
+          toast({
+            title: 'Advertencia',
+            description: 'El movimiento se guardó pero hubo un error al subir algunos archivos',
+            variant: 'destructive'
+          })
+        }
+      }
+
       queryClient.invalidateQueries({ queryKey: ['movements'] })
       toast({
         title: editingMovement ? 'Movimiento actualizado' : 'Movimiento creado',
@@ -332,6 +415,8 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
           currency_id: '',
           wallet_id: ''
         })
+        setFiles([])
+        setExistingFiles([])
       }, 100)
     },
     onError: (error) => {
@@ -454,7 +539,30 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         return movements
       }
     },
-    onSuccess: () => {
+    onSuccess: async (result) => {
+      // Upload files if any (associate with the first movement for conversions)
+      if (files.length > 0 && result && Array.isArray(result) && result.length > 0) {
+        try {
+          const filesToUpload = files.filter(f => f.file).map(f => f.file!)
+          if (filesToUpload.length > 0) {
+            // Associate files with the first movement of the conversion (egresso)
+            await uploadMovementFiles(
+              filesToUpload,
+              result[0].id,
+              currentUser?.user?.id || '',
+              organizationId || ''
+            )
+          }
+        } catch (error) {
+          console.error('Error uploading files:', error)
+          toast({
+            title: 'Advertencia',
+            description: 'La conversión se guardó pero hubo un error al subir algunos archivos',
+            variant: 'destructive'
+          })
+        }
+      }
+
       queryClient.invalidateQueries({ queryKey: ['movements'] })
       const isEditing = (editingMovement as any)?._isConversion;
       toast({
@@ -477,6 +585,8 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
           to_currency_id: '',
           to_wallet_id: ''
         })
+        setFiles([])
+        setExistingFiles([])
       }, 100)
     },
     onError: (error) => {
@@ -765,6 +875,89 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                         />
                       </AccordionContent>
                     </AccordionItem>
+
+                    {/* Sección de Archivos para Conversiones */}
+                    <AccordionItem value="archivos">
+                      <AccordionTrigger>
+                        <div className="flex items-center gap-2">
+                          <Folder className="h-4 w-4" />
+                          📎 Archivos ({files.length + existingFiles.length})
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="space-y-3 pt-3">
+                        {/* Existing Files */}
+                        {existingFiles.length > 0 && (
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium">Archivos existentes</label>
+                            {existingFiles.map((file) => (
+                              <div key={file.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-gray-50">
+                                <div className="flex items-center gap-2">
+                                  <FileText className="h-4 w-4 text-blue-500" />
+                                  <span className="text-sm">{file.file_name}</span>
+                                </div>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => removeExistingFile(file.id, file.file_path)}
+                                >
+                                  <Trash2 className="h-4 w-4 text-red-500" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* New Files */}
+                        {files.length > 0 && (
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium">Nuevos archivos</label>
+                            {files.map((fileEntry) => (
+                              <div key={fileEntry.id} className="p-3 border border-gray-200 rounded-lg space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <Input
+                                    placeholder="Nombre del archivo"
+                                    value={fileEntry.name}
+                                    onChange={(e) => updateFileName(fileEntry.id, e.target.value)}
+                                    className="flex-1"
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => removeFileEntry(fileEntry.id)}
+                                  >
+                                    <X className="h-4 w-4 text-red-500" />
+                                  </Button>
+                                </div>
+                                <Input
+                                  type="file"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0]
+                                    if (file) {
+                                      updateFile(fileEntry.id, file)
+                                    }
+                                  }}
+                                  className="text-sm"
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Add File Button */}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={addFileEntry}
+                          className="w-full"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          + Agregar Archivo
+                        </Button>
+                      </AccordionContent>
+                    </AccordionItem>
                   </Accordion>
                 </form>
               </Form>
@@ -1015,6 +1208,89 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                           </FormItem>
                         )}
                       />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  {/* Sección de Archivos */}
+                  <AccordionItem value="archivos">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <Folder className="h-4 w-4" />
+                        📎 Archivos ({files.length + existingFiles.length})
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="space-y-3 pt-3">
+                      {/* Existing Files */}
+                      {existingFiles.length > 0 && (
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Archivos existentes</label>
+                          {existingFiles.map((file) => (
+                            <div key={file.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-gray-50">
+                              <div className="flex items-center gap-2">
+                                <FileText className="h-4 w-4 text-blue-500" />
+                                <span className="text-sm">{file.file_name}</span>
+                              </div>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removeExistingFile(file.id, file.file_path)}
+                              >
+                                <Trash2 className="h-4 w-4 text-red-500" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* New Files */}
+                      {files.length > 0 && (
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Nuevos archivos</label>
+                          {files.map((fileEntry) => (
+                            <div key={fileEntry.id} className="p-3 border border-gray-200 rounded-lg space-y-2">
+                              <div className="flex items-center gap-2">
+                                <Input
+                                  placeholder="Nombre del archivo"
+                                  value={fileEntry.name}
+                                  onChange={(e) => updateFileName(fileEntry.id, e.target.value)}
+                                  className="flex-1"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => removeFileEntry(fileEntry.id)}
+                                >
+                                  <X className="h-4 w-4 text-red-500" />
+                                </Button>
+                              </div>
+                              <Input
+                                type="file"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0]
+                                  if (file) {
+                                    updateFile(fileEntry.id, file)
+                                  }
+                                }}
+                                className="text-sm"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Add File Button */}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={addFileEntry}
+                        className="w-full"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        + Agregar Archivo
+                      </Button>
                     </AccordionContent>
                   </AccordionItem>
                   </Accordion>

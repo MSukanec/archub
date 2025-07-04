@@ -119,6 +119,16 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 4, 2025. Complete financial movements file attachment system implementation - COMPLETED
+  • Added "📎 Archivos" accordion section to movement creation/editing modal with "+ Agregar Archivo" functionality
+  • Created uploadMovementFiles.ts utility following site log files pattern for movement-files bucket integration
+  • Implemented complete file management: add, edit name, upload, delete for both new and existing files
+  • Enhanced both regular movement and conversion forms with identical file attachment capabilities
+  • Files automatically upload to movement-files bucket and save metadata to movement_files table
+  • Added proper file loading for editing movements with existing file display and deletion functionality
+  • File uploads integrated with movement save operations: files upload after successful movement creation/editing
+  • System supports all file types with proper MIME type detection and unique UUID-based file naming
+  • Conversion files associate with first movement (egreso) while maintaining conversion group relationship
 - July 4, 2025. Mobile card interaction refinement and tap-to-edit removal - COMPLETED
   • Removed onClick handlers from all mobile cards to eliminate tap-to-edit functionality
   • Modal editing now exclusively accessible through SwipeableCard "Editar" button for better UX
