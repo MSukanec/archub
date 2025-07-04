@@ -67,6 +67,29 @@ export function Sidebar() {
     return saved || null;
   });
 
+  // Estado para transiciones
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  // Función para navegación con transición hacia adelante
+  const navigateForward = (newContext: string, href: string) => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setSidebarContext(newContext as any);
+      navigate(href);
+      setIsTransitioning(false);
+    }, 150);
+  };
+
+  // Función para navegación con transición hacia atrás
+  const navigateBackward = (newContext: string, href: string) => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setSidebarContext(newContext as any);
+      navigate(href);
+      setIsTransitioning(false);
+    }, 150);
+  };
+
   // Guardar estado de acordeón en localStorage
   useEffect(() => {
     if (expandedAccordion) {
@@ -128,21 +151,13 @@ export function Sidebar() {
   
   // Estado para búsqueda de proyectos
   const [projectSearchValue, setProjectSearchValue] = useState('');
-  const [isTransitioning, setIsTransitioning] = useState(false);
   const prevContextRef = useRef(currentSidebarContext);
   
   const isExpanded = isDocked || isHovered;
 
   // Handle fade animation when context changes
   useEffect(() => {
-    if (prevContextRef.current !== currentSidebarContext) {
-      setIsTransitioning(true);
-      const timer = setTimeout(() => {
-        setIsTransitioning(false);
-        prevContextRef.current = currentSidebarContext;
-      }, 150);
-      return () => clearTimeout(timer);
-    }
+    prevContextRef.current = currentSidebarContext;
   }, [currentSidebarContext]);
   
   // Project selector removed as requested

@@ -269,7 +269,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
           />
         ),
         body: (
-          <CustomModalBody padding="md">
+          <CustomModalBody padding="md" columns={1}>
             <Form {...form}>
               <form 
                 key={editingMovement?.id || 'new'} 

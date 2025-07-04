@@ -39,6 +39,7 @@ import AdminMaterialCategories from "@/pages/admin/AdminMaterialCategories";
 import Tasks from "@/pages/others/Tasks";
 import Changelog from "@/pages/others/Changelog";
 import DesignTimeline from "@/pages/design/DesignTimeline";
+import NotFound from "@/pages/others/NotFound";
 
 function Router() {
   return (
@@ -320,6 +321,11 @@ function Router() {
       {/* Redirección principal */}
       <Route path="/">
         <Redirect to="/organization/dashboard" />
+      </Route>
+
+      {/* Página 404 - debe ir al final */}
+      <Route>
+        <NotFound />
       </Route>
     </Switch>
   );
