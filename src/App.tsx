@@ -21,7 +21,7 @@ import ProjectDashboard from "@/pages/project/ProjectDashboard";
 import FinancesDashboard from "@/pages/finances/FinancesDashboard";
 import FinancesPreferences from "@/pages/finances/FinancesPreferences";
 import Profile from "@/pages/others/Profile";
-import Movements from "@/pages/finances/FinancesMovements";
+import FinancesMovements from "@/pages/finances/FinancesMovements";
 import ConstructionLogs from "@/pages/construction/ConstructionLogs";
 import ConstructionPersonnel from "@/pages/construction/ConstructionPersonnel";
 import ConstructionDashboard from "@/pages/construction/ConstructionDashboard";
@@ -57,13 +57,19 @@ function Router() {
 
       <Route path="/movimientos">
         <ProtectedRoute>
-          <Movements />
+          <FinancesMovements />
         </ProtectedRoute>
       </Route>
 
       <Route path="/finanzas/movimientos">
         <ProtectedRoute>
-          <Movements />
+          <FinancesMovements />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/finances/movements">
+        <ProtectedRoute>
+          <FinancesMovements />
         </ProtectedRoute>
       </Route>
 
