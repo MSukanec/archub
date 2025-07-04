@@ -188,77 +188,59 @@ export function NewNavigationMaster() {
         <div className="h-px bg-[--menues-border] my-2"></div>
 
         {/* Sidebars Secundarios */}
-        <div className="flex items-center justify-between hover:bg-[--button-ghost-hover-bg] rounded-md transition-colors duration-150 cursor-pointer" onClick={() => setSidebarContext('organization')}>
-          <SidebarButton
-            icon={<Building className="h-4 w-4" />}
-            label="Organización"
-            isActive={false}
-            isExpanded={isExpanded}
-            onClick={() => {}}
-            className="flex-1 hover:bg-transparent"
-          />
-          {isExpanded && <ChevronRight className="h-3 w-3 text-[--muted-fg] mr-2" />}
-        </div>
+        <SidebarButton
+          icon={<Building className="h-4 w-4" />}
+          label="Organización"
+          isActive={false}
+          isExpanded={isExpanded}
+          onClick={() => setSidebarContext('organization')}
+          showArrow={true}
+        />
 
-        <div className="flex items-center justify-between hover:bg-[--button-ghost-hover-bg] rounded-md transition-colors duration-150 cursor-pointer" onClick={() => setSidebarContext('project')}>
-          <SidebarButton
-            icon={<FolderOpen className="h-4 w-4" />}
-            label="Proyecto"
-            isActive={false}
-            isExpanded={isExpanded}
-            onClick={() => {}}
-            className="flex-1 hover:bg-transparent"
-          />
-          {isExpanded && <ChevronRight className="h-3 w-3 text-[--muted-fg] mr-2" />}
-        </div>
+        <SidebarButton
+          icon={<FolderOpen className="h-4 w-4" />}
+          label="Proyecto"
+          isActive={false}
+          isExpanded={isExpanded}
+          onClick={() => setSidebarContext('project')}
+          showArrow={true}
+        />
 
-        <div className="flex items-center justify-between hover:bg-[--button-ghost-hover-bg] rounded-md transition-colors duration-150 cursor-pointer" onClick={() => setSidebarContext('design')}>
-          <SidebarButton
-            icon={<Palette className="h-4 w-4" />}
-            label="Diseño"
-            isActive={false}
-            isExpanded={isExpanded}
-            onClick={() => {}}
-            className="flex-1 hover:bg-transparent"
-          />
-          {isExpanded && <ChevronRight className="h-3 w-3 text-[--muted-fg] mr-2" />}
-        </div>
+        <SidebarButton
+          icon={<Palette className="h-4 w-4" />}
+          label="Diseño"
+          isActive={false}
+          isExpanded={isExpanded}
+          onClick={() => setSidebarContext('design')}
+          showArrow={true}
+        />
 
-        <div className="flex items-center justify-between hover:bg-[--button-ghost-hover-bg] rounded-md transition-colors duration-150 cursor-pointer" onClick={() => setSidebarContext('construction')}>
-          <SidebarButton
-            icon={<Hammer className="h-4 w-4" />}
-            label="Obra"
-            isActive={false}
-            isExpanded={isExpanded}
-            onClick={() => {}}
-            className="flex-1 hover:bg-transparent"
-          />
-          {isExpanded && <ChevronRight className="h-3 w-3 text-[--muted-fg] mr-2" />}
-        </div>
+        <SidebarButton
+          icon={<Hammer className="h-4 w-4" />}
+          label="Obra"
+          isActive={false}
+          isExpanded={isExpanded}
+          onClick={() => setSidebarContext('construction')}
+          showArrow={true}
+        />
 
-        <div className="flex items-center justify-between hover:bg-[--button-ghost-hover-bg] rounded-md transition-colors duration-150 cursor-pointer" onClick={() => setSidebarContext('finance')}>
-          <SidebarButton
-            icon={<DollarSign className="h-4 w-4" />}
-            label="Finanzas"
-            isActive={false}
-            isExpanded={isExpanded}
-            onClick={() => {}}
-            className="flex-1 hover:bg-transparent"
-          />
-          {isExpanded && <ChevronRight className="h-3 w-3 text-[--muted-fg] mr-2" />}
-        </div>
+        <SidebarButton
+          icon={<DollarSign className="h-4 w-4" />}
+          label="Finanzas"
+          isActive={false}
+          isExpanded={isExpanded}
+          onClick={() => setSidebarContext('finance')}
+          showArrow={true}
+        />
 
-        <div className="flex items-center justify-between hover:bg-[--button-ghost-hover-bg] rounded-md transition-colors duration-150 cursor-pointer" onClick={() => setSidebarContext('marketing')}>
-          <SidebarButton
-            icon={<ShoppingCart className="h-4 w-4" />}
-            label="Comercialización"
-            isActive={false}
-            isExpanded={isExpanded}
-            onClick={() => {}}
-            className="flex-1 hover:bg-transparent"
-          />
-          {isExpanded && <ChevronRight className="h-3 w-3 text-[--muted-fg] mr-2" />}
-        </div>
+        <SidebarButton
+          icon={<ShoppingCart className="h-4 w-4" />}
+          label="Comercialización"
+          isActive={false}
+          isExpanded={isExpanded}
+          onClick={() => setSidebarContext('marketing')}
+          showArrow={true}
+        />
       </div>
 
       {/* Footer */}
@@ -361,22 +343,266 @@ export function NewNavigationMaster() {
     </>
   );
 
+  const renderProjectSidebar = () => (
+    <>
+      {/* Header - Botón de volver */}
+      <div className="p-2">
+        <SidebarButton
+          icon={<ArrowLeft className="h-4 w-4" />}
+          label="Volver"
+          isActive={false}
+          isExpanded={isExpanded}
+          onClick={() => setSidebarContext('master')}
+        />
+      </div>
+
+      {/* Separador */}
+      <div className="h-px bg-[--menues-border] mx-2"></div>
+
+      {/* Navigation */}
+      <div className="flex-1 p-2 space-y-1">
+        <SidebarButton
+          icon={<Home className="h-4 w-4" />}
+          label="Resumen del Proyecto"
+          isActive={isActive('/project/dashboard')}
+          isExpanded={isExpanded}
+          onClick={() => navigate('/project/dashboard')}
+        />
+
+        <SidebarButton
+          icon={<Calendar className="h-4 w-4" />}
+          label="Cronograma"
+          isActive={isActive('/design/timeline')}
+          isExpanded={isExpanded}
+          onClick={() => navigate('/design/timeline')}
+        />
+
+        <SidebarButton
+          icon={<CheckSquare className="h-4 w-4" />}
+          label="Gestión de Tareas"
+          isActive={isActive('/tasks')}
+          isExpanded={isExpanded}
+          onClick={() => navigate('/tasks')}
+        />
+      </div>
+
+      {/* Footer */}
+      <div className="border-t border-[--menues-border] p-2">
+        <SidebarButton
+          icon={<UserCircle className="h-4 w-4" />}
+          label="Perfil"
+          isActive={isActive('/perfil')}
+          isExpanded={isExpanded}
+          onClick={() => navigate('/perfil')}
+        />
+      </div>
+    </>
+  );
+
+  const renderConstructionSidebar = () => (
+    <>
+      {/* Header - Botón de volver */}
+      <div className="p-2">
+        <SidebarButton
+          icon={<ArrowLeft className="h-4 w-4" />}
+          label="Volver"
+          isActive={false}
+          isExpanded={isExpanded}
+          onClick={() => setSidebarContext('master')}
+        />
+      </div>
+
+      {/* Separador */}
+      <div className="h-px bg-[--menues-border] mx-2"></div>
+
+      {/* Navigation */}
+      <div className="flex-1 p-2 space-y-1">
+        <SidebarButton
+          icon={<Home className="h-4 w-4" />}
+          label="Resumen de Obra"
+          isActive={isActive('/construction/dashboard')}
+          isExpanded={isExpanded}
+          onClick={() => navigate('/construction/dashboard')}
+        />
+
+        <SidebarButton
+          icon={<Calculator className="h-4 w-4" />}
+          label="Presupuestos"
+          isActive={isActive('/construction/budgets')}
+          isExpanded={isExpanded}
+          onClick={() => navigate('/construction/budgets')}
+        />
+
+        <SidebarButton
+          icon={<Package className="h-4 w-4" />}
+          label="Materiales"
+          isActive={isActive('/construction/materials')}
+          isExpanded={isExpanded}
+          onClick={() => navigate('/construction/materials')}
+        />
+
+        <SidebarButton
+          icon={<FileText className="h-4 w-4" />}
+          label="Bitácora"
+          isActive={isActive('/construction/logs')}
+          isExpanded={isExpanded}
+          onClick={() => navigate('/construction/logs')}
+        />
+
+        <SidebarButton
+          icon={<Users className="h-4 w-4" />}
+          label="Personal"
+          isActive={isActive('/construction/personnel')}
+          isExpanded={isExpanded}
+          onClick={() => navigate('/construction/personnel')}
+        />
+      </div>
+
+      {/* Footer */}
+      <div className="border-t border-[--menues-border] p-2">
+        <SidebarButton
+          icon={<UserCircle className="h-4 w-4" />}
+          label="Perfil"
+          isActive={isActive('/perfil')}
+          isExpanded={isExpanded}
+          onClick={() => navigate('/perfil')}
+        />
+      </div>
+    </>
+  );
+
+  const renderFinanceSidebar = () => (
+    <>
+      {/* Header - Botón de volver */}
+      <div className="p-2">
+        <SidebarButton
+          icon={<ArrowLeft className="h-4 w-4" />}
+          label="Volver"
+          isActive={false}
+          isExpanded={isExpanded}
+          onClick={() => setSidebarContext('master')}
+        />
+      </div>
+
+      {/* Separador */}
+      <div className="h-px bg-[--menues-border] mx-2"></div>
+
+      {/* Navigation */}
+      <div className="flex-1 p-2 space-y-1">
+        <SidebarButton
+          icon={<Home className="h-4 w-4" />}
+          label="Resumen de Finanzas"
+          isActive={isActive('/finances/dashboard')}
+          isExpanded={isExpanded}
+          onClick={() => navigate('/finances/dashboard')}
+        />
+
+        <SidebarButton
+          icon={<DollarSign className="h-4 w-4" />}
+          label="Movimientos"
+          isActive={isActive('/finances/movements')}
+          isExpanded={isExpanded}
+          onClick={() => navigate('/finances/movements')}
+        />
+
+        <SidebarButton
+          icon={<Settings className="h-4 w-4" />}
+          label="Preferencias"
+          isActive={isActive('/finances/preferences')}
+          isExpanded={isExpanded}
+          onClick={() => navigate('/finances/preferences')}
+        />
+      </div>
+
+      {/* Footer */}
+      <div className="border-t border-[--menues-border] p-2">
+        <SidebarButton
+          icon={<UserCircle className="h-4 w-4" />}
+          label="Perfil"
+          isActive={isActive('/perfil')}
+          isExpanded={isExpanded}
+          onClick={() => navigate('/perfil')}
+        />
+      </div>
+    </>
+  );
+
+  const renderDesignSidebar = () => (
+    <>
+      {/* Header - Botón de volver */}
+      <div className="p-2">
+        <SidebarButton
+          icon={<ArrowLeft className="h-4 w-4" />}
+          label="Volver"
+          isActive={false}
+          isExpanded={isExpanded}
+          onClick={() => setSidebarContext('master')}
+        />
+      </div>
+
+      {/* Separador */}
+      <div className="h-px bg-[--menues-border] mx-2"></div>
+
+      {/* Navigation */}
+      <div className="flex-1 p-2 space-y-1">
+        <SidebarButton
+          icon={<Home className="h-4 w-4" />}
+          label="Dashboard"
+          isActive={isActive('/design/dashboard')}
+          isExpanded={isExpanded}
+          onClick={() => navigate('/design/dashboard')}
+        />
+
+        <SidebarButton
+          icon={<Calendar className="h-4 w-4" />}
+          label="Cronograma"
+          isActive={isActive('/design/timeline')}
+          isExpanded={isExpanded}
+          onClick={() => navigate('/design/timeline')}
+        />
+
+        <SidebarButton
+          icon={<FileText className="h-4 w-4" />}
+          label="Moodboard"
+          isActive={isActive('/design/moodboard')}
+          isExpanded={isExpanded}
+          onClick={() => navigate('/design/moodboard')}
+        />
+
+        <SidebarButton
+          icon={<FolderOpen className="h-4 w-4" />}
+          label="Documentación"
+          isActive={isActive('/design/documentacion')}
+          isExpanded={isExpanded}
+          onClick={() => navigate('/design/documentacion')}
+        />
+      </div>
+
+      {/* Footer */}
+      <div className="border-t border-[--menues-border] p-2">
+        <SidebarButton
+          icon={<UserCircle className="h-4 w-4" />}
+          label="Perfil"
+          isActive={isActive('/perfil')}
+          isExpanded={isExpanded}
+          onClick={() => navigate('/perfil')}
+        />
+      </div>
+    </>
+  );
+
   const renderCurrentSidebar = () => {
     switch (currentContext) {
       case 'organization':
         return renderOrganizationSidebar();
       case 'project':
-        // TODO: Implementar proyecto sidebar
-        return renderMasterSidebar();
+        return renderProjectSidebar();
       case 'design':
-        // TODO: Implementar diseño sidebar
-        return renderMasterSidebar();
+        return renderDesignSidebar();
       case 'construction':
-        // TODO: Implementar obra sidebar
-        return renderMasterSidebar();
+        return renderConstructionSidebar();
       case 'finance':
-        // TODO: Implementar finanzas sidebar
-        return renderMasterSidebar();
+        return renderFinanceSidebar();
       case 'marketing':
         // TODO: Implementar comercialización sidebar
         return renderMasterSidebar();

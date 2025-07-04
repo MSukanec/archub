@@ -9,6 +9,7 @@ interface SidebarButtonProps {
   avatarUrl?: string;
   rightIcon?: React.ReactNode;
   isChild?: boolean;
+  showArrow?: boolean;
 }
 
 export default function SidebarButton({ 
@@ -19,7 +20,8 @@ export default function SidebarButton({
   onClick,
   avatarUrl,
   rightIcon,
-  isChild = false
+  isChild = false,
+  showArrow = false
 }: SidebarButtonProps) {
   return (
     <button
@@ -61,9 +63,9 @@ export default function SidebarButton({
           <span className="text-sm font-medium whitespace-nowrap text-left transition-opacity duration-300 delay-100">
             {label}
           </span>
-          {rightIcon && (
+          {(rightIcon || showArrow) && (
             <div className="flex-shrink-0 ml-2">
-              {rightIcon}
+              {rightIcon || (showArrow && <svg className="h-3 w-3 text-[--muted-fg]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>)}
             </div>
           )}
         </div>
