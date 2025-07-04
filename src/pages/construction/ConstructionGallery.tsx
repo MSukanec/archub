@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import * as AlertDialogPrimitive from '@/components/ui/alert-dialog';
 
 const {
@@ -331,34 +332,45 @@ export default function ConstructionGallery() {
     searchValue: searchTerm,
     onSearchChange: setSearchTerm,
     customFilters: (
-      <div className="flex gap-4">
-        <Select value={fileTypeFilter} onValueChange={setFileTypeFilter}>
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder="Tipo de archivo" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos los archivos</SelectItem>
-            <SelectItem value="image">Solo imágenes</SelectItem>
-            <SelectItem value="video">Solo videos</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={entryTypeFilter} onValueChange={setEntryTypeFilter}>
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder="Tipo de entrada" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos los tipos</SelectItem>
-            <SelectItem value="avance_de_obra">Avance de Obra</SelectItem>
-            <SelectItem value="visita_tecnica">Visita Técnica</SelectItem>
-            <SelectItem value="problema_detectado">Problema Detectado</SelectItem>
-            <SelectItem value="pedido_material">Pedido Material</SelectItem>
-            <SelectItem value="nota_climatica">Nota Climática</SelectItem>
-            <SelectItem value="decision">Decisión</SelectItem>
-            <SelectItem value="inspeccion">Inspección</SelectItem>
-            <SelectItem value="foto_diaria">Foto Diaria</SelectItem>
-            <SelectItem value="registro_general">Registro General</SelectItem>
-          </SelectContent>
-        </Select>
+      <div className="space-y-4">
+        <div>
+          <Label className="text-xs font-medium text-muted-foreground">
+            Filtrar por tipo de archivo
+          </Label>
+          <Select value={fileTypeFilter} onValueChange={setFileTypeFilter}>
+            <SelectTrigger className="mt-1">
+              <SelectValue placeholder="Todos los archivos" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos los archivos</SelectItem>
+              <SelectItem value="image">Solo imágenes</SelectItem>
+              <SelectItem value="video">Solo videos</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label className="text-xs font-medium text-muted-foreground">
+            Filtrar por tipo de entrada
+          </Label>
+          <Select value={entryTypeFilter} onValueChange={setEntryTypeFilter}>
+            <SelectTrigger className="mt-1">
+              <SelectValue placeholder="Todos los tipos" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos los tipos</SelectItem>
+              <SelectItem value="avance_de_obra">Avance de Obra</SelectItem>
+              <SelectItem value="visita_tecnica">Visita Técnica</SelectItem>
+              <SelectItem value="problema_detectado">Problema Detectado</SelectItem>
+              <SelectItem value="pedido_material">Pedido Material</SelectItem>
+              <SelectItem value="nota_climatica">Nota Climática</SelectItem>
+              <SelectItem value="decision">Decisión</SelectItem>
+              <SelectItem value="inspeccion">Inspección</SelectItem>
+              <SelectItem value="foto_diaria">Foto Diaria</SelectItem>
+              <SelectItem value="registro_general">Registro General</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
     ),
     onClearFilters: () => {
@@ -504,7 +516,14 @@ export default function ConstructionGallery() {
             header: (
               <CustomModalHeader
                 title={selectedFile.title || 'Archivo'}
-                description={`${getEntryTypeLabel(selectedFile.entry_type || 'registro_general')} • ${format(new Date(selectedFile.created_at), 'dd MMM yyyy', { locale: es })}`}
+                description={
+                  <div className="space-y-1">
+                    <div>{`${getEntryTypeLabel(selectedFile.entry_type || 'registro_general')} • ${format(new Date(selectedFile.created_at), 'dd MMM yyyy', { locale: es })}`}</div>
+                    {selectedFile.description && (
+                      <div className="text-sm text-muted-foreground">{selectedFile.description}</div>
+                    )}
+                  </div>
+                }
                 onClose={() => setSelectedFile(null)}
               />
             ),
