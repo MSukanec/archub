@@ -20,15 +20,24 @@ export async function uploadSiteLogFiles(
 
   for (const file of files) {
     try {
-      // Use user.id as prefix followed by original filename
-      const filePath = `${user.id}/${file.name}`
+      // Validate file first
+      if (!file || file.size === 0) {
+        console.error('Archivo vacío o inválido')
+        continue
+      }
 
-      // Upload to Supabase Storage
+      // Generate unique filename with user prefix as required by RLS
+      const extension = file.name.split('.').pop()
+      const filePath = `${user.id}/${crypto.randomUUID()}.${extension}`
+
+      console.log('Subiendo archivo:', filePath, file)
+
+      // Upload to Supabase Storage with upsert: true
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('site-log-files')
         .upload(filePath, file, {
           cacheControl: '3600',
-          upsert: false
+          upsert: true
         })
 
       if (uploadError) {
@@ -60,16 +69,30 @@ export async function uploadSiteLogFiles(
 
 export async function saveSiteLogFiles(
   siteLogId: string,
-  uploadedFiles: UploadedFile[]
+  uploadedFiles: UploadedFile[],
+  userId: string,
+  organizationId: string
 ): Promise<void> {
   if (uploadedFiles.length === 0) return
 
-  const fileRecords = uploadedFiles.map(file => ({
-    site_log_id: siteLogId,
-    file_url: file.file_url,
-    file_type: file.file_type,
-    original_name: file.original_name
-  }))
+  const fileRecords = uploadedFiles.map(file => {
+    // Extract file path from URL
+    const url = new URL(file.file_url)
+    const pathSegments = url.pathname.split('/')
+    const bucketIndex = pathSegments.findIndex(segment => segment === 'site-log-files')
+    const filePath = bucketIndex !== -1 ? pathSegments.slice(bucketIndex + 1).join('/') : file.original_name
+
+    return {
+      site_log_id: siteLogId,
+      file_path: filePath,
+      file_name: file.original_name,
+      file_type: file.file_type,
+      file_url: file.file_url,
+      user_id: userId,
+      organization_id: organizationId,
+      visibility: 'organization' as const
+    }
+  })
 
   const { error } = await supabase
     .from('site_log_files')

@@ -113,9 +113,13 @@ export function Header({
       '/finance/dashboard': 'Finanzas',
       '/movimientos': 'Finanzas',
       
-      // Obra accordion  
-      '/construction/dashboard': 'Obra',
-      '/bitacora': 'Obra',
+      // Obra accordion - NO mostrar "Obra" para dashboard ya que está en el contexto
+      '/construction/logs': 'Obra',
+      '/construction/budgets': 'Obra',
+      '/construction/materials': 'Obra',
+      '/construction/personnel': 'Obra',
+      // Galería debe mostrar "Galería"
+      '/construction/gallery': 'Galería',
       
       // Proyecto accordion (Design)
       '/design/dashboard': 'Proyecto',

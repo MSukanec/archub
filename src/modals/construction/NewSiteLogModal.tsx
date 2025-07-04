@@ -437,7 +437,12 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
       if (siteLogResult.data && files.length > 0) {
         try {
           const uploadedFiles = await uploadSiteLogFiles(files, siteLogResult.data.id)
-          await saveSiteLogFiles(siteLogResult.data.id, uploadedFiles)
+          await saveSiteLogFiles(
+            siteLogResult.data.id, 
+            uploadedFiles, 
+            userData.user.id, 
+            userData.preferences.last_organization_id
+          )
         } catch (error) {
           console.error('Error uploading files:', error)
           toast({
