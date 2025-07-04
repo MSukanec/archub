@@ -21,7 +21,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
-import { Plus, X, Folder, FileText, Trash2 } from 'lucide-react'
+import { Plus, X, Folder, FileText, Trash2, Download } from 'lucide-react'
 import { uploadMovementFiles, getMovementFiles, deleteMovementFile } from '@/lib/storage/uploadMovementFiles'
 
 const movementSchema = z.object({
@@ -879,10 +879,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                     {/* Sección de Archivos para Conversiones */}
                     <AccordionItem value="archivos">
                       <AccordionTrigger>
-                        <div className="flex items-center gap-2">
-                          <Folder className="h-4 w-4" />
-                          📎 Archivos ({files.length + existingFiles.length})
-                        </div>
+                        Archivos ({files.length + existingFiles.length})
                       </AccordionTrigger>
                       <AccordionContent className="space-y-3 pt-3">
                         {/* Existing Files */}
@@ -895,14 +892,35 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                                   <FileText className="h-4 w-4 text-blue-500" />
                                   <span className="text-sm">{file.file_name}</span>
                                 </div>
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => removeExistingFile(file.id, file.file_path)}
-                                >
-                                  <Trash2 className="h-4 w-4 text-red-500" />
-                                </Button>
+                                <div className="flex items-center gap-1">
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                      // Create download link for existing file
+                                      const link = document.createElement('a');
+                                      link.href = file.file_url;
+                                      link.download = file.file_name;
+                                      link.target = '_blank';
+                                      document.body.appendChild(link);
+                                      link.click();
+                                      document.body.removeChild(link);
+                                    }}
+                                    title="Descargar archivo"
+                                  >
+                                    <Download className="h-4 w-4 text-green-500" />
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => removeExistingFile(file.id, file.file_path)}
+                                    title="Eliminar archivo"
+                                  >
+                                    <Trash2 className="h-4 w-4 text-red-500" />
+                                  </Button>
+                                </div>
                               </div>
                             ))}
                           </div>
@@ -1214,10 +1232,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                   {/* Sección de Archivos */}
                   <AccordionItem value="archivos">
                     <AccordionTrigger>
-                      <div className="flex items-center gap-2">
-                        <Folder className="h-4 w-4" />
-                        📎 Archivos ({files.length + existingFiles.length})
-                      </div>
+                      Archivos ({files.length + existingFiles.length})
                     </AccordionTrigger>
                     <AccordionContent className="space-y-3 pt-3">
                       {/* Existing Files */}
@@ -1230,14 +1245,35 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                                 <FileText className="h-4 w-4 text-blue-500" />
                                 <span className="text-sm">{file.file_name}</span>
                               </div>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => removeExistingFile(file.id, file.file_path)}
-                              >
-                                <Trash2 className="h-4 w-4 text-red-500" />
-                              </Button>
+                              <div className="flex items-center gap-1">
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    // Create download link for existing file
+                                    const link = document.createElement('a');
+                                    link.href = file.file_url;
+                                    link.download = file.file_name;
+                                    link.target = '_blank';
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
+                                  }}
+                                  title="Descargar archivo"
+                                >
+                                  <Download className="h-4 w-4 text-green-500" />
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => removeExistingFile(file.id, file.file_path)}
+                                  title="Eliminar archivo"
+                                >
+                                  <Trash2 className="h-4 w-4 text-red-500" />
+                                </Button>
+                              </div>
                             </div>
                           ))}
                         </div>

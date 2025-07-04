@@ -45,6 +45,7 @@ import { NewMovementModal } from "@/modals/finances/NewMovementModal";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMovements, useToggleMovementFavorite } from "@/hooks/use-movements";
 import { useOrganizationDefaultCurrency } from "@/hooks/use-currencies";
+import { getMovementFiles } from "@/lib/storage/uploadMovementFiles";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
@@ -128,6 +129,7 @@ export default function Movements() {
   );
   const [selectedMovements, setSelectedMovements] = useState<Movement[]>([]);
   const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
+  const [movementFileCounts, setMovementFileCounts] = useState<Record<string, number>>({});
 
   const { setSidebarContext } = useNavigationStore();
   const { setActions, setShowActionBar, clearActions } = useMobileActionBar();
@@ -208,6 +210,45 @@ export default function Movements() {
 
   // Get organization's default currency
   const { data: defaultCurrency } = useOrganizationDefaultCurrency(organizationId);
+
+  // Load file counts for all movements
+  useEffect(() => {
+    const loadFileCounts = async () => {
+      if (!movements.length) return;
+      
+      const counts: Record<string, number> = {};
+      
+      // Load file counts for each movement
+      for (const item of movements) {
+        let movementId: string;
+        
+        if ('is_conversion_group' in item) {
+          // For conversion groups, get the first movement (egreso) ID
+          const conversionGroup = item as any;
+          const egresoMovement = conversionGroup.movements?.find((m: any) => 
+            m.movement_data?.type?.name?.toLowerCase().includes('egreso')
+          );
+          movementId = egresoMovement?.id || '';
+        } else {
+          movementId = item.id;
+        }
+        
+        if (movementId && !counts[movementId]) {
+          try {
+            const files = await getMovementFiles(movementId);
+            counts[movementId] = files.length;
+          } catch (error) {
+            console.error(`Error loading files for movement ${movementId}:`, error);
+            counts[movementId] = 0;
+          }
+        }
+      }
+      
+      setMovementFileCounts(counts);
+    };
+
+    loadFileCounts();
+  }, [movements]);
 
   // Toggle favorite mutation
   const toggleFavoriteMutation = useToggleMovementFavorite();
@@ -835,6 +876,38 @@ export default function Movements() {
           <span className="text-xs font-medium">
             ${item.amount?.toLocaleString() || "0"}
           </span>
+        );
+      },
+    },
+    {
+      key: "attachments",
+      label: "Adjuntos",
+      width: "5%",
+      sortable: false,
+      render: (item: Movement | ConversionGroup) => {
+        // For conversion groups, get files from the first movement (egreso)
+        if ('is_conversion_group' in item) {
+          const egresoMovement = item.movements.find(m => 
+            m.movement_data?.type?.name?.toLowerCase().includes('egreso')
+          );
+          const fileCount = egresoMovement ? movementFileCounts[egresoMovement.id] || 0 : 0;
+          return (
+            <div className="flex items-center justify-center">
+              <span className={`text-xs ${fileCount > 0 ? 'text-accent font-medium' : 'text-muted-foreground'}`}>
+                {fileCount}
+              </span>
+            </div>
+          );
+        }
+        
+        // For regular movements, get file count from state
+        const fileCount = movementFileCounts[item.id] || 0;
+        return (
+          <div className="flex items-center justify-center">
+            <span className={`text-xs ${fileCount > 0 ? 'text-accent font-medium' : 'text-muted-foreground'}`}>
+              {fileCount}
+            </span>
+          </div>
         );
       },
     },

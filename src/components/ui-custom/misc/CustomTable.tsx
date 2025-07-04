@@ -148,9 +148,19 @@ export function CustomTable<T = any>({
     if (!onSelectionChange) return
 
     if (checked) {
-      onSelectionChange([...data])
+      // Add all items from current page to selection
+      const newSelectedItems = [...selectedItems]
+      paginatedData.forEach(item => {
+        if (!isItemSelected(item)) {
+          newSelectedItems.push(item)
+        }
+      })
+      onSelectionChange(newSelectedItems)
     } else {
-      onSelectionChange([])
+      // Remove all items from current page from selection
+      const currentPageIds = new Set(paginatedData.map(item => getItemId(item)))
+      const filteredSelection = selectedItems.filter(item => !currentPageIds.has(getItemId(item)))
+      onSelectionChange(filteredSelection)
     }
   }
 
@@ -237,7 +247,7 @@ export function CustomTable<T = any>({
           {selectable && (
             <div className="flex items-center justify-center">
               <Checkbox
-                checked={selectedItems.length === data.length && data.length > 0}
+                checked={paginatedData.length > 0 && paginatedData.every(item => isItemSelected(item))}
                 onCheckedChange={handleSelectAll}
                 aria-label="Seleccionar todos"
                 className="h-3 w-3"
