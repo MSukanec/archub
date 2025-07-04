@@ -155,10 +155,12 @@ export function Sidebar() {
     organization: [
       { icon: Home, label: 'Resumen de la Organización', href: '/organization/dashboard' },
       { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },
-      { icon: FolderOpen, label: 'Diseño', href: '#', onClick: () => { setSidebarContext('design'); navigate('/design/timeline'); } },
-      { icon: Building, label: 'Obra', href: '#', onClick: () => { setSidebarContext('construction'); navigate('/construction/dashboard'); } },
-      { icon: DollarSign, label: 'Finanzas', href: '#', onClick: () => { setSidebarContext('finances'); navigate('/finances/dashboard'); } },
-      { icon: Users, label: 'Comercialización', href: '#', onClick: () => { setSidebarContext('commercialization'); navigate('/commercialization/dashboard'); } },
+      { type: 'divider' },
+      { icon: FolderOpen, label: 'Diseño', href: '#', onClick: () => { setSidebarContext('design'); navigate('/design/timeline'); }, hasChevron: true },
+      { icon: Building, label: 'Obra', href: '#', onClick: () => { setSidebarContext('construction'); navigate('/construction/dashboard'); }, hasChevron: true },
+      { icon: DollarSign, label: 'Finanzas', href: '#', onClick: () => { setSidebarContext('finances'); navigate('/finances/dashboard'); }, hasChevron: true },
+      { icon: Users, label: 'Comercialización', href: '#', onClick: () => { setSidebarContext('commercialization'); navigate('/commercialization/dashboard'); }, hasChevron: true },
+      ...(isAdmin ? [{ icon: Shield, label: 'Administración', href: '#', onClick: () => { setSidebarContext('admin'); navigate('/admin/dashboard'); }, hasChevron: true }] : []),
     ],
     organizations: [
       // Minimal sidebar - only bottom section buttons
@@ -290,33 +292,42 @@ export function Sidebar() {
         <div className="flex flex-col gap-[2px] h-full">
           <div className={`flex-1 transition-opacity duration-150 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
             {navigationItems.map((item: any, index) => (
-              <div key={`${item.label}-${index}`} className="mb-[2px]">
-                {/* Main Button */}
-                <SidebarButton
-                  icon={<item.icon className="w-[18px] h-[18px]" />}
-                  label={item.label}
-                  isActive={location === item.href}
-                  isExpanded={isExpanded}
-                  onClick={item.isAccordion ? item.onToggle : (item.onClick || (() => navigate(item.href)))}
-                  rightIcon={item.isAccordion && isExpanded ? (
-                    item.expanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />
-                  ) : undefined}
-                />
+              <div key={`${item.label || 'divider'}-${index}`} className="mb-[2px]">
+                {/* Divider */}
+                {item.type === 'divider' ? (
+                  <div className="mx-2 my-2 border-t border-[var(--menues-border)]" />
+                ) : (
+                  <div>
+                    {/* Main Button */}
+                    <SidebarButton
+                      icon={<item.icon className="w-[18px] h-[18px]" />}
+                      label={item.label}
+                      isActive={location === item.href}
+                      isExpanded={isExpanded}
+                      onClick={item.isAccordion ? item.onToggle : (item.onClick || (() => navigate(item.href)))}
+                      rightIcon={item.isAccordion && isExpanded ? (
+                        item.expanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />
+                      ) : item.hasChevron && isExpanded ? (
+                        <ChevronRight className="w-4 h-4" />
+                      ) : undefined}
+                    />
                 
-                {/* Accordion Children */}
-                {item.isAccordion && item.expanded && isExpanded && (
-                  <div className="ml-6 mt-1 flex flex-col gap-[2px]">
-                    {item.children?.map((child: any, childIndex: number) => (
-                      <SidebarButton
-                        key={`${child.label}-${childIndex}`}
-                        icon={<child.icon className="w-[18px] h-[18px]" />}
-                        label={child.label}
-                        isActive={location === child.href}
-                        isExpanded={isExpanded}
-                        onClick={() => navigate(child.href)}
-                        isChild={true}
-                      />
-                    ))}
+                    {/* Accordion Children */}
+                    {item.isAccordion && item.expanded && isExpanded && (
+                      <div className="ml-6 mt-1 flex flex-col gap-[2px]">
+                        {item.children?.map((child: any, childIndex: number) => (
+                          <SidebarButton
+                            key={`${child.label}-${childIndex}`}
+                            icon={<child.icon className="w-[18px] h-[18px]" />}
+                            label={child.label}
+                            isActive={location === child.href}
+                            isExpanded={isExpanded}
+                            onClick={() => navigate(child.href)}
+                            isChild={true}
+                          />
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

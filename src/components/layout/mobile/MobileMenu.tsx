@@ -148,10 +148,12 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     organization: [
       { icon: Home, label: 'Resumen de la Organización', href: '/organization/dashboard' },
       { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },
-      { icon: FolderOpen, label: 'Diseño', href: '#', onClick: () => { setSidebarContext('design'); navigate('/design/timeline'); } },
-      { icon: Building, label: 'Obra', href: '#', onClick: () => { setSidebarContext('construction'); navigate('/construction/dashboard'); } },
-      { icon: DollarSign, label: 'Finanzas', href: '#', onClick: () => { setSidebarContext('finances'); navigate('/finances/dashboard'); } },
-      { icon: Users, label: 'Comercialización', href: '#', onClick: () => { setSidebarContext('commercialization'); navigate('/commercialization/dashboard'); } },
+      { type: 'divider' },
+      { icon: FolderOpen, label: 'Diseño', href: '#', onClick: () => { setSidebarContext('design'); navigate('/design/timeline'); }, hasChevron: true },
+      { icon: Building, label: 'Obra', href: '#', onClick: () => { setSidebarContext('construction'); navigate('/construction/dashboard'); }, hasChevron: true },
+      { icon: DollarSign, label: 'Finanzas', href: '#', onClick: () => { setSidebarContext('finances'); navigate('/finances/dashboard'); }, hasChevron: true },
+      { icon: Users, label: 'Comercialización', href: '#', onClick: () => { setSidebarContext('commercialization'); navigate('/commercialization/dashboard'); }, hasChevron: true },
+      ...(isAdmin ? [{ icon: Shield, label: 'Administración', href: '#', onClick: () => { setSidebarContext('admin'); navigate('/admin/dashboard'); }, hasChevron: true }] : []),
     ],
     project: [
       { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },
@@ -278,44 +280,55 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
         <nav className="space-y-0.5">
           {navigationItems.map((item: any, index: number) => (
-            <div key={`${item.label}-${index}`}>
-              {/* Main Button */}
-              <button
-                onClick={item.isAccordion ? item.onToggle : (item.onClick || (() => handleNavigation(item.href)))}
-                className="flex w-full items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
-                style={{
-                  color: 'var(--menues-fg)',
-                  backgroundColor: 'transparent'
-                }}
-              >
-                <item.icon className="h-5 w-5" />
-                {item.label}
-                {item.isAccordion && (
-                  <div className="ml-auto">
-                    {item.expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                  </div>
-                )}
-              </button>
-              
-              {/* Accordion Children */}
-              {item.isAccordion && item.expanded && (
-                <div className="ml-6 mt-1 space-y-0.5">
-                  {item.children?.map((child: any, childIndex: number) => (
-                    <button
-                      key={`${child.label}-${childIndex}`}
-                      onClick={() => handleNavigation(child.href)}
-                      className="flex w-full items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
-                      style={{
-                        color: 'var(--menues-fg)',
-                        backgroundColor: 'transparent',
-                        opacity: 0.9
-                      }}
-                    >
-                      <child.icon className="h-4 w-4" />
-                      {child.label}
-                    </button>
-                  ))}
-                </div>
+            <div key={`${item.label || 'divider'}-${index}`}>
+              {/* Divider */}
+              {item.type === 'divider' ? (
+                <div className="mx-3 my-3 border-t border-[var(--menues-border)]" />
+              ) : (
+                <>
+                  {/* Main Button */}
+                  <button
+                    onClick={item.isAccordion ? item.onToggle : (item.onClick || (() => handleNavigation(item.href)))}
+                    className="flex w-full items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+                    style={{
+                      color: 'var(--menues-fg)',
+                      backgroundColor: 'transparent'
+                    }}
+                  >
+                    <item.icon className="h-5 w-5" />
+                    {item.label}
+                    {item.isAccordion ? (
+                      <div className="ml-auto">
+                        {item.expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                      </div>
+                    ) : item.hasChevron ? (
+                      <div className="ml-auto">
+                        <ChevronRight className="h-4 w-4" />
+                      </div>
+                    ) : null}
+                  </button>
+                  
+                  {/* Accordion Children */}
+                  {item.isAccordion && item.expanded && (
+                    <div className="ml-6 mt-1 space-y-0.5">
+                      {item.children?.map((child: any, childIndex: number) => (
+                        <button
+                          key={`${child.label}-${childIndex}`}
+                          onClick={() => handleNavigation(child.href)}
+                          className="flex w-full items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+                          style={{
+                            color: 'var(--menues-fg)',
+                            backgroundColor: 'transparent',
+                            opacity: 0.9
+                          }}
+                        >
+                          <child.icon className="h-4 w-4" />
+                          {child.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
               )}
             </div>
           ))}
