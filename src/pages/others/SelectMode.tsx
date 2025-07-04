@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { Building, Package, Hammer, Eye, CheckCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CustomRestricted } from "@/components/ui-custom/misc/CustomRestricted";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
@@ -26,28 +27,28 @@ const modeOptions: ModeOption[] = [
     title: "Profesional",
     description: "Estudios de arquitectura, constructoras y empresas de construcción",
     icon: Building,
-    color: "from-blue-500 to-blue-600"
+    color: "bg-[var(--accent)]"
   },
   {
     type: "provider",
     title: "Proveedor de Materiales",
     description: "Empresas que suministran materiales y equipos de construcción",
     icon: Package,
-    color: "from-green-500 to-green-600"
+    color: "bg-[var(--accent)]"
   },
   {
     type: "worker",
     title: "Mano de Obra",
     description: "Contratistas, maestros de obra y profesionales independientes",
     icon: Hammer,
-    color: "from-orange-500 to-orange-600"
+    color: "bg-[var(--accent)]"
   },
   {
     type: "visitor",
     title: "Solo Exploración",
     description: "Explora las funcionalidades sin compromiso",
     icon: Eye,
-    color: "from-purple-500 to-purple-600"
+    color: "bg-[var(--accent)]"
   }
 ];
 
@@ -124,7 +125,7 @@ export function SelectMode() {
       <div className="w-full max-w-4xl">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-            {isOnboarding ? "¡Bienvenido a Archub!" : "Cambiar modo de uso"}
+            {isOnboarding ? "¡Bienvenido a Archub!" : "Elegir modo de uso"}
           </h1>
           <p className="text-lg text-slate-600 dark:text-slate-300">
             {isOnboarding 
@@ -145,21 +146,23 @@ export function SelectMode() {
             const isSelected = selectedMode === mode.type;
             const isCurrent = currentUserType === mode.type;
             const isLoading = updateUserTypeMutation.isPending && selectedMode === mode.type;
+            const isAvailable = mode.type === 'professional'; // Solo profesional está disponible
             
-            return (
+            const cardContent = (
               <Card
                 key={mode.type}
                 className={`
-                  cursor-pointer transition-all duration-300 transform hover:scale-105 hover:shadow-lg
+                  ${isAvailable ? 'cursor-pointer hover:scale-105 hover:shadow-lg' : 'cursor-not-allowed opacity-60'}
+                  transition-all duration-300 transform
                   ${isSelected ? 'ring-2 ring-blue-500' : ''}
                   ${isCurrent ? 'ring-2 ring-green-500' : ''}
                   ${isLoading ? 'opacity-75' : ''}
                 `}
-                onClick={() => !isLoading && handleModeSelect(mode.type)}
+                onClick={() => isAvailable && !isLoading && handleModeSelect(mode.type)}
               >
                 <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">
-                    <div className={`p-3 rounded-lg bg-gradient-to-r ${mode.color} text-white`}>
+                    <div className={`p-3 rounded-lg ${mode.color} text-white`}>
                       <Icon className="h-6 w-6" />
                     </div>
                     {isCurrent && !isLoading && (
@@ -186,6 +189,16 @@ export function SelectMode() {
                 </CardContent>
               </Card>
             );
+
+            if (!isAvailable) {
+              return (
+                <CustomRestricted key={mode.type} reason="coming_soon">
+                  {cardContent}
+                </CustomRestricted>
+              );
+            }
+
+            return cardContent;
           })}
         </div>
 

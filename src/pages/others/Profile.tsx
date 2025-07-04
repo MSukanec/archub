@@ -461,31 +461,36 @@ export default function Profile() {
 
             {/* Right Column - Current Mode and Change Button */}
             <div className="space-y-6">
-              {(() => {
-                const modeInfo = getUserModeInfo(userData?.preferences?.last_user_type);
-                const ModeIcon = modeInfo.icon;
-                return (
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-                      <div className="p-2 rounded-md bg-primary/10">
-                        <ModeIcon className="h-5 w-5 text-primary" />
+              <div className="space-y-4 p-4 border border-green-500 rounded-lg">
+                {(() => {
+                  const modeInfo = getUserModeInfo(userData?.preferences?.last_user_type);
+                  const ModeIcon = modeInfo.icon;
+                  return (
+                    <>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium text-green-600">Modo de uso actual</Label>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-md bg-green-50 dark:bg-green-900/20">
+                            <ModeIcon className="h-5 w-5 text-[var(--accent)]" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">{modeInfo.label}</p>
+                            <p className="text-xs text-muted-foreground">{modeInfo.description}</p>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">{modeInfo.label}</p>
-                        <p className="text-xs text-muted-foreground">{modeInfo.description}</p>
-                      </div>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => navigate('/select-mode')}
-                      className="w-full md:w-auto"
-                    >
-                      Cambiar modo de uso
-                    </Button>
-                  </div>
-                );
-              })()}
+                      
+                      <Button
+                        onClick={() => navigate('/select-mode')}
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                      >
+                        Elegir modo de uso
+                      </Button>
+                    </>
+                  );
+                })()}
+              </div>
             </div>
           </div>
         </div>

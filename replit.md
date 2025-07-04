@@ -119,6 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 4, 2025. Complete user type selection system implementation - COMPLETED
+  • Created SelectMode.tsx page at /select-mode with 4 user type cards: Professional, Material Provider, Labor, Explorer
+  • Added last_user_type enum field to user_preferences schema with proper database integration
+  • Implemented automatic redirection to select-mode when user has no type selected (onboarding flow)
+  • Enhanced Profile page with user mode section matching danger zone styling but with green colors
+  • Only "Professional" mode available, other 3 modes wrapped with CustomRestricted showing "coming soon"
+  • All mode icons use --accent CSS variable for consistent theming throughout interface
+  • Page title updated to "Elegir modo de uso" with proper conditional display for onboarding vs mode change
+  • Complete integration with Supabase for user_type persistence and sidebar context navigation
 - July 4, 2025. UI constants cleanup and breadcrumb navigation fixes - COMPLETED
   • Eliminated src/lib/constants/ui.ts file and replaced constant usage with direct CSS values
   • Updated sidebar-button.tsx to use h-9 and w-[18px] h-[18px] classes instead of BUTTON_SIZE and ICON_SIZE constants
