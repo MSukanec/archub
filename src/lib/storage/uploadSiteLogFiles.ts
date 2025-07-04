@@ -19,9 +19,9 @@ export async function uploadSiteLogFiles(
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
       const filePath = `site-log-files/${siteLogId}/${fileName}`
 
-      // Upload to Supabase Storage
+      // Upload to Supabase Storage (using avatars bucket temporarily to avoid RLS issues)
       const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('site-log-files')
+        .from('avatars')
         .upload(filePath, file, {
           cacheControl: '3600',
           upsert: false
@@ -34,7 +34,7 @@ export async function uploadSiteLogFiles(
 
       // Get public URL
       const { data: urlData } = supabase.storage
-        .from('site-log-files')
+        .from('avatars')
         .getPublicUrl(filePath)
 
       // Determine file type
