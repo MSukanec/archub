@@ -119,15 +119,16 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- July 4, 2025. Enhanced floating actions system with card-style background and red heart favorites
+- July 4, 2025. Enhanced floating actions system with card-style background and red filled heart favorites
   • Changed TableRowActions background to use standard card styling (bg-card, border-border) instead of gradient
-  • Implemented red heart icon for favorite button when active - text-red-500 with hover:text-red-600
+  • Implemented red filled heart icon for favorite button when active - text-red-500 with fill-current class
   • Enhanced favorite button with isActive prop controlling red color state when is_favorite is true
   • Added scroll capability to CustomModalBody with overflow-y-auto and max-height constraints for long content
   • Floating actions now have proper card-style background with shadow-sm and border styling
   • Button hover states include background color changes and improved visual feedback for all variants
-  • Fixed favorite button to use red heart icon instead of yellow background when favorited
-  • System provides complete visual hierarchy with card styling and intuitive red heart favorites
+  • Fixed favorite button to use red filled heart icon (fill-current) instead of outline when favorited
+  • Eliminated all hardcoded grid layouts from NewMovementModal - now fully managed by CustomModalBody columns prop
+  • System provides complete visual hierarchy with card styling and intuitive red filled heart favorites
 - July 4, 2025. Complete SwipeableCard integration across all mobile cards with iOS-style swipe functionality
   • Successfully integrated SwipeableCard component with all 4 card types: ProjectCard, SiteLogCard, MovementCard, and ChangelogCard
   • Removed action buttons from all cards since swipe actions now replace them for mobile interface consistency

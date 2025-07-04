@@ -690,7 +690,7 @@ export default function Movements() {
         )}
         getRowActions={(movement: Movement) => [
           {
-            icon: <Heart className="h-4 w-4" />,
+            icon: movement.is_favorite ? <Heart className="h-4 w-4 fill-current" /> : <Heart className="h-4 w-4" />,
             label: movement.is_favorite ? "Quitar de favoritos" : "Agregar a favoritos",
             onClick: () => handleToggleFavorite(movement),
             variant: movement.is_favorite ? "muted" : "default",
