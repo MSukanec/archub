@@ -59,7 +59,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       </div>
       <main
         className={`transition-all duration-300 ease-in-out flex-1 overflow-auto p-3 mt-1 ${
-          isExpanded ? "md:ml-60" : "md:ml-12"
+          isExpanded ? "md:ml-60" : "md:ml-10"
         } ml-0 ${isMobile && showActionBar ? "pb-20" : ""}`}
       >
         <div className={wide ? "" : "max-w-[1440px] mx-auto"}>{children}</div>

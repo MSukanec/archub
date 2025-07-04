@@ -188,53 +188,77 @@ export function NewNavigationMaster() {
         <div className="h-px bg-[--menues-border] my-2"></div>
 
         {/* Sidebars Secundarios */}
-        <SidebarButton
-          icon={<Building className="h-4 w-4" />}
-          label="Organización"
-          isActive={false}
-          isExpanded={isExpanded}
-          onClick={() => setSidebarContext('organization')}
-        />
+        <div className="flex items-center justify-between hover:bg-[--button-ghost-hover-bg] rounded-md transition-colors duration-150 cursor-pointer" onClick={() => setSidebarContext('organization')}>
+          <SidebarButton
+            icon={<Building className="h-4 w-4" />}
+            label="Organización"
+            isActive={false}
+            isExpanded={isExpanded}
+            onClick={() => {}}
+            className="flex-1 hover:bg-transparent"
+          />
+          {isExpanded && <ChevronRight className="h-3 w-3 text-[--muted-fg] mr-2" />}
+        </div>
 
-        <SidebarButton
-          icon={<FolderOpen className="h-4 w-4" />}
-          label="Proyecto"
-          isActive={false}
-          isExpanded={isExpanded}
-          onClick={() => setSidebarContext('project')}
-        />
+        <div className="flex items-center justify-between hover:bg-[--button-ghost-hover-bg] rounded-md transition-colors duration-150 cursor-pointer" onClick={() => setSidebarContext('project')}>
+          <SidebarButton
+            icon={<FolderOpen className="h-4 w-4" />}
+            label="Proyecto"
+            isActive={false}
+            isExpanded={isExpanded}
+            onClick={() => {}}
+            className="flex-1 hover:bg-transparent"
+          />
+          {isExpanded && <ChevronRight className="h-3 w-3 text-[--muted-fg] mr-2" />}
+        </div>
 
-        <SidebarButton
-          icon={<Palette className="h-4 w-4" />}
-          label="Diseño"
-          isActive={false}
-          isExpanded={isExpanded}
-          onClick={() => setSidebarContext('design')}
-        />
+        <div className="flex items-center justify-between hover:bg-[--button-ghost-hover-bg] rounded-md transition-colors duration-150 cursor-pointer" onClick={() => setSidebarContext('design')}>
+          <SidebarButton
+            icon={<Palette className="h-4 w-4" />}
+            label="Diseño"
+            isActive={false}
+            isExpanded={isExpanded}
+            onClick={() => {}}
+            className="flex-1 hover:bg-transparent"
+          />
+          {isExpanded && <ChevronRight className="h-3 w-3 text-[--muted-fg] mr-2" />}
+        </div>
 
-        <SidebarButton
-          icon={<Hammer className="h-4 w-4" />}
-          label="Obra"
-          isActive={false}
-          isExpanded={isExpanded}
-          onClick={() => setSidebarContext('construction')}
-        />
+        <div className="flex items-center justify-between hover:bg-[--button-ghost-hover-bg] rounded-md transition-colors duration-150 cursor-pointer" onClick={() => setSidebarContext('construction')}>
+          <SidebarButton
+            icon={<Hammer className="h-4 w-4" />}
+            label="Obra"
+            isActive={false}
+            isExpanded={isExpanded}
+            onClick={() => {}}
+            className="flex-1 hover:bg-transparent"
+          />
+          {isExpanded && <ChevronRight className="h-3 w-3 text-[--muted-fg] mr-2" />}
+        </div>
 
-        <SidebarButton
-          icon={<DollarSign className="h-4 w-4" />}
-          label="Finanzas"
-          isActive={false}
-          isExpanded={isExpanded}
-          onClick={() => setSidebarContext('finance')}
-        />
+        <div className="flex items-center justify-between hover:bg-[--button-ghost-hover-bg] rounded-md transition-colors duration-150 cursor-pointer" onClick={() => setSidebarContext('finance')}>
+          <SidebarButton
+            icon={<DollarSign className="h-4 w-4" />}
+            label="Finanzas"
+            isActive={false}
+            isExpanded={isExpanded}
+            onClick={() => {}}
+            className="flex-1 hover:bg-transparent"
+          />
+          {isExpanded && <ChevronRight className="h-3 w-3 text-[--muted-fg] mr-2" />}
+        </div>
 
-        <SidebarButton
-          icon={<ShoppingCart className="h-4 w-4" />}
-          label="Comercialización"
-          isActive={false}
-          isExpanded={isExpanded}
-          onClick={() => setSidebarContext('marketing')}
-        />
+        <div className="flex items-center justify-between hover:bg-[--button-ghost-hover-bg] rounded-md transition-colors duration-150 cursor-pointer" onClick={() => setSidebarContext('marketing')}>
+          <SidebarButton
+            icon={<ShoppingCart className="h-4 w-4" />}
+            label="Comercialización"
+            isActive={false}
+            isExpanded={isExpanded}
+            onClick={() => {}}
+            className="flex-1 hover:bg-transparent"
+          />
+          {isExpanded && <ChevronRight className="h-3 w-3 text-[--muted-fg] mr-2" />}
+        </div>
       </div>
 
       {/* Footer */}
@@ -367,8 +391,8 @@ export function NewNavigationMaster() {
   return (
     <div
       className={cn(
-        "fixed left-0 top-16 z-40 h-[calc(100vh-4rem)] bg-[--menues-bg] border-r border-[--menues-border] transition-all duration-300 flex flex-col",
-        isExpanded ? "w-60" : "w-12"
+        "fixed left-0 top-10 z-40 h-[calc(100vh-2.5rem)] bg-[--menues-bg] border-r border-[--menues-border] transition-all duration-300 flex flex-col",
+        isExpanded ? "w-60" : "w-10"
       )}
       onMouseEnter={() => !isDocked && setHovered(true)}
       onMouseLeave={() => !isDocked && setHovered(false)}
