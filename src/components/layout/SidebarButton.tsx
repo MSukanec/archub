@@ -26,18 +26,17 @@ export default function SidebarButton({
   return (
     <button
       className={cn(
-        'relative flex items-center transition-all duration-300',
-        // Botón SIEMPRE 32x32px (w-8 h-8), centrado cuando colapsado
-        'w-8 h-8',
-        // Cuando expandido, el botón se extiende pero el icono queda fijo
-        isExpanded && 'w-full',
+        'relative flex items-center justify-center transition-all duration-300 rounded-md mb-0.5',
+        // Botón SIEMPRE 32x32px (w-8 h-8), perfectamente centrado
+        'w-8 h-8 mx-auto',
+        // Cuando expandido, el botón se extiende a full width
+        isExpanded && 'w-full justify-start mx-0',
         isActive 
           ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]' 
           : 'text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]'
       )}
       onClick={onClick}
       title={!isExpanded ? label : undefined}
-      style={{ borderRadius: '4px' }}
     >
       {/* Contenedor del icono - SIEMPRE centrado en 32x32px, no mostrar para hijos */}
       {!isChild && (
