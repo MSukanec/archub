@@ -49,22 +49,13 @@ const MovementCard: React.FC<MovementCardProps> = ({ movement, onEdit, onDelete,
     type,
     category,
     subcategory,
-    description,
     currency,
     amount
   } = movement;
 
-  // Format the category line without type (user will know by color)
-  const categoryLine = subcategory 
-    ? `${category} / ${subcategory}`
-    : category;
-
-  // Truncate description to 30 characters
-  const truncatedDescription = description 
-    ? description.length > 30 
-      ? `${description.slice(0, 30)}...`
-      : description
-    : 'Sin descripción';
+  // Format the category and subcategory as separate lines
+  const categoryDisplay = category;
+  const subcategoryDisplay = subcategory || '';
 
   // Format amount with sign and color
   const isIngreso = type === 'Ingreso';
@@ -115,16 +106,18 @@ const MovementCard: React.FC<MovementCardProps> = ({ movement, onEdit, onDelete,
         <div className="flex-1 min-w-0">
           <div 
             className="text-[var(--card-fg)] font-medium text-sm"
-            title={subcategory ? `${category} / ${subcategory}` : category}
+            title={category}
           >
-            {categoryLine}
+            {categoryDisplay}
           </div>
-          <div 
-            className="text-[var(--muted-fg)] text-sm mt-1 truncate"
-            title={description || 'Sin descripción'}
-          >
-            {truncatedDescription}
-          </div>
+          {subcategoryDisplay && (
+            <div 
+              className="text-[var(--muted-fg)] text-sm mt-1 truncate"
+              title={subcategoryDisplay}
+            >
+              {subcategoryDisplay}
+            </div>
+          )}
         </div>
 
         {/* Right: Amount + Currency */}

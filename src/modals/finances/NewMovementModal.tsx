@@ -604,34 +604,8 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
 
                         {/* Divider */}
                         <div className="border-t pt-3 mt-3">
-                          <h4 className="text-sm font-medium mb-3">Moneda de Origen (Salida)</h4>
+                          <h4 className="text-sm font-medium mb-3">Moneda de Origen/Destino</h4>
                         </div>
-
-                        <FormField
-                          control={conversionForm.control}
-                          name="from_amount"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Cantidad Origen</FormLabel>
-                              <FormControl>
-                                <div className="relative">
-                                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                                    $
-                                  </span>
-                                  <Input
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    value={field.value || ''}
-                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                                    className="pl-8"
-                                  />
-                                </div>
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
 
                         <FormField
                           control={conversionForm.control}
@@ -653,62 +627,6 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                                   ))}
                                 </SelectContent>
                               </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={conversionForm.control}
-                          name="from_wallet_id"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Billetera Origen</FormLabel>
-                              <Select onValueChange={field.onChange} value={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Seleccionar billetera origen" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {wallets?.map((wallet: any) => (
-                                    <SelectItem key={wallet.wallet_id} value={wallet.wallet_id}>
-                                      {wallet.wallets?.name || wallet.name || 'Sin nombre'}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        {/* Divider */}
-                        <div className="border-t pt-3 mt-3">
-                          <h4 className="text-sm font-medium mb-3">Moneda de Destino (Entrada)</h4>
-                        </div>
-
-                        <FormField
-                          control={conversionForm.control}
-                          name="to_amount"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Cantidad Destino</FormLabel>
-                              <FormControl>
-                                <div className="relative">
-                                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                                    $
-                                  </span>
-                                  <Input
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    value={field.value || ''}
-                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                                    className="pl-8"
-                                  />
-                                </div>
-                              </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -739,6 +657,36 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                           )}
                         />
 
+                        {/* Divider */}
+                        <div className="border-t pt-3 mt-3">
+                          <h4 className="text-sm font-medium mb-3">Billetera Origen/Destino</h4>
+                        </div>
+
+                        <FormField
+                          control={conversionForm.control}
+                          name="from_wallet_id"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Billetera Origen</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Seleccionar billetera origen" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {wallets?.map((wallet: any) => (
+                                    <SelectItem key={wallet.wallet_id} value={wallet.wallet_id}>
+                                      {wallet.wallets?.name || wallet.name || 'Sin nombre'}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
                         <FormField
                           control={conversionForm.control}
                           name="to_wallet_id"
@@ -759,6 +707,63 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                                   ))}
                                 </SelectContent>
                               </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* Divider */}
+                        <div className="border-t pt-3 mt-3">
+                          <h4 className="text-sm font-medium mb-3">Cantidad Origen/Destino</h4>
+                        </div>
+
+                        <FormField
+                          control={conversionForm.control}
+                          name="from_amount"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Cantidad Origen</FormLabel>
+                              <FormControl>
+                                <div className="relative">
+                                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                                    $
+                                  </span>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    value={field.value || ''}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                    className="pl-8"
+                                  />
+                                </div>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={conversionForm.control}
+                          name="to_amount"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Cantidad Destino</FormLabel>
+                              <FormControl>
+                                <div className="relative">
+                                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                                    $
+                                  </span>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    value={field.value || ''}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                    className="pl-8"
+                                  />
+                                </div>
+                              </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
