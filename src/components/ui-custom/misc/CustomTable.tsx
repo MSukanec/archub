@@ -3,7 +3,7 @@ import { ChevronUp, ChevronDown, ArrowUpDown, ChevronLeft, ChevronRight } from '
 import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { TableRowActions } from '@/components/ui-custom/TableRowActions'
+import { TableRowActions } from '@/components/ui-custom/misc/TableRowActions'
 
 interface TableRowAction {
   icon: React.ReactNode

@@ -36,7 +36,19 @@ export default function OrganizationActivity() {
       // Get projects
       const { data: projects } = await supabase
         .from('projects')
-        .select('id, name, created_at, status')
+        .select(`
+          id, 
+          name, 
+          created_at, 
+          status,
+          created_by,
+          organization_members!projects_created_by_fkey (
+            users (
+              full_name,
+              avatar_url
+            )
+          )
+        `)
         .eq('organization_id', currentOrganization.id)
         .order('created_at', { ascending: false });
 
@@ -48,7 +60,7 @@ export default function OrganizationActivity() {
           title: 'Nuevo proyecto creado',
           description: `Se creó el proyecto "${project.name}"`,
           created_at: project.created_at,
-          author: userData?.user || { full_name: 'Sistema', avatar_url: '' },
+          author: project.organization_members?.users || { full_name: 'Sistema', avatar_url: '' },
           status: project.status
         });
       });

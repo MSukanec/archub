@@ -8,6 +8,7 @@ import { Building, Users, Crown, Activity } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext';
 import { useMobile } from '@/hooks/use-mobile';
+import { OrganizationGrowthChart } from '@/components/graphics/OrganizationGrowthChart';
 
 // Hook para obtener estadísticas del sistema
 function useSystemStats() {
@@ -141,6 +142,9 @@ export default function AdminDashboard() {
             </div>
           </Card>
         </div>
+
+        {/* Gráfico de crecimiento de organizaciones */}
+        <OrganizationGrowthChart />
 
         {/* Organizaciones recientes */}
         <Card>

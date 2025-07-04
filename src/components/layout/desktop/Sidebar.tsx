@@ -175,7 +175,7 @@ export function Sidebar() {
     construction: null,
     finances: null,
     commercialization: null,
-    admin: 'ADMINISTRACIÓN' // Only admin keeps title for accordion organization
+    admin: null // Admin title removed as requested
   };
 
   // Different navigation items based on context
