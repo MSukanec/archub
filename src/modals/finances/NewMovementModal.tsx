@@ -349,65 +349,119 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
       if (!supabase) throw new Error('Supabase no está disponible')
       if (!organizationId) throw new Error('No hay organización seleccionada')
 
-      // Obtener el tipo de conversión
-      const conversionType = types?.find((type: any) => 
-        type.name?.toLowerCase() === 'conversión' || type.name?.toLowerCase() === 'conversion'
-      )
-      if (!conversionType) throw new Error('Tipo de conversión no encontrado')
+      // Check if we're editing an existing conversion
+      const isEditingConversion = (editingMovement as any)?._isConversion;
+      const conversionData = (editingMovement as any)?._conversionData;
 
-      // Generar UUID para el grupo de conversión
-      const conversionGroupId = crypto.randomUUID()
+      if (isEditingConversion && conversionData) {
+        // UPDATE existing conversion movements
+        const egresoMovement = conversionData.movements.find((m: any) => 
+          m.movement_data?.type?.name?.toLowerCase().includes('egreso')
+        );
+        const ingresoMovement = conversionData.movements.find((m: any) => 
+          m.movement_data?.type?.name?.toLowerCase().includes('ingreso')
+        );
 
-      // Movimiento de salida (egreso)
-      const egressType = types?.find((type: any) => 
-        type.name?.toLowerCase() === 'egresos' || type.name?.toLowerCase() === 'egreso'
-      )
-      
-      const egressMovement = {
-        movement_date: data.movement_date.toISOString().split('T')[0],
-        created_by: data.created_by,
-        description: data.description || 'Conversión - Salida',
-        amount: data.from_amount,
-        type_id: egressType?.id || conversionType.id,
-        currency_id: data.from_currency_id,
-        wallet_id: data.from_wallet_id,
-        organization_id: organizationId,
-        project_id: currentUser?.preferences?.last_project_id,
-        conversion_group_id: conversionGroupId
+        if (!egresoMovement || !ingresoMovement) {
+          throw new Error('No se encontraron los movimientos de la conversión');
+        }
+
+        // Update egreso movement
+        const { error: egresoError } = await supabase
+          .from('movements')
+          .update({
+            movement_date: data.movement_date.toISOString().split('T')[0],
+            description: data.description || 'Conversión - Salida',
+            amount: data.from_amount,
+            currency_id: data.from_currency_id,
+            wallet_id: data.from_wallet_id,
+            created_by: data.created_by
+          })
+          .eq('id', egresoMovement.id);
+
+        if (egresoError) throw egresoError;
+
+        // Update ingreso movement
+        const { error: ingresoError } = await supabase
+          .from('movements')
+          .update({
+            movement_date: data.movement_date.toISOString().split('T')[0],
+            description: data.description || 'Conversión - Entrada',
+            amount: data.to_amount,
+            currency_id: data.to_currency_id,
+            wallet_id: data.to_wallet_id,
+            created_by: data.created_by
+          })
+          .eq('id', ingresoMovement.id);
+
+        if (ingresoError) throw ingresoError;
+
+        console.log('Conversion updated successfully');
+        return [egresoMovement, ingresoMovement];
+      } else {
+        // CREATE new conversion
+        const conversionType = types?.find((type: any) => 
+          type.name?.toLowerCase() === 'conversión' || type.name?.toLowerCase() === 'conversion'
+        )
+        if (!conversionType) throw new Error('Tipo de conversión no encontrado')
+
+        // Generar UUID para el grupo de conversión
+        const conversionGroupId = crypto.randomUUID()
+
+        // Movimiento de salida (egreso)
+        const egressType = types?.find((type: any) => 
+          type.name?.toLowerCase() === 'egresos' || type.name?.toLowerCase() === 'egreso'
+        )
+        
+        const egressMovement = {
+          movement_date: data.movement_date.toISOString().split('T')[0],
+          created_by: data.created_by,
+          description: data.description || 'Conversión - Salida',
+          amount: data.from_amount,
+          type_id: egressType?.id || conversionType.id,
+          currency_id: data.from_currency_id,
+          wallet_id: data.from_wallet_id,
+          organization_id: organizationId,
+          project_id: currentUser?.preferences?.last_project_id,
+          conversion_group_id: conversionGroupId
+        }
+
+        // Movimiento de entrada (ingreso)
+        const ingressType = types?.find((type: any) => 
+          type.name?.toLowerCase() === 'ingresos' || type.name?.toLowerCase() === 'ingreso'
+        )
+        
+        const ingressMovement = {
+          movement_date: data.movement_date.toISOString().split('T')[0],
+          created_by: data.created_by,
+          description: data.description || 'Conversión - Entrada',
+          amount: data.to_amount,
+          type_id: ingressType?.id || conversionType.id,
+          currency_id: data.to_currency_id,
+          wallet_id: data.to_wallet_id,
+          organization_id: organizationId,
+          project_id: currentUser?.preferences?.last_project_id,
+          conversion_group_id: conversionGroupId
+        }
+
+        // Insertar ambos movimientos
+        const { data: movements, error } = await supabase
+          .from('movements')
+          .insert([egressMovement, ingressMovement])
+          .select()
+
+        if (error) throw error
+        return movements
       }
-
-      // Movimiento de entrada (ingreso)
-      const ingressType = types?.find((type: any) => 
-        type.name?.toLowerCase() === 'ingresos' || type.name?.toLowerCase() === 'ingreso'
-      )
-      
-      const ingressMovement = {
-        movement_date: data.movement_date.toISOString().split('T')[0],
-        created_by: data.created_by,
-        description: data.description || 'Conversión - Entrada',
-        amount: data.to_amount,
-        type_id: ingressType?.id || conversionType.id,
-        currency_id: data.to_currency_id,
-        wallet_id: data.to_wallet_id,
-        organization_id: organizationId,
-        project_id: currentUser?.preferences?.last_project_id,
-        conversion_group_id: conversionGroupId
-      }
-
-      // Insertar ambos movimientos
-      const { data: movements, error } = await supabase
-        .from('movements')
-        .insert([egressMovement, ingressMovement])
-        .select()
-
-      if (error) throw error
-      return movements
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['movements'] })
+      const isEditing = (editingMovement as any)?._isConversion;
       toast({
-        title: 'Conversión creada',
-        description: 'La conversión ha sido creada exitosamente con ambos movimientos.',
+        title: isEditing ? 'Conversión actualizada' : 'Conversión creada',
+        description: isEditing 
+          ? 'La conversión ha sido actualizada exitosamente.' 
+          : 'La conversión ha sido creada exitosamente con ambos movimientos.',
       })
       onClose()
       // Reset form

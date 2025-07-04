@@ -213,20 +213,40 @@ export default function Movements() {
 
   // Delete movement mutation
   const deleteMovementMutation = useMutation({
-    mutationFn: async (movementId: string) => {
-      const { error } = await supabase
-        .from("movements")
-        .delete()
-        .eq("id", movementId);
+    mutationFn: async (movementOrId: string | Movement) => {
+      // Check if it's a conversion deletion
+      if (typeof movementOrId === 'object' && (movementOrId as any)._isConversionDeletion) {
+        const conversionData = (movementOrId as any)._conversionData;
+        const movementIds = conversionData.movements.map((m: Movement) => m.id);
+        
+        // Delete all movements in the conversion group
+        const { error } = await supabase
+          .from("movements")
+          .delete()
+          .in("id", movementIds);
 
-      if (error) throw error;
+        if (error) throw error;
+        return { isConversion: true, count: movementIds.length };
+      } else {
+        // Regular single movement deletion
+        const movementId = typeof movementOrId === 'string' ? movementOrId : movementOrId.id;
+        const { error } = await supabase
+          .from("movements")
+          .delete()
+          .eq("id", movementId);
+
+        if (error) throw error;
+        return { isConversion: false, count: 1 };
+      }
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["movements"] });
       setDeletingMovement(null);
       toast({
-        title: "Movimiento eliminado",
-        description: "El movimiento ha sido eliminado correctamente",
+        title: result.isConversion ? "Conversión eliminada" : "Movimiento eliminado",
+        description: result.isConversion 
+          ? "La conversión completa ha sido eliminada correctamente"
+          : "El movimiento ha sido eliminado correctamente",
       });
     },
     onError: (error: any) => {
@@ -291,6 +311,17 @@ export default function Movements() {
     setDeletingMovement(movement);
   };
 
+  const handleDeleteConversion = (conversionGroup: ConversionGroup) => {
+    // Use the first movement as the deleting movement but mark it as a conversion deletion
+    const firstMovement = conversionGroup.movements[0];
+    const movementWithConversionData = {
+      ...firstMovement,
+      _isConversionDeletion: true,
+      _conversionData: conversionGroup
+    };
+    setDeletingMovement(movementWithConversionData as any);
+  };
+
   const handleToggleFavorite = async (movement: Movement) => {
     try {
       await toggleFavoriteMutation.mutateAsync({
@@ -315,7 +346,7 @@ export default function Movements() {
 
   const confirmDelete = () => {
     if (deletingMovement) {
-      deleteMovementMutation.mutate(deletingMovement.id);
+      deleteMovementMutation.mutate(deletingMovement);
     }
   };
 
@@ -939,12 +970,7 @@ export default function Movements() {
                 icon: <Trash2 className="h-4 w-4" />,
                 label: "Eliminar conversión",
                 onClick: () => {
-                  // Delete all movements in the group
-                  if (window.confirm('¿Estás seguro de que quieres eliminar esta conversión completa? Esto eliminará ambos movimientos.')) {
-                    item.movements.forEach(movement => {
-                      handleDelete(movement);
-                    });
-                  }
+                  handleDeleteConversion(item);
                 },
                 variant: "destructive"
               }
@@ -1010,10 +1036,17 @@ export default function Movements() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar movimiento?</AlertDialogTitle>
+            <AlertDialogTitle>
+              {(deletingMovement as any)?._isConversionDeletion 
+                ? "¿Eliminar conversión completa?" 
+                : "¿Eliminar movimiento?"
+              }
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción no se puede deshacer. El movimiento será eliminado
-              permanentemente.
+              {(deletingMovement as any)?._isConversionDeletion 
+                ? "Esta acción no se puede deshacer. La conversión completa (ambos movimientos) será eliminada permanentemente."
+                : "Esta acción no se puede deshacer. El movimiento será eliminado permanentemente."
+              }
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
