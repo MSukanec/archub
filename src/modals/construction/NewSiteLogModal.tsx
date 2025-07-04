@@ -13,6 +13,7 @@ import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeade
 import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody'
 import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -22,7 +23,9 @@ import { Switch } from '@/components/ui/switch'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { useToast } from '@/hooks/use-toast'
-import { Calendar, User, FileText, Cloud, MessageSquare, Star, Eye, Calendar as CalendarIcon, Plus, X, Settings, Truck, Trash2 } from 'lucide-react'
+import { Calendar, User, FileText, Cloud, MessageSquare, Star, Eye, Calendar as CalendarIcon, Plus, X, Settings, Truck, Trash2, Folder } from 'lucide-react'
+import { FileUploader } from '@/components/ui-custom/FileUploader'
+import { uploadSiteLogFiles, saveSiteLogFiles, getSiteLogFiles, deleteSiteLogFile } from '@/lib/storage/uploadSiteLogFiles'
 
 // ContactOptions component for rendering contact options
 interface ContactOptionsProps {
@@ -189,6 +192,8 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
   const [attendees, setAttendees] = useState<SiteLogAttendeeForm[]>([])
   const [equipmentList, setEquipmentList] = useState<SiteLogEquipmentForm[]>([])
   const [accordionValue, setAccordionValue] = useState<string>("informacion-basica")
+  const [files, setFiles] = useState<File[]>([])
+  const [existingFiles, setExistingFiles] = useState<any[]>([])
   
   const form = useForm<SiteLogForm>({
     resolver: zodResolver(siteLogSchema),
@@ -225,9 +230,12 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
       // Load events and attendees for editing
       loadSiteLogData(editingSiteLog.id)
     } else {
-      // Reset events and attendees for new entries
+      // Reset events, attendees, and files for new entries
       setEvents([])
       setAttendees([])
+      setEquipmentList([])
+      setFiles([])
+      setExistingFiles([])
       
       // Seleccionar usuario actual por defecto en modo creación
       const currentUserMember = members?.find((member: any) => member.users.id === userData?.user?.id);
@@ -283,6 +291,10 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
           description: equip.description || ''
         })))
       }
+
+      // Load existing files
+      const existingFiles = await getSiteLogFiles(siteLogId)
+      setExistingFiles(existingFiles)
     } catch (error) {
       console.error('Error loading site log data:', error)
     }
@@ -421,6 +433,21 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
         }
       }
 
+      // Handle file uploads
+      if (siteLogResult.data && files.length > 0) {
+        try {
+          const uploadedFiles = await uploadSiteLogFiles(files, siteLogResult.data.id)
+          await saveSiteLogFiles(siteLogResult.data.id, uploadedFiles)
+        } catch (error) {
+          console.error('Error uploading files:', error)
+          toast({
+            title: 'Advertencia',
+            description: 'La entrada se guardó pero hubo un error al subir algunos archivos',
+            variant: 'destructive'
+          })
+        }
+      }
+
       return siteLogResult.data
     },
     onSuccess: () => {
@@ -447,6 +474,8 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
           'La nueva entrada de bitácora ha sido creada correctamente'
       })
       form.reset()
+      setFiles([])
+      setExistingFiles([])
       onClose()
     },
     onError: (error: any) => {
@@ -1057,6 +1086,78 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                         <Plus className="h-4 w-4 mr-2" />
                         Agregar Maquinaria
                       </Button>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  {/* Fotos y Videos */}
+                  <AccordionItem value="fotos-videos">
+                    <AccordionTrigger className="text-sm font-medium">
+                      Fotos y Videos ({files.length + existingFiles.length})
+                    </AccordionTrigger>
+                    <AccordionContent className="space-y-3">
+                      <div className="space-y-3">
+                        <div>
+                          <Label className="text-xs text-muted-foreground mb-1 block">
+                            Subir nuevos archivos
+                          </Label>
+                          <FileUploader
+                            value={files}
+                            onChange={setFiles}
+                            accept={['image/*', 'video/*']}
+                            maxSizeMB={10}
+                            multiple={true}
+                          />
+                        </div>
+                        
+                        {existingFiles.length > 0 && (
+                          <div>
+                            <Label className="text-xs text-muted-foreground mb-1 block">
+                              Archivos existentes
+                            </Label>
+                            <div className="grid grid-cols-2 gap-2">
+                              {existingFiles.map((file, index) => (
+                                <div key={index} className="relative group">
+                                  {file.file_type === 'image' ? (
+                                    <img 
+                                      src={file.file_url} 
+                                      alt={file.original_name}
+                                      className="w-full h-24 object-cover rounded-md border"
+                                    />
+                                  ) : (
+                                    <div className="w-full h-24 bg-gray-100 rounded-md border flex items-center justify-center">
+                                      <span className="text-xs text-gray-600">{file.original_name}</span>
+                                    </div>
+                                  )}
+                                  <Button
+                                    type="button"
+                                    variant="destructive"
+                                    size="sm"
+                                    className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
+                                    onClick={async () => {
+                                      try {
+                                        await deleteSiteLogFile(file.id, file.file_url)
+                                        setExistingFiles(prev => prev.filter(f => f.id !== file.id))
+                                        toast({
+                                          title: 'Archivo eliminado',
+                                          description: 'El archivo se eliminó correctamente'
+                                        })
+                                      } catch (error) {
+                                        toast({
+                                          title: 'Error',
+                                          description: 'No se pudo eliminar el archivo',
+                                          variant: 'destructive'
+                                        })
+                                      }
+                                    }}
+                                  >
+                                    ×
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </AccordionContent>
                   </AccordionItem>
 
