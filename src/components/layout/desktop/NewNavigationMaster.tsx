@@ -45,7 +45,7 @@ import {
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { useSidebarStore } from "@/stores/sidebarStore";
-import SidebarButton from "./SidebarButton";
+import SidebarButton from "../SidebarButton";
 
 export function NewNavigationMaster() {
   const [location, navigate] = useLocation();
@@ -273,30 +273,38 @@ export function NewNavigationMaster() {
           onClick={() => navigate('/perfil')}
         />
 
-        {/* Plan Button */}
+        {/* Profile Button */}
         <div className={cn(
           "transition-all duration-300",
           isExpanded ? "p-2" : "p-1"
         )}>
           {isExpanded ? (
-            <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+            <div className="bg-[--card-bg] border border-[--card-border] rounded-lg p-3 cursor-pointer hover:bg-[--card-hover-bg]" onClick={() => navigate('/perfil')}>
               <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-                  <Crown className="w-3 h-3 text-white" />
+                <div className="w-6 h-6 rounded-full flex items-center justify-center bg-[--accent] text-white">
+                  {userData?.user?.avatar_url ? (
+                    <img src={userData.user.avatar_url} alt="Avatar" className="w-6 h-6 rounded-full" />
+                  ) : (
+                    <UserCircle className="w-4 h-4" />
+                  )}
                 </div>
                 <div>
-                  <div className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                    Plan {userData?.organization?.plan?.name || 'FREE'}
+                  <div className="text-sm font-medium text-[--card-fg]">
+                    {userData?.user?.full_name || 'Usuario'}
                   </div>
-                  <div className="text-xs text-blue-600 dark:text-blue-400">
-                    Actualizar
+                  <div className="text-xs text-[--muted-fg]">
+                    Perfil
                   </div>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mx-auto">
-              <Crown className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 rounded-full flex items-center justify-center mx-auto bg-[--accent] cursor-pointer hover:opacity-80" onClick={() => navigate('/perfil')}>
+              {userData?.user?.avatar_url ? (
+                <img src={userData.user.avatar_url} alt="Avatar" className="w-8 h-8 rounded-full" />
+              ) : (
+                <UserCircle className="w-4 h-4 text-white" />
+              )}
             </div>
           )}
         </div>

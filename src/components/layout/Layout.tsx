@@ -1,11 +1,11 @@
 import { useEffect } from "react";
-import { NewNavigationMaster } from "./NewNavigationMaster";
+import { NewNavigationMaster } from "./desktop/NewNavigationMaster";
 import { Header } from "./Header";
 import { useAuthStore } from "@/stores/authStore";
 import { useThemeStore } from "@/stores/themeStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useSidebarStore } from "@/stores/sidebarStore";
-import { MobileActionBar } from "@/components/ui-custom/mobile/MobileActionBar";
+import { MobileActionBar } from "./mobile/MobileActionBar";
 import { useMobileActionBar } from "@/contexts/MobileActionBarContext";
 import { useMobile } from "@/hooks/use-mobile";
 
