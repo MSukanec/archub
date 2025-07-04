@@ -66,6 +66,7 @@ interface Movement {
   currency_id: string;
   wallet_id: string;
   is_favorite?: boolean;
+  conversion_group_id?: string;
   movement_data?: {
     type?: {
       id: string;
@@ -95,6 +96,26 @@ interface Movement {
     email: string;
     avatar_url?: string;
   };
+}
+
+interface ConversionGroup {
+  id: string;
+  conversion_group_id: string;
+  movements: Movement[];
+  from_currency: string;
+  to_currency: string;
+  from_amount: number;
+  to_amount: number;
+  description: string;
+  movement_date: string;
+  created_at: string;
+  creator?: {
+    id: string;
+    full_name?: string;
+    email: string;
+    avatar_url?: string;
+  };
+  is_conversion_group: true;
 }
 
 export default function Movements() {
@@ -313,7 +334,62 @@ export default function Movements() {
     ),
   );
 
-  // Filter movements
+  // Group movements by conversion_group_id
+  const groupConversions = (movements: Movement[]): (Movement | ConversionGroup)[] => {
+    const conversionGroups = new Map<string, Movement[]>();
+    const regularMovements: Movement[] = [];
+
+    // Separate movements with conversion_group_id from regular movements
+    movements.forEach(movement => {
+      if (movement.conversion_group_id) {
+        if (!conversionGroups.has(movement.conversion_group_id)) {
+          conversionGroups.set(movement.conversion_group_id, []);
+        }
+        conversionGroups.get(movement.conversion_group_id)!.push(movement);
+      } else {
+        regularMovements.push(movement);
+      }
+    });
+
+    // Create conversion group objects
+    const conversionGroupObjects: ConversionGroup[] = [];
+    conversionGroups.forEach((groupMovements, groupId) => {
+      if (groupMovements.length >= 2) {
+        // Find egreso and ingreso movements
+        const egresoMovement = groupMovements.find(m => 
+          m.movement_data?.type?.name?.toLowerCase().includes('egreso')
+        );
+        const ingresoMovement = groupMovements.find(m => 
+          m.movement_data?.type?.name?.toLowerCase().includes('ingreso')
+        );
+
+        if (egresoMovement && ingresoMovement) {
+          const conversionGroup: ConversionGroup = {
+            id: groupId,
+            conversion_group_id: groupId,
+            movements: groupMovements,
+            from_currency: egresoMovement.movement_data?.currency?.code || 'N/A',
+            to_currency: ingresoMovement.movement_data?.currency?.code || 'N/A',
+            from_amount: egresoMovement.amount,
+            to_amount: ingresoMovement.amount,
+            description: egresoMovement.description || 'Conversión',
+            movement_date: egresoMovement.movement_date,
+            created_at: egresoMovement.created_at,
+            creator: egresoMovement.creator,
+            is_conversion_group: true
+          };
+          conversionGroupObjects.push(conversionGroup);
+        }
+      } else {
+        // If only one movement in group, treat as regular movement
+        regularMovements.push(...groupMovements);
+      }
+    });
+
+    return [...conversionGroupObjects, ...regularMovements];
+  };
+
+  // Filter movements (applied before grouping)
   const filteredMovements = movements
     .filter((movement) => {
       const matchesSearch =
@@ -341,7 +417,10 @@ export default function Movements() {
       return (
         matchesSearch && matchesType && matchesCategory && matchesConversion
       );
-    })
+    });
+
+  // Group conversions and sort
+  const processedMovements = groupConversions(filteredMovements)
     .sort((a, b) => {
       let comparison = 0;
 
@@ -351,17 +430,25 @@ export default function Movements() {
             new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
           break;
         case "amount":
-          comparison = a.amount - b.amount;
+          if ('is_conversion_group' in a && 'is_conversion_group' in b) {
+            comparison = a.from_amount - b.from_amount;
+          } else if ('is_conversion_group' in a) {
+            comparison = a.from_amount - (b as Movement).amount;
+          } else if ('is_conversion_group' in b) {
+            comparison = (a as Movement).amount - b.from_amount;
+          } else {
+            comparison = (a as Movement).amount - (b as Movement).amount;
+          }
           break;
         case "type":
-          comparison = (a.movement_data?.type?.name || "").localeCompare(
-            b.movement_data?.type?.name || "",
-          );
+          const aType = 'is_conversion_group' in a ? 'Conversión' : (a as Movement).movement_data?.type?.name || '';
+          const bType = 'is_conversion_group' in b ? 'Conversión' : (b as Movement).movement_data?.type?.name || '';
+          comparison = aType.localeCompare(bType);
           break;
         case "category":
-          comparison = (a.movement_data?.category?.name || "").localeCompare(
-            b.movement_data?.category?.name || "",
-          );
+          const aCategory = 'is_conversion_group' in a ? 'Conversión' : (a as Movement).movement_data?.category?.name || '';
+          const bCategory = 'is_conversion_group' in b ? 'Conversión' : (b as Movement).movement_data?.category?.name || '';
+          comparison = aCategory.localeCompare(bCategory);
           break;
       }
 
@@ -484,8 +571,8 @@ export default function Movements() {
       width: "5%",
       sortable: true,
       sortType: "date" as const,
-      render: (movement: Movement) => {
-        const displayDate = movement.movement_date;
+      render: (item: Movement | ConversionGroup) => {
+        const displayDate = item.movement_date;
 
         if (!displayDate) {
           return <div className="text-xs text-muted-foreground">Sin fecha</div>;
@@ -528,19 +615,19 @@ export default function Movements() {
       width: "10%",
       sortable: true,
       sortType: "string" as const,
-      render: (movement: Movement) => (
+      render: (item: Movement | ConversionGroup) => (
         <div className="flex items-center gap-2">
           <Avatar className="h-6 w-6">
-            <AvatarImage src={movement.creator?.avatar_url} />
+            <AvatarImage src={item.creator?.avatar_url} />
             <AvatarFallback className="text-xs">
-              {movement.creator?.full_name?.charAt(0) ||
-                movement.creator?.email?.charAt(0) ||
+              {item.creator?.full_name?.charAt(0) ||
+                item.creator?.email?.charAt(0) ||
                 "U"}
             </AvatarFallback>
           </Avatar>
           <span className="text-xs truncate">
-            {movement.creator?.full_name ||
-              movement.creator?.email ||
+            {item.creator?.full_name ||
+              item.creator?.email ||
               "Usuario"}
           </span>
         </div>
@@ -552,11 +639,20 @@ export default function Movements() {
       width: "5%",
       sortable: true,
       sortType: "string" as const,
-      render: (movement: Movement) => (
-        <span className="text-xs font-medium">
-          {movement.movement_data?.type?.name || "Sin tipo"}
-        </span>
-      ),
+      render: (item: Movement | ConversionGroup) => {
+        if ('is_conversion_group' in item) {
+          return (
+            <span className="text-xs font-medium text-blue-600">
+              Conversión
+            </span>
+          );
+        }
+        return (
+          <span className="text-xs font-medium">
+            {item.movement_data?.type?.name || "Sin tipo"}
+          </span>
+        );
+      },
     },
     {
       key: "category",
@@ -564,29 +660,57 @@ export default function Movements() {
       width: "10%",
       sortable: true,
       sortType: "string" as const,
-      render: (movement: Movement) => (
-        <div>
-          <div className="text-xs font-medium">
-            {movement.movement_data?.category?.name || "Sin categoría"}
-          </div>
-          {movement.movement_data?.subcategory?.name && (
-            <div className="text-xs text-muted-foreground">
-              {movement.movement_data.subcategory.name}
+      render: (item: Movement | ConversionGroup) => {
+        if ('is_conversion_group' in item) {
+          return (
+            <div>
+              <div className="text-xs font-medium text-blue-600">
+                Conversión
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {item.from_currency} → {item.to_currency}
+              </div>
             </div>
-          )}
-        </div>
-      ),
+          );
+        }
+        return (
+          <div>
+            <div className="text-xs font-medium">
+              {item.movement_data?.category?.name || "Sin categoría"}
+            </div>
+            {item.movement_data?.subcategory?.name && (
+              <div className="text-xs text-muted-foreground">
+                {item.movement_data.subcategory.name}
+              </div>
+            )}
+          </div>
+        );
+      },
     },
     {
       key: "description",
       label: "Descripción",
       sortable: true,
       sortType: "string" as const,
-      render: (movement: Movement) => (
-        <span className="text-xs">
-          {movement.description || "Sin descripción"}
-        </span>
-      ),
+      render: (item: Movement | ConversionGroup) => {
+        if ('is_conversion_group' in item) {
+          return (
+            <div className="text-xs">
+              <div className="font-medium text-blue-600">
+                Conversión {item.from_currency} → {item.to_currency}
+              </div>
+              <div className="text-muted-foreground mt-1">
+                {item.description || "Sin descripción"}
+              </div>
+            </div>
+          );
+        }
+        return (
+          <span className="text-xs">
+            {item.description || "Sin descripción"}
+          </span>
+        );
+      },
     },
     {
       key: "currency",
@@ -594,11 +718,26 @@ export default function Movements() {
       width: "5%",
       sortable: true,
       sortType: "string" as const,
-      render: (movement: Movement) => (
-        <Badge variant="secondary" className="text-xs">
-          {movement.movement_data?.currency?.code || "USD"}
-        </Badge>
-      ),
+      render: (item: Movement | ConversionGroup) => {
+        if ('is_conversion_group' in item) {
+          return (
+            <div className="space-y-1">
+              <Badge variant="outline" className="text-xs">
+                {item.from_currency}
+              </Badge>
+              <div className="text-xs text-muted-foreground">↓</div>
+              <Badge variant="outline" className="text-xs">
+                {item.to_currency}
+              </Badge>
+            </div>
+          );
+        }
+        return (
+          <Badge variant="secondary" className="text-xs">
+            {item.movement_data?.currency?.code || "USD"}
+          </Badge>
+        );
+      },
     },
     {
       key: "wallet",
@@ -606,11 +745,28 @@ export default function Movements() {
       width: "5%",
       sortable: true,
       sortType: "string" as const,
-      render: (movement: Movement) => (
-        <span className="text-xs">
-          {movement.movement_data?.wallet?.name || "Principal"}
-        </span>
-      ),
+      render: (item: Movement | ConversionGroup) => {
+        if ('is_conversion_group' in item) {
+          const egresoMovement = item.movements.find(m => 
+            m.movement_data?.type?.name?.toLowerCase().includes('egreso')
+          );
+          const ingresoMovement = item.movements.find(m => 
+            m.movement_data?.type?.name?.toLowerCase().includes('ingreso')
+          );
+          return (
+            <div className="text-xs space-y-1">
+              <div>{egresoMovement?.movement_data?.wallet?.name || "Principal"}</div>
+              <div className="text-muted-foreground">↓</div>
+              <div>{ingresoMovement?.movement_data?.wallet?.name || "Principal"}</div>
+            </div>
+          );
+        }
+        return (
+          <span className="text-xs">
+            {item.movement_data?.wallet?.name || "Principal"}
+          </span>
+        );
+      },
     },
     {
       key: "amount",
@@ -618,11 +774,26 @@ export default function Movements() {
       width: "5%",
       sortable: true,
       sortType: "number" as const,
-      render: (movement: Movement) => (
-        <span className="text-xs font-medium">
-          ${movement.amount?.toLocaleString() || "0"}
-        </span>
-      ),
+      render: (item: Movement | ConversionGroup) => {
+        if ('is_conversion_group' in item) {
+          return (
+            <div className="text-xs space-y-1">
+              <div className="font-medium text-red-600">
+                -${item.from_amount?.toLocaleString() || "0"}
+              </div>
+              <div className="text-muted-foreground">↓</div>
+              <div className="font-medium text-green-600">
+                +${item.to_amount?.toLocaleString() || "0"}
+              </div>
+            </div>
+          );
+        }
+        return (
+          <span className="text-xs font-medium">
+            ${item.amount?.toLocaleString() || "0"}
+          </span>
+        );
+      },
     },
   ];
 
@@ -671,16 +842,19 @@ export default function Movements() {
       
       <CustomTable
         columns={tableColumns}
-        data={filteredMovements}
+        data={processedMovements}
         isLoading={isLoading}
         selectable={true}
         defaultSort={{
           key: "movement_date",
           direction: "desc",
         }}
-        getRowClassName={(movement: Movement) => {
+        getRowClassName={(item: Movement | ConversionGroup) => {
+          if ('is_conversion_group' in item) {
+            return "movement-row-conversion";
+          }
           // Determine if it's income or expense based on movement type
-          const typeName = movement.movement_data?.type?.name || "";
+          const typeName = item.movement_data?.type?.name || "";
           
           if (typeName === "Ingresos" || typeName.toLowerCase().includes("ingreso")) {
             return "movement-row-income";
@@ -690,33 +864,62 @@ export default function Movements() {
           return "";
         }}
         selectedItems={selectedMovements}
-        onSelectionChange={setSelectedMovements}
-        getItemId={(movement) => movement.id}
-        onCardClick={(movement: Movement) => handleEdit(movement)}
-        renderCard={(movement) => (
-          <MovementCard movement={transformMovementToCard(movement)} />
-        )}
-        getRowActions={(movement: Movement) => [
-          {
-            icon: movement.is_favorite ? <Heart className="h-4 w-4 fill-current" /> : <Heart className="h-4 w-4" />,
-            label: movement.is_favorite ? "Quitar de favoritos" : "Agregar a favoritos",
-            onClick: () => handleToggleFavorite(movement),
-            variant: movement.is_favorite ? "muted" : "default",
-            isActive: movement.is_favorite
-          },
-          {
-            icon: <Pencil className="h-4 w-4" />,
-            label: "Editar",
-            onClick: () => handleEdit(movement),
-            variant: "default"
-          },
-          {
-            icon: <Trash2 className="h-4 w-4" />,
-            label: "Eliminar",
-            onClick: () => handleDelete(movement),
-            variant: "destructive"
+        onSelectionChange={(items) => {
+          // Only allow selection of regular movements, not conversion groups
+          const regularMovements = items.filter(item => !('is_conversion_group' in item)) as Movement[];
+          setSelectedMovements(regularMovements);
+        }}
+        getItemId={(item) => item.id}
+        onCardClick={(item: Movement | ConversionGroup) => {
+          if (!('is_conversion_group' in item)) {
+            handleEdit(item);
           }
-        ]}
+        }}
+        renderCard={(item) => {
+          if ('is_conversion_group' in item) {
+            // For conversion groups, we'll use a simple display since they can't be edited
+            return (
+              <div className="p-3 bg-blue-50 rounded-lg border">
+                <div className="text-sm font-medium text-blue-600">
+                  Conversión {item.from_currency} → {item.to_currency}
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  -{item.from_amount?.toLocaleString()} {item.from_currency} → +{item.to_amount?.toLocaleString()} {item.to_currency}
+                </div>
+              </div>
+            );
+          }
+          return (
+            <MovementCard movement={transformMovementToCard(item)} />
+          );
+        }}
+        getRowActions={(item: Movement | ConversionGroup) => {
+          if ('is_conversion_group' in item) {
+            // No actions for conversion groups
+            return [];
+          }
+          return [
+            {
+              icon: item.is_favorite ? <Heart className="h-4 w-4 fill-current" /> : <Heart className="h-4 w-4" />,
+              label: item.is_favorite ? "Quitar de favoritos" : "Agregar a favoritos",
+              onClick: () => handleToggleFavorite(item),
+              variant: item.is_favorite ? "muted" : "default",
+              isActive: item.is_favorite
+            },
+            {
+              icon: <Pencil className="h-4 w-4" />,
+              label: "Editar",
+              onClick: () => handleEdit(item),
+              variant: "default"
+            },
+            {
+              icon: <Trash2 className="h-4 w-4" />,
+              label: "Eliminar",
+              onClick: () => handleDelete(item),
+              variant: "destructive"
+            }
+          ];
+        }}
         emptyState={
           <CustomEmptyState
             title="No hay movimientos registrados"

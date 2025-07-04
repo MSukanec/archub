@@ -16,6 +16,7 @@ interface Movement {
   currency_id: string
   wallet_id: string
   is_favorite?: boolean
+  conversion_group_id?: string
   movement_data?: {
     type?: {
       id: string
@@ -78,7 +79,8 @@ export function useMovements(organizationId: string | undefined, projectId: stri
           wallet_id,
           file_url,
           is_conversion,
-          is_favorite
+          is_favorite,
+          conversion_group_id
         `)
         .eq('organization_id', organizationId)
         .order('created_at', { ascending: false });

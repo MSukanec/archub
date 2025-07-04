@@ -309,6 +309,11 @@
   border-left: 4px solid var(--movement-expense-border) !important;
 }
 
+.movement-row-conversion {
+  background-color: rgba(59, 130, 246, 0.08) !important;
+  border-left: 4px solid rgb(59, 130, 246) !important;
+}
+
 /* Avatar styles - aplicar borde de 3px a todos los avatares */
 .avatar-border,
 [data-avatar],
