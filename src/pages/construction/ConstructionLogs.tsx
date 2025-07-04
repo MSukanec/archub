@@ -622,7 +622,7 @@ export default function ConstructionLogs() {
                                 siteLog.files.map((file: any, index: number) => (
                                   <Card key={index} className="p-2 bg-gray-50/50 border-gray-200">
                                     <div className="flex items-center gap-2">
-                                      {file.file_type === 'image' ? (
+                                      {file.file_type?.startsWith('image/') ? (
                                         <Image className="h-4 w-4 text-blue-600" />
                                       ) : (
                                         <Video className="h-4 w-4 text-purple-600" />

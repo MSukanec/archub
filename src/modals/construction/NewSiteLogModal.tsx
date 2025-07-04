@@ -832,7 +832,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                             <div className="grid grid-cols-2 gap-2">
                               {existingFiles.map((file, index) => (
                                 <div key={index} className="relative group">
-                                  {file.file_type === 'image' ? (
+                                  {file.file_type?.startsWith('image/') ? (
                                     <img 
                                       src={file.file_url} 
                                       alt={file.original_name}

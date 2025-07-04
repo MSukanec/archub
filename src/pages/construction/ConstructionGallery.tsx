@@ -143,9 +143,9 @@ export default function ConstructionGallery() {
     // Filter by file type
     if (filterType !== 'all') {
       filtered = filtered.filter(file => 
-        filterType === 'image' 
-          ? file.file_type === 'image'
-          : file.file_type === 'video'
+        filterType === 'image'
+          ? file.file_type?.startsWith('image/')
+          : file.file_type?.startsWith('video/')
       );
     }
 
@@ -270,7 +270,7 @@ export default function ConstructionGallery() {
                 onClick={() => openLightbox(file)}
               >
                 <div className="aspect-square relative">
-                  {file.file_type === 'image' ? (
+                  {file.file_type?.startsWith('image/') ? (
                     <img 
                       src={file.file_url} 
                       alt={file.original_name}
@@ -343,7 +343,7 @@ export default function ConstructionGallery() {
 
                 {/* Media content */}
                 <div className="flex-1 flex items-center justify-center p-4 bg-black/5">
-                  {selectedFile.file_type === 'image' ? (
+                  {selectedFile.file_type?.startsWith('image/') ? (
                     <img 
                       src={selectedFile.file_url} 
                       alt={selectedFile.original_name}
