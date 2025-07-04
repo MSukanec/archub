@@ -39,7 +39,9 @@ import {
   FileCode,
   History,
   Contact,
-  Images
+  Images,
+  Database,
+  Layout
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -193,43 +195,48 @@ export function Sidebar() {
     ],
     project: [
       { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },
+      { icon: ArrowLeft, label: 'Volver a Organización', href: '#', onClick: () => { setSidebarContext('organization'); navigate('/organization/dashboard'); } },
       { type: 'divider' },
       { icon: FolderOpen, label: 'Diseño', href: '#', onClick: () => { setSidebarContext('design'); navigate('/design/dashboard'); }, rightIcon: ChevronRight },
       { icon: Building, label: 'Obra', href: '#', onClick: () => { setSidebarContext('construction'); navigate('/construction/dashboard'); }, rightIcon: ChevronRight },
       { icon: DollarSign, label: 'Finanzas', href: '#', onClick: () => { setSidebarContext('finances'); navigate('/finances/dashboard'); }, rightIcon: ChevronRight },
       { icon: Users, label: 'Comercialización', href: '#', onClick: () => { setSidebarContext('commercialization'); navigate('/commercialization/dashboard'); }, rightIcon: ChevronRight, restricted: true },
-      { icon: ArrowLeft, label: 'Volver a Organización', href: '#', onClick: () => { setSidebarContext('organization'); navigate('/organization/dashboard'); } },
     ],
     design: [
       { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' },
-      { type: 'divider' },
-      { icon: Calendar, label: 'Cronograma', href: '/design/timeline', restricted: true },
       { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
+      { type: 'divider' },
+      { icon: FileText, label: 'Documentación', href: '/design/documentation' },
+      { icon: Database, label: 'Datos', href: '/design/data', restricted: true },
+      { icon: Calendar, label: 'Cronograma', href: '/design/timeline', restricted: true },
+      { icon: Layout, label: 'Tablero', href: '/design/board', restricted: true },
+      { icon: Calculator, label: 'Cómputo', href: '/design/compute', restricted: true },
+      { icon: Settings, label: 'Preferencias de Diseño', href: '/design/preferences', restricted: true },
     ],
     construction: [
       { icon: Home, label: 'Resumen de Obra', href: '/construction/dashboard' },
+      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
       { type: 'divider' },
       { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
       { icon: Package, label: 'Materiales', href: '/construction/materials' },
       { icon: FileText, label: 'Bitácora', href: '/construction/logs' },
       { icon: Users, label: 'Personal', href: '/construction/personnel' },
       { icon: Images, label: 'Galería', href: '/construction/gallery' },
-      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
     ],
     finances: [
       { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
+      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
       { type: 'divider' },
       { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
       { icon: Settings, label: 'Preferencias de Finanzas', href: '/finances/preferences' },
-      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
     ],
     commercialization: [
       { icon: Home, label: 'Resumen de Comercialización', href: '/commercialization/dashboard' },
+      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
       { type: 'divider' },
       { icon: Building, label: 'Listado de unidades', href: '/commercialization/unidades' },
       { icon: Users, label: 'Clientes interesados', href: '/commercialization/clientes' },
       { icon: FileText, label: 'Estadísticas de venta', href: '/commercialization/estadisticas' },
-      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
     ],
     admin: [
       { icon: Home, label: 'Resumen de Administración', href: '/admin/dashboard' },
@@ -298,7 +305,7 @@ export function Sidebar() {
                 </span>
               </div>
             )}
-            {navigationItems.map((item: any, index) => (
+            {navigationItems.map((item: any, index: number) => (
               <div key={`${item.label || 'divider'}-${index}`} className="mb-[2px]">
                 {/* Divider */}
                 {item.type === 'divider' ? (

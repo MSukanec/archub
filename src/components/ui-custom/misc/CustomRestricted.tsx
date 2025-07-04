@@ -10,6 +10,7 @@ import { usePlanFeatures } from "@/hooks/usePlanFeatures";
 import { getRestrictionMessage } from "@/utils/restrictions";
 import { useLocation } from "wouter";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useIsAdmin } from "@/hooks/use-admin-permissions";
 
 interface CustomRestrictedProps {
   feature?: string;
@@ -30,6 +31,9 @@ export function CustomRestricted({
 
   // Datos del usuario para debug
   const { data: userData } = useCurrentUser();
+
+  // Verificar si el usuario es administrador
+  const { isAdmin } = useIsAdmin();
 
   // Determinar si está restringido
   let isRestricted = false;
@@ -65,6 +69,49 @@ export function CustomRestricted({
   // Si no está restringido, renderizar directamente los children
   if (!isRestricted) {
     return <>{children}</>;
+  }
+
+  // Si es administrador y la restricción es "coming_soon", permitir acceso pero mostrar indicador visual
+  if (isAdmin && reason === "coming_soon") {
+    return (
+      <div className="relative w-full">
+        {children}
+        
+        {/* Indicador visual para admin en coming_soon */}
+        <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+          <PopoverTrigger asChild>
+            <div
+              className="absolute top-2 right-2 flex items-center justify-center cursor-pointer group"
+              onMouseEnter={() => setIsPopoverOpen(true)}
+              onMouseLeave={() => setIsPopoverOpen(false)}
+            >
+              <div className="bg-white rounded-full p-1 shadow-sm border border-black group-hover:shadow-md transition-shadow">
+                <Lock className="h-2 w-2 text-black" />
+              </div>
+            </div>
+          </PopoverTrigger>
+
+          <PopoverContent
+            className="w-60 p-3 bg-[var(--card-bg)] border shadow-lg"
+            side="top"
+          >
+            <div className="space-y-2">
+              <div className="flex items-start gap-2">
+                <div className="bg-accent/10 rounded-full p-1 flex-shrink-0">
+                  <Lock className="h-3 w-3 text-accent" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-medium text-xs">Acceso de Admin</h4>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Esta función está en desarrollo. Tienes acceso como administrador.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
+      </div>
+    );
   }
 
   // Obtener el mensaje de restricción

@@ -119,6 +119,13 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 4, 2025. Comprehensive sidebar reorganization and DISEÑO section expansion with consistent layout patterns - COMPLETED
+  • Repositioned "Volver a..." navigation buttons below "Resumen de..." buttons and above dividers in all sidebar contexts
+  • Expanded DISEÑO sidebar with 6 new items: Documentación (unrestricted), Datos (restricted), Cronograma (timeline), Tablero (board), Cómputo (compute), Preferencias de Diseño (restricted)
+  • Fixed mobile menu animation system to prevent menu closing during context transitions between navigation states
+  • Enhanced CustomRestricted component to allow admin users to bypass "coming_soon" restrictions while maintaining visual restriction badge
+  • Synchronized all navigation changes between desktop Sidebar.tsx and mobile MobileMenu.tsx for consistent user experience
+  • Added Database and Layout icons to support new DISEÑO sidebar items with proper import structure
 - July 4, 2025. Enhanced mobile menu design with footer navigation and animated transitions - COMPLETED
   • Changed MobileMenu header title from "ARCHUB·" to current context name (Organización, Proyecto, Diseño, etc.)
   • Redesigned mobile menu with flex layout: header (fixed top), navigation (flex-grow), footer (fixed bottom)
