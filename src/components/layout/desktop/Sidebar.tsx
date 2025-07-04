@@ -38,7 +38,8 @@ import {
   Calculator,
   FileCode,
   History,
-  Contact
+  Contact,
+  Images
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -211,6 +212,7 @@ export function Sidebar() {
       { icon: Package, label: 'Materiales', href: '/construction/materials' },
       { icon: FileText, label: 'Bitácora', href: '/construction/logs' },
       { icon: Users, label: 'Personal', href: '/construction/personnel' },
+      { icon: Images, label: 'Galería', href: '/construction/gallery' },
       { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
     ],
     finances: [

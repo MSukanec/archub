@@ -119,17 +119,19 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- July 4, 2025. File upload system implementation and bitácora card expansion with styling fixes
-  • Reorganized "Fotos y Videos" accordion to second position in NewSiteLogModal with proper icon and styling matching other sections
-  • Fixed accordion styling consistency: added gap-2 for icon spacing, proper text-sm font-medium, and Folder icon
-  • Removed duplicate "Fotos y Videos" accordion that was appearing at the end of modal
-  • Added 5th column "Archivos Adjuntos" to expanded bitácora card view in second position after "Comentario Completo"
-  • Changed grid from grid-cols-4 to grid-cols-5 for proper layout with file attachments display
-  • Integrated Image and Video icons for different file types with color coding (blue for images, purple for videos)
-  • Temporarily disabled database operations for site_log_files table until proper Supabase table structure is created
-  • File upload to Supabase Storage still functional - only database record persistence temporarily disabled
-  • Enhanced file upload UI shows "Sin archivos adjuntos" when no files present in expanded card view
-  • System prepared for full functionality once site_log_files table with proper RLS policies is implemented
+- July 4, 2025. Complete gallery system implementation with mobile-first design and file upload restoration
+  • Restored site-log-files bucket usage after user fixed RLS policies - files now upload to correct bucket
+  • Re-enabled all database operations for site_log_files table with proper site_log_id relationships
+  • Created ConstructionGallery.tsx page with modern mobile-first gallery interface following ai-page-template.md structure
+  • Built comprehensive gallery grid with responsive layout: 2-6 columns based on screen size (mobile to desktop)
+  • Implemented advanced lightbox with navigation controls, file info overlay, and download functionality
+  • Added dual filtering system: file type (all/image/video) and date (monthly grouping with localized names)
+  • Gallery displays files from all project bitácoras sorted by date (newest to oldest) as requested
+  • Enhanced file cards with hover overlays showing creator info, date, and entry type badges
+  • Integrated video playback support with Play button overlay and proper video controls in lightbox
+  • Added "Galería" navigation button to construction sidebar with Images icon between Personal and Volver a Proyecto
+  • Gallery route /construction/gallery properly configured in App.tsx with ProtectedRoute wrapper
+  • Mobile-optimized interface matches phone gallery aesthetic with proper aspect ratios and touch interactions
 - July 4, 2025. Complete AdminChangelogs system implementation with professional admin interface for changelog_entries management
   • Created AdminChangelogs.tsx page in src/pages/admin/ following ai-page-template.md structure with comprehensive table interface
   • Built NewAdminChangelogEntryModal.tsx in src/modals/admin/ with proper form validation and single-column layout

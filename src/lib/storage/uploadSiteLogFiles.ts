@@ -19,9 +19,9 @@ export async function uploadSiteLogFiles(
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
       const filePath = `site-log-files/${siteLogId}/${fileName}`
 
-      // Upload to Supabase Storage (using avatars bucket temporarily to avoid RLS issues)
+      // Upload to Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('avatars')
+        .from('site-log-files')
         .upload(filePath, file, {
           cacheControl: '3600',
           upsert: false
@@ -34,7 +34,7 @@ export async function uploadSiteLogFiles(
 
       // Get public URL
       const { data: urlData } = supabase.storage
-        .from('avatars')
+        .from('site-log-files')
         .getPublicUrl(filePath)
 
       // Determine file type
@@ -60,11 +60,6 @@ export async function saveSiteLogFiles(
 ): Promise<void> {
   if (uploadedFiles.length === 0) return
 
-  // Temporalmente deshabilitado hasta crear la tabla site_log_files
-  console.log('Files would be saved to site_log_files table:', uploadedFiles)
-  return
-
-  /* TODO: Uncomment when site_log_files table is created
   const fileRecords = uploadedFiles.map(file => ({
     site_log_id: siteLogId,
     file_url: file.file_url,
@@ -80,15 +75,9 @@ export async function saveSiteLogFiles(
     console.error('Error saving file records:', error)
     throw error
   }
-  */
 }
 
 export async function getSiteLogFiles(siteLogId: string) {
-  // Temporalmente deshabilitado hasta crear la tabla site_log_files
-  console.log('Getting site log files for:', siteLogId)
-  return []
-
-  /* TODO: Uncomment when site_log_files table is created
   const { data, error } = await supabase
     .from('site_log_files')
     .select('*')
@@ -100,7 +89,6 @@ export async function getSiteLogFiles(siteLogId: string) {
   }
 
   return data || []
-  */
 }
 
 export async function deleteSiteLogFile(fileId: string, fileUrl: string): Promise<void> {

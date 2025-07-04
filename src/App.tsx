@@ -27,6 +27,7 @@ import ConstructionPersonnel from "@/pages/construction/ConstructionPersonnel";
 import ConstructionDashboard from "@/pages/construction/ConstructionDashboard";
 import ConstructionBudgets from "@/pages/construction/ConstructionBudgets";
 import ConstructionMaterials from "@/pages/construction/ConstructionMaterials";
+import ConstructionGallery from "@/pages/construction/ConstructionGallery";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminOrganizations from "@/pages/admin/AdminOrganizations";
 import AdminUsers from "@/pages/admin/AdminUsers";
@@ -144,6 +145,12 @@ function Router() {
       <Route path="/construction/personnel">
         <ProtectedRoute>
           <ConstructionPersonnel />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/construction/gallery">
+        <ProtectedRoute>
+          <ConstructionGallery />
         </ProtectedRoute>
       </Route>
 
