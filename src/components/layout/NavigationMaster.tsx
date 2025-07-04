@@ -1,16 +1,142 @@
-import { Building, FolderOpen, Users, Activity, Crown, Palette, Hammer, DollarSign, ShoppingCart, Home, User, ArrowLeft } from "lucide-react";
-import { useSidebarStore } from "@/stores/sidebarStore";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
-import { Separator } from "@/components/ui/separator";
+import { useCurrentUser } from "@/hooks/use-current-user";
+import { useIsAdmin } from "@/hooks/use-admin-permissions";
+
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/lib/supabase";
 
-interface NavigationMasterProps {}
+import { 
+  Settings, 
+  UserCircle,
+  Home,
+  Users,
+  Building,
+  FileText,
+  DollarSign,
+  FolderOpen,
+  Mail,
+  Activity,
+  Calendar,
+  ArrowLeft,
+  ArrowRight,
+  Tag,
+  ChevronDown,
+  ChevronRight,
+  Search,
+  Crown,
+  Package,
+  Shield,
+  Star,
+  Zap,
+  Sun,
+  Moon,
+  PanelLeftOpen,
+  PanelLeftClose,
+  CheckSquare,
+  Calculator,
+  FileCode,
+  History,
+  Palette,
+  Hammer,
+  ShoppingCart
+} from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { useSidebarStore } from "@/stores/sidebarStore";
+import SidebarButton from "./SidebarButton";
 
-export function NavigationMaster({}: NavigationMasterProps) {
-  const { isExpanded, toggleSidebar, currentContext, setSidebarContext } = useSidebarStore();
-  const [, navigate] = useLocation();
+export function NavigationMaster() {
+  const [location, navigate] = useLocation();
+  const { data: userData } = useCurrentUser();
+  const isAdmin = useIsAdmin();
+  const { isDocked, isHovered, setHovered, setDocked, currentContext, setSidebarContext } = useSidebarStore();
+  
+  // Sync sidebar state with user preferences
+  useEffect(() => {
+    if (userData?.preferences?.sidebar_docked !== undefined) {
+      setDocked(userData.preferences.sidebar_docked);
+    }
+  }, [userData?.preferences?.sidebar_docked, setDocked]);
+  
+  const queryClient = useQueryClient();
 
-  const handleNavigate = (context: any, path?: string) => {
+  // Theme toggle mutation
+  const themeToggleMutation = useMutation({
+    mutationFn: async (newTheme: 'light' | 'dark') => {
+      if (!supabase || !userData?.preferences?.id) {
+        throw new Error('No user preferences available');
+      }
+
+      const { error } = await supabase
+        .from('user_preferences')
+        .update({ theme: newTheme })
+        .eq('id', userData.preferences.id);
+
+      if (error) throw error;
+      return newTheme;
+    },
+    onSuccess: (newTheme) => {
+      // Apply theme to document
+      if (newTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      
+      // Invalidate user data to refresh theme
+      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+    },
+    onError: (error) => {
+      console.error('Failed to update theme:', error);
+    }
+  });
+
+  // Sidebar docking mutation
+  const sidebarDockingMutation = useMutation({
+    mutationFn: async (docked: boolean) => {
+      if (!supabase || !userData?.preferences?.id) {
+        throw new Error('No user preferences available');
+      }
+
+      const { error } = await supabase
+        .from('user_preferences')
+        .update({ sidebar_docked: docked })
+        .eq('id', userData.preferences.id);
+
+      if (error) throw error;
+      return docked;
+    },
+    onSuccess: (docked) => {
+      setDocked(docked);
+      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+    },
+    onError: (error) => {
+      console.error('Failed to update sidebar docking:', error);
+    }
+  });
+
+  const toggleAccordion = (accordionId: string) => {
+    setExpandedAccordion(expandedAccordion === accordionId ? null : accordionId);
+  };
+
+  const toggleTheme = () => {
+    const currentTheme = userData?.preferences?.theme || 'light';
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    themeToggleMutation.mutate(newTheme);
+  };
+
+  const toggleDocking = () => {
+    const newDocked = !isDocked;
+    sidebarDockingMutation.mutate(newDocked);
+  };
+
+  const handleNavigate = (path: string) => {
+    navigate(path);
+  };
+
+  const handleContextSwitch = (context: any, path?: string) => {
     setSidebarContext(context);
     if (path) {
       navigate(path);
@@ -19,6 +145,27 @@ export function NavigationMaster({}: NavigationMasterProps) {
 
   const handleBack = () => {
     setSidebarContext('master');
+  };
+
+  // Estado para acordeones - solo uno abierto a la vez
+  const [expandedAccordion, setExpandedAccordion] = useState<string | null>(() => {
+    const saved = localStorage.getItem('sidebar-accordion');
+    return saved || null;
+  });
+
+  // Guardar estado de acordeón en localStorage
+  useEffect(() => {
+    if (expandedAccordion) {
+      localStorage.setItem('sidebar-accordion', expandedAccordion);
+    } else {
+      localStorage.removeItem('sidebar-accordion');
+    }
+  }, [expandedAccordion]);
+
+  const isExpanded = isDocked || isHovered;
+
+  const isActive = (path: string) => {
+    return location === path;
   };
 
   const renderMasterSidebar = () => (

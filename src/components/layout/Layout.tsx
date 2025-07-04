@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { NavigationMaster } from "./NavigationMaster";
+import { NewNavigationMaster } from "./NewNavigationMaster";
 import { Header } from "./Header";
 import { useAuthStore } from "@/stores/authStore";
 import { useThemeStore } from "@/stores/themeStore";
@@ -55,11 +55,11 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       <Header {...headerProps} />
       {/* Navigation Master - hidden on mobile */}
       <div className="hidden md:block">
-        <NavigationMaster />
+        <NewNavigationMaster />
       </div>
       <main
         className={`transition-all duration-300 ease-in-out flex-1 overflow-auto p-3 mt-1 ${
-          isExpanded ? "md:ml-[200px]" : "md:ml-[48px]"
+          isExpanded ? "md:ml-60" : "md:ml-12"
         } ml-0 ${isMobile && showActionBar ? "pb-20" : ""}`}
       >
         <div className={wide ? "" : "max-w-[1440px] mx-auto"}>{children}</div>
