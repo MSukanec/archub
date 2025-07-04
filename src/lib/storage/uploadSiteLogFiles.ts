@@ -12,12 +12,16 @@ export async function uploadSiteLogFiles(
 ): Promise<UploadedFile[]> {
   const uploadedFiles: UploadedFile[] = []
 
+  // Get current user for file path prefix
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  if (userError || !user) {
+    throw new Error('User not authenticated')
+  }
+
   for (const file of files) {
     try {
-      // Generate unique filename
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
-      const filePath = `site-log-files/${siteLogId}/${fileName}`
+      // Use user.id as prefix followed by original filename
+      const filePath = `${user.id}/${file.name}`
 
       // Upload to Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage

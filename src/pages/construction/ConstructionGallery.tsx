@@ -60,26 +60,39 @@ function useProjectGallery(projectId: string | null) {
           id,
           file_url,
           file_type,
-          file_name,
-          created_at,
+          site_log_id,
           site_logs!inner (
             id,
             log_date,
             entry_type,
             created_by,
-            users!created_by (
-              id,
-              full_name,
-              avatar_url
-            )
+            project_id
           )
         `)
         .eq('site_logs.project_id', projectId)
-        .order('created_at', { ascending: false });
+        .order('site_logs(log_date)', { ascending: false });
 
       if (error) {
         console.error('Error fetching gallery files:', error);
         throw error;
+      }
+
+      // Get unique creator IDs to fetch user data
+      const creatorIds = Array.from(new Set(data?.map((file: any) => file.site_logs?.created_by).filter(Boolean)));
+      
+      let creators: Record<string, any> = {};
+      if (creatorIds.length > 0) {
+        const { data: usersData } = await supabase
+          .from('users')
+          .select('id, full_name, avatar_url')
+          .in('id', creatorIds);
+        
+        if (usersData) {
+          creators = usersData.reduce((acc: Record<string, any>, user: any) => {
+            acc[user.id] = user;
+            return acc;
+          }, {});
+        }
       }
 
       // Transform data to match interface
@@ -87,16 +100,16 @@ function useProjectGallery(projectId: string | null) {
         id: file.id,
         file_url: file.file_url,
         file_type: file.file_type,
-        original_name: file.file_name,
-        created_at: file.created_at,
+        original_name: file.file_url?.split('/').pop() || 'archivo',
+        created_at: file.site_logs.log_date,
         site_log: {
           id: file.site_logs.id,
           log_date: file.site_logs.log_date,
           entry_type: file.site_logs.entry_type,
-          creator: {
-            id: file.site_logs.users.id,
-            full_name: file.site_logs.users.full_name,
-            avatar_url: file.site_logs.users.avatar_url || ""
+          creator: creators[file.site_logs.created_by] || {
+            id: file.site_logs.created_by,
+            full_name: "Usuario",
+            avatar_url: ""
           }
         }
       })) || [];
