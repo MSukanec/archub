@@ -1,5 +1,7 @@
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Star, Trash2, Edit } from 'lucide-react';
+import SwipeableCard from '@/components/layout/mobile/SwipeableCard';
 
 type MovementCardProps = {
   movement: {
@@ -17,6 +19,9 @@ type MovementCardProps = {
     currency: string;
     amount: number;
   };
+  onEdit?: (movement: any) => void;
+  onDelete?: (movement: any) => void;
+  onToggleFavorite?: (movement: any) => void;
 };
 
 // Utility function to format amount with thousands separators
@@ -38,7 +43,7 @@ const getInitials = (name: string): string => {
     .slice(0, 2);
 };
 
-const MovementCard: React.FC<MovementCardProps> = ({ movement }) => {
+const MovementCard: React.FC<MovementCardProps> = ({ movement, onEdit, onDelete, onToggleFavorite }) => {
   const {
     creator,
     type,
@@ -70,47 +75,69 @@ const MovementCard: React.FC<MovementCardProps> = ({ movement }) => {
   const cardClassName = isIngreso ? 'movement-row-income' : 'movement-row-expense';
 
   return (
-    <div className={`flex items-center justify-between gap-3 bg-[var(--card-bg)] hover:bg-[var(--card-hover-bg)] rounded-lg shadow-sm border border-[var(--card-border)] p-3 mb-2 transition-colors`}
-         style={{ borderRight: isIngreso ? '4px solid var(--movement-income-border)' : '4px solid var(--movement-expense-border)' }}>
-      {/* Left: Avatar */}
-      <div className="flex-shrink-0">
-        <Avatar className="w-10 h-10">
-          <AvatarImage 
-            src={creator?.avatar_url || ''} 
-            alt={creator?.name || 'Usuario'} 
-          />
-          <AvatarFallback className="bg-gray-100 text-gray-600 text-sm font-medium">
-            {getInitials(creator?.name || 'Usuario')}
-          </AvatarFallback>
-        </Avatar>
-      </div>
+    <SwipeableCard
+      actions={[
+        {
+          label: "Favorito",
+          icon: <Star className="w-4 h-4" />,
+          onClick: () => onToggleFavorite?.(movement)
+        },
+        {
+          label: "Editar",
+          icon: <Edit className="w-4 h-4" />,
+          onClick: () => onEdit?.(movement)
+        },
+        {
+          label: "Eliminar",
+          icon: <Trash2 className="w-4 h-4" />,
+          variant: "destructive" as const,
+          onClick: () => onDelete?.(movement)
+        }
+      ]}
+    >
+      <div className={`flex items-center justify-between gap-3 bg-[var(--card-bg)] hover:bg-[var(--card-hover-bg)] rounded-lg shadow-sm border border-[var(--card-border)] p-3 mb-2 transition-colors cursor-pointer`}
+           style={{ borderRight: isIngreso ? '4px solid var(--movement-income-border)' : '4px solid var(--movement-expense-border)' }}
+           onClick={() => onEdit?.(movement)}>
+        {/* Left: Avatar */}
+        <div className="flex-shrink-0">
+          <Avatar className="w-10 h-10">
+            <AvatarImage 
+              src={creator?.avatar_url || ''} 
+              alt={creator?.name || 'Usuario'} 
+            />
+            <AvatarFallback className="bg-gray-100 text-gray-600 text-sm font-medium">
+              {getInitials(creator?.name || 'Usuario')}
+            </AvatarFallback>
+          </Avatar>
+        </div>
 
-      {/* Center: Data */}
-      <div className="flex-1 min-w-0">
-        <div 
-          className="text-[var(--card-fg)] font-medium text-sm"
-          title={subcategory ? `${category} / ${subcategory}` : category}
-        >
-          {categoryLine}
+        {/* Center: Data */}
+        <div className="flex-1 min-w-0">
+          <div 
+            className="text-[var(--card-fg)] font-medium text-sm"
+            title={subcategory ? `${category} / ${subcategory}` : category}
+          >
+            {categoryLine}
+          </div>
+          <div 
+            className="text-[var(--muted-fg)] text-sm mt-1 truncate"
+            title={description || 'Sin descripción'}
+          >
+            {truncatedDescription}
+          </div>
         </div>
-        <div 
-          className="text-[var(--muted-fg)] text-sm mt-1 truncate"
-          title={description || 'Sin descripción'}
-        >
-          {truncatedDescription}
-        </div>
-      </div>
 
-      {/* Right: Amount + Currency */}
-      <div className="flex-shrink-0 text-right">
-        <div className={`font-semibold text-sm ${amountColor}`}>
-          {amountPrefix}${formatAmount(amount)}
-        </div>
-        <div className="text-xs text-gray-500 mt-0.5">
-          {currency}
+        {/* Right: Amount + Currency */}
+        <div className="flex-shrink-0 text-right">
+          <div className={`font-semibold text-sm ${amountColor}`}>
+            {amountPrefix}${formatAmount(amount)}
+          </div>
+          <div className="text-xs text-gray-500 mt-0.5">
+            {currency}
+          </div>
         </div>
       </div>
-    </div>
+    </SwipeableCard>
   );
 };
 

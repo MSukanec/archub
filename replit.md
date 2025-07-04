@@ -119,6 +119,16 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 4, 2025. Complete SwipeableCard integration across all mobile cards with iOS-style swipe functionality
+  • Successfully integrated SwipeableCard component with all 4 card types: ProjectCard, SiteLogCard, MovementCard, and ChangelogCard
+  • Removed action buttons from all cards since swipe actions now replace them for mobile interface consistency
+  • Enhanced ProjectCard with proper callback functions (onEdit, onDelete, onSelect) for SwipeableCard integration
+  • Applied SwipeableCard wrapper to SiteLogCard with Star (favorite), Edit, and Delete swipe actions
+  • Updated MovementCard with SwipeableCard support including onEdit, onDelete, onToggleFavorite callback functions
+  • Enhanced ChangelogCard with conditional admin-only swipe actions (Edit/Delete) and removed inline action buttons
+  • All cards now provide WhatsApp/iOS Mail-style swipe functionality with proper action button reveal on mobile
+  • Maintained desktop functionality while adding mobile-optimized swipe gestures for better mobile UX
+  • Consistent SwipeableCard pattern applied across entire card system following established mobile design patterns
 - July 4, 2025. Fixed navigation synchronization and breadcrumb improvements
   • Added missing routes /organization/projects and /organization/contacts to App.tsx for OrganizationProjects.tsx and OrganizationContacts.tsx
   • Changed contact icon from Users to Contact in both desktop sidebar and mobile menu to avoid duplication with members

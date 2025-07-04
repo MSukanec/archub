@@ -2,7 +2,6 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { 
@@ -16,8 +15,10 @@ import {
   TrendingUp, 
   Flame,
   Star,
-  Trash2
+  Trash2,
+  Edit
 } from 'lucide-react';
+import SwipeableCard from '@/components/layout/mobile/SwipeableCard';
 
 // Entry type configurations
 const entryTypes = {
@@ -60,14 +61,33 @@ export default function SiteLogCard({ siteLog, onEdit, onDelete, onToggleFavorit
   }
 
   return (
-    <Card 
-      className="bg-[var(--card-bg)] border-[var(--card-border)] shadow-sm hover:bg-[var(--card-hover-bg)] transition-colors cursor-pointer"
-      onClick={() => onEdit(siteLog)}
+    <SwipeableCard
+      actions={[
+        {
+          label: "Favorito",
+          icon: <Star className="w-4 h-4" />,
+          onClick: () => onToggleFavorite(siteLog.id, !siteLog.is_favorite)
+        },
+        {
+          label: "Editar",
+          icon: <Edit className="w-4 h-4" />,
+          onClick: () => onEdit(siteLog)
+        },
+        {
+          label: "Eliminar",
+          icon: <Trash2 className="w-4 h-4" />,
+          variant: "destructive" as const,
+          onClick: () => onDelete(siteLog)
+        }
+      ]}
     >
-      <CardContent className="p-3">
-        {/* First Row: Type | Date Time + Action Buttons */}
-        <div className="flex items-center justify-between text-sm mb-2">
-          <div className="flex items-center gap-2">
+      <Card 
+        className="bg-[var(--card-bg)] border-[var(--card-border)] shadow-sm hover:bg-[var(--card-hover-bg)] transition-colors cursor-pointer"
+        onClick={() => onEdit(siteLog)}
+      >
+        <CardContent className="p-3">
+          {/* First Row: Type | Date Time */}
+          <div className="flex items-center gap-2 text-sm mb-2">
             <span className="text-[var(--card-fg)] font-medium">
               {entryTypeConfig.label}
             </span>
@@ -76,39 +96,6 @@ export default function SiteLogCard({ siteLog, onEdit, onDelete, onToggleFavorit
               {format(new Date(siteLog.log_date), 'dd/MM/yyyy HH:mm', { locale: es })}
             </span>
           </div>
-          
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleFavorite(siteLog.id, !siteLog.is_favorite);
-              }}
-              className="h-6 w-6 p-0 hover:bg-transparent"
-            >
-              <Star 
-                className={`h-3 w-3 transition-colors ${
-                  siteLog.is_favorite 
-                    ? 'fill-yellow-400 text-yellow-400' 
-                    : 'text-muted-foreground hover:text-yellow-400'
-                }`} 
-              />
-            </Button>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete(siteLog);
-              }}
-              className="h-6 w-6 p-0 hover:bg-transparent"
-            >
-              <Trash2 className="h-3 w-3 text-muted-foreground hover:text-red-500 transition-colors" />
-            </Button>
-          </div>
-        </div>
 
         {/* Second Row: Avatar + Creator */}
         <div className="flex items-center gap-2">
@@ -125,7 +112,8 @@ export default function SiteLogCard({ siteLog, onEdit, onDelete, onToggleFavorit
             {siteLog.creator?.full_name || 'Usuario'}
           </span>
         </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </SwipeableCard>
   );
 }

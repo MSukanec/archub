@@ -5,6 +5,7 @@ import { Star, Bug, Wrench, Plus as PlusIcon, Edit, Trash2 } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
+import SwipeableCard from '@/components/layout/mobile/SwipeableCard'
 
 interface ChangelogEntry {
   id: string
@@ -42,61 +43,55 @@ export function ChangelogCard({ entry, onEdit, onDelete }: ChangelogCardProps) {
   const isAdmin = userData?.role?.name === "super_admin"
 
   return (
-    <Card className="overflow-hidden">
-      <CardContent className="p-4">
-        <div className="flex items-start gap-3">
-          {/* Icon */}
-          <div className="mt-0.5">
-            {getChangelogIcon(entry.type)}
-          </div>
+    <SwipeableCard
+      actions={isAdmin ? [
+        {
+          label: "Editar",
+          icon: <Edit className="w-4 h-4" />,
+          onClick: () => onEdit?.(entry)
+        },
+        {
+          label: "Eliminar",
+          icon: <Trash2 className="w-4 h-4" />,
+          variant: "destructive" as const,
+          onClick: () => onDelete?.(entry.id)
+        }
+      ] : []}
+    >
+      <Card className="overflow-hidden cursor-pointer" onClick={() => onEdit?.(entry)}>
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            {/* Icon */}
+            <div className="mt-0.5">
+              {getChangelogIcon(entry.type)}
+            </div>
 
-          {/* Content */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex-1">
-                <h3 className="font-medium text-sm leading-5 mb-1">
-                  {entry.title}
-                </h3>
-                <p className="text-sm text-muted-foreground leading-5 line-clamp-2">
-                  {entry.description}
-                </p>
-              </div>
-              
-              {/* Right side: Badge, Date, Admin Actions */}
-              <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                <div className="flex items-center gap-2">
+            {/* Content */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1">
+                  <h3 className="font-medium text-sm leading-5 mb-1">
+                    {entry.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-5 line-clamp-2">
+                    {entry.description}
+                  </p>
+                </div>
+                
+                {/* Right side: Badge, Date */}
+                <div className="flex flex-col items-end gap-1 flex-shrink-0">
                   <Badge variant="secondary" className="text-xs">
                     {entry.type}
                   </Badge>
-                  {isAdmin && (
-                    <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 w-6 p-0"
-                        onClick={() => onEdit?.(entry)}
-                      >
-                        <Edit className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 w-6 p-0 text-destructive"
-                        onClick={() => onDelete?.(entry.id)}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  )}
+                  <span className="text-xs text-muted-foreground">
+                    {format(new Date(entry.date), 'dd MMM', { locale: es })}
+                  </span>
                 </div>
-                <span className="text-xs text-muted-foreground">
-                  {format(new Date(entry.date), 'dd MMM', { locale: es })}
-                </span>
               </div>
             </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </SwipeableCard>
   )
 }
