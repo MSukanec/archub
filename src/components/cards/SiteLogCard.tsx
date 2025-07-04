@@ -16,7 +16,8 @@ import {
   Flame,
   Star,
   Trash2,
-  Edit
+  Edit,
+  Paperclip
 } from 'lucide-react';
 import SwipeableCard from '@/components/layout/mobile/SwipeableCard';
 
@@ -55,6 +56,7 @@ function getEntryTypeVariant(entryType: string) {
 
 export default function SiteLogCard({ siteLog, onEdit, onDelete, onToggleFavorite }: SiteLogCardProps) {
   const entryTypeConfig = entryTypes[siteLog.entry_type as keyof typeof entryTypes];
+  const fileCount = siteLog.files?.length || 0;
 
   if (!entryTypeConfig) {
     return null;
@@ -96,6 +98,14 @@ export default function SiteLogCard({ siteLog, onEdit, onDelete, onToggleFavorit
               {format(new Date(siteLog.log_date), 'dd/MM/yyyy HH:mm', { locale: es })}
             </span>
           </div>
+
+          {/* File Counter Row */}
+          {fileCount > 0 && (
+            <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
+              <Paperclip className="h-3 w-3" />
+              <span>Archivos ({fileCount})</span>
+            </div>
+          )}
 
         {/* Second Row: Avatar + Creator */}
         <div className="flex items-center gap-2">

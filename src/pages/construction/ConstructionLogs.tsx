@@ -126,12 +126,19 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
         `)
         .in('site_log_id', logIds);
 
+      // Fetch files separately
+      const { data: filesData } = await supabase
+        .from('site_log_files')
+        .select('*')
+        .in('site_log_id', logIds);
+
       // Combine data
       const data = logsData.map(log => ({
         ...log,
         events: eventsData?.filter(event => event.site_log_id === log.id) || [],
         attendees: attendeesData?.filter(attendee => attendee.site_log_id === log.id) || [],
-        equipment: equipmentData?.filter(equip => equip.site_log_id === log.id) || []
+        equipment: equipmentData?.filter(equip => equip.site_log_id === log.id) || [],
+        files: filesData?.filter(file => file.site_log_id === log.id) || []
       }));
 
       console.log('Site logs with related data:', data);
