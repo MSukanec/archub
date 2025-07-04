@@ -270,6 +270,23 @@ export default function Movements() {
     setShowNewMovementModal(true);
   };
 
+  const handleEditConversion = (conversionGroup: ConversionGroup) => {
+    // For conversions, we need to set special data so the modal can handle it
+    const egresoMovement = conversionGroup.movements.find(m => 
+      m.movement_data?.type?.name?.toLowerCase().includes('egreso')
+    ) || conversionGroup.movements[0];
+    
+    // Add conversion metadata to the movement
+    const conversionMovement = {
+      ...egresoMovement,
+      _isConversion: true,
+      _conversionData: conversionGroup
+    };
+    
+    setEditingMovement(conversionMovement as any);
+    setShowNewMovementModal(true);
+  };
+
   const handleDelete = (movement: Movement) => {
     setDeletingMovement(movement);
   };
@@ -695,11 +712,11 @@ export default function Movements() {
       render: (item: Movement | ConversionGroup) => {
         if ('is_conversion_group' in item) {
           return (
-            <div className="text-xs">
-              <div className="font-medium">
+            <div>
+              <div className="text-xs font-medium">
                 Conversión {item.from_currency} → {item.to_currency}
               </div>
-              <div className="text-muted-foreground mt-1">
+              <div className="text-xs text-muted-foreground">
                 {item.description || "Sin descripción"}
               </div>
             </div>
@@ -716,8 +733,7 @@ export default function Movements() {
       key: "currency",
       label: "Moneda",
       width: "5%",
-      sortable: true,
-      sortType: "string" as const,
+      sortable: false,
       render: (item: Movement | ConversionGroup) => {
         if ('is_conversion_group' in item) {
           return (
@@ -743,8 +759,7 @@ export default function Movements() {
       key: "wallet",
       label: "Billetera",
       width: "5%",
-      sortable: true,
-      sortType: "string" as const,
+      sortable: false,
       render: (item: Movement | ConversionGroup) => {
         if ('is_conversion_group' in item) {
           const egresoMovement = item.movements.find(m => 
@@ -772,8 +787,7 @@ export default function Movements() {
       key: "amount",
       label: "Cantidad",
       width: "5%",
-      sortable: true,
-      sortType: "number" as const,
+      sortable: false,
       render: (item: Movement | ConversionGroup) => {
         if ('is_conversion_group' in item) {
           return (
@@ -872,11 +886,8 @@ export default function Movements() {
         getItemId={(item) => item.id}
         onCardClick={(item: Movement | ConversionGroup) => {
           if ('is_conversion_group' in item) {
-            // Edit the first movement (egreso) for conversion groups
-            const egresoMovement = item.movements.find(m => 
-              m.movement_data?.type?.name?.toLowerCase().includes('egreso')
-            ) || item.movements[0];
-            handleEdit(egresoMovement);
+            // Edit the conversion group properly
+            handleEditConversion(item);
           } else {
             handleEdit(item);
           }
@@ -920,11 +931,7 @@ export default function Movements() {
                 icon: <Pencil className="h-4 w-4" />,
                 label: "Editar conversión",
                 onClick: () => {
-                  // Edit the first movement (egreso) which usually has the conversion details
-                  const egresoMovement = item.movements.find(m => 
-                    m.movement_data?.type?.name?.toLowerCase().includes('egreso')
-                  ) || item.movements[0];
-                  handleEdit(egresoMovement);
+                  handleEditConversion(item);
                 },
                 variant: "default"
               },

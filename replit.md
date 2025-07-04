@@ -119,6 +119,16 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 4, 2025. Complete UI refinements and conversion edit functionality implementation
+  • Fixed text spacing in description column to match category column formatting for visual consistency
+  • Removed sorting arrows from Moneda, Billetera, and Cantidad columns to reduce card size and improve mobile UX
+  • Implemented comprehensive conversion editing system with proper data loading and field population
+  • Added handleEditConversion function to properly detect and handle conversion group editing vs individual movements
+  • Enhanced modal detection system for conversions using _isConversion and _conversionData metadata markers
+  • Modal now correctly opens in conversion mode when editing conversion groups, populating all conversion fields
+  • Fixed edit functionality to load complete conversion data: from/to currencies, amounts, wallets, dates, and descriptions
+  • Updated all edit triggers (card clicks and action buttons) to use handleEditConversion for conversion groups
+  • Conversion editing now opens with proper form state showing all conversion parameters instead of single egreso movement
 - July 4, 2025. Enhanced financial movements table with conversion grouping and professional visual styling
   • Implemented conversion group visualization system grouping movements with same conversion_group_id into single table rows
   • Added MovementOrGroup type union to handle both regular movements and conversion groups in table interface

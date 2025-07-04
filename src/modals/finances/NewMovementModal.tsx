@@ -132,7 +132,50 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
       
       console.log('Initializing edit form with movement:', editingMovement)
       
-      // Set state first to trigger proper data loading for categories/subcategories
+      // Check if this is a conversion being edited
+      const isEditingConversion = (editingMovement as any)._isConversion;
+      const conversionData = (editingMovement as any)._conversionData;
+      
+      if (isEditingConversion && conversionData) {
+        // Handle conversion editing
+        console.log('Editing conversion with data:', conversionData);
+        
+        // Set conversion type to trigger isConversion state
+        const conversionType = types?.find((type: any) => 
+          type.name?.toLowerCase() === 'conversión' || type.name?.toLowerCase() === 'conversion'
+        );
+        if (conversionType) {
+          setSelectedTypeId(conversionType.id);
+        }
+        
+        // Initialize conversion form with data from both movements
+        const egresoMovement = conversionData.movements.find((m: any) => 
+          m.movement_data?.type?.name?.toLowerCase().includes('egreso')
+        );
+        const ingresoMovement = conversionData.movements.find((m: any) => 
+          m.movement_data?.type?.name?.toLowerCase().includes('ingreso')
+        );
+        
+        if (egresoMovement && ingresoMovement) {
+          const currentMember = members?.find(m => m.user_id === currentUser?.user?.id);
+          
+          conversionForm.reset({
+            movement_date: new Date(conversionData.movement_date),
+            description: conversionData.description || '',
+            created_by: currentMember?.id || '',
+            from_amount: egresoMovement.amount,
+            from_currency_id: egresoMovement.currency_id,
+            from_wallet_id: egresoMovement.wallet_id,
+            to_amount: ingresoMovement.amount,
+            to_currency_id: ingresoMovement.currency_id,
+            to_wallet_id: ingresoMovement.wallet_id
+          });
+        }
+        
+        return;
+      }
+      
+      // Handle regular movement editing
       setSelectedTypeId(editingMovement.type_id)
       setSelectedCategoryId(editingMovement.category_id || '')
       
