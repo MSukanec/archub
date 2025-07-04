@@ -41,6 +41,7 @@ import AdminChangelogs from "@/pages/admin/AdminChangelogs";
 import Tasks from "@/pages/others/Tasks";
 import Changelog from "@/pages/others/Changelog";
 import DesignTimeline from "@/pages/design/DesignTimeline";
+import DesignDashboard from "@/pages/design/DesignDashboard";
 import NotFound from "@/pages/others/NotFound";
 
 function Router() {
@@ -203,6 +204,12 @@ function Router() {
       <Route path="/project/dashboard">
         <ProtectedRoute>
           <ProjectDashboard />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/design/dashboard">
+        <ProtectedRoute>
+          <DesignDashboard />
         </ProtectedRoute>
       </Route>
 

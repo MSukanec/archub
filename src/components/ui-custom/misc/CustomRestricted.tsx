@@ -78,7 +78,7 @@ export function CustomRestricted({
   };
 
   return (
-    <div className="relative inline-block">
+    <div className="relative w-full">
       {/* Contenido bloqueado - sin efectos hover */}
       <div className="relative opacity-50 pointer-events-none [&_*]:hover:bg-transparent [&_*]:hover:text-inherit [&_*]:hover:scale-100 [&_*]:hover:shadow-none">
         {children}
