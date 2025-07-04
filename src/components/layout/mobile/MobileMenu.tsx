@@ -160,6 +160,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const sidebarContexts = {
     organization: [
       { icon: Home, label: 'Resumen de la Organización', href: '/organization/dashboard' },
+      { icon: ArrowRight, label: 'Ir al Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
       { type: 'divider' },
       { icon: FolderOpen, label: 'Proyectos', href: '/organization/projects' },
       { icon: Activity, label: 'Actividad', href: '/organization/activity' },
@@ -270,7 +271,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       </div>
 
       {/* Navigation Menu */}
-      <div className="px-4 py-3 overflow-hidden" style={{ height: 'calc(100vh - 120px)' }}>
+      <div className="px-4 py-3 overflow-y-auto" style={{ height: 'calc(100vh - 120px)' }}>
         {/* Context Title */}
         <div className="mb-4">
           <h2 className="text-sm font-medium opacity-70" style={{ color: 'var(--menues-fg)' }}>

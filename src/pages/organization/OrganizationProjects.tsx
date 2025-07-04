@@ -8,10 +8,10 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { CustomRestricted } from '@/components/ui-custom/misc/CustomRestricted'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects } from '@/hooks/use-projects'
-import { Folder, Crown, Plus, Calendar, MoreHorizontal, Edit, Trash2 } from 'lucide-react'
+import { Folder, Crown, Plus, Calendar, MoreHorizontal, Edit, Trash2, Home, Search, Filter, X } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
@@ -21,6 +21,8 @@ import { useNavigationStore } from '@/stores/navigationStore'
 import { useLocation } from 'wouter'
 import { NewProjectModal } from '@/modals/project/NewProjectModal'
 import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState'
+import ProjectCard from '@/components/cards/ProjectCard'
+import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
 
 export default function OrganizationProjects() {
   const [searchValue, setSearchValue] = useState("")
@@ -30,6 +32,7 @@ export default function OrganizationProjects() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [projectToDelete, setProjectToDelete] = useState<any>(null)
   const [showNewProjectModal, setShowNewProjectModal] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   
   const { data: userData, isLoading } = useCurrentUser()
   const { data: projects = [], isLoading: projectsLoading } = useProjects(userData?.organization?.id)
@@ -37,6 +40,68 @@ export default function OrganizationProjects() {
   const queryClient = useQueryClient()
   const { setSidebarContext } = useNavigationStore()
   const [, navigate] = useLocation()
+  const { setActions } = useMobileActionBar()
+
+  // Detectar si es móvil
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  // Configurar acciones para móvil
+  useEffect(() => {
+    if (isMobile) {
+      setActions({
+        slot1: {
+          id: 'home',
+          icon: <Home className="w-5 h-5" />,
+          label: 'Inicio',
+          onClick: () => navigate('/organization/dashboard')
+        },
+        slot2: {
+          id: 'search',
+          icon: <Search className="w-5 h-5" />,
+          label: 'Buscar',
+          onClick: () => {}
+        },
+        slot3: {
+          id: 'create',
+          icon: <Plus className="w-5 h-5" />,
+          label: 'Crear',
+          variant: 'primary',
+          onClick: () => setShowNewProjectModal(true)
+        },
+        slot4: {
+          id: 'filter',
+          icon: <Filter className="w-5 h-5" />,
+          label: 'Filtros',
+          onClick: () => {}
+        },
+        slot5: {
+          id: 'clear',
+          icon: <X className="w-5 h-5" />,
+          label: 'Limpiar',
+          onClick: () => {
+            setSearchValue('')
+            setFilterByStatus('all')
+            setSortBy('date_recent')
+          }
+        }
+      })
+    }
+
+    return () => {
+      if (isMobile) {
+        setActions({})
+      }
+    }
+  }, [isMobile, navigate, setActions])
 
   // Filtrar y ordenar proyectos
   let filteredProjects = projects?.filter(project => {
@@ -251,33 +316,48 @@ export default function OrganizationProjects() {
         {/* Mostrar contenido solo si hay proyectos */}
         {filteredProjects.length > 0 ? (
           <>
-            {/* Headers de columnas */}
-            <div className="grid grid-cols-12 gap-4 px-4 py-2 text-xs font-medium text-muted-foreground border-b">
-              <div className="col-span-2">Fecha</div>
-              <div className="col-span-2">Creador</div>
-              <div className="col-span-2">Proyecto</div>
-              <div className="col-span-2">Tipología</div>
-              <div className="col-span-2">Modalidad</div>
-              <div className="col-span-1">Estado</div>
-              <div className="col-span-1">Acciones</div>
-            </div>
+            {/* Vista móvil */}
+            {isMobile ? (
+              <div className="space-y-3 px-4">
+                {filteredProjects.map((project) => (
+                  <ProjectCard
+                    key={project.id}
+                    project={project}
+                    onEdit={handleEdit}
+                    onDelete={handleDeleteClick}
+                    onSelect={(project) => handleSelectProject(project.id)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <>
+                {/* Headers de columnas - Desktop */}
+                <div className="grid grid-cols-12 gap-4 px-4 py-2 text-xs font-medium text-muted-foreground border-b">
+                  <div className="col-span-2">Fecha</div>
+                  <div className="col-span-2">Creador</div>
+                  <div className="col-span-2">Proyecto</div>
+                  <div className="col-span-2">Tipología</div>
+                  <div className="col-span-2">Modalidad</div>
+                  <div className="col-span-1">Estado</div>
+                  <div className="col-span-1">Acciones</div>
+                </div>
 
-            {/* Lista de proyectos */}
-            <div className="space-y-2">
-              {filteredProjects.map((project) => {
-                const isSelected = userData?.preferences?.last_project_id === project.id
-                
-                return (
-                  <Card 
-                    key={project.id} 
-                    className={`w-full cursor-pointer transition-all hover:shadow-sm border ${
-                      isSelected ? 'border-[var(--accent)] bg-[var(--accent-bg)]' : ''
-                    }`}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleSelectProject(project.id)
-                    }}
-                  >
+                {/* Lista de proyectos - Desktop */}
+                <div className="space-y-2">
+                  {filteredProjects.map((project) => {
+                    const isSelected = userData?.preferences?.last_project_id === project.id
+                    
+                    return (
+                      <Card 
+                        key={project.id} 
+                        className={`w-full cursor-pointer transition-all hover:shadow-sm border ${
+                          isSelected ? 'border-[var(--accent)] bg-[var(--accent-bg)]' : ''
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleSelectProject(project.id)
+                        }}
+                      >
                     <CardContent className="p-4">
                       <div className="grid grid-cols-12 gap-4 items-center">
                         {/* Fecha */}
@@ -381,6 +461,8 @@ export default function OrganizationProjects() {
                 )
               })}
             </div>
+              </>
+            )}
           </>
         ) : (
           <CustomEmptyState
