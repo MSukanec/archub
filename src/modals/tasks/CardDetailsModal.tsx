@@ -12,9 +12,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Trash2 } from 'lucide-react';
-import { useUpdateKanbanCard, useDeleteKanbanCard } from '@/hooks/use-kanban';
-import { supabase } from '@/lib/supabase';
+
+import { useUpdateKanbanCard } from '@/hooks/use-kanban';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useOrganizationMembers } from '@/hooks/use-organization-members';
 import { toast } from '@/hooks/use-toast';
@@ -37,7 +36,6 @@ interface CardDetailsModalProps {
 
 export function CardDetailsModal({ open, onClose, card }: CardDetailsModalProps) {
   const updateCardMutation = useUpdateKanbanCard();
-  const deleteCardMutation = useDeleteKanbanCard();
   const { data: userData } = useCurrentUser();
   const { data: organizationMembers, isLoading: membersLoading } = useOrganizationMembers(userData?.organization?.id);
 
@@ -75,24 +73,7 @@ export function CardDetailsModal({ open, onClose, card }: CardDetailsModalProps)
     onClose();
   };
 
-  const handleDelete = async () => {
-    if (!card || !supabase) return;
-    
-    // Get board ID from card's list
-    const { data: listData } = await supabase
-      .from('kanban_lists')
-      .select('board_id')
-      .eq('id', card.list_id)
-      .single();
-    
-    if (listData?.board_id) {
-      deleteCardMutation.mutate({ 
-        cardId: card.id, 
-        boardId: listData.board_id 
-      });
-      handleClose();
-    }
-  };
+
 
   const onSubmit = async (data: CardFormData) => {
     if (!card) return;
@@ -200,27 +181,12 @@ export function CardDetailsModal({ open, onClose, card }: CardDetailsModalProps)
           </CustomModalBody>
         ),
         footer: (
-          <div className="flex justify-between">
-            <Button
-              variant="destructive"
-              onClick={handleDelete}
-              disabled={deleteCardMutation.isPending}
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Eliminar
-            </Button>
-            <div className="flex gap-2">
-              <Button variant="secondary" onClick={handleClose}>
-                Cancelar
-              </Button>
-              <Button 
-                onClick={() => handleSubmit(onSubmit)()} 
-                disabled={isSubmitting}
-              >
-                Guardar
-              </Button>
-            </div>
-          </div>
+          <CustomModalFooter
+            onCancel={handleClose}
+            onSubmit={() => handleSubmit(onSubmit)()}
+            submitText="Guardar"
+            isSubmitting={isSubmitting}
+          />
         )
       }}
     </CustomModalLayout>
