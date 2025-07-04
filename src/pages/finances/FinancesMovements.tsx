@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { DollarSign, Plus, Edit, Trash2, Heart, Search, Filter, X } from "lucide-react";
+import { DollarSign, Plus, Edit, Trash2, Heart, Search, Filter, X, Pencil } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -724,6 +724,26 @@ export default function Movements() {
         renderCard={(movement) => (
           <MovementCard movement={transformMovementToCard(movement)} />
         )}
+        getRowActions={(movement: Movement) => [
+          {
+            icon: <Heart className="h-4 w-4" />,
+            label: movement.is_favorite ? "Quitar de favoritos" : "Agregar a favoritos",
+            onClick: () => handleToggleFavorite(movement),
+            variant: movement.is_favorite ? "primary" : "default"
+          },
+          {
+            icon: <Pencil className="h-4 w-4" />,
+            label: "Editar",
+            onClick: () => handleEdit(movement),
+            variant: "default"
+          },
+          {
+            icon: <Trash2 className="h-4 w-4" />,
+            label: "Eliminar",
+            onClick: () => handleDelete(movement),
+            variant: "destructive"
+          }
+        ]}
         emptyState={
           <CustomEmptyState
             title="No hay movimientos registrados"

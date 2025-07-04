@@ -3,6 +3,14 @@ import { ChevronUp, ChevronDown, ArrowUpDown, ChevronLeft, ChevronRight } from '
 import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { TableRowActions } from '@/components/ui-custom/TableRowActions'
+
+interface TableRowAction {
+  icon: React.ReactNode
+  label: string
+  onClick: () => void
+  variant?: "default" | "destructive" | "primary" | "muted"
+}
 
 type SortDirection = 'asc' | 'desc' | null
 
@@ -35,6 +43,8 @@ interface CustomTableProps<T = any> {
   }
   // Nueva prop para renderizado de cards en mobile
   renderCard?: (item: T) => React.ReactNode
+  // Nueva prop para acciones flotantes
+  getRowActions?: (item: T) => TableRowAction[]
 }
 
 export function CustomTable<T = any>({ 
@@ -50,7 +60,8 @@ export function CustomTable<T = any>({
   getRowClassName,
   onCardClick,
   defaultSort,
-  renderCard
+  renderCard,
+  getRowActions
 }: CustomTableProps<T>) {
   const [sortKey, setSortKey] = useState<string | null>(defaultSort?.key || null)
   const [sortDirection, setSortDirection] = useState<SortDirection>(defaultSort?.direction || null)
@@ -255,7 +266,7 @@ export function CustomTable<T = any>({
             <div
               key={index}
               className={cn(
-                "grid gap-4 px-4 py-3 bg-[var(--card-bg)] text-xs hover:bg-[var(--card-hover-bg)] transition-colors",
+                "group relative grid gap-4 px-4 py-3 bg-[var(--card-bg)] text-xs hover:bg-[var(--card-hover-bg)] transition-colors",
                 index < paginatedData.length - 1 ? "border-b border-[var(--card-border)]" : "",
                 getRowClassName?.(item)
               )}
@@ -279,6 +290,11 @@ export function CustomTable<T = any>({
                   }
                 </div>
               ))}
+              
+              {/* Floating Actions */}
+              {getRowActions && (
+                <TableRowActions actions={getRowActions(item)} />
+              )}
             </div>
           ))}
         </div>
