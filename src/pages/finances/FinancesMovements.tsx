@@ -642,7 +642,7 @@ export default function Movements() {
       render: (item: Movement | ConversionGroup) => {
         if ('is_conversion_group' in item) {
           return (
-            <span className="text-xs font-medium text-blue-600">
+            <span className="text-xs font-medium">
               Conversión
             </span>
           );
@@ -664,7 +664,7 @@ export default function Movements() {
         if ('is_conversion_group' in item) {
           return (
             <div>
-              <div className="text-xs font-medium text-blue-600">
+              <div className="text-xs font-medium">
                 Conversión
               </div>
               <div className="text-xs text-muted-foreground">
@@ -696,7 +696,7 @@ export default function Movements() {
         if ('is_conversion_group' in item) {
           return (
             <div className="text-xs">
-              <div className="font-medium text-blue-600">
+              <div className="font-medium">
                 Conversión {item.from_currency} → {item.to_currency}
               </div>
               <div className="text-muted-foreground mt-1">
@@ -871,7 +871,13 @@ export default function Movements() {
         }}
         getItemId={(item) => item.id}
         onCardClick={(item: Movement | ConversionGroup) => {
-          if (!('is_conversion_group' in item)) {
+          if ('is_conversion_group' in item) {
+            // Edit the first movement (egreso) for conversion groups
+            const egresoMovement = item.movements.find(m => 
+              m.movement_data?.type?.name?.toLowerCase().includes('egreso')
+            ) || item.movements[0];
+            handleEdit(egresoMovement);
+          } else {
             handleEdit(item);
           }
         }}
@@ -895,8 +901,47 @@ export default function Movements() {
         }}
         getRowActions={(item: Movement | ConversionGroup) => {
           if ('is_conversion_group' in item) {
-            // No actions for conversion groups
-            return [];
+            // Actions for conversion groups - apply to both movements
+            const isGroupFavorited = item.movements.some(m => m.is_favorite);
+            return [
+              {
+                icon: isGroupFavorited ? <Heart className="h-4 w-4 fill-current" /> : <Heart className="h-4 w-4" />,
+                label: isGroupFavorited ? "Quitar de favoritos" : "Agregar a favoritos",
+                onClick: () => {
+                  // Toggle favorite for all movements in the group
+                  item.movements.forEach(movement => {
+                    handleToggleFavorite(movement);
+                  });
+                },
+                variant: isGroupFavorited ? "muted" : "default",
+                isActive: isGroupFavorited
+              },
+              {
+                icon: <Pencil className="h-4 w-4" />,
+                label: "Editar conversión",
+                onClick: () => {
+                  // Edit the first movement (egreso) which usually has the conversion details
+                  const egresoMovement = item.movements.find(m => 
+                    m.movement_data?.type?.name?.toLowerCase().includes('egreso')
+                  ) || item.movements[0];
+                  handleEdit(egresoMovement);
+                },
+                variant: "default"
+              },
+              {
+                icon: <Trash2 className="h-4 w-4" />,
+                label: "Eliminar conversión",
+                onClick: () => {
+                  // Delete all movements in the group
+                  if (window.confirm('¿Estás seguro de que quieres eliminar esta conversión completa? Esto eliminará ambos movimientos.')) {
+                    item.movements.forEach(movement => {
+                      handleDelete(movement);
+                    });
+                  }
+                },
+                variant: "destructive"
+              }
+            ];
           }
           return [
             {

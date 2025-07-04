@@ -119,6 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 4, 2025. Enhanced financial movements table with conversion grouping and professional visual styling
+  • Implemented conversion group visualization system grouping movements with same conversion_group_id into single table rows
+  • Added MovementOrGroup type union to handle both regular movements and conversion groups in table interface
+  • Enhanced table columns with specialized rendering for conversions: currency arrows, dual amounts, and neutral styling
+  • Created movement-row-conversion CSS class with blue background (rgba(59, 130, 246, 0.08)) and blue border for visual distinction
+  • Conversion groups display format "Conversión USD → ARS" with proper from/to currency and amount visualization
+  • Implemented comprehensive action system for conversion groups: favorite/unfavorite both movements, edit egreso movement, delete entire conversion
+  • Actions work seamlessly: clicking conversion rows opens edit modal with proper data, hover actions function correctly
+  • Enhanced user experience: conversion groups behave like unified entities while maintaining individual movement editing capabilities
 - July 4, 2025. Fixed file upload system with proper RLS policy compliance and corrected authentication flow
   • Implemented proper file upload sequence: create database record first, then upload to Storage to satisfy RLS
   • Removed user.id prefix from file paths - now uses crypto.randomUUID() for unique filenames only
