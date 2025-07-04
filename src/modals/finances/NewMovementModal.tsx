@@ -269,7 +269,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
           />
         ),
         body: (
-          <CustomModalBody padding="md" columns={1}>
+          <CustomModalBody padding="md">
             <Form {...form}>
               <form 
                 key={editingMovement?.id || 'new'} 
@@ -282,8 +282,9 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                       Información Básica
                     </AccordionTrigger>
                     <AccordionContent className="space-y-3 pt-3">
-                      {/* Fecha del Movimiento */}
-                      <FormField
+                      {/* Primera fila: Fecha y Creador */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
                           control={form.control}
                           name="movement_date"
                           render={({ field }) => (
@@ -338,36 +339,38 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                             </FormItem>
                           )}
                         />
+                      </div>
 
-                      {/* Tipo */}
-                      <FormField
-                        control={form.control}
-                        name="type_id"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Tipo</FormLabel>
-                            <Select onValueChange={(value) => {
-                              field.onChange(value)
-                              setSelectedTypeId(value)
-                              // Clear dependent fields when type changes
-                              setSelectedCategoryId('')
-                            }} value={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Seleccionar tipo" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {typeOptions.map((type: any) => (
-                                  <SelectItem key={type.id} value={type.id}>
-                                    {type.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+                      {/* Segunda fila: Tipo y Categoría */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="type_id"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Tipo</FormLabel>
+                              <Select onValueChange={(value) => {
+                                field.onChange(value)
+                                setSelectedTypeId(value)
+                                // Clear dependent fields when type changes
+                                setSelectedCategoryId('')
+                              }} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Seleccionar tipo" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {typeOptions.map((type: any) => (
+                                    <SelectItem key={type.id} value={type.id}>
+                                      {type.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
                         />
 
                         <FormField
