@@ -43,21 +43,9 @@ interface GalleryFile {
   id: string;
   file_url: string;
   file_type: string;
-  original_name: string;
+  file_name: string;
   created_at: string;
-  title?: string;
-  description?: string;
-  entry_type?: string;
-  site_log?: {
-    id: string;
-    log_date: string;
-    entry_type: string;
-    creator: {
-      id: string;
-      full_name: string;
-      avatar_url: string;
-    };
-  };
+  site_log_id?: string;
 }
 
 export default function ConstructionGallery() {
@@ -88,24 +76,7 @@ export default function ConstructionGallery() {
         throw new Error('Supabase client not initialized');
       }
 
-      // First get all site log IDs for this project
-      const { data: siteLogs, error: siteLogsError } = await supabase
-        .from('site_logs')
-        .select('id')
-        .eq('project_id', projectId);
-
-      if (siteLogsError) {
-        console.error('Error fetching site logs:', siteLogsError);
-        throw siteLogsError;
-      }
-
-      const siteLogIds = siteLogs?.map(log => log.id) || [];
-      
-      if (siteLogIds.length === 0) {
-        return [];
-      }
-
-      // Now get files for those site logs
+      // Get files directly by project_id (includes both site log files and independent gallery files)
       const { data, error } = await supabase
         .from('site_log_files')
         .select(`
@@ -116,7 +87,7 @@ export default function ConstructionGallery() {
           created_at,
           site_log_id
         `)
-        .in('site_log_id', siteLogIds)
+        .eq('project_id', projectId)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -253,9 +224,7 @@ export default function ConstructionGallery() {
     // Search filter
     if (searchTerm) {
       filtered = filtered.filter(file => 
-        file.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        file.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        file.original_name?.toLowerCase().includes(searchTerm.toLowerCase())
+        file.file_name?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -295,7 +264,7 @@ export default function ConstructionGallery() {
   const downloadFile = (file: GalleryFile) => {
     const link = document.createElement('a');
     link.href = file.file_url;
-    link.download = file.original_name;
+    link.download = file.file_name;
     link.target = '_blank';
     document.body.appendChild(link);
     link.click();
