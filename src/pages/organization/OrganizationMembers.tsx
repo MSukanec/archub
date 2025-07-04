@@ -16,7 +16,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
-import { CustomRestricted } from "@/components/ui-custom/misc/CustomRestricted";
+import { CustomRestricted } from "@/components/ui-custom/CustomRestricted";
 import { NewMemberModal } from "@/modals/organization/NewMemberModal";
 
 interface OrganizationMember {

@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { CustomRestricted } from "@/components/ui-custom/misc/CustomRestricted";
+import { CustomRestricted } from "@/components/ui-custom/CustomRestricted";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjects } from "@/hooks/use-projects";
 import { useMutation } from "@tanstack/react-query";
@@ -137,11 +137,11 @@ export function Header({
 
   return (
     <>
-    <header className="sticky top-0 z-50 h-10 border-b border-[var(--menues-border)] bg-[var(--menues-bg)] flex items-center justify-between gap-2">
+    <header className="sticky top-0 z-50 h-14 md:h-9 border-b border-[var(--menues-border)] bg-[var(--menues-bg)] flex items-center justify-between gap-2">
       {/* Left side - Logo + Breadcrumb */}
       <div className="flex items-center gap-2">
         {/* Logo Section - Desktop only */}
-        <div className="hidden md:flex w-10 h-10 items-center justify-center border-r border-[var(--menues-border)]">
+        <div className="hidden md:flex w-[40px] h-9 items-center justify-center border-r border-[var(--menues-border)]">
           <span className="text-base font-bold leading-none text-[var(--menues-fg)]">A</span>
         </div>
 

@@ -1,11 +1,11 @@
 import { useEffect } from "react";
-import { NewNavigationMaster } from "./desktop/NewNavigationMaster";
+import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { useAuthStore } from "@/stores/authStore";
 import { useThemeStore } from "@/stores/themeStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useSidebarStore } from "@/stores/sidebarStore";
-import { MobileActionBar } from "./mobile/MobileActionBar";
+import { MobileActionBar } from "@/components/ui-custom/mobile/MobileActionBar";
 import { useMobileActionBar } from "@/contexts/MobileActionBarContext";
 import { useMobile } from "@/hooks/use-mobile";
 
@@ -29,9 +29,11 @@ interface LayoutProps {
 export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   const { isDark, setTheme } = useThemeStore();
   const { data } = useCurrentUser();
-  const { isDocked, isHovered, isExpanded } = useSidebarStore();
+  const { isDocked, isHovered } = useSidebarStore();
   const { showActionBar } = useMobileActionBar();
   const isMobile = useMobile();
+
+  const isExpanded = isDocked || isHovered;
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDark);
@@ -53,13 +55,13 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   return (
     <div className="min-h-screen bg-background">
       <Header {...headerProps} />
-      {/* Navigation Master - hidden on mobile */}
+      {/* Sidebar - hidden on mobile */}
       <div className="hidden md:block">
-        <NewNavigationMaster />
+        <Sidebar />
       </div>
       <main
         className={`transition-all duration-300 ease-in-out flex-1 overflow-auto p-3 mt-1 ${
-          isExpanded ? "md:ml-60" : "md:ml-10"
+          isExpanded ? "md:ml-[240px]" : "md:ml-[40px]"
         } ml-0 ${isMobile && showActionBar ? "pb-20" : ""}`}
       >
         <div className={wide ? "" : "max-w-[1440px] mx-auto"}>{children}</div>
