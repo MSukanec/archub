@@ -79,6 +79,12 @@ function Router() {
         </ProtectedRoute>
       </Route>
 
+      <Route path="/finanzas/preferencias">
+        <ProtectedRoute>
+          <FinancesPreferences />
+        </ProtectedRoute>
+      </Route>
+
       <Route path="/bitacora">
         <ProtectedRoute>
           <ConstructionLogs />
@@ -91,7 +97,7 @@ function Router() {
         </ProtectedRoute>
       </Route>
 
-      <Route path="/construction/dashboard">
+      <Route path="/obra/dashboard">
         <ProtectedRoute>
           <ConstructionDashboard />
         </ProtectedRoute>
@@ -191,19 +197,25 @@ function Router() {
         </ProtectedRoute>
       </Route>
 
-      <Route path="/finance/dashboard">
+      <Route path="/finances/dashboard">
         <ProtectedRoute>
           <FinancesDashboard />
         </ProtectedRoute>
       </Route>
 
-      <Route path="/finanzas">
+      <Route path="/finanzas/dashboard">
         <ProtectedRoute>
           <FinancesDashboard />
         </ProtectedRoute>
       </Route>
 
       <Route path="/perfil">
+        <ProtectedRoute>
+          <Profile />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/profile">
         <ProtectedRoute>
           <Profile />
         </ProtectedRoute>
@@ -291,12 +303,6 @@ function Router() {
       <Route path="/changelog">
         <ProtectedRoute>
           <Changelog />
-        </ProtectedRoute>
-      </Route>
-
-      <Route path="/design/timeline">
-        <ProtectedRoute>
-          <DesignTimeline />
         </ProtectedRoute>
       </Route>
 
