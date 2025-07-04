@@ -1,0 +1,80 @@
+Necesito que corrijas el diseño del sidebar (`MasterSidebar.tsx`) para que los botones se vean correctamente alineados, tanto cuando el sidebar está expandido como cuando está colapsado.
+
+🎯 OBJETIVOS
+
+1. Que los íconos de los botones estén perfectamente **centrados vertical y horizontalmente** cuando el sidebar está colapsado (`isExpanded === false`).
+2. Que el footer (con botones de “Administración” y “Perfil”) esté siempre en el **fondo del sidebar**, sin importar cuántos botones haya arriba.
+3. Que el espaciado entre botones sea correcto y no rompa la alineación de íconos.
+
+---
+
+### 🛠 CAMBIOS CONCRETOS A HACER
+
+#### ✅ 1. En `MasterSidebar.tsx`:
+
+Reemplazá la estructura actual por esta:
+
+```tsx
+<div className={`fixed top-0 left-0 h-full bg-[--menues-bg] border-r border-[--menues-border] z-50 transition-all duration-300 ${isExpanded ? 'w-[200px]' : 'w-[48px]'} flex flex-col justify-between`}>
+  
+  {/* Header */}
+  <div className="p-2">
+    <SidebarButton 
+      icon={<Building className="w-4 h-4" />}
+      label="Archub"
+      isActive={false}
+      isExpanded={isExpanded}
+      onClick={toggleSidebar}
+    />
+  </div>
+
+  {/* Middle: Navegación */}
+  <div className="flex-1 overflow-y-auto px-2 space-y-1">
+    {/* Aquí van los SidebarButton */}
+    ...
+  </div>
+
+  {/* Footer: Administración y Perfil */}
+  <div className="p-2 space-y-1 border-t border-[--menues-border]">
+    <SidebarButton 
+      icon={<Crown className="w-4 h-4" />}
+      label="Administración"
+      isActive={false}
+      isExpanded={isExpanded}
+      onClick={() => handleNavigateToSidebar('admin')}
+    />
+    <SidebarButton 
+      icon={<User className="w-4 h-4" />}
+      label="Perfil"
+      isActive={false}
+      isExpanded={isExpanded}
+      onClick={() => navigate('/perfil')}
+    />
+  </div>
+</div>
+✅ 2. En SidebarButton.tsx:
+Asegurate de que:
+
+El botón tenga:
+
+tsx
+Copiar
+Editar
+className="relative flex items-center justify-center w-8 h-8 md:hover:bg-muted rounded-md transition-all duration-300"
+Y cuando isExpanded === true, aplicar w-full y mostrar el texto con ml-8.
+
+Esto garantiza que:
+
+Íconos estén perfectamente centrados cuando colapsado.
+
+Texto aparezca alineado cuando expandido.
+
+📌 NO toques:
+
+El contenido del botón.
+
+La lógica de expansión.
+
+La navegación.
+
+🧠 Esto debe replicar el diseño visual de Supabase exactamente: sidebar limpio, íconos centrados, texto alineado, footer siempre pegado abajo.

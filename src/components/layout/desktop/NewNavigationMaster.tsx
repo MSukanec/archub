@@ -148,6 +148,12 @@ export function NewNavigationMaster() {
     sidebarDockingMutation.mutate(newDocked);
   };
 
+  const toggleSidebar = () => {
+    if (!isDocked) {
+      setExpanded(!isExpanded);
+    }
+  };
+
   const isActive = (path: string) => {
     return location === path;
   };
@@ -164,9 +170,20 @@ export function NewNavigationMaster() {
   };
 
   const renderMasterSidebar = () => (
-    <>
-      {/* Navigation Menu */}
-      <div className="flex-1 py-2 px-2 space-y-1">
+    <div className="flex flex-col h-full justify-between">
+      {/* Header */}
+      <div className="p-2">
+        <SidebarButton
+          icon={<Building className="h-4 w-4" />}
+          label="Archub"
+          isActive={false}
+          isExpanded={isExpanded}
+          onClick={toggleSidebar}
+        />
+      </div>
+
+      {/* Middle: Navegación */}
+      <div className="flex-1 overflow-y-auto px-2 space-y-1">
         {/* Resúmenes */}
         <SidebarButton
           icon={<Home className="h-4 w-4" />}
@@ -271,7 +288,7 @@ export function NewNavigationMaster() {
           onClick={() => navigate('/perfil')}
         />
       </div>
-    </>
+    </div>
   );
 
   const renderOrganizationSidebar = () => (
@@ -617,7 +634,7 @@ export function NewNavigationMaster() {
   return (
     <div
       className={cn(
-        "fixed left-0 top-10 z-40 h-[calc(100vh-2.5rem)] bg-[--menues-bg] border-r border-[--menues-border] transition-all duration-300 flex flex-col",
+        "fixed left-0 top-10 z-40 h-[calc(100vh-2.5rem)] bg-[--menues-bg] border-r border-[--menues-border] transition-all duration-300",
         isExpanded ? "w-60" : "w-10"
       )}
       onMouseEnter={() => !isDocked && setHovered(true)}
