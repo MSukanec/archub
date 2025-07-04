@@ -102,31 +102,36 @@ const MovementCard: React.FC<MovementCardProps> = ({ movement, onEdit, onDelete,
           </Avatar>
         </div>
 
-        {/* Center: Data */}
-        <div className="flex-1 min-w-0">
-          <div 
-            className="text-[var(--card-fg)] font-medium text-sm"
-            title={category}
-          >
-            {categoryDisplay}
-          </div>
-          {subcategoryDisplay && (
+        {/* Center: Data - Two rows layout */}
+        <div className="flex-1 min-w-0 flex flex-col justify-center">
+          <div className="flex items-center justify-between">
             <div 
-              className="text-[var(--muted-fg)] text-sm mt-1 truncate"
-              title={subcategoryDisplay}
+              className="text-[var(--card-fg)] font-medium text-sm"
+              title={category}
             >
-              {subcategoryDisplay}
+              {categoryDisplay}
             </div>
-          )}
-        </div>
-
-        {/* Right: Amount + Currency */}
-        <div className="flex-shrink-0 text-right">
-          <div className={`font-semibold text-sm ${amountColor}`}>
-            {amountPrefix}${formatAmount(amount)}
+            <div className={`font-semibold text-sm ${amountColor} ml-4`}>
+              {amountPrefix}${formatAmount(amount)}
+            </div>
           </div>
-          <div className="text-xs text-gray-500 mt-0.5">
-            {currency}
+          
+          <div className="flex items-center justify-between mt-1">
+            {subcategoryDisplay ? (
+              <div 
+                className="text-[var(--muted-fg)] text-sm truncate"
+                title={subcategoryDisplay}
+              >
+                {subcategoryDisplay}
+              </div>
+            ) : (
+              <div className="text-[var(--muted-fg)] text-sm">
+                Sin subcategoría
+              </div>
+            )}
+            <div className="text-xs text-gray-500 ml-4">
+              {currency}
+            </div>
           </div>
         </div>
       </div>

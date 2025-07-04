@@ -604,7 +604,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
 
                         {/* Divider */}
                         <div className="border-t pt-3 mt-3">
-                          <h4 className="text-sm font-medium mb-3">Moneda de Origen/Destino</h4>
+                          <h4 className="text-sm font-medium mb-3">Origen</h4>
                         </div>
 
                         <FormField
@@ -612,7 +612,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                           name="from_currency_id"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Moneda Origen</FormLabel>
+                              <FormLabel>Moneda</FormLabel>
                               <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
                                   <SelectTrigger>
@@ -634,40 +634,10 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
 
                         <FormField
                           control={conversionForm.control}
-                          name="to_currency_id"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Moneda Destino</FormLabel>
-                              <Select onValueChange={field.onChange} value={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Seleccionar moneda destino" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {organizationCurrencies?.map((orgCurrency: any) => (
-                                    <SelectItem key={orgCurrency.currency.id} value={orgCurrency.currency.id}>
-                                      {orgCurrency.currency.name} ({orgCurrency.currency.symbol})
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        {/* Divider */}
-                        <div className="border-t pt-3 mt-3">
-                          <h4 className="text-sm font-medium mb-3">Billetera Origen/Destino</h4>
-                        </div>
-
-                        <FormField
-                          control={conversionForm.control}
                           name="from_wallet_id"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Billetera Origen</FormLabel>
+                              <FormLabel>Billetera</FormLabel>
                               <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
                                   <SelectTrigger>
@@ -689,40 +659,10 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
 
                         <FormField
                           control={conversionForm.control}
-                          name="to_wallet_id"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Billetera Destino</FormLabel>
-                              <Select onValueChange={field.onChange} value={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Seleccionar billetera destino" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {wallets?.map((wallet: any) => (
-                                    <SelectItem key={wallet.wallet_id} value={wallet.wallet_id}>
-                                      {wallet.wallets?.name || wallet.name || 'Sin nombre'}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        {/* Divider */}
-                        <div className="border-t pt-3 mt-3">
-                          <h4 className="text-sm font-medium mb-3">Cantidad Origen/Destino</h4>
-                        </div>
-
-                        <FormField
-                          control={conversionForm.control}
                           name="from_amount"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Cantidad Origen</FormLabel>
+                              <FormLabel>Cantidad</FormLabel>
                               <FormControl>
                                 <div className="relative">
                                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
@@ -743,12 +683,67 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                           )}
                         />
 
+                        {/* Divider */}
+                        <div className="border-t pt-3 mt-3">
+                          <h4 className="text-sm font-medium mb-3">Destino</h4>
+                        </div>
+
+                        <FormField
+                          control={conversionForm.control}
+                          name="to_currency_id"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Moneda</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Seleccionar moneda destino" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {organizationCurrencies?.map((orgCurrency: any) => (
+                                    <SelectItem key={orgCurrency.currency.id} value={orgCurrency.currency.id}>
+                                      {orgCurrency.currency.name} ({orgCurrency.currency.symbol})
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={conversionForm.control}
+                          name="to_wallet_id"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Billetera</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Seleccionar billetera destino" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {wallets?.map((wallet: any) => (
+                                    <SelectItem key={wallet.wallet_id} value={wallet.wallet_id}>
+                                      {wallet.wallets?.name || wallet.name || 'Sin nombre'}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
                         <FormField
                           control={conversionForm.control}
                           name="to_amount"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Cantidad Destino</FormLabel>
+                              <FormLabel>Cantidad</FormLabel>
                               <FormControl>
                                 <div className="relative">
                                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">

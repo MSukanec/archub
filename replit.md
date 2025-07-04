@@ -119,13 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- July 4, 2025. Final MovementCard UI polish and conversion modal field organization
-  • Removed description field from MovementCard.tsx for cleaner 2-row information layout
-  • Updated MovementCard to display category and subcategory on separate lines instead of inline "Categoria / Subcategoria" format
-  • Confirmed sorting arrows disabled for Moneda, Billetera, and Cantidad columns in conversions table (sortable: false already implemented)
-  • Reordered conversion modal fields into logical grouping: Moneda Origen/Destino → Billetera Origen/Destino → Cantidad Origen/Destino
-  • Enhanced conversion modal with improved section headers and better visual organization of field groups
-  • Completed all requested UI improvements for enhanced user experience and professional appearance
+- July 4, 2025. Final MovementCard UI polish and conversion modal field organization - COMPLETED
+  • Restructured conversion modal with correct Origen/Destino grouping: Origen (Moneda, Billetera, Cantidad) → Destino (Moneda, Billetera, Cantidad)
+  • Removed arrow indicators (↓) from conversion amounts in table for cleaner visual presentation
+  • Fixed MovementCard mobile layout with proper two-row alignment: Category aligned with Amount, Subcategory aligned with Currency
+  • Enhanced MovementCard to use justify-between layout ensuring perfect alignment between left and right elements
+  • Removed description field from MovementCard.tsx for cleaner 2-row information layout as requested
+  • Updated conversion modal section headers to "Origen" and "Destino" with simplified field labels (Moneda, Billetera, Cantidad)
+  • Confirmed sorting arrows disabled for Moneda, Billetera, and Cantidad columns in conversions table
+  • All UI improvements completed with professional mobile-optimized appearance
 - July 4, 2025. Complete conversion editing and deletion system with proper update/create handling
   • Implemented unified createConversionMutation that handles both creation and editing based on metadata detection
   • Fixed conversion editing to update existing movements instead of creating duplicates using _isConversion metadata

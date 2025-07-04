@@ -826,7 +826,6 @@ export default function Movements() {
               <div className="font-medium text-red-600">
                 -${item.from_amount?.toLocaleString() || "0"}
               </div>
-              <div className="text-muted-foreground">↓</div>
               <div className="font-medium text-green-600">
                 +${item.to_amount?.toLocaleString() || "0"}
               </div>
