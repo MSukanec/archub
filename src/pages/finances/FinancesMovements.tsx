@@ -693,7 +693,8 @@ export default function Movements() {
             icon: <Heart className="h-4 w-4" />,
             label: movement.is_favorite ? "Quitar de favoritos" : "Agregar a favoritos",
             onClick: () => handleToggleFavorite(movement),
-            variant: movement.is_favorite ? "primary" : "default"
+            variant: movement.is_favorite ? "muted" : "default",
+            isActive: movement.is_favorite
           },
           {
             icon: <Pencil className="h-4 w-4" />,
