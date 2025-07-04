@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Sidebar } from "./Sidebar";
+import { NavigationMaster } from "./NavigationMaster";
 import { Header } from "./Header";
 import { useAuthStore } from "@/stores/authStore";
 import { useThemeStore } from "@/stores/themeStore";
@@ -29,11 +29,9 @@ interface LayoutProps {
 export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   const { isDark, setTheme } = useThemeStore();
   const { data } = useCurrentUser();
-  const { isDocked, isHovered } = useSidebarStore();
+  const { isDocked, isHovered, isExpanded } = useSidebarStore();
   const { showActionBar } = useMobileActionBar();
   const isMobile = useMobile();
-
-  const isExpanded = isDocked || isHovered;
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDark);
@@ -55,13 +53,13 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   return (
     <div className="min-h-screen bg-background">
       <Header {...headerProps} />
-      {/* Sidebar - hidden on mobile */}
+      {/* Navigation Master - hidden on mobile */}
       <div className="hidden md:block">
-        <Sidebar />
+        <NavigationMaster />
       </div>
       <main
         className={`transition-all duration-300 ease-in-out flex-1 overflow-auto p-3 mt-1 ${
-          isExpanded ? "md:ml-[240px]" : "md:ml-[40px]"
+          isExpanded ? "md:ml-[200px]" : "md:ml-[48px]"
         } ml-0 ${isMobile && showActionBar ? "pb-20" : ""}`}
       >
         <div className={wide ? "" : "max-w-[1440px] mx-auto"}>{children}</div>
