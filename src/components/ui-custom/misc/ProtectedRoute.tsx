@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
+import { useLocation } from 'wouter'
 import { useAuthStore } from '@/stores/authStore'
+import { useCurrentUser } from '@/hooks/use-current-user'
 import { AuthModal } from '@/components/auth/AuthModal'
 
 interface ProtectedRouteProps {
@@ -8,6 +10,8 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, loading, initialized, initialize } = useAuthStore()
+  const { data: userData, isLoading: userDataLoading } = useCurrentUser()
+  const [location, navigate] = useLocation()
   const [showAuthModal, setShowAuthModal] = useState(false)
 
   useEffect(() => {
@@ -29,6 +33,18 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
       setShowAuthModal(false)
     }
   }, [user, initialized, loading])
+
+  // Check if user needs to select a mode (only after user data is loaded)
+  useEffect(() => {
+    if (user && userData && !userDataLoading && location !== '/select-mode') {
+      const hasUserType = userData.preferences?.last_user_type;
+      
+      if (!hasUserType) {
+        console.log('User has no type selected, redirecting to select-mode');
+        navigate('/select-mode');
+      }
+    }
+  }, [user, userData, userDataLoading, location, navigate])
 
   // Debug adicional
   console.log('ProtectedRoute render:', { initialized, loading, user: !!user, showAuthModal })

@@ -8,8 +8,9 @@ import { Switch } from '@/components/ui/switch'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
-import { Upload, Link as LinkIcon, LogOut, Crown, MessageCircle, Camera, User, Settings } from 'lucide-react'
+import { Upload, Link as LinkIcon, LogOut, Crown, MessageCircle, Camera, User, Settings, Building, Package, Hammer, Eye } from 'lucide-react'
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { useLocation } from 'wouter'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQuery } from '@tanstack/react-query'
@@ -27,6 +28,23 @@ export default function Profile() {
   const { data: userData, isLoading } = useCurrentUser()
   const { toast } = useToast()
   const { setDocked } = useSidebarStore()
+  const [, navigate] = useLocation()
+  
+  // Function to get user mode info
+  const getUserModeInfo = (userType: string | null) => {
+    switch (userType) {
+      case 'professional':
+        return { icon: Building, label: 'Profesional', description: 'Estudios y constructoras' };
+      case 'provider':
+        return { icon: Package, label: 'Proveedor de Materiales', description: 'Suministro de materiales' };
+      case 'worker':
+        return { icon: Hammer, label: 'Mano de Obra', description: 'Contratistas y maestros' };
+      case 'visitor':
+        return { icon: Eye, label: 'Solo Exploración', description: 'Modo exploración' };
+      default:
+        return { icon: Settings, label: 'No definido', description: 'Selecciona tu modo de uso' };
+    }
+  };
   
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
@@ -421,6 +439,53 @@ export default function Profile() {
                   onCheckedChange={handleSidebarDockedChange}
                 />
               </div>
+            </div>
+          </div>
+        </div>
+
+        <hr className="border-t border-gray-200 dark:border-gray-700 my-8" />
+
+        {/* Modo de Usuario */}
+        <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            {/* Left Column - Title and Description */}
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Settings className="h-5 w-5 text-[var(--accent)]" />
+                <h3 className="text-lg font-semibold">Modo de uso</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Personaliza tu experiencia según tu tipo de actividad.
+              </p>
+            </div>
+
+            {/* Right Column - Current Mode and Change Button */}
+            <div className="space-y-6">
+              {(() => {
+                const modeInfo = getUserModeInfo(userData?.preferences?.last_user_type);
+                const ModeIcon = modeInfo.icon;
+                return (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                      <div className="p-2 rounded-md bg-primary/10">
+                        <ModeIcon className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">{modeInfo.label}</p>
+                        <p className="text-xs text-muted-foreground">{modeInfo.description}</p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate('/select-mode')}
+                      className="w-full md:w-auto"
+                    >
+                      Cambiar modo de uso
+                    </Button>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </div>

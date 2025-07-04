@@ -43,11 +43,18 @@ import Changelog from "@/pages/others/Changelog";
 import DesignTimeline from "@/pages/design/DesignTimeline";
 import DesignDashboard from "@/pages/design/DesignDashboard";
 import DesignDocumentation from "@/pages/design/DesignDocumentation";
+import { SelectMode } from "@/pages/others/SelectMode";
 import NotFound from "@/pages/others/NotFound";
 
 function Router() {
   return (
     <Switch>
+      <Route path="/select-mode">
+        <ProtectedRoute>
+          <SelectMode />
+        </ProtectedRoute>
+      </Route>
+
       <Route path="/organizations">
         <ProtectedRoute>
           <OrganizationManagement />
