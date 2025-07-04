@@ -92,8 +92,8 @@ export function CustomRestricted({
             onMouseEnter={() => setIsPopoverOpen(true)}
             onMouseLeave={() => setIsPopoverOpen(false)}
           >
-            <div className="bg-[var(--card-bg)] rounded-full p-1.5 shadow-sm border border-gray-500 group-hover:shadow-md transition-shadow">
-              <Lock className="h-3 w-3 text-gray-500" />
+            <div className="bg-accent rounded-full p-1.5 shadow-sm border border-accent group-hover:shadow-md transition-shadow">
+              <Lock className="h-3 w-3 text-accent-foreground" />
             </div>
           </div>
         </PopoverTrigger>

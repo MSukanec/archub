@@ -119,6 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 4, 2025. Enhanced navigation and UI improvements with real data dashboards - COMPLETED
+  • Changed DISEÑO context default navigation from timeline to dashboard in both desktop and mobile navigation
+  • Updated CustomRestricted icon color from pink to --accent background with accent-foreground text
+  • Added CustomRestricted to Comercialización buttons in both desktop sidebar and mobile menu with reason="coming_soon"
+  • Completely removed all mock data from ConstructionDashboard and FinancesDashboard - now uses only real Supabase data
+  • ConstructionDashboard shows real metrics from site logs, budgets, personnel, and materials with proper empty states
+  • FinancesDashboard displays authentic financial calculations from movements table with monthly summaries
+  • Both dashboards include real activity feeds, proper data aggregation, and working quick action buttons
+  • Enhanced data integrity throughout dashboard system with loading states and empty state handling
 - July 4, 2025. Complete financial movements file attachment system implementation - COMPLETED
   • Added "📎 Archivos" accordion section to movement creation/editing modal with "+ Agregar Archivo" functionality
   • Created uploadMovementFiles.ts utility following site log files pattern for movement-files bucket integration
