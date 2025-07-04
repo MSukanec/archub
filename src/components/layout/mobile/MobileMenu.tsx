@@ -166,7 +166,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
       { icon: Users, label: 'Miembros', href: '/organization/members' },
       { icon: CheckSquare, label: 'Tareas', href: '/tasks' },
-      { icon: Building, label: 'Gestión de Organizaciones', href: '/organizations' },
     ],
     project: [
       { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },

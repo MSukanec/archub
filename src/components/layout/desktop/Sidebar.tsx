@@ -173,18 +173,14 @@ export function Sidebar() {
       { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
       { icon: Users, label: 'Miembros', href: '/organization/members' },
       { icon: CheckSquare, label: 'Tareas', href: '/tasks' },
-      { icon: Building, label: 'Gestión de Organizaciones', href: '/organizations' },
-    ],
-    organizations: [
-      // Minimal sidebar - only bottom section buttons
     ],
     project: [
       { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },
       { type: 'divider' },
-      { icon: FolderOpen, label: 'Diseño', href: '#', onClick: () => { setSidebarContext('design'); navigate('/design/timeline'); } },
-      { icon: Building, label: 'Obra', href: '#', onClick: () => { setSidebarContext('construction'); navigate('/construction/dashboard'); } },
-      { icon: DollarSign, label: 'Finanzas', href: '#', onClick: () => { setSidebarContext('finances'); navigate('/finances/dashboard'); } },
-      { icon: Users, label: 'Comercialización', href: '#', onClick: () => { setSidebarContext('commercialization'); navigate('/commercialization/dashboard'); } },
+      { icon: FolderOpen, label: 'Diseño', href: '#', onClick: () => { setSidebarContext('design'); navigate('/design/timeline'); }, rightIcon: ChevronRight },
+      { icon: Building, label: 'Obra', href: '#', onClick: () => { setSidebarContext('construction'); navigate('/construction/dashboard'); }, rightIcon: ChevronRight },
+      { icon: DollarSign, label: 'Finanzas', href: '#', onClick: () => { setSidebarContext('finances'); navigate('/finances/dashboard'); }, rightIcon: ChevronRight },
+      { icon: Users, label: 'Comercialización', href: '#', onClick: () => { setSidebarContext('commercialization'); navigate('/commercialization/dashboard'); }, rightIcon: ChevronRight },
       { icon: ArrowLeft, label: 'Volver a Organización', href: '#', onClick: () => { setSidebarContext('organization'); navigate('/organization/dashboard'); } },
     ],
     design: [
@@ -219,6 +215,7 @@ export function Sidebar() {
     ],
     admin: [
       { icon: Home, label: 'Resumen de Administración', href: '/admin/dashboard' },
+      { type: 'divider' },
       { 
         icon: Users, 
         label: 'Comunidad', 
@@ -286,7 +283,7 @@ export function Sidebar() {
               <div key={`${item.label || 'divider'}-${index}`} className="mb-[2px]">
                 {/* Divider */}
                 {item.type === 'divider' ? (
-                  <div className="mx-2 my-2 border-t border-[var(--menues-border)]" />
+                  <div className="mx-2 my-1 border-t border-[var(--menues-border)]" />
                 ) : (
                   <div>
                     {/* Main Button */}
@@ -298,8 +295,8 @@ export function Sidebar() {
                       onClick={item.isAccordion ? item.onToggle : (item.onClick || (() => navigate(item.href)))}
                       rightIcon={item.isAccordion && isExpanded ? (
                         item.expanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />
-                      ) : item.hasChevron && isExpanded ? (
-                        <ChevronRight className="w-4 h-4" />
+                      ) : item.rightIcon && isExpanded ? (
+                        <item.rightIcon className="w-4 h-4" />
                       ) : undefined}
                     />
                 

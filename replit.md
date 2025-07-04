@@ -128,6 +128,14 @@ Changelog:
   • Corrected finanzas preferences route from /organization/preferences to /finances/preferences in both navigation systems
   • Stage breadcrumb now correctly displays "Diseño", "Obra", "Finanzas", "Comercialización" labels matching sidebar contexts
   • Enhanced dropdown stage selector to include all phases with proper navigation and context switching functionality
+- July 4, 2025. Sidebar navigation fixes and visual improvements
+  • Removed "Gestión de Organizaciones" button from organization context and eliminated empty "organizations" sidebar state
+  • Fixed admin context structure: removed title, replaced with divider after "Resumen de Administración" 
+  • Reduced divider padding from my-2 to my-1 for tighter spacing matching administration/plan divider
+  • Added ChevronRight icons to stage navigation buttons: Diseño, Obra, Finanzas, Comercialización
+  • Updated SidebarButton component to support rightIcon prop with proper rendering logic
+  • Applied all navigation fixes consistently to both desktop Sidebar.tsx and mobile MobileMenu.tsx
+  • Admin context now follows correct structure: Resumen → divider → Comunidad (accordion) → Tareas (accordion) → Materiales (accordion)
 - July 4, 2025. Complete sidebar navigation updates and finances module restructuring
   • Eliminated "Tareas" access from sidebar footer as requested
   • Added "Proyectos" button to ORGANIZACIÓN context above "Actividad" linking to /organization/projects
