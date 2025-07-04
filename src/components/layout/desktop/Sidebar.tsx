@@ -186,6 +186,7 @@ export function Sidebar() {
   const sidebarContexts = {
     organization: [
       { icon: Home, label: 'Resumen de la Organización', href: '/organization/dashboard' },
+      { icon: ArrowRight, label: 'Ir al Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
       { type: 'divider' },
       { icon: FolderOpen, label: 'Proyectos', href: '/organization/projects' },
       { icon: Activity, label: 'Actividad', href: '/organization/activity' },

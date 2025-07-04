@@ -8,6 +8,18 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import * as AlertDialogPrimitive from '@/components/ui/alert-dialog';
+
+const {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} = AlertDialogPrimitive;
 import { useToast } from '@/hooks/use-toast';
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext';
 import { useMobile } from '@/hooks/use-mobile';
@@ -61,6 +73,7 @@ export default function ConstructionGallery() {
   const [showGalleryModal, setShowGalleryModal] = useState(false);
   const [editingFile, setEditingFile] = useState<GalleryFile | null>(null);
   const [selectedFile, setSelectedFile] = useState<GalleryFile | null>(null);
+  const [fileToDelete, setFileToDelete] = useState<GalleryFile | null>(null);
   
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
@@ -257,8 +270,13 @@ export default function ConstructionGallery() {
   };
 
   const handleDelete = (file: GalleryFile) => {
-    if (confirm('¿Estás seguro de que quieres eliminar este archivo?')) {
-      deleteFileMutation.mutate(file.id);
+    setFileToDelete(file);
+  };
+
+  const confirmDelete = () => {
+    if (fileToDelete) {
+      deleteFileMutation.mutate(fileToDelete.id);
+      setFileToDelete(null);
     }
   };
 
@@ -547,6 +565,31 @@ export default function ConstructionGallery() {
             ),
           }}
         />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {fileToDelete && (
+        <AlertDialog open={!!fileToDelete} onOpenChange={() => setFileToDelete(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Eliminar archivo</AlertDialogTitle>
+              <AlertDialogDescription>
+                ¿Estás seguro de que quieres eliminar este archivo? Esta acción no se puede deshacer.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setFileToDelete(null)}>
+                Cancelar
+              </AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={confirmDelete}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Eliminar
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       )}
 
       {/* Gallery Modal */}
