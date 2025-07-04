@@ -34,13 +34,24 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     }
   }, [user, initialized, loading])
 
-  // Check if user needs to select a mode (only after user data is loaded)
+  // Check if user needs to complete onboarding or select a mode
   useEffect(() => {
     if (user && userData && !userDataLoading && location !== '/select-mode') {
       const hasUserType = userData.preferences?.last_user_type;
+      const onboardingCompleted = userData.preferences?.onboarding_completed;
       
-      if (!hasUserType) {
-        console.log('User has no type selected, redirecting to select-mode');
+      console.log('Checking user type:', { 
+        hasUser: !!user, 
+        hasUserData: !!userData, 
+        userDataLoading, 
+        hasUserType: !!hasUserType,
+        onboardingCompleted,
+        currentLocation: location 
+      });
+      
+      // Redirect to onboarding if not completed OR if no user type selected
+      if (!onboardingCompleted || !hasUserType) {
+        console.log('User needs onboarding or type selection, redirecting to select-mode');
         navigate('/select-mode');
       }
     }

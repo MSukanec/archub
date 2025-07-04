@@ -1,212 +1,231 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { useLocation } from "wouter";
-import { Building, Package, Hammer, Eye, CheckCircle, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CustomRestricted } from "@/components/ui-custom/misc/CustomRestricted";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { queryClient } from "@/lib/queryClient";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useToast } from "@/hooks/use-toast";
+import { useOnboardingStore } from "@/stores/onboardingStore";
+import { Step1UserData } from "@/components/onboarding/Step1UserData";
+import { Step2Discovery } from "@/components/onboarding/Step2Discovery";
+import { Step3SelectMode } from "@/components/onboarding/Step3SelectMode";
 
-type UserType = "professional" | "provider" | "worker" | "visitor";
-
-interface ModeOption {
-  type: UserType;
-  title: string;
-  description: string;
-  icon: React.ComponentType<{ className?: string }>;
-  color: string;
-}
-
-const modeOptions: ModeOption[] = [
-  {
-    type: "professional",
-    title: "Profesional",
-    description: "Estudios de arquitectura, constructoras y empresas de construcción",
-    icon: Building,
-    color: "bg-[var(--accent)]"
-  },
-  {
-    type: "provider",
-    title: "Proveedor de Materiales",
-    description: "Empresas que suministran materiales y equipos de construcción",
-    icon: Package,
-    color: "bg-[var(--accent)]"
-  },
-  {
-    type: "worker",
-    title: "Mano de Obra",
-    description: "Contratistas, maestros de obra y profesionales independientes",
-    icon: Hammer,
-    color: "bg-[var(--accent)]"
-  },
-  {
-    type: "visitor",
-    title: "Solo Exploración",
-    description: "Explora las funcionalidades sin compromiso",
-    icon: Eye,
-    color: "bg-[var(--accent)]"
-  }
-];
-
-export function SelectMode() {
+export default function SelectMode() {
   const [, navigate] = useLocation();
-  const { data: userData } = useCurrentUser();
+  const { data: userData, isLoading: userLoading } = useCurrentUser();
   const { setSidebarContext } = useNavigationStore();
   const { toast } = useToast();
-  const [selectedMode, setSelectedMode] = useState<UserType | null>(null);
+  const { 
+    currentStep, 
+    totalSteps, 
+    formData, 
+    updateFormData, 
+    resetOnboarding, 
+    setCurrentStep 
+  } = useOnboardingStore();
 
-  const updateUserTypeMutation = useMutation({
-    mutationFn: async (userType: UserType) => {
-      if (!supabase || !userData?.preferences?.id) {
-        throw new Error('Missing required data');
-      }
-      
-      const { error } = await supabase
-        .from('user_preferences')
-        .update({ last_user_type: userType })
-        .eq('id', userData.preferences.id);
-      
-      if (error) throw error;
-      return userType;
-    },
-    onSuccess: (userType) => {
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      
-      // Set appropriate sidebar context and navigate based on user type
-      if (userType === 'professional') {
-        setSidebarContext('organization');
-        navigate('/organization/dashboard');
-      } else if (userType === 'provider') {
-        // For now, redirect to organization dashboard
-        // TODO: Create provider-specific dashboard
-        setSidebarContext('organization');
-        navigate('/organization/dashboard');
-      } else if (userType === 'worker') {
-        // For now, redirect to organization dashboard
-        // TODO: Create worker-specific dashboard
-        setSidebarContext('organization');
-        navigate('/organization/dashboard');
-      } else if (userType === 'visitor') {
-        // For now, redirect to organization dashboard
-        // TODO: Create visitor-specific dashboard
-        setSidebarContext('organization');
-        navigate('/organization/dashboard');
-      }
-      
-      toast({
-        title: "Modo actualizado",
-        description: `Ahora estás usando Archub como ${modeOptions.find(m => m.type === userType)?.title}`,
+  // Determine if this is onboarding (user hasn't completed it) or just mode change
+  const isOnboarding = !userData?.preferences?.onboarding_completed;
+
+  // Initialize form data with existing user data if available
+  useEffect(() => {
+    if (userData && !userLoading) {
+      updateFormData({
+        first_name: userData.user_data?.first_name || '',
+        last_name: userData.user_data?.last_name || '',
+        theme: (userData.preferences?.theme === 'dark' ? 'dark' : 'light'),
+        discovered_by: userData.user_data?.discovered_by || '',
+        discovered_by_other_text: userData.user_data?.discovered_by_other_text || '',
+        last_user_type: userData.preferences?.last_user_type || null,
       });
+
+      // If not onboarding (user completed it), skip to step 3 (mode selection only)
+      if (!isOnboarding) {
+        setCurrentStep(3);
+      } else {
+        // If onboarding and has existing data, skip appropriate steps
+        if (userData.user_data?.first_name && userData.user_data?.last_name) {
+          if (userData.user_data?.discovered_by) {
+            setCurrentStep(3); // Skip to mode selection
+          } else {
+            setCurrentStep(2); // Skip to discovery step
+          }
+        } else {
+          setCurrentStep(1); // Start from beginning
+        }
+      }
+    }
+  }, [userData, userLoading, isOnboarding, updateFormData, setCurrentStep]);
+
+  // Mutation to save all onboarding data
+  const saveOnboardingMutation = useMutation({
+    mutationFn: async () => {
+      if (!userData?.user?.id) throw new Error('Usuario no encontrado');
+
+      const userId = userData.user.id;
+
+      if (!supabase) throw new Error('Supabase no está configurado');
+
+      // Update user_data table
+      const { error: userDataError } = await supabase
+        .from('user_data')
+        .update({
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          discovered_by: formData.discovered_by,
+          discovered_by_other_text: formData.discovered_by_other_text || null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', userId);
+
+      if (userDataError) throw userDataError;
+
+      // Update user_preferences table
+      const { error: preferencesError } = await supabase
+        .from('user_preferences')
+        .update({
+          theme: formData.theme,
+          last_user_type: formData.last_user_type,
+          onboarding_completed: true,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', userId);
+
+      if (preferencesError) throw preferencesError;
+
+      return { success: true };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      toast({
+        title: "¡Bienvenido a Archub!",
+        description: "Tu configuración se ha guardado exitosamente.",
+      });
+      
+      // Redirect to dashboard after successful onboarding
+      setSidebarContext('organization');
+      navigate('/dashboard');
+      resetOnboarding();
     },
     onError: (error) => {
+      console.error('Error saving onboarding data:', error);
       toast({
-        title: "Error",
-        description: "No se pudo actualizar el modo de usuario",
         variant: "destructive",
+        title: "Error",
+        description: "No se pudo guardar la configuración. Intenta nuevamente.",
       });
-      console.error('Error updating user type:', error);
-    }
+    },
   });
 
-  const handleModeSelect = (mode: UserType) => {
-    setSelectedMode(mode);
-    updateUserTypeMutation.mutate(mode);
+  // Mutation for simple mode change (when not onboarding)
+  const updateUserTypeMutation = useMutation({
+    mutationFn: async (userType: string) => {
+      if (!userData?.user?.id) throw new Error('Usuario no encontrado');
+      if (!supabase) throw new Error('Supabase no está configurado');
+
+      const { error } = await supabase
+        .from('user_preferences')
+        .update({
+          last_user_type: userType,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', userData.user.id);
+
+      if (error) throw error;
+      return { success: true };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      toast({
+        title: "Modo actualizado",
+        description: "Tu modo de uso se ha actualizado correctamente.",
+      });
+      navigate('/dashboard');
+    },
+    onError: (error) => {
+      console.error('Error updating user type:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No se pudo actualizar el modo. Intenta nuevamente.",
+      });
+    },
+  });
+
+  const handleFinishOnboarding = () => {
+    if (isOnboarding) {
+      saveOnboardingMutation.mutate();
+    } else {
+      // Just update the user type
+      if (formData.last_user_type) {
+        updateUserTypeMutation.mutate(formData.last_user_type);
+      }
+    }
   };
 
-  const currentUserType = userData?.preferences?.last_user_type;
-  const isOnboarding = !currentUserType;
+  if (userLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--accent)] mx-auto mb-4"></div>
+          <p className="text-slate-600 dark:text-slate-300">Cargando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const renderCurrentStep = () => {
+    switch (currentStep) {
+      case 1:
+        return <Step1UserData />;
+      case 2:
+        return <Step2Discovery />;
+      case 3:
+        return (
+          <Step3SelectMode 
+            isOnboarding={isOnboarding}
+            onFinish={handleFinishOnboarding}
+            isLoading={saveOnboardingMutation.isPending || updateUserTypeMutation.isPending}
+          />
+        );
+      default:
+        return <Step1UserData />;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-4">
       <div className="w-full max-w-4xl">
+        {/* Header with step indicator */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
             {isOnboarding ? "¡Bienvenido a Archub!" : "Elegir modo de uso"}
           </h1>
-          <p className="text-lg text-slate-600 dark:text-slate-300">
-            {isOnboarding 
-              ? "Elige cómo quieres usar Archub para personalizar tu experiencia"
-              : `Estás usando Archub como: ${modeOptions.find(m => m.type === currentUserType)?.title || 'No definido'}`
-            }
-          </p>
-          {!isOnboarding && (
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
-              ¿Quieres cambiar tu modo de uso?
-            </p>
+          
+          {isOnboarding && currentStep < 3 && (
+            <div className="flex items-center justify-center space-x-2 mt-4">
+              <p className="text-sm text-slate-600 dark:text-slate-300">
+                Paso {currentStep} de {totalSteps}
+              </p>
+              <div className="flex space-x-1">
+                {Array.from({ length: totalSteps }, (_, index) => (
+                  <div
+                    key={index}
+                    className={`h-2 w-8 rounded-full transition-colors ${
+                      index + 1 <= currentStep 
+                        ? 'bg-[var(--accent)]' 
+                        : 'bg-slate-300 dark:bg-slate-600'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {modeOptions.map((mode) => {
-            const Icon = mode.icon;
-            const isSelected = selectedMode === mode.type;
-            const isCurrent = currentUserType === mode.type;
-            const isLoading = updateUserTypeMutation.isPending && selectedMode === mode.type;
-            const isAvailable = mode.type === 'professional'; // Solo profesional está disponible
-            
-            const cardContent = (
-              <Card
-                key={mode.type}
-                className={`
-                  ${isAvailable ? 'cursor-pointer hover:scale-105 hover:shadow-lg' : 'cursor-not-allowed opacity-60'}
-                  transition-all duration-300 transform
-                  ${isSelected ? 'ring-2 ring-blue-500' : ''}
-                  ${isCurrent ? 'ring-2 ring-green-500' : ''}
-                  ${isLoading ? 'opacity-75' : ''}
-                `}
-                onClick={() => isAvailable && !isLoading && handleModeSelect(mode.type)}
-              >
-                <CardHeader className="pb-4">
-                  <div className="flex items-center justify-between">
-                    <div className={`p-3 rounded-lg ${mode.color} text-white`}>
-                      <Icon className="h-6 w-6" />
-                    </div>
-                    {isCurrent && !isLoading && (
-                      <div className="flex items-center text-green-600 dark:text-green-400">
-                        <CheckCircle className="h-5 w-5 mr-1" />
-                        <span className="text-sm font-medium">Actual</span>
-                      </div>
-                    )}
-                    {isLoading && (
-                      <div className="flex items-center text-blue-600 dark:text-blue-400">
-                        <Loader2 className="h-5 w-5 mr-1 animate-spin" />
-                        <span className="text-sm font-medium">Guardando...</span>
-                      </div>
-                    )}
-                  </div>
-                  <CardTitle className="text-xl font-semibold text-slate-900 dark:text-white">
-                    {mode.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-slate-600 dark:text-slate-300 text-base leading-relaxed">
-                    {mode.description}
-                  </CardDescription>
-                </CardContent>
-              </Card>
-            );
-
-            if (!isAvailable) {
-              return (
-                <CustomRestricted key={mode.type} reason="coming_soon">
-                  {cardContent}
-                </CustomRestricted>
-              );
-            }
-
-            return cardContent;
-          })}
-        </div>
-
-        <div className="text-center mt-8">
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            Puedes cambiar tu modo de uso en cualquier momento desde tu perfil
-          </p>
-        </div>
+        {/* Current step content */}
+        {renderCurrentStep()}
       </div>
     </div>
   );

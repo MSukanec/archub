@@ -24,8 +24,12 @@ export const countries = pgTable("countries", {
 export const user_data = pgTable("user_data", {
   id: uuid("id").primaryKey().defaultRandom(),
   user_id: uuid("user_id").notNull(),
+  first_name: text("first_name"),
+  last_name: text("last_name"),
   country: uuid("country"),
   birthdate: text("birthdate"),
+  discovered_by: text("discovered_by", { enum: ["YouTube", "Instagram", "TikTok", "Google", "Recomendación", "LinkedIn", "Twitter/X", "Otro"] }),
+  discovered_by_other_text: text("discovered_by_other_text"),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
 });
