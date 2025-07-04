@@ -61,39 +61,38 @@ const ConversionCard = ({ conversion, onEdit, onDelete, onToggleFavorite }: Conv
         }
       ]}
     >
-      <div className="flex items-center justify-between gap-3 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950 dark:hover:bg-blue-900 rounded-lg shadow-sm border border-blue-200 dark:border-blue-800 p-3 mb-2 transition-colors cursor-pointer"
-           style={{ borderRight: '4px solid rgb(59, 130, 246)' }}
+      <div className="flex items-center justify-between gap-3 bg-background hover:bg-muted/40 rounded-lg shadow-sm border border-blue-500 p-3 mb-2 transition-colors cursor-pointer"
            onClick={() => onEdit?.(conversion)}>
         {/* Left: Avatar */}
         <div className="flex-shrink-0">
-          <Avatar className="w-10 h-10">
+          <Avatar className="w-10 h-10 border border-primary/20">
             <AvatarImage 
               src={creator?.avatar_url || ''} 
               alt={creator?.full_name || creator?.email || 'Usuario'} 
             />
-            <AvatarFallback className="bg-blue-100 text-blue-600 text-sm font-medium">
+            <AvatarFallback className="bg-muted text-foreground text-sm font-medium">
               {getInitials(creator?.full_name || creator?.email || 'Usuario')}
             </AvatarFallback>
           </Avatar>
         </div>
 
-        {/* Center: Data - Two rows layout for conversion */}
+        {/* Center: Data - Two rows layout matching MovementCard */}
         <div className="flex-1 min-w-0 flex flex-col justify-center">
           <div className="flex items-center justify-between">
-            <div className="text-blue-700 dark:text-blue-300 font-medium text-sm">
+            <div className="text-foreground font-medium text-sm">
               Conversión
             </div>
-            <div className="text-blue-700 dark:text-blue-300 font-semibold text-sm ml-4">
+            <div className="font-semibold text-sm ml-4 text-blue-600">
               ${formatAmount(from_amount)} → ${formatAmount(to_amount)}
             </div>
           </div>
           
           <div className="flex items-center justify-between mt-1">
-            <div className="text-blue-600 dark:text-blue-400 text-sm">
-              {from_currency} → {to_currency}
+            <div className="text-muted-foreground text-sm">
+              {from_currency} - {to_currency}
             </div>
-            <div className="text-xs text-blue-500 dark:text-blue-400 ml-4">
-              {new Date(conversion.movement_date).toLocaleDateString('es-AR')}
+            <div className="text-sm font-medium ml-4 text-blue-600">
+              {from_currency} → {to_currency}
             </div>
           </div>
         </div>

@@ -119,6 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 4, 2025. ConversionCard visual styling refinement and CustomTable renderCard integration - COMPLETED
+  • Fixed ConversionCard styling to match regular movement cards: same background, hover states, and text colors
+  • Changed conversion border to blue only (border-blue-500) while maintaining standard card appearance
+  • Replaced date display with currency pair format: "ARS - USD" in left bottom position
+  • Maintained conversion amounts display: "$7,800 → $9,984,000" in blue text on right side
+  • Successfully integrated ConversionCard into CustomTable renderCard function with proper movement detection
+  • ConversionCard automatically renders for conversion groups while MovementCard renders for regular movements
+  • SwipeableCard functionality preserved for mobile touch interactions with edit/delete/favorite actions
+  • Visual consistency achieved: only border color distinguishes conversions from regular income/expense movements
 - July 4, 2025. Final MovementCard UI polish and conversion modal field organization - COMPLETED
   • Restructured conversion modal with correct Origen/Destino grouping: Origen (Moneda, Billetera, Cantidad) → Destino (Moneda, Billetera, Cantidad)
   • Completely removed all arrow indicators (↓) from conversion table columns: Moneda, Billetera, and Cantidad for cleaner visual presentation
