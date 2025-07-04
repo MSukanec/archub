@@ -60,19 +60,17 @@ function useProjectGallery(projectId: string | null) {
           id,
           file_url,
           file_type,
-          original_name,
+          file_name,
           created_at,
           site_logs!inner (
             id,
             log_date,
             entry_type,
             created_by,
-            organization_members!inner (
-              users (
-                id,
-                full_name,
-                avatar_url
-              )
+            users!created_by (
+              id,
+              full_name,
+              avatar_url
             )
           )
         `)
@@ -89,16 +87,16 @@ function useProjectGallery(projectId: string | null) {
         id: file.id,
         file_url: file.file_url,
         file_type: file.file_type,
-        original_name: file.original_name,
+        original_name: file.file_name,
         created_at: file.created_at,
         site_log: {
           id: file.site_logs.id,
           log_date: file.site_logs.log_date,
           entry_type: file.site_logs.entry_type,
           creator: {
-            id: file.site_logs.organization_members.users.id,
-            full_name: file.site_logs.organization_members.users.full_name,
-            avatar_url: file.site_logs.organization_members.users.avatar_url || ""
+            id: file.site_logs.users.id,
+            full_name: file.site_logs.users.full_name,
+            avatar_url: file.site_logs.users.avatar_url || ""
           }
         }
       })) || [];
@@ -123,7 +121,7 @@ export default function ConstructionGallery() {
     data: galleryFiles = [], 
     isLoading, 
     error 
-  } = useProjectGallery(currentProject);
+  } = useProjectGallery(currentProject || null);
 
   // Filter files based on selected filters
   const filteredFiles = galleryFiles.filter(file => {
@@ -225,11 +223,9 @@ export default function ConstructionGallery() {
           </div>
 
           <CustomEmptyState
-            icon={Images}
+            icon={<Images />}
             title="No hay archivos en la galería"
             description="Los archivos que subas en las bitácoras aparecerán aquí"
-            actionText="Ir a Bitácora"
-            actionHref="/construction/logs"
           />
         </div>
       </Layout>
@@ -289,7 +285,7 @@ export default function ConstructionGallery() {
         {/* Gallery Grid */}
         {filteredFiles.length === 0 ? (
           <CustomEmptyState
-            icon={Filter}
+            icon={<Filter />}
             title="No se encontraron archivos"
             description="Intenta cambiar los filtros para ver más resultados"
           />
