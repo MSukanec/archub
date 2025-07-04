@@ -1,22 +1,35 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@supabase/supabase-js';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState';
 import { Card } from '@/components/ui/card';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+
+import { useToast } from '@/hooks/use-toast';
+import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext';
+import { useMobile } from '@/hooks/use-mobile';
+import { NewGalleryModal } from '@/modals/construction/NewGalleryModal';
+import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout';
+import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader';
+import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
+import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter';
 import { 
   Images, 
   Filter, 
-  Calendar, 
+  Search,
+  FilterX,
+  Plus,
   Download, 
   ChevronLeft, 
   ChevronRight, 
   PlayCircle, 
-  X 
+  X,
+  Edit,
+  Trash2
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -33,7 +46,10 @@ interface GalleryFile {
   file_type: string;
   original_name: string;
   created_at: string;
-  site_log: {
+  title?: string;
+  description?: string;
+  entry_type?: string;
+  site_log?: {
     id: string;
     log_date: string;
     entry_type: string;
@@ -45,12 +61,25 @@ interface GalleryFile {
   };
 }
 
-
-
 export default function ConstructionGallery() {
   const { data: userData } = useCurrentUser();
   const projectId = userData?.preferences?.last_project_id;
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { setActions, setShowActionBar } = useMobileActionBar();
+  const isMobile = useMobile();
   
+  // Modal states
+  const [showGalleryModal, setShowGalleryModal] = useState(false);
+  const [editingFile, setEditingFile] = useState<GalleryFile | null>(null);
+  const [selectedFile, setSelectedFile] = useState<GalleryFile | null>(null);
+  
+  // Filter states
+  const [searchTerm, setSearchTerm] = useState('');
+  const [fileTypeFilter, setFileTypeFilter] = useState<string>('all');
+  const [entryTypeFilter, setEntryTypeFilter] = useState<string>('all');
+
+  // Gallery files query
   const { data: galleryFiles = [], isLoading, error } = useQuery({
     queryKey: ['galleryFiles', projectId],
     queryFn: async () => {
@@ -67,16 +96,13 @@ export default function ConstructionGallery() {
           file_url,
           file_type,
           file_name,
+          title,
+          description,
+          entry_type,
           created_at,
-          site_logs!inner(
-            id,
-            log_date,
-            entry_type,
-            created_by,
-            project_id
-          )
+          site_log_id
         `)
-        .eq('site_logs.project_id', projectId)
+        .or(`project_id.eq.${projectId},site_logs.project_id.eq.${projectId}`)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -84,105 +110,172 @@ export default function ConstructionGallery() {
         throw error;
       }
 
-      // Get unique creator IDs
-      const creatorIds = Array.from(new Set(data?.map((file: any) => file.site_logs?.created_by).filter(Boolean)));
-      
-      let creators: Record<string, any> = {};
-      if (creatorIds.length > 0) {
-        const { data: usersData } = await supabase
-          .from('users')
-          .select('id, full_name, avatar_url')
-          .in('id', creatorIds);
-        
-        if (usersData) {
-          creators = usersData.reduce((acc: Record<string, any>, user: any) => {
-            acc[user.id] = user;
-            return acc;
-          }, {});
-        }
-      }
-
-      // Transform data to match interface
-      const transformedData = data?.map((file: any) => ({
+      return data?.map((file: any) => ({
         id: file.id,
         file_url: file.file_url,
         file_type: file.file_type,
-        original_name: file.file_name || file.file_url?.split('/').pop() || 'archivo',
-        created_at: file.site_logs.log_date,
-        site_log: {
-          id: file.site_logs.id,
-          log_date: file.site_logs.log_date,
-          entry_type: file.site_logs.entry_type,
-          creator: creators[file.site_logs.created_by] || {
-            id: file.site_logs.created_by,
-            full_name: "Usuario",
-            avatar_url: ""
+        original_name: file.file_name || 'Sin nombre',
+        title: file.title || file.file_name || 'Sin título',
+        description: file.description,
+        entry_type: file.entry_type || 'registro_general',
+        created_at: file.created_at,
+        site_log: file.site_log_id ? {
+          id: file.site_log_id,
+          log_date: file.created_at,
+          entry_type: file.entry_type || 'registro_general',
+          creator: {
+            id: userData?.user?.id || '',
+            full_name: userData?.user?.full_name || 'Usuario',
+            avatar_url: userData?.user?.avatar_url || ''
           }
-        }
+        } : undefined
       })) || [];
-
-      return transformedData;
     },
     enabled: !!projectId
   });
-  const [selectedFile, setSelectedFile] = useState<GalleryFile | null>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [filterType, setFilterType] = useState<'all' | 'image' | 'video'>('all');
-  const [filterDate, setFilterDate] = useState<string>('all');
 
-  // Reset filters when project changes
+  // Delete mutation
+  const deleteFileMutation = useMutation({
+    mutationFn: async (fileId: string) => {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized');
+      }
+
+      // Get file info first
+      const { data: fileData, error: fetchError } = await supabase
+        .from('site_log_files')
+        .select('file_path')
+        .eq('id', fileId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      // Delete from storage
+      const { error: storageError } = await supabase.storage
+        .from('site-log-files')
+        .remove([fileData.file_path]);
+
+      if (storageError) throw storageError;
+
+      // Delete from database
+      const { error: dbError } = await supabase
+        .from('site_log_files')
+        .delete()
+        .eq('id', fileId);
+
+      if (dbError) throw dbError;
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Éxito',
+        description: 'Archivo eliminado correctamente',
+      });
+      queryClient.invalidateQueries({ queryKey: ['galleryFiles'] });
+      setSelectedFile(null);
+    },
+    onError: (error) => {
+      console.error('Error deleting file:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo eliminar el archivo',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  // Mobile Action Bar setup
   useEffect(() => {
-    setFilterType('all');
-    setFilterDate('all');
-  }, [projectId]);
+    if (isMobile) {
+      setActions({
+        slot2: {
+          id: 'search',
+          icon: <Search className="h-5 w-5" />,
+          label: 'Buscar',
+          onClick: () => {
+            const searchInput = document.getElementById('gallery-search');
+            searchInput?.focus();
+          },
+        },
+        slot3: {
+          id: 'new-file',
+          icon: <Plus className="h-6 w-6" />,
+          label: 'Subir',
+          onClick: () => setShowGalleryModal(true),
+        },
+        slot4: {
+          id: 'filters',
+          icon: <Filter className="h-5 w-5" />,
+          label: 'Filtros',
+          onClick: () => {
+            const filtersContainer = document.getElementById('gallery-filters');
+            if (filtersContainer) {
+              filtersContainer.style.display = filtersContainer.style.display === 'none' ? 'block' : 'none';
+            }
+          },
+        },
+        slot5: {
+          id: 'clear-filters',
+          icon: <FilterX className="h-5 w-5" />,
+          label: 'Limpiar',
+          onClick: () => {
+            setSearchTerm('');
+            setFileTypeFilter('all');
+            setEntryTypeFilter('all');
+          },
+        },
+      });
+      setShowActionBar(true);
 
-  // Filter files based on type and date
+      return () => {
+        setShowActionBar(false);
+      };
+    }
+  }, [isMobile, setActions, setShowActionBar]);
+
+  // Filter files
   const filteredFiles = useMemo(() => {
     let filtered = galleryFiles;
 
-    // Filter by file type
-    if (filterType !== 'all') {
+    // Search filter
+    if (searchTerm) {
       filtered = filtered.filter(file => 
-        filterType === 'image'
+        file.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        file.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        file.original_name?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // File type filter
+    if (fileTypeFilter !== 'all') {
+      filtered = filtered.filter(file => 
+        fileTypeFilter === 'image'
           ? file.file_type === 'image' || file.file_type?.startsWith('image/')
           : file.file_type === 'video' || file.file_type?.startsWith('video/')
       );
     }
 
-    // Filter by date
-    if (filterDate !== 'all') {
-      filtered = filtered.filter(file => 
-        file.created_at?.startsWith(filterDate)
-      );
+    // Entry type filter
+    if (entryTypeFilter !== 'all') {
+      filtered = filtered.filter(file => file.entry_type === entryTypeFilter);
     }
 
     return filtered;
-  }, [galleryFiles, filterType, filterDate]);
+  }, [galleryFiles, searchTerm, fileTypeFilter, entryTypeFilter]);
 
-  // Get available months for filter
-  const availableMonths = useMemo(() => {
-    const months = galleryFiles.map(file => file.created_at?.substring(0, 7)).filter(Boolean);
-    const uniqueMonths: string[] = [];
-    months.forEach(month => {
-      if (!uniqueMonths.includes(month)) {
-        uniqueMonths.push(month);
-      }
-    });
-    return uniqueMonths.sort().reverse();
-  }, [galleryFiles]);
-
+  // Functions
   const openLightbox = (file: GalleryFile) => {
     setSelectedFile(file);
-    setCurrentIndex(filteredFiles.findIndex(f => f.id === file.id));
   };
 
-  const navigateImage = (direction: 'prev' | 'next') => {
-    const newIndex = direction === 'prev'
-      ? (currentIndex > 0 ? currentIndex - 1 : filteredFiles.length - 1)
-      : (currentIndex < filteredFiles.length - 1 ? currentIndex + 1 : 0);
+  const handleEdit = (file: GalleryFile) => {
+    setEditingFile(file);
+    setShowGalleryModal(true);
+  };
 
-    setCurrentIndex(newIndex);
-    setSelectedFile(filteredFiles[newIndex]);
+  const handleDelete = (file: GalleryFile) => {
+    if (confirm('¿Estás seguro de que quieres eliminar este archivo?')) {
+      deleteFileMutation.mutate(file.id);
+    }
   };
 
   const downloadFile = (file: GalleryFile) => {
@@ -193,6 +286,19 @@ export default function ConstructionGallery() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const navigateImage = (direction: 'prev' | 'next') => {
+    const currentIndex = filteredFiles.findIndex(file => file.id === selectedFile?.id);
+    let newIndex;
+    
+    if (direction === 'prev') {
+      newIndex = currentIndex > 0 ? currentIndex - 1 : filteredFiles.length - 1;
+    } else {
+      newIndex = currentIndex < filteredFiles.length - 1 ? currentIndex + 1 : 0;
+    }
+    
+    setSelectedFile(filteredFiles[newIndex]);
   };
 
   const getEntryTypeLabel = (type: string) => {
@@ -208,6 +314,11 @@ export default function ConstructionGallery() {
       'registro_general': 'Registro General'
     };
     return types[type] || type;
+  };
+
+  const handleCloseModal = () => {
+    setShowGalleryModal(false);
+    setEditingFile(null);
   };
 
   if (isLoading) {
@@ -241,11 +352,41 @@ export default function ConstructionGallery() {
   if (galleryFiles.length === 0) {
     return (
       <Layout>
-        <CustomEmptyState
-          icon={<Images />}
-          title="No hay archivos en la galería"
-          description="Los archivos que subas en las bitácoras aparecerán aquí"
-        />
+        <div className="space-y-6">
+          {/* Header with Desktop Action Buttons */}
+          {!isMobile && (
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-bold">Galería</h1>
+                <p className="text-muted-foreground">Administra los archivos de tu proyecto</p>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm">
+                  <Search className="h-4 w-4 mr-2" />
+                  Buscar
+                </Button>
+                <Button variant="outline" size="sm">
+                  <Filter className="h-4 w-4 mr-2" />
+                  Filtros
+                </Button>
+                <Button variant="outline" size="sm">
+                  <FilterX className="h-4 w-4 mr-2" />
+                  Limpiar
+                </Button>
+                <Button size="sm" onClick={() => setShowGalleryModal(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Subir Archivo
+                </Button>
+              </div>
+            </div>
+          )}
+
+          <CustomEmptyState
+            icon={<Images />}
+            title="No hay archivos en la galería"
+            description="Sube tu primer archivo para comenzar"
+          />
+        </div>
       </Layout>
     );
   }
@@ -253,6 +394,97 @@ export default function ConstructionGallery() {
   return (
     <Layout>
       <div className="space-y-6">
+        {/* Header with Desktop Action Buttons */}
+        {!isMobile && (
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold">Galería</h1>
+              <p className="text-muted-foreground">Administra los archivos de tu proyecto</p>
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  const searchInput = document.getElementById('gallery-search');
+                  searchInput?.focus();
+                }}
+              >
+                <Search className="h-4 w-4 mr-2" />
+                Buscar
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  const filtersContainer = document.getElementById('gallery-filters');
+                  if (filtersContainer) {
+                    filtersContainer.style.display = filtersContainer.style.display === 'none' ? 'block' : 'none';
+                  }
+                }}
+              >
+                <Filter className="h-4 w-4 mr-2" />
+                Filtros
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  setSearchTerm('');
+                  setFileTypeFilter('all');
+                  setEntryTypeFilter('all');
+                }}
+              >
+                <FilterX className="h-4 w-4 mr-2" />
+                Limpiar
+              </Button>
+              <Button size="sm" onClick={() => setShowGalleryModal(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Subir Archivo
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Search and Filters */}
+        <div className="space-y-4" id="gallery-filters">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Input
+              id="gallery-search"
+              placeholder="Buscar archivos..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="sm:max-w-sm"
+            />
+            <Select value={fileTypeFilter} onValueChange={setFileTypeFilter}>
+              <SelectTrigger className="sm:w-48">
+                <SelectValue placeholder="Tipo de archivo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los archivos</SelectItem>
+                <SelectItem value="image">Solo imágenes</SelectItem>
+                <SelectItem value="video">Solo videos</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={entryTypeFilter} onValueChange={setEntryTypeFilter}>
+              <SelectTrigger className="sm:w-48">
+                <SelectValue placeholder="Tipo de entrada" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los tipos</SelectItem>
+                <SelectItem value="avance_de_obra">Avance de Obra</SelectItem>
+                <SelectItem value="visita_tecnica">Visita Técnica</SelectItem>
+                <SelectItem value="problema_detectado">Problema Detectado</SelectItem>
+                <SelectItem value="pedido_material">Pedido Material</SelectItem>
+                <SelectItem value="nota_climatica">Nota Climática</SelectItem>
+                <SelectItem value="decision">Decisión</SelectItem>
+                <SelectItem value="inspeccion">Inspección</SelectItem>
+                <SelectItem value="foto_diaria">Foto Diaria</SelectItem>
+                <SelectItem value="registro_general">Registro General</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
 
         {/* Gallery Grid */}
         {filteredFiles.length === 0 ? (
@@ -273,7 +505,7 @@ export default function ConstructionGallery() {
                   {file.file_type === 'image' || file.file_type?.startsWith('image/') ? (
                     <img 
                       src={file.file_url} 
-                      alt={file.original_name}
+                      alt={file.title}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -282,25 +514,42 @@ export default function ConstructionGallery() {
                     </div>
                   )}
                   
-                  {/* Overlay with info */}
+                  {/* Overlay with info and actions */}
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-between p-2">
                     <div className="flex justify-between items-start">
                       <span className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded">
-                        {getEntryTypeLabel(file.site_log.entry_type)}
+                        {getEntryTypeLabel(file.entry_type || 'registro_general')}
                       </span>
+                      <div className="flex gap-1">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-6 w-6 p-0 bg-white/20 hover:bg-white/40"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEdit(file);
+                          }}
+                        >
+                          <Edit className="h-3 w-3 text-white" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-6 w-6 p-0 bg-white/20 hover:bg-white/40"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(file);
+                          }}
+                        >
+                          <Trash2 className="h-3 w-3 text-white" />
+                        </Button>
+                      </div>
                     </div>
                     
                     <div className="text-white">
-                      <div className="flex items-center gap-2 mb-1">
-                        <img
-                          src={file.site_log.creator.avatar_url || '/placeholder.svg'}
-                          alt={file.site_log.creator.full_name}
-                          className="w-4 h-4 rounded-full object-cover"
-                        />
-                        <span className="text-xs truncate">{file.site_log.creator.full_name}</span>
-                      </div>
+                      <p className="text-xs font-medium truncate">{file.title}</p>
                       <p className="text-xs">
-                        {format(new Date(file.site_log.log_date), 'dd MMM yyyy', { locale: es })}
+                        {format(new Date(file.created_at), 'dd MMM yyyy', { locale: es })}
                       </p>
                     </div>
                   </div>
@@ -312,83 +561,82 @@ export default function ConstructionGallery() {
 
         {/* Lightbox Modal */}
         {selectedFile && (
-          <Dialog open={!!selectedFile} onOpenChange={() => setSelectedFile(null)}>
-            <DialogContent className="max-w-4xl h-[90vh] p-0">
-              <div className="relative h-full flex flex-col">
-                {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b">
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={selectedFile.site_log.creator.avatar_url || '/placeholder.svg'}
-                      alt={selectedFile.site_log.creator.full_name}
-                      className="w-8 h-8 rounded-full object-cover"
-                    />
-                    <div>
-                      <p className="font-medium">{selectedFile.site_log.creator.full_name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {format(new Date(selectedFile.site_log.log_date), 'dd MMM yyyy', { locale: es })} • {getEntryTypeLabel(selectedFile.site_log.entry_type)}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="sm" onClick={() => downloadFile(selectedFile)}>
-                      <Download className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => setSelectedFile(null)}>
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
+          <CustomModalLayout
+            open={!!selectedFile}
+            onClose={() => setSelectedFile(null)}
+            children={{
+              header: (
+                <CustomModalHeader
+                  title={selectedFile.title || 'Archivo'}
+                  description={`${getEntryTypeLabel(selectedFile.entry_type || 'registro_general')} • ${format(new Date(selectedFile.created_at), 'dd MMM yyyy', { locale: es })}`}
+                  onClose={() => setSelectedFile(null)}
+                />
+              ),
+              body: (
+                <CustomModalBody columns={1} className="p-0">
+                  <div className="relative flex items-center justify-center bg-black/5 min-h-[60vh]">
+                    {selectedFile.file_type === 'image' || selectedFile.file_type?.startsWith('image/') ? (
+                      <img 
+                        src={selectedFile.file_url} 
+                        alt={selectedFile.title}
+                        className="max-w-full max-h-full object-contain"
+                      />
+                    ) : (
+                      <video 
+                        src={selectedFile.file_url} 
+                        controls 
+                        className="max-w-full max-h-full"
+                      />
+                    )}
 
-                {/* Media content */}
-                <div className="flex-1 flex items-center justify-center p-4 bg-black/5">
-                  {selectedFile.file_type === 'image' || selectedFile.file_type?.startsWith('image/') ? (
-                    <img 
-                      src={selectedFile.file_url} 
-                      alt={selectedFile.original_name}
-                      className="max-w-full max-h-full object-contain"
-                    />
-                  ) : (
-                    <video 
-                      src={selectedFile.file_url} 
-                      controls 
-                      className="max-w-full max-h-full"
-                    />
-                  )}
-                </div>
-
-                {/* Navigation */}
-                {filteredFiles.length > 1 && (
-                  <div className="absolute inset-y-0 left-4 right-4 flex items-center justify-between pointer-events-none">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="pointer-events-auto"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigateImage('prev');
-                      }}
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="pointer-events-auto"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigateImage('next');
-                      }}
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
+                    {/* Navigation */}
+                    {filteredFiles.length > 1 && (
+                      <div className="absolute inset-y-0 left-4 right-4 flex items-center justify-between pointer-events-none">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="pointer-events-auto"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigateImage('prev');
+                          }}
+                        >
+                          <ChevronLeft className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="pointer-events-auto"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigateImage('next');
+                          }}
+                        >
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            </DialogContent>
-          </Dialog>
+                </CustomModalBody>
+              ),
+              footer: (
+                <CustomModalFooter
+                  onCancel={() => setSelectedFile(null)}
+                  onSave={() => downloadFile(selectedFile)}
+                  cancelText="Cerrar"
+                  saveText="Descargar"
+                />
+              ),
+            }}
+          />
         )}
+
+        {/* Gallery Modal */}
+        <NewGalleryModal
+          open={showGalleryModal}
+          onClose={handleCloseModal}
+          editingFile={editingFile}
+        />
       </div>
     </Layout>
   );
