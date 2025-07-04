@@ -36,6 +36,7 @@ import AdminTaskCategoriesTemplates from "@/pages/admin/AdminTaskCategoriesTempl
 import AdminTaskParameters from "@/pages/admin/AdminTaskParameters";
 import AdminMaterials from "@/pages/admin/AdminMaterials";
 import AdminMaterialCategories from "@/pages/admin/AdminMaterialCategories";
+import AdminChangelogs from "@/pages/admin/AdminChangelogs";
 import Tasks from "@/pages/others/Tasks";
 import Changelog from "@/pages/others/Changelog";
 import DesignTimeline from "@/pages/design/DesignTimeline";
@@ -249,6 +250,14 @@ function Router() {
         <ProtectedRoute>
           <AdminProtectedRoute>
             <AdminUsers />
+          </AdminProtectedRoute>
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/admin/changelogs">
+        <ProtectedRoute>
+          <AdminProtectedRoute>
+            <AdminChangelogs />
           </AdminProtectedRoute>
         </ProtectedRoute>
       </Route>

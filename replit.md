@@ -119,6 +119,17 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 4, 2025. Complete AdminChangelogs system implementation with professional admin interface for changelog_entries management
+  • Created AdminChangelogs.tsx page in src/pages/admin/ following ai-page-template.md structure with comprehensive table interface
+  • Built NewAdminChangelogEntryModal.tsx in src/modals/admin/ with proper form validation and single-column layout
+  • Added "Changelog" navigation button to admin sidebar under ADMINISTRACIÓN > Comunidad section
+  • Implemented complete CRUD operations: create, edit, delete with confirmation dialogs and proper error handling
+  • Enhanced filtering system with type filters (Novedad, Mejora, Arreglo de Errores) and visibility filters (public/private)
+  • Statistics cards show Total Entries, Public Entries, Recent Entries (7 days), and Improvements count
+  • Added /admin/changelogs route with proper AdminProtectedRoute wrapper in App.tsx
+  • Table displays creation date, title, type badges with icons, creator info, visibility badges, and change date
+  • All data sourced from authentic Supabase changelog_entries table with proper error handling and loading states
+  • Modal uses single-column layout (columns={1}) eliminating hardcoded grid layouts as per system standards
 - July 4, 2025. Enhanced floating actions system with card-style background and red filled heart favorites
   • Changed TableRowActions background to use standard card styling (bg-card, border-border) instead of gradient
   • Implemented red filled heart icon for favorite button when active - text-red-500 with fill-current class

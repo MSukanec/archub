@@ -239,7 +239,8 @@ export function Sidebar() {
         onToggle: () => toggleAccordion('admin-comunidad'),
         children: [
           { icon: Building, label: 'Organizaciones', href: '/admin/organizations' },
-          { icon: Users, label: 'Usuarios', href: '/admin/users' }
+          { icon: Users, label: 'Usuarios', href: '/admin/users' },
+          { icon: FileText, label: 'Changelog', href: '/admin/changelogs' }
         ]
       },
       { 
