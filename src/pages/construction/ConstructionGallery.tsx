@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useQuery } from '@tanstack/react-query';
 import { createClient } from '@supabase/supabase-js';
@@ -45,17 +45,20 @@ interface GalleryFile {
   };
 }
 
-// Hook para obtener archivos de la galería
-const useGalleryFiles = () => {
+
+
+export default function ConstructionGallery() {
   const { data: userData } = useCurrentUser();
   const projectId = userData?.preferences?.last_project_id;
-
-  return useQuery({
+  
+  const { data: galleryFiles = [], isLoading, error } = useQuery({
     queryKey: ['galleryFiles', projectId],
     queryFn: async () => {
-      if (!projectId || !supabase) return [];
-
       console.log('Fetching gallery files for project:', projectId);
+      
+      if (!supabase) {
+        throw new Error('Supabase client not initialized');
+      }
 
       const { data, error } = await supabase
         .from('site_log_files')
@@ -63,8 +66,9 @@ const useGalleryFiles = () => {
           id,
           file_url,
           file_type,
-          site_log_id,
-          site_logs!inner (
+          file_name,
+          created_at,
+          site_logs!inner(
             id,
             log_date,
             entry_type,
@@ -73,14 +77,14 @@ const useGalleryFiles = () => {
           )
         `)
         .eq('site_logs.project_id', projectId)
-        .order('site_logs(log_date)', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching gallery files:', error);
         throw error;
       }
 
-      // Get unique creator IDs to fetch user data
+      // Get unique creator IDs
       const creatorIds = Array.from(new Set(data?.map((file: any) => file.site_logs?.created_by).filter(Boolean)));
       
       let creators: Record<string, any> = {};
@@ -103,7 +107,7 @@ const useGalleryFiles = () => {
         id: file.id,
         file_url: file.file_url,
         file_type: file.file_type,
-        original_name: file.file_url?.split('/').pop() || 'archivo',
+        original_name: file.file_name || file.file_url?.split('/').pop() || 'archivo',
         created_at: file.site_logs.log_date,
         site_log: {
           id: file.site_logs.id,
@@ -121,14 +125,16 @@ const useGalleryFiles = () => {
     },
     enabled: !!projectId
   });
-};
-
-export default function ConstructionGallery() {
-  const { data: galleryFiles = [], isLoading, error } = useGalleryFiles();
   const [selectedFile, setSelectedFile] = useState<GalleryFile | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [filterType, setFilterType] = useState<'all' | 'image' | 'video'>('all');
   const [filterDate, setFilterDate] = useState<string>('all');
+
+  // Reset filters when project changes
+  useEffect(() => {
+    setFilterType('all');
+    setFilterDate('all');
+  }, [projectId]);
 
   // Filter files based on type and date
   const filteredFiles = useMemo(() => {
@@ -171,12 +177,12 @@ export default function ConstructionGallery() {
   };
 
   const navigateImage = (direction: 'prev' | 'next') => {
-    if (direction === 'prev') {
-      setCurrentIndex(prev => prev > 0 ? prev - 1 : filteredFiles.length - 1);
-    } else {
-      setCurrentIndex(prev => prev < filteredFiles.length - 1 ? prev + 1 : 0);
-    }
-    setSelectedFile(filteredFiles[currentIndex]);
+    const newIndex = direction === 'prev'
+      ? (currentIndex > 0 ? currentIndex - 1 : filteredFiles.length - 1)
+      : (currentIndex < filteredFiles.length - 1 ? currentIndex + 1 : 0);
+
+    setCurrentIndex(newIndex);
+    setSelectedFile(filteredFiles[newIndex]);
   };
 
   const downloadFile = (file: GalleryFile) => {
@@ -247,37 +253,6 @@ export default function ConstructionGallery() {
   return (
     <Layout>
       <div className="space-y-6">
-        {/* Filters */}
-        <div className="flex items-center justify-end gap-3">
-          <Select value={filterType} onValueChange={(value: any) => setFilterType(value)}>
-            <SelectTrigger className="w-32">
-              <Filter className="h-4 w-4 mr-2" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos</SelectItem>
-              <SelectItem value="image">Imágenes</SelectItem>
-              <SelectItem value="video">Videos</SelectItem>
-            </SelectContent>
-          </Select>
-
-          {availableMonths.length > 0 && (
-            <Select value={filterDate} onValueChange={setFilterDate}>
-              <SelectTrigger className="w-40">
-                <Calendar className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Mes" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos los meses</SelectItem>
-                {availableMonths.map(month => (
-                  <SelectItem key={month} value={month}>
-                    {format(new Date(month + '-01'), 'MMMM yyyy', { locale: es })}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        </div>
 
         {/* Gallery Grid */}
         {filteredFiles.length === 0 ? (
@@ -317,7 +292,11 @@ export default function ConstructionGallery() {
                     
                     <div className="text-white">
                       <div className="flex items-center gap-2 mb-1">
-                        <div className="w-4 h-4 rounded-full bg-muted flex-shrink-0"></div>
+                        <img
+                          src={file.site_log.creator.avatar_url || '/placeholder.svg'}
+                          alt={file.site_log.creator.full_name}
+                          className="w-4 h-4 rounded-full object-cover"
+                        />
                         <span className="text-xs truncate">{file.site_log.creator.full_name}</span>
                       </div>
                       <p className="text-xs">
@@ -339,7 +318,11 @@ export default function ConstructionGallery() {
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-muted flex-shrink-0"></div>
+                    <img
+                      src={selectedFile.site_log.creator.avatar_url || '/placeholder.svg'}
+                      alt={selectedFile.site_log.creator.full_name}
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
                     <div>
                       <p className="font-medium">{selectedFile.site_log.creator.full_name}</p>
                       <p className="text-sm text-muted-foreground">
