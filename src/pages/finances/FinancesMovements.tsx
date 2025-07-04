@@ -941,14 +941,7 @@ export default function Movements() {
             );
           }
         }}
-        onCardClick={(item: Movement | ConversionGroup) => {
-          if ('is_conversion_group' in item) {
-            // Edit the conversion group properly
-            handleEditConversion(item);
-          } else {
-            handleEdit(item);
-          }
-        }}
+
 
         getRowActions={(item: Movement | ConversionGroup) => {
           if ('is_conversion_group' in item) {

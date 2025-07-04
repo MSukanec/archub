@@ -84,8 +84,7 @@ export default function SiteLogCard({ siteLog, onEdit, onDelete, onToggleFavorit
       ]}
     >
       <Card 
-        className="bg-[var(--card-bg)] border-[var(--card-border)] shadow-sm hover:bg-[var(--card-hover-bg)] transition-colors cursor-pointer"
-        onClick={() => onEdit(siteLog)}
+        className="bg-[var(--card-bg)] border-[var(--card-border)] shadow-sm hover:bg-[var(--card-hover-bg)] transition-colors"
       >
         <CardContent className="p-3">
           {/* First Row: Type | Date Time */}

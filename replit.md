@@ -119,6 +119,13 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 4, 2025. Mobile card interaction refinement and tap-to-edit removal - COMPLETED
+  • Removed onClick handlers from all mobile cards to eliminate tap-to-edit functionality
+  • Modal editing now exclusively accessible through SwipeableCard "Editar" button for better UX
+  • Updated MovementCard, ConversionCard, SiteLogCard, and ChangelogCard to remove cursor-pointer and onClick
+  • Eliminated onCardClick handler from CustomTable in FinancesMovements.tsx
+  • Preserved ProjectCard navigation onClick as it serves different purpose (project selection vs editing)
+  • Enhanced mobile user experience with intentional swipe-to-reveal actions instead of accidental modal triggers
 - July 4, 2025. ConversionCard visual styling refinement and CustomTable renderCard integration - COMPLETED
   • Fixed ConversionCard styling to match regular movement cards: same background, hover states, and text colors
   • Changed conversion border to blue only (border-blue-500) while maintaining standard card appearance

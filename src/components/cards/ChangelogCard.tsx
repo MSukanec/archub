@@ -58,7 +58,7 @@ export function ChangelogCard({ entry, onEdit, onDelete }: ChangelogCardProps) {
         }
       ] : []}
     >
-      <Card className="overflow-hidden cursor-pointer" onClick={() => onEdit?.(entry)}>
+      <Card className="overflow-hidden">
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
             {/* Icon */}

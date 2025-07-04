@@ -61,9 +61,8 @@ const ConversionCard = ({ conversion, onEdit, onDelete, onToggleFavorite }: Conv
         }
       ]}
     >
-      <div className="flex items-center justify-between gap-3 bg-[var(--card-bg)] hover:bg-[var(--card-hover-bg)] rounded-lg shadow-sm border border-[var(--card-border)] p-3 mb-2 transition-colors cursor-pointer"
-           style={{ borderRight: '4px solid rgb(59, 130, 246)' }}
-           onClick={() => onEdit?.(conversion)}>
+      <div className="flex items-center justify-between gap-3 bg-[var(--card-bg)] hover:bg-[var(--card-hover-bg)] rounded-lg shadow-sm border border-[var(--card-border)] p-3 mb-2 transition-colors"
+           style={{ borderRight: '4px solid rgb(59, 130, 246)' }}>
         {/* Left: Avatar */}
         <div className="flex-shrink-0">
           <Avatar className="w-10 h-10">
