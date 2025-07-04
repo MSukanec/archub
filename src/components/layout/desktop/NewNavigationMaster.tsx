@@ -165,22 +165,6 @@ export function NewNavigationMaster() {
 
   const renderMasterSidebar = () => (
     <>
-      {/* Logo y Header */}
-      <div className="flex h-12 items-center justify-center border-b border-[--menues-border] px-2">
-        <div className="relative group">
-          <div className="flex items-center">
-            <div className="h-8 w-8 rounded-md bg-[--accent] flex items-center justify-center text-white font-bold text-sm">
-              A
-            </div>
-            {isExpanded && (
-              <span className="ml-3 text-lg font-semibold text-[--menues-fg] whitespace-nowrap">
-                Archub
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-
       {/* Navigation Menu */}
       <div className="flex-1 py-2 px-2 space-y-1">
         {/* Resúmenes */}
@@ -273,41 +257,13 @@ export function NewNavigationMaster() {
           onClick={() => navigate('/perfil')}
         />
 
-        {/* Profile Button */}
-        <div className={cn(
-          "transition-all duration-300",
-          isExpanded ? "p-2" : "p-1"
-        )}>
-          {isExpanded ? (
-            <div className="bg-[--card-bg] border border-[--card-border] rounded-lg p-3 cursor-pointer hover:bg-[--card-hover-bg]" onClick={() => navigate('/perfil')}>
-              <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 rounded-full flex items-center justify-center bg-[--accent] text-white">
-                  {userData?.user?.avatar_url ? (
-                    <img src={userData.user.avatar_url} alt="Avatar" className="w-6 h-6 rounded-full" />
-                  ) : (
-                    <UserCircle className="w-4 h-4" />
-                  )}
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-[--card-fg]">
-                    {userData?.user?.full_name || 'Usuario'}
-                  </div>
-                  <div className="text-xs text-[--muted-fg]">
-                    Perfil
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="w-8 h-8 rounded-full flex items-center justify-center mx-auto bg-[--accent] cursor-pointer hover:opacity-80" onClick={() => navigate('/perfil')}>
-              {userData?.user?.avatar_url ? (
-                <img src={userData.user.avatar_url} alt="Avatar" className="w-8 h-8 rounded-full" />
-              ) : (
-                <UserCircle className="w-4 h-4 text-white" />
-              )}
-            </div>
-          )}
-        </div>
+        <SidebarButton
+          icon={<UserCircle className="h-4 w-4" />}
+          label="Perfil"
+          isActive={isActive('/perfil')}
+          isExpanded={isExpanded}
+          onClick={() => navigate('/perfil')}
+        />
       </div>
     </>
   );
@@ -411,7 +367,7 @@ export function NewNavigationMaster() {
   return (
     <div
       className={cn(
-        "fixed left-0 top-0 z-50 h-full bg-[--menues-bg] border-r border-[--menues-border] transition-all duration-300 flex flex-col",
+        "fixed left-0 top-16 z-40 h-[calc(100vh-4rem)] bg-[--menues-bg] border-r border-[--menues-border] transition-all duration-300 flex flex-col",
         isExpanded ? "w-60" : "w-12"
       )}
       onMouseEnter={() => !isDocked && setHovered(true)}

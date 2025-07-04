@@ -12,7 +12,7 @@ import { useKanbanStore } from '@/stores/kanbanStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { NewBoardModal } from '@/modals/tasks/NewBoardModal';
 import { NewListModal } from '@/modals/tasks/NewListModal';
-import { CustomRestricted } from '@/components/ui-custom/CustomRestricted';
+import { CustomRestricted } from '@/components/ui-custom/misc/CustomRestricted';
 import { MobileActionBarProvider, useMobileActionBar } from '@/contexts/MobileActionBarContext';
 import { MobileActionBar } from '@/components/layout/mobile/MobileActionBar';
 
