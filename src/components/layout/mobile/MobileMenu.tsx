@@ -46,6 +46,8 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const [expandedAccordion, setExpandedAccordion] = useState<string | null>(null);
   const [expandedOrgSelector, setExpandedOrgSelector] = useState(false);
   const [expandedProjectSelector, setExpandedProjectSelector] = useState(false);
+  const [animationDirection, setAnimationDirection] = useState<'left' | 'right' | null>(null);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   // Bloquear scroll del body cuando el menú está abierto
   useEffect(() => {
@@ -108,12 +110,25 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     }
   });
 
-  const handleNavigation = (href: string, newContext?: string) => {
-    if (newContext) {
+  const handleNavigationWithAnimation = (href: string, newContext?: string, direction?: 'left' | 'right') => {
+    if (newContext && direction) {
+      setAnimationDirection(direction);
+      setIsAnimating(true);
+      
+      setTimeout(() => {
+        setSidebarContext(newContext as any);
+        setIsAnimating(false);
+        setAnimationDirection(null);
+      }, 150);
+    } else if (newContext) {
       setSidebarContext(newContext as any);
     }
     navigate(href);
     onClose();
+  };
+
+  const handleNavigation = (href: string, newContext?: string) => {
+    handleNavigationWithAnimation(href, newContext);
   };
 
   const handleOrganizationSelect = (organizationId: string) => {
@@ -148,7 +163,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const sidebarContexts = {
     organization: [
       { icon: Home, label: 'Resumen de la Organización', href: '/organization/dashboard' },
-      { icon: ArrowRight, label: 'Ir al Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
+      { icon: ArrowRight, label: 'Ir al Proyecto', href: '#', onClick: () => handleNavigationWithAnimation('/project/dashboard', 'project', 'left') },
       { type: 'divider' },
       { icon: FolderOpen, label: 'Proyectos', href: '/organization/projects' },
       { icon: Activity, label: 'Actividad', href: '/organization/activity' },
@@ -159,16 +174,16 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     project: [
       { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },
       { type: 'divider' },
-      { icon: FolderOpen, label: 'Diseño', href: '#', onClick: () => { setSidebarContext('design'); navigate('/design/dashboard'); } },
-      { icon: Building, label: 'Obra', href: '#', onClick: () => { setSidebarContext('construction'); navigate('/construction/dashboard'); } },
-      { icon: DollarSign, label: 'Finanzas', href: '#', onClick: () => { setSidebarContext('finances'); navigate('/finances/dashboard'); } },
-      { icon: Users, label: 'Comercialización', href: '#', onClick: () => { setSidebarContext('commercialization'); navigate('/commercialization/dashboard'); }, restricted: true },
-      { icon: ArrowLeft, label: 'Volver a Organización', href: '#', onClick: () => { setSidebarContext('organization'); navigate('/organization/dashboard'); } },
+      { icon: FolderOpen, label: 'Diseño', href: '#', onClick: () => handleNavigationWithAnimation('/design/dashboard', 'design', 'left') },
+      { icon: Building, label: 'Obra', href: '#', onClick: () => handleNavigationWithAnimation('/construction/dashboard', 'construction', 'left') },
+      { icon: DollarSign, label: 'Finanzas', href: '#', onClick: () => handleNavigationWithAnimation('/finances/dashboard', 'finances', 'left') },
+      { icon: Users, label: 'Comercialización', href: '#', onClick: () => handleNavigationWithAnimation('/commercialization/dashboard', 'commercialization', 'left'), restricted: true },
+      { icon: ArrowLeft, label: 'Volver a Organización', href: '#', onClick: () => handleNavigationWithAnimation('/organization/dashboard', 'organization', 'right') },
     ],
     design: [
       { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' },
       { icon: Calendar, label: 'Cronograma', href: '#', restricted: true },
-      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
+      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => handleNavigationWithAnimation('/project/dashboard', 'project', 'right') },
     ],
     construction: [
       { icon: Home, label: 'Resumen de Obra', href: '/construction/dashboard' },
@@ -176,17 +191,17 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: Package, label: 'Materiales', href: '/construction/materials' },
       { icon: FileText, label: 'Bitácora', href: '/construction/logs' },
       { icon: Users, label: 'Personal', href: '/construction/personnel' },
-      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
+      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => handleNavigationWithAnimation('/project/dashboard', 'project', 'right') },
     ],
     finances: [
       { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
       { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
       { icon: Settings, label: 'Preferencias de Finanzas', href: '/finances/preferences' },
-      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
+      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => handleNavigationWithAnimation('/project/dashboard', 'project', 'right') },
     ],
     commercialization: [
       { icon: Home, label: 'Resumen de Comercialización', href: '/commercialization/dashboard' },
-      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
+      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => handleNavigationWithAnimation('/project/dashboard', 'project', 'right') },
     ],
     admin: [
       { icon: Home, label: 'Resumen de Administración', href: '/admin/dashboard' },
@@ -254,7 +269,12 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
       {/* Navigation Menu - Flex grow para ocupar el espacio disponible */}
       <div className="flex-1 px-4 py-3 overflow-y-auto">
-        <nav className="space-y-0.5">
+        <nav className={cn(
+          "space-y-0.5 transition-all duration-300 ease-in-out",
+          isAnimating && animationDirection === 'left' && "transform translate-x-full opacity-0",
+          isAnimating && animationDirection === 'right' && "transform -translate-x-full opacity-0",
+          !isAnimating && "transform translate-x-0 opacity-100"
+        )}>
           {/* Context Title */}
           {sidebarContextTitles[currentSidebarContext] && (
             <div className="px-3 py-2 mb-2">
@@ -441,43 +461,40 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
           </div>
         </div>
 
-        {/* Action Buttons Grid */}
-        <div className={cn("grid gap-2", isAdmin ? "grid-cols-3" : "grid-cols-2")}>
+        {/* Action Buttons Grid - Misma altura que header (h-14) */}
+        <div className={cn("h-14 grid gap-2 items-center", isAdmin ? "grid-cols-3" : "grid-cols-2")}>
           <button
             onClick={() => handleNavigation('/profile')}
-            className="flex flex-col items-center gap-1 px-3 py-2 rounded-md text-center transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+            className="flex items-center justify-center p-2 rounded-md transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
             style={{ 
               color: 'var(--menues-fg)',
               backgroundColor: 'transparent'
             }}
           >
-            <UserCircle className="h-5 w-5" />
-            <span className="text-xs font-medium">Mi Perfil</span>
+            <UserCircle className="h-6 w-6" />
           </button>
           
           <button
             onClick={() => handleNavigation('/changelog')}
-            className="flex flex-col items-center gap-1 px-3 py-2 rounded-md text-center transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+            className="flex items-center justify-center p-2 rounded-md transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
             style={{ 
               color: 'var(--menues-fg)',
               backgroundColor: 'transparent'
             }}
           >
-            <History className="h-5 w-5" />
-            <span className="text-xs font-medium">Changelog</span>
+            <History className="h-6 w-6" />
           </button>
           
           {isAdmin && (
             <button
               onClick={() => handleNavigation('/admin/dashboard', 'admin')}
-              className="flex flex-col items-center gap-1 px-3 py-2 rounded-md text-center transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+              className="flex items-center justify-center p-2 rounded-md transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
               style={{ 
                 color: 'var(--menues-fg)',
                 backgroundColor: 'transparent'
               }}
             >
-              <Shield className="h-5 w-5" />
-              <span className="text-xs font-medium">Admin</span>
+              <Shield className="h-6 w-6" />
             </button>
           )}
         </div>

@@ -43,9 +43,9 @@ export function CustomRestricted({
     // Verificar límites si se proporcionó current
     if (current !== undefined) {
       const featureLimit = limit(feature);
-      
+
       // console.log(`Feature: ${feature}, Current: ${current}, Limit: ${featureLimit}`);
-      
+
       // Restringir si se alcanzó o superó el límite
       if (featureLimit !== Infinity && current >= featureLimit) {
         isRestricted = true;
@@ -87,18 +87,21 @@ export function CustomRestricted({
       {/* Overlay con candado que activa hover */}
       <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
         <PopoverTrigger asChild>
-          <div 
+          <div
             className="absolute inset-0 flex items-center justify-center bg-black/5 cursor-pointer group"
             onMouseEnter={() => setIsPopoverOpen(true)}
             onMouseLeave={() => setIsPopoverOpen(false)}
           >
-            <div className="bg-pink-100 rounded-full p-1.5 shadow-sm border border-pink-200 group-hover:shadow-md transition-shadow">
-              <Lock className="h-3 w-3 text-pink-600" />
+            <div className="bg-white rounded-full p-1.5 shadow-sm border border-black group-hover:shadow-md transition-shadow">
+              <Lock className="h-3 w-3 text-black" />
             </div>
           </div>
         </PopoverTrigger>
 
-        <PopoverContent className="w-80 p-4 bg-[var(--card-bg)] border shadow-lg" side="top">
+        <PopoverContent
+          className="w-80 p-4 bg-[var(--card-bg)] border shadow-lg"
+          side="top"
+        >
           <div className="space-y-3">
             <div className="flex items-start gap-3">
               <div className="bg-accent/10 rounded-full p-2 flex-shrink-0">
@@ -111,12 +114,13 @@ export function CustomRestricted({
                 </p>
                 {current !== undefined && feature && (
                   <p className="text-xs text-muted-foreground mt-1">
-                    Límite actual: {current}/{limit(feature) === Infinity ? '∞' : limit(feature)}
+                    Límite actual: {current}/
+                    {limit(feature) === Infinity ? "∞" : limit(feature)}
                   </p>
                 )}
               </div>
             </div>
-            
+
             {restriction.actionLabel && restriction.actionUrl && (
               <Button onClick={handleActionClick} size="sm" className="w-full">
                 {restriction.actionLabel}
