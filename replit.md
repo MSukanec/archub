@@ -121,7 +121,7 @@ Archub is a modern construction management platform built with a React frontend 
 Changelog:
 - July 4, 2025. Final MovementCard UI polish and conversion modal field organization - COMPLETED
   • Restructured conversion modal with correct Origen/Destino grouping: Origen (Moneda, Billetera, Cantidad) → Destino (Moneda, Billetera, Cantidad)
-  • Removed arrow indicators (↓) from conversion amounts in table for cleaner visual presentation
+  • Completely removed all arrow indicators (↓) from conversion table columns: Moneda, Billetera, and Cantidad for cleaner visual presentation
   • Fixed MovementCard mobile layout with proper two-row alignment: Category aligned with Amount, Subcategory aligned with Currency
   • Enhanced MovementCard to use justify-between layout ensuring perfect alignment between left and right elements
   • Removed description field from MovementCard.tsx for cleaner 2-row information layout as requested

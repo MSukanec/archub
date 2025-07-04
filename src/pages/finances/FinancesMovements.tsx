@@ -38,6 +38,7 @@ import { CustomTable } from "@/components/ui-custom/misc/CustomTable";
 import { CustomEmptyState } from "@/components/ui-custom/misc/CustomEmptyState";
 import { FinancialCards } from "@/components/ui-custom/misc/FinancialCards";
 import MovementCard from "@/components/cards/MovementCard";
+import ConversionCard from "@/components/cards/ConversionCard";
 import { transformMovementToCard } from "@/utils/movementCardAdapter";
 
 import { NewMovementModal } from "@/modals/finances/NewMovementModal";
@@ -772,7 +773,6 @@ export default function Movements() {
               <Badge variant="outline" className="text-xs">
                 {item.from_currency}
               </Badge>
-              <div className="text-xs text-muted-foreground">↓</div>
               <Badge variant="outline" className="text-xs">
                 {item.to_currency}
               </Badge>
@@ -802,7 +802,6 @@ export default function Movements() {
           return (
             <div className="text-xs space-y-1">
               <div>{egresoMovement?.movement_data?.wallet?.name || "Principal"}</div>
-              <div className="text-muted-foreground">↓</div>
               <div>{ingresoMovement?.movement_data?.wallet?.name || "Principal"}</div>
             </div>
           );
@@ -914,6 +913,34 @@ export default function Movements() {
           setSelectedMovements(regularMovements);
         }}
         getItemId={(item) => item.id}
+        renderCard={(item: Movement | ConversionGroup) => {
+          if ('is_conversion_group' in item) {
+            // Render ConversionCard for conversion groups
+            return (
+              <ConversionCard
+                conversion={item}
+                onEdit={handleEditConversion}
+                onDelete={handleDeleteConversion}
+                onToggleFavorite={(conversionGroup) => {
+                  // Toggle favorite for all movements in the group
+                  conversionGroup.movements.forEach(movement => {
+                    handleToggleFavorite(movement);
+                  });
+                }}
+              />
+            );
+          } else {
+            // Render MovementCard for regular movements
+            return (
+              <MovementCard
+                movement={transformMovementToCard(item)}
+                onEdit={() => handleEdit(item)}
+                onDelete={() => handleDelete(item)}
+                onToggleFavorite={() => handleToggleFavorite(item)}
+              />
+            );
+          }
+        }}
         onCardClick={(item: Movement | ConversionGroup) => {
           if ('is_conversion_group' in item) {
             // Edit the conversion group properly
@@ -922,24 +949,7 @@ export default function Movements() {
             handleEdit(item);
           }
         }}
-        renderCard={(item) => {
-          if ('is_conversion_group' in item) {
-            // For conversion groups, we'll use a simple display since they can't be edited
-            return (
-              <div className="p-3 bg-blue-50 rounded-lg border">
-                <div className="text-sm font-medium text-blue-600">
-                  Conversión {item.from_currency} → {item.to_currency}
-                </div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  -{item.from_amount?.toLocaleString()} {item.from_currency} → +{item.to_amount?.toLocaleString()} {item.to_currency}
-                </div>
-              </div>
-            );
-          }
-          return (
-            <MovementCard movement={transformMovementToCard(item)} />
-          );
-        }}
+
         getRowActions={(item: Movement | ConversionGroup) => {
           if ('is_conversion_group' in item) {
             // Actions for conversion groups - apply to both movements
