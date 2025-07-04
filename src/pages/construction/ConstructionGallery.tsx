@@ -8,7 +8,6 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-
 import { useToast } from '@/hooks/use-toast';
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext';
 import { useMobile } from '@/hooks/use-mobile';
@@ -89,6 +88,24 @@ export default function ConstructionGallery() {
         throw new Error('Supabase client not initialized');
       }
 
+      // First get all site log IDs for this project
+      const { data: siteLogs, error: siteLogsError } = await supabase
+        .from('site_logs')
+        .select('id')
+        .eq('project_id', projectId);
+
+      if (siteLogsError) {
+        console.error('Error fetching site logs:', siteLogsError);
+        throw siteLogsError;
+      }
+
+      const siteLogIds = siteLogs?.map(log => log.id) || [];
+      
+      if (siteLogIds.length === 0) {
+        return [];
+      }
+
+      // Now get files for those site logs
       const { data, error } = await supabase
         .from('site_log_files')
         .select(`
@@ -96,13 +113,10 @@ export default function ConstructionGallery() {
           file_url,
           file_type,
           file_name,
-          title,
-          description,
-          entry_type,
           created_at,
           site_log_id
         `)
-        .or(`project_id.eq.${projectId},site_logs.project_id.eq.${projectId}`)
+        .in('site_log_id', siteLogIds)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -115,14 +129,14 @@ export default function ConstructionGallery() {
         file_url: file.file_url,
         file_type: file.file_type,
         original_name: file.file_name || 'Sin nombre',
-        title: file.title || file.file_name || 'Sin título',
-        description: file.description,
-        entry_type: file.entry_type || 'registro_general',
+        title: file.file_name || 'Sin título',
+        description: '',
+        entry_type: 'registro_general',
         created_at: file.created_at,
         site_log: file.site_log_id ? {
           id: file.site_log_id,
           log_date: file.created_at,
-          entry_type: file.entry_type || 'registro_general',
+          entry_type: 'registro_general',
           creator: {
             id: userData?.user?.id || '',
             full_name: userData?.user?.full_name || 'Usuario',
@@ -321,9 +335,64 @@ export default function ConstructionGallery() {
     setEditingFile(null);
   };
 
+  // Header props configuration
+  const headerProps = {
+    title: "Galería",
+    icon: Images,
+    showSearch: true,
+    searchValue: searchTerm,
+    onSearchChange: setSearchTerm,
+    customFilters: (
+      <div className="flex gap-4">
+        <Select value={fileTypeFilter} onValueChange={setFileTypeFilter}>
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="Tipo de archivo" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos los archivos</SelectItem>
+            <SelectItem value="image">Solo imágenes</SelectItem>
+            <SelectItem value="video">Solo videos</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={entryTypeFilter} onValueChange={setEntryTypeFilter}>
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="Tipo de entrada" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos los tipos</SelectItem>
+            <SelectItem value="avance_de_obra">Avance de Obra</SelectItem>
+            <SelectItem value="visita_tecnica">Visita Técnica</SelectItem>
+            <SelectItem value="problema_detectado">Problema Detectado</SelectItem>
+            <SelectItem value="pedido_material">Pedido Material</SelectItem>
+            <SelectItem value="nota_climatica">Nota Climática</SelectItem>
+            <SelectItem value="decision">Decisión</SelectItem>
+            <SelectItem value="inspeccion">Inspección</SelectItem>
+            <SelectItem value="foto_diaria">Foto Diaria</SelectItem>
+            <SelectItem value="registro_general">Registro General</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    ),
+    onClearFilters: () => {
+      setSearchTerm('');
+      setFileTypeFilter('all');
+      setEntryTypeFilter('all');
+    },
+    actions: [
+      <Button
+        key="new-file"
+        onClick={() => setShowGalleryModal(true)}
+        className="h-8"
+      >
+        <Plus className="mr-2 h-4 w-4" />
+        Subir Archivo
+      </Button>,
+    ].filter(Boolean),
+  };
+
   if (isLoading) {
     return (
-      <Layout>
+      <Layout headerProps={headerProps}>
         <div className="h-96 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
@@ -336,7 +405,7 @@ export default function ConstructionGallery() {
 
   if (error) {
     return (
-      <Layout>
+      <Layout headerProps={headerProps}>
         <div className="h-96 flex items-center justify-center">
           <div className="text-center">
             <p className="text-destructive mb-2">Error al cargar la galería</p>
@@ -351,141 +420,19 @@ export default function ConstructionGallery() {
 
   if (galleryFiles.length === 0) {
     return (
-      <Layout>
-        <div className="space-y-6">
-          {/* Header with Desktop Action Buttons */}
-          {!isMobile && (
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold">Galería</h1>
-                <p className="text-muted-foreground">Administra los archivos de tu proyecto</p>
-              </div>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm">
-                  <Search className="h-4 w-4 mr-2" />
-                  Buscar
-                </Button>
-                <Button variant="outline" size="sm">
-                  <Filter className="h-4 w-4 mr-2" />
-                  Filtros
-                </Button>
-                <Button variant="outline" size="sm">
-                  <FilterX className="h-4 w-4 mr-2" />
-                  Limpiar
-                </Button>
-                <Button size="sm" onClick={() => setShowGalleryModal(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Subir Archivo
-                </Button>
-              </div>
-            </div>
-          )}
-
-          <CustomEmptyState
-            icon={<Images />}
-            title="No hay archivos en la galería"
-            description="Sube tu primer archivo para comenzar"
-          />
-        </div>
+      <Layout headerProps={headerProps}>
+        <CustomEmptyState
+          icon={<Images />}
+          title="No hay archivos en la galería"
+          description="Sube tu primer archivo para comenzar"
+        />
       </Layout>
     );
   }
 
   return (
-    <Layout>
+    <Layout headerProps={headerProps}>
       <div className="space-y-6">
-        {/* Header with Desktop Action Buttons */}
-        {!isMobile && (
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold">Galería</h1>
-              <p className="text-muted-foreground">Administra los archivos de tu proyecto</p>
-            </div>
-            <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => {
-                  const searchInput = document.getElementById('gallery-search');
-                  searchInput?.focus();
-                }}
-              >
-                <Search className="h-4 w-4 mr-2" />
-                Buscar
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => {
-                  const filtersContainer = document.getElementById('gallery-filters');
-                  if (filtersContainer) {
-                    filtersContainer.style.display = filtersContainer.style.display === 'none' ? 'block' : 'none';
-                  }
-                }}
-              >
-                <Filter className="h-4 w-4 mr-2" />
-                Filtros
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => {
-                  setSearchTerm('');
-                  setFileTypeFilter('all');
-                  setEntryTypeFilter('all');
-                }}
-              >
-                <FilterX className="h-4 w-4 mr-2" />
-                Limpiar
-              </Button>
-              <Button size="sm" onClick={() => setShowGalleryModal(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Subir Archivo
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* Search and Filters */}
-        <div className="space-y-4" id="gallery-filters">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Input
-              id="gallery-search"
-              placeholder="Buscar archivos..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="sm:max-w-sm"
-            />
-            <Select value={fileTypeFilter} onValueChange={setFileTypeFilter}>
-              <SelectTrigger className="sm:w-48">
-                <SelectValue placeholder="Tipo de archivo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos los archivos</SelectItem>
-                <SelectItem value="image">Solo imágenes</SelectItem>
-                <SelectItem value="video">Solo videos</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={entryTypeFilter} onValueChange={setEntryTypeFilter}>
-              <SelectTrigger className="sm:w-48">
-                <SelectValue placeholder="Tipo de entrada" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos los tipos</SelectItem>
-                <SelectItem value="avance_de_obra">Avance de Obra</SelectItem>
-                <SelectItem value="visita_tecnica">Visita Técnica</SelectItem>
-                <SelectItem value="problema_detectado">Problema Detectado</SelectItem>
-                <SelectItem value="pedido_material">Pedido Material</SelectItem>
-                <SelectItem value="nota_climatica">Nota Climática</SelectItem>
-                <SelectItem value="decision">Decisión</SelectItem>
-                <SelectItem value="inspeccion">Inspección</SelectItem>
-                <SelectItem value="foto_diaria">Foto Diaria</SelectItem>
-                <SelectItem value="registro_general">Registro General</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
         {/* Gallery Grid */}
         {filteredFiles.length === 0 ? (
           <CustomEmptyState
@@ -558,86 +505,86 @@ export default function ConstructionGallery() {
             ))}
           </div>
         )}
-
-        {/* Lightbox Modal */}
-        {selectedFile && (
-          <CustomModalLayout
-            open={!!selectedFile}
-            onClose={() => setSelectedFile(null)}
-            children={{
-              header: (
-                <CustomModalHeader
-                  title={selectedFile.title || 'Archivo'}
-                  description={`${getEntryTypeLabel(selectedFile.entry_type || 'registro_general')} • ${format(new Date(selectedFile.created_at), 'dd MMM yyyy', { locale: es })}`}
-                  onClose={() => setSelectedFile(null)}
-                />
-              ),
-              body: (
-                <CustomModalBody columns={1} className="p-0">
-                  <div className="relative flex items-center justify-center bg-black/5 min-h-[60vh]">
-                    {selectedFile.file_type === 'image' || selectedFile.file_type?.startsWith('image/') ? (
-                      <img 
-                        src={selectedFile.file_url} 
-                        alt={selectedFile.title}
-                        className="max-w-full max-h-full object-contain"
-                      />
-                    ) : (
-                      <video 
-                        src={selectedFile.file_url} 
-                        controls 
-                        className="max-w-full max-h-full"
-                      />
-                    )}
-
-                    {/* Navigation */}
-                    {filteredFiles.length > 1 && (
-                      <div className="absolute inset-y-0 left-4 right-4 flex items-center justify-between pointer-events-none">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="pointer-events-auto"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigateImage('prev');
-                          }}
-                        >
-                          <ChevronLeft className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="pointer-events-auto"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigateImage('next');
-                          }}
-                        >
-                          <ChevronRight className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </CustomModalBody>
-              ),
-              footer: (
-                <CustomModalFooter
-                  onCancel={() => setSelectedFile(null)}
-                  onSave={() => downloadFile(selectedFile)}
-                  cancelText="Cerrar"
-                  saveText="Descargar"
-                />
-              ),
-            }}
-          />
-        )}
-
-        {/* Gallery Modal */}
-        <NewGalleryModal
-          open={showGalleryModal}
-          onClose={handleCloseModal}
-          editingFile={editingFile}
-        />
       </div>
+
+      {/* Lightbox Modal */}
+      {selectedFile && (
+        <CustomModalLayout
+          open={!!selectedFile}
+          onClose={() => setSelectedFile(null)}
+          children={{
+            header: (
+              <CustomModalHeader
+                title={selectedFile.title || 'Archivo'}
+                description={`${getEntryTypeLabel(selectedFile.entry_type || 'registro_general')} • ${format(new Date(selectedFile.created_at), 'dd MMM yyyy', { locale: es })}`}
+                onClose={() => setSelectedFile(null)}
+              />
+            ),
+            body: (
+              <CustomModalBody columns={1} className="p-0">
+                <div className="relative flex items-center justify-center bg-black/5 min-h-[60vh]">
+                  {selectedFile.file_type === 'image' || selectedFile.file_type?.startsWith('image/') ? (
+                    <img 
+                      src={selectedFile.file_url} 
+                      alt={selectedFile.title}
+                      className="max-w-full max-h-full object-contain"
+                    />
+                  ) : (
+                    <video 
+                      src={selectedFile.file_url} 
+                      controls 
+                      className="max-w-full max-h-full"
+                    />
+                  )}
+
+                  {/* Navigation */}
+                  {filteredFiles.length > 1 && (
+                    <div className="absolute inset-y-0 left-4 right-4 flex items-center justify-between pointer-events-none">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="pointer-events-auto"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigateImage('prev');
+                        }}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="pointer-events-auto"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigateImage('next');
+                        }}
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </CustomModalBody>
+            ),
+            footer: (
+              <CustomModalFooter
+                onCancel={() => setSelectedFile(null)}
+                onSave={() => downloadFile(selectedFile)}
+                cancelText="Cerrar"
+                saveText="Descargar"
+              />
+            ),
+          }}
+        />
+      )}
+
+      {/* Gallery Modal */}
+      <NewGalleryModal
+        open={showGalleryModal}
+        onClose={handleCloseModal}
+        editingFile={editingFile}
+      />
     </Layout>
   );
 }
