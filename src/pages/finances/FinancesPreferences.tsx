@@ -6,6 +6,7 @@ import { Layout } from '@/components/layout/desktop/Layout';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CustomMultiComboBox } from '@/components/ui-custom/misc/CustomMultiComboBox';
+import { HelpPopover } from '@/components/ui-custom/HelpPopover';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useCurrencies, useOrganizationCurrencies } from '@/hooks/use-currencies';
@@ -253,11 +254,11 @@ export default function FinancesPreferences() {
   const availableSecondaryWallets = allWallets?.filter(w => w.id !== defaultWallet) || [];
 
   return (
-    <Layout headerProps={{ title: "Configuración de Finanzas" }}>
+    <Layout headerProps={{ title: "Preferencias de Finanzas" }}>
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header */}
         <div className="space-y-2">
-          <h1 className="text-2xl font-semibold">Configuración de Finanzas</h1>
+          <h1 className="text-2xl font-semibold">Preferencias de Finanzas</h1>
           <p className="text-sm text-muted-foreground">
             Configura las preferencias financieras de tu organización, incluyendo monedas y billeteras predeterminadas.
           </p>
@@ -269,8 +270,12 @@ export default function FinancesPreferences() {
             {/* Monedas y Billeteras Section */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Coins className="w-4 h-4" />
+                <Coins className="h-5 w-5 text-[var(--accent)]" />
                 <h2 className="text-lg font-semibold">Monedas y Billeteras</h2>
+                <HelpPopover 
+                  title="Monedas y Billeteras"
+                  description="Estas configuraciones determinan qué monedas y billeteras tendrás disponibles al crear movimientos financieros. Tu selección por defecto se usará automáticamente en nuevos movimientos, mientras que las secundarias aparecerán como opciones adicionales."
+                />
               </div>
               <p className="text-sm text-muted-foreground">
                 Configura las monedas y billeteras que utilizas frecuentemente en tu organización
