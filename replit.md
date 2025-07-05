@@ -119,6 +119,17 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 5, 2025. Complete project installments (aportes) system implementation with sidebar navigation integration - COMPLETED
+  • Created ProjectInstallmentsPage.tsx in src/pages/finances/ with complete CRUD functionality for project installments management
+  • Built NewInstallmentModal.tsx using proper CustomModalLayout pattern with TypeScript compliance and form validation
+  • Implemented installments page that filters movements by "Cuotas" concept to display contact-based project contributions
+  • Added comprehensive installments interface with summary card showing total contributed amounts and proper table display
+  • Page includes search functionality, empty state handling with CustomEmptyState component, and proper error handling
+  • Successfully added /finances/installments route to App.tsx with proper ProtectedRoute wrapper for authentication
+  • Added "Aportes" button with CreditCard icon to finances sidebar navigation between "Movimientos" and "Preferencias de Finanzas"
+  • Enhanced finances context in both desktop Sidebar.tsx with proper navigation to installments management page
+  • Modal handles both create and edit scenarios with proper form validation, currency selection, wallet management, and contact assignment
+  • System integrates with existing movement concepts database structure to track project funding contributions from investors
 - July 5, 2025. Complete centralized auto-save system implementation with useDebouncedAutoSave hook - COMPLETED
   • Created reusable useDebouncedAutoSave hook in src/hooks/useDebouncedAutoSave.ts with 750ms debounce delay
   • Hook features: deep comparison to prevent unnecessary saves, skips first render, proper cleanup with timeout cancellation

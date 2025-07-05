@@ -41,7 +41,8 @@ import {
   Contact,
   Images,
   Database,
-  Layout
+  Layout,
+  CreditCard
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -229,6 +230,7 @@ export function Sidebar() {
       { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
       { type: 'divider' },
       { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
+      { icon: CreditCard, label: 'Aportes', href: '/finances/installments' },
       { icon: Settings, label: 'Preferencias de Finanzas', href: '/finances/preferences' },
     ],
     commercialization: [
