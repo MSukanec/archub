@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { Search, ArrowLeft } from "lucide-react";
+import { HelpPopover } from "@/components/ui-custom/HelpPopover";
 
 // Discovery source options (enum discovery_source)
 const discoveryOptions = [
@@ -76,7 +77,15 @@ export function Step2Discovery() {
       <CardContent className="space-y-4">
         {/* Fuente de descubrimiento - OBLIGATORIO */}
         <div className="space-y-2">
-          <Label htmlFor="discovered_by">¿Cómo conociste Archub? *</Label>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="discovered_by">¿Cómo conociste Archub? *</Label>
+            <HelpPopover
+              title="Fuente de Descubrimiento"
+              description="Conocer cómo nos encontraste nos ayuda a entender qué canales funcionan mejor y donde enfocar nuestros esfuerzos para llegar a más profesionales como tú."
+              primaryActionText="Entendido"
+              placement="top"
+            />
+          </div>
           <Select
             value={formData.discovered_by}
             onValueChange={(value) => {
@@ -114,7 +123,15 @@ export function Step2Discovery() {
 
         {/* Uso principal - OPCIONAL */}
         <div className="space-y-2">
-          <Label htmlFor="main_use">¿Para qué vas a usar principalmente Archub?</Label>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="main_use">¿Para qué vas a usar principalmente Archub?</Label>
+            <HelpPopover
+              title="Uso Principal"
+              description="Entender tu propósito principal nos permite personalizar las funciones más relevantes para ti y sugerir flujos de trabajo optimizados. Puedes cambiarlo después."
+              primaryActionText="Entendido"
+              placement="top"
+            />
+          </div>
           <Select
             value={formData.main_use || ''}
             onValueChange={(value) => updateFormData({ main_use: value })}
@@ -134,7 +151,15 @@ export function Step2Discovery() {
 
         {/* Rol profesional - OPCIONAL */}
         <div className="space-y-2">
-          <Label htmlFor="user_role">¿Cuál es tu rol profesional?</Label>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="user_role">¿Cuál es tu rol profesional?</Label>
+            <HelpPopover
+              title="Rol Profesional"
+              description="Tu rol nos ayuda a mostrar las herramientas más relevantes para tu trabajo y conectarte con funciones específicas de tu profesión. Puedes actualizarlo en cualquier momento."
+              primaryActionText="Entendido"
+              placement="top"
+            />
+          </div>
           <Select
             value={formData.user_role || ''}
             onValueChange={(value) => {
@@ -172,7 +197,15 @@ export function Step2Discovery() {
 
         {/* Tamaño de equipo - OPCIONAL */}
         <div className="space-y-2">
-          <Label htmlFor="team_size">¿Cuántas personas trabajan con vos?</Label>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="team_size">¿Cuántas personas trabajan con vos?</Label>
+            <HelpPopover
+              title="Tamaño del Equipo"
+              description="El tamaño de tu equipo nos ayuda a configurar permisos apropiados, sugerir planes de colaboración y ajustar funciones grupales según tu escala de trabajo."
+              primaryActionText="Entendido"
+              placement="top"
+            />
+          </div>
           <Select
             value={formData.team_size || ''}
             onValueChange={(value) => updateFormData({ team_size: value })}

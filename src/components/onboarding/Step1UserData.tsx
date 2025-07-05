@@ -12,6 +12,14 @@ export function Step1UserData() {
   const { formData, updateFormData, goNextStep } = useOnboardingStore();
   const { setTheme } = useThemeStore();
 
+  const handleThemeChange = (value: 'light' | 'dark') => {
+    // Update form data
+    updateFormData({ theme: value });
+    
+    // Apply theme immediately
+    setTheme(value === 'dark');
+  };
+
   const handleNext = () => {
     if (formData.first_name && formData.last_name && formData.organization_name) {
       goNextStep();
@@ -35,7 +43,15 @@ export function Step1UserData() {
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="first_name">Nombre/s *</Label>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="first_name">Nombre/s *</Label>
+              <HelpPopover
+                title="Nombre Personal"
+                description="Usamos tu nombre para personalizar tu experiencia y para que tu equipo pueda identificarte en colaboraciones. Puedes usar uno o varios nombres."
+                primaryActionText="Entendido"
+                placement="top"
+              />
+            </div>
             <Input
               id="first_name"
               placeholder="Tu nombre"
@@ -45,7 +61,15 @@ export function Step1UserData() {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="last_name">Apellido/s *</Label>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="last_name">Apellido/s *</Label>
+              <HelpPopover
+                title="Apellido Personal"
+                description="Tu apellido completa tu identificación en la plataforma y es útil para reportes oficiales y documentación del proyecto."
+                primaryActionText="Entendido"
+                placement="top"
+              />
+            </div>
             <Input
               id="last_name"
               placeholder="Tu apellido"
@@ -57,7 +81,15 @@ export function Step1UserData() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="organization_name">Nombre de Organización / Empresa *</Label>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="organization_name">Nombre de Organización / Empresa *</Label>
+              <HelpPopover
+                title="Organización"
+                description="El nombre de tu empresa o estudio será visible en reportes, presupuestos y documentación oficial. Asegúrate de usar el nombre legal completo."
+                primaryActionText="Entendido"
+                placement="top"
+              />
+            </div>
             <Input
               id="organization_name"
               placeholder="Nombre de tu organización"
@@ -80,10 +112,7 @@ export function Step1UserData() {
             </div>
             <Select
               value={formData.theme}
-              onValueChange={(value: 'light' | 'dark') => {
-                updateFormData({ theme: value });
-                setTheme(value === 'dark');
-              }}
+              onValueChange={handleThemeChange}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecciona un tema" />

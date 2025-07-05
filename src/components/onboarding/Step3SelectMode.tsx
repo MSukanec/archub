@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { CustomRestricted } from "@/components/ui-custom/misc/CustomRestricted";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { Building, Package, Hammer, Eye, CheckCircle, Loader2, ArrowLeft } from "lucide-react";
+import { HelpPopover } from "@/components/ui-custom/HelpPopover";
 import { useState } from "react";
 
 interface ModeOption {
@@ -17,32 +18,47 @@ const modeOptions: ModeOption[] = [
   {
     type: "professional",
     title: "Profesional",
-    description: "Estudios de arquitectura, constructoras y empresas de construcción",
+    description: "Gestiona proyectos completos con equipos, presupuestos, cronogramas y documentación técnica",
     icon: Building,
     color: "bg-[var(--accent)]"
   },
   {
     type: "provider",
     title: "Proveedor de Materiales",
-    description: "Empresas que suministran materiales y equipos de construcción",
+    description: "Administra catálogo de productos, cotizaciones y seguimiento de entregas a obras",
     icon: Package,
     color: "bg-[var(--accent)]"
   },
   {
     type: "worker",
     title: "Mano de Obra",
-    description: "Contratistas, maestros de obra y profesionales independientes",
+    description: "Registra avances, reporta incidencias y coordina tareas con el equipo del proyecto",
     icon: Hammer,
     color: "bg-[var(--accent)]"
   },
   {
     type: "visitor",
     title: "Solo Exploración",
-    description: "Explora las funcionalidades sin compromiso",
+    description: "Explora las funcionalidades sin comprometerte con datos de proyectos reales",
     icon: Eye,
     color: "bg-[var(--accent)]"
   }
 ];
+
+function getHelpDescription(type: string): string {
+  switch (type) {
+    case 'professional':
+      return 'Modo ideal para arquitectos, ingenieros, constructoras y estudios. Incluye gestión completa de proyectos, equipos, presupuestos, cronogramas y documentación técnica profesional. Puedes cambiar el modo después.';
+    case 'provider':
+      return 'Diseñado para empresas proveedoras de materiales y equipos. Permite gestionar catálogos, enviar cotizaciones, rastrear entregas y coordinar con múltiples obras simultáneamente.';
+    case 'worker':
+      return 'Perfecto para contratistas, maestros de obra y trabajadores independientes. Facilita el registro de avances, reporte de incidencias y coordinación de tareas dentro del equipo.';
+    case 'visitor':
+      return 'Explora todas las funcionalidades de Archub sin necesidad de ingresar datos reales de proyectos. Ideal para conocer la plataforma antes de decidirte por un modo específico.';
+    default:
+      return 'Selecciona el modo que mejor se adapte a tu rol y necesidades profesionales.';
+  }
+}
 
 interface Step3SelectModeProps {
   isOnboarding?: boolean;
@@ -107,9 +123,18 @@ export function Step3SelectMode({ isOnboarding = true, onFinish, isLoading = fal
                       </div>
                     )}
                   </div>
-                  <CardTitle className="text-lg font-semibold text-slate-900 dark:text-white">
-                    {mode.title}
-                  </CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg font-semibold text-slate-900 dark:text-white">
+                      {mode.title}
+                    </CardTitle>
+                    <HelpPopover
+                      title={`Modo ${mode.title}`}
+                      description={getHelpDescription(mode.type)}
+                      primaryActionText="Entendido"
+                      placement="top"
+                      iconSize={16}
+                    />
+                  </div>
                 </CardHeader>
                 <CardContent className="pt-0">
                   <CardDescription className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
