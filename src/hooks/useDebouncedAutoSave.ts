@@ -25,7 +25,7 @@ export function useDebouncedAutoSave<T>({
   const isFirstRenderRef = useRef(true);
 
   const debouncedSave = useCallback(async (dataToSave: T) => {
-    if (!enabled || dataToSave === undefined || dataToSave === null) {
+    if (!enabled || !dataToSave) {
       return;
     }
 
@@ -33,6 +33,7 @@ export function useDebouncedAutoSave<T>({
     try {
       await saveFn(dataToSave);
       setLastSavedAt(new Date());
+      console.log('Auto-save completed successfully');
     } catch (error) {
       console.error('Auto-save error:', error);
     } finally {
@@ -51,7 +52,15 @@ export function useDebouncedAutoSave<T>({
     // Deep comparison to avoid unnecessary saves
     const hasChanged = JSON.stringify(data) !== JSON.stringify(previousDataRef.current);
     
-    if (!hasChanged || !enabled || data === undefined || data === null) {
+    console.log('useDebouncedAutoSave effect:', {
+      hasChanged,
+      enabled,
+      data,
+      previousData: previousDataRef.current
+    });
+    
+    if (!hasChanged || !enabled || !data) {
+      console.log('Skipping save:', { hasChanged, enabled, dataExists: !!data });
       return;
     }
 
@@ -60,8 +69,11 @@ export function useDebouncedAutoSave<T>({
       clearTimeout(timeoutRef.current);
     }
 
+    console.log('Setting timeout for auto-save in', delay, 'ms');
+    
     // Set new timeout for debounced save
     timeoutRef.current = setTimeout(() => {
+      console.log('Executing auto-save...');
       debouncedSave(data);
     }, delay);
 

@@ -87,7 +87,7 @@
   --card-fg: hsl(0, 0%, 35%);
   --card-text: hsl(0, 0%, 35%);
   --card-border: hsl(0, 0%, 85%);
-  --card-hover-bg: hsl(240, 3%, 98%);
+  --card-hover-bg: hsl(0, 0%, 97%);
 
   /* Secondary Cards */
   --secondary-card-bg: hsl(0, 0%, 95%);
@@ -192,18 +192,18 @@
   --menues-bg: hsl(0, 0%, 14%);
   --menues-fg: hsl(0, 0%, 70%);
   --menues-secondary-fg: hsl(0, 0%, 60%);
-  --menues-border: hsl(240, 8%, 20%);
+  --menues-border: hsl(0, 0%, 16%);
   --menues-hover-bg: hsl(90, 50%, 50%);
   --menues-hover-fg: hsl(0, 0%, 90%);
   --menues-active-bg: hsl(90, 50%, 50%);
   --menues-active-fg: hsl(0, 0%, 98%);
 
   /* Cards */
-  --card-bg: hsl(0, 50%, 50%);
+  --card-bg: hsl(0, 0%, 14%);
   --card-fg: hsl(0, 0%, 90%);
   --card-text: hsl(0, 0%, 90%);
-  --card-border: hsl(240, 8%, 15%);
-  --card-hover-bg: hsl(0, 0%, 16%);
+  --card-border: hsl(0, 0%, 16%);
+  --card-hover-bg: hsl(0, 0%, 14%);
 
   /* Secondary Cards */
   --secondary-card-bg: hsl(0, 0%, 50%);
@@ -288,9 +288,9 @@
   --text-inverted: hsl(240, 10%, 4%);
 
   /* Borders and Rings */
-  --border-default: hsl(240, 8%, 15%);
-  --border-strong: hsl(240, 8%, 25%);
-  --ring-default: hsl(0, 0%, 30%);
+  --border-default: hsl(0, 0%, 16%);
+  --border-strong: hsl(0, 50%, 50%);
+  --ring-default: hsl(0, 50%, 50%);
 
   /* Radius */
   --radius-sm: 4px;
