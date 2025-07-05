@@ -180,8 +180,13 @@ export default function Profile() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...data,
-          userId: userData.user.id
+          user_id: userData.user.id,
+          first_name: data.firstName,
+          last_name: data.lastName,
+          country: data.country,
+          birthdate: data.birthdate,
+          avatar_url: data.avatarUrl,
+          sidebar_docked: data.sidebarDocked
         }),
       })
 
