@@ -126,9 +126,9 @@ export default function SelectMode() {
         description: "Tu configuración se ha guardado exitosamente.",
       });
       
-      // Redirect to dashboard after successful onboarding
+      // Redirect to organization dashboard after successful onboarding
       setSidebarContext('organization');
-      navigate('/dashboard');
+      navigate('/organization/dashboard');
       resetOnboarding();
     },
     onError: (error) => {
@@ -164,7 +164,7 @@ export default function SelectMode() {
         title: "Modo actualizado",
         description: "Tu modo de uso se ha actualizado correctamente.",
       });
-      navigate('/dashboard');
+      navigate('/organization/dashboard');
     },
     onError: (error) => {
       console.error('Error updating user type:', error);
