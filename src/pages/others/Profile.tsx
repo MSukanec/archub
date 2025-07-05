@@ -9,9 +9,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Upload, Link as LinkIcon, LogOut, Crown, MessageCircle, Camera, User, Settings, Building, Package, Hammer, Eye } from 'lucide-react'
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useLocation } from 'wouter'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { useDebouncedAutoSave } from '@/hooks/useDebouncedAutoSave'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { queryClient } from '@/lib/queryClient'
@@ -56,127 +57,75 @@ export default function Profile() {
   const [showAvatarUpload, setShowAvatarUpload] = useState(false)
   const [sidebarDocked, setSidebarDocked] = useState(false)
 
-  // Profile update mutation
-  const updateProfileMutation = useMutation({
-    mutationFn: async (data: {
-      firstName: string
-      lastName: string
-      country: string
-      birthdate: string
-      avatarUrl: string
-      sidebarDocked: boolean
-    }) => {
-      if (!userData?.user?.id) {
-        throw new Error('User ID not available')
+
+
+  // Profile data object for debounced auto-save
+  const profileData = {
+    firstName,
+    lastName,
+    country,
+    birthdate,
+    avatarUrl,
+    sidebarDocked
+  }
+
+  // Centralized auto-save with debounce
+  const { isSaving } = useDebouncedAutoSave({
+    data: profileData,
+    saveFn: async (data) => {
+      if (!userData?.user?.id) return
+      
+      const updates = {
+        first_name: data.firstName,
+        last_name: data.lastName,
+        country: data.country,
+        birthdate: data.birthdate,
+        avatar_url: data.avatarUrl,
+        updated_at: new Date().toISOString(),
       }
 
-      const response = await fetch('/api/user/profile', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          user_id: userData.user.id,
-          first_name: data.firstName,
-          last_name: data.lastName,
-          country: data.country,
-          birthdate: data.birthdate,
-          avatar_url: data.avatarUrl,
-          sidebar_docked: data.sidebarDocked
-        }),
-      })
+      // Update user_data table
+      const { error: userDataError } = await supabase
+        .from('user_data')
+        .update(updates)
+        .eq('user_id', userData.user.id)
 
-      if (!response.ok) {
-        throw new Error('Failed to update profile')
-      }
+      if (userDataError) throw userDataError
 
-      return response.json()
-    },
-    onSuccess: () => {
+      // Update preferences table
+      const { error: preferencesError } = await supabase
+        .from('user_preferences')
+        .update({
+          sidebar_docked: data.sidebarDocked,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', userData.user.id)
+
+      if (preferencesError) throw preferencesError
+
+      // Invalidate cache
       queryClient.invalidateQueries({ queryKey: ['current-user'] })
-      toast({
-        title: "Cambios guardados automáticamente",
-        description: "Tu perfil se ha actualizado correctamente.",
-      })
     },
-    onError: (error) => {
-      console.error('Profile update error:', error)
-      toast({
-        title: "Error al guardar",
-        description: "No se pudieron guardar los cambios automáticamente.",
-        variant: "destructive",
-      })
-    },
+    delay: 750,
+    enabled: !!userData?.user?.id
   })
 
-  // Auto-save handlers - exactly like FinancesPreferences
-  const handleFirstNameChange = (value: string) => {
-    setFirstName(value)
-    updateProfileMutation.mutate({
-      firstName: value,
-      lastName,
-      country,
-      birthdate,
-      avatarUrl,
-      sidebarDocked
-    })
-  }
+  // Simple state setters (auto-save handles the persistence)
+  const handleFirstNameChange = (value: string) => setFirstName(value)
+  const handleLastNameChange = (value: string) => setLastName(value)
+  const handleCountryChange = (value: string) => setCountry(value)
+  const handleBirthdateChange = (value: string) => setBirthdate(value)
 
-  const handleLastNameChange = (value: string) => {
-    setLastName(value)
-    updateProfileMutation.mutate({
-      firstName,
-      lastName: value,
-      country,
-      birthdate,
-      avatarUrl,
-      sidebarDocked
-    })
-  }
-
-  const handleCountryChange = (value: string) => {
-    setCountry(value)
-    updateProfileMutation.mutate({
-      firstName,
-      lastName,
-      country: value,
-      birthdate,
-      avatarUrl,
-      sidebarDocked
-    })
-  }
-
-  const handleBirthdateChange = (value: string) => {
-    setBirthdate(value)
-    updateProfileMutation.mutate({
-      firstName,
-      lastName,
-      country,
-      birthdate: value,
-      avatarUrl,
-      sidebarDocked
-    })
-  }
-
-  const handleSidebarDockedChange = useCallback((value: boolean) => {
+  const handleSidebarDockedChange = (value: boolean) => {
     setSidebarDocked(value)
     setDocked(value)
-    // Guardado inmediato para switches
-    updateProfileMutation.mutate({
-      firstName,
-      lastName,
-      country,
-      birthdate,
-      avatarUrl,
-      sidebarDocked: value
-    })
-  }, [firstName, lastName, country, birthdate, avatarUrl, updateProfileMutation, setDocked])
+  }
 
-  const handleThemeChange = useCallback((value: boolean) => {
+  const handleThemeChange = (value: boolean) => {
     if (userData?.user?.id && userData?.preferences?.id) {
       toggleTheme(userData.user.id, userData.preferences.id)
     }
-  }, [toggleTheme, userData])
+  }
 
   // Countries query
   const { data: countries = [] } = useQuery<Country[]>({
@@ -247,7 +196,15 @@ export default function Profile() {
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header Section */}
         <div className="space-y-2">
-          <h1 className="text-2xl font-semibold">Mi Perfil</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-semibold">Mi Perfil</h1>
+            {isSaving && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <div className="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
+                Guardando...
+              </div>
+            )}
+          </div>
           <p className="text-sm text-muted-foreground">
             Esta es la información de tu perfil y las preferencias de tu cuenta.
           </p>

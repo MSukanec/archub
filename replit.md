@@ -119,6 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 5, 2025. Complete centralized auto-save system implementation with useDebouncedAutoSave hook - COMPLETED
+  • Created reusable useDebouncedAutoSave hook in src/hooks/useDebouncedAutoSave.ts with 750ms debounce delay
+  • Hook features: deep comparison to prevent unnecessary saves, skips first render, proper cleanup with timeout cancellation
+  • Returns isSaving and lastSavedAt states for visual feedback integration
+  • Implemented in Profile page replacing all individual mutations with single debounced auto-save system
+  • Eliminated multiple Supabase update calls - now batches changes with 750ms delay after last user input
+  • Added visual "Guardando..." indicator with animated accent dot when saving in progress
+  • System prevents server spam while maintaining responsive UX with instant visual feedback
+  • Pattern ready for adoption across all pages: FinancesPreferences, OrganizationPreferences, and other real-time edit forms
 - July 5, 2025. Fixed CONFIGURACIÓN DE FINANZAS page to use real database structure and proper data management - COMPLETED
   • Rebuilt FinancesPreferences.tsx using authentic database tables: organization_currencies, organization_wallets, organization_preferences
   • Implemented proper data flow: default selections from organization_preferences table, secondary selections from organization tables
