@@ -8,6 +8,7 @@ export interface MovementConceptAdmin {
   description?: string
   parent_id?: string
   organization_id?: string
+  is_system: boolean
   created_at: string
   children?: MovementConceptAdmin[]
 }
@@ -111,6 +112,7 @@ export const useUpdateMovementConcept = () => {
       name?: string
       description?: string
       parent_id?: string
+      is_system?: boolean
     }) => {
       if (!supabase) {
         throw new Error('Supabase client not initialized')

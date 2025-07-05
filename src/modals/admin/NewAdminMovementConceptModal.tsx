@@ -10,13 +10,15 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
+import { Switch } from "@/components/ui/switch"
 import { useCreateMovementConcept, useUpdateMovementConcept, useParentMovementConcepts, type MovementConceptAdmin } from "@/hooks/use-movement-concepts-admin"
 import { useCurrentUser } from "@/hooks/use-current-user"
 
 const conceptSchema = z.object({
   name: z.string().min(1, "El nombre es requerido"),
   description: z.string().optional(),
-  parent_id: z.string().optional()
+  parent_id: z.string().optional(),
+  is_system: z.boolean().default(false)
 })
 
 type ConceptForm = z.infer<typeof conceptSchema>
@@ -42,7 +44,8 @@ export function NewAdminMovementConceptModal({
     defaultValues: {
       name: editingConcept?.name || "",
       description: editingConcept?.description || "",
-      parent_id: editingConcept?.parent_id || ""
+      parent_id: editingConcept?.parent_id || "",
+      is_system: editingConcept?.is_system || false
     }
   })
 
@@ -59,7 +62,8 @@ export function NewAdminMovementConceptModal({
           id: editingConcept.id,
           name: conceptData.name,
           description: conceptData.description,
-          parent_id: conceptData.parent_id || undefined
+          parent_id: conceptData.parent_id || undefined,
+          is_system: conceptData.is_system
         })
       } else {
         await createMutation.mutateAsync(conceptData)
@@ -148,6 +152,27 @@ export function NewAdminMovementConceptModal({
                         </SelectContent>
                       </Select>
                       <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="is_system"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                      <div className="space-y-0.5">
+                        <FormLabel>Concepto del Sistema</FormLabel>
+                        <div className="text-sm text-muted-foreground">
+                          Los conceptos del sistema no pueden ser eliminados por usuarios
+                        </div>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
                     </FormItem>
                   )}
                 />

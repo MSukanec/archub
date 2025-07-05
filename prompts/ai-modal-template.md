@@ -42,11 +42,6 @@ El botón de guardar debe desactivarse mientras se envía (isSubmitting)
 El modal debe funcionar tanto para crear como para editar
 
 Estilo visual
-Por defecto: dos columnas (md:grid-cols-2)
-
-Cada campo debe estar envuelto en un <div className="col-span-1">
-
-Si un campo necesita ocupar el ancho completo, usar <div className="col-span-2">
 
 Todos los campos deben tener separación y alineación vertical consistente
 
