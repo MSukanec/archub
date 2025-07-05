@@ -80,7 +80,6 @@ export default function Profile() {
         last_name: data.lastName,
         country: data.country,
         birthdate: data.birthdate,
-        avatar_url: data.avatarUrl,
         updated_at: new Date().toISOString(),
       }
 

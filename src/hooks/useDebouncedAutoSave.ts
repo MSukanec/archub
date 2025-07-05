@@ -72,23 +72,15 @@ export function useDebouncedAutoSave<T>({
 
     console.log('Setting timeout for auto-save in', delay, 'ms');
     
+    // Update previous data reference immediately
+    previousDataRef.current = data;
+    
     // Set new timeout for debounced save
     timeoutRef.current = setTimeout(() => {
       console.log('Executing auto-save...');
       debouncedSave(data);
     }, delay);
 
-    // Update previous data reference
-    previousDataRef.current = data;
-
-    // Cleanup function
-    return () => {
-      console.log('useEffect cleanup called - clearing timeout');
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
-      }
-    };
   }, [data, delay, enabled, debouncedSave]);
 
   // Cleanup on unmount
