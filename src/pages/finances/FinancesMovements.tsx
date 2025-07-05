@@ -135,9 +135,9 @@ export default function Movements() {
   const { setActions, setShowActionBar, clearActions } = useMobileActionBar();
   const isMobile = useMobile();
 
-  // Set sidebar context to project when component mounts
+  // Set sidebar context to finances when component mounts
   useEffect(() => {
-    setSidebarContext("project");
+    setSidebarContext("finances");
   }, [setSidebarContext]);
 
   // Configure mobile action bar when page mounts

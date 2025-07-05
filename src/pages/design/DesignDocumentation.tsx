@@ -110,18 +110,7 @@ export default function DesignDocumentation() {
 
       const { data, error } = await supabase
         .from('design_documents')
-        .select(`
-          *,
-          creator:created_by (
-            id,
-            full_name,
-            avatar_url
-          ),
-          design_phase:design_phase_id (
-            id,
-            name
-          )
-        `)
+        .select('*')
         .eq('project_id', projectId)
         .order('created_at', { ascending: false });
 
@@ -361,7 +350,7 @@ export default function DesignDocumentation() {
           icon={<FileText className="h-12 w-12" />}
           title="No hay documentos"
           description="Comienza subiendo tu primer documento de diseño"
-          actionButton={
+          action={
             <Button onClick={() => setShowDocumentModal(true)}>
               <Upload className="mr-2 h-4 w-4" />
               Subir Documento

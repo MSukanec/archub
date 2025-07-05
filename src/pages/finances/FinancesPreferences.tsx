@@ -61,6 +61,28 @@ export default function FinancesPreferences() {
   const { setSidebarContext } = useNavigationStore();
   const { data: currencies } = useCurrencies();
   const { data: wallets } = useWallets();
+
+  // Fetch movement concepts
+  const { data: movementConcepts = [] } = useQuery({
+    queryKey: ['movement-concepts', userData?.organization?.id],
+    queryFn: async () => {
+      if (!userData?.organization?.id || !supabase) return [];
+
+      const { data, error } = await supabase
+        .from('movement_concepts')
+        .select('*')
+        .or(`organization_id.is.null,organization_id.eq.${userData.organization.id}`)
+        .order('name', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching movement concepts:', error);
+        return [];
+      }
+
+      return data as MovementConcept[];
+    },
+    enabled: !!userData?.organization?.id && !!supabase,
+  });
   const { toast } = useToast();
 
   // Auto-save debounce refs
@@ -72,7 +94,7 @@ export default function FinancesPreferences() {
   const [defaultWallet, setDefaultWallet] = useState<string>('');
   const [pdfTemplateOptions, setPdfTemplateOptions] = useState<string[]>([]);
   const [enableNotifications, setEnableNotifications] = useState(false);
-  const [autoBackup, setAutoBackup] = useState(false);
+
 
   // Set sidebar context on component mount
   useEffect(() => {
@@ -109,7 +131,7 @@ export default function FinancesPreferences() {
       setDefaultWallet(preferences.default_wallet_id || '');
       setPdfTemplateOptions(preferences.pdf_template_options || []);
       setEnableNotifications(preferences.enable_notifications || false);
-      setAutoBackup(preferences.auto_backup || false);
+
     }
   }, [preferences]);
 
@@ -129,7 +151,7 @@ export default function FinancesPreferences() {
             default_wallet_id: data.defaultWallet || null,
             pdf_template_options: data.pdfTemplateOptions || [],
             enable_notifications: data.enableNotifications || false,
-            auto_backup: data.autoBackup || false,
+
             updated_at: new Date().toISOString(),
           },
           { onConflict: 'organization_id' }
@@ -168,19 +190,19 @@ export default function FinancesPreferences() {
           defaultWallet,
           pdfTemplateOptions,
           enableNotifications,
-          autoBackup,
+
         });
       }
     }, 1500); // 1.5 second delay
-  }, [defaultCurrency, defaultWallet, pdfTemplateOptions, enableNotifications, autoBackup, pendingChanges, savePreferencesMutation]);
+  }, [defaultCurrency, defaultWallet, pdfTemplateOptions, enableNotifications, pendingChanges, savePreferencesMutation]);
 
   // Trigger auto-save when form values change
   useEffect(() => {
     if (preferences) { // Only auto-save after initial load
       setPendingChanges(true);
-      debouncedSave();
+  
     }
-  }, [defaultCurrency, defaultWallet, pdfTemplateOptions, enableNotifications, autoBackup, debouncedSave, preferences]);
+  }, [defaultCurrency, defaultWallet, pdfTemplateOptions, enableNotifications, debouncedSave, preferences]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -208,9 +230,7 @@ export default function FinancesPreferences() {
     setEnableNotifications(checked);
   };
 
-  const handleAutoBackupChange = (checked: boolean) => {
-    setAutoBackup(checked);
-  };
+
 
   if (isLoadingPreferences) {
     return (
@@ -315,8 +335,8 @@ export default function FinancesPreferences() {
                     { value: 'detailed', label: 'Reporte detallado' },
                     { value: 'summary', label: 'Resumen financiero' },
                   ]}
-                  selectedValues={pdfTemplateOptions}
-                  onChange={handlePdfTemplateOptionsChange}
+                  values={pdfTemplateOptions}
+                  onValuesChange={handlePdfTemplateOptionsChange}
                   placeholder="Selecciona plantillas PDF"
                   searchPlaceholder="Buscar plantillas..."
                 />
@@ -336,21 +356,26 @@ export default function FinancesPreferences() {
                 <Label htmlFor="enable-notifications">Habilitar notificaciones financieras</Label>
               </div>
 
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="auto-backup"
-                  checked={autoBackup}
-                  onCheckedChange={handleAutoBackupChange}
-                />
-                <Label htmlFor="auto-backup">Respaldo automático de datos financieros</Label>
-              </div>
+
             </div>
 
             <Separator />
 
             {/* Movement Concepts */}
             <div className="space-y-4">
-              <CustomMovementConcepts />
+              {/* Temporarily disabled while fixing props issue */}
+              {/* 
+              <CustomMovementConcepts
+                movementConcepts={movementConcepts}
+                organizationId={userData?.organization?.id || ''}
+                queryKey={['movement-concepts', userData?.organization?.id]}
+              />
+              */}
+              <div className="p-4 border rounded-lg">
+                <p className="text-sm text-muted-foreground">
+                  Conceptos de movimientos temporalmente deshabilitados
+                </p>
+              </div>
             </div>
           </div>
         </div>

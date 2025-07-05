@@ -46,19 +46,23 @@ export function CustomMultiComboBox({
 }: CustomMultiComboBoxProps) {
   const [open, setOpen] = useState(false);
 
-  const selectedOptions = options.filter(option => values.includes(option.value));
-  const availableOptions = options.filter(option => !values.includes(option.value));
+  // Safety checks to prevent undefined errors
+  const safeOptions = options || [];
+  const safeValues = values || [];
+
+  const selectedOptions = safeOptions.filter(option => safeValues.includes(option.value));
+  const availableOptions = safeOptions.filter(option => !safeValues.includes(option.value));
 
   const handleSelect = (optionValue: string) => {
-    if (values.includes(optionValue)) {
-      onValuesChange(values.filter(v => v !== optionValue));
+    if (safeValues.includes(optionValue)) {
+      onValuesChange(safeValues.filter(v => v !== optionValue));
     } else {
-      onValuesChange([...values, optionValue]);
+      onValuesChange([...safeValues, optionValue]);
     }
   };
 
   const handleRemove = (optionValue: string) => {
-    onValuesChange(values.filter(v => v !== optionValue));
+    onValuesChange(safeValues.filter(v => v !== optionValue));
   };
 
   return (

@@ -299,14 +299,14 @@ export function useWalletBalances(organizationId: string | undefined, projectId:
 
         console.log('Wallet balances calculated:', walletBalances)
 
-        // Convert to array and filter positive balances
+        // Convert to array - show absolute values for all balances
         const result: WalletBalance[] = Object.entries(walletBalances)
           .map(([walletName, balance], index) => ({
             wallet: walletName,
-            balance: Math.max(0, balance), // Only show positive balances
+            balance: Math.abs(balance), // Show absolute value (both positive and negative balances)
             color: colors[index % colors.length]
           }))
-          .filter(item => item.balance > 0)
+          .filter(item => item.balance > 0.01) // Filter only very small amounts
 
         console.log('Final wallet chart data:', result)
         return result
