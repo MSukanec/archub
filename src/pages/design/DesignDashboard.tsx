@@ -1,301 +1,335 @@
 import { Layout } from '@/components/layout/desktop/Layout'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
-import { Compass, Calendar, FileText, Users, CheckCircle2, Clock, Palette, Layers } from 'lucide-react'
+import { FileText, CheckCircle2, Clock, Layers, Plus, Calendar, Palette } from 'lucide-react'
+import { useCurrentUser } from '@/hooks/use-current-user'
+import { useDesignSummary, useRecentDesignDocuments, useDesignPhasesWithTasks, useUpcomingDesignTasks } from '@/hooks/use-design-dashboard'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
+import { Link } from 'wouter'
+import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState'
+import { Button } from '@/components/ui/button'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 export default function DesignDashboard() {
+  const { data: userData } = useCurrentUser()
+  const organizationId = userData?.preferences?.last_organization_id
+  const projectId = userData?.preferences?.last_project_id
+
+  const { data: designSummary, isLoading: summaryLoading } = useDesignSummary(organizationId, projectId)
+  const { data: recentDocuments, isLoading: documentsLoading } = useRecentDesignDocuments(organizationId, projectId, 5)
+  const { data: phasesWithTasks, isLoading: phasesLoading } = useDesignPhasesWithTasks(organizationId, projectId)
+  const { data: upcomingTasks, isLoading: tasksLoading } = useUpcomingDesignTasks(organizationId, projectId, 5)
+
   const headerProps = {
     title: "Resumen de Diseño",
     showSearch: false,
     showFilters: false,
   }
 
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'completado':
+        return <Badge variant="default" className="bg-green-100 text-green-800">Completado</Badge>
+      case 'en_progreso':
+        return <Badge variant="default" className="bg-blue-100 text-blue-800">En progreso</Badge>
+      default:
+        return <Badge variant="outline">Pendiente</Badge>
+    }
+  }
+
+  const getDocumentStatusColor = (status: string) => {
+    switch (status) {
+      case 'aprobado':
+        return 'text-green-600'
+      case 'en_revision':
+        return 'text-blue-600'
+      case 'rechazado':
+        return 'text-red-600'
+      default:
+        return 'text-muted-foreground'
+    }
+  }
+
+  // Show empty state if no design data exists
+  if (!summaryLoading && (!designSummary || (designSummary.totalDocuments === 0 && designSummary.totalPhases === 0 && designSummary.totalTasks === 0))) {
+    return (
+      <Layout headerProps={headerProps}>
+        <CustomEmptyState 
+          icon={<Layers className="h-12 w-12" />}
+          title="Sin actividad de diseño registrada"
+          description="Comienza creando fases de diseño y documentos para ver el resumen completo del proyecto."
+          action={
+            <Link href="/design/documentation">
+              <Button className="h-8 px-3 text-sm">
+                <Plus className="h-3 w-3 mr-1" />
+                Crear Primer Documento
+              </Button>
+            </Link>
+          }
+        />
+      </Layout>
+    )
+  }
+
   return (
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
-        {/* Estado General */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Estado del Diseño</CardTitle>
-              <Compass className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">En Progreso</div>
-              <p className="text-xs text-muted-foreground">
-                Anteproyecto en revisión
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Avance de Diseño</CardTitle>
-              <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">45%</div>
-              <Progress value={45} className="mt-2" />
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Equipo de Diseño</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">5</div>
-              <p className="text-xs text-muted-foreground">
-                Profesionales activos
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Fases de Diseño */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Layers className="h-5 w-5" />
-                Fases de Diseño
-              </CardTitle>
-              <CardDescription>
-                Progreso por etapas del proceso de diseño
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="default" className="bg-green-100 text-green-800">
-                      Completado
-                    </Badge>
-                    <span className="text-sm font-medium">Relevamiento</span>
-                  </div>
-                  <span className="text-sm text-muted-foreground">100%</span>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="default" className="bg-blue-100 text-blue-800">
-                      En progreso
-                    </Badge>
-                    <span className="text-sm font-medium">Anteproyecto</span>
-                  </div>
-                  <span className="text-sm text-muted-foreground">70%</span>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline">
-                      Pendiente
-                    </Badge>
-                    <span className="text-sm font-medium">Proyecto Ejecutivo</span>
-                  </div>
-                  <span className="text-sm text-muted-foreground">0%</span>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline">
-                      Pendiente
-                    </Badge>
-                    <span className="text-sm font-medium">Detalles Constructivos</span>
-                  </div>
-                  <span className="text-sm text-muted-foreground">0%</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                Documentación
-              </CardTitle>
-              <CardDescription>
-                Estado de planos y documentos técnicos
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Planos de Arquitectura</span>
-                  <Badge variant="default" className="bg-green-100 text-green-800">
-                    8 planos
-                  </Badge>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Planos de Estructura</span>
-                  <Badge variant="default" className="bg-blue-100 text-blue-800">
-                    3 planos
-                  </Badge>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Planos de Instalaciones</span>
-                  <Badge variant="outline">
-                    Pendiente
-                  </Badge>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Memoria Descriptiva</span>
-                  <Badge variant="default" className="bg-green-100 text-green-800">
-                    Completa
-                  </Badge>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Actividad Reciente y Próximas Tareas */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="h-5 w-5" />
-                Actividad Reciente
-              </CardTitle>
-              <CardDescription>
-                Últimas actualizaciones en el diseño
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <div className="flex gap-3">
-                  <div className="h-2 w-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Revisión de fachada principal</p>
-                    <p className="text-xs text-muted-foreground">Arq. María González - Hace 2 horas</p>
-                  </div>
-                </div>
-                
-                <div className="flex gap-3">
-                  <div className="h-2 w-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Actualización de planimetría</p>
-                    <p className="text-xs text-muted-foreground">Arq. Carlos Ruiz - Ayer</p>
-                  </div>
-                </div>
-                
-                <div className="flex gap-3">
-                  <div className="h-2 w-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Reunión con cliente</p>
-                    <p className="text-xs text-muted-foreground">Arq. Ana López - Hace 2 días</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                Próximas Tareas
-              </CardTitle>
-              <CardDescription>
-                Actividades programadas
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <Badge variant="default" className="bg-red-100 text-red-800">
-                    Urgente
-                  </Badge>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Entrega de anteproyecto</p>
-                    <p className="text-xs text-muted-foreground">Vence mañana</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-3">
-                  <Badge variant="default" className="bg-yellow-100 text-yellow-800">
-                    Esta semana
-                  </Badge>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Revisión estructural</p>
-                    <p className="text-xs text-muted-foreground">Viernes 28</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-3">
-                  <Badge variant="outline">
-                    Próxima semana
-                  </Badge>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Inicio proyecto ejecutivo</p>
-                    <p className="text-xs text-muted-foreground">Lunes 7</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Métricas de Rendimiento */}
+        {/* Métricas Principales */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Planos Entregados</CardTitle>
+              <CardTitle className="text-sm font-medium">Documentos Totales</CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">11</div>
+              <div className="text-2xl font-bold">
+                {summaryLoading ? '...' : designSummary?.totalDocuments || 0}
+              </div>
               <p className="text-xs text-muted-foreground">
-                +3 esta semana
+                archivos del proyecto
               </p>
             </CardContent>
           </Card>
           
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Revisiones</CardTitle>
-              <Palette className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Documentos Aprobados</CardTitle>
+              <CheckCircle2 className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">7</div>
+              <div className="text-2xl font-bold text-green-600">
+                {summaryLoading ? '...' : designSummary?.approvedDocuments || 0}
+              </div>
               <p className="text-xs text-muted-foreground">
-                En este mes
+                listos para construcción
               </p>
             </CardContent>
           </Card>
           
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Horas Diseño</CardTitle>
+              <CardTitle className="text-sm font-medium">Fases de Diseño</CardTitle>
+              <Layers className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {summaryLoading ? '...' : designSummary?.totalPhases || 0}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                etapas del proyecto
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Progreso General</CardTitle>
               <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">186</div>
+              <div className="text-2xl font-bold">
+                {summaryLoading ? '...' : `${designSummary?.progress || 0}%`}
+              </div>
               <p className="text-xs text-muted-foreground">
-                Total invertidas
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Eficiencia</CardTitle>
-              <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">94%</div>
-              <p className="text-xs text-muted-foreground">
-                Tareas a tiempo
+                tareas completadas
               </p>
             </CardContent>
           </Card>
         </div>
+
+        {/* Fases de Diseño y Documentación Reciente */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Fases de Diseño</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {phasesLoading ? (
+                <div className="space-y-3">
+                  <div className="h-4 bg-muted rounded animate-pulse"></div>
+                  <div className="h-4 bg-muted rounded animate-pulse"></div>
+                  <div className="h-4 bg-muted rounded animate-pulse"></div>
+                </div>
+              ) : phasesWithTasks && phasesWithTasks.length > 0 ? (
+                <div className="space-y-3">
+                  {phasesWithTasks.map((phase: any) => (
+                    <div key={phase.id} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {getStatusBadge(phase.status)}
+                        <span className="text-sm font-medium">
+                          {phase.design_phases?.name || 'Fase sin nombre'}
+                        </span>
+                      </div>
+                      <span className="text-sm text-muted-foreground">
+                        {phase.progress}% ({phase.completedTasks}/{phase.totalTasks})
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <CustomEmptyState 
+                  title="Sin fases de diseño"
+                  description="Crea fases para organizar el proceso de diseño del proyecto."
+                  action={
+                    <Link href="/design/timeline">
+                      <Button variant="outline" size="sm">
+                        Ir a Cronograma
+                      </Button>
+                    </Link>
+                  }
+                />
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Documentación Reciente</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {documentsLoading ? (
+                <div className="space-y-3">
+                  <div className="h-4 bg-muted rounded animate-pulse"></div>
+                  <div className="h-4 bg-muted rounded animate-pulse"></div>
+                  <div className="h-4 bg-muted rounded animate-pulse"></div>
+                </div>
+              ) : recentDocuments && recentDocuments.length > 0 ? (
+                <div className="space-y-3">
+                  {recentDocuments.map((document: any) => (
+                    <div key={document.id} className="flex items-center gap-3">
+                      <Avatar className="h-6 w-6">
+                        <AvatarImage src={document.creator?.avatar_url} />
+                        <AvatarFallback className="text-xs">
+                          {document.creator?.full_name?.split(' ').map((n: string) => n[0]).join('') || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">
+                          {document.file_name || 'Documento sin nombre'}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {document.creator?.full_name || 'Usuario'} - {format(new Date(document.created_at), 'dd MMM', { locale: es })}
+                        </p>
+                      </div>
+                      <Badge variant="outline" className={getDocumentStatusColor(document.status)}>
+                        {document.status}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <CustomEmptyState 
+                  title="Sin documentos registrados"
+                  description="Sube documentos de diseño para ver la actividad aquí."
+                  action={
+                    <Link href="/design/documentation">
+                      <Button variant="outline" size="sm">
+                        Ir a Documentación
+                      </Button>
+                    </Link>
+                  }
+                />
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Métricas de Estado de Documentos */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Pendientes</CardTitle>
+              <Clock className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-muted-foreground">
+                {summaryLoading ? '...' : designSummary?.pendingDocuments || 0}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                documentos por revisar
+              </p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">En Revisión</CardTitle>
+              <Palette className="h-4 w-4 text-blue-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-600">
+                {summaryLoading ? '...' : designSummary?.inReviewDocuments || 0}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                en proceso de revisión
+              </p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Tareas Activas</CardTitle>
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {summaryLoading ? '...' : ((designSummary?.totalTasks || 0) - (designSummary?.completedTasks || 0))}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                tareas por completar
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Próximas Tareas */}
+        {upcomingTasks && upcomingTasks.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Próximas Tareas</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {tasksLoading ? (
+                <div className="space-y-3">
+                  <div className="h-4 bg-muted rounded animate-pulse"></div>
+                  <div className="h-4 bg-muted rounded animate-pulse"></div>
+                  <div className="h-4 bg-muted rounded animate-pulse"></div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {upcomingTasks.map((task: any) => (
+                    <div key={task.id} className="flex items-center gap-3">
+                      <Badge variant="outline" className={
+                        new Date(task.end_date) < new Date() ? 'border-red-500 text-red-500' : 
+                        new Date(task.end_date).getTime() - new Date().getTime() < 7 * 24 * 60 * 60 * 1000 ? 'border-yellow-500 text-yellow-600' : 
+                        'border-muted-foreground'
+                      }>
+                        {new Date(task.end_date) < new Date() ? 'Vencida' : 
+                         new Date(task.end_date).getTime() - new Date().getTime() < 7 * 24 * 60 * 60 * 1000 ? 'Esta semana' : 
+                         'Próxima'}
+                      </Badge>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{task.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {task.design_project_phases?.design_phases?.name} - Vence {format(new Date(task.end_date), 'dd MMM', { locale: es })}
+                        </p>
+                      </div>
+                      {task.assigned_user && (
+                        <Avatar className="h-6 w-6">
+                          <AvatarImage src={task.assigned_user.avatar_url} />
+                          <AvatarFallback className="text-xs">
+                            {task.assigned_user.full_name?.split(' ').map((n: string) => n[0]).join('') || 'U'}
+                          </AvatarFallback>
+                        </Avatar>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
       </div>
     </Layout>
   )

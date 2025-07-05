@@ -119,6 +119,17 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 5, 2025. Complete RESUMEN DE DISEÑO redesign with real data integration matching RESUMEN DE FINANZAS and RESUMEN DE OBRA styling - COMPLETED
+  • Rebuilt DesignDashboard.tsx to match exact styling and structure of FinancesDashboard and ConstructionDashboard pages
+  • Created useDesignDashboard hook with comprehensive real data queries: summary, recent documents, phases with tasks, upcoming tasks
+  • Replaced all mock data with authentic Supabase data: document counts, phase progress, task completion rates
+  • Implemented identical card styling with proper icons, text-2xl font-bold numbers, and text-xs descriptions
+  • Added CustomEmptyState components with proper action buttons when no data exists (matching other dashboards)
+  • Enhanced document status badges with color coding: green for approved, blue for in review, red for rejected
+  • Added real-time progress calculation based on completed vs total tasks across all design phases
+  • Integrated Avatar components for user display in recent documents and upcoming tasks
+  • Applied consistent grid layouts: 4-column metrics, 2-column content cards, proper spacing with space-y-6
+  • All data now sourced from design_documents, design_project_phases, design_phase_tasks, and users tables
 - July 5, 2025. Enhanced design documentation with created_by and design_phase_id fields plus modal field reordering - COMPLETED
   • Added created_by field (mandatory) with dropdown showing all organization members, pre-selects current user
   • Added design_phase_id field (optional) with dropdown showing both organization-specific and default phases (NULL)
