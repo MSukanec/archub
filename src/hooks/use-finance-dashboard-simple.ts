@@ -297,6 +297,8 @@ export function useWalletBalances(organizationId: string | undefined, projectId:
           'hsl(var(--chart-5))'
         ]
 
+        console.log('Wallet balances calculated:', walletBalances)
+
         // Convert to array and filter positive balances
         const result: WalletBalance[] = Object.entries(walletBalances)
           .map(([walletName, balance], index) => ({
@@ -306,6 +308,7 @@ export function useWalletBalances(organizationId: string | undefined, projectId:
           }))
           .filter(item => item.balance > 0)
 
+        console.log('Final wallet chart data:', result)
         return result
       } catch (error) {
         console.error('Error in useWalletBalances:', error)
