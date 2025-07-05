@@ -353,9 +353,9 @@ export default function AdminTaskCategoriesTemplates() {
 
   if (isLoading) {
     return (
-      <Layout headerProps={headerProps}>
-        <div className="p-6">
-          <div className="text-center">Cargando categorías...</div>
+      <Layout wide headerProps={headerProps}>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-muted-foreground">Cargando categorías...</div>
         </div>
       </Layout>
     );
@@ -363,56 +363,48 @@ export default function AdminTaskCategoriesTemplates() {
 
   return (
     <>
-      <Layout headerProps={headerProps}>
-        <div className="p-6 space-y-6">
+      <Layout wide headerProps={headerProps}>
+        <div className="space-y-6">
           {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card className="p-3">
-            <CardContent className="p-0">
-              <div className="flex items-center space-x-2">
-                <Package2 className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Total Categorías</p>
-                  <p className="text-lg font-semibold">{stats.totalCategories}</p>
-                </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">Total Categorías</p>
+                <p className="text-lg font-semibold">{stats.totalCategories}</p>
               </div>
-            </CardContent>
+              <Package2 className="h-4 w-4 text-muted-foreground" />
+            </div>
           </Card>
 
           <Card className="p-3">
-            <CardContent className="p-0">
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Con Plantilla</p>
-                  <p className="text-lg font-semibold">{stats.categoriesWithTemplates}</p>
-                </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">Con Plantilla</p>
+                <p className="text-lg font-semibold">{stats.categoriesWithTemplates}</p>
               </div>
-            </CardContent>
+              <CheckCircle className="h-4 w-4 text-muted-foreground" />
+            </div>
           </Card>
 
           <Card className="p-3">
-            <CardContent className="p-0">
-              <div className="flex items-center space-x-2">
-                <XCircle className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Sin Plantilla</p>
-                  <p className="text-lg font-semibold">{stats.categoriesWithoutTemplates}</p>
-                </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">Sin Plantilla</p>
+                <p className="text-lg font-semibold">{stats.categoriesWithoutTemplates}</p>
               </div>
-            </CardContent>
+              <XCircle className="h-4 w-4 text-muted-foreground" />
+            </div>
           </Card>
 
           <Card className="p-3">
-            <CardContent className="p-0">
-              <div className="flex items-center space-x-2">
-                <FileText className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Total Plantillas</p>
-                  <p className="text-lg font-semibold">{stats.totalTemplates}</p>
-                </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">Total Plantillas</p>
+                <p className="text-lg font-semibold">{stats.totalTemplates}</p>
               </div>
-            </CardContent>
+              <FileText className="h-4 w-4 text-muted-foreground" />
+            </div>
           </Card>
         </div>
 
