@@ -240,15 +240,21 @@ export function NewDesignDocumentModal({
   };
 
   return (
-    <CustomModalLayout open={open} onOpenChange={onClose}>
-      <CustomModalHeader
-        title={editingDocument ? 'Editar Documento' : 'Nuevo Documento'}
-        onClose={onClose}
-      />
-      
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+    <CustomModalLayout 
+      open={open} 
+      onClose={onClose}
+    >
+      {{
+        header: (
+          <CustomModalHeader
+            title={editingDocument ? 'Editar Documento' : 'Nuevo Documento'}
+            onClose={onClose}
+          />
+        ),
+        body: (
           <CustomModalBody columns={1}>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             {/* File Upload Section */}
             <div className="space-y-3">
               <Label>Archivo</Label>
@@ -391,17 +397,20 @@ export function NewDesignDocumentModal({
                   </FormItem>
                 )}
               />
-            </div>
+                </div>
+              </form>
+            </Form>
           </CustomModalBody>
-
+        ),
+        footer: (
           <CustomModalFooter
             onCancel={handleCancel}
-            onSubmit={form.handleSubmit(handleSubmit)}
-            submitText={editingDocument ? 'Actualizar' : 'Crear'}
-            isSubmitting={createDocumentMutation.isPending || isUploading}
+            onSave={form.handleSubmit(handleSubmit)}
+            saveText={editingDocument ? 'Actualizar' : 'Crear'}
+            saveLoading={createDocumentMutation.isPending || isUploading}
           />
-        </form>
-      </Form>
+        )
+      }}
     </CustomModalLayout>
   );
 }

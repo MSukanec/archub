@@ -127,14 +127,21 @@ export default function DesignDocumentation() {
 
   // Design phases query for grouping
   const { data: designPhases = [] } = useQuery({
-    queryKey: ['designPhases', projectId],
+    queryKey: ['designProjectPhases', projectId, organizationId],
     queryFn: async () => {
-      if (!supabase || !projectId) return [];
+      if (!supabase || !projectId || !organizationId) return [];
 
       const { data, error } = await supabase
-        .from('design_phases')
-        .select('*')
+        .from('design_project_phases')
+        .select(`
+          *,
+          design_phases (
+            id,
+            name
+          )
+        `)
         .eq('project_id', projectId)
+        .eq('organization_id', organizationId)
         .order('created_at', { ascending: true });
 
       if (error) {
@@ -144,7 +151,7 @@ export default function DesignDocumentation() {
 
       return data;
     },
-    enabled: !!projectId && !!supabase,
+    enabled: !!projectId && !!organizationId && !!supabase,
   });
 
   // Delete mutation
