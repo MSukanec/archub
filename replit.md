@@ -119,6 +119,14 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 5, 2025. Enhanced onboarding system with detailed descriptions, help tooltips, and corrected enum values - COMPLETED
+  • Updated Step3SelectMode with detailed descriptions for each user mode explaining specific functionality
+  • Added HelpPopover components to all Step3SelectMode cards with comprehensive explanations
+  • Fixed enum values to match database exactly: team_size now uses EN DASH (–) instead of ASCII dash (-)
+  • Applied --accent color to all required field asterisks (*) across onboarding steps
+  • Changed Step3SelectMode selection ring from blue to --accent for consistent theming
+  • Verified all cards use proper CSS variables (--card-bg, --card-border) for theme consistency
+  • Corrected main_use, user_role, discovery_source, and team_size enum values to prevent database errors
 - July 5, 2025. Complete 3-step onboarding system with enhanced user data collection and theme management - COMPLETED
   • Implemented complete 3-step onboarding flow: Datos básicos, Descubrimiento, Modo de uso
   • Added organization_name field to Step 1 that saves to organizations.name table

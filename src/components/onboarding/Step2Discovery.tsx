@@ -47,8 +47,8 @@ const userRoleOptions = [
 // Team size options (enum team_size)
 const teamSizeOptions = [
   'Trabajo solo/a',
-  '2-5 personas',
-  '6-15 personas',
+  '2–5 personas',
+  '6–15 personas',
   'Más de 15 personas'
 ];
 

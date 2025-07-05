@@ -107,7 +107,7 @@ export function Step3SelectMode({ isOnboarding = true, onFinish, isLoading = fal
                   bg-[var(--card-bg)] border-[var(--card-border)]
                   ${isAvailable ? 'cursor-pointer hover:scale-105 hover:shadow-lg' : 'cursor-not-allowed opacity-60'}
                   transition-all duration-300 transform
-                  ${isSelected ? 'ring-2 ring-blue-500' : ''}
+                  ${isSelected ? 'ring-2 ring-[var(--accent)]' : ''}
                   ${isLoading ? 'opacity-75' : ''}
                 `}
                 onClick={() => isAvailable && !isLoading && handleModeSelect(mode.type)}
