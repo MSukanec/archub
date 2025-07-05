@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, Camera, Users, Cloud } from 'lucide-react';
-import { SlideModal, SlideModalHeader, SlideModalBody, SlideModalFooter, ModalSectionBlock, useSlideNavigation } from './index';
+import { SlideModal, SlideModalHeader, SlideModalBody, SlideModalFooter, SlideModalSectionBlock, useSlideNavigation } from './index';
 
 // Vista principal del resumen usando nuevos componentes
 function ResumenBitacora() {
@@ -28,7 +28,7 @@ function ResumenBitacora() {
           </div>
           
           {/* Sección de Clima */}
-          <ModalSectionBlock 
+          <SlideModalSectionBlock 
             title="Condiciones Climáticas" 
             onAdd={() => navigateTo('clima')}
             addLabel="Registrar"
@@ -37,10 +37,10 @@ function ResumenBitacora() {
             isEmpty={true}
           >
             <p className="text-xs text-muted-foreground">No hay datos de clima registrados</p>
-          </ModalSectionBlock>
+          </SlideModalSectionBlock>
           
           {/* Sección de Personal */}
-          <ModalSectionBlock 
+          <SlideModalSectionBlock 
             title="Personal en Obra" 
             onAdd={() => navigateTo('equipo')}
             addLabel="Añadir"
@@ -50,10 +50,10 @@ function ResumenBitacora() {
               <div className="px-2 py-1 bg-[var(--muted)] rounded text-xs">Juan Pérez - Maestro</div>
               <div className="px-2 py-1 bg-[var(--muted)] rounded text-xs">Ana García - Oficial</div>
             </div>
-          </ModalSectionBlock>
+          </SlideModalSectionBlock>
           
           {/* Sección de Fotos */}
-          <ModalSectionBlock 
+          <SlideModalSectionBlock 
             title="Galería del Día" 
             onAdd={() => navigateTo('fotos')}
             addLabel="Subir"
@@ -70,10 +70,10 @@ function ResumenBitacora() {
                 <span className="text-xs text-muted-foreground">+3</span>
               </div>
             </div>
-          </ModalSectionBlock>
+          </SlideModalSectionBlock>
           
           {/* Sección de Eventos */}
-          <ModalSectionBlock 
+          <SlideModalSectionBlock 
             title="Eventos del Día" 
             onAdd={() => navigateTo('eventos')}
             addLabel="Crear"
@@ -89,7 +89,7 @@ function ResumenBitacora() {
                 <div className="text-muted-foreground">Cemento y hierro para columnas</div>
               </div>
             </div>
-          </ModalSectionBlock>
+          </SlideModalSectionBlock>
           
           <div className="space-y-3">
             <Label htmlFor="notas">Notas generales</Label>
@@ -307,7 +307,7 @@ function FormularioFotos() {
           </div>
           
           {/* Zona de subida de archivos */}
-          <ModalSectionBlock 
+          <SlideModalSectionBlock 
             title="Subir Archivos" 
             onAdd={() => {}}
             addLabel="Examinar"
@@ -319,10 +319,10 @@ function FormularioFotos() {
                 Arrastra archivos aquí o haz clic en "Examinar"
               </p>
             </div>
-          </ModalSectionBlock>
+          </SlideModalSectionBlock>
           
           {/* Fotos existentes */}
-          <ModalSectionBlock 
+          <SlideModalSectionBlock 
             title="Fotos Actuales" 
             isEmpty={false}
           >
@@ -334,7 +334,7 @@ function FormularioFotos() {
                 <span className="text-xs text-muted-foreground">IMG_002.jpg</span>
               </div>
             </div>
-          </ModalSectionBlock>
+          </SlideModalSectionBlock>
           
           <div className="space-y-2">
             <Label htmlFor="descripcion-fotos">Descripción de las fotos</Label>
@@ -426,7 +426,7 @@ function FormularioEventos() {
 
 // Componente principal del ejemplo mejorado
 export default function SlideModalExample2() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
   
   const handleSaveAll = () => {
     alert('Guardando toda la información de la bitácora...');
