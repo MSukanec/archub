@@ -385,16 +385,38 @@ export default function Profile() {
                   <Label className="text-sm font-medium">Nombre</Label>
                   <Input
                     value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    onBlur={(e) => handleFirstNameChange(e.target.value)}
+                    onChange={(e) => {
+                      setFirstName(e.target.value)
+                    }}
+                    onBlur={(e) => {
+                      updateProfileMutation.mutate({
+                        firstName: e.target.value,
+                        lastName,
+                        country,
+                        birthdate,
+                        avatarUrl,
+                        sidebarDocked
+                      })
+                    }}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Apellido</Label>
                   <Input
                     value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    onBlur={(e) => handleLastNameChange(e.target.value)}
+                    onChange={(e) => {
+                      setLastName(e.target.value)
+                    }}
+                    onBlur={(e) => {
+                      updateProfileMutation.mutate({
+                        firstName,
+                        lastName: e.target.value,
+                        country,
+                        birthdate,
+                        avatarUrl,
+                        sidebarDocked
+                      })
+                    }}
                   />
                 </div>
               </div>
@@ -402,7 +424,17 @@ export default function Profile() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">País</Label>
-                  <Select value={country} onValueChange={handleCountryChange}>
+                  <Select value={country} onValueChange={(value) => {
+                    setCountry(value)
+                    updateProfileMutation.mutate({
+                      firstName,
+                      lastName,
+                      country: value,
+                      birthdate,
+                      avatarUrl,
+                      sidebarDocked
+                    })
+                  }}>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecciona un país" />
                     </SelectTrigger>
@@ -421,7 +453,17 @@ export default function Profile() {
                   <Input
                     type="date"
                     value={birthdate}
-                    onChange={(e) => handleBirthdateChange(e.target.value)}
+                    onChange={(e) => {
+                      setBirthdate(e.target.value)
+                      updateProfileMutation.mutate({
+                        firstName,
+                        lastName,
+                        country,
+                        birthdate: e.target.value,
+                        avatarUrl,
+                        sidebarDocked
+                      })
+                    }}
                   />
                 </div>
               </div>
