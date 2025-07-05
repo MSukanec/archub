@@ -197,12 +197,7 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
 
   const views = {
     main: (
-      <>
-        <SlideModalHeader
-          title={contact ? "Editar contacto" : "Nuevo contacto"}
-          onClose={handleClose}
-          showBack={false}
-        />
+      <div className="flex flex-col h-full">
         <SlideModalBody>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4" id="contact-form">
@@ -355,12 +350,13 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
             {createContactMutation.isPending ? 'Guardando...' : (contact ? "Actualizar" : "Crear contacto")}
           </Button>
         </SlideModalFooter>
-      </>
+      </div>
     )
   };
 
   return (
     <SlideModal
+      title={contact ? "Editar contacto" : "Nuevo contacto"}
       views={views}
       initialView="main"
       onClose={handleClose}
