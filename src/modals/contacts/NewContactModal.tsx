@@ -181,9 +181,9 @@ export function NewContactModal({
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="p-0 max-w-lg w-full bg-background rounded-xl shadow-xl overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b">
-          <h2 className="text-lg font-semibold">
+        {/* Header estilo SlideModal */}
+        <div className="flex items-center justify-between p-4 border-b bg-card">
+          <h2 className="text-lg font-semibold text-card-foreground">
             {contact ? "Editar contacto" : "Nuevo contacto"}
           </h2>
           <Button variant="ghost" size="sm" onClick={handleClose}>
@@ -191,8 +191,8 @@ export function NewContactModal({
           </Button>
         </div>
 
-        {/* Body */}
-        <div className="p-4 max-h-[70vh] overflow-y-auto">
+        {/* Body estilo SlideModal */}
+        <div className="p-4 max-h-[70vh] overflow-y-auto bg-background">
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(handleSubmit)}
@@ -337,8 +337,8 @@ export function NewContactModal({
           </Form>
         </div>
 
-        {/* Footer */}
-        <div className="flex gap-2 p-4 border-t">
+        {/* Footer estilo SlideModal */}
+        <div className="flex gap-2 p-4 border-t bg-card">
           <Button
             type="button"
             variant="ghost"

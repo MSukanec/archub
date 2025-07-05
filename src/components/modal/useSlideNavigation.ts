@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState } from "react";
 
 interface SlideNavigationContextType {
   activeView: string;
@@ -11,12 +11,14 @@ interface SlideNavigationContextType {
 
 const SlideNavigationContext = createContext<SlideNavigationContextType | undefined>(undefined);
 
-export const SlideNavigationProvider = ({
-  children,
-  initialView = "main",
-}: {
+interface SlideNavigationProviderProps {
   children: React.ReactNode;
   initialView?: string;
+}
+
+export const SlideNavigationProvider: React.FC<SlideNavigationProviderProps> = ({
+  children,
+  initialView = "main",
 }) => {
   const [activeView, setActiveViewInternal] = useState(initialView);
   const [direction, setDirection] = useState<"forward" | "backward">("forward");
@@ -33,23 +35,28 @@ export const SlideNavigationProvider = ({
 
   const goBack = () => {
     setDirection("backward");
-    // En un caso real, podrías mantener un historial de vistas
-    // Por ahora, solo cambiamos la dirección
+  };
+
+  const value = {
+    activeView,
+    setActiveView,
+    direction,
+    setDirection,
+    navigateTo,
+    goBack,
   };
 
   return (
-    <SlideNavigationContext.Provider
-      value={{ activeView, setActiveView, direction, setDirection, navigateTo, goBack }}
-    >
+    <SlideNavigationContext.Provider value={value}>
       {children}
     </SlideNavigationContext.Provider>
   );
 };
 
-export const useSlideNavigation = () => {
+export const useSlideNavigation = (): SlideNavigationContextType => {
   const context = useContext(SlideNavigationContext);
   if (!context) {
-    throw new Error("useSlideNavigation must be used within a SlideModal");
+    throw new Error("useSlideNavigation must be used within a SlideNavigationProvider");
   }
   return context;
 };
