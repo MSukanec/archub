@@ -119,48 +119,6 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- July 5, 2025. Updated SlideModalBody component and migrated contact modal to new SlideModal system - COMPLETED
-  • Updated SlideModalBody.tsx with improved styling: px-6 py-4, space-y-4, overflow-y-auto, scrollbar-hide, flex-1
-  • Removed maxHeight prop and customizable styles in favor of consistent design across all modals
-  • Migrated NewContactModal.tsx from CustomModalLayout to SlideModal system
-  • Contact modal now uses single view with all fields displayed vertically using space-y-4 spacing
-  • Removed grid layout in favor of linear form field arrangement for better mobile UX
-  • Updated imports to use SlideModal, SlideModalHeader, SlideModalBody, SlideModalFooter components
-  • Modal follows new pattern: views object with main view containing header, body, and footer components
-  • All form fields now display one below the other with consistent spacing and proper accessibility
-- July 5, 2025. Created ModalSectionBlock component for structured form sections within SlideModal system - COMPLETED
-  • Built ModalSectionBlock.tsx in src/components/modal/ as reusable component for organizing form sections
-  • Component displays title, optional add button with customizable icon/label, and content areas below
-  • Props support: title, children, onAdd, addLabel (default "Añadir"), icon (default PlusCircle), hideIfEmpty, isEmpty
-  • Styling uses bg-muted/30, border, rounded-xl, p-4 with dark mode support through CSS variables
-  • Enhanced SlideModalExample2 to demonstrate ModalSectionBlock usage replacing individual buttons
-  • Created sections for "Condiciones Climáticas", "Personal en Obra", "Galería del Día", "Eventos del Día"
-  • Each section shows realistic content: personal tags, photo thumbnails, event cards with proper spacing
-  • Updated FormularioFotos view to use ModalSectionBlock for file upload areas and existing photos
-  • Component includes accessibility features with aria-label and proper semantic structure
-  • Added to modal/index.ts exports for easy component access throughout application
-- July 5, 2025. Enhanced SlideModal system with dedicated Header, Body, and Footer components - COMPLETED
-  • Created SlideModalHeader.tsx with back button, centered title, and close button functionality
-  • Built SlideModalBody.tsx as scrollable wrapper with overflow-y-auto and configurable max-height
-  • Implemented SlideModalFooter.tsx with border-top, flex layout for buttons, and consistent styling
-  • Added SlideModalExample2.tsx demonstrating advanced usage with per-view header/body/footer structure
-  • Each component supports dark mode with CSS variables and proper spacing/padding
-  • Header includes showBack prop for conditional back button display and title centering
-  • Body component provides scrollable content area with 70vh max-height and hidden scrollbar
-  • Footer component offers flexible button layout with proper border and background styling
-  • Updated modal/index.ts exports for easy component access throughout application
-  • Added /slide-modal-advanced route for testing enhanced modal structure
-- July 5, 2025. Created comprehensive SlideModal system for multi-view modal navigation - COMPLETED
-  • Built SlideModal.tsx component with slide animations between internal views using Tailwind transitions
-  • Created useSlideNavigation.ts hook with Context API for navigation state management and view history
-  • Implemented smooth left-right slide animations with proper transform classes and timing
-  • Added comprehensive header with dynamic back button, title display, and close functionality
-  • Built SlideModalExample.tsx demonstrating bitácora workflow with 5 interconnected views (main, clima, equipo, fotos, eventos)
-  • Added keyboard navigation support (ESC to go back or close) and outside-click handling
-  • Configured proper z-index layering, backdrop blur effects, and responsive modal sizing
-  • Created export index.ts for easy component imports throughout the application
-  • Integrated example route /slide-modal-example for testing and demonstration
-  • Modal system ready for use across entire Archub app for forms with multiple contextual blocks
 - July 5, 2025. Fixed onboarding navigation loop and optimized mobile UX components - COMPLETED
   • Fixed Step3SelectMode double-click issue by adding setTimeout delay before onFinish() execution
   • Disabled tab navigation for HelpPopover components using tabIndex={-1} to prevent keyboard focus

@@ -46,7 +46,6 @@ import DesignDocumentation from "@/pages/design/DesignDocumentation";
 import SelectMode from "@/pages/others/SelectMode";
 import NotFound from "@/pages/others/NotFound";
 
-
 function Router() {
   return (
     <Switch>
@@ -55,8 +54,6 @@ function Router() {
           <SelectMode />
         </ProtectedRoute>
       </Route>
-
-
 
       <Route path="/organizations">
         <ProtectedRoute>

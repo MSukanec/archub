@@ -9,6 +9,7 @@ import { Calendar, User } from "lucide-react";
 
 import { CustomModalLayout } from "@/components/ui-custom/modal/CustomModalLayout";
 import { CustomModalHeader } from "@/components/ui-custom/modal/CustomModalHeader";
+import { CustomModalBody } from "@/components/ui-custom/modal/CustomModalBody";
 import { CustomModalFooter } from "@/components/ui-custom/modal/CustomModalFooter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -195,174 +196,183 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
     form.reset();
   };
 
-  if (!open) return null;
-
-  const views = {
-    main: (
-      <div className="flex flex-col h-full">
-        <SlideModalBody>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4" id="contact-form">
-              <FormField
-                control={form.control}
-                name="first_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium required-asterisk">Nombre</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Ingresa el nombre" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="last_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">Apellido</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Ingresa el apellido" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">Email</FormLabel>
-                    <FormControl>
-                      <Input placeholder="ejemplo@correo.com" type="email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">Teléfono</FormLabel>
-                    <FormControl>
-                      <CustomPhoneInput 
-                        value={field.value || ''}
-                        onChange={field.onChange}
-                        placeholder="Número de teléfono"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="contact_type_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">Tipo de contacto</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona el tipo de contacto" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {contactTypes.map((type) => (
-                          <SelectItem key={type.id} value={type.id}>
-                            {type.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="company_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">Empresa</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Nombre de la empresa" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="location"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">Ubicación</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Ciudad, País" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="notes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">Notas</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Notas adicionales sobre el contacto..."
-                        className="min-h-[80px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </form>
-          </Form>
-        </SlideModalBody>
-        <SlideModalFooter>
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={handleClose}
-          >
-            Cancelar
-          </Button>
-          <Button
-            type="submit"
-            form="contact-form"
-            disabled={createContactMutation.isPending}
-          >
-            {createContactMutation.isPending ? 'Guardando...' : (contact ? "Actualizar" : "Crear contacto")}
-          </Button>
-        </SlideModalFooter>
-      </div>
-    )
-  };
-
   return (
-    <SlideModal
-      title={contact ? "Editar contacto" : "Nuevo contacto"}
-      views={views}
-      initialView="main"
-      onClose={handleClose}
-      isOpen={open}
-    />
+    <CustomModalLayout open={open} onClose={handleClose}>
+      {{
+        header: (
+          <CustomModalHeader
+            title={contact ? "Editar contacto" : "Nuevo contacto"}
+            description={contact ? "Modifica la información del contacto" : "Agrega un nuevo contacto a tu organización"}
+            onClose={handleClose}
+          />
+        ),
+        body: (
+          <CustomModalBody padding="md">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-2" id="contact-form">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <FormField
+                    control={form.control}
+                    name="first_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium required-asterisk">Nombre</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Ingresa el nombre" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="last_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">Apellido</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Ingresa el apellido" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">Email</FormLabel>
+                        <FormControl>
+                          <Input placeholder="ejemplo@correo.com" type="email" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">Teléfono</FormLabel>
+                        <FormControl>
+                          <CustomPhoneInput 
+                            value={field.value || ''}
+                            onChange={field.onChange}
+                            placeholder="Número de teléfono"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="contact_type_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">Tipo de contacto</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecciona el tipo de contacto" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {contactTypes.map((type) => (
+                            <SelectItem key={type.id} value={type.id}>
+                              {type.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <FormField
+                    control={form.control}
+                    name="company_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">Empresa</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Nombre de la empresa" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="location"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">Ubicación</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Ciudad, País" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="notes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">Notas</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Notas adicionales sobre el contacto..."
+                          className="min-h-[80px]"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </form>
+            </Form>
+          </CustomModalBody>
+        ),
+        footer: (
+          <div className="p-2 border-t border-[var(--card-border)] mt-auto">
+            <div className="flex gap-2 w-full">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={handleClose}
+                className="w-1/4"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                form="contact-form"
+                className="w-3/4"
+                disabled={createContactMutation.isPending}
+              >
+                {createContactMutation.isPending ? 'Guardando...' : (contact ? "Actualizar" : "Crear contacto")}
+              </Button>
+            </div>
+          </div>
+        )
+      }}
+    </CustomModalLayout>
   );
 }
