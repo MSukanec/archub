@@ -4,26 +4,22 @@ import { cn } from '@/lib/utils';
 interface SlideModalBodyProps {
   children: React.ReactNode;
   className?: string;
-  maxHeight?: string;
 }
 
 export default function SlideModalBody({
   children,
-  className,
-  maxHeight = "70vh"
+  className
 }: SlideModalBodyProps) {
   return (
     <div 
       className={cn(
-        "px-4 py-2",
-        "overflow-y-auto scrollbar-hide",
-        "bg-[var(--card-bg)]",
+        "px-6 py-4",
+        "space-y-4",
+        "overflow-y-auto",
+        "scrollbar-hide",
         "flex-1",
         className
       )}
-      style={{
-        maxHeight: maxHeight
-      }}
     >
       {children}
     </div>

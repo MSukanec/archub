@@ -119,6 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 5, 2025. Updated SlideModalBody component and migrated contact modal to new SlideModal system - COMPLETED
+  • Updated SlideModalBody.tsx with improved styling: px-6 py-4, space-y-4, overflow-y-auto, scrollbar-hide, flex-1
+  • Removed maxHeight prop and customizable styles in favor of consistent design across all modals
+  • Migrated NewContactModal.tsx from CustomModalLayout to SlideModal system
+  • Contact modal now uses single view with all fields displayed vertically using space-y-4 spacing
+  • Removed grid layout in favor of linear form field arrangement for better mobile UX
+  • Updated imports to use SlideModal, SlideModalHeader, SlideModalBody, SlideModalFooter components
+  • Modal follows new pattern: views object with main view containing header, body, and footer components
+  • All form fields now display one below the other with consistent spacing and proper accessibility
 - July 5, 2025. Created ModalSectionBlock component for structured form sections within SlideModal system - COMPLETED
   • Built ModalSectionBlock.tsx in src/components/modal/ as reusable component for organizing form sections
   • Component displays title, optional add button with customizable icon/label, and content areas below
