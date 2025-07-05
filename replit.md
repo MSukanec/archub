@@ -119,6 +119,17 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 5, 2025. Fixed CONFIGURACIÓN DE FINANZAS page to use real database structure and proper data management - COMPLETED
+  • Rebuilt FinancesPreferences.tsx using authentic database tables: organization_currencies, organization_wallets, organization_preferences
+  • Implemented proper data flow: default selections from organization_preferences table, secondary selections from organization tables
+  • Fixed user preferences integration using existing hooks: useCurrencies, useOrganizationCurrencies, useOrganizationWallets
+  • Added real-time mutations for updating default currency/wallet with proper is_default column management
+  • Enhanced secondary currencies/wallets management with add/remove functionality from organization tables
+  • Removed all references to non-existent fields and auto-save errors that were causing database issues
+  • Default selections now properly excluded from secondary selection lists to prevent duplication
+  • All data now saves correctly to is_default column in organization_wallets and organization_currencies tables
+  • Applied proper error handling and toast notifications for successful preference updates
+  • Page now matches PERFIL page styling exactly with two-column layout and proper form organization
 - July 5, 2025. Complete RESUMEN DE DISEÑO redesign with real data integration matching RESUMEN DE FINANZAS and RESUMEN DE OBRA styling - COMPLETED
   • Rebuilt DesignDashboard.tsx to match exact styling and structure of FinancesDashboard and ConstructionDashboard pages
   • Created useDesignDashboard hook with comprehensive real data queries: summary, recent documents, phases with tasks, upcoming tasks

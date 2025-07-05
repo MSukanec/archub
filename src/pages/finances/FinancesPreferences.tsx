@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { Coins } from 'lucide-react';
 
 import { Layout } from '@/components/layout/desktop/Layout';
@@ -7,17 +8,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { CustomMultiComboBox } from '@/components/ui-custom/misc/CustomMultiComboBox';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useCurrencies } from '@/hooks/use-currencies';
-import { useWallets } from '@/hooks/use-wallets';
+import { useCurrencies, useOrganizationCurrencies } from '@/hooks/use-currencies';
+import { useOrganizationWallets } from '@/hooks/use-organization-wallets';
 import { useNavigationStore } from '@/stores/navigationStore';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/lib/supabase';
+import { queryClient } from '@/lib/queryClient';
 
 export default function FinancesPreferences() {
   const { data: userData } = useCurrentUser();
   const { setSidebarContext } = useNavigationStore();
-  const { data: currencies } = useCurrencies();
-  const { data: wallets } = useWallets();
+  const { data: allCurrencies } = useCurrencies();
+  const { data: organizationCurrencies } = useOrganizationCurrencies(userData?.organization?.id);
+  const { data: organizationWallets } = useOrganizationWallets(userData?.organization?.id);
+  const { toast } = useToast();
 
-  // Form states - using local state since organization_preferences table doesn't exist yet
+  // Form states
   const [defaultCurrency, setDefaultCurrency] = useState<string>('');
   const [secondaryCurrencies, setSecondaryCurrencies] = useState<string[]>([]);
   const [defaultWallet, setDefaultWallet] = useState<string>('');
@@ -28,20 +34,221 @@ export default function FinancesPreferences() {
     setSidebarContext('finances');
   }, [setSidebarContext]);
 
-  // Initialize with first available currency and wallet as defaults
-  useEffect(() => {
-    if (currencies && currencies.length > 0 && !defaultCurrency) {
-      // Find ARS currency or use first one
-      const arsCurrency = currencies.find(c => c.code === 'ARS');
-      setDefaultCurrency(arsCurrency?.id || currencies[0].id);
-    }
-  }, [currencies, defaultCurrency]);
+  // Load existing organization preferences
+  const { data: preferences } = useQuery({
+    queryKey: ['organization-preferences', userData?.organization?.id],
+    queryFn: async () => {
+      if (!userData?.organization?.id) return null;
+      
+      const { data, error } = await supabase
+        .from('organization_preferences')
+        .select('*')
+        .eq('organization_id', userData.organization.id)
+        .single();
 
+      if (error && error.code !== 'PGRST116') {
+        throw error;
+      }
+      return data;
+    },
+    enabled: !!userData?.organization?.id,
+  });
+
+  // Initialize form with existing data
   useEffect(() => {
-    if (wallets && wallets.length > 0 && !defaultWallet) {
-      setDefaultWallet(wallets[0].id);
+    if (organizationCurrencies && organizationWallets) {
+      // Find default currency
+      const defaultCurrencyRecord = organizationCurrencies.find(oc => 
+        oc.currency && preferences?.default_currency_id === oc.currency.id
+      );
+      if (defaultCurrencyRecord) {
+        setDefaultCurrency(defaultCurrencyRecord.currency.id);
+      }
+
+      // Find default wallet
+      const defaultWalletRecord = organizationWallets.find(ow => ow.is_default);
+      if (defaultWalletRecord?.wallets) {
+        setDefaultWallet(defaultWalletRecord.wallets.id);
+      }
+
+      // Set secondary currencies (all except default)
+      const secondaryCurrencyIds = organizationCurrencies
+        .filter(oc => oc.currency && oc.currency.id !== defaultCurrency)
+        .map(oc => oc.currency.id);
+      setSecondaryCurrencies(secondaryCurrencyIds);
+
+      // Set secondary wallets (all except default)
+      const secondaryWalletIds = organizationWallets
+        .filter(ow => !ow.is_default && ow.wallets)
+        .map(ow => ow.wallets!.id);
+      setSecondaryWallets(secondaryWalletIds);
     }
-  }, [wallets, defaultWallet]);
+  }, [organizationCurrencies, organizationWallets, preferences, defaultCurrency]);
+
+  // Save default currency mutation
+  const saveDefaultCurrencyMutation = useMutation({
+    mutationFn: async (currencyId: string) => {
+      if (!userData?.organization?.id) throw new Error('No organization found');
+
+      const { error } = await supabase
+        .from('organization_preferences')
+        .upsert({
+          organization_id: userData.organization.id,
+          default_currency_id: currencyId,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'organization_id' });
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['organization-preferences'] });
+      toast({ title: "Moneda por defecto actualizada", description: "Los cambios se han guardado correctamente." });
+    },
+  });
+
+  // Save default wallet mutation
+  const saveDefaultWalletMutation = useMutation({
+    mutationFn: async (walletId: string) => {
+      if (!userData?.organization?.id) throw new Error('No organization found');
+
+      // First, remove default from all wallets
+      await supabase
+        .from('organization_wallets')
+        .update({ is_default: false })
+        .eq('organization_id', userData.organization.id);
+
+      // Then set the new default
+      const { error } = await supabase
+        .from('organization_wallets')
+        .update({ is_default: true })
+        .eq('organization_id', userData.organization.id)
+        .eq('wallet_id', walletId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['organization-wallets'] });
+      toast({ title: "Billetera por defecto actualizada", description: "Los cambios se han guardado correctamente." });
+    },
+  });
+
+  // Add/remove secondary currencies
+  const updateSecondaryCurrenciesMutation = useMutation({
+    mutationFn: async (currencyIds: string[]) => {
+      if (!userData?.organization?.id) throw new Error('No organization found');
+
+      // Get current organization currencies
+      const { data: currentCurrencies } = await supabase
+        .from('organization_currencies')
+        .select('currency_id')
+        .eq('organization_id', userData.organization.id);
+
+      const currentIds = currentCurrencies?.map(c => c.currency_id) || [];
+      const allSelectedIds = [defaultCurrency, ...currencyIds].filter(Boolean);
+
+      // Remove currencies that are not selected
+      const toRemove = currentIds.filter(id => !allSelectedIds.includes(id));
+      if (toRemove.length > 0) {
+        await supabase
+          .from('organization_currencies')
+          .delete()
+          .eq('organization_id', userData.organization.id)
+          .in('currency_id', toRemove);
+      }
+
+      // Add new currencies
+      const toAdd = allSelectedIds.filter(id => !currentIds.includes(id));
+      if (toAdd.length > 0) {
+        const newRecords = toAdd.map(currencyId => ({
+          organization_id: userData.organization.id,
+          currency_id: currencyId,
+          is_active: true,
+          is_default: currencyId === defaultCurrency,
+        }));
+
+        await supabase
+          .from('organization_currencies')
+          .insert(newRecords);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['organization-currencies'] });
+      toast({ title: "Monedas secundarias actualizadas", description: "Los cambios se han guardado correctamente." });
+    },
+  });
+
+  // Add/remove secondary wallets
+  const updateSecondaryWalletsMutation = useMutation({
+    mutationFn: async (walletIds: string[]) => {
+      if (!userData?.organization?.id) throw new Error('No organization found');
+
+      // Get current organization wallets
+      const { data: currentWallets } = await supabase
+        .from('organization_wallets')
+        .select('wallet_id')
+        .eq('organization_id', userData.organization.id);
+
+      const currentIds = currentWallets?.map(w => w.wallet_id) || [];
+      const allSelectedIds = [defaultWallet, ...walletIds].filter(Boolean);
+
+      // Remove wallets that are not selected
+      const toRemove = currentIds.filter(id => !allSelectedIds.includes(id));
+      if (toRemove.length > 0) {
+        await supabase
+          .from('organization_wallets')
+          .delete()
+          .eq('organization_id', userData.organization.id)
+          .in('wallet_id', toRemove);
+      }
+
+      // Add new wallets
+      const toAdd = allSelectedIds.filter(id => !currentIds.includes(id));
+      if (toAdd.length > 0) {
+        const newRecords = toAdd.map(walletId => ({
+          organization_id: userData.organization.id,
+          wallet_id: walletId,
+          is_active: true,
+          is_default: walletId === defaultWallet,
+        }));
+
+        await supabase
+          .from('organization_wallets')
+          .insert(newRecords);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['organization-wallets'] });
+      toast({ title: "Billeteras secundarias actualizadas", description: "Los cambios se han guardado correctamente." });
+    },
+  });
+
+  const handleDefaultCurrencyChange = (currencyId: string) => {
+    setDefaultCurrency(currencyId);
+    // Remove from secondary currencies if it was there
+    setSecondaryCurrencies(prev => prev.filter(id => id !== currencyId));
+    saveDefaultCurrencyMutation.mutate(currencyId);
+  };
+
+  const handleDefaultWalletChange = (walletId: string) => {
+    setDefaultWallet(walletId);
+    // Remove from secondary wallets if it was there
+    setSecondaryWallets(prev => prev.filter(id => id !== walletId));
+    saveDefaultWalletMutation.mutate(walletId);
+  };
+
+  const handleSecondaryCurrenciesChange = (currencyIds: string[]) => {
+    setSecondaryCurrencies(currencyIds);
+    updateSecondaryCurrenciesMutation.mutate(currencyIds);
+  };
+
+  const handleSecondaryWalletsChange = (walletIds: string[]) => {
+    setSecondaryWallets(walletIds);
+    updateSecondaryWalletsMutation.mutate(walletIds);
+  };
+
+  // Get available currencies and wallets (excluding defaults from secondary options)
+  const availableSecondaryCurrencies = allCurrencies?.filter(c => c.id !== defaultCurrency) || [];
+  const availableSecondaryWallets = organizationWallets?.filter(ow => ow.wallets && ow.wallets.id !== defaultWallet).map(ow => ow.wallets!) || [];
 
   return (
     <Layout headerProps={{ title: "Configuración de Finanzas" }}>
@@ -75,12 +282,12 @@ export default function FinancesPreferences() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="default-currency">Moneda por Defecto</Label>
-                <Select value={defaultCurrency} onValueChange={setDefaultCurrency}>
+                <Select value={defaultCurrency} onValueChange={handleDefaultCurrencyChange}>
                   <SelectTrigger id="default-currency">
                     <SelectValue placeholder="Selecciona una moneda" />
                   </SelectTrigger>
                   <SelectContent>
-                    {currencies?.map((currency) => (
+                    {allCurrencies?.map((currency) => (
                       <SelectItem key={currency.id} value={currency.id}>
                         {currency.name} ({currency.symbol})
                       </SelectItem>
@@ -92,12 +299,12 @@ export default function FinancesPreferences() {
               <div className="space-y-2">
                 <Label htmlFor="secondary-currencies">Monedas Secundarias</Label>
                 <CustomMultiComboBox
-                  options={currencies?.filter(c => c.id !== defaultCurrency).map(currency => ({
+                  options={availableSecondaryCurrencies.map(currency => ({
                     value: currency.id,
                     label: `${currency.name} (${currency.symbol})`
-                  })) || []}
+                  }))}
                   values={secondaryCurrencies}
-                  onValuesChange={setSecondaryCurrencies}
+                  onValuesChange={handleSecondaryCurrenciesChange}
                   placeholder="Selecciona monedas secundarias"
                   searchPlaceholder="Buscar monedas..."
                 />
@@ -105,14 +312,14 @@ export default function FinancesPreferences() {
 
               <div className="space-y-2">
                 <Label htmlFor="default-wallet">Billetera por Defecto</Label>
-                <Select value={defaultWallet} onValueChange={setDefaultWallet}>
+                <Select value={defaultWallet} onValueChange={handleDefaultWalletChange}>
                   <SelectTrigger id="default-wallet">
                     <SelectValue placeholder="Selecciona una billetera" />
                   </SelectTrigger>
                   <SelectContent>
-                    {wallets?.map((wallet) => (
-                      <SelectItem key={wallet.id} value={wallet.id}>
-                        {wallet.name}
+                    {organizationWallets?.filter(ow => ow.wallets).map((orgWallet) => (
+                      <SelectItem key={orgWallet.wallets!.id} value={orgWallet.wallets!.id}>
+                        {orgWallet.wallets!.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -122,24 +329,16 @@ export default function FinancesPreferences() {
               <div className="space-y-2">
                 <Label htmlFor="secondary-wallets">Billeteras Secundarias</Label>
                 <CustomMultiComboBox
-                  options={wallets?.filter(w => w.id !== defaultWallet).map(wallet => ({
+                  options={availableSecondaryWallets.map(wallet => ({
                     value: wallet.id,
                     label: wallet.name
-                  })) || []}
+                  }))}
                   values={secondaryWallets}
-                  onValuesChange={setSecondaryWallets}
+                  onValuesChange={handleSecondaryWalletsChange}
                   placeholder="Selecciona billeteras secundarias"
                   searchPlaceholder="Buscar billeteras..."
                 />
               </div>
-            </div>
-
-            {/* Info Note */}
-            <div className="bg-muted/50 border border-border rounded-lg p-4">
-              <p className="text-sm text-muted-foreground">
-                <strong>Nota:</strong> Los cambios en las preferencias financieras se aplicarán en futuras actualizaciones. 
-                Actualmente puedes visualizar y seleccionar las monedas y billeteras disponibles.
-              </p>
             </div>
           </div>
         </div>
