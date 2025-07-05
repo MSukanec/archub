@@ -52,7 +52,7 @@ export default function ProjectInstallmentsPage() {
   const organizationId = userData?.preferences?.last_organization_id
   const projectId = userData?.preferences?.last_project_id
 
-  // Get "Cuotas" concept ID
+  // Get "Cuotas" concept ID (exact match)
   const { data: cuotasConcept } = useQuery({
     queryKey: ['movement-concepts', 'cuotas'],
     queryFn: async () => {
@@ -61,7 +61,7 @@ export default function ProjectInstallmentsPage() {
       const { data, error } = await supabase
         .from('movement_concepts')
         .select('id, name')
-        .ilike('name', '%cuota%')
+        .eq('name', 'Cuotas')
         .limit(1)
         .single()
 
@@ -69,6 +69,7 @@ export default function ProjectInstallmentsPage() {
         console.error('Error fetching cuotas concept:', error)
         return null
       }
+      console.log('Found Cuotas concept:', data)
       return data
     }
   })
@@ -97,7 +98,7 @@ export default function ProjectInstallmentsPage() {
         `)
         .eq('organization_id', organizationId)
         .eq('project_id', projectId)
-        .eq('type_id', cuotasConcept.id)
+        .eq('subcategory_id', cuotasConcept.id)
         .not('contact_id', 'is', null)
         .order('movement_date', { ascending: false })
 
