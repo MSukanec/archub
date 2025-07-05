@@ -9,6 +9,7 @@ import { CustomMultiComboBox } from '@/components/ui-custom/misc/CustomMultiComb
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useCurrencies, useOrganizationCurrencies } from '@/hooks/use-currencies';
+import { useWallets } from '@/hooks/use-wallets';
 import { useOrganizationWallets } from '@/hooks/use-organization-wallets';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useToast } from '@/hooks/use-toast';
@@ -20,6 +21,7 @@ export default function FinancesPreferences() {
   const { setSidebarContext } = useNavigationStore();
   const { data: allCurrencies } = useCurrencies();
   const { data: organizationCurrencies } = useOrganizationCurrencies(userData?.organization?.id);
+  const { data: allWallets } = useWallets(userData?.organization?.id);
   const { data: organizationWallets } = useOrganizationWallets(userData?.organization?.id);
   const { toast } = useToast();
 
@@ -65,7 +67,7 @@ export default function FinancesPreferences() {
         setDefaultCurrency(defaultCurrencyRecord.currency.id);
       }
 
-      // Find default wallet
+      // Find default wallet - same logic as currencies
       const defaultWalletRecord = organizationWallets.find(ow => ow.is_default);
       if (defaultWalletRecord?.wallets) {
         setDefaultWallet(defaultWalletRecord.wallets.id);
@@ -77,7 +79,7 @@ export default function FinancesPreferences() {
         .map(oc => oc.currency.id);
       setSecondaryCurrencies(secondaryCurrencyIds);
 
-      // Set secondary wallets (all except default)
+      // Set secondary wallets - same logic as currencies
       const secondaryWalletIds = organizationWallets
         .filter(ow => !ow.is_default && ow.wallets)
         .map(ow => ow.wallets!.id);
@@ -248,7 +250,7 @@ export default function FinancesPreferences() {
 
   // Get available currencies and wallets (excluding defaults from secondary options)
   const availableSecondaryCurrencies = allCurrencies?.filter(c => c.id !== defaultCurrency) || [];
-  const availableSecondaryWallets = organizationWallets?.filter(ow => ow.wallets && ow.wallets.id !== defaultWallet).map(ow => ow.wallets!) || [];
+  const availableSecondaryWallets = allWallets?.filter(w => w.wallets && w.wallets.id !== defaultWallet).map(w => w.wallets!) || [];
 
   return (
     <Layout headerProps={{ title: "Configuración de Finanzas" }}>
@@ -317,9 +319,9 @@ export default function FinancesPreferences() {
                     <SelectValue placeholder="Selecciona una billetera" />
                   </SelectTrigger>
                   <SelectContent>
-                    {organizationWallets?.filter(ow => ow.wallets).map((orgWallet) => (
-                      <SelectItem key={orgWallet.wallets!.id} value={orgWallet.wallets!.id}>
-                        {orgWallet.wallets!.name}
+                    {allWallets?.filter(w => w.wallets).map((wallet) => (
+                      <SelectItem key={wallet.wallets!.id} value={wallet.wallets!.id}>
+                        {wallet.wallets!.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
