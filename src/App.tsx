@@ -38,6 +38,7 @@ import AdminTaskCategoriesTemplates from "@/pages/admin/AdminTaskCategoriesTempl
 import AdminTaskParameters from "@/pages/admin/AdminTaskParameters";
 import AdminMaterials from "@/pages/admin/AdminMaterials";
 import AdminMaterialCategories from "@/pages/admin/AdminMaterialCategories";
+import AdminMovementConcepts from "@/pages/admin/AdminMovementConcepts";
 import AdminChangelogs from "@/pages/admin/AdminChangelogs";
 import Tasks from "@/pages/others/Tasks";
 import Changelog from "@/pages/others/Changelog";
@@ -341,6 +342,14 @@ function Router() {
         <ProtectedRoute>
           <AdminProtectedRoute>
             <AdminMaterials />
+          </AdminProtectedRoute>
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/admin/movement-concepts">
+        <ProtectedRoute>
+          <AdminProtectedRoute>
+            <AdminMovementConcepts />
           </AdminProtectedRoute>
         </ProtectedRoute>
       </Route>

@@ -279,6 +279,16 @@ export function Sidebar() {
           { icon: Package, label: 'Materiales', href: '/admin/materials' },
           { icon: Tag, label: 'Categorías de Materiales', href: '/admin/material-categories' }
         ]
+      },
+      { 
+        icon: DollarSign, 
+        label: 'Finanzas', 
+        isAccordion: true, 
+        expanded: expandedAccordion === 'admin-finanzas',
+        onToggle: () => toggleAccordion('admin-finanzas'),
+        children: [
+          { icon: DollarSign, label: 'Conceptos', href: '/admin/movement-concepts' }
+        ]
       }
     ]
   };
