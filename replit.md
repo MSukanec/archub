@@ -119,6 +119,12 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 5, 2025. Fixed installments modal currency field and database column errors - COMPLETED
+  • Resolved currency field showing "N/A - Sin nombre" by using existing useOrganizationCurrencies hook
+  • Fixed database error by removing non-existent 'main_category_id' column and using correct movement table structure
+  • Corrected movement data to use proper columns: type_id, category_id, subcategory_id with hardcoded installment category IDs
+  • Installments modal now successfully creates movements with proper currency display and database persistence
+  • System automatically categorizes installments as INGRESO > PREVENTA > CUOTAS for proper financial tracking
 - July 5, 2025. Complete project installments (aportes) system implementation with sidebar navigation integration - COMPLETED
   • Created ProjectInstallmentsPage.tsx in src/pages/finances/ with complete CRUD functionality for project installments management
   • Built NewInstallmentModal.tsx using proper CustomModalLayout pattern with TypeScript compliance and form validation
