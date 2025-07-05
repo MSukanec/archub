@@ -112,10 +112,16 @@ export default function Profile() {
 
       if (preferencesError) throw preferencesError
 
+      // Show success toast
+      toast({
+        title: "Perfil guardado",
+        description: "Los cambios se han guardado automáticamente",
+      })
+
       // Invalidate cache
       queryClient.invalidateQueries({ queryKey: ['current-user'] })
     },
-    delay: 750,
+    delay: 300,
     enabled: !!userData?.user?.id
   })
 

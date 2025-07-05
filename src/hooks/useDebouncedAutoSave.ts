@@ -64,12 +64,12 @@ export function useDebouncedAutoSave<T>({
     // Update previous data reference immediately
     previousDataRef.current = data;
     
-    // Set new timeout for debounced save
+    // Set new timeout for debounced save with shorter delay
     timeoutRef.current = setTimeout(() => {
       debouncedSave(data);
     }, delay);
 
-  }, [data, delay, enabled, debouncedSave]);
+  }, [JSON.stringify(data), delay, enabled]); // Removed debouncedSave from dependencies
 
   // Cleanup on unmount
   useEffect(() => {
