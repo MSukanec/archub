@@ -69,23 +69,7 @@ export function NewInstallmentModal({
     }
   })
 
-  // Get "Cuotas" concept ID
-  const { data: cuotasConcept } = useQuery({
-    queryKey: ['movement-concepts', 'cuotas'],
-    queryFn: async () => {
-      if (!supabase) throw new Error('Supabase client not initialized')
-      
-      const { data, error } = await supabase
-        .from('movement_concepts')
-        .select('id, name')
-        .ilike('name', '%cuota%')
-        .limit(1)
-        .single()
 
-      if (error) throw error
-      return data
-    }
-  })
 
   // Get organization currencies using existing hook
   const { data: organizationCurrencies } = useOrganizationCurrencies(organizationId)
@@ -163,15 +147,14 @@ export function NewInstallmentModal({
   // Create installment mutation
   const createInstallmentMutation = useMutation({
     mutationFn: async (data: InstallmentForm) => {
-      if (!supabase || !cuotasConcept?.id) {
-        throw new Error('Datos requeridos faltantes')
+      if (!supabase) {
+        throw new Error('Cliente Supabase no inicializado')
       }
 
       const movementData = {
         movement_date: format(data.movement_date, 'yyyy-MM-dd'),
         amount: data.amount,
         description: data.description || 'Aporte de proyecto',
-        type_id: cuotasConcept.id, // Using "Cuotas" concept
         currency_id: data.currency_id,
         wallet_id: data.wallet_id,
         contact_id: data.contact_id,
@@ -179,7 +162,7 @@ export function NewInstallmentModal({
         organization_id: organizationId,
         created_by: data.created_by,
         // Categorías automáticas para aportes: INGRESO > PREVENTA > CUOTAS
-        main_category_id: '88ebeac7-6d00-4001-9535-6ae0704b3403', // INGRESO
+        type_id: '88ebeac7-6d00-4001-9535-6ae0704b3403', // INGRESO
         category_id: 'e7794e04-724a-47e9-bb61-ef1d644519e0', // PREVENTA  
         subcategory_id: '6d599e96-3041-4b9b-a391-995de4da0f6f' // CUOTAS
       }
