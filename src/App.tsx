@@ -45,7 +45,7 @@ import DesignDashboard from "@/pages/design/DesignDashboard";
 import DesignDocumentation from "@/pages/design/DesignDocumentation";
 import SelectMode from "@/pages/others/SelectMode";
 import NotFound from "@/pages/others/NotFound";
-import SlideModalExample2 from "@/components/modal/SlideModalExample2";
+// Removed problematic import - SlideModalExample2
 
 function Router() {
   return (
@@ -56,11 +56,13 @@ function Router() {
         </ProtectedRoute>
       </Route>
 
+      {/* Temporarily commented out due to compilation issues
       <Route path="/slide-modal-example">
         <ProtectedRoute>
           <SlideModalExample2 />
         </ProtectedRoute>
       </Route>
+      */}
 
       <Route path="/organizations">
         <ProtectedRoute>

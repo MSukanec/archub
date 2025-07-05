@@ -1,5 +1,5 @@
-import React from 'react';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { cn } from "@/lib/utils";
 
 interface SlideModalBodyProps {
   children: React.ReactNode;
@@ -10,19 +10,19 @@ interface SlideModalBodyProps {
 export default function SlideModalBody({
   children,
   className,
-  maxHeight = "70vh"
+  maxHeight = "70vh",
 }: SlideModalBodyProps) {
   return (
-    <div 
+    <div
       className={cn(
-        "px-4 py-2",
+        "px-6 py-4 space-y-4", // padding + separación vertical
         "overflow-y-auto scrollbar-hide",
         "bg-[var(--card-bg)]",
         "flex-1",
-        className
+        className,
       )}
       style={{
-        maxHeight: maxHeight
+        maxHeight: maxHeight,
       }}
     >
       {children}
