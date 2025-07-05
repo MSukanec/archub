@@ -130,10 +130,11 @@ export function OrganizationGrowthChart() {
               <Line 
                 type="monotone" 
                 dataKey="cumulative" 
-                stroke="hsl(var(--primary))" 
-                strokeWidth={2}
-                dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 4 }}
-                activeDot={{ r: 6, stroke: 'hsl(var(--primary))', strokeWidth: 2 }}
+                stroke="#3b82f6"
+                strokeWidth={3}
+                connectNulls={true}
+                dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
+                activeDot={{ r: 6, stroke: '#3b82f6', strokeWidth: 2, fill: '#ffffff' }}
               />
             </LineChart>
           </ResponsiveContainer>
