@@ -306,8 +306,89 @@ export function NewDesignDocumentModal({
           <CustomModalBody columns={1}>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            
-            {/* Nombre del documento */}
+
+            {/* 1. Creado por */}
+            <FormField
+              control={form.control}
+              name="created_by"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Creado por <span className="text-[var(--accent)]">*</span></FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona el creador" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {organizationMembers.map((member) => (
+                        <SelectItem key={member.user_id} value={member.user_id}>
+                          <div className="flex items-center gap-2">
+                            <Avatar className="h-6 w-6">
+                              <AvatarImage src={member.avatar_url} />
+                              <AvatarFallback className="text-xs">
+                                {member.full_name.split(' ').map(n => n[0]).join('')}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span>{member.full_name}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* 2. Fase de Diseño */}
+            <FormField
+              control={form.control}
+              name="design_phase_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Fase de Diseño</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona una fase (opcional)" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="">Sin fase asignada</SelectItem>
+                      {designPhases.map((phase) => (
+                        <SelectItem key={phase.id} value={phase.id}>
+                          <span className="flex items-center gap-2">
+                            {phase.name}
+                            {phase.organization_id === null && (
+                              <span className="text-xs text-muted-foreground">(Por defecto)</span>
+                            )}
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* 3. Carpeta */}
+            <FormField
+              control={form.control}
+              name="folder"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Carpeta</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Nombre de la carpeta" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* 4. Nombre del documento */}
             <FormField
               control={form.control}
               name="file_name"
@@ -322,7 +403,7 @@ export function NewDesignDocumentModal({
               )}
             />
 
-            {/* Descripción */}
+            {/* 5. Descripción */}
             <FormField
               control={form.control}
               name="description"
@@ -337,7 +418,32 @@ export function NewDesignDocumentModal({
               )}
             />
 
-            {/* File Upload Section */}
+            {/* 6. Estado */}
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Estado</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona un estado" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="pendiente">Pendiente</SelectItem>
+                      <SelectItem value="en_revision">En Revisión</SelectItem>
+                      <SelectItem value="aprobado">Aprobado</SelectItem>
+                      <SelectItem value="rechazado">Rechazado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* 7. File Upload Section */}
             <div className="space-y-3">
               <Label>Archivo</Label>
               <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
@@ -389,105 +495,6 @@ export function NewDesignDocumentModal({
                 )}
               </div>
             </div>
-
-            <FormField
-              control={form.control}
-              name="folder"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Carpeta</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="Nombre de la carpeta" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Creado por */}
-            <FormField
-              control={form.control}
-              name="created_by"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Creado por <span className="text-[var(--accent)]">*</span></FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecciona el creador" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {organizationMembers.map((member) => (
-                        <SelectItem key={member.user_id} value={member.user_id}>
-                          <div className="flex items-center gap-2">
-                            <Avatar className="h-6 w-6">
-                              <AvatarImage src={member.avatar_url} />
-                              <AvatarFallback className="text-xs">
-                                {member.full_name.split(' ').map(n => n[0]).join('')}
-                              </AvatarFallback>
-                            </Avatar>
-                            <span>{member.full_name}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Fase de Diseño */}
-            <FormField
-              control={form.control}
-              name="design_phase_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Fase de Diseño</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecciona una fase (opcional)" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="">Sin fase asignada</SelectItem>
-                      {designPhases.map((phase) => (
-                        <SelectItem key={phase.id} value={phase.id}>
-                          {phase.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Estado</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecciona un estado" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="pendiente">Pendiente</SelectItem>
-                      <SelectItem value="en_revision">En Revisión</SelectItem>
-                      <SelectItem value="aprobado">Aprobado</SelectItem>
-                      <SelectItem value="rechazado">Rechazado</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
               </form>
             </Form>
           </CustomModalBody>

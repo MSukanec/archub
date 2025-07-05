@@ -9,7 +9,7 @@ const supabase = createClient(
 export interface DesignPhase {
   id: string;
   name: string;
-  organization_id: string;
+  organization_id: string | null;
   created_at: string;
 }
 
@@ -24,7 +24,7 @@ export function useDesignPhases(organizationId?: string) {
       const { data, error } = await supabase
         .from('design_phases')
         .select('*')
-        .eq('organization_id', organizationId)
+        .or(`organization_id.eq.${organizationId},organization_id.is.null`)
         .order('name', { ascending: true });
 
       if (error) {

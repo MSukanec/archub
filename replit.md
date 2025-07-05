@@ -119,6 +119,16 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 5, 2025. Enhanced design documentation with created_by and design_phase_id fields plus modal field reordering - COMPLETED
+  • Added created_by field (mandatory) with dropdown showing all organization members, pre-selects current user
+  • Added design_phase_id field (optional) with dropdown showing both organization-specific and default phases (NULL)
+  • Updated useDesignPhases hook to fetch phases with organization_id matching current org OR null (default phases)
+  • Enhanced design documents query with JOIN to users table to display creator information on document cards
+  • Added creator avatar and name display on document cards for better user identification
+  • Reordered modal fields per user specification: Creado por, Fase de Diseño, Carpeta, Nombre, Descripción, Estado, Archivo
+  • Added visual indicator "(Por defecto)" for system-wide design phases vs organization-specific phases
+  • Fixed all missing hook exports: useDesignProjectPhases, useGanttPhasesWithTasks, useCreateDesignProjectPhase
+  • Complete form validation ensures created_by is required while design_phase_id remains optional
 - July 5, 2025. Complete document versioning system implementation with automatic version increments and field corrections - COMPLETED
   • Fixed all database schema references to use 'file_name' field instead of 'name' as specified by user requirements
   • Implemented complete versioning system: new documents start at version 1, editing creates new version with automatic increment
