@@ -7,7 +7,9 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Calendar, User } from "lucide-react";
 
-import { SlideModal, SlideModalHeader, SlideModalBody, SlideModalFooter } from "@/components/modal";
+import { CustomModalLayout } from "@/components/ui-custom/modal/CustomModalLayout";
+import { CustomModalHeader } from "@/components/ui-custom/modal/CustomModalHeader";
+import { CustomModalFooter } from "@/components/ui-custom/modal/CustomModalFooter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
