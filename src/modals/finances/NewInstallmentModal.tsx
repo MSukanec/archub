@@ -74,6 +74,34 @@ export function NewInstallmentModal({
   // Get organization currencies using existing hook
   const { data: organizationCurrencies } = useOrganizationCurrencies(organizationId)
 
+  // Get movement concepts to find correct IDs
+  const { data: movementConcepts } = useQuery({
+    queryKey: ['movement-concepts'],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase client not initialized')
+      
+      const { data, error } = await supabase
+        .from('movement_concepts')
+        .select('id, name, parent_id')
+        .order('name')
+
+      if (error) throw error
+      
+      // Find the specific concepts we need
+      const ingresos = data.find(c => c.name === 'Ingresos')
+      const preventa = data.find(c => c.name === 'Preventa')
+      const cuotas = data.find(c => c.name === 'Cuotas')
+      
+      console.log('Found concepts:', {
+        ingresos: ingresos?.id,
+        preventa: preventa?.id, 
+        cuotas: cuotas?.id
+      })
+      
+      return data || []
+    }
+  })
+
   // Get organization wallets
   const { data: wallets } = useQuery({
     queryKey: ['organization-wallets', organizationId],
@@ -162,9 +190,9 @@ export function NewInstallmentModal({
         organization_id: organizationId,
         created_by: data.created_by,
         // Categorías automáticas para aportes: INGRESO > PREVENTA > CUOTAS
-        type_id: '88ebeac7-6d00-4001-9535-6ae0704b3403', // INGRESO
-        category_id: 'e7794e04-724a-47e9-bb61-ef1d644519e0', // PREVENTA  
-        subcategory_id: '6d599e96-3041-4b9b-a391-995de4da0f6f' // CUOTAS
+        type_id: '8862eee7-dd00-4f01-9335-5ea0070d3403', // INGRESO
+        category_id: '5d5549d6-20d1-459b-a391-99295e65b6f2', // PREVENTA  
+        subcategory_id: 'e675eb59-3717-4451-89eb-0d838388238f' // CUOTAS
       }
 
       const { error } = await supabase
