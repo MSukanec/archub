@@ -10,7 +10,7 @@ export function Step1UserData() {
   const { formData, updateFormData, goNextStep } = useOnboardingStore();
 
   const handleNext = () => {
-    if (formData.first_name && formData.last_name) {
+    if (formData.first_name && formData.last_name && formData.organization_name) {
       goNextStep();
     }
   };
@@ -25,14 +25,14 @@ export function Step1UserData() {
         </div>
         <CardTitle className="text-2xl font-bold">Datos básicos</CardTitle>
         <CardDescription className="text-base">
-          Completa tu información personal y preferencias iniciales
+          Completa tu información personal y preferencias iniciales. Luego puedes cambiarlo.
         </CardDescription>
       </CardHeader>
       
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="first_name">Nombre *</Label>
+            <Label htmlFor="first_name">Nombre/s *</Label>
             <Input
               id="first_name"
               placeholder="Tu nombre"
@@ -42,7 +42,7 @@ export function Step1UserData() {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="last_name">Apellido *</Label>
+            <Label htmlFor="last_name">Apellido/s *</Label>
             <Input
               id="last_name"
               placeholder="Tu apellido"
@@ -50,6 +50,16 @@ export function Step1UserData() {
               onChange={(e) => updateFormData({ last_name: e.target.value })}
             />
           </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="organization_name">Nombre de Organización / Empresa *</Label>
+          <Input
+            id="organization_name"
+            placeholder="Nombre de tu organización"
+            value={formData.organization_name}
+            onChange={(e) => updateFormData({ organization_name: e.target.value })}
+          />
         </div>
 
         <div className="space-y-2">
@@ -81,7 +91,7 @@ export function Step1UserData() {
         <div className="flex justify-end pt-4">
           <Button 
             onClick={handleNext}
-            disabled={!formData.first_name || !formData.last_name}
+            disabled={!formData.first_name || !formData.last_name || !formData.organization_name}
             className="bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white px-8"
           >
             Siguiente

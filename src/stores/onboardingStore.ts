@@ -6,6 +6,7 @@ interface OnboardingState {
   formData: {
     first_name: string;
     last_name: string;
+    organization_name: string;
     theme: 'light' | 'dark';
     discovered_by: string;
     discovered_by_other_text: string;
@@ -21,6 +22,7 @@ interface OnboardingState {
 const initialFormData = {
   first_name: '',
   last_name: '',
+  organization_name: '',
   theme: 'light' as const,
   discovered_by: '',
   discovered_by_other_text: '',

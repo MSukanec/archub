@@ -7,6 +7,7 @@ import { queryClient } from "@/lib/queryClient";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useToast } from "@/hooks/use-toast";
 import { useOnboardingStore } from "@/stores/onboardingStore";
+import { useThemeStore } from "@/stores/themeStore";
 import { Step1UserData } from "@/components/onboarding/Step1UserData";
 import { Step2Discovery } from "@/components/onboarding/Step2Discovery";
 import { Step3SelectMode } from "@/components/onboarding/Step3SelectMode";
@@ -16,6 +17,7 @@ export default function SelectMode() {
   const { data: userData, isLoading: userLoading } = useCurrentUser();
   const { setSidebarContext } = useNavigationStore();
   const { toast } = useToast();
+  const { setTheme } = useThemeStore();
   const { 
     currentStep, 
     totalSteps, 
@@ -34,6 +36,7 @@ export default function SelectMode() {
       updateFormData({
         first_name: userData.user_data?.first_name || '',
         last_name: userData.user_data?.last_name || '',
+        organization_name: userData.organization?.name || '',
         theme: (userData.preferences?.theme === 'dark' ? 'dark' : 'light'),
         discovered_by: userData.user_data?.discovered_by || '',
         discovered_by_other_text: userData.user_data?.discovered_by_other_text || '',
@@ -93,6 +96,22 @@ export default function SelectMode() {
         .eq('user_id', userId);
 
       if (preferencesError) throw preferencesError;
+
+      // Update organization name if provided
+      if (formData.organization_name && userData.organization?.id) {
+        const { error: orgError } = await supabase
+          .from('organizations')
+          .update({
+            name: formData.organization_name,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', userData.organization.id);
+
+        if (orgError) throw orgError;
+      }
+
+      // Apply theme immediately
+      setTheme(formData.theme === 'dark');
 
       return { success: true };
     },
