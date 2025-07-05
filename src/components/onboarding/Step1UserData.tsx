@@ -44,7 +44,7 @@ export function Step1UserData() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <Label htmlFor="first_name">Nombre/s *</Label>
+              <Label htmlFor="first_name">Nombre/s <span className="text-[var(--accent)]">*</span></Label>
               <HelpPopover
                 title="Nombre Personal"
                 description="Usamos tu nombre para personalizar tu experiencia y para que tu equipo pueda identificarte en colaboraciones. Puedes usar uno o varios nombres."
@@ -62,7 +62,7 @@ export function Step1UserData() {
           
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <Label htmlFor="last_name">Apellido/s *</Label>
+              <Label htmlFor="last_name">Apellido/s <span className="text-[var(--accent)]">*</span></Label>
               <HelpPopover
                 title="Apellido Personal"
                 description="Tu apellido completa tu identificación en la plataforma y es útil para reportes oficiales y documentación del proyecto."
@@ -82,7 +82,7 @@ export function Step1UserData() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <Label htmlFor="organization_name">Nombre de Organización / Empresa *</Label>
+              <Label htmlFor="organization_name">Nombre de Organización / Empresa <span className="text-[var(--accent)]">*</span></Label>
               <HelpPopover
                 title="Organización"
                 description="El nombre de tu empresa o estudio será visible en reportes, presupuestos y documentación oficial. Asegúrate de usar el nombre legal completo."

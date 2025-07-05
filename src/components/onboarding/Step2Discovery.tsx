@@ -21,12 +21,13 @@ const discoveryOptions = [
 
 // Main use options (enum main_use)
 const mainUseOptions = [
-  'Gestión de proyectos',
-  'Control de presupuestos',
-  'Seguimiento de obra',
-  'Administración de equipos',
   'Documentación técnica',
-  'Comercialización',
+  'Presupuestos de obra',
+  'Organización de proyectos',
+  'Seguimiento de obra',
+  'Colaboración con clientes',
+  'Capacitación / aprendizaje',
+  'Exploración / curiosidad',
   'Otro'
 ];
 
@@ -34,21 +35,21 @@ const mainUseOptions = [
 const userRoleOptions = [
   'Arquitecto/a',
   'Ingeniero/a',
-  'Constructor/a',
-  'Project Manager',
-  'Desarrollador inmobiliario',
-  'Inversor',
+  'Maestro Mayor de Obras',
   'Estudiante',
+  'Estudio de arquitectura',
+  'Empresa constructora',
+  'Proveedor de materiales',
+  'Oficio profesional (instalador, herrero, carpintero, etc.)',
   'Otro'
 ];
 
 // Team size options (enum team_size)
 const teamSizeOptions = [
-  'Solo yo',
+  'Trabajo solo/a',
   '2-5 personas',
   '6-15 personas',
-  '16-50 personas',
-  'Más de 50 personas'
+  'Más de 15 personas'
 ];
 
 export function Step2Discovery() {
