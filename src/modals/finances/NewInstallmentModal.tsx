@@ -175,11 +175,11 @@ export function NewInstallmentModal({
           company_name
         `)
         .eq('organization_id', organizationId)
-        .eq('is_active', true)
 
       if (error) throw error
       return data || []
-    }
+    },
+    enabled: !!organizationId && !!supabase
   })
 
   // Create installment mutation
