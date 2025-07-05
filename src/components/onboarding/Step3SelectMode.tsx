@@ -77,8 +77,8 @@ export function Step3SelectMode({ isOnboarding = true, onFinish, isLoading = fal
         </CardDescription>
       </CardHeader>
       
-      <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {modeOptions.map((mode) => {
             const Icon = mode.icon;
             const isSelected = selectedMode === mode.type;
@@ -95,24 +95,24 @@ export function Step3SelectMode({ isOnboarding = true, onFinish, isLoading = fal
                 `}
                 onClick={() => isAvailable && !isLoading && handleModeSelect(mode.type)}
               >
-                <CardHeader className="pb-4">
+                <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
-                    <div className={`p-3 rounded-lg ${mode.color} text-white`}>
-                      <Icon className="h-6 w-6" />
+                    <div className={`p-2 rounded-lg ${mode.color} text-white`}>
+                      <Icon className="h-5 w-5" />
                     </div>
                     {isLoading && isSelected && (
                       <div className="flex items-center text-blue-600 dark:text-blue-400">
-                        <Loader2 className="h-5 w-5 mr-1 animate-spin" />
-                        <span className="text-sm font-medium">Guardando...</span>
+                        <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                        <span className="text-xs font-medium">Guardando...</span>
                       </div>
                     )}
                   </div>
-                  <CardTitle className="text-xl font-semibold text-slate-900 dark:text-white">
+                  <CardTitle className="text-lg font-semibold text-slate-900 dark:text-white">
                     {mode.title}
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-slate-600 dark:text-slate-300 text-base leading-relaxed">
+                <CardContent className="pt-0">
+                  <CardDescription className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
                     {mode.description}
                   </CardDescription>
                 </CardContent>
