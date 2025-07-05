@@ -119,6 +119,16 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 5, 2025. Complete document versioning system implementation with automatic version increments and field corrections - COMPLETED
+  • Fixed all database schema references to use 'file_name' field instead of 'name' as specified by user requirements
+  • Implemented complete versioning system: new documents start at version 1, editing creates new version with automatic increment
+  • Enhanced version calculation logic to check highest existing version for same file_name, folder, and project
+  • Updated all TypeScript interfaces across modal and documentation page to use file_name field consistently
+  • Fixed cache invalidation system to ensure real-time updates without F5 refresh requirement after mutations
+  • Added version indicators to document cards showing version numbers (v2, v3, etc.) for documents with multiple versions
+  • Corrected all form fields, search functionality, download functionality, and delete dialogs to use file_name
+  • Version creation workflow: file selection → auto-fill file_name → upload to Storage → save metadata with correct version number
+  • All document display and management operations now properly use file_name field throughout entire system
 - July 5, 2025. Design documentation system implementation with file upload functionality and complete modal restructure - COMPLETED
   • Added file_name field to design documents for proper document naming as requested
   • Fixed database schema alignment - removed references to non-existent fields (name, visibility, design_phase_id)

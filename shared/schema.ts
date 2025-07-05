@@ -71,7 +71,7 @@ export const insertUserPreferencesSchema = createInsertSchema(user_preferences).
 // Design Documents Table
 export const design_documents = pgTable("design_documents", {
   id: uuid("id").primaryKey().defaultRandom(),
-  name: text("name").notNull(),
+  file_name: text("file_name").notNull(),
   description: text("description"),
   file_path: text("file_path").notNull(),
   file_url: text("file_url").notNull(),
@@ -90,7 +90,7 @@ export const design_documents = pgTable("design_documents", {
 });
 
 export const insertDesignDocumentSchema = createInsertSchema(design_documents).pick({
-  name: true,
+  file_name: true,
   description: true,
   file_path: true,
   file_url: true,

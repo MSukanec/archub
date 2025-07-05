@@ -52,7 +52,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 interface DesignDocument {
   id: string;
-  name: string;
+  file_name: string;
   description?: string;
   file_path: string;
   file_url: string;
@@ -123,7 +123,7 @@ export default function DesignDocumentation() {
       
       if (data) {
         data.forEach((doc: DesignDocument) => {
-          const groupKey = `${doc.name}-${doc.folder}-${doc.design_phase_id || 'null'}`;
+          const groupKey = `${doc.file_name}-${doc.folder}-${doc.design_phase_id || 'null'}`;
           const existing = latestDocuments.get(groupKey);
           
           if (!existing || doc.version_number > existing.version_number || 
@@ -205,7 +205,7 @@ export default function DesignDocumentation() {
   // Filter documents based on search
   const filteredDocuments = useMemo(() => {
     return documents.filter(doc =>
-      (doc.name && doc.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (doc.file_name && doc.file_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (doc.description && doc.description.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   }, [documents, searchTerm]);
@@ -288,7 +288,7 @@ export default function DesignDocumentation() {
   const downloadFile = (document: DesignDocument) => {
     const link = window.document.createElement('a');
     link.href = document.file_url;
-    link.download = document.name;
+    link.download = document.file_name;
     link.target = '_blank';
     link.click();
   };
@@ -393,7 +393,7 @@ export default function DesignDocumentation() {
                           {getFileIcon(document.file_type)}
                           <div>
                             <CardTitle className="text-sm font-medium truncate">
-                              {document.name || 'Documento sin nombre'}
+                              {document.file_name || 'Documento sin nombre'}
                             </CardTitle>
                             {document.version_number > 1 && (
                               <Badge variant="outline" className="text-xs mt-1">
@@ -478,7 +478,7 @@ export default function DesignDocumentation() {
             <AlertDialogHeader>
               <AlertDialogTitle>Eliminar documento</AlertDialogTitle>
               <AlertDialogDescription>
-                ¿Estás seguro de que quieres eliminar "{documentToDelete.name || 'este documento'}"? Esta acción no se puede deshacer.
+                ¿Estás seguro de que quieres eliminar "{documentToDelete.file_name || 'este documento'}"? Esta acción no se puede deshacer.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
