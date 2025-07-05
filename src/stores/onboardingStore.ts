@@ -10,6 +10,10 @@ interface OnboardingState {
     theme: 'light' | 'dark';
     discovered_by: string;
     discovered_by_other_text: string;
+    main_use: string;
+    user_role: string;
+    user_role_other: string;
+    team_size: string;
     last_user_type: 'professional' | 'provider' | 'worker' | 'visitor' | null;
   };
   setCurrentStep: (step: number) => void;
@@ -26,6 +30,10 @@ const initialFormData = {
   theme: 'light' as const,
   discovered_by: '',
   discovered_by_other_text: '',
+  main_use: '',
+  user_role: '',
+  user_role_other: '',
+  team_size: '',
   last_user_type: null as OnboardingState['formData']['last_user_type'],
 };
 

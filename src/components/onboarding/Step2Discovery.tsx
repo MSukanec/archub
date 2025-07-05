@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { Search, ArrowLeft } from "lucide-react";
 
+// Discovery source options (enum discovery_source)
 const discoveryOptions = [
   'YouTube',
   'Instagram', 
@@ -15,6 +16,38 @@ const discoveryOptions = [
   'LinkedIn',
   'Twitter/X',
   'Otro'
+];
+
+// Main use options (enum main_use)
+const mainUseOptions = [
+  'Gestión de proyectos',
+  'Control de presupuestos',
+  'Seguimiento de obra',
+  'Administración de equipos',
+  'Documentación técnica',
+  'Comercialización',
+  'Otro'
+];
+
+// User role options (enum user_role)
+const userRoleOptions = [
+  'Arquitecto/a',
+  'Ingeniero/a',
+  'Constructor/a',
+  'Project Manager',
+  'Desarrollador inmobiliario',
+  'Inversor',
+  'Estudiante',
+  'Otro'
+];
+
+// Team size options (enum team_size)
+const teamSizeOptions = [
+  'Solo yo',
+  '2-5 personas',
+  '6-15 personas',
+  '16-50 personas',
+  'Más de 50 personas'
 ];
 
 export function Step2Discovery() {
@@ -27,22 +60,23 @@ export function Step2Discovery() {
   };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
+    <Card className="w-full max-w-2xl mx-auto bg-[var(--card-bg)] border-[var(--card-border)]">
       <CardHeader className="text-center pb-4">
         <div className="flex items-center justify-center mb-4">
           <div className="p-3 rounded-lg bg-[var(--accent)] text-white">
             <Search className="h-8 w-8" />
           </div>
         </div>
-        <CardTitle className="text-2xl font-bold">¿Cómo conociste Archub?</CardTitle>
+        <CardTitle className="text-2xl font-bold">Queremos conocerte mejor</CardTitle>
         <CardDescription className="text-base">
-          Nos ayuda saber cómo llegaste hasta nosotros para mejorar nuestro alcance
+          Esta información nos ayuda a personalizar tu experiencia en Archub y mejorar nuestra plataforma.
         </CardDescription>
       </CardHeader>
       
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4">
+        {/* Fuente de descubrimiento - OBLIGATORIO */}
         <div className="space-y-2">
-          <Label htmlFor="discovered_by">Fuente de descubrimiento *</Label>
+          <Label htmlFor="discovered_by">¿Cómo conociste Archub? *</Label>
           <Select
             value={formData.discovered_by}
             onValueChange={(value) => {
@@ -65,6 +99,7 @@ export function Step2Discovery() {
           </Select>
         </div>
 
+        {/* Campo adicional si elige "Otro" */}
         {formData.discovered_by === 'Otro' && (
           <div className="space-y-2">
             <Label htmlFor="discovered_by_other_text">Especifica cómo nos conociste *</Label>
@@ -76,6 +111,84 @@ export function Step2Discovery() {
             />
           </div>
         )}
+
+        {/* Uso principal - OPCIONAL */}
+        <div className="space-y-2">
+          <Label htmlFor="main_use">¿Para qué vas a usar principalmente Archub?</Label>
+          <Select
+            value={formData.main_use || ''}
+            onValueChange={(value) => updateFormData({ main_use: value })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="¿Para qué vas a usar principalmente Archub?" />
+            </SelectTrigger>
+            <SelectContent>
+              {mainUseOptions.map((option) => (
+                <SelectItem key={option} value={option}>
+                  {option}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Rol profesional - OPCIONAL */}
+        <div className="space-y-2">
+          <Label htmlFor="user_role">¿Cuál es tu rol profesional?</Label>
+          <Select
+            value={formData.user_role || ''}
+            onValueChange={(value) => {
+              updateFormData({ user_role: value });
+              if (value !== 'Otro') {
+                updateFormData({ user_role_other: '' });
+              }
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="¿Cuál es tu rol profesional?" />
+            </SelectTrigger>
+            <SelectContent>
+              {userRoleOptions.map((option) => (
+                <SelectItem key={option} value={option}>
+                  {option}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Campo adicional si elige "Otro" en rol */}
+        {formData.user_role === 'Otro' && (
+          <div className="space-y-2">
+            <Label htmlFor="user_role_other">Especifica tu rol</Label>
+            <Input
+              id="user_role_other"
+              placeholder="Escribe aquí..."
+              value={formData.user_role_other}
+              onChange={(e) => updateFormData({ user_role_other: e.target.value })}
+            />
+          </div>
+        )}
+
+        {/* Tamaño de equipo - OPCIONAL */}
+        <div className="space-y-2">
+          <Label htmlFor="team_size">¿Cuántas personas trabajan con vos?</Label>
+          <Select
+            value={formData.team_size || ''}
+            onValueChange={(value) => updateFormData({ team_size: value })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="¿Cuántas personas trabajan con vos?" />
+            </SelectTrigger>
+            <SelectContent>
+              {teamSizeOptions.map((option) => (
+                <SelectItem key={option} value={option}>
+                  {option}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
         <div className="flex justify-between pt-4">
           <Button 

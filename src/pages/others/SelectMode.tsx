@@ -78,6 +78,10 @@ export default function SelectMode() {
           last_name: formData.last_name,
           discovered_by: formData.discovered_by,
           discovered_by_other_text: formData.discovered_by_other_text || null,
+          main_use: formData.main_use || null,
+          user_role: formData.user_role || null,
+          user_role_other: formData.user_role_other || null,
+          team_size: formData.team_size || null,
           updated_at: new Date().toISOString(),
         })
         .eq('user_id', userId);
@@ -185,10 +189,10 @@ export default function SelectMode() {
 
   if (userLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--accent)] mx-auto mb-4"></div>
-          <p className="text-slate-600 dark:text-slate-300">Cargando...</p>
+          <p className="text-[var(--muted-foreground)]">Cargando...</p>
         </div>
       </div>
     );
@@ -214,11 +218,11 @@ export default function SelectMode() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[var(--background)] flex items-center justify-center p-4">
       <div className="w-full max-w-4xl">
         {/* Header with step indicator */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+          <h1 className="text-3xl font-bold text-[var(--foreground)] mb-2">
             {isOnboarding ? "¡Bienvenido a Archub!" : "Elegir modo de uso"}
           </h1>
           

@@ -67,8 +67,9 @@ export function HelpPopover({
         side={placement}
         align="center"
         className={cn(
-          "w-80 p-4 bg-popover text-popover-foreground",
-          "border border-border rounded-xl shadow-xl",
+          "w-80 p-4 z-[9999]",
+          "bg-[var(--popover-bg)] text-[var(--popover-fg)] border-[var(--popover-border)]",
+          "rounded-xl shadow-xl",
           "animate-in fade-in-0 zoom-in-95 duration-200"
         )}
         onMouseEnter={() => setIsOpen(true)}

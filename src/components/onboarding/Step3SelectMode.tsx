@@ -64,7 +64,7 @@ export function Step3SelectMode({ isOnboarding = true, onFinish, isLoading = fal
   };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
+    <Card className="w-full max-w-2xl mx-auto bg-[var(--card-bg)] border-[var(--card-border)]">
       <CardHeader className="text-center pb-4">
         <div className="flex items-center justify-center mb-4">
           <div className="p-3 rounded-lg bg-[var(--accent)] text-white">
