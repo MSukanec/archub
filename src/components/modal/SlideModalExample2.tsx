@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, Camera, Users, Cloud } from 'lucide-react';
-import { SlideModal, SlideModalHeader, SlideModalBody, SlideModalFooter, useSlideNavigation } from './index';
+import { SlideModal, SlideModalHeader, SlideModalBody, SlideModalFooter, ModalSectionBlock, useSlideNavigation } from './index';
 
 // Vista principal del resumen usando nuevos componentes
 function ResumenBitacora() {
@@ -27,43 +27,69 @@ function ResumenBitacora() {
             </p>
           </div>
           
-          <div className="grid grid-cols-2 gap-3">
-            <Button
-              variant="outline"
-              className="h-20 flex flex-col items-center gap-2"
-              onClick={() => navigateTo('clima')}
-            >
-              <Cloud className="h-6 w-6" />
-              <span className="text-sm">Clima</span>
-            </Button>
-            
-            <Button
-              variant="outline"
-              className="h-20 flex flex-col items-center gap-2"
-              onClick={() => navigateTo('equipo')}
-            >
-              <Users className="h-6 w-6" />
-              <span className="text-sm">Personal</span>
-            </Button>
-            
-            <Button
-              variant="outline"
-              className="h-20 flex flex-col items-center gap-2"
-              onClick={() => navigateTo('fotos')}
-            >
-              <Camera className="h-6 w-6" />
-              <span className="text-sm">Fotos</span>
-            </Button>
-            
-            <Button
-              variant="outline"
-              className="h-20 flex flex-col items-center gap-2"
-              onClick={() => navigateTo('eventos')}
-            >
-              <Calendar className="h-6 w-6" />
-              <span className="text-sm">Eventos</span>
-            </Button>
-          </div>
+          {/* Sección de Clima */}
+          <ModalSectionBlock 
+            title="Condiciones Climáticas" 
+            onAdd={() => navigateTo('clima')}
+            addLabel="Registrar"
+            icon={<Cloud className="h-4 w-4" />}
+            hideIfEmpty={true}
+            isEmpty={true}
+          >
+            <p className="text-xs text-muted-foreground">No hay datos de clima registrados</p>
+          </ModalSectionBlock>
+          
+          {/* Sección de Personal */}
+          <ModalSectionBlock 
+            title="Personal en Obra" 
+            onAdd={() => navigateTo('equipo')}
+            addLabel="Añadir"
+            icon={<Users className="h-4 w-4" />}
+          >
+            <div className="flex gap-2 flex-wrap">
+              <div className="px-2 py-1 bg-[var(--muted)] rounded text-xs">Juan Pérez - Maestro</div>
+              <div className="px-2 py-1 bg-[var(--muted)] rounded text-xs">Ana García - Oficial</div>
+            </div>
+          </ModalSectionBlock>
+          
+          {/* Sección de Fotos */}
+          <ModalSectionBlock 
+            title="Galería del Día" 
+            onAdd={() => navigateTo('fotos')}
+            addLabel="Subir"
+            icon={<Camera className="h-4 w-4" />}
+          >
+            <div className="grid grid-cols-3 gap-2">
+              <div className="aspect-square bg-[var(--muted)] rounded flex items-center justify-center">
+                <Camera className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <div className="aspect-square bg-[var(--muted)] rounded flex items-center justify-center">
+                <Camera className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <div className="aspect-square bg-[var(--muted)] rounded flex items-center justify-center">
+                <span className="text-xs text-muted-foreground">+3</span>
+              </div>
+            </div>
+          </ModalSectionBlock>
+          
+          {/* Sección de Eventos */}
+          <ModalSectionBlock 
+            title="Eventos del Día" 
+            onAdd={() => navigateTo('eventos')}
+            addLabel="Crear"
+            icon={<Calendar className="h-4 w-4" />}
+          >
+            <div className="space-y-2">
+              <div className="text-xs p-2 bg-[var(--muted)] rounded">
+                <div className="font-medium">08:00 - Inicio de jornada</div>
+                <div className="text-muted-foreground">Llegada del equipo principal</div>
+              </div>
+              <div className="text-xs p-2 bg-[var(--muted)] rounded">
+                <div className="font-medium">14:30 - Entrega de materiales</div>
+                <div className="text-muted-foreground">Cemento y hierro para columnas</div>
+              </div>
+            </div>
+          </ModalSectionBlock>
           
           <div className="space-y-3">
             <Label htmlFor="notas">Notas generales</Label>
@@ -280,15 +306,35 @@ function FormularioFotos() {
             </p>
           </div>
           
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-            <Camera className="h-12 w-12 mx-auto text-gray-400 mb-3" />
-            <p className="text-sm text-gray-600 mb-4">
-              Arrastra imágenes aquí o haz clic para seleccionar
-            </p>
-            <Button variant="outline">
-              Seleccionar Archivos
-            </Button>
-          </div>
+          {/* Zona de subida de archivos */}
+          <ModalSectionBlock 
+            title="Subir Archivos" 
+            onAdd={() => {}}
+            addLabel="Examinar"
+            icon={<Camera className="h-4 w-4" />}
+          >
+            <div className="border-2 border-dashed border-muted-foreground/20 rounded-lg p-6 text-center">
+              <Camera className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+              <p className="text-xs text-muted-foreground">
+                Arrastra archivos aquí o haz clic en "Examinar"
+              </p>
+            </div>
+          </ModalSectionBlock>
+          
+          {/* Fotos existentes */}
+          <ModalSectionBlock 
+            title="Fotos Actuales" 
+            isEmpty={false}
+          >
+            <div className="grid grid-cols-2 gap-2">
+              <div className="aspect-square bg-[var(--muted)] rounded flex items-center justify-center">
+                <span className="text-xs text-muted-foreground">IMG_001.jpg</span>
+              </div>
+              <div className="aspect-square bg-[var(--muted)] rounded flex items-center justify-center">
+                <span className="text-xs text-muted-foreground">IMG_002.jpg</span>
+              </div>
+            </div>
+          </ModalSectionBlock>
           
           <div className="space-y-2">
             <Label htmlFor="descripcion-fotos">Descripción de las fotos</Label>

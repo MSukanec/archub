@@ -119,6 +119,17 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 5, 2025. Created ModalSectionBlock component for structured form sections within SlideModal system - COMPLETED
+  • Built ModalSectionBlock.tsx in src/components/modal/ as reusable component for organizing form sections
+  • Component displays title, optional add button with customizable icon/label, and content areas below
+  • Props support: title, children, onAdd, addLabel (default "Añadir"), icon (default PlusCircle), hideIfEmpty, isEmpty
+  • Styling uses bg-muted/30, border, rounded-xl, p-4 with dark mode support through CSS variables
+  • Enhanced SlideModalExample2 to demonstrate ModalSectionBlock usage replacing individual buttons
+  • Created sections for "Condiciones Climáticas", "Personal en Obra", "Galería del Día", "Eventos del Día"
+  • Each section shows realistic content: personal tags, photo thumbnails, event cards with proper spacing
+  • Updated FormularioFotos view to use ModalSectionBlock for file upload areas and existing photos
+  • Component includes accessibility features with aria-label and proper semantic structure
+  • Added to modal/index.ts exports for easy component access throughout application
 - July 5, 2025. Enhanced SlideModal system with dedicated Header, Body, and Footer components - COMPLETED
   • Created SlideModalHeader.tsx with back button, centered title, and close button functionality
   • Built SlideModalBody.tsx as scrollable wrapper with overflow-y-auto and configurable max-height
