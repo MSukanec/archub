@@ -43,25 +43,45 @@ export function useFinancialSummary(organizationId: string | undefined, projectI
       }
 
       try {
-        // Get movements with concepts in a single query
-        let query = supabase
+        // Get movements data first
+        let movementsQuery = supabase
           .from('movements')
-          .select(`
-            amount,
-            movement_date,
-            movement_concepts!movements_type_id_fkey (
-              name
-            )
-          `)
+          .select('amount, movement_date, type_id')
           .eq('organization_id', organizationId)
 
         if (projectId) {
-          query = query.eq('project_id', projectId)
+          movementsQuery = movementsQuery.eq('project_id', projectId)
         }
 
-        const { data: movements, error } = await query
+        const { data: movements, error } = await movementsQuery
 
         if (error) throw error
+        if (!movements || movements.length === 0) {
+          return {
+            totalIncome: 0,
+            totalExpenses: 0,
+            balance: 0,
+            totalMovements: 0,
+            thisMonthIncome: 0,
+            thisMonthExpenses: 0,
+            thisMonthBalance: 0
+          }
+        }
+
+        // Get unique type IDs
+        const typeIds = Array.from(new Set(movements.map(m => m.type_id).filter(Boolean)))
+        
+        // Get movement concepts separately
+        const { data: concepts } = await supabase
+          .from('movement_concepts')
+          .select('id, name')
+          .in('id', typeIds)
+
+        // Create lookup map
+        const conceptsMap = new Map()
+        concepts?.forEach(concept => {
+          conceptsMap.set(concept.id, concept.name)
+        })
 
         // Calculate totals
         let totalIncome = 0
@@ -73,9 +93,9 @@ export function useFinancialSummary(organizationId: string | undefined, projectI
         const monthStart = startOfMonth(currentMonth)
         const monthEnd = endOfMonth(currentMonth)
 
-        movements?.forEach((movement: any) => {
+        movements.forEach(movement => {
           const amount = Math.abs(movement.amount || 0)
-          const typeName = movement.movement_concepts?.name?.toLowerCase() || ''
+          const typeName = conceptsMap.get(movement.type_id)?.toLowerCase() || ''
           const movementDate = new Date(movement.movement_date)
           
           const isIncome = typeName.includes('ingreso')
@@ -128,26 +148,36 @@ export function useMonthlyFlowData(organizationId: string | undefined, projectId
         const startDate = subMonths(endDate, 11)
         const months = eachMonthOfInterval({ start: startDate, end: endDate })
 
-        // Get movements with concepts
-        let query = supabase
+        // Get movements data
+        let movementsQuery = supabase
           .from('movements')
-          .select(`
-            amount,
-            movement_date,
-            movement_concepts!movements_type_id_fkey (
-              name
-            )
-          `)
+          .select('amount, movement_date, type_id')
           .eq('organization_id', organizationId)
           .gte('movement_date', startDate.toISOString())
 
         if (projectId) {
-          query = query.eq('project_id', projectId)
+          movementsQuery = movementsQuery.eq('project_id', projectId)
         }
 
-        const { data: movements, error } = await query
+        const { data: movements, error } = await movementsQuery
 
         if (error) throw error
+        if (!movements || movements.length === 0) return []
+
+        // Get unique type IDs
+        const typeIds = Array.from(new Set(movements.map(m => m.type_id).filter(Boolean)))
+        
+        // Get movement concepts separately
+        const { data: concepts } = await supabase
+          .from('movement_concepts')
+          .select('id, name')
+          .in('id', typeIds)
+
+        // Create lookup map
+        const conceptsMap = new Map()
+        concepts?.forEach(concept => {
+          conceptsMap.set(concept.id, concept.name)
+        })
 
         // Group by month
         const monthlyData: MonthlyFlowData[] = months.map(month => {
@@ -157,11 +187,11 @@ export function useMonthlyFlowData(organizationId: string | undefined, projectId
           let income = 0
           let expenses = 0
 
-          movements?.forEach((movement: any) => {
+          movements.forEach(movement => {
             const movementDate = new Date(movement.movement_date)
             if (movementDate >= monthStart && movementDate <= monthEnd) {
               const amount = Math.abs(movement.amount || 0)
-              const typeName = movement.movement_concepts?.name?.toLowerCase() || ''
+              const typeName = conceptsMap.get(movement.type_id)?.toLowerCase() || ''
               
               if (typeName.includes('ingreso')) {
                 income += amount
@@ -196,35 +226,49 @@ export function useWalletBalances(organizationId: string | undefined, projectId:
       if (!organizationId || !supabase) return []
 
       try {
-        // Get movements with wallet and concept data
-        let query = supabase
+        // Get movements data
+        let movementsQuery = supabase
           .from('movements')
-          .select(`
-            amount,
-            wallets!movements_wallet_id_fkey (
-              name
-            ),
-            movement_concepts!movements_type_id_fkey (
-              name
-            )
-          `)
+          .select('amount, type_id, wallet_id')
           .eq('organization_id', organizationId)
 
         if (projectId) {
-          query = query.eq('project_id', projectId)
+          movementsQuery = movementsQuery.eq('project_id', projectId)
         }
 
-        const { data: movements, error } = await query
+        const { data: movements, error } = await movementsQuery
 
         if (error) throw error
+        if (!movements || movements.length === 0) return []
+
+        // Get unique IDs
+        const typeIds = Array.from(new Set(movements.map(m => m.type_id).filter(Boolean)))
+        const walletIds = Array.from(new Set(movements.map(m => m.wallet_id).filter(Boolean)))
+        
+        // Get concepts and wallets separately
+        const [conceptsResult, walletsResult] = await Promise.all([
+          supabase.from('movement_concepts').select('id, name').in('id', typeIds),
+          supabase.from('wallets').select('id, name').in('id', walletIds)
+        ])
+
+        // Create lookup maps
+        const conceptsMap = new Map()
+        conceptsResult.data?.forEach(concept => {
+          conceptsMap.set(concept.id, concept.name)
+        })
+
+        const walletsMap = new Map()
+        walletsResult.data?.forEach(wallet => {
+          walletsMap.set(wallet.id, wallet.name)
+        })
 
         // Calculate balances by wallet
         const walletBalances: { [key: string]: number } = {}
 
-        movements?.forEach((movement: any) => {
-          const walletName = movement.wallets?.name || 'Sin billetera'
+        movements.forEach(movement => {
+          const walletName = walletsMap.get(movement.wallet_id) || 'Sin billetera'
           const amount = movement.amount || 0
-          const typeName = movement.movement_concepts?.name?.toLowerCase() || ''
+          const typeName = conceptsMap.get(movement.type_id)?.toLowerCase() || ''
           
           if (!walletBalances[walletName]) {
             walletBalances[walletName] = 0
@@ -272,31 +316,47 @@ export function useRecentMovements(organizationId: string | undefined, projectId
       if (!organizationId || !supabase) return []
 
       try {
-        // Get recent movements with all related data
-        let query = supabase
+        // Get recent movements
+        let movementsQuery = supabase
           .from('movements')
-          .select(`
-            id,
-            description,
-            amount,
-            movement_date,
-            movement_concepts!movements_type_id_fkey (
-              name
-            )
-          `)
+          .select('id, description, amount, movement_date, type_id')
           .eq('organization_id', organizationId)
           .order('movement_date', { ascending: false })
           .limit(limit)
 
         if (projectId) {
-          query = query.eq('project_id', projectId)
+          movementsQuery = movementsQuery.eq('project_id', projectId)
         }
 
-        const { data, error } = await query
+        const { data: movements, error } = await movementsQuery
 
         if (error) throw error
+        if (!movements || movements.length === 0) return []
 
-        return data || []
+        // Get unique type IDs
+        const typeIds = Array.from(new Set(movements.map(m => m.type_id).filter(Boolean)))
+        
+        // Get movement concepts
+        const { data: concepts } = await supabase
+          .from('movement_concepts')
+          .select('id, name')
+          .in('id', typeIds)
+
+        // Create lookup map
+        const conceptsMap = new Map()
+        concepts?.forEach(concept => {
+          conceptsMap.set(concept.id, concept.name)
+        })
+
+        // Add concept names to movements
+        const enrichedMovements = movements.map(movement => ({
+          ...movement,
+          movement_concepts: {
+            name: conceptsMap.get(movement.type_id) || 'Desconocido'
+          }
+        }))
+
+        return enrichedMovements
       } catch (error) {
         console.error('Error in useRecentMovements:', error)
         return []
