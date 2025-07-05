@@ -45,6 +45,7 @@ import DesignDashboard from "@/pages/design/DesignDashboard";
 import DesignDocumentation from "@/pages/design/DesignDocumentation";
 import SelectMode from "@/pages/others/SelectMode";
 import NotFound from "@/pages/others/NotFound";
+import SlideModalExample from "@/components/modal/SlideModalExample";
 
 function Router() {
   return (
@@ -52,6 +53,12 @@ function Router() {
       <Route path="/select-mode">
         <ProtectedRoute>
           <SelectMode />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/slide-modal-example">
+        <ProtectedRoute>
+          <SlideModalExample />
         </ProtectedRoute>
       </Route>
 
