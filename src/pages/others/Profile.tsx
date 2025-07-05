@@ -109,20 +109,9 @@ export default function Profile() {
     },
   })
 
-  // Debounced auto-save handlers
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
-
-  const saveProfile = useCallback((data: any) => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
-    }
-    
-    timeoutRef.current = setTimeout(() => {
-      updateProfileMutation.mutate(data)
-    }, 300)
-  }, [updateProfileMutation])
-
-  const handleFirstNameChange = useCallback((value: string) => {
+  // Auto-save handlers - exactly like FinancesPreferences
+  const handleFirstNameChange = (value: string) => {
+    setFirstName(value)
     updateProfileMutation.mutate({
       firstName: value,
       lastName,
@@ -131,9 +120,10 @@ export default function Profile() {
       avatarUrl,
       sidebarDocked
     })
-  }, [lastName, country, birthdate, avatarUrl, sidebarDocked, updateProfileMutation])
+  }
 
-  const handleLastNameChange = useCallback((value: string) => {
+  const handleLastNameChange = (value: string) => {
+    setLastName(value)
     updateProfileMutation.mutate({
       firstName,
       lastName: value,
@@ -142,9 +132,9 @@ export default function Profile() {
       avatarUrl,
       sidebarDocked
     })
-  }, [firstName, country, birthdate, avatarUrl, sidebarDocked, updateProfileMutation])
+  }
 
-  const handleCountryChange = useCallback((value: string) => {
+  const handleCountryChange = (value: string) => {
     setCountry(value)
     updateProfileMutation.mutate({
       firstName,
@@ -154,9 +144,9 @@ export default function Profile() {
       avatarUrl,
       sidebarDocked
     })
-  }, [firstName, lastName, birthdate, avatarUrl, sidebarDocked, updateProfileMutation])
+  }
 
-  const handleBirthdateChange = useCallback((value: string) => {
+  const handleBirthdateChange = (value: string) => {
     setBirthdate(value)
     updateProfileMutation.mutate({
       firstName,
@@ -166,7 +156,7 @@ export default function Profile() {
       avatarUrl,
       sidebarDocked
     })
-  }, [firstName, lastName, country, avatarUrl, sidebarDocked, updateProfileMutation])
+  }
 
   const handleSidebarDockedChange = useCallback((value: boolean) => {
     setSidebarDocked(value)
@@ -385,38 +375,14 @@ export default function Profile() {
                   <Label className="text-sm font-medium">Nombre</Label>
                   <Input
                     value={firstName}
-                    onChange={(e) => {
-                      setFirstName(e.target.value)
-                    }}
-                    onBlur={(e) => {
-                      updateProfileMutation.mutate({
-                        firstName: e.target.value,
-                        lastName,
-                        country,
-                        birthdate,
-                        avatarUrl,
-                        sidebarDocked
-                      })
-                    }}
+                    onChange={(e) => handleFirstNameChange(e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Apellido</Label>
                   <Input
                     value={lastName}
-                    onChange={(e) => {
-                      setLastName(e.target.value)
-                    }}
-                    onBlur={(e) => {
-                      updateProfileMutation.mutate({
-                        firstName,
-                        lastName: e.target.value,
-                        country,
-                        birthdate,
-                        avatarUrl,
-                        sidebarDocked
-                      })
-                    }}
+                    onChange={(e) => handleLastNameChange(e.target.value)}
                   />
                 </div>
               </div>
@@ -424,17 +390,7 @@ export default function Profile() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">País</Label>
-                  <Select value={country} onValueChange={(value) => {
-                    setCountry(value)
-                    updateProfileMutation.mutate({
-                      firstName,
-                      lastName,
-                      country: value,
-                      birthdate,
-                      avatarUrl,
-                      sidebarDocked
-                    })
-                  }}>
+                  <Select value={country} onValueChange={handleCountryChange}>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecciona un país" />
                     </SelectTrigger>
@@ -453,17 +409,7 @@ export default function Profile() {
                   <Input
                     type="date"
                     value={birthdate}
-                    onChange={(e) => {
-                      setBirthdate(e.target.value)
-                      updateProfileMutation.mutate({
-                        firstName,
-                        lastName,
-                        country,
-                        birthdate: e.target.value,
-                        avatarUrl,
-                        sidebarDocked
-                      })
-                    }}
+                    onChange={(e) => handleBirthdateChange(e.target.value)}
                   />
                 </div>
               </div>
