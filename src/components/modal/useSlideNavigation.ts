@@ -1,62 +1,57 @@
-import React, { createContext, useContext, useState } from "react";
+import { useState, useCallback, createContext, useContext } from 'react';
 
 interface SlideNavigationContextType {
   activeView: string;
-  direction: "forward" | "backward";
-  setActiveView: (viewId: string) => void;
-  setDirection: (dir: "forward" | "backward") => void;
   navigateTo: (viewId: string) => void;
+  canGoBack: boolean;
   goBack: () => void;
+  history: string[];
 }
 
-const SlideNavigationContext = createContext<SlideNavigationContextType | undefined>(undefined);
+const SlideNavigationContext = createContext<SlideNavigationContextType | null>(null);
 
-interface SlideNavigationProviderProps {
-  children: React.ReactNode;
-  initialView?: string;
-}
-
-export const SlideNavigationProvider: React.FC<SlideNavigationProviderProps> = ({
-  children,
-  initialView = "main",
-}) => {
-  const [activeView, setActiveViewInternal] = useState(initialView);
-  const [direction, setDirection] = useState<"forward" | "backward">("forward");
-
-  const setActiveView = (newView: string) => {
-    setDirection("forward");
-    setActiveViewInternal(newView);
-  };
-
-  const navigateTo = (viewId: string) => {
-    setDirection("forward");
-    setActiveViewInternal(viewId);
-  };
-
-  const goBack = () => {
-    setDirection("backward");
-  };
-
-  const value = {
-    activeView,
-    setActiveView,
-    direction,
-    setDirection,
-    navigateTo,
-    goBack,
-  };
-
-  return (
-    <SlideNavigationContext.Provider value={value}>
-      {children}
-    </SlideNavigationContext.Provider>
-  );
-};
-
-export const useSlideNavigation = (): SlideNavigationContextType => {
+export function useSlideNavigation() {
   const context = useContext(SlideNavigationContext);
   if (!context) {
-    throw new Error("useSlideNavigation must be used within a SlideNavigationProvider");
+    throw new Error('useSlideNavigation must be used within a SlideModal');
   }
   return context;
-};
+}
+
+export function useSlideNavigationState(initialView: string = 'main') {
+  const [history, setHistory] = useState<string[]>([initialView]);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  const activeView = history[history.length - 1];
+  const canGoBack = history.length > 1;
+
+  const navigateTo = useCallback((viewId: string) => {
+    if (isAnimating || viewId === activeView) return;
+    
+    setIsAnimating(true);
+    setHistory(prev => [...prev, viewId]);
+    
+    // Reset animation state after transition
+    setTimeout(() => setIsAnimating(false), 300);
+  }, [activeView, isAnimating]);
+
+  const goBack = useCallback(() => {
+    if (isAnimating || !canGoBack) return;
+    
+    setIsAnimating(true);
+    setHistory(prev => prev.slice(0, -1));
+    
+    // Reset animation state after transition
+    setTimeout(() => setIsAnimating(false), 300);
+  }, [canGoBack, isAnimating]);
+
+  return {
+    activeView,
+    navigateTo,
+    canGoBack,
+    goBack,
+    history,
+    isAnimating,
+    SlideNavigationContext
+  };
+}
