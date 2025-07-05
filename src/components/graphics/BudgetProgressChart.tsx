@@ -40,9 +40,9 @@ export function BudgetProgressChart({ data, isLoading }: BudgetProgressChartProp
   }
 
   const getBarColor = (percentage: number) => {
-    if (percentage >= 90) return '#ef4444'
-    if (percentage >= 70) return '#f59e0b'
-    return '#22c55e'
+    if (percentage >= 90) return 'hsl(0, 87%, 67%)'   // chart-5 - rojo
+    if (percentage >= 70) return 'hsl(43, 74%, 66%)'  // chart-4 - amarillo
+    return 'hsl(110, 40%, 50%)'                       // chart-1 - verde
   }
 
   const CustomTooltip = ({ active, payload, label }: any) => {

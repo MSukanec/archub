@@ -8,6 +8,7 @@ import { WalletBalanceChart } from '@/components/graphics/WalletBalanceChart'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Link } from 'wouter'
+import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState'
 
 export default function FinancesDashboard() {
   const { data: userData } = useCurrentUser()
@@ -37,6 +38,28 @@ export default function FinancesDashboard() {
     if (balance > 0) return 'text-green-600'
     if (balance < 0) return 'text-red-600'
     return 'text-muted-foreground'
+  }
+
+  // Show empty state if no movements exist
+  if (!summaryLoading && (!financialSummary || financialSummary.totalMovements === 0)) {
+    return (
+      <Layout headerProps={headerProps}>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <CustomEmptyState 
+            title="Sin movimientos financieros registrados"
+            description="Comienza registrando tu primer ingreso o egreso para ver el resumen completo de tus finanzas."
+            action={
+              <Link 
+                href="/finances/movements"
+                className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+              >
+                Crear Primer Movimiento
+              </Link>
+            }
+          />
+        </div>
+      </Layout>
+    )
   }
 
   return (

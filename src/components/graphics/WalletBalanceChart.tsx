@@ -61,13 +61,22 @@ export function WalletBalanceChart({ data, isLoading }: WalletBalanceChartProps)
           cy="50%"
           labelLine={false}
           outerRadius={80}
-          fill="hsl(var(--chart-1))"
+          fill="hsl(110, 40%, 50%)"
           dataKey="balance"
           label={({ wallet, percent }) => `${wallet} ${(percent * 100).toFixed(0)}%`}
         >
-          {data.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={entry.color} />
-          ))}
+          {data.map((entry, index) => {
+            const colors = [
+              "hsl(110, 40%, 50%)",
+              "hsl(173, 58%, 39%)",
+              "hsl(197, 37%, 24%)",
+              "hsl(43, 74%, 66%)",
+              "hsl(0, 87%, 67%)"
+            ];
+            return (
+              <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+            )
+          })}
         </Pie>
         <Tooltip content={<CustomTooltip />} />
         <Legend />

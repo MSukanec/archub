@@ -232,11 +232,11 @@ export function OrganizationGrowthChart() {
               <Line 
                 type="monotone" 
                 dataKey="cumulative" 
-                stroke="#80bf41"
+                stroke="hsl(110, 40%, 50%)"
                 strokeWidth={3}
                 connectNulls={true}
-                dot={{ fill: '#80bf41', strokeWidth: 2, r: 4 }}
-                activeDot={{ r: 6, stroke: '#80bf41', strokeWidth: 2, fill: '#ffffff' }}
+                dot={{ fill: "hsl(110, 40%, 50%)", strokeWidth: 2, r: 4 }}
+                activeDot={{ r: 6, stroke: "hsl(110, 40%, 50%)", strokeWidth: 2, fill: "#ffffff" }}
               />
             </LineChart>
           </ResponsiveContainer>

@@ -65,23 +65,32 @@ export function MonthlyFlowChart({ data, isLoading }: MonthlyFlowChartProps) {
         <Line 
           type="monotone" 
           dataKey="income" 
-          stroke="hsl(var(--chart-1))" 
-          strokeWidth={2}
+          stroke="hsl(110, 40%, 50%)" 
+          strokeWidth={3}
           name="Ingresos"
+          connectNulls={true}
+          dot={{ fill: "hsl(110, 40%, 50%)", strokeWidth: 2, r: 4 }}
+          activeDot={{ r: 6, fill: "hsl(110, 40%, 50%)", stroke: "#fff", strokeWidth: 2 }}
         />
         <Line 
           type="monotone" 
           dataKey="expenses" 
-          stroke="hsl(var(--chart-2))" 
-          strokeWidth={2}
+          stroke="hsl(0, 87%, 67%)" 
+          strokeWidth={3}
           name="Gastos"
+          connectNulls={true}
+          dot={{ fill: "hsl(0, 87%, 67%)", strokeWidth: 2, r: 4 }}
+          activeDot={{ r: 6, fill: "hsl(0, 87%, 67%)", stroke: "#fff", strokeWidth: 2 }}
         />
         <Line 
           type="monotone" 
           dataKey="net" 
-          stroke="hsl(var(--chart-3))" 
-          strokeWidth={3}
+          stroke="hsl(197, 37%, 24%)" 
+          strokeWidth={4}
           name="Flujo neto"
+          connectNulls={true}
+          dot={{ fill: "hsl(197, 37%, 24%)", strokeWidth: 2, r: 5 }}
+          activeDot={{ r: 7, fill: "hsl(197, 37%, 24%)", stroke: "#fff", strokeWidth: 2 }}
         />
       </LineChart>
     </ResponsiveContainer>
