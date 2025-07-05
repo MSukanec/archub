@@ -1,41 +1,24 @@
-// CustomModalBody.tsx
-import { cn } from "@/lib/utils";
+import React from 'react';
+import { cn } from '@/lib/utils';
 
 interface CustomModalBodyProps {
   children: React.ReactNode;
   className?: string;
-  padding?: "none" | "sm" | "md" | "lg";
-  columns?: 1 | 2;
 }
 
-export function CustomModalBody({
-  children,
-  className,
-  padding = "md",
-  columns = 2,
-}: CustomModalBodyProps) {
-  const paddingClasses = {
-    none: "",
-    sm: "p-3",
-    md: "p-3",
-    lg: "p-3",
-  };
-
-  const gridCols = columns === 1 ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2";
-
+export default function CustomModalBody({ children, className }: CustomModalBodyProps) {
   return (
     <div
       className={cn(
-        "w-full overflow-y-auto max-h-[calc(80vh-8rem)]",
-        paddingClasses[padding],
-        className,
+        "px-6 py-4",
+        "space-y-4",
+        "overflow-y-auto",
+        "scrollbar-hide",
+        "flex-1",
+        className
       )}
     >
-      <div className={cn("grid gap-4", gridCols)}>
-        {children}
-      </div>
+      {children}
     </div>
   );
 }
-
-export default CustomModalBody; // 👈 opcional, solo si lo importás como default
