@@ -119,6 +119,13 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 5, 2025. Fixed onboarding navigation loop and optimized mobile UX components - COMPLETED
+  • Fixed Step3SelectMode double-click issue by adding setTimeout delay before onFinish() execution
+  • Disabled tab navigation for HelpPopover components using tabIndex={-1} to prevent keyboard focus
+  • Optimized mobile menu footer buttons: reduced height from h-14 to h-10 with vertical icon+text layout
+  • Changed footer buttons to use smaller icons (h-4 w-4) with text labels (Perfil, Changelog, Admin)
+  • Corrected onboarding redirect paths from '/dashboard' to '/organization/dashboard' to prevent navigation loops
+  • Fixed both onboarding completion and mode change redirections to use proper dashboard route
 - July 5, 2025. Enhanced onboarding system with detailed descriptions, help tooltips, and corrected enum values - COMPLETED
   • Updated Step3SelectMode with detailed descriptions for each user mode explaining specific functionality
   • Added HelpPopover components to all Step3SelectMode cards with comprehensive explanations

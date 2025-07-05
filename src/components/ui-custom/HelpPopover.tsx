@@ -55,6 +55,7 @@ export function HelpPopover({
           )}
           onMouseEnter={() => setIsOpen(true)}
           onMouseLeave={() => setIsOpen(false)}
+          tabIndex={-1}
         >
           <HelpCircle 
             className="text-[var(--accent)] hover:text-[var(--accent)]/80 transition-colors"

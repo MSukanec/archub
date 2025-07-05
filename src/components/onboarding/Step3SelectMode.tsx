@@ -74,8 +74,11 @@ export function Step3SelectMode({ isOnboarding = true, onFinish, isLoading = fal
     setSelectedMode(modeType);
     updateFormData({ last_user_type: modeType });
     
+    // Usar setTimeout para asegurar que el estado se actualice antes de llamar onFinish
     if (onFinish) {
-      onFinish();
+      setTimeout(() => {
+        onFinish();
+      }, 100);
     }
   };
 

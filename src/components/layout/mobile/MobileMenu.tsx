@@ -65,7 +65,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   // Obtener organizaciones y proyectos
   const currentOrganization = userData?.organization;
   const sortedOrganizations = userData?.organizations || [];
-  const { data: projectsData } = useProjects();
+  const { data: projectsData } = useProjects(currentOrganization?.id);
   const effectiveCurrentProject = userData?.preferences?.last_project_id;
   const isAdmin = userData?.organization?.is_admin || false;
 
@@ -491,40 +491,43 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
           </div>
         </div>
 
-        {/* Action Buttons Grid - Misma altura que header (h-14) */}
-        <div className={cn("h-14 grid gap-2 items-center", isAdmin ? "grid-cols-3" : "grid-cols-2")}>
+        {/* Action Buttons Grid - Optimized height */}
+        <div className={cn("h-10 grid gap-2 items-center", isAdmin ? "grid-cols-3" : "grid-cols-2")}>
           <button
             onClick={() => handleNavigation('/profile')}
-            className="flex items-center justify-center p-2 rounded-md transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+            className="flex flex-col items-center justify-center py-1 px-2 rounded-md transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
             style={{ 
               color: 'var(--menues-fg)',
               backgroundColor: 'transparent'
             }}
           >
-            <UserCircle className="h-6 w-6" />
+            <UserCircle className="h-4 w-4" />
+            <span className="text-xs font-medium mt-0.5">Perfil</span>
           </button>
           
           <button
             onClick={() => handleNavigation('/changelog')}
-            className="flex items-center justify-center p-2 rounded-md transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+            className="flex flex-col items-center justify-center py-1 px-2 rounded-md transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
             style={{ 
               color: 'var(--menues-fg)',
               backgroundColor: 'transparent'
             }}
           >
-            <History className="h-6 w-6" />
+            <History className="h-4 w-4" />
+            <span className="text-xs font-medium mt-0.5">Changelog</span>
           </button>
           
           {isAdmin && (
             <button
               onClick={() => handleNavigation('/admin/dashboard', 'admin')}
-              className="flex items-center justify-center p-2 rounded-md transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+              className="flex flex-col items-center justify-center py-1 px-2 rounded-md transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
               style={{ 
                 color: 'var(--menues-fg)',
                 backgroundColor: 'transparent'
               }}
             >
-              <Shield className="h-6 w-6" />
+              <Shield className="h-4 w-4" />
+              <span className="text-xs font-medium mt-0.5">Admin</span>
             </button>
           )}
         </div>
