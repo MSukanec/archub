@@ -66,6 +66,7 @@ export function useDebouncedAutoSave<T>({
 
     // Clear any existing timeout
     if (timeoutRef.current) {
+      console.log('Clearing existing timeout');
       clearTimeout(timeoutRef.current);
     }
 
@@ -82,8 +83,10 @@ export function useDebouncedAutoSave<T>({
 
     // Cleanup function
     return () => {
+      console.log('useEffect cleanup called - clearing timeout');
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
       }
     };
   }, [data, delay, enabled, debouncedSave]);
