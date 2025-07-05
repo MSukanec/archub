@@ -24,23 +24,22 @@ interface Installment {
   wallet_id: string
   project_id: string
   created_at: string
-  contact?: {
+  contacts?: Array<{
     id: string
     first_name: string
     last_name: string
     company_name?: string
-    avatar_url?: string
-  }
-  currency?: {
+  }>
+  currencies?: Array<{
     id: string
     name: string
     code: string
     symbol: string
-  }
-  wallet?: {
+  }>
+  organization_wallets?: Array<{
     id: string
     name: string
-  }
+  }>
 }
 
 export default function ProjectInstallmentsPage() {
@@ -81,7 +80,7 @@ export default function ProjectInstallmentsPage() {
         return []
       }
 
-      // Get movements filtered by cuotas concept and project
+      // Get movements filtered by cuotas concept and project with related data
       const { data: movements, error } = await supabase
         .from('movements')
         .select(`
@@ -93,7 +92,23 @@ export default function ProjectInstallmentsPage() {
           currency_id,
           wallet_id,
           project_id,
-          created_at
+          created_at,
+          contacts (
+            id,
+            first_name,
+            last_name,
+            company_name
+          ),
+          currencies (
+            id,
+            name,
+            code,
+            symbol
+          ),
+          organization_wallets (
+            id,
+            name
+          )
         `)
         .eq('organization_id', organizationId)
         .eq('project_id', projectId)
@@ -110,51 +125,8 @@ export default function ProjectInstallmentsPage() {
         return []
       }
 
-      // Get related data
-      const contactIds = Array.from(new Set(movements.map(m => m.contact_id).filter(Boolean)))
-      const currencyIds = Array.from(new Set(movements.map(m => m.currency_id).filter(Boolean)))
-      const walletIds = Array.from(new Set(movements.map(m => m.wallet_id).filter(Boolean)))
-
-      const [contactsResult, currenciesResult, walletsResult] = await Promise.all([
-        supabase
-          .from('contacts')
-          .select('id, first_name, last_name, company_name, avatar_url')
-          .in('id', contactIds),
-        
-        supabase
-          .from('currencies')
-          .select('id, name, code, symbol')
-          .in('id', currencyIds),
-        
-        supabase
-          .from('wallets')
-          .select('id, name')
-          .in('id', walletIds)
-      ])
-
-      // Create lookup maps
-      const contactsMap = new Map()
-      contactsResult.data?.forEach(contact => {
-        contactsMap.set(contact.id, contact)
-      })
-
-      const currenciesMap = new Map()
-      currenciesResult.data?.forEach(currency => {
-        currenciesMap.set(currency.id, currency)
-      })
-
-      const walletsMap = new Map()
-      walletsResult.data?.forEach(wallet => {
-        walletsMap.set(wallet.id, wallet)
-      })
-
-      // Transform data with related information
-      return movements.map(movement => ({
-        ...movement,
-        contact: contactsMap.get(movement.contact_id),
-        currency: currenciesMap.get(movement.currency_id),
-        wallet: walletsMap.get(movement.wallet_id)
-      })) as Installment[]
+      // Return movements with related data already joined by Supabase
+      return movements || []
     },
     enabled: !!organizationId && !!projectId && !!cuotasConcept?.id
   })
@@ -167,8 +139,8 @@ export default function ProjectInstallmentsPage() {
   // Filter installments based on search
   const filteredInstallments = installments.filter(installment => {
     const searchLower = searchValue.toLowerCase()
-    const contactName = installment.contact?.company_name || 
-                       `${installment.contact?.first_name || ''} ${installment.contact?.last_name || ''}`.trim()
+    const contactName = installment.contacts?.[0]?.company_name || 
+                       `${installment.contacts?.[0]?.first_name || ''} ${installment.contacts?.[0]?.last_name || ''}`.trim()
     
     return contactName.toLowerCase().includes(searchLower) ||
            installment.description?.toLowerCase().includes(searchLower)
@@ -210,27 +182,26 @@ export default function ProjectInstallmentsPage() {
       label: "Contacto",
       width: "25%",
       render: (item: Installment) => {
-        if (!item.contact) {
+        if (!item.contacts) {
           return <div className="text-sm text-muted-foreground">Sin contacto</div>
         }
 
-        const displayName = item.contact.company_name || 
-                           `${item.contact.first_name || ''} ${item.contact.last_name || ''}`.trim()
-        const initials = item.contact.company_name 
-          ? item.contact.company_name.charAt(0).toUpperCase()
-          : `${item.contact.first_name?.charAt(0) || ''}${item.contact.last_name?.charAt(0) || ''}`.toUpperCase()
+        const displayName = item.contacts.company_name || 
+                           `${item.contacts.first_name || ''} ${item.contacts.last_name || ''}`.trim()
+        const initials = item.contacts.company_name 
+          ? item.contacts.company_name.charAt(0).toUpperCase()
+          : `${item.contacts.first_name?.charAt(0) || ''}${item.contacts.last_name?.charAt(0) || ''}`.toUpperCase()
 
         return (
           <div className="flex items-center gap-2">
             <Avatar className="w-8 h-8">
-              <AvatarImage src={item.contact.avatar_url || ''} />
               <AvatarFallback className="text-xs">{initials}</AvatarFallback>
             </Avatar>
             <div>
               <div className="text-sm font-medium">{displayName}</div>
-              {item.contact.company_name && (
+              {item.contacts.company_name && (
                 <div className="text-xs text-muted-foreground">
-                  {item.contact.first_name} {item.contact.last_name}
+                  {item.contacts.first_name} {item.contacts.last_name}
                 </div>
               )}
             </div>
@@ -245,7 +216,7 @@ export default function ProjectInstallmentsPage() {
       sortable: true,
       sortType: "number" as const,
       render: (item: Installment) => {
-        const symbol = item.currency?.symbol || '$'
+        const symbol = item.currencies?.[0]?.symbol || '$'
         return (
           <div className="text-sm font-medium text-green-600">
             {symbol}{Math.abs(item.amount || 0).toLocaleString('es-AR')}
@@ -259,7 +230,7 @@ export default function ProjectInstallmentsPage() {
       width: "10%",
       render: (item: Installment) => (
         <Badge variant="outline" className="text-xs">
-          {item.currency?.code || 'N/A'}
+          {item.currencies?.[0]?.code || 'N/A'}
         </Badge>
       )
     },
@@ -268,7 +239,7 @@ export default function ProjectInstallmentsPage() {
       label: "Billetera",
       width: "15%",
       render: (item: Installment) => (
-        <div className="text-sm">{item.wallet?.name || 'Sin billetera'}</div>
+        <div className="text-sm">{item.organization_wallets?.[0]?.name || 'Sin billetera'}</div>
       )
     },
 
