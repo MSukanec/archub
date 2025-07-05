@@ -119,6 +119,17 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 5, 2025. Design documentation system implementation with file upload functionality and RLS compliance - IN PROGRESS  
+  • Hidden view selector (folder vs phase) when no documents exist - only shows CustomEmptyState
+  • Added file_name and file_size fields to design_documents schema for complete PDF metadata storage
+  • Implemented complete PDF upload flow to Supabase Storage bucket 'design-documents' with UUID-based file paths
+  • Enhanced NewDesignDocumentModal with proper error handling for upload and database operations
+  • Fixed RLS compliance by using user.id (from users table) instead of auth.uid() for created_by field
+  • Added comprehensive error messages for upload failures, RLS violations, and validation errors
+  • Modal now validates file selection, uploads to Storage first, then saves metadata to database
+  • Configured proper file upload sequence: generate UUID path → upload to bucket → save metadata with file_name/file_size
+  • Database schema mismatch detected - working to align actual table structure with schema definitions
+  • Enhanced mutation error handling with specific messages for different failure scenarios
 - July 5, 2025. Fixed onboarding navigation loop and optimized mobile UX components - COMPLETED
   • Fixed Step3SelectMode double-click issue by adding setTimeout delay before onFinish() execution
   • Disabled tab navigation for HelpPopover components using tabIndex={-1} to prevent keyboard focus

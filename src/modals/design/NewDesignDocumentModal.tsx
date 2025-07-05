@@ -150,15 +150,22 @@ export function NewDesignDocumentModal({
 
       if (selectedFile) {
         setIsUploading(true);
-        const uploadResult = await uploadFile(selectedFile);
-        filePath = uploadResult.path;
-        fileUrl = uploadResult.url;
-        fileType = selectedFile.type;
+        try {
+          const uploadResult = await uploadFile(selectedFile);
+          filePath = uploadResult.path;
+          fileUrl = uploadResult.url;
+          fileType = selectedFile.type;
+        } catch (uploadError: any) {
+          setIsUploading(false);
+          throw new Error(`Error al subir archivo: ${uploadError.message}`);
+        }
       } else if (editingDocument) {
         // Keep existing file info if editing without new file
         filePath = editingDocument.file_path;
         fileUrl = editingDocument.file_url;
         fileType = editingDocument.file_type;
+      } else {
+        throw new Error('Debe seleccionar un archivo');
       }
 
       const documentData = {
@@ -212,11 +219,21 @@ export function NewDesignDocumentModal({
       });
       onClose();
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error saving document:', error);
+      let errorMessage = 'No se pudo guardar el documento';
+      
+      if (error.message?.includes('row-level security')) {
+        errorMessage = 'Sin permisos para guardar el documento';
+      } else if (error.message?.includes('upload')) {
+        errorMessage = 'Error al subir el archivo';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: 'Error',
-        description: 'No se pudo guardar el documento',
+        description: errorMessage,
         variant: 'destructive',
       });
     },
