@@ -5,34 +5,12 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { useThemeStore } from "@/stores/themeStore";
-import { useUserData } from "@/hooks/useUserData";
-import { useSupabase } from "@/hooks/useSupabase";
-import { useMutation } from "@tanstack/react-query";
 import { User, Palette } from "lucide-react";
 import { HelpPopover } from "@/components/ui-custom/HelpPopover";
 
 export function Step1UserData() {
   const { formData, updateFormData, goNextStep } = useOnboardingStore();
   const { setTheme } = useThemeStore();
-  const { userData } = useUserData();
-  const { supabase } = useSupabase();
-
-  // Mutation to save theme immediately
-  const saveThemeMutation = useMutation({
-    mutationFn: async (theme: 'light' | 'dark') => {
-      if (!userData?.user?.id || !supabase) return;
-      
-      const { error } = await supabase
-        .from('user_preferences')
-        .update({ 
-          theme,
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', userData.user.id);
-      
-      if (error) throw error;
-    }
-  });
 
   const handleThemeChange = (value: 'light' | 'dark') => {
     // Update form data
@@ -40,9 +18,6 @@ export function Step1UserData() {
     
     // Apply theme immediately
     setTheme(value === 'dark');
-    
-    // Save to database immediately
-    saveThemeMutation.mutate(value);
   };
 
   const handleNext = () => {
