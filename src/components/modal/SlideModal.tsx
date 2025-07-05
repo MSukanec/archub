@@ -157,15 +157,14 @@ export default function SlideModal({
                       "absolute inset-0 transition-transform duration-300 ease-in-out",
                       transformClass,
                       "overflow-y-auto scrollbar-hide",
-                      "bg-[var(--card-bg)]"
+                      "bg-[var(--card-bg)]",
+                      "flex flex-col"
                     )}
                     style={{
                       visibility: isActive || isAnimating ? 'visible' : 'hidden'
                     }}
                   >
-                    <div className="p-4 min-h-full">
-                      {views[viewKey]}
-                    </div>
+                    {views[viewKey]}
                   </div>
                 );
               })}
