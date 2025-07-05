@@ -17,6 +17,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
 import { useSidebarStore } from '@/stores/sidebarStore'
+import { useThemeStore } from '@/stores/themeStore'
 
 interface Country {
   id: string;
@@ -28,6 +29,7 @@ export default function Profile() {
   const { data: userData, isLoading } = useCurrentUser()
   const { toast } = useToast()
   const { setDocked } = useSidebarStore()
+  const { isDark, toggleTheme } = useThemeStore()
   const [, navigate] = useLocation()
   
   // Function to get user mode info
@@ -128,6 +130,12 @@ export default function Profile() {
     })
   }, [firstName, lastName, country, birthdate, avatarUrl, saveProfile, setDocked])
 
+  const handleThemeChange = useCallback((value: boolean) => {
+    if (userData?.user?.id && userData?.preferences?.id) {
+      toggleTheme(userData.user.id, userData.preferences.id)
+    }
+  }, [toggleTheme, userData])
+
   // Countries query
   const { data: countries = [] } = useQuery<Country[]>({
     queryKey: ['countries'],
@@ -162,12 +170,19 @@ export default function Profile() {
       avatarUrl: string
       sidebarDocked: boolean
     }) => {
+      if (!userData?.user?.id) {
+        throw new Error('User ID not available')
+      }
+
       const response = await fetch('/api/user/profile', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          userId: userData.user.id
+        }),
       })
 
       if (!response.ok) {
@@ -426,6 +441,20 @@ export default function Profile() {
 
             {/* Right Column - Form Fields */}
             <div className="space-y-6">
+              {/* Tema */}
+              <div className="flex items-center justify-between py-2">
+                <div className="space-y-0.5">
+                  <Label className="text-sm font-medium">Modo oscuro</Label>
+                  <div className="text-xs text-muted-foreground">
+                    Cambiar entre tema claro y oscuro
+                  </div>
+                </div>
+                <Switch
+                  checked={isDark}
+                  onCheckedChange={handleThemeChange}
+                />
+              </div>
+              
               {/* Sidebar fixed */}
               <div className="flex items-center justify-between py-2">
                 <div className="space-y-0.5">
