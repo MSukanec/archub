@@ -19,7 +19,6 @@ interface Installment {
   movement_date: string
   amount: number
   description: string
-  installment_number?: string
   contact_id: string
   currency_id: string
   wallet_id: string
@@ -90,7 +89,6 @@ export default function ProjectInstallmentsPage() {
           movement_date,
           amount,
           description,
-          installment_number,
           contact_id,
           currency_id,
           wallet_id,
@@ -173,8 +171,7 @@ export default function ProjectInstallmentsPage() {
                        `${installment.contact?.first_name || ''} ${installment.contact?.last_name || ''}`.trim()
     
     return contactName.toLowerCase().includes(searchLower) ||
-           installment.description?.toLowerCase().includes(searchLower) ||
-           installment.installment_number?.toLowerCase().includes(searchLower)
+           installment.description?.toLowerCase().includes(searchLower)
   })
 
   const handleEdit = (installment: Installment) => {
@@ -274,16 +271,7 @@ export default function ProjectInstallmentsPage() {
         <div className="text-sm">{item.wallet?.name || 'Sin billetera'}</div>
       )
     },
-    {
-      key: "installment_number",
-      label: "Cuota",
-      width: "8%",
-      render: (item: Installment) => (
-        <div className="text-sm">
-          {item.installment_number ? `#${item.installment_number}` : '-'}
-        </div>
-      )
-    },
+
     {
       key: "actions",
       label: "Acciones",

@@ -26,11 +26,11 @@ const installmentSchema = z.object({
   movement_date: z.date({
     required_error: "Fecha es requerida",
   }),
-  amount: z.number().min(0.01, 'Monto debe ser mayor a 0'),
+  created_by: z.string().min(1, 'Creador es requerido'),
+  contact_id: z.string().min(1, 'Contacto es requerido'),
   currency_id: z.string().min(1, 'Moneda es requerida'),
   wallet_id: z.string().min(1, 'Billetera es requerida'),
-  contact_id: z.string().min(1, 'Contacto es requerido'),
-  installment_number: z.string().optional(),
+  amount: z.number().min(0.01, 'Monto debe ser mayor a 0'),
   description: z.string().optional(),
 })
 
@@ -59,11 +59,11 @@ export function NewInstallmentModal({
     resolver: zodResolver(installmentSchema),
     defaultValues: {
       movement_date: new Date(),
-      amount: 0,
+      created_by: '',
+      contact_id: '',
       currency_id: '',
       wallet_id: '',
-      contact_id: '',
-      installment_number: '',
+      amount: 0,
       description: '',
     }
   })
@@ -136,24 +136,46 @@ export function NewInstallmentModal({
     }
   })
 
-  // Get project investors (contacts)
-  const { data: projectInvestors } = useQuery({
-    queryKey: ['project-investors', projectId],
+  // Get organization members (creators)
+  const { data: organizationMembers } = useQuery({
+    queryKey: ['organization-members', organizationId],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase client not initialized')
       
       const { data, error } = await supabase
-        .from('project_investors')
+        .from('organization_members')
         .select(`
-          contact_id,
-          contacts (
+          id,
+          users (
             id,
-            first_name,
-            last_name,
-            company_name
+            full_name,
+            email
           )
         `)
-        .eq('project_id', projectId)
+        .eq('organization_id', organizationId)
+        .eq('is_active', true)
+
+      if (error) throw error
+      return data || []
+    }
+  })
+
+  // Get organization contacts (not just project investors)
+  const { data: organizationContacts } = useQuery({
+    queryKey: ['organization-contacts', organizationId],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase client not initialized')
+      
+      const { data, error } = await supabase
+        .from('contacts')
+        .select(`
+          id,
+          first_name,
+          last_name,
+          company_name
+        `)
+        .eq('organization_id', organizationId)
+        .eq('is_active', true)
 
       if (error) throw error
       return data || []
@@ -163,32 +185,21 @@ export function NewInstallmentModal({
   // Create installment mutation
   const createInstallmentMutation = useMutation({
     mutationFn: async (data: InstallmentForm) => {
-      if (!supabase || !userData?.user?.id || !cuotasConcept?.id) {
+      if (!supabase || !cuotasConcept?.id) {
         throw new Error('Datos requeridos faltantes')
       }
-
-      // Get current user's organization member ID
-      const { data: memberData, error: memberError } = await supabase
-        .from('organization_members')
-        .select('id')
-        .eq('user_id', userData.user.id)
-        .eq('organization_id', organizationId)
-        .single()
-
-      if (memberError) throw memberError
 
       const movementData = {
         movement_date: format(data.movement_date, 'yyyy-MM-dd'),
         amount: data.amount,
-        description: data.description || `Aporte ${data.installment_number ? `cuota ${data.installment_number}` : ''}`.trim(),
+        description: data.description || 'Aporte de proyecto',
         type_id: cuotasConcept.id, // Using "Cuotas" concept
         currency_id: data.currency_id,
         wallet_id: data.wallet_id,
         contact_id: data.contact_id,
         project_id: projectId,
         organization_id: organizationId,
-        created_by: memberData.id,
-        installment_number: data.installment_number,
+        created_by: data.created_by,
       }
 
       const { error } = await supabase
@@ -225,7 +236,7 @@ export function NewInstallmentModal({
     createInstallmentMutation.mutate(data)
   }
 
-  // Set default values when currencies and wallets are loaded
+  // Set default values when data is loaded
   useEffect(() => {
     if (currencies && currencies.length > 0) {
       const defaultCurrency = currencies.find(c => c.is_default)?.currencies
@@ -244,6 +255,16 @@ export function NewInstallmentModal({
     }
   }, [wallets, form])
 
+  // Set current user as default creator
+  useEffect(() => {
+    if (organizationMembers && organizationMembers.length > 0 && userData?.user?.id) {
+      const currentUserMember = organizationMembers.find(m => m.users?.id === userData.user.id)
+      if (currentUserMember && !form.getValues('created_by')) {
+        form.setValue('created_by', currentUserMember.id)
+      }
+    }
+  }, [organizationMembers, userData, form])
+
   return (
     <CustomModalLayout open={open} onClose={handleClose}>
       {{
@@ -254,8 +275,8 @@ export function NewInstallmentModal({
           />
         ),
         body: (
-          <CustomModalBody columns={2}>
-            <div className="col-span-1 space-y-2">
+          <CustomModalBody columns={1}>
+            <div className="space-y-2">
               <Label htmlFor="movement_date">Fecha *</Label>
               <Input
                 id="movement_date"
@@ -273,7 +294,106 @@ export function NewInstallmentModal({
               )}
             </div>
 
-            <div className="col-span-1 space-y-2">
+            <div className="space-y-2">
+              <Label>Creador *</Label>
+              <Select 
+                value={form.watch('created_by')} 
+                onValueChange={(value) => form.setValue('created_by', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar creador" />
+                </SelectTrigger>
+                <SelectContent>
+                  {organizationMembers?.map((member, index) => (
+                    <SelectItem key={`member-${member.id || index}`} value={member.id || ''}>
+                      {member.users?.full_name || member.users?.email || 'Usuario sin nombre'}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {form.formState.errors.created_by && (
+                <p className="text-sm text-destructive">
+                  {form.formState.errors.created_by.message}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label>Contacto *</Label>
+              <Select 
+                value={form.watch('contact_id')} 
+                onValueChange={(value) => form.setValue('contact_id', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar contacto" />
+                </SelectTrigger>
+                <SelectContent>
+                  {organizationContacts?.map((contact, index) => (
+                    <SelectItem key={`contact-${contact.id || index}`} value={contact.id || ''}>
+                      {contact.company_name || 
+                       `${contact.first_name} ${contact.last_name}` || 'Contacto sin nombre'}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {form.formState.errors.contact_id && (
+                <p className="text-sm text-destructive">
+                  {form.formState.errors.contact_id.message}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label>Moneda *</Label>
+              <Select 
+                value={form.watch('currency_id')} 
+                onValueChange={(value) => form.setValue('currency_id', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar moneda" />
+                </SelectTrigger>
+                <SelectContent>
+                  {currencies?.map((orgCurrency, index) => (
+                    <SelectItem key={`currency-${orgCurrency.currencies?.id || index}`} value={orgCurrency.currencies?.id || ''}>
+                      {orgCurrency.currencies?.code || 'N/A'} - {orgCurrency.currencies?.name || 'Sin nombre'}
+                      {orgCurrency.is_default && ' (Por defecto)'}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {form.formState.errors.currency_id && (
+                <p className="text-sm text-destructive">
+                  {form.formState.errors.currency_id.message}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label>Billetera *</Label>
+              <Select 
+                value={form.watch('wallet_id')} 
+                onValueChange={(value) => form.setValue('wallet_id', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar billetera" />
+                </SelectTrigger>
+                <SelectContent>
+                  {wallets?.map((orgWallet, index) => (
+                    <SelectItem key={`wallet-${orgWallet.wallets?.id || index}`} value={orgWallet.wallets?.id || ''}>
+                      {orgWallet.wallets?.name || 'Billetera sin nombre'}
+                      {orgWallet.is_default && ' (Por defecto)'}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {form.formState.errors.wallet_id && (
+                <p className="text-sm text-destructive">
+                  {form.formState.errors.wallet_id.message}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="amount">Monto *</Label>
               <Input
                 id="amount"
@@ -290,91 +410,9 @@ export function NewInstallmentModal({
               )}
             </div>
 
-            <div className="col-span-1 space-y-2">
-              <Label>Moneda *</Label>
-              <Select 
-                value={form.watch('currency_id')} 
-                onValueChange={(value) => form.setValue('currency_id', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar moneda" />
-                </SelectTrigger>
-                <SelectContent>
-                  {currencies?.map((orgCurrency) => (
-                    <SelectItem key={orgCurrency.currencies?.id} value={orgCurrency.currencies?.id || ''}>
-                      {orgCurrency.currencies?.code} - {orgCurrency.currencies?.name}
-                      {orgCurrency.is_default && ' (Por defecto)'}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {form.formState.errors.currency_id && (
-                <p className="text-sm text-destructive">
-                  {form.formState.errors.currency_id.message}
-                </p>
-              )}
-            </div>
 
-            <div className="col-span-1 space-y-2">
-              <Label>Billetera *</Label>
-              <Select 
-                value={form.watch('wallet_id')} 
-                onValueChange={(value) => form.setValue('wallet_id', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar billetera" />
-                </SelectTrigger>
-                <SelectContent>
-                  {wallets?.map((orgWallet) => (
-                    <SelectItem key={orgWallet.wallets?.id} value={orgWallet.wallets?.id || ''}>
-                      {orgWallet.wallets?.name}
-                      {orgWallet.is_default && ' (Por defecto)'}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {form.formState.errors.wallet_id && (
-                <p className="text-sm text-destructive">
-                  {form.formState.errors.wallet_id.message}
-                </p>
-              )}
-            </div>
 
-            <div className="col-span-1 space-y-2">
-              <Label>Contacto *</Label>
-              <Select 
-                value={form.watch('contact_id')} 
-                onValueChange={(value) => form.setValue('contact_id', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar contacto" />
-                </SelectTrigger>
-                <SelectContent>
-                  {projectInvestors?.map((investor) => (
-                    <SelectItem key={investor.contacts?.id} value={investor.contacts?.id || ''}>
-                      {investor.contacts?.company_name || 
-                       `${investor.contacts?.first_name} ${investor.contacts?.last_name}`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {form.formState.errors.contact_id && (
-                <p className="text-sm text-destructive">
-                  {form.formState.errors.contact_id.message}
-                </p>
-              )}
-            </div>
-
-            <div className="col-span-1 space-y-2">
-              <Label htmlFor="installment_number">Número de cuota</Label>
-              <Input
-                id="installment_number"
-                placeholder="Ej: 1, 2, 3..."
-                {...form.register('installment_number')}
-              />
-            </div>
-
-            <div className="col-span-2 space-y-2">
+            <div className="space-y-2">
               <Label htmlFor="description">Notas</Label>
               <Textarea
                 id="description"
@@ -389,7 +427,7 @@ export function NewInstallmentModal({
             onCancel={handleClose}
             onSubmit={form.handleSubmit(onSubmit)}
             submitText="Guardar Aporte"
-            isSubmitting={createInstallmentMutation.isPending}
+            isLoading={createInstallmentMutation.isPending}
           />
         )
       }}
