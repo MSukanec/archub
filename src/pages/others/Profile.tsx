@@ -30,7 +30,7 @@ export default function Profile() {
   const { data: userData, isLoading } = useCurrentUser()
   const { toast } = useToast()
   const { setDocked } = useSidebarStore()
-  const { isDark, toggleTheme } = useThemeStore()
+  const { isDark, setTheme } = useThemeStore()
   const [, navigate] = useLocation()
   
   // Function to get user mode info
@@ -66,7 +66,8 @@ export default function Profile() {
     country,
     birthdate,
     avatarUrl,
-    sidebarDocked
+    sidebarDocked,
+    theme: isDark ? 'dark' : 'light'
   }
 
   // Centralized auto-save with debounce
@@ -106,6 +107,7 @@ export default function Profile() {
         .from('user_preferences')
         .update({
           sidebar_docked: data.sidebarDocked,
+          theme: data.theme,
           updated_at: new Date().toISOString(),
         })
         .eq('user_id', userData.user.id)
@@ -137,9 +139,9 @@ export default function Profile() {
   }
 
   const handleThemeChange = (value: boolean) => {
-    if (userData?.user?.id && userData?.preferences?.id) {
-      toggleTheme(userData.user.id, userData.preferences.id)
-    }
+    // Update theme immediately in UI
+    setTheme(value)
+    // The auto-save system will handle the database update automatically
   }
 
   // Countries query
