@@ -52,32 +52,20 @@ export function useDebouncedAutoSave<T>({
     // Deep comparison to avoid unnecessary saves
     const hasChanged = JSON.stringify(data) !== JSON.stringify(previousDataRef.current);
     
-    console.log('useDebouncedAutoSave effect:', {
-      hasChanged,
-      enabled,
-      data,
-      previousData: previousDataRef.current
-    });
-    
     if (!hasChanged || !enabled || !data) {
-      console.log('Skipping save:', { hasChanged, enabled, dataExists: !!data });
       return;
     }
 
     // Clear any existing timeout
     if (timeoutRef.current) {
-      console.log('Clearing existing timeout');
       clearTimeout(timeoutRef.current);
     }
-
-    console.log('Setting timeout for auto-save in', delay, 'ms');
     
     // Update previous data reference immediately
     previousDataRef.current = data;
     
     // Set new timeout for debounced save
     timeoutRef.current = setTimeout(() => {
-      console.log('Executing auto-save...');
       debouncedSave(data);
     }, delay);
 

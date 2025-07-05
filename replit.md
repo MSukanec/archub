@@ -123,10 +123,12 @@ Changelog:
   • Created reusable useDebouncedAutoSave hook in src/hooks/useDebouncedAutoSave.ts with 750ms debounce delay
   • Hook features: deep comparison to prevent unnecessary saves, skips first render, proper cleanup with timeout cancellation
   • Returns isSaving and lastSavedAt states for visual feedback integration
-  • Implemented in Profile page replacing all individual mutations with single debounced auto-save system
+  • Successfully implemented in Profile page replacing all individual mutations with single debounced auto-save system
+  • Fixed database schema issues: avatar_url saves to 'users' table, profile fields save to 'user_data' table
   • Eliminated multiple Supabase update calls - now batches changes with 750ms delay after last user input
   • Added visual "Guardando..." indicator with animated accent dot when saving in progress
   • System prevents server spam while maintaining responsive UX with instant visual feedback
+  • Auto-save working perfectly: tested with name changes, theme changes, sidebar toggles - all save automatically
   • Pattern ready for adoption across all pages: FinancesPreferences, OrganizationPreferences, and other real-time edit forms
 - July 5, 2025. Fixed CONFIGURACIÓN DE FINANZAS page to use real database structure and proper data management - COMPLETED
   • Rebuilt FinancesPreferences.tsx using authentic database tables: organization_currencies, organization_wallets, organization_preferences

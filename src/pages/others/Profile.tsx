@@ -91,6 +91,16 @@ export default function Profile() {
 
       if (userDataError) throw userDataError
 
+      // Update users table for avatar
+      if (data.avatarUrl !== undefined) {
+        const { error: userError } = await supabase
+          .from('users')
+          .update({ avatar_url: data.avatarUrl })
+          .eq('id', userData.user.id)
+
+        if (userError) throw userError
+      }
+
       // Update preferences table
       const { error: preferencesError } = await supabase
         .from('user_preferences')
