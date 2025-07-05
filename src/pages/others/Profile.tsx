@@ -56,110 +56,6 @@ export default function Profile() {
   const [showAvatarUpload, setShowAvatarUpload] = useState(false)
   const [sidebarDocked, setSidebarDocked] = useState(false)
 
-  // Debounced auto-save handlers
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
-
-  const saveProfile = useCallback((data: any) => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
-    }
-    
-    timeoutRef.current = setTimeout(() => {
-      updateProfileMutation.mutate(data)
-    }, 1500)
-  }, [])
-
-  const handleFirstNameChange = useCallback((value: string) => {
-    setFirstName(value)
-    saveProfile({
-      firstName: value,
-      lastName,
-      country,
-      birthdate,
-      avatarUrl,
-      sidebarDocked
-    })
-  }, [lastName, country, birthdate, avatarUrl, sidebarDocked, saveProfile])
-
-  const handleLastNameChange = useCallback((value: string) => {
-    setLastName(value)
-    saveProfile({
-      firstName,
-      lastName: value,
-      country,
-      birthdate,
-      avatarUrl,
-      sidebarDocked
-    })
-  }, [firstName, country, birthdate, avatarUrl, sidebarDocked, saveProfile])
-
-  const handleCountryChange = useCallback((value: string) => {
-    setCountry(value)
-    saveProfile({
-      firstName,
-      lastName,
-      country: value,
-      birthdate,
-      avatarUrl,
-      sidebarDocked
-    })
-  }, [firstName, lastName, birthdate, avatarUrl, sidebarDocked, saveProfile])
-
-  const handleBirthdateChange = useCallback((value: string) => {
-    setBirthdate(value)
-    saveProfile({
-      firstName,
-      lastName,
-      country,
-      birthdate: value,
-      avatarUrl,
-      sidebarDocked
-    })
-  }, [firstName, lastName, country, avatarUrl, sidebarDocked, saveProfile])
-
-  const handleSidebarDockedChange = useCallback((value: boolean) => {
-    setSidebarDocked(value)
-    setDocked(value)
-    saveProfile({
-      firstName,
-      lastName,
-      country,
-      birthdate,
-      avatarUrl,
-      sidebarDocked: value
-    })
-  }, [firstName, lastName, country, birthdate, avatarUrl, saveProfile, setDocked])
-
-  const handleThemeChange = useCallback((value: boolean) => {
-    if (userData?.user?.id && userData?.preferences?.id) {
-      toggleTheme(userData.user.id, userData.preferences.id)
-    }
-  }, [toggleTheme, userData])
-
-  // Countries query
-  const { data: countries = [] } = useQuery<Country[]>({
-    queryKey: ['countries'],
-    queryFn: async () => {
-      const response = await fetch('/api/countries')
-      if (!response.ok) {
-        throw new Error('Failed to fetch countries')
-      }
-      return response.json()
-    },
-  })
-
-  // Load profile data
-  useEffect(() => {
-    if (userData) {
-      setFirstName(userData.user_data?.first_name || '')
-      setLastName(userData.user_data?.last_name || '')
-      setCountry(userData.user_data?.country || '')
-      setBirthdate(userData.user_data?.birthdate || '')
-      setAvatarUrl(userData.user?.avatar_url || '')
-      setSidebarDocked(userData.preferences?.sidebar_docked || false)
-    }
-  }, [userData])
-
   // Profile update mutation
   const updateProfileMutation = useMutation({
     mutationFn: async (data: {
@@ -212,6 +108,109 @@ export default function Profile() {
       })
     },
   })
+
+  // Debounced auto-save handlers
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  const saveProfile = useCallback((data: any) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+    }
+    
+    timeoutRef.current = setTimeout(() => {
+      updateProfileMutation.mutate(data)
+    }, 300)
+  }, [updateProfileMutation])
+
+  const handleFirstNameChange = useCallback((value: string) => {
+    updateProfileMutation.mutate({
+      firstName: value,
+      lastName,
+      country,
+      birthdate,
+      avatarUrl,
+      sidebarDocked
+    })
+  }, [lastName, country, birthdate, avatarUrl, sidebarDocked, updateProfileMutation])
+
+  const handleLastNameChange = useCallback((value: string) => {
+    updateProfileMutation.mutate({
+      firstName,
+      lastName: value,
+      country,
+      birthdate,
+      avatarUrl,
+      sidebarDocked
+    })
+  }, [firstName, country, birthdate, avatarUrl, sidebarDocked, updateProfileMutation])
+
+  const handleCountryChange = useCallback((value: string) => {
+    setCountry(value)
+    updateProfileMutation.mutate({
+      firstName,
+      lastName,
+      country: value,
+      birthdate,
+      avatarUrl,
+      sidebarDocked
+    })
+  }, [firstName, lastName, birthdate, avatarUrl, sidebarDocked, updateProfileMutation])
+
+  const handleBirthdateChange = useCallback((value: string) => {
+    setBirthdate(value)
+    updateProfileMutation.mutate({
+      firstName,
+      lastName,
+      country,
+      birthdate: value,
+      avatarUrl,
+      sidebarDocked
+    })
+  }, [firstName, lastName, country, avatarUrl, sidebarDocked, updateProfileMutation])
+
+  const handleSidebarDockedChange = useCallback((value: boolean) => {
+    setSidebarDocked(value)
+    setDocked(value)
+    // Guardado inmediato para switches
+    updateProfileMutation.mutate({
+      firstName,
+      lastName,
+      country,
+      birthdate,
+      avatarUrl,
+      sidebarDocked: value
+    })
+  }, [firstName, lastName, country, birthdate, avatarUrl, updateProfileMutation, setDocked])
+
+  const handleThemeChange = useCallback((value: boolean) => {
+    if (userData?.user?.id && userData?.preferences?.id) {
+      toggleTheme(userData.user.id, userData.preferences.id)
+    }
+  }, [toggleTheme, userData])
+
+  // Countries query
+  const { data: countries = [] } = useQuery<Country[]>({
+    queryKey: ['countries'],
+    queryFn: async () => {
+      const response = await fetch('/api/countries')
+      if (!response.ok) {
+        throw new Error('Failed to fetch countries')
+      }
+      return response.json()
+    },
+  })
+
+  // Load profile data
+  useEffect(() => {
+    if (userData) {
+      setFirstName(userData.user_data?.first_name || '')
+      setLastName(userData.user_data?.last_name || '')
+      setCountry(userData.user_data?.country || '')
+      setBirthdate(userData.user_data?.birthdate || '')
+      setAvatarUrl(userData.user?.avatar_url || '')
+      setSidebarDocked(userData.preferences?.sidebar_docked || false)
+    }
+  }, [userData])
 
   // Sign out mutation
   const signOutMutation = useMutation({
@@ -386,14 +385,16 @@ export default function Profile() {
                   <Label className="text-sm font-medium">Nombre</Label>
                   <Input
                     value={firstName}
-                    onChange={(e) => handleFirstNameChange(e.target.value)}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    onBlur={(e) => handleFirstNameChange(e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Apellido</Label>
                   <Input
                     value={lastName}
-                    onChange={(e) => handleLastNameChange(e.target.value)}
+                    onChange={(e) => setLastName(e.target.value)}
+                    onBlur={(e) => handleLastNameChange(e.target.value)}
                   />
                 </div>
               </div>
