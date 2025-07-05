@@ -1,17 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { DollarSign, Settings, Wallet, Tags, Plus, Trash2 } from 'lucide-react';
+import { DollarSign, CreditCard, Coins, Wallet, Bell, Settings } from 'lucide-react';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Checkbox } from '@/components/ui/checkbox';
-import { CustomComboBox } from '@/components/ui-custom/misc/CustomComboBox';
+import { Switch } from '@/components/ui/switch';
 import { CustomMultiComboBox } from '@/components/ui-custom/misc/CustomMultiComboBox';
-import { CustomMovementConcepts } from '@/components/ui-custom/misc/CustomMovementConcepts';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useCurrencies } from '@/hooks/use-currencies';
@@ -20,12 +16,6 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';
 import { useNavigationStore } from '@/stores/navigationStore';
-
-interface Wallet {
-  id: string;
-  name: string;
-  created_at: string;
-}
 
 interface Currency {
   id: string;
@@ -37,23 +27,22 @@ interface Currency {
   created_at: string;
 }
 
+interface Wallet {
+  id: string;
+  name: string;
+  created_at: string;
+}
+
 interface OrganizationPreferences {
   id: string;
   organization_id: string;
   default_currency_id: string;
   default_wallet_id: string;
-  default_pdf_template_id: string;
+  secondary_currencies: string[];
+  secondary_wallets: string[];
+  enable_notifications: boolean;
   created_at: string;
   updated_at: string;
-}
-
-interface MovementConcept {
-  id: string;
-  name: string;
-  parent_id?: string;
-  organization_id?: string;
-  is_system: boolean;
-  children?: MovementConcept[];
 }
 
 export default function FinancesPreferences() {
@@ -61,28 +50,6 @@ export default function FinancesPreferences() {
   const { setSidebarContext } = useNavigationStore();
   const { data: currencies } = useCurrencies();
   const { data: wallets } = useWallets();
-
-  // Fetch movement concepts
-  const { data: movementConcepts = [] } = useQuery({
-    queryKey: ['movement-concepts', userData?.organization?.id],
-    queryFn: async () => {
-      if (!userData?.organization?.id || !supabase) return [];
-
-      const { data, error } = await supabase
-        .from('movement_concepts')
-        .select('*')
-        .or(`organization_id.is.null,organization_id.eq.${userData.organization.id}`)
-        .order('name', { ascending: true });
-
-      if (error) {
-        console.error('Error fetching movement concepts:', error);
-        return [];
-      }
-
-      return data as MovementConcept[];
-    },
-    enabled: !!userData?.organization?.id && !!supabase,
-  });
   const { toast } = useToast();
 
   // Auto-save debounce refs
@@ -91,10 +58,10 @@ export default function FinancesPreferences() {
 
   // Form states
   const [defaultCurrency, setDefaultCurrency] = useState<string>('');
+  const [secondaryCurrencies, setSecondaryCurrencies] = useState<string[]>([]);
   const [defaultWallet, setDefaultWallet] = useState<string>('');
-  const [pdfTemplateOptions, setPdfTemplateOptions] = useState<string[]>([]);
+  const [secondaryWallets, setSecondaryWallets] = useState<string[]>([]);
   const [enableNotifications, setEnableNotifications] = useState(false);
-
 
   // Set sidebar context on component mount
   useEffect(() => {
@@ -110,7 +77,7 @@ export default function FinancesPreferences() {
       }
 
       const { data, error } = await supabase
-        .from('organization_preferences')
+        ?.from('organization_preferences')
         .select('*')
         .eq('organization_id', userData.organization.id)
         .single();
@@ -129,9 +96,9 @@ export default function FinancesPreferences() {
     if (preferences) {
       setDefaultCurrency(preferences.default_currency_id || '');
       setDefaultWallet(preferences.default_wallet_id || '');
-      setPdfTemplateOptions(preferences.pdf_template_options || []);
+      setSecondaryCurrencies(preferences.secondary_currencies || []);
+      setSecondaryWallets(preferences.secondary_wallets || []);
       setEnableNotifications(preferences.enable_notifications || false);
-
     }
   }, [preferences]);
 
@@ -143,15 +110,15 @@ export default function FinancesPreferences() {
       }
 
       const { error } = await supabase
-        .from('organization_preferences')
+        ?.from('organization_preferences')
         .upsert(
           {
             organization_id: userData.organization.id,
             default_currency_id: data.defaultCurrency || null,
             default_wallet_id: data.defaultWallet || null,
-            pdf_template_options: data.pdfTemplateOptions || [],
+            secondary_currencies: data.secondaryCurrencies || [],
+            secondary_wallets: data.secondaryWallets || [],
             enable_notifications: data.enableNotifications || false,
-
             updated_at: new Date().toISOString(),
           },
           { onConflict: 'organization_id' }
@@ -188,21 +155,21 @@ export default function FinancesPreferences() {
         savePreferencesMutation.mutate({
           defaultCurrency,
           defaultWallet,
-          pdfTemplateOptions,
+          secondaryCurrencies,
+          secondaryWallets,
           enableNotifications,
-
         });
       }
     }, 1500); // 1.5 second delay
-  }, [defaultCurrency, defaultWallet, pdfTemplateOptions, enableNotifications, pendingChanges, savePreferencesMutation]);
+  }, [defaultCurrency, defaultWallet, secondaryCurrencies, secondaryWallets, enableNotifications, pendingChanges, savePreferencesMutation]);
 
   // Trigger auto-save when form values change
   useEffect(() => {
     if (preferences) { // Only auto-save after initial load
       setPendingChanges(true);
-  
+      debouncedSave();
     }
-  }, [defaultCurrency, defaultWallet, pdfTemplateOptions, enableNotifications, debouncedSave, preferences]);
+  }, [defaultCurrency, defaultWallet, secondaryCurrencies, secondaryWallets, enableNotifications, debouncedSave, preferences]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -222,19 +189,21 @@ export default function FinancesPreferences() {
     setDefaultWallet(value);
   };
 
-  const handlePdfTemplateOptionsChange = (values: string[]) => {
-    setPdfTemplateOptions(values);
+  const handleSecondaryCurrenciesChange = (values: string[]) => {
+    setSecondaryCurrencies(values);
+  };
+
+  const handleSecondaryWalletsChange = (values: string[]) => {
+    setSecondaryWallets(values);
   };
 
   const handleNotificationsChange = (checked: boolean) => {
     setEnableNotifications(checked);
   };
 
-
-
   if (isLoadingPreferences) {
     return (
-      <Layout>
+      <Layout headerProps={{ title: "Configuración de Finanzas" }}>
         <div className="flex items-center justify-center h-64">
           <div className="text-sm text-muted-foreground">Cargando preferencias...</div>
         </div>
@@ -243,59 +212,48 @@ export default function FinancesPreferences() {
   }
 
   return (
-    <Layout>
+    <Layout headerProps={{ title: "Configuración de Finanzas" }}>
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header */}
         <div className="space-y-2">
           <h1 className="text-2xl font-semibold">Configuración de Finanzas</h1>
           <p className="text-sm text-muted-foreground">
-            Configura las preferencias financieras de tu organización
+            Configura las preferencias financieras de tu organización, incluyendo monedas y billeteras predeterminadas.
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Left Column - Titles and Descriptions */}
           <div className="space-y-12">
-            {/* Financial Preferences Section */}
+            {/* Monedas y Billeteras Section */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <DollarSign className="w-4 h-4" />
-                <h2 className="text-lg font-semibold">Preferencias Financieras</h2>
+                <Coins className="w-4 h-4" />
+                <h2 className="text-lg font-semibold">Monedas y Billeteras</h2>
               </div>
               <p className="text-sm text-muted-foreground">
-                Configura las opciones predeterminadas para las operaciones financieras
+                Configura las monedas y billeteras que utilizas frecuentemente en tu organización
               </p>
             </div>
 
-            {/* Notifications Section */}
+            {/* Notificaciones Section */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Settings className="w-4 h-4" />
+                <Bell className="w-4 h-4" />
                 <h2 className="text-lg font-semibold">Notificaciones</h2>
               </div>
               <p className="text-sm text-muted-foreground">
-                Controla qué notificaciones financieras quieres recibir
-              </p>
-            </div>
-
-            {/* Movement Concepts Section */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Tags className="w-4 h-4" />
-                <h2 className="text-lg font-semibold">Conceptos de Movimiento</h2>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Gestiona los conceptos utilizados para categorizar tus movimientos financieros
+                Controla qué notificaciones financieras quieres recibir en tu organización
               </p>
             </div>
           </div>
 
           {/* Right Column - Form Fields */}
           <div className="space-y-8">
-            {/* Financial Preferences */}
+            {/* Monedas y Billeteras */}
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="default-currency" className="required-asterisk">Moneda por defecto</Label>
+                <Label htmlFor="default-currency" className="required-asterisk">Moneda por Defecto</Label>
                 <Select value={defaultCurrency} onValueChange={handleCurrencyChange}>
                   <SelectTrigger id="default-currency">
                     <SelectValue placeholder="Selecciona una moneda" />
@@ -311,10 +269,24 @@ export default function FinancesPreferences() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="default-wallet" className="required-asterisk">Cartera por defecto</Label>
+                <Label htmlFor="secondary-currencies">Monedas Secundarias</Label>
+                <CustomMultiComboBox
+                  options={currencies?.filter(c => c.id !== defaultCurrency).map(currency => ({
+                    value: currency.id,
+                    label: `${currency.name} (${currency.symbol})`
+                  })) || []}
+                  values={secondaryCurrencies}
+                  onValuesChange={handleSecondaryCurrenciesChange}
+                  placeholder="Selecciona monedas secundarias"
+                  searchPlaceholder="Buscar monedas..."
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="default-wallet" className="required-asterisk">Billetera por Defecto</Label>
                 <Select value={defaultWallet} onValueChange={handleWalletChange}>
                   <SelectTrigger id="default-wallet">
-                    <SelectValue placeholder="Selecciona una cartera" />
+                    <SelectValue placeholder="Selecciona una billetera" />
                   </SelectTrigger>
                   <SelectContent>
                     {wallets?.map((wallet) => (
@@ -327,18 +299,16 @@ export default function FinancesPreferences() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="pdf-templates">Plantillas PDF disponibles</Label>
+                <Label htmlFor="secondary-wallets">Billeteras Secundarias</Label>
                 <CustomMultiComboBox
-                  options={[
-                    { value: 'invoice', label: 'Factura estándar' },
-                    { value: 'receipt', label: 'Recibo simple' },
-                    { value: 'detailed', label: 'Reporte detallado' },
-                    { value: 'summary', label: 'Resumen financiero' },
-                  ]}
-                  values={pdfTemplateOptions}
-                  onValuesChange={handlePdfTemplateOptionsChange}
-                  placeholder="Selecciona plantillas PDF"
-                  searchPlaceholder="Buscar plantillas..."
+                  options={wallets?.filter(w => w.id !== defaultWallet).map(wallet => ({
+                    value: wallet.id,
+                    label: wallet.name
+                  })) || []}
+                  values={secondaryWallets}
+                  onValuesChange={handleSecondaryWalletsChange}
+                  placeholder="Selecciona billeteras secundarias"
+                  searchPlaceholder="Buscar billeteras..."
                 />
               </div>
             </div>
@@ -347,34 +317,18 @@ export default function FinancesPreferences() {
 
             {/* Notifications Settings */}
             <div className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <Checkbox
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="enable-notifications">Habilitar notificaciones financieras</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Recibe notificaciones sobre movimientos importantes y alertas financieras
+                  </p>
+                </div>
+                <Switch
                   id="enable-notifications"
                   checked={enableNotifications}
                   onCheckedChange={handleNotificationsChange}
                 />
-                <Label htmlFor="enable-notifications">Habilitar notificaciones financieras</Label>
-              </div>
-
-
-            </div>
-
-            <Separator />
-
-            {/* Movement Concepts */}
-            <div className="space-y-4">
-              {/* Temporarily disabled while fixing props issue */}
-              {/* 
-              <CustomMovementConcepts
-                movementConcepts={movementConcepts}
-                organizationId={userData?.organization?.id || ''}
-                queryKey={['movement-concepts', userData?.organization?.id]}
-              />
-              */}
-              <div className="p-4 border rounded-lg">
-                <p className="text-sm text-muted-foreground">
-                  Conceptos de movimientos temporalmente deshabilitados
-                </p>
               </div>
             </div>
           </div>
