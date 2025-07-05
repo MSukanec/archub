@@ -144,6 +144,8 @@ export function NewDesignDocumentModal({
         throw new Error('Datos de usuario incompletos');
       }
 
+
+
       let filePath = '';
       let fileUrl = '';
       let fileType = '';
@@ -167,7 +169,6 @@ export function NewDesignDocumentModal({
         file_path: filePath,
         file_url: fileUrl,
         file_name: selectedFile ? selectedFile.name : (editingDocument?.file_name || ''),
-        file_size: selectedFile ? selectedFile.size : (editingDocument?.file_size || 0),
         file_type: fileType,
         version_number: editingDocument ? editingDocument.version_number : 1,
         project_id: userData.preferences.last_project_id,
