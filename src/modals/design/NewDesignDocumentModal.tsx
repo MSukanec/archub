@@ -20,32 +20,24 @@ import { Badge } from '@/components/ui/badge';
 import { FileText, Upload, X, File } from 'lucide-react';
 
 const formSchema = z.object({
-  name: z.string().min(1, 'El nombre es requerido'),
   description: z.string().optional(),
   folder: z.string().min(1, 'La carpeta es requerida'),
   status: z.enum(['pendiente', 'en_revision', 'aprobado', 'rechazado']),
-  visibility: z.enum(['public', 'private']),
-  design_phase_id: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
 interface DesignDocument {
   id: string;
-  name: string;
   description?: string;
   file_path: string;
   file_url: string;
-  file_name: string;
-  file_size: number;
   file_type: string;
   version_number: number;
   project_id: string;
   organization_id: string;
-  design_phase_id?: string;
   folder: string;
   status: string;
-  visibility: string;
   created_by: string;
   created_at: string;
   updated_at: string;
@@ -71,12 +63,9 @@ export function NewDesignDocumentModal({
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: '',
       description: '',
       folder: '',
       status: 'pendiente',
-      visibility: 'public',
-      design_phase_id: '',
     },
   });
 
@@ -84,21 +73,15 @@ export function NewDesignDocumentModal({
   useEffect(() => {
     if (editingDocument) {
       form.reset({
-        name: editingDocument.name,
         description: editingDocument.description || '',
         folder: editingDocument.folder,
         status: editingDocument.status as any,
-        visibility: editingDocument.visibility as any,
-        design_phase_id: editingDocument.design_phase_id || '',
       });
     } else {
       form.reset({
-        name: '',
         description: '',
         folder: '',
         status: 'pendiente',
-        visibility: 'public',
-        design_phase_id: '',
       });
     }
   }, [editingDocument, form]);
@@ -107,10 +90,6 @@ export function NewDesignDocumentModal({
     const file = event.target.files?.[0];
     if (file) {
       setSelectedFile(file);
-      // Auto-fill name if empty
-      if (!form.getValues('name')) {
-        form.setValue('name', file.name.replace(/\.[^/.]+$/, ''));
-      }
     }
   };
 
@@ -169,22 +148,15 @@ export function NewDesignDocumentModal({
       }
 
       const documentData = {
-        name: values.name,
         description: values.description || null,
         file_path: filePath,
         file_url: fileUrl,
-        file_name: selectedFile ? selectedFile.name : (editingDocument?.file_name || ''),
-        file_size: selectedFile ? selectedFile.size : (editingDocument?.file_size || 0),
         file_type: fileType,
         version_number: editingDocument ? editingDocument.version_number : 1,
         project_id: userData.preferences.last_project_id,
         organization_id: userData.organization.id,
-        design_phase_id: values.design_phase_id || null,
         folder: values.folder,
         status: values.status,
-        visibility: values.visibility,
-        created_by: userData.user.id,
-        updated_at: new Date().toISOString(),
       };
 
       if (editingDocument) {
@@ -332,20 +304,6 @@ export function NewDesignDocumentModal({
             {/* Document Information */}
             <FormField
               control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nombre</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="Nombre del documento" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
               name="description"
               render={({ field }) => (
                 <FormItem>
@@ -397,27 +355,6 @@ export function NewDesignDocumentModal({
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="visibility"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Visibilidad</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona visibilidad" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="public">Público</SelectItem>
-                        <SelectItem value="private">Privado</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
                 </div>
               </form>
             </Form>
