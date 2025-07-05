@@ -13,6 +13,7 @@ interface SlideModalProps {
   onSaveAll?: () => void;
   isOpen?: boolean;
   className?: string;
+  useCustomLayout?: boolean; // Para cuando las vistas manejan su propio header/body/footer
 }
 
 export default function SlideModal({
@@ -22,7 +23,8 @@ export default function SlideModal({
   onClose,
   onSaveAll,
   isOpen = true,
-  className
+  className,
+  useCustomLayout = false
 }: SlideModalProps) {
   const {
     activeView,
@@ -103,39 +105,10 @@ export default function SlideModal({
         )}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-[var(--card-border)] bg-[var(--card-bg)] relative z-10">
-          <div className="flex items-center gap-3">
-            {canGoBack && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={goBack}
-                className="h-8 w-8 p-0 rounded-full hover:bg-[var(--muted)]"
-                disabled={isAnimating}
-              >
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-            )}
-            <h2 className="text-lg font-semibold text-[var(--foreground)]">
-              {title || 'Modal'}
-            </h2>
-          </div>
-          
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="h-8 w-8 p-0 rounded-full hover:bg-[var(--muted)]"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-
-        {/* Content Area with Slide Animation */}
-        <CardContent className="p-0 flex-1 relative overflow-hidden">
+        {useCustomLayout ? (
+          // Layout personalizado - las vistas manejan su propio header/body/footer
           <SlideNavigationContext.Provider value={contextValue}>
-            <div className="relative h-full">
+            <div className="relative h-full flex flex-col">
               {viewKeys.map((viewKey, index) => {
                 const isActive = viewKey === activeView;
                 let transformClass = '';
@@ -143,10 +116,8 @@ export default function SlideModal({
                 if (isActive) {
                   transformClass = 'translate-x-0';
                 } else if (index < currentViewIndex) {
-                  // Previous views slide to the left
                   transformClass = '-translate-x-full';
                 } else {
-                  // Next views slide to the right
                   transformClass = 'translate-x-full';
                 }
 
@@ -156,34 +127,103 @@ export default function SlideModal({
                     className={cn(
                       "absolute inset-0 transition-transform duration-300 ease-in-out",
                       transformClass,
-                      "overflow-y-auto scrollbar-hide",
+                      "flex flex-col h-full",
                       "bg-[var(--card-bg)]"
                     )}
                     style={{
                       visibility: isActive || isAnimating ? 'visible' : 'hidden'
                     }}
                   >
-                    <div className="p-4 min-h-full">
-                      {views[viewKey]}
-                    </div>
+                    {views[viewKey]}
                   </div>
                 );
               })}
             </div>
           </SlideNavigationContext.Provider>
-        </CardContent>
+        ) : (
+          // Layout estándar con header y footer automáticos
+          <>
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-[var(--card-border)] bg-[var(--card-bg)] relative z-10">
+              <div className="flex items-center gap-3">
+                {canGoBack && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={goBack}
+                    className="h-8 w-8 p-0 rounded-full hover:bg-[var(--muted)]"
+                    disabled={isAnimating}
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                  </Button>
+                )}
+                <h2 className="text-lg font-semibold text-[var(--foreground)]">
+                  {title || 'Modal'}
+                </h2>
+              </div>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onClose}
+                className="h-8 w-8 p-0 rounded-full hover:bg-[var(--muted)]"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
 
-        {/* Footer with Save Button (optional) */}
-        {onSaveAll && (
-          <div className="p-4 border-t border-[var(--card-border)] bg-[var(--card-bg)]">
-            <Button 
-              onClick={onSaveAll}
-              className="w-full"
-              disabled={isAnimating}
-            >
-              Guardar Todo
-            </Button>
-          </div>
+            {/* Content Area with Slide Animation */}
+            <CardContent className="p-0 flex-1 relative overflow-hidden">
+              <SlideNavigationContext.Provider value={contextValue}>
+                <div className="relative h-full">
+                  {viewKeys.map((viewKey, index) => {
+                    const isActive = viewKey === activeView;
+                    let transformClass = '';
+                    
+                    if (isActive) {
+                      transformClass = 'translate-x-0';
+                    } else if (index < currentViewIndex) {
+                      transformClass = '-translate-x-full';
+                    } else {
+                      transformClass = 'translate-x-full';
+                    }
+
+                    return (
+                      <div
+                        key={viewKey}
+                        className={cn(
+                          "absolute inset-0 transition-transform duration-300 ease-in-out",
+                          transformClass,
+                          "overflow-y-auto scrollbar-hide",
+                          "bg-[var(--card-bg)]"
+                        )}
+                        style={{
+                          visibility: isActive || isAnimating ? 'visible' : 'hidden'
+                        }}
+                      >
+                        <div className="p-4 min-h-full">
+                          {views[viewKey]}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </SlideNavigationContext.Provider>
+            </CardContent>
+
+            {/* Footer with Save Button (optional) */}
+            {onSaveAll && (
+              <div className="p-4 border-t border-[var(--card-border)] bg-[var(--card-bg)]">
+                <Button 
+                  onClick={onSaveAll}
+                  className="w-full"
+                  disabled={isAnimating}
+                >
+                  Guardar Todo
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </Card>
     </div>

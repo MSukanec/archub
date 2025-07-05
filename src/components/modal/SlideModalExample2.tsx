@@ -8,7 +8,7 @@ import { Calendar, Camera, Users, Cloud } from 'lucide-react';
 import { SlideModal, SlideModalHeader, SlideModalBody, SlideModalFooter, SlideModalSectionBlock, useSlideNavigation } from './index';
 
 // Vista principal del resumen usando nuevos componentes
-function ResumenBitacora() {
+function ResumenBitacora({ onClose }: { onClose?: () => void }) {
   const { navigateTo } = useSlideNavigation();
   
   return (
@@ -16,7 +16,7 @@ function ResumenBitacora() {
       <SlideModalHeader 
         title="Bitácora del Día"
         showBack={false}
-        onClose={() => {}} // Se maneja desde el SlideModal principal
+        onClose={onClose || (() => {})}
       />
       
       <SlideModalBody>
@@ -436,7 +436,7 @@ export default function SlideModalExample2() {
   // Nota: En este ejemplo, cada vista maneja su propio header, body y footer
   // No usamos el header/footer automático del SlideModal
   const views = {
-    main: <ResumenBitacora />,
+    main: <ResumenBitacora onClose={() => setIsOpen(false)} />,
     clima: <FormularioClima />,
     equipo: <FormularioEquipo />,
     fotos: <FormularioFotos />,
@@ -460,6 +460,7 @@ export default function SlideModalExample2() {
         initialView="main"
         views={views}
         onClose={() => setIsOpen(false)}
+        useCustomLayout={true}
         // No usamos title, onSaveAll aquí porque cada vista maneja su propio header/footer
       />
     </div>
