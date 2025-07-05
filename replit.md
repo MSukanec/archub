@@ -119,17 +119,6 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- July 5, 2025. Redesigned Finance Dashboard to match Construction Dashboard styling with real data integration - COMPLETED
-  • Completely rebuilt FinancesDashboard.tsx following exact styling structure of ConstructionDashboard.tsx
-  • Removed all complex charts and mock data visualizations in favor of clean card-based layout
-  • Implemented 4-card metrics grid: Balance, Ingresos, Egresos, Movimientos with real data from Supabase
-  • Added "Actividad Reciente" and "Estado Financiero" cards in 2-column layout matching construction dashboard
-  • Integrated CustomEmptyState components for empty data scenarios with proper action buttons
-  • Created "Acciones Rápidas" section with 4 buttons: Movimientos, Preferencias, Nuevo Ingreso, Nuevo Egreso
-  • All data sourced from useFinancialSummary and useRecentMovements hooks with real financial calculations
-  • Eliminated MonthlyFlowChart, WalletBalanceChart and complex layouts for clean, consistent interface
-  • Applied identical Card styling, spacing, colors, and CustomEmptyState usage as RESUMEN DE OBRA
-  • Dashboard now uses only authentic financial data without any mock or placeholder content
 - July 5, 2025. Enhanced design documentation with created_by and design_phase_id fields plus modal field reordering - COMPLETED
   • Added created_by field (mandatory) with dropdown showing all organization members, pre-selects current user
   • Added design_phase_id field (optional) with dropdown showing both organization-specific and default phases (NULL)
