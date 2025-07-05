@@ -52,19 +52,22 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 interface DesignDocument {
   id: string;
-  file_name: string;
+  name: string;
   description?: string;
   file_path: string;
   file_url: string;
   file_type: string;
+  file_size?: number;
   version_number: number;
   project_id: string;
   organization_id: string;
+  design_phase_id?: string;
   folder: string;
   status: string;
+  visibility?: string;
   created_by: string;
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
   creator?: {
     id: string;
     full_name: string;
@@ -102,16 +105,38 @@ export default function DesignDocumentation() {
         throw new Error('Supabase client not initialized or no project selected');
       }
 
+      // Get all documents for the project
       const { data, error } = await supabase
         .from('design_documents')
         .select('*')
         .eq('project_id', projectId)
+        .order('version_number', { ascending: false })
         .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching design documents:', error);
         throw error;
       }
+
+      // Filter to get only the latest version of each document (grouped by name + folder + design_phase_id)
+      const latestDocuments = new Map<string, DesignDocument>();
+      
+      if (data) {
+        data.forEach((doc: DesignDocument) => {
+          const groupKey = `${doc.name}-${doc.folder}-${doc.design_phase_id || 'null'}`;
+          const existing = latestDocuments.get(groupKey);
+          
+          if (!existing || doc.version_number > existing.version_number || 
+              (doc.version_number === existing.version_number && new Date(doc.created_at) > new Date(existing.created_at))) {
+            latestDocuments.set(groupKey, doc);
+          }
+        });
+      }
+
+      const filteredDocuments = Array.from(latestDocuments.values());
+      console.log('Design documents data received:', filteredDocuments);
+      
+      return filteredDocuments;
 
       console.log('Design documents data received:', data);
       return data as DesignDocument[];
@@ -180,7 +205,7 @@ export default function DesignDocumentation() {
   // Filter documents based on search
   const filteredDocuments = useMemo(() => {
     return documents.filter(doc =>
-      (doc.file_name && doc.file_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (doc.name && doc.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (doc.description && doc.description.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   }, [documents, searchTerm]);
@@ -263,7 +288,7 @@ export default function DesignDocumentation() {
   const downloadFile = (document: DesignDocument) => {
     const link = window.document.createElement('a');
     link.href = document.file_url;
-    link.download = document.file_name;
+    link.download = document.name;
     link.target = '_blank';
     link.click();
   };
@@ -366,9 +391,16 @@ export default function DesignDocumentation() {
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-2">
                           {getFileIcon(document.file_type)}
-                          <CardTitle className="text-sm font-medium truncate">
-                            {document.file_name || 'Documento sin nombre'}
-                          </CardTitle>
+                          <div>
+                            <CardTitle className="text-sm font-medium truncate">
+                              {document.name || 'Documento sin nombre'}
+                            </CardTitle>
+                            {document.version_number > 1 && (
+                              <Badge variant="outline" className="text-xs mt-1">
+                                v{document.version_number}
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -446,7 +478,7 @@ export default function DesignDocumentation() {
             <AlertDialogHeader>
               <AlertDialogTitle>Eliminar documento</AlertDialogTitle>
               <AlertDialogDescription>
-                ¿Estás seguro de que quieres eliminar "{documentToDelete.file_name || 'este documento'}"? Esta acción no se puede deshacer.
+                ¿Estás seguro de que quieres eliminar "{documentToDelete.name || 'este documento'}"? Esta acción no se puede deshacer.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
