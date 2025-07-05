@@ -9,7 +9,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { useCreateMovementConcept, useUpdateMovementConcept, useParentMovementConcepts, type MovementConceptAdmin } from "@/hooks/use-movement-concepts-admin"
 import { useCurrentUser } from "@/hooks/use-current-user"
@@ -34,10 +33,10 @@ export function NewAdminMovementConceptModal({
   onClose,
   editingConcept
 }: NewAdminMovementConceptModalProps) {
-  const { data: userData } = useCurrentUser()
-  const { data: parentConcepts = [] } = useParentMovementConcepts()
-  const createMutation = useCreateMovementConcept()
-  const updateMutation = useUpdateMovementConcept()
+  const { userData } = useCurrentUser()
+  const { data: parentConcepts } = useParentMovementConcepts()
+  const createConceptMutation = useCreateMovementConcept()
+  const updateConceptMutation = useUpdateMovementConcept()
 
   const form = useForm<ConceptForm>({
     resolver: zodResolver(conceptSchema),
@@ -50,159 +49,133 @@ export function NewAdminMovementConceptModal({
   })
 
   const onSubmit = async (data: ConceptForm) => {
-    try {
-      const conceptData = {
-        ...data,
-        parent_id: data.parent_id || undefined,
-        organization_id: userData?.organization?.id
-      }
+    if (!userData?.organization) return
 
+    try {
       if (editingConcept) {
-        await updateMutation.mutateAsync({
+        await updateConceptMutation.mutateAsync({
           id: editingConcept.id,
-          name: conceptData.name,
-          description: conceptData.description,
-          parent_id: conceptData.parent_id || undefined,
-          is_system: conceptData.is_system
+          ...data
         })
       } else {
-        await createMutation.mutateAsync(conceptData)
+        await createConceptMutation.mutateAsync({
+          ...data,
+          organization_id: data.is_system ? undefined : userData.organization.id
+        })
       }
-
+      
       form.reset()
       onClose()
     } catch (error) {
-      console.error('Error saving movement concept:', error)
+      console.error('Error saving concept:', error)
     }
   }
 
-  const handleClose = () => {
-    form.reset()
-    onClose()
-  }
-
-  const isSubmitting = createMutation.isPending || updateMutation.isPending
+  const isLoading = createConceptMutation.isPending || updateConceptMutation.isPending
 
   return (
-    <CustomModalLayout 
-      open={open} 
-      onClose={handleClose}
-      children={{
-        header: (
-          <CustomModalHeader 
-            title={editingConcept ? "Editar Concepto de Movimiento" : "Nuevo Concepto de Movimiento"} 
-            onClose={handleClose} 
-          />
-        ),
-        body: (
+    <CustomModalLayout open={open} onClose={onClose}>
+      <CustomModalHeader 
+        title={editingConcept ? "Editar Concepto" : "Nuevo Concepto"}
+        onClose={onClose}
+      />
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
           <CustomModalBody columns={1}>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} id="concept-form">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nombre *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Nombre del concepto" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nombre *</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Nombre del concepto" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Descripción</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Descripción del concepto"
-                          rows={3}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descripción</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Descripción del concepto"
+                      className="min-h-[80px]"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-                <FormField
-                  control={form.control}
-                  name="parent_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Concepto Padre</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar concepto padre (opcional)" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="">Sin concepto padre</SelectItem>
-                          {parentConcepts.map((concept: any) => (
-                            <SelectItem key={concept.id} value={concept.id}>
-                              {concept.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            <FormField
+              control={form.control}
+              name="parent_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Concepto Padre</FormLabel>
+                  <Select 
+                    onValueChange={field.onChange} 
+                    value={field.value || ""}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar concepto padre (opcional)" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="">Sin concepto padre</SelectItem>
+                      {parentConcepts?.map((concept) => (
+                        <SelectItem key={concept.id} value={concept.id}>
+                          {concept.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-                <FormField
-                  control={form.control}
-                  name="is_system"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                      <div className="space-y-0.5">
-                        <FormLabel>Concepto del Sistema</FormLabel>
-                        <div className="text-sm text-muted-foreground">
-                          Los conceptos del sistema no pueden ser eliminados por usuarios
-                        </div>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </form>
-            </Form>
+            <FormField
+              control={form.control}
+              name="is_system"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">
+                      Concepto del Sistema
+                    </FormLabel>
+                    <div className="text-sm text-muted-foreground">
+                      Los conceptos del sistema son globales y no se pueden eliminar
+                    </div>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
           </CustomModalBody>
-        ),
-        footer: (
-          <div className="p-2 border-t border-[var(--card-border)] mt-auto">
-            <div className="flex gap-2 w-full">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={handleClose}
-                className="w-1/4"
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                form="concept-form"
-                className="w-3/4"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Guardando...' : (editingConcept ? "Actualizar Concepto" : "Crear Concepto")}
-              </Button>
-            </div>
-          </div>
-        )
-      }}
-    />
+
+          <CustomModalFooter
+            onSave={() => form.handleSubmit(onSubmit)()}
+            saveText={editingConcept ? "Actualizar" : "Crear"}
+            saveDisabled={isLoading}
+            onCancel={onClose}
+          />
+        </form>
+      </Form>
+    </CustomModalLayout>
   )
 }

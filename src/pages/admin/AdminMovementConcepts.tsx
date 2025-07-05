@@ -2,15 +2,13 @@ import React, { useState, useMemo } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Plus, Users, CheckCircle, FolderTree, Edit, Trash2, ChevronDown, ChevronRight, MoreVertical } from 'lucide-react'
+import { Plus, Users, CheckCircle, FolderTree } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { HierarchicalTree, type HierarchicalItem } from '@/components/ui-custom/misc/HierarchicalTree'
 import { NewAdminMovementConceptModal } from '@/modals/admin/NewAdminMovementConceptModal'
-import { useMovementConceptsAdmin, type MovementConceptAdmin } from '@/hooks/use-movement-concepts-admin'
+import { useMovementConceptsAdmin, useDeleteMovementConcept, type MovementConceptAdmin } from '@/hooks/use-movement-concepts-admin'
 
 export default function AdminMovementConcepts() {
   const [searchValue, setSearchValue] = useState('')
@@ -18,13 +16,9 @@ export default function AdminMovementConcepts() {
   const [newConceptModalOpen, setNewConceptModalOpen] = useState(false)
   const [editingConcept, setEditingConcept] = useState<MovementConceptAdmin | null>(null)
   const [deletingConcept, setDeletingConcept] = useState<MovementConceptAdmin | null>(null)
-  const [expandedConcepts, setExpandedConcepts] = useState<Set<string>>(new Set())
 
-  const { 
-    concepts, 
-    isLoading, 
-    deleteConceptMutation 
-  } = useMovementConceptsAdmin()
+  const { data: concepts, isLoading } = useMovementConceptsAdmin()
+  const deleteConceptMutation = useDeleteMovementConcept()
 
   // Clear filters function
   const clearFilters = () => {
@@ -49,11 +43,7 @@ export default function AdminMovementConcepts() {
     })
   }, [concepts, searchValue, systemFilter])
 
-  // Event handlers
-  const handleEditConcept = (concept: MovementConceptAdmin) => {
-    setEditingConcept(concept)
-    setNewConceptModalOpen(true)
-  }
+
 
   const handleDeleteConcept = async () => {
     if (!deletingConcept) return
@@ -65,100 +55,14 @@ export default function AdminMovementConcepts() {
     }
   }
 
-  const toggleExpanded = (conceptId: string) => {
-    const newExpanded = new Set(expandedConcepts)
-    if (newExpanded.has(conceptId)) {
-      newExpanded.delete(conceptId)
-    } else {
-      newExpanded.add(conceptId)
-    }
-    setExpandedConcepts(newExpanded)
+  // Event handlers for the hierarchical tree
+  const handleEdit = (item: HierarchicalItem) => {
+    setEditingConcept(item as MovementConceptAdmin)
+    setNewConceptModalOpen(true)
   }
 
-  // Render concept tree structure
-  const renderConcept = (concept: MovementConceptAdmin, level = 0) => {
-    const hasChildren = concept.children && concept.children.length > 0
-    const isExpanded = expandedConcepts.has(concept.id)
-
-    return (
-      <div key={concept.id} className={`${level > 0 ? 'ml-6' : ''}`}>
-        <Collapsible open={isExpanded} onOpenChange={() => toggleExpanded(concept.id)}>
-          <Card className="p-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 flex-1">
-                {hasChildren && (
-                  <CollapsibleTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-auto p-0 w-4">
-                      {isExpanded ? (
-                        <ChevronDown className="h-4 w-4" />
-                      ) : (
-                        <ChevronRight className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </CollapsibleTrigger>
-                )}
-                
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-medium">{concept.name}</span>
-                    <Badge variant={concept.is_system ? "default" : "secondary"} className="text-xs">
-                      {concept.is_system ? "Sistema" : "Personalizado"}
-                    </Badge>
-                    {concept.parent_id && (
-                      <Badge variant="outline" className="text-xs">
-                        Subcategoría
-                      </Badge>
-                    )}
-                    {hasChildren && (
-                      <Badge variant="outline" className="text-xs">
-                        {concept.children!.length} {concept.children!.length === 1 ? 'hijo' : 'hijos'}
-                      </Badge>
-                    )}
-                  </div>
-                  {concept.description && (
-                    <p className="text-sm text-muted-foreground">{concept.description}</p>
-                  )}
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Creado: {new Date(concept.created_at).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => handleEditConcept(concept)}>
-                    <Edit className="mr-2 h-4 w-4" />
-                    Editar
-                  </DropdownMenuItem>
-                  {!concept.is_system && (
-                    <DropdownMenuItem 
-                      onClick={() => setDeletingConcept(concept)}
-                      className="text-red-600"
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Eliminar
-                    </DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </Card>
-
-          {hasChildren && (
-            <CollapsibleContent className="mt-2">
-              <div className="space-y-2">
-                {concept.children?.map((child: any) => renderConcept(child, level + 1))}
-              </div>
-            </CollapsibleContent>
-          )}
-        </Collapsible>
-      </div>
-    )
+  const handleDelete = (item: HierarchicalItem) => {
+    setDeletingConcept(item as MovementConceptAdmin)
   }
 
   // Statistics calculations with recursive count
@@ -274,17 +178,16 @@ export default function AdminMovementConcepts() {
         </div>
 
         {/* Concepts Tree */}
-        <div className="space-y-2">
-          {filteredConcepts.length === 0 ? (
-            <Card className="p-8">
-              <div className="text-center text-muted-foreground">
-                {searchValue ? 'No se encontraron conceptos que coincidan con la búsqueda' : 'No hay conceptos creados'}
-              </div>
-            </Card>
-          ) : (
-            filteredConcepts.map(concept => renderConcept(concept))
-          )}
-        </div>
+        <HierarchicalTree
+          items={filteredConcepts}
+          isLoading={isLoading}
+          emptyMessage="No hay conceptos creados"
+          searchValue={searchValue}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          showSystemBadge={true}
+          allowDelete={(item) => !item.is_system}
+        />
       </div>
 
       {/* Modals */}
