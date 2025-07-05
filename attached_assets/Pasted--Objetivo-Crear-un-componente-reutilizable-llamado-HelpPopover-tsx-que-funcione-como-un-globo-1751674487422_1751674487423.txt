@@ -1,0 +1,82 @@
+## Objetivo
+
+Crear un componente reutilizable llamado `HelpPopover.tsx` que funcione como un globo de ayuda interactivo, con diseño moderno tipo popover (como en la imagen adjunta), para brindar asistencia contextual en la interfaz de Archub.
+
+---
+
+## Estilo y funcionalidad
+
+- Estética moderna tipo “globo de diálogo”, con borde suavemente redondeado y sombreado
+- Adaptado automáticamente a modo dark y light
+- Aparece al hacer hover o clic sobre un botón con ícono de “?”
+- Posicionamiento adecuado (preferentemente arriba o abajo del icono)
+- Con flecha (arrow) apuntando al botón como en la imagen
+- Animación sutil al abrir
+- Opcionalmente puede tener:
+  - Título
+  - Descripción
+  - Botón primario (ej: “Entendido” o “Got it!”)
+  - Botón secundario (ej: “Más info” o “Learn more”)
+
+---
+
+## Props del componente
+
+El componente `HelpPopover` debe recibir las siguientes props:
+
+```ts
+{
+  title?: string
+  description: string
+  primaryActionText?: string
+  onPrimaryAction?: () => void
+  secondaryActionText?: string
+  onSecondaryAction?: () => void
+  iconSize?: number // default 18
+  placement?: "top" | "bottom" | "left" | "right" // default bottom
+}
+Ejemplos de uso
+tsx
+Copiar
+Editar
+<HelpPopover
+  title="Modo Oscuro"
+  description="Activa el modo oscuro para reducir fatiga visual y ahorrar batería."
+  primaryActionText="Entendido"
+  onPrimaryAction={() => console.log("Entendido")}
+  secondaryActionText="Más info"
+  onSecondaryAction={() => router.push('/ayuda/tema')}
+  placement="top"
+/>
+Y también debe poder usarse solo con descripción:
+
+tsx
+Copiar
+Editar
+<HelpPopover description="Este código debe ser único para identificar la tarea." />
+Estética
+Usa el ícono HelpCircle de Lucide o un “?” estilizado como botón circular.
+
+El contenido debe tener padding generoso (p-4), borde redondeado (rounded-xl), sombra suave (shadow-xl) y transición sutil.
+
+El fondo debe ser bg-popover y texto text-popover-foreground para soportar light/dark.
+
+La flechita debe integrarse visualmente con el globo.
+
+Botones:
+
+Primario con btn-primary estilo Archub o azul degradado como el de la imagen
+
+Secundario con text-muted-foreground y subrayado o hover:underline
+
+Archivos y ubicación sugerida
+src/components/ui/HelpPopover.tsx
+
+Usar @/components/ui/popover como base (Trigger, Content, Arrow)
+
+Si necesitás, crear helpHints.json como ejemplo de uso futuro
+
+Extras
+Agregá una animación sutil de apertura (transition-opacity, duration-200)
+
+Asegurate de que funcione correctamente en dark/light mode y sea completamente responsive

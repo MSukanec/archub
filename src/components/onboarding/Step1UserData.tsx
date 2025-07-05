@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { User, Palette } from "lucide-react";
+import { HelpPopover } from "@/components/ui-custom/HelpPopover";
 
 export function Step1UserData() {
   const { formData, updateFormData, goNextStep } = useOnboardingStore();
@@ -63,7 +64,17 @@ export function Step1UserData() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="theme">Tema de la aplicación</Label>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="theme">Tema de la aplicación</Label>
+            <HelpPopover
+              title="Modo Oscuro"
+              description="Activa el modo oscuro para reducir fatiga visual y ahorrar batería. Puedes cambiarlo después desde tu perfil."
+              primaryActionText="Entendido"
+              secondaryActionText="Más info"
+              onSecondaryAction={() => console.log("Más información sobre temas")}
+              placement="top"
+            />
+          </div>
           <Select
             value={formData.theme}
             onValueChange={(value: 'light' | 'dark') => updateFormData({ theme: value })}
