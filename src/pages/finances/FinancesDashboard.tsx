@@ -1,6 +1,6 @@
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { DollarSign, TrendingUp, TrendingDown, FileText, Calendar, CreditCard, User, ArrowUpDown } from 'lucide-react'
+import { DollarSign, TrendingUp, TrendingDown, FileText, Calendar, CreditCard, User, ArrowUpDown, Plus } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useFinancialSummary, useMonthlyFlowData, useWalletBalances, useRecentMovements } from '@/hooks/use-finance-dashboard-simple'
 import { MonthlyFlowChart } from '@/components/graphics/MonthlyFlowChart'
@@ -9,6 +9,8 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Link } from 'wouter'
 import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState'
+
+import { Button } from '@/components/ui/button'
 
 export default function FinancesDashboard() {
   const { data: userData } = useCurrentUser()
@@ -44,20 +46,19 @@ export default function FinancesDashboard() {
   if (!summaryLoading && (!financialSummary || financialSummary.totalMovements === 0)) {
     return (
       <Layout headerProps={headerProps}>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <CustomEmptyState 
-            title="Sin movimientos financieros registrados"
-            description="Comienza registrando tu primer ingreso o egreso para ver el resumen completo de tus finanzas."
-            action={
-              <Link 
-                href="/finances/movements"
-                className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-              >
+        <CustomEmptyState 
+          icon={<DollarSign className="h-12 w-12" />}
+          title="Sin movimientos financieros registrados"
+          description="Comienza registrando tu primer ingreso o egreso para ver el resumen completo de tus finanzas."
+          action={
+            <Link href="/finances/movements">
+              <Button className="h-8 px-3 text-sm">
+                <Plus className="h-3 w-3 mr-1" />
                 Crear Primer Movimiento
-              </Link>
-            }
-          />
-        </div>
+              </Button>
+            </Link>
+          }
+        />
       </Layout>
     )
   }

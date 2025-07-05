@@ -239,11 +239,18 @@ export function useWalletBalances(organizationId: string | undefined, projectId:
         const { data: movements, error } = await movementsQuery
 
         if (error) throw error
-        if (!movements || movements.length === 0) return []
+        if (!movements || movements.length === 0) {
+          console.log('No movements found for wallet balances')
+          return []
+        }
+
+        console.log('Movements found for wallets:', movements.length)
 
         // Get unique IDs
         const typeIds = Array.from(new Set(movements.map(m => m.type_id).filter(Boolean)))
         const walletIds = Array.from(new Set(movements.map(m => m.wallet_id).filter(Boolean)))
+        
+        console.log('Wallet IDs found:', walletIds)
         
         // Get concepts and wallets separately
         const [conceptsResult, walletsResult] = await Promise.all([
