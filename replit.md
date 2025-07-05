@@ -119,17 +119,18 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- July 5, 2025. Design documentation system implementation with file upload functionality and RLS compliance - IN PROGRESS  
-  • Hidden view selector (folder vs phase) when no documents exist - only shows CustomEmptyState
-  • Added file_name and file_size fields to design_documents schema for complete PDF metadata storage
-  • Implemented complete PDF upload flow to Supabase Storage bucket 'design-documents' with UUID-based file paths
-  • Enhanced NewDesignDocumentModal with proper error handling for upload and database operations
-  • Fixed RLS compliance by using user.id (from users table) instead of auth.uid() for created_by field
-  • Added comprehensive error messages for upload failures, RLS violations, and validation errors
-  • Modal now validates file selection, uploads to Storage first, then saves metadata to database
-  • Configured proper file upload sequence: generate UUID path → upload to bucket → save metadata with file_name/file_size
-  • Database schema mismatch detected - working to align actual table structure with schema definitions
-  • Enhanced mutation error handling with specific messages for different failure scenarios
+- July 5, 2025. Design documentation system implementation with file upload functionality and complete modal restructure - COMPLETED
+  • Added file_name field to design documents for proper document naming as requested
+  • Fixed database schema alignment - removed references to non-existent fields (name, visibility, design_phase_id)
+  • Reorganized NewDesignDocumentModal field order: NOMBRE, DESCRIPCIÓN, file upload as specified
+  • All modal fields now use full width layout instead of 50% grid layout
+  • Enhanced auto-fill functionality: file name auto-populates from selected file name (without extension)
+  • Fixed filtering system to search by file_name and description instead of non-existent name field
+  • Updated document cards to display file_name with fallback to "Documento sin nombre" for null values
+  • Corrected download functionality to use file_name for downloaded file names
+  • Simplified document grouping to use folder structure only (phase functionality removed for now)
+  • All TypeScript errors resolved and interfaces aligned with actual database structure
+  • File upload flow: file selection → auto-fill name → upload to Storage → save metadata with correct fields
 - July 5, 2025. Fixed onboarding navigation loop and optimized mobile UX components - COMPLETED
   • Fixed Step3SelectMode double-click issue by adding setTimeout delay before onFinish() execution
   • Disabled tab navigation for HelpPopover components using tabIndex={-1} to prevent keyboard focus

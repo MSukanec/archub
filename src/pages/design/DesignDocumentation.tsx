@@ -52,20 +52,16 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 interface DesignDocument {
   id: string;
-  name: string;
+  file_name: string;
   description?: string;
   file_path: string;
   file_url: string;
-  file_name: string;
-  file_size: number;
   file_type: string;
   version_number: number;
   project_id: string;
   organization_id: string;
-  design_phase_id?: string;
   folder: string;
   status: string;
-  visibility: string;
   created_by: string;
   created_at: string;
   updated_at: string;
@@ -73,10 +69,6 @@ interface DesignDocument {
     id: string;
     full_name: string;
     avatar_url: string;
-  };
-  design_phase?: {
-    id: string;
-    name: string;
   };
 }
 
@@ -188,35 +180,22 @@ export default function DesignDocumentation() {
   // Filter documents based on search
   const filteredDocuments = useMemo(() => {
     return documents.filter(doc =>
-      doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (doc.file_name && doc.file_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (doc.description && doc.description.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   }, [documents, searchTerm]);
 
   // Group documents
   const groupedDocuments = useMemo(() => {
-    if (viewByPhase) {
-      // Group by design phase
-      const groups: Record<string, DesignDocument[]> = {};
-      
-      filteredDocuments.forEach(doc => {
-        const phaseKey = doc.design_phase?.name || 'Sin fase asignada';
-        if (!groups[phaseKey]) groups[phaseKey] = [];
-        groups[phaseKey].push(doc);
-      });
-      
-      return groups;
-    } else {
-      // Group by folder
-      const groups: Record<string, DesignDocument[]> = {};
-      
-      filteredDocuments.forEach(doc => {
-        if (!groups[doc.folder]) groups[doc.folder] = [];
-        groups[doc.folder].push(doc);
-      });
-      
-      return groups;
-    }
+    // Group by folder (phase functionality to be implemented later)
+    const groups: Record<string, DesignDocument[]> = {};
+    
+    filteredDocuments.forEach(doc => {
+      if (!groups[doc.folder]) groups[doc.folder] = [];
+      groups[doc.folder].push(doc);
+    });
+    
+    return groups;
   }, [filteredDocuments, viewByPhase]);
 
   // Mobile Action Bar setup
@@ -284,7 +263,7 @@ export default function DesignDocumentation() {
   const downloadFile = (document: DesignDocument) => {
     const link = window.document.createElement('a');
     link.href = document.file_url;
-    link.download = document.name;
+    link.download = document.file_name;
     link.target = '_blank';
     link.click();
   };
@@ -388,7 +367,7 @@ export default function DesignDocumentation() {
                         <div className="flex items-center gap-2">
                           {getFileIcon(document.file_type)}
                           <CardTitle className="text-sm font-medium truncate">
-                            {document.name}
+                            {document.file_name || 'Documento sin nombre'}
                           </CardTitle>
                         </div>
                         <DropdownMenu>
@@ -467,7 +446,7 @@ export default function DesignDocumentation() {
             <AlertDialogHeader>
               <AlertDialogTitle>Eliminar documento</AlertDialogTitle>
               <AlertDialogDescription>
-                ¿Estás seguro de que quieres eliminar "{documentToDelete.name}"? Esta acción no se puede deshacer.
+                ¿Estás seguro de que quieres eliminar "{documentToDelete.file_name || 'este documento'}"? Esta acción no se puede deshacer.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

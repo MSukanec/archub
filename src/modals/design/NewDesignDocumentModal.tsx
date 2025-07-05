@@ -20,6 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { FileText, Upload, X, File } from 'lucide-react';
 
 const formSchema = z.object({
+  file_name: z.string().min(1, 'El nombre es requerido'),
   description: z.string().optional(),
   folder: z.string().min(1, 'La carpeta es requerida'),
   status: z.enum(['pendiente', 'en_revision', 'aprobado', 'rechazado']),
@@ -29,6 +30,7 @@ type FormData = z.infer<typeof formSchema>;
 
 interface DesignDocument {
   id: string;
+  file_name: string;
   description?: string;
   file_path: string;
   file_url: string;
@@ -63,6 +65,7 @@ export function NewDesignDocumentModal({
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      file_name: '',
       description: '',
       folder: '',
       status: 'pendiente',
@@ -73,12 +76,14 @@ export function NewDesignDocumentModal({
   useEffect(() => {
     if (editingDocument) {
       form.reset({
+        file_name: editingDocument.file_name || '',
         description: editingDocument.description || '',
         folder: editingDocument.folder,
         status: editingDocument.status as any,
       });
     } else {
       form.reset({
+        file_name: '',
         description: '',
         folder: '',
         status: 'pendiente',
@@ -90,6 +95,10 @@ export function NewDesignDocumentModal({
     const file = event.target.files?.[0];
     if (file) {
       setSelectedFile(file);
+      // Auto-fill file_name if empty
+      if (!form.getValues('file_name')) {
+        form.setValue('file_name', file.name.replace(/\.[^/.]+$/, ''));
+      }
     }
   };
 
@@ -148,6 +157,7 @@ export function NewDesignDocumentModal({
       }
 
       const documentData = {
+        file_name: values.file_name,
         description: values.description || null,
         file_path: filePath,
         file_url: fileUrl,
@@ -248,6 +258,37 @@ export function NewDesignDocumentModal({
           <CustomModalBody columns={1}>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            
+            {/* Nombre del documento */}
+            <FormField
+              control={form.control}
+              name="file_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nombre</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Nombre del documento" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Descripción */}
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descripción</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} placeholder="Descripción del documento" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             {/* File Upload Section */}
             <div className="space-y-3">
               <Label>Archivo</Label>
@@ -301,21 +342,6 @@ export function NewDesignDocumentModal({
               </div>
             </div>
 
-            {/* Document Information */}
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descripción</FormLabel>
-                  <FormControl>
-                    <Textarea {...field} placeholder="Descripción del documento" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <FormField
               control={form.control}
               name="folder"
@@ -330,32 +356,29 @@ export function NewDesignDocumentModal({
               )}
             />
 
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Estado</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona un estado" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="pendiente">Pendiente</SelectItem>
-                        <SelectItem value="en_revision">En Revisión</SelectItem>
-                        <SelectItem value="aprobado">Aprobado</SelectItem>
-                        <SelectItem value="rechazado">Rechazado</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-                </div>
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Estado</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona un estado" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="pendiente">Pendiente</SelectItem>
+                      <SelectItem value="en_revision">En Revisión</SelectItem>
+                      <SelectItem value="aprobado">Aprobado</SelectItem>
+                      <SelectItem value="rechazado">Rechazado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
               </form>
             </Form>
           </CustomModalBody>
