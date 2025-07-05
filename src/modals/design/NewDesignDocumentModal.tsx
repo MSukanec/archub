@@ -36,6 +36,8 @@ interface DesignDocument {
   description?: string;
   file_path: string;
   file_url: string;
+  file_name: string;
+  file_size: number;
   file_type: string;
   version_number: number;
   project_id: string;
@@ -164,6 +166,8 @@ export function NewDesignDocumentModal({
         description: values.description || null,
         file_path: filePath,
         file_url: fileUrl,
+        file_name: selectedFile ? selectedFile.name : (editingDocument?.file_name || ''),
+        file_size: selectedFile ? selectedFile.size : (editingDocument?.file_size || 0),
         file_type: fileType,
         version_number: editingDocument ? editingDocument.version_number : 1,
         project_id: userData.preferences.last_project_id,

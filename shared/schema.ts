@@ -75,6 +75,8 @@ export const design_documents = pgTable("design_documents", {
   description: text("description"),
   file_path: text("file_path").notNull(),
   file_url: text("file_url").notNull(),
+  file_name: text("file_name").notNull(),
+  file_size: integer("file_size").notNull(),
   file_type: text("file_type").notNull(),
   version_number: integer("version_number").default(1),
   project_id: uuid("project_id").notNull(),
@@ -82,7 +84,7 @@ export const design_documents = pgTable("design_documents", {
   design_phase_id: uuid("design_phase_id"),
   folder: text("folder").notNull(),
   status: text("status").default("pendiente"), // pendiente, en_revision, aprobado, rechazado
-  visibility: text("visibility").default("equipo"), // equipo, cliente
+  visibility: text("visibility").default("public"), // public, private
   created_by: uuid("created_by").notNull(),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
@@ -93,6 +95,8 @@ export const insertDesignDocumentSchema = createInsertSchema(design_documents).p
   description: true,
   file_path: true,
   file_url: true,
+  file_name: true,
+  file_size: true,
   file_type: true,
   version_number: true,
   project_id: true,

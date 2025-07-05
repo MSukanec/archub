@@ -56,6 +56,8 @@ interface DesignDocument {
   description?: string;
   file_path: string;
   file_url: string;
+  file_name: string;
+  file_size: number;
   file_type: string;
   version_number: number;
   project_id: string;
@@ -332,24 +334,26 @@ export default function DesignDocumentation() {
 
   return (
     <Layout headerProps={headerProps}>
-      {/* View Toggle */}
-      <div className="mb-6">
-        <div className="flex items-center space-x-2">
-          <FolderOpen className="h-4 w-4" />
-          <Label htmlFor="view-toggle" className="text-sm font-medium">
-            Vista por carpeta
-          </Label>
-          <Switch
-            id="view-toggle"
-            checked={viewByPhase}
-            onCheckedChange={setViewByPhase}
-          />
-          <Calendar className="h-4 w-4" />
-          <Label htmlFor="view-toggle" className="text-sm font-medium">
-            Vista por fase de diseño
-          </Label>
+      {/* View Toggle - only show when documents exist */}
+      {documents.length > 0 && (
+        <div className="mb-6">
+          <div className="flex items-center space-x-2">
+            <FolderOpen className="h-4 w-4" />
+            <Label htmlFor="view-toggle" className="text-sm font-medium">
+              Vista por carpeta
+            </Label>
+            <Switch
+              id="view-toggle"
+              checked={viewByPhase}
+              onCheckedChange={setViewByPhase}
+            />
+            <Calendar className="h-4 w-4" />
+            <Label htmlFor="view-toggle" className="text-sm font-medium">
+              Vista por fase de diseño
+            </Label>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Documents */}
       {Object.keys(groupedDocuments).length === 0 ? (
