@@ -20,6 +20,7 @@ import { CalendarIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { supabase } from '@/lib/supabase'
 
 const installmentSchema = z.object({
@@ -86,31 +87,8 @@ export function NewInstallmentModal({
     }
   })
 
-  // Get organization currencies
-  const { data: currencies } = useQuery({
-    queryKey: ['organization-currencies', organizationId],
-    queryFn: async () => {
-      if (!supabase) throw new Error('Supabase client not initialized')
-      
-      const { data, error } = await supabase
-        .from('organization_currencies')
-        .select(`
-          id,
-          is_default,
-          currencies (
-            id,
-            name,
-            code,
-            symbol
-          )
-        `)
-        .eq('organization_id', organizationId)
-        .eq('is_active', true)
-
-      if (error) throw error
-      return data || []
-    }
-  })
+  // Get organization currencies using existing hook
+  const { data: organizationCurrencies } = useOrganizationCurrencies(organizationId)
 
   // Get organization wallets
   const { data: wallets } = useQuery({
@@ -242,13 +220,13 @@ export function NewInstallmentModal({
 
   // Set default values when data is loaded
   useEffect(() => {
-    if (currencies && currencies.length > 0) {
-      const defaultCurrency = currencies.find(c => c.is_default)?.currencies
+    if (organizationCurrencies && organizationCurrencies.length > 0) {
+      const defaultCurrency = organizationCurrencies[0]?.currency
       if (defaultCurrency && !form.getValues('currency_id')) {
         form.setValue('currency_id', defaultCurrency.id)
       }
     }
-  }, [currencies, form])
+  }, [organizationCurrencies, form])
 
   useEffect(() => {
     if (wallets && wallets.length > 0) {
@@ -357,10 +335,9 @@ export function NewInstallmentModal({
                   <SelectValue placeholder="Seleccionar moneda" />
                 </SelectTrigger>
                 <SelectContent>
-                  {currencies?.map((orgCurrency, index) => (
-                    <SelectItem key={`currency-${orgCurrency.currencies?.id || index}`} value={orgCurrency.currencies?.id || ''}>
-                      {orgCurrency.currencies?.code || 'N/A'} - {orgCurrency.currencies?.name || 'Sin nombre'}
-                      {orgCurrency.is_default && ' (Por defecto)'}
+                  {organizationCurrencies?.map((orgCurrency, index) => (
+                    <SelectItem key={`currency-${orgCurrency.currency?.id || index}`} value={orgCurrency.currency?.id || ''}>
+                      {orgCurrency.currency?.code || 'N/A'} - {orgCurrency.currency?.name || 'Sin nombre'}
                     </SelectItem>
                   ))}
                 </SelectContent>
