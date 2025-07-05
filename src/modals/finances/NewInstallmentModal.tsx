@@ -200,6 +200,10 @@ export function NewInstallmentModal({
         project_id: projectId,
         organization_id: organizationId,
         created_by: data.created_by,
+        // Categorías automáticas para aportes: INGRESO > PREVENTA > CUOTAS
+        main_category_id: '88ebeac7-6d00-4001-9535-6ae0704b3403', // INGRESO
+        category_id: 'e7794e04-724a-47e9-bb61-ef1d644519e0', // PREVENTA  
+        subcategory_id: '6d599e96-3041-4b9b-a391-995de4da0f6f' // CUOTAS
       }
 
       const { error } = await supabase

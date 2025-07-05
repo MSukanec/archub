@@ -242,11 +242,11 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         description: '',
         created_by: currentMember?.id || '',
         from_amount: 0,
-        from_currency_id: defaultOrgCurrency?.currency?.id || '',
-        from_wallet_id: defaultWallet?.wallet_id || '',
+        from_currency_id: (defaultOrgCurrency && defaultOrgCurrency.currency) ? defaultOrgCurrency.currency.id : '',
+        from_wallet_id: (defaultWallet && defaultWallet.wallet_id) ? defaultWallet.wallet_id : '',
         to_amount: 0,
         to_currency_id: '',
-        to_wallet_id: defaultWallet?.wallet_id || ''
+        to_wallet_id: (defaultWallet && defaultWallet.wallet_id) ? defaultWallet.wallet_id : ''
       })
     }
   }, [open, editingMovement, members, organizationCurrencies, wallets, types])
