@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext';
 import { useMobile } from '@/hooks/use-mobile';
@@ -105,10 +106,17 @@ export default function DesignDocumentation() {
         throw new Error('Supabase client not initialized or no project selected');
       }
 
-      // Get all documents for the project
+      // Get all documents for the project with creator information
       const { data, error } = await supabase
         .from('design_documents')
-        .select('*')
+        .select(`
+          *,
+          creator:created_by (
+            id,
+            full_name,
+            avatar_url
+          )
+        `)
         .eq('project_id', projectId)
         .order('version_number', { ascending: false })
         .order('created_at', { ascending: false });
@@ -446,8 +454,19 @@ export default function DesignDocumentation() {
                           </span>
                         </div>
                         
-                        <div className="text-xs text-muted-foreground">
-                          {format(new Date(document.created_at), 'dd MMM yyyy', { locale: es })}
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          <span>{format(new Date(document.created_at), 'dd MMM yyyy', { locale: es })}</span>
+                          {document.creator && (
+                            <div className="flex items-center gap-1">
+                              <Avatar className="h-4 w-4">
+                                <AvatarImage src={document.creator.avatar_url} />
+                                <AvatarFallback className="text-xs">
+                                  {document.creator.full_name?.split(' ').map(n => n[0]).join('') || '?'}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="truncate max-w-[80px]">{document.creator.full_name}</span>
+                            </div>
+                          )}
                         </div>
                         
                         <div className="flex gap-2">

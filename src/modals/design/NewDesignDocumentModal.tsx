@@ -5,6 +5,8 @@ import { z } from 'zod';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { useDesignPhases } from '@/hooks/use-design-phases';
+import { useOrganizationMembers } from '@/hooks/use-organization-members';
 import { supabase } from '@/lib/supabase';
 import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout';
 import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader';
@@ -17,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { FileText, Upload, X, File } from 'lucide-react';
 
 const formSchema = z.object({
@@ -26,6 +29,7 @@ const formSchema = z.object({
   status: z.enum(['pendiente', 'en_revision', 'aprobado', 'rechazado']),
   visibility: z.enum(['public', 'private']).optional(),
   design_phase_id: z.string().optional(),
+  created_by: z.string().min(1, 'El creador es requerido'),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -66,6 +70,14 @@ export function NewDesignDocumentModal({
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();
+  
+  // Get organization ID and project ID
+  const organizationId = userData?.preferences?.last_organization_id;
+  const projectId = userData?.preferences?.last_project_id;
+  
+  // Get design phases and organization members
+  const { data: designPhases = [] } = useDesignPhases(organizationId);
+  const { data: organizationMembers = [] } = useOrganizationMembers(organizationId);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -76,6 +88,7 @@ export function NewDesignDocumentModal({
       status: 'pendiente',
       visibility: 'public',
       design_phase_id: '',
+      created_by: userData?.user?.id || '',
     },
   });
 
@@ -89,6 +102,7 @@ export function NewDesignDocumentModal({
         status: editingDocument.status as any,
         visibility: editingDocument.visibility as any || 'public',
         design_phase_id: editingDocument.design_phase_id || '',
+        created_by: editingDocument.created_by || userData?.user?.id || '',
       });
     } else {
       form.reset({
@@ -98,9 +112,10 @@ export function NewDesignDocumentModal({
         status: 'pendiente',
         visibility: 'public',
         design_phase_id: '',
+        created_by: userData?.user?.id || '',
       });
     }
-  }, [editingDocument, form]);
+  }, [editingDocument, form, userData]);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -203,7 +218,7 @@ export function NewDesignDocumentModal({
         folder: values.folder,
         status: values.status,
         visibility: values.visibility || 'public',
-        created_by: userData.user.id,
+        created_by: values.created_by,
       };
 
       // Always create a new document entry (versioning system)
@@ -384,6 +399,67 @@ export function NewDesignDocumentModal({
                   <FormControl>
                     <Input {...field} placeholder="Nombre de la carpeta" />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Creado por */}
+            <FormField
+              control={form.control}
+              name="created_by"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Creado por <span className="text-[var(--accent)]">*</span></FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona el creador" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {organizationMembers.map((member) => (
+                        <SelectItem key={member.user_id} value={member.user_id}>
+                          <div className="flex items-center gap-2">
+                            <Avatar className="h-6 w-6">
+                              <AvatarImage src={member.avatar_url} />
+                              <AvatarFallback className="text-xs">
+                                {member.full_name.split(' ').map(n => n[0]).join('')}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span>{member.full_name}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Fase de Diseño */}
+            <FormField
+              control={form.control}
+              name="design_phase_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Fase de Diseño</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona una fase (opcional)" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="">Sin fase asignada</SelectItem>
+                      {designPhases.map((phase) => (
+                        <SelectItem key={phase.id} value={phase.id}>
+                          {phase.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

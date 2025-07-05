@@ -121,8 +121,7 @@ export function Header({
       // Galería NO debe tener accordion parent - el breadcrumb se forma con ORGANIZACIÓN / PROYECTO / ETAPA (Obra) / Galería
       // '/construction/gallery': removed - no accordion parent
       
-      // Proyecto accordion (Design)
-      '/design/dashboard': 'Proyecto',
+      // Proyecto accordion (Design) - dashboard no debe mostrar "Proyecto" como accordion parent
       '/design/moodboard': 'Proyecto',
       '/design/documentacion': 'Proyecto',
       
