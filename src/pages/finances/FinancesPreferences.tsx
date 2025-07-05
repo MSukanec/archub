@@ -9,7 +9,7 @@ import { CustomMultiComboBox } from '@/components/ui-custom/misc/CustomMultiComb
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useCurrencies, useOrganizationCurrencies } from '@/hooks/use-currencies';
-import { useWallets } from '@/hooks/use-wallets';
+import { useAllWallets } from '@/hooks/use-wallets';
 import { useOrganizationWallets } from '@/hooks/use-organization-wallets';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useToast } from '@/hooks/use-toast';
@@ -21,7 +21,7 @@ export default function FinancesPreferences() {
   const { setSidebarContext } = useNavigationStore();
   const { data: allCurrencies } = useCurrencies();
   const { data: organizationCurrencies } = useOrganizationCurrencies(userData?.organization?.id);
-  const { data: allWallets } = useWallets(userData?.organization?.id);
+  const { data: allWallets } = useAllWallets();
   const { data: organizationWallets } = useOrganizationWallets(userData?.organization?.id);
   const { toast } = useToast();
 
@@ -250,7 +250,7 @@ export default function FinancesPreferences() {
 
   // Get available currencies and wallets (excluding defaults from secondary options)
   const availableSecondaryCurrencies = allCurrencies?.filter(c => c.id !== defaultCurrency) || [];
-  const availableSecondaryWallets = allWallets?.filter(w => w.wallets && w.wallets.id !== defaultWallet).map(w => w.wallets!) || [];
+  const availableSecondaryWallets = allWallets?.filter(w => w.id !== defaultWallet) || [];
 
   return (
     <Layout headerProps={{ title: "Configuración de Finanzas" }}>
@@ -319,9 +319,9 @@ export default function FinancesPreferences() {
                     <SelectValue placeholder="Selecciona una billetera" />
                   </SelectTrigger>
                   <SelectContent>
-                    {allWallets?.filter(w => w.wallets).map((wallet) => (
-                      <SelectItem key={wallet.wallets!.id} value={wallet.wallets!.id}>
-                        {wallet.wallets!.name}
+                    {allWallets?.map((wallet) => (
+                      <SelectItem key={wallet.id} value={wallet.id}>
+                        {wallet.name}
                       </SelectItem>
                     ))}
                   </SelectContent>

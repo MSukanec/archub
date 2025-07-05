@@ -1,6 +1,30 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 
+export interface Wallet {
+  id: string;
+  name: string;
+  created_at: string;
+  is_active: boolean;
+}
+
+// Hook to get ALL wallets (like useCurrencies)
+export const useAllWallets = () => {
+  return useQuery({
+    queryKey: ['wallets'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('wallets')
+        .select('*')
+        .eq('is_active', true)
+        .order('name');
+      
+      if (error) throw error;
+      return data as Wallet[];
+    },
+  });
+};
+
 interface OrganizationWallet {
   id: string;
   organization_id: string;
