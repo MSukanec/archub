@@ -3,6 +3,7 @@ import { Layout } from '@/components/layout/desktop/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import CustomCard from '@/components/ui-custom/misc/CustomCard'
 import { 
   FolderOpen, 
   Calendar, 
@@ -178,65 +179,65 @@ export default function ProjectDashboard() {
       <div className="space-y-6">
         {/* Métricas Principales */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Documentos de Diseño
-              </CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{projectSummary?.totalDocuments || 0}</div>
-              <p className="text-xs text-muted-foreground">
-                Total documentos
-              </p>
-            </CardContent>
-          </Card>
+          <CustomCard
+            colorScheme="blue"
+            icon={<FileText className="h-8 w-8" />}
+            topContent={
+              <div className="text-center">
+                <div className="flex justify-center mb-4">
+                  <FileText className="h-12 w-12" />
+                </div>
+                <div className="text-3xl font-bold">{projectSummary?.totalDocuments || 0}</div>
+              </div>
+            }
+            title="Documentos de Diseño"
+            description="Total documentos creados"
+          />
           
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Registros de Obra
-              </CardTitle>
-              <Construction className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{projectSummary?.totalSiteLogs || 0}</div>
-              <p className="text-xs text-muted-foreground">
-                Entradas de bitácora
-              </p>
-            </CardContent>
-          </Card>
+          <CustomCard
+            colorScheme="orange"
+            icon={<Construction className="h-8 w-8" />}
+            topContent={
+              <div className="text-center">
+                <div className="flex justify-center mb-4">
+                  <Construction className="h-12 w-12" />
+                </div>
+                <div className="text-3xl font-bold">{projectSummary?.totalSiteLogs || 0}</div>
+              </div>
+            }
+            title="Registros de Obra"
+            description="Entradas de bitácora"
+          />
           
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Presupuestos
-              </CardTitle>
-              <Calculator className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{projectSummary?.totalBudgets || 0}</div>
-              <p className="text-xs text-muted-foreground">
-                Presupuestos creados
-              </p>
-            </CardContent>
-          </Card>
+          <CustomCard
+            colorScheme="purple"
+            icon={<Calculator className="h-8 w-8" />}
+            topContent={
+              <div className="text-center">
+                <div className="flex justify-center mb-4">
+                  <Calculator className="h-12 w-12" />
+                </div>
+                <div className="text-3xl font-bold">{projectSummary?.totalBudgets || 0}</div>
+              </div>
+            }
+            title="Presupuestos"
+            description="Presupuestos creados"
+          />
           
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Movimientos
-              </CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{projectSummary?.totalMovements || 0}</div>
-              <p className="text-xs text-muted-foreground">
-                Transacciones
-              </p>
-            </CardContent>
-          </Card>
+          <CustomCard
+            colorScheme="green"
+            icon={<DollarSign className="h-8 w-8" />}
+            topContent={
+              <div className="text-center">
+                <div className="flex justify-center mb-4">
+                  <DollarSign className="h-12 w-12" />
+                </div>
+                <div className="text-3xl font-bold">{projectSummary?.totalMovements || 0}</div>
+              </div>
+            }
+            title="Movimientos"
+            description="Transacciones financieras"
+          />
         </div>
 
         {/* Contenido en 3 columnas */}
