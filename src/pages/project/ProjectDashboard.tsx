@@ -181,62 +181,50 @@ export default function ProjectDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <CustomCard
             colorScheme="blue"
-            icon={<FileText className="h-8 w-8" />}
             topContent={
-              <div className="text-center">
-                <div className="flex justify-center mb-4">
-                  <FileText className="h-12 w-12" />
-                </div>
-                <div className="text-3xl font-bold">{projectSummary?.totalDocuments || 0}</div>
+              <div className="flex items-center justify-between">
+                <div className="text-4xl font-bold">{projectSummary?.totalDocuments || 0}</div>
+                <FileText className="h-8 w-8 opacity-80" />
               </div>
             }
-            title="Documentos de Diseño"
-            description="Total documentos creados"
+            title="Documentos"
+            description="Diseño"
           />
           
           <CustomCard
             colorScheme="orange"
-            icon={<Construction className="h-8 w-8" />}
             topContent={
-              <div className="text-center">
-                <div className="flex justify-center mb-4">
-                  <Construction className="h-12 w-12" />
-                </div>
-                <div className="text-3xl font-bold">{projectSummary?.totalSiteLogs || 0}</div>
+              <div className="flex items-center justify-between">
+                <div className="text-4xl font-bold">{projectSummary?.totalSiteLogs || 0}</div>
+                <Construction className="h-8 w-8 opacity-80" />
               </div>
             }
-            title="Registros de Obra"
-            description="Entradas de bitácora"
+            title="Registros"
+            description="Obra"
           />
           
           <CustomCard
             colorScheme="purple"
-            icon={<Calculator className="h-8 w-8" />}
             topContent={
-              <div className="text-center">
-                <div className="flex justify-center mb-4">
-                  <Calculator className="h-12 w-12" />
-                </div>
-                <div className="text-3xl font-bold">{projectSummary?.totalBudgets || 0}</div>
+              <div className="flex items-center justify-between">
+                <div className="text-4xl font-bold">{projectSummary?.totalBudgets || 0}</div>
+                <Calculator className="h-8 w-8 opacity-80" />
               </div>
             }
             title="Presupuestos"
-            description="Presupuestos creados"
+            description="Creados"
           />
           
           <CustomCard
             colorScheme="green"
-            icon={<DollarSign className="h-8 w-8" />}
             topContent={
-              <div className="text-center">
-                <div className="flex justify-center mb-4">
-                  <DollarSign className="h-12 w-12" />
-                </div>
-                <div className="text-3xl font-bold">{projectSummary?.totalMovements || 0}</div>
+              <div className="flex items-center justify-between">
+                <div className="text-4xl font-bold">{projectSummary?.totalMovements || 0}</div>
+                <DollarSign className="h-8 w-8 opacity-80" />
               </div>
             }
             title="Movimientos"
-            description="Transacciones financieras"
+            description="Financieros"
           />
         </div>
 
