@@ -48,11 +48,14 @@ import DesignDashboard from "@/pages/design/DesignDashboard";
 import DesignDocumentation from "@/pages/design/DesignDocumentation";
 import SelectMode from "@/pages/others/SelectMode";
 import AuthCallback from "@/pages/auth/AuthCallback";
+import Home from "@/pages/others/Home";
 import NotFound from "@/pages/others/NotFound";
 
 function Router() {
   return (
     <Switch>
+      <Route path="/" component={Home} />
+      
       <Route path="/auth/callback">
         <AuthCallback />
       </Route>
