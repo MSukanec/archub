@@ -36,22 +36,7 @@ export default function Home() {
     )
   }
 
-  // Debug: Botón temporal para logout
-  if (user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center space-y-4">
-          <p>Usuario logueado: {user.email}</p>
-          <Button onClick={logout} variant="destructive">
-            Cerrar Sesión (Test)
-          </Button>
-          <Button onClick={() => (window as any).debugAuthFlow?.()} variant="outline">
-            Debug Auth Flow
-          </Button>
-        </div>
-      </div>
-    )
-  }
+
 
   // Mostrar loading mientras se cargan los datos del usuario
   return (
