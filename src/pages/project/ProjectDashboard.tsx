@@ -66,44 +66,42 @@ export default function ProjectDashboard() {
       { phase: 'Finanzas', progress: 90, total: 8, completed: 7, icon: DollarSign },
       { phase: 'Comercial', progress: 45, total: 20, completed: 9, icon: Users }
     ],
-    kpiData: [
-      { label: 'Presupuesto', value: 78, color: 'hsl(var(--chart-1))' },
-      { label: 'Cronograma', value: 82, color: 'hsl(var(--chart-2))' },
-      { label: 'Equipo', value: 95, color: 'hsl(var(--chart-3))' },
-      { label: 'Eficiencia', value: 88, color: 'hsl(var(--chart-4))' }
-    ],
+    kpiData: {
+      budget: { used: 780000, total: 1000000 },
+      team: { active: 8, total: 10 },
+      timeline: { elapsed: 60, total: 90 },
+      efficiency: { score: 88, max: 100 }
+    },
     timelineData: [
-      { date: '2025-01', value: 12 },
-      { date: '2025-02', value: 19 },
-      { date: '2025-03', value: 25 },
-      { date: '2025-04', value: 18 },
-      { date: '2025-05', value: 32 },
-      { date: '2025-06', value: 28 },
-      { date: '2025-07', value: 35 }
+      { month: 'Enero', activities: 12 },
+      { month: 'Febrero', activities: 19 },
+      { month: 'Marzo', activities: 25 },
+      { month: 'Abril', activities: 18 },
+      { month: 'Mayo', activities: 32 },
+      { month: 'Junio', activities: 28 },
+      { month: 'Julio', activities: 35 }
     ],
     activityData: [
-      { date: '2025-01-15', count: 5, type: 'medium' },
-      { date: '2025-01-16', count: 12, type: 'very_high' },
-      { date: '2025-01-17', count: 8, type: 'high' },
-      { date: '2025-01-18', count: 3, type: 'low' },
-      { date: '2025-01-19', count: 15, type: 'very_high' }
+      { date: '2025-01-15', value: 5, type: 'medium' },
+      { date: '2025-01-16', value: 12, type: 'very_high' },
+      { date: '2025-01-17', value: 8, type: 'high' },
+      { date: '2025-01-18', value: 3, type: 'low' },
+      { date: '2025-01-19', value: 15, type: 'very_high' }
     ],
     recentActivities: [
       { 
         id: '1', 
-        type: 'document', 
-        title: 'Documento de Diseño Actualizado', 
-        user: { full_name: 'Juan Pérez', avatar_url: '' },
-        date: '2025-01-19',
-        icon: FileText 
+        user: 'Juan Pérez', 
+        action: 'Actualizó documento de diseño', 
+        timestamp: '2025-01-19T10:30:00Z',
+        type: 'design'
       },
       { 
         id: '2', 
-        type: 'budget', 
-        title: 'Presupuesto Revisado', 
-        user: { full_name: 'María García', avatar_url: '' },
-        date: '2025-01-18',
-        icon: DollarSign 
+        user: 'María García', 
+        action: 'Revisó presupuesto', 
+        timestamp: '2025-01-18T15:45:00Z',
+        type: 'finance'
       }
     ]
   }
