@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -48,19 +48,16 @@ interface Contact {
   id: string;
   organization_id: string;
   first_name: string;
-  last_name: string;
-  email: string;
-  phone: string;
-  company_name: string;
-  location: string;
-  notes: string;
-  contact_type_id: string;
+  last_name?: string;
+  full_name?: string;
+  email?: string;
+  phone?: string;
+  contact_type_id?: string;
+  company_name?: string;
+  location?: string;
+  notes?: string;
   linked_user_id?: string;
   created_at: string;
-  contact_type?: {
-    id: string;
-    name: string;
-  };
   linked_user?: {
     id: string;
     full_name: string;
@@ -88,15 +85,11 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
   const { data: contactTypes = [] } = useContactTypes();
   
   // Estados para búsqueda de usuarios
-  const [userSearchQuery, setUserSearchQuery] = useState("");
   const [selectedUser, setSelectedUser] = useState<any>(null);
-  const [showUserSearch, setShowUserSearch] = useState(false);
   
   // Estados para invitaciones
   const [existingInvitation, setExistingInvitation] = useState<any>(null);
   const [checkingInvitation, setCheckingInvitation] = useState(false);
-  
-  const { data: searchResults = [] } = useSearchUsers(userSearchQuery);
 
   const organizationId = userData?.preferences?.last_organization_id;
 
@@ -115,8 +108,34 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
     },
   });
 
+  // Buscar usuarios basado en el email del formulario
+  const emailValue = form.watch('email');
+  const { data: searchResults = [] } = useSearchUsers(emailValue || "");
+
+  // Detectar automáticamente si el email corresponde a un usuario existente
+  useEffect(() => {
+    if (emailValue && searchResults.length > 0 && !selectedUser) {
+      const exactMatch = searchResults.find(user => user.email === emailValue);
+      if (exactMatch) {
+        setSelectedUser(exactMatch);
+        form.setValue('linked_user_id', exactMatch.id);
+        // Auto-completar campos solo si están vacíos
+        if (!form.getValues('first_name') && exactMatch.full_name) {
+          const nameParts = exactMatch.full_name.split(' ');
+          form.setValue('first_name', nameParts[0] || '');
+          if (nameParts.length > 1) {
+            form.setValue('last_name', nameParts.slice(1).join(' '));
+          }
+        }
+      }
+    } else if (!emailValue) {
+      setSelectedUser(null);
+      form.setValue('linked_user_id', '');
+    }
+  }, [emailValue, searchResults, selectedUser, form]);
+
   // Reset form when contact changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (contact) {
       form.reset({
         first_name: contact.first_name || "",
@@ -149,8 +168,6 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
         linked_user_id: "",
       });
       setSelectedUser(null);
-      setUserSearchQuery("");
-      setShowUserSearch(false);
     }
   }, [contact, form]);
 
@@ -255,7 +272,6 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
         .insert({
           organization_id: organizationId,
           email: email,
-          full_name: fullName,
           invited_by: userData.user.id,
           status: 'pending'
         });
@@ -267,94 +283,88 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
     onSuccess: () => {
       toast({
         title: "Invitación enviada",
-        description: "Se ha enviado la invitación por email exitosamente",
+        description: "Se ha enviado la invitación por email correctamente"
       });
+      // Verificar inmediatamente la invitación
+      checkInvitation();
     },
-    onError: (error: Error) => {
+    onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message,
-        variant: "destructive",
+        description: error.message || "No se pudo enviar la invitación",
+        variant: "destructive"
       });
-    },
+    }
   });
 
-  // Función para copiar link de WhatsApp
-  const copyWhatsAppLink = async (email: string) => {
-    const whatsappLink = `https://archub.app/register?invited_email=${encodeURIComponent(email)}`;
+  // Función para verificar invitación existente
+  const checkInvitation = async () => {
+    if (!emailValue || !supabase || !organizationId) return;
     
+    setCheckingInvitation(true);
     try {
-      await navigator.clipboard.writeText(whatsappLink);
-      toast({
-        title: "Link copiado",
-        description: "El link de invitación se ha copiado al portapapeles",
-      });
+      const { data, error } = await supabase
+        .from('organization_invitations')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .eq('email', emailValue)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (!error) {
+        setExistingInvitation(data?.[0] || null);
+      }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "No se pudo copiar el link al portapapeles",
-        variant: "destructive",
-      });
+      console.error('Error checking invitation:', error);
+    } finally {
+      setCheckingInvitation(false);
     }
   };
 
-
-
   // Verificar invitación existente cuando cambia el email
-  const emailValue = form.watch('email');
-  React.useEffect(() => {
+  useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (emailValue && !selectedUser && supabase && organizationId) {
-        setCheckingInvitation(true);
-        supabase
-          .from('organization_invitations')
-          .select('*')
-          .eq('organization_id', organizationId)
-          .eq('email', emailValue)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .then(({ data, error }) => {
-            if (!error) {
-              setExistingInvitation(data?.[0] || null);
-            }
-            setCheckingInvitation(false);
-          });
+      if (emailValue && !selectedUser) {
+        checkInvitation();
       } else {
         setExistingInvitation(null);
       }
     }, 300);
 
     return () => clearTimeout(timeoutId);
-  }, [emailValue, selectedUser, supabase, organizationId]);
-
-  // Funciones auxiliares para vinculación de usuarios
-  const handleUserSelect = (user: any) => {
-    setSelectedUser(user);
-    setUserSearchQuery("");
-    setShowUserSearch(false);
-    form.setValue('linked_user_id', user.id);
-    
-    // Auto-rellenar campos si están vacíos y no es modo edición
-    if (!contact) {
-      if (!form.getValues('first_name') && user.full_name) {
-        const nameParts = user.full_name.split(' ');
-        form.setValue('first_name', nameParts[0] || '');
-        if (nameParts.length > 1) {
-          form.setValue('last_name', nameParts.slice(1).join(' '));
-        }
-      }
-      if (!form.getValues('email') && user.email) {
-        form.setValue('email', user.email);
-      }
-    }
-  };
+  }, [emailValue, selectedUser]);
 
   const handleUnlinkUser = () => {
     setSelectedUser(null);
     form.setValue('linked_user_id', '');
   };
 
+  const handleCopyWhatsAppLink = () => {
+    const currentEmail = form.getValues('email');
+    const currentName = `${form.getValues('first_name')} ${form.getValues('last_name')}`.trim();
+    
+    if (!currentEmail) {
+      toast({
+        title: "Email requerido",
+        description: "Ingresa un email para crear el enlace de WhatsApp",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const whatsappMessage = `¡Hola ${currentName}! Te invitamos a unirte a nuestra organización en Archub. Regístrate con este email: ${currentEmail}`;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(whatsappMessage)}`;
+    
+    navigator.clipboard.writeText(whatsappUrl).then(() => {
+      toast({
+        title: "Enlace copiado",
+        description: "El enlace de WhatsApp se ha copiado al portapapeles"
+      });
+    });
+  };
+
   const isLinkedUser = !!selectedUser;
+  const showInviteBlock = emailValue && !selectedUser;
   
   const handleSubmit = (data: CreateContactForm) => {
     createContactMutation.mutate(data);
@@ -364,8 +374,6 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
     onClose();
     form.reset();
     setSelectedUser(null);
-    setUserSearchQuery("");
-    setShowUserSearch(false);
     setExistingInvitation(null);
     setCheckingInvitation(false);
   };
@@ -385,142 +393,143 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4" id="contact-form">
                 
-                {/* Sección de vinculación con usuario */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm font-medium">Usuario de Archub</Label>
-                    {isLinkedUser && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleUnlinkUser}
-                        className="h-auto p-1 text-xs text-muted-foreground hover:text-destructive"
-                      >
-                        <Unlink className="w-3 h-3 mr-1" />
-                        Desvincular
-                      </Button>
+                {/* Campo Usuario de Archub */}
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex items-center justify-between">
+                        <FormLabel className="text-sm font-medium">Usuario de Archub</FormLabel>
+                        {isLinkedUser && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleUnlinkUser}
+                            className="h-auto p-1 text-xs text-muted-foreground hover:text-destructive"
+                          >
+                            <Unlink className="w-3 h-3 mr-1" />
+                            Desvincular
+                          </Button>
+                        )}
+                      </div>
+                      
+                      {isLinkedUser ? (
+                        <div className="bg-accent/30 border border-accent rounded-lg p-3">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="w-8 h-8">
+                              <AvatarImage src={selectedUser.avatar_url} />
+                              <AvatarFallback>
+                                {selectedUser.full_name?.charAt(0) || 'U'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <p className="font-medium text-sm truncate">
+                                  {selectedUser.full_name}
+                                </p>
+                                <Badge variant="secondary" className="text-xs">
+                                  <CheckCircle className="w-3 h-3 mr-1" />
+                                  Este usuario ya está en Archub
+                                </Badge>
+                              </div>
+                              <p className="text-xs text-muted-foreground truncate">
+                                {selectedUser.email}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <FormControl>
+                            <Input 
+                              placeholder="Buscar por email completo (ej: usuario@email.com)" 
+                              type="email" 
+                              {...field} 
+                            />
+                          </FormControl>
+                          <p className="text-xs text-muted-foreground">
+                            Si este contacto ya es un usuario de Archub, vinculalo aquí ingresando su email.
+                          </p>
+                        </div>
+                      )}
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Bloque de invitación */}
+                {showInviteBlock && (
+                  <div className="bg-muted/50 border rounded-lg p-4 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <UserPlus className="w-4 h-4 text-muted-foreground" />
+                      <p className="text-sm font-medium">Invitar a Archub</p>
+                    </div>
+                    
+                    {existingInvitation ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-500" />
+                          <p className="text-sm text-muted-foreground">
+                            Ya se envió una invitación a este email
+                          </p>
+                        </div>
+                        <Badge variant="secondary" className="text-xs">
+                          Estado: {existingInvitation.status === 'pending' ? 'Pendiente' : existingInvitation.status}
+                        </Badge>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-xs text-muted-foreground">
+                          Este email no corresponde a un usuario registrado. Puedes invitarlo a unirse a Archub.
+                        </p>
+                        <div className="flex gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const currentEmail = form.getValues('email');
+                              const currentName = `${form.getValues('first_name')} ${form.getValues('last_name')}`.trim();
+                              if (currentEmail) {
+                                sendInvitationMutation.mutate({ 
+                                  email: currentEmail, 
+                                  fullName: currentName || 'Usuario' 
+                                });
+                              }
+                            }}
+                            disabled={sendInvitationMutation.isPending}
+                          >
+                            <Mail className="w-3 h-3 mr-1" />
+                            {sendInvitationMutation.isPending ? 'Enviando...' : 'Enviar invitación'}
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={handleCopyWhatsAppLink}
+                          >
+                            <MessageSquare className="w-3 h-3 mr-1" />
+                            Copiar link WhatsApp
+                          </Button>
+                        </div>
+                      </>
                     )}
                   </div>
-                  
-                  {isLinkedUser ? (
-                    <div className="bg-accent/30 border border-accent rounded-lg p-3">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="w-8 h-8">
-                          <AvatarImage src={selectedUser.avatar_url} />
-                          <AvatarFallback>
-                            {selectedUser.full_name?.charAt(0) || 'U'}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p className="font-medium text-sm truncate">
-                              {selectedUser.full_name}
-                            </p>
-                            <Badge variant="secondary" className="text-xs">
-                              <CheckCircle className="w-3 h-3 mr-1" />
-                              Usuario de Archub
-                            </Badge>
-                          </div>
-                          <p className="text-xs text-muted-foreground truncate">
-                            {selectedUser.email}
-                          </p>
-                          {selectedUser.organization_members?.[0]?.organizations?.name && (
-                            <p className="text-xs text-muted-foreground truncate">
-                              {selectedUser.organization_members[0].organizations.name}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <p className="text-xs text-muted-foreground">
-                        Si este contacto ya es un usuario de Archub, vinculalo aquí para mantener sincronizados sus datos.
-                      </p>
-                      
-                      <div className="relative">
-                        <div className="relative">
-                          <Input
-                            placeholder="Buscar por email completo (ej: usuario@email.com)"
-                            value={userSearchQuery}
-                            onChange={(e) => setUserSearchQuery(e.target.value)}
-                            className="pr-8 bg-background"
-                            onBlur={() => {
-                              // Cerrar resultados si se hace clic fuera
-                              setTimeout(() => setShowUserSearch(false), 150)
-                            }}
-                            onFocus={() => setShowUserSearch(true)}
-                          />
-                          {userSearchQuery && (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setUserSearchQuery("")
-                                setShowUserSearch(false)
-                              }}
-                              className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0 hover:bg-muted-foreground/20"
-                            >
-                              <X className="w-3 h-3" />
-                            </Button>
-                          )}
-                        </div>
-                        
-                        {/* Resultados de búsqueda */}
-                        {showUserSearch && userSearchQuery.length >= 3 && searchResults.length > 0 && (
-                          <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-md shadow-lg max-h-48 overflow-y-auto z-50">
-                            {searchResults.map((user: any) => (
-                              <button
-                                key={user.id}
-                                type="button"
-                                onClick={() => handleUserSelect(user)}
-                                className="w-full p-3 hover:bg-accent flex items-center gap-3 text-left first:rounded-t-md last:rounded-b-md"
-                              >
-                                <Avatar className="w-8 h-8">
-                                  <AvatarImage src={user.avatar_url} />
-                                  <AvatarFallback className="text-xs">
-                                    {user.full_name?.charAt(0) || 'U'}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1 min-w-0">
-                                  <p className="font-medium text-sm truncate">
-                                    {user.full_name}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground truncate">
-                                    {user.email}
-                                  </p>
-                                </div>
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                        
-                        {showUserSearch && userSearchQuery.length >= 3 && searchResults.length === 0 && (
-                          <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-md shadow-lg p-4 z-50">
-                            <p className="text-sm text-muted-foreground text-center">
-                              No se encontraron usuarios
-                            </p>
-                            <p className="text-xs text-muted-foreground text-center mt-1">
-                              Para emails, escriba la dirección completa
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
+                )}
 
                 <FormField
                   control={form.control}
                   name="first_name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium required-asterisk">Nombre</FormLabel>
+                      <FormLabel className="text-sm font-medium">
+                        Nombre/s <span className="text-accent">*</span>
+                      </FormLabel>
                       <FormControl>
                         <Input 
-                          placeholder="Ingresa el nombre" 
+                          placeholder="Nombre/s" 
                           disabled={isLinkedUser}
                           {...field} 
                         />
@@ -535,29 +544,10 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
                   name="last_name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Apellido</FormLabel>
+                      <FormLabel className="text-sm font-medium">Apellido/s</FormLabel>
                       <FormControl>
                         <Input 
-                          placeholder="Ingresa el apellido" 
-                          disabled={isLinkedUser}
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium">Email</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="ejemplo@correo.com" 
-                          type="email" 
+                          placeholder="Apellido/s" 
                           disabled={isLinkedUser}
                           {...field} 
                         />
@@ -593,7 +583,7 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
                       <FormLabel className="text-sm font-medium">Tipo de contacto</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="bg-background">
                             <SelectValue placeholder="Selecciona el tipo de contacto" />
                           </SelectTrigger>
                         </FormControl>
@@ -631,7 +621,7 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
                     <FormItem>
                       <FormLabel className="text-sm font-medium">Ubicación</FormLabel>
                       <FormControl>
-                        <Input placeholder="Ciudad, País" {...field} />
+                        <Input placeholder="Ciudad, país" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -646,105 +636,30 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
                       <FormLabel className="text-sm font-medium">Notas</FormLabel>
                       <FormControl>
                         <Textarea 
-                          placeholder="Notas adicionales sobre el contacto..."
-                          className="min-h-[80px]"
-                          {...field}
+                          placeholder="Notas adicionales sobre el contacto" 
+                          rows={3}
+                          {...field} 
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
               </form>
             </Form>
-
-            {/* Bloque de invitación para contactos sin usuario vinculado */}
-            {!selectedUser && form.watch('email') && (
-              <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
-                <div className="flex items-center gap-2 mb-3">
-                  <UserPlus className="h-4 w-4 text-accent" />
-                  <h3 className="text-sm font-medium text-foreground">
-                    ¿Querés invitar a esta persona a Archub?
-                  </h3>
-                </div>
-                
-                {checkingInvitation ? (
-                  <div className="text-sm text-muted-foreground">
-                    Verificando invitaciones existentes...
-                  </div>
-                ) : existingInvitation ? (
-                  <div className="mb-3">
-                    <Badge variant="secondary" className="text-xs">
-                      {existingInvitation.status === 'pending' && 'Invitación pendiente'}
-                      {existingInvitation.status === 'accepted' && 'Invitación aceptada'}
-                      {existingInvitation.status === 'expired' && 'Invitación expirada'}
-                    </Badge>
-                  </div>
-                ) : null}
-                
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      const email = form.getValues('email');
-                      const firstName = form.getValues('first_name');
-                      const lastName = form.getValues('last_name');
-                      const fullName = `${firstName} ${lastName || ''}`.trim();
-                      
-                      if (email && fullName) {
-                        sendInvitationMutation.mutate({ email, fullName });
-                      }
-                    }}
-                    disabled={sendInvitationMutation.isPending || existingInvitation?.status === 'pending'}
-                    className="flex items-center gap-2"
-                  >
-                    <Mail className="h-4 w-4" />
-                    {sendInvitationMutation.isPending ? 'Enviando...' : 'Enviar invitación por email'}
-                  </Button>
-                  
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      const email = form.getValues('email');
-                      if (email) {
-                        copyWhatsAppLink(email);
-                      }
-                    }}
-                    className="flex items-center gap-2"
-                  >
-                    <MessageSquare className="h-4 w-4" />
-                    Copiar link para WhatsApp
-                  </Button>
-                </div>
-              </div>
-            )}
           </CustomModalBody>
         ),
         footer: (
-          <div className="p-2 border-t border-[var(--card-border)] mt-auto">
-            <div className="flex gap-2 w-full">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={handleClose}
-                className="w-1/4"
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                form="contact-form"
-                className="w-3/4"
-                disabled={createContactMutation.isPending}
-              >
-                {createContactMutation.isPending ? 'Guardando...' : (contact ? "Actualizar" : "Crear contacto")}
-              </Button>
-            </div>
-          </div>
+          <CustomModalFooter onCancel={handleClose}>
+            <Button 
+              type="submit" 
+              form="contact-form"
+              disabled={createContactMutation.isPending}
+            >
+              {createContactMutation.isPending ? 'Guardando...' : (contact ? 'Actualizar contacto' : 'Crear contacto')}
+            </Button>
+          </CustomModalFooter>
         )
       }}
     </CustomModalLayout>

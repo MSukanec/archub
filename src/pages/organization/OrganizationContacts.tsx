@@ -312,7 +312,7 @@ export default function OrganizationContacts() {
         onClick={() => setShowCreateModal(true)}
       >
         <Plus className="w-4 h-4 mr-2" />
-        CREAR CONTACTO
+        Crear contacto
       </Button>
     ]
   }
@@ -335,7 +335,7 @@ export default function OrganizationContacts() {
           action={
             <Button onClick={() => setShowCreateModal(true)}>
               <Plus className="w-4 h-4 mr-2" />
-              CREAR CONTACTO
+              Crear contacto
             </Button>
           }
         />
