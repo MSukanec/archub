@@ -76,16 +76,16 @@
 
 :root {
   /* Layout */
-  --layout-bg: hsl(0, 0%, 99%);
+  --layout-bg: hsl(0, 0%, 92%);
   --layout-text: hsl(0, 0%, 45%);
   --layout-border: hsl(0, 0%, 45%);
   
   /* Background Texture */
-  --bg-texture-base: hsl(0, 0%, 96%);
-  --bg-texture-dots: rgba(0, 0, 0, 0.08);
+  --bg-texture-base: hsl(0, 0%, 92%);
+  --bg-texture-dots: rgba(0, 0, 0, 0.005);
 
   /* Menus/Sidebar */
-  --menues-bg: hsl(0, 0%, 97%);
+  --menues-bg: hsl(0, 0%, 96%);
   --menues-fg: hsl(0, 0%, 45%);
   --menues-secondary-fg: hsl(0, 0%, 50%);
   --menues-border: hsl(0, 0%, 85%);
@@ -95,21 +95,21 @@
   --menues-active-fg: hsl(0, 0%, 97%);
 
   /* Cards */
-  --card-bg: hsl(0, 0%, 97%);
+  --card-bg: hsl(0, 0%, 96%);
   --card-fg: hsl(0, 0%, 35%);
   --card-text: hsl(0, 0%, 35%);
   --card-border: hsl(0, 0%, 85%);
-  --card-hover-bg: hsl(0, 0%, 97%);
+  --card-hover-bg: hsl(0, 0%, 96%);
 
   /* Secondary Cards */
-  --secondary-card-bg: hsl(0, 0%, 95%);
+  --secondary-card-bg: hsl(0, 0%, 96%);
   --secondary-card-fg: hsl(0, 0%, 35%);
   --secondary-card-border: hsl(0, 0%, 85%);
   --secondary-card-color-1: hsl(90, 50%, 50%);
   --secondary-card-color-2: hsl(90, 50%, 50%);
 
   /* Colorful Cards */
-  --colorful-card-top-bg: hsl(0, 0%, 97%);
+  --colorful-card-top-bg: hsl(0, 0%, 96%);
   --colorful-card-top-fg: hsl(0, 0%, 35%);
   --colorful-card-bot-bg: hsl(0, 0%, 94%);
   --colorful-card-text: hsl(0, 0%, 35%);
@@ -212,8 +212,8 @@
   --layout-border: hsl(240, 8%, 15%);
   
   /* Background Texture */
-  --bg-texture-base: hsl(0, 0%, 6%);
-  --bg-texture-dots: rgba(255, 255, 255, 0.06);
+  --bg-texture-base: hsl(0, 0%, 16%);
+  --bg-texture-dots: rgba(255, 255, 255, 0.005);
 
   /* Menus/Sidebar */
   --menues-bg: hsl(0, 0%, 20%);
@@ -226,11 +226,11 @@
   --menues-active-fg: hsl(0, 0%, 98%);
 
   /* Cards */
-  --card-bg: hsl(0, 50%, 50%);
+  --card-bg: hsl(0, 0%, 20%);
   --card-fg: hsl(0, 0%, 90%);
   --card-text: hsl(0, 0%, 90%);
   --card-border: hsl(0, 0%, 16%);
-  --card-hover-bg: hsl(0, 0%, 14%);
+  --card-hover-bg: hsl(0, 0%, 20%);
 
   /* Secondary Cards */
   --secondary-card-bg: hsl(0, 0%, 14%);

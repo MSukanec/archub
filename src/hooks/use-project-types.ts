@@ -1,31 +1,54 @@
-import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase';
 
-interface ProjectType {
-  id: string
-  name: string
-  description?: string
-  created_at: string
+export interface ProjectType {
+  id: string;
+  name: string;
+  description?: string;
+  created_at: string;
 }
 
+export interface ProjectModality {
+  id: string;
+  name: string;
+  description?: string;
+  created_at: string;
+}
+
+// Hook to get project types
 export function useProjectTypes() {
-  return useQuery<ProjectType[]>({
+  return useQuery({
     queryKey: ['project-types'],
     queryFn: async () => {
-      if (!supabase) {
-        throw new Error('Supabase not available')
-      }
-
       const { data, error } = await supabase
         .from('project_types')
         .select('*')
-        .order('name')
+        .order('name');
 
       if (error) {
-        throw error
+        throw error;
       }
 
-      return data || []
-    }
-  })
+      return data as ProjectType[];
+    },
+  });
+}
+
+// Hook to get project modalities
+export function useProjectModalities() {
+  return useQuery({
+    queryKey: ['project-modalities'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('project_modalities')
+        .select('*')
+        .order('name');
+
+      if (error) {
+        throw error;
+      }
+
+      return data as ProjectModality[];
+    },
+  });
 }
