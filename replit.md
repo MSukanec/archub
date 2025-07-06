@@ -129,6 +129,9 @@ Changelog:
   • Changed contacts page from wide layout to normal layout for better user experience
   • Converted contact list from cards to CustomTable positioned below user detail cards
   • Enhanced UI structure: contact detail cards above, CustomTable with full contact management below
+  • Restructured page to follow ai-page-template.md standard: moved all search, filters and actions to headerProps
+  • Eliminated all cards and extra UI elements, keeping only clean CustomTable with integrated actions
+  • Applied proper template pattern: search in header, filters as clickable buttons, actions in header actions area
 - July 6, 2025. Fixed NewMovementModal user display issue and created project "Datos Básicos" page - COMPLETED
   • Fixed NewMovementModal user dropdown showing "Usuario sin nombre" by correcting data structure access in member mapping
   • Modal now properly displays user names using member.full_name instead of member.user.full_name (useOrganizationMembers already flattens data)
