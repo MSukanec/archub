@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { Receipt } from 'lucide-react'
+import { Receipt, Edit, Trash2 } from 'lucide-react'
 
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
@@ -164,7 +164,7 @@ export default function ProjectInstallmentsPage() {
         promises.push(
           supabase
             .from('contacts')
-            .select('id, first_name, last_name, company_name, avatar_url')
+            .select('id, first_name, last_name, company_name')
             .eq('organization_id', organizationId)
             .in('id', contactIds)
         )
@@ -538,8 +538,20 @@ export default function ProjectInstallmentsPage() {
               columns={detailColumns}
               defaultSort={{ key: 'movement_date', direction: 'desc' }}
               onCardClick={handleCardClick}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
+              getRowActions={(item: Installment) => [
+                {
+                  icon: <Edit className="h-4 w-4" />,
+                  label: 'Editar',
+                  onClick: () => handleEdit(item),
+                  variant: 'default' as const
+                },
+                {
+                  icon: <Trash2 className="h-4 w-4" />,
+                  label: 'Eliminar',
+                  onClick: () => handleDelete(item),
+                  variant: 'destructive' as const
+                }
+              ]}
             />
           </div>
         ) : installments.length === 0 ? (
