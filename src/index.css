@@ -6,7 +6,7 @@
   .bg-texture {
     background-color: var(--bg-texture-base);
     background-image: radial-gradient(var(--bg-texture-dots) 1px, transparent 1px);
-    background-size: 2px 2px;
+    background-size: 4px 4px;
   }
 }
 
@@ -81,8 +81,8 @@
   --layout-border: hsl(0, 0%, 45%);
   
   /* Background Texture */
-  --bg-texture-base: hsl(0, 0%, 99%);
-  --bg-texture-dots: rgba(0, 0, 0, 0.015);
+  --bg-texture-base: hsl(0, 0%, 96%);
+  --bg-texture-dots: rgba(0, 0, 0, 0.08);
 
   /* Menus/Sidebar */
   --menues-bg: hsl(0, 0%, 97%);
@@ -212,8 +212,8 @@
   --layout-border: hsl(240, 8%, 15%);
   
   /* Background Texture */
-  --bg-texture-base: hsl(0, 0%, 7%);
-  --bg-texture-dots: rgba(255, 255, 255, 0.015);
+  --bg-texture-base: hsl(0, 0%, 6%);
+  --bg-texture-dots: rgba(255, 255, 255, 0.06);
 
   /* Menus/Sidebar */
   --menues-bg: hsl(0, 0%, 20%);
