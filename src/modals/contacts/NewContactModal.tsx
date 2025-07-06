@@ -503,9 +503,9 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
                             <SelectValue placeholder="Selecciona el tipo de contacto" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="bg-background">
+                        <SelectContent className="bg-background border border-border shadow-md">
                           {contactTypes.map((type) => (
-                            <SelectItem key={type.id} value={type.id}>
+                            <SelectItem key={type.id} value={type.id} className="hover:bg-accent hover:text-accent-foreground">
                               {type.name}
                             </SelectItem>
                           ))}
