@@ -66,11 +66,6 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
   const { data: projectTypes = [] } = useProjectTypes();
   const { data: projectModalities = [] } = useProjectModalities();
 
-  // Verificar que hay una organización activa
-  if (!organizationId) {
-    return <div className="p-6 text-center text-muted-foreground">No hay una organización activa seleccionada.</div>;
-  }
-
   // Encontrar el member_id del usuario actual
   const currentUserMember = organizationMembers.find(member => 
     member.user_id === userData?.user?.id
@@ -236,6 +231,30 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
     initials: getCreatorInfo().split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2),
     avatar: userData?.user?.avatar_url || ''
   };
+
+  // Verificar que hay una organización activa
+  if (!organizationId) {
+    return (
+      <CustomModalLayout open={open} onClose={onClose}>
+        {{
+          header: (
+            <CustomModalHeader
+              title="Error"
+              description="No hay una organización activa seleccionada"
+              onClose={onClose}
+            />
+          ),
+          body: (
+            <CustomModalBody columns={1}>
+              <div className="p-6 text-center text-muted-foreground">
+                No hay una organización activa seleccionada.
+              </div>
+            </CustomModalBody>
+          )
+        }}
+      </CustomModalLayout>
+    );
+  }
 
   return (
     <CustomModalLayout open={open} onClose={onClose}>
