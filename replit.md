@@ -132,6 +132,12 @@ Changelog:
   • Restructured page to follow ai-page-template.md standard: moved all search, filters and actions to headerProps
   • Eliminated all cards and extra UI elements, keeping only clean CustomTable with integrated actions
   • Applied proper template pattern: search in header, filters as clickable buttons, actions in header actions area
+  • Enhanced user search system: requires complete email for email searches (exact match), partial name search allowed
+  • Added clear button (X) to user search input field with proper styling and functionality
+  • Fixed select background transparency issue - now has proper bg-background styling
+  • Added click outside to close and focus/blur event handling for user search dropdown
+  • Removed all hardcoded grid layouts from NewContactModal, now uses CustomModalBody columns={1} pattern
+  • Improved user search dropdown: better styling, larger click areas, shadow effects, and proper z-index
 - July 6, 2025. Fixed NewMovementModal user display issue and created project "Datos Básicos" page - COMPLETED
   • Fixed NewMovementModal user dropdown showing "Usuario sin nombre" by correcting data structure access in member mapping
   • Modal now properly displays user names using member.full_name instead of member.user.full_name (useOrganizationMembers already flattens data)

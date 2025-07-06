@@ -287,7 +287,7 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
           />
         ),
         body: (
-          <CustomModalBody padding="md">
+          <CustomModalBody columns={1}>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4" id="contact-form">
                 
@@ -346,34 +346,45 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
                       </p>
                       
                       <div className="relative">
-                        <div className="flex gap-2">
+                        <div className="relative">
                           <Input
-                            placeholder="Buscar usuario por nombre o email..."
+                            placeholder="Buscar por email completo (ej: usuario@email.com)"
                             value={userSearchQuery}
                             onChange={(e) => setUserSearchQuery(e.target.value)}
-                            className="flex-1"
+                            className="pr-8 bg-background"
+                            onBlur={() => {
+                              // Cerrar resultados si se hace clic fuera
+                              setTimeout(() => setShowUserSearch(false), 150)
+                            }}
+                            onFocus={() => setShowUserSearch(true)}
                           />
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setShowUserSearch(!showUserSearch)}
-                          >
-                            <Search className="w-4 h-4" />
-                          </Button>
+                          {userSearchQuery && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setUserSearchQuery("")
+                                setShowUserSearch(false)
+                              }}
+                              className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0 hover:bg-muted-foreground/20"
+                            >
+                              <X className="w-3 h-3" />
+                            </Button>
+                          )}
                         </div>
                         
                         {/* Resultados de búsqueda */}
-                        {userSearchQuery.length >= 2 && searchResults.length > 0 && (
-                          <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-md shadow-md max-h-48 overflow-y-auto z-50">
+                        {showUserSearch && userSearchQuery.length >= 3 && searchResults.length > 0 && (
+                          <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-md shadow-lg max-h-48 overflow-y-auto z-50">
                             {searchResults.map((user: any) => (
                               <button
                                 key={user.id}
                                 type="button"
                                 onClick={() => handleUserSelect(user)}
-                                className="w-full p-2 hover:bg-accent flex items-center gap-3 text-left"
+                                className="w-full p-3 hover:bg-accent flex items-center gap-3 text-left first:rounded-t-md last:rounded-b-md"
                               >
-                                <Avatar className="w-6 h-6">
+                                <Avatar className="w-8 h-8">
                                   <AvatarImage src={user.avatar_url} />
                                   <AvatarFallback className="text-xs">
                                     {user.full_name?.charAt(0) || 'U'}
@@ -392,10 +403,13 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
                           </div>
                         )}
                         
-                        {userSearchQuery.length >= 2 && searchResults.length === 0 && (
-                          <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-md shadow-md p-3 z-50">
+                        {showUserSearch && userSearchQuery.length >= 3 && searchResults.length === 0 && (
+                          <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-md shadow-lg p-4 z-50">
                             <p className="text-sm text-muted-foreground text-center">
                               No se encontraron usuarios
+                            </p>
+                            <p className="text-xs text-muted-foreground text-center mt-1">
+                              Para emails, escriba la dirección completa
                             </p>
                           </div>
                         )}
@@ -404,82 +418,78 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  <FormField
-                    control={form.control}
-                    name="first_name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium required-asterisk">Nombre</FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="Ingresa el nombre" 
-                            disabled={isLinkedUser}
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <FormField
+                  control={form.control}
+                  name="first_name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium required-asterisk">Nombre</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Ingresa el nombre" 
+                          disabled={isLinkedUser}
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                  <FormField
-                    control={form.control}
-                    name="last_name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium">Apellido</FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="Ingresa el apellido" 
-                            disabled={isLinkedUser}
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="last_name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">Apellido</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Ingresa el apellido" 
+                          disabled={isLinkedUser}
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium">Email</FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="ejemplo@correo.com" 
-                            type="email" 
-                            disabled={isLinkedUser}
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">Email</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="ejemplo@correo.com" 
+                          type="email" 
+                          disabled={isLinkedUser}
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                  <FormField
-                    control={form.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium">Teléfono</FormLabel>
-                        <FormControl>
-                          <CustomPhoneInput 
-                            value={field.value || ''}
-                            onChange={field.onChange}
-                            placeholder="Número de teléfono"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">Teléfono</FormLabel>
+                      <FormControl>
+                        <CustomPhoneInput 
+                          value={field.value || ''}
+                          onChange={field.onChange}
+                          placeholder="Número de teléfono"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <FormField
                   control={form.control}
@@ -506,35 +516,33 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
                   )}
                 />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  <FormField
-                    control={form.control}
-                    name="company_name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium">Empresa</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Nombre de la empresa" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <FormField
+                  control={form.control}
+                  name="company_name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">Empresa</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Nombre de la empresa" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                  <FormField
-                    control={form.control}
-                    name="location"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium">Ubicación</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Ciudad, País" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="location"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">Ubicación</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Ciudad, País" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <FormField
                   control={form.control}

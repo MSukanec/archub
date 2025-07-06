@@ -8,8 +8,20 @@ export function useSearchUsers(query: string) {
   return useQuery({
     queryKey: ['searchUsers', query, userData?.organization?.id],
     queryFn: async () => {
-      if (!supabase || !userData?.organization?.id || !query || query.length < 2) {
+      if (!supabase || !userData?.organization?.id || !query || query.length < 3) {
         return []
+      }
+
+      // Determinar si la consulta parece un email completo
+      const isEmailQuery = query.includes('@') && query.includes('.')
+      let searchCondition = ''
+
+      if (isEmailQuery) {
+        // Para emails, buscar coincidencia exacta
+        searchCondition = `email.eq.${query}`
+      } else {
+        // Para nombres, permitir búsqueda parcial
+        searchCondition = `full_name.ilike.%${query}%`
       }
 
       // Search users by name or email
@@ -28,7 +40,7 @@ export function useSearchUsers(query: string) {
             )
           )
         `)
-        .or(`full_name.ilike.%${query}%,email.ilike.%${query}%`)
+        .or(searchCondition)
         .limit(10)
 
       if (error) {
@@ -38,6 +50,6 @@ export function useSearchUsers(query: string) {
 
       return data || []
     },
-    enabled: !!supabase && !!userData?.organization?.id && !!query && query.length >= 2,
+    enabled: !!supabase && !!userData?.organization?.id && !!query && query.length >= 3,
   })
 }
