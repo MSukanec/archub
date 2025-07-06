@@ -47,11 +47,16 @@ import DesignTimeline from "@/pages/design/DesignTimeline";
 import DesignDashboard from "@/pages/design/DesignDashboard";
 import DesignDocumentation from "@/pages/design/DesignDocumentation";
 import SelectMode from "@/pages/others/SelectMode";
+import AuthCallback from "@/pages/auth/AuthCallback";
 import NotFound from "@/pages/others/NotFound";
 
 function Router() {
   return (
     <Switch>
+      <Route path="/auth/callback">
+        <AuthCallback />
+      </Route>
+      
       <Route path="/select-mode">
         <ProtectedRoute>
           <SelectMode />
