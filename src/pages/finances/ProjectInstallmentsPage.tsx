@@ -460,7 +460,7 @@ export default function ProjectInstallmentsPage() {
               ]}
               emptyState={
                 <CustomEmptyState
-                  icon={Receipt}
+                  icon={<Receipt className="h-12 w-12" />}
                   title="No hay aportes registrados"
                   description="Comienza agregando el primer aporte al proyecto"
                   actionLabel="Crear Primer Aporte"
