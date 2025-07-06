@@ -106,6 +106,14 @@ export default function ProjectBasicData() {
       // Cronograma
       setStartDate(projectData.start_date || '');
       setEstimatedEnd(projectData.estimated_end || '');
+      
+      // Mark data as loaded after a short delay to prevent immediate auto-save
+      setTimeout(() => {
+        setDataLoaded(true);
+      }, 100);
+    } else {
+      // If no project data exists, mark as loaded immediately
+      setDataLoaded(true);
     }
   }, [projectData]);
 
@@ -119,6 +127,9 @@ export default function ProjectBasicData() {
     },
     dependencies: [projectName],
   });
+
+  // Track if data has been loaded to prevent auto-save on initial load
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   // Auto-save for project data
   const { isSaving: isSavingData } = useDebouncedAutoSave({
@@ -154,6 +165,11 @@ export default function ProjectBasicData() {
       estimated_end: estimatedEnd || null,
     },
     onSave: async (data) => {
+      // Only save if data has been loaded and there are actual changes
+      if (!dataLoaded) {
+        return;
+      }
+      
       // Filter out empty strings to avoid unnecessary saves
       const cleanData = Object.fromEntries(
         Object.entries(data).filter(([_, value]) => value !== '' && value !== null)
@@ -163,6 +179,7 @@ export default function ProjectBasicData() {
       }
     },
     dependencies: [
+      dataLoaded, // Include dataLoaded in dependencies
       projectDescription, projectTypeId, modalityId, internalNotes, heroImageUrl,
       surfaceTotal, surfaceCovered, surfaceSemi,
       address, city, state, country, zipCode, lat, lng,
