@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { Eye, Edit, Trash2, Receipt } from 'lucide-react'
+import { Receipt } from 'lucide-react'
 
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
@@ -23,6 +23,7 @@ interface Installment {
   currency_id: string
   wallet_id: string
   project_id: string
+  created_by: string
   created_at: string
   contact?: {
     id: string
@@ -41,6 +42,35 @@ interface Installment {
     id: string
     name: string
   }
+  creator?: {
+    id: string
+    full_name: string
+    email: string
+  }
+}
+
+interface InstallmentSummary {
+  contact_id: string
+  contact?: {
+    id: string
+    first_name: string
+    last_name: string
+    company_name?: string
+    avatar_url?: string
+  }
+  currency_id: string
+  currency?: {
+    id: string
+    name: string
+    code: string
+    symbol: string
+  }
+  wallet_id: string
+  wallet?: {
+    id: string
+    name: string
+  }
+  total_amount: number
 }
 
 export default function ProjectInstallmentsPage() {
@@ -49,38 +79,43 @@ export default function ProjectInstallmentsPage() {
   const [showModal, setShowModal] = useState(false)
   const [editingInstallment, setEditingInstallment] = useState<Installment | null>(null)
 
-  const organizationId = userData?.preferences?.last_organization_id
+  const organizationId = userData?.organization?.id
   const projectId = userData?.preferences?.last_project_id
 
-  // Get "Cuotas" concept ID (exact match)
+  // Get cuotas concept ID from movement concepts
   const { data: cuotasConcept } = useQuery({
-    queryKey: ['movement-concepts', 'cuotas'],
+    queryKey: ['cuotas-concept', organizationId],
     queryFn: async () => {
-      if (!supabase) throw new Error('Supabase client not initialized')
+      if (!supabase || !organizationId) return null
       
       const { data, error } = await supabase
         .from('movement_concepts')
         .select('id, name')
+        .eq('organization_id', organizationId)
         .eq('name', 'Cuotas')
-        .limit(1)
         .single()
 
       if (error) {
         console.error('Error fetching cuotas concept:', error)
-        return null
+        throw error
       }
+
       console.log('Found Cuotas concept:', data)
       return data
-    }
+    },
+    enabled: !!organizationId && !!supabase
   })
 
-  // Get installments (movements with concept_id = CUOTAS)
+  // Get installments (movements filtered by cuotas concept)
   const { data: installments = [], isLoading } = useQuery({
     queryKey: ['installments', organizationId, projectId, cuotasConcept?.id],
     queryFn: async () => {
-      if (!supabase || !organizationId || !projectId || !cuotasConcept?.id) {
-        return []
-      }
+      if (!supabase || !organizationId || !projectId || !cuotasConcept) return []
+
+      console.log('Found concepts:', {
+        ingresos: '8862eee7-dd00-4f01-9335-5ea0070d3403',
+        cuotas: cuotasConcept.id
+      })
 
       // Get movements filtered by cuotas concept and project
       const { data: movements, error } = await supabase
@@ -94,7 +129,13 @@ export default function ProjectInstallmentsPage() {
           currency_id,
           wallet_id,
           project_id,
-          created_at
+          created_by,
+          created_at,
+          users!created_by (
+            id,
+            full_name,
+            email
+          )
         `)
         .eq('organization_id', organizationId)
         .eq('project_id', projectId)
@@ -172,7 +213,8 @@ export default function ProjectInstallmentsPage() {
         ...movement,
         contact: contactsMap.get(movement.contact_id),
         currency: currenciesMap.get(movement.currency_id),
-        wallet: walletsMap.get(movement.wallet_id)
+        wallet: walletsMap.get(movement.wallet_id),
+        creator: Array.isArray(movement.users) ? movement.users[0] : movement.users
       })) as Installment[]
     },
     enabled: !!organizationId && !!projectId && !!cuotasConcept?.id
@@ -182,6 +224,32 @@ export default function ProjectInstallmentsPage() {
   const totalContributed = installments.reduce((sum, installment) => {
     return sum + (installment.amount || 0)
   }, 0)
+
+  // Calculate installment summary by contact
+  const installmentSummary: InstallmentSummary[] = React.useMemo(() => {
+    const summaryMap = new Map<string, InstallmentSummary>()
+    
+    installments.forEach(installment => {
+      const key = `${installment.contact_id}-${installment.currency_id}-${installment.wallet_id}`
+      
+      if (summaryMap.has(key)) {
+        const existing = summaryMap.get(key)!
+        existing.total_amount += installment.amount || 0
+      } else {
+        summaryMap.set(key, {
+          contact_id: installment.contact_id,
+          contact: installment.contact,
+          currency_id: installment.currency_id,
+          currency: installment.currency,
+          wallet_id: installment.wallet_id,
+          wallet: installment.wallet,
+          total_amount: installment.amount || 0
+        })
+      }
+    })
+    
+    return Array.from(summaryMap.values()).sort((a, b) => b.total_amount - a.total_amount)
+  }, [installments])
 
   // Filter installments based on search
   const filteredInstallments = installments.filter(installment => {
@@ -203,32 +271,22 @@ export default function ProjectInstallmentsPage() {
     console.log('Delete installment:', installment.id)
   }
 
+  const handleCardClick = (installment: Installment) => {
+    handleEdit(installment)
+  }
+
   const handleCloseModal = () => {
     setShowModal(false)
     setEditingInstallment(null)
   }
 
-  const tableColumns = [
-    {
-      key: "movement_date",
-      label: "Fecha",
-      width: "12%",
-      sortable: true,
-      sortType: "date" as const,
-      render: (item: Installment) => {
-        const date = new Date(item.movement_date)
-        return (
-          <div className="text-sm">
-            {format(date, 'dd/MM/yyyy', { locale: es })}
-          </div>
-        )
-      }
-    },
+  // Summary table columns (Contacto, Moneda, Billetera, Monto)
+  const summaryColumns = [
     {
       key: "contact",
       label: "Contacto",
-      width: "25%",
-      render: (item: Installment) => {
+      width: "35%",
+      render: (item: InstallmentSummary) => {
         if (!item.contact) {
           return <div className="text-sm text-muted-foreground">Sin contacto</div>
         }
@@ -258,9 +316,107 @@ export default function ProjectInstallmentsPage() {
       }
     },
     {
+      key: "currency",
+      label: "Moneda",
+      width: "15%",
+      render: (item: InstallmentSummary) => (
+        <Badge variant="outline" className="text-xs">
+          {item.currency?.code || 'N/A'}
+        </Badge>
+      )
+    },
+    {
+      key: "wallet",
+      label: "Billetera",
+      width: "25%",
+      render: (item: InstallmentSummary) => (
+        <div className="text-sm">{item.wallet?.name || 'Sin billetera'}</div>
+      )
+    },
+    {
+      key: "total_amount",
+      label: "Monto Total",
+      width: "25%",
+      sortable: true,
+      sortType: "number" as const,
+      render: (item: InstallmentSummary) => {
+        const symbol = item.currency?.symbol || '$'
+        return (
+          <div className="text-sm font-bold text-green-600">
+            {symbol}{Math.abs(item.total_amount || 0).toLocaleString('es-AR')}
+          </div>
+        )
+      }
+    }
+  ]
+
+  // Detailed table columns (Fecha, Creador, Moneda, Billetera, Monto)
+  const detailColumns = [
+    {
+      key: "movement_date",
+      label: "Fecha",
+      width: "15%",
+      sortable: true,
+      sortType: "date" as const,
+      render: (item: Installment) => {
+        const date = new Date(item.movement_date)
+        return (
+          <div className="text-sm">
+            {format(date, 'dd/MM/yyyy', { locale: es })}
+          </div>
+        )
+      }
+    },
+    {
+      key: "creator",
+      label: "Creador",
+      width: "25%",
+      render: (item: Installment) => {
+        if (!item.creator) {
+          return <div className="text-sm text-muted-foreground">Sin creador</div>
+        }
+
+        const initials = item.creator.full_name
+          ? item.creator.full_name.split(' ').map(n => n.charAt(0)).join('').toUpperCase()
+          : item.creator.email?.charAt(0).toUpperCase() || 'U'
+
+        return (
+          <div className="flex items-center gap-2">
+            <Avatar className="w-8 h-8">
+              <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+            </Avatar>
+            <div>
+              <div className="text-sm font-medium">{item.creator.full_name || item.creator.email}</div>
+              {item.creator.full_name && (
+                <div className="text-xs text-muted-foreground">{item.creator.email}</div>
+              )}
+            </div>
+          </div>
+        )
+      }
+    },
+    {
+      key: "currency",
+      label: "Moneda",
+      width: "15%",
+      render: (item: Installment) => (
+        <Badge variant="outline" className="text-xs">
+          {item.currency?.code || 'N/A'}
+        </Badge>
+      )
+    },
+    {
+      key: "wallet",
+      label: "Billetera",
+      width: "20%",
+      render: (item: Installment) => (
+        <div className="text-sm">{item.wallet?.name || 'Sin billetera'}</div>
+      )
+    },
+    {
       key: "amount",
       label: "Monto",
-      width: "15%",
+      width: "25%",
       sortable: true,
       sortType: "number" as const,
       render: (item: Installment) => {
@@ -271,48 +427,6 @@ export default function ProjectInstallmentsPage() {
           </div>
         )
       }
-    },
-    {
-      key: "currency",
-      label: "Moneda",
-      width: "10%",
-      render: (item: Installment) => (
-        <Badge variant="outline" className="text-xs">
-          {item.currency?.code || 'N/A'}
-        </Badge>
-      )
-    },
-    {
-      key: "wallet",
-      label: "Billetera",
-      width: "15%",
-      render: (item: Installment) => (
-        <div className="text-sm">{item.wallet?.name || 'Sin billetera'}</div>
-      )
-    },
-
-    {
-      key: "actions",
-      label: "Acciones",
-      width: "15%",
-      render: (item: Installment) => (
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleEdit(item)}
-          >
-            <Edit className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDelete(item)}
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
-        </div>
-      )
     }
   ]
 
@@ -365,13 +479,37 @@ export default function ProjectInstallmentsPage() {
           </div>
         )}
 
-        {/* Table or Empty State */}
+        {/* Summary Table by Contact */}
+        {installmentSummary.length > 0 && (
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold">Resumen por Contacto</h3>
+              <p className="text-sm text-muted-foreground">Totales agregados por contacto, moneda y billetera</p>
+            </div>
+            <CustomTable
+              data={installmentSummary}
+              columns={summaryColumns}
+              defaultSort={{ key: 'total_amount', direction: 'desc' }}
+            />
+          </div>
+        )}
+
+        {/* Detailed Table */}
         {filteredInstallments.length > 0 ? (
-          <CustomTable
-            data={filteredInstallments}
-            columns={tableColumns}
-            defaultSort={{ key: 'movement_date', direction: 'desc' }}
-          />
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold">Detalle de Aportes</h3>
+              <p className="text-sm text-muted-foreground">Todos los aportes registrados en el proyecto</p>
+            </div>
+            <CustomTable
+              data={filteredInstallments}
+              columns={detailColumns}
+              defaultSort={{ key: 'movement_date', direction: 'desc' }}
+              onCardClick={handleCardClick}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          </div>
         ) : installments.length === 0 ? (
           <CustomEmptyState
             title="Aún no hay aportes registrados"
@@ -385,21 +523,19 @@ export default function ProjectInstallmentsPage() {
         ) : (
           <CustomEmptyState
             title="No se encontraron aportes"
-            description="Intenta ajustar los términos de búsqueda"
+            description="Intenta con otros términos de búsqueda"
           />
         )}
-      </div>
 
-      {/* Modal */}
-      {showModal && organizationId && projectId && (
+        {/* Modal */}
         <NewInstallmentModal
           open={showModal}
           onClose={handleCloseModal}
-          projectId={projectId}
-          organizationId={organizationId}
           editingInstallment={editingInstallment}
+          organizationId={organizationId}
+          projectId={projectId}
         />
-      )}
+      </div>
     </Layout>
   )
 }
