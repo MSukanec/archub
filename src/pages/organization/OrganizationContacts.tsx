@@ -28,7 +28,7 @@ export default function OrganizationContacts() {
   const [contactToDelete, setContactToDelete] = useState<any>(null)
   
   const { data: userData, isLoading } = useCurrentUser()
-  const { data: contacts = [], isLoading: contactsLoading } = useContacts(userData?.organization?.id)
+  const { data: contacts = [], isLoading: contactsLoading } = useContacts()
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
@@ -58,6 +58,8 @@ export default function OrganizationContacts() {
 
   // Filtrar y ordenar contactos
   const filteredContacts = React.useMemo(() => {
+    console.log('Filtering contacts:', { total: contacts.length, searchValue, filterByType })
+    
     let filtered = contacts.filter((contact: any) => {
       const fullName = `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
       const matchesSearch = !searchValue || 
@@ -88,6 +90,7 @@ export default function OrganizationContacts() {
       filtered.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     }
 
+    console.log('Filtered contacts result:', filtered.length)
     return filtered
   }, [contacts, searchValue, sortBy, filterByType])
 
