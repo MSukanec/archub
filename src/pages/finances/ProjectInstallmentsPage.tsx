@@ -13,18 +13,6 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { supabase } from '@/lib/supabase'
 import { NewInstallmentModal } from '@/modals/finances/NewInstallmentModal'
-import { useToast } from '@/hooks/use-toast'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 interface Installment {
   id: string
@@ -90,10 +78,6 @@ export default function ProjectInstallmentsPage() {
   const [searchValue, setSearchValue] = useState("")
   const [showModal, setShowModal] = useState(false)
   const [editingInstallment, setEditingInstallment] = useState<Installment | null>(null)
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [installmentToDelete, setInstallmentToDelete] = useState<Installment | null>(null)
-  const { toast } = useToast()
-  const queryClient = useQueryClient()
 
   const organizationId = userData?.organization?.id
   const projectId = userData?.preferences?.last_project_id
@@ -309,46 +293,9 @@ export default function ProjectInstallmentsPage() {
     setShowModal(true)
   }
 
-  // Delete mutation
-  const deleteMutation = useMutation({
-    mutationFn: async (installmentId: string) => {
-      if (!supabase) throw new Error('Supabase not initialized')
-      
-      const { error } = await supabase
-        .from('movements')
-        .delete()
-        .eq('id', installmentId)
-      
-      if (error) throw error
-    },
-    onSuccess: () => {
-      toast({
-        title: "Éxito",
-        description: "Aporte eliminado correctamente"
-      })
-      queryClient.invalidateQueries({ queryKey: ['installments'] })
-      setDeleteDialogOpen(false)
-      setInstallmentToDelete(null)
-    },
-    onError: (error) => {
-      console.error('Error deleting installment:', error)
-      toast({
-        title: "Error",
-        description: "No se pudo eliminar el aporte",
-        variant: "destructive"
-      })
-    }
-  })
-
   const handleDelete = (installment: Installment) => {
-    setInstallmentToDelete(installment)
-    setDeleteDialogOpen(true)
-  }
-
-  const handleDeleteConfirm = () => {
-    if (installmentToDelete) {
-      deleteMutation.mutate(installmentToDelete.id)
-    }
+    // TODO: Implement delete functionality
+    console.log('Delete installment:', installment.id)
   }
 
   const handleCardClick = (installment: Installment) => {
@@ -624,42 +571,15 @@ export default function ProjectInstallmentsPage() {
           />
         )}
 
+        {/* Modal */}
+        <NewInstallmentModal
+          open={showModal}
+          onClose={handleCloseModal}
+          editingInstallment={editingInstallment}
+          organizationId={organizationId || ''}
+          projectId={projectId || ''}
+        />
       </div>
     </Layout>
-
-    {/* Modal fuera del Layout */}
-    <NewInstallmentModal
-      open={showModal}
-      onClose={handleCloseModal}
-      editingInstallment={editingInstallment}
-      organizationId={organizationId || ''}
-      projectId={projectId || ''}
-    />
-
-    {/* Delete confirmation dialog */}
-    <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>¿Eliminar aporte?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Esta acción no se puede deshacer. El aporte de{' '}
-            {installmentToDelete?.contact?.company_name || 
-             `${installmentToDelete?.contact?.first_name || ''} ${installmentToDelete?.contact?.last_name || ''}`.trim()}{' '}
-            por {installmentToDelete?.currency?.symbol}{installmentToDelete?.amount?.toLocaleString()} será eliminado permanentemente.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction 
-            onClick={handleDeleteConfirm}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            disabled={deleteMutation.isPending}
-          >
-            {deleteMutation.isPending ? 'Eliminando...' : 'Eliminar'}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  </>
   )
 }
