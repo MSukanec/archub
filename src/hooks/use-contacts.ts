@@ -2,23 +2,21 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useCurrentUser } from '@/hooks/use-current-user'
 
-export function useContacts() {
+export function useContacts(organizationId?: string) {
   const { userData } = useCurrentUser()
+  
+  // Use provided organizationId or fall back to userData organization
+  const orgId = organizationId || userData?.organization?.id
 
   return useQuery({
-    queryKey: ['contacts', userData?.organization?.id],
+    queryKey: ['contacts', orgId],
     queryFn: async () => {
-      console.log('Fetching contacts for organization:', userData?.organization?.id)
-      
-      if (!supabase || !userData?.organization?.id) {
-        console.log('Skipping contacts fetch - missing supabase or organization ID')
-        return []
-      }
+      if (!supabase || !orgId) return []
 
       const { data, error } = await supabase
         .from('contacts')
         .select('*')
-        .eq('organization_id', userData.organization.id)
+        .eq('organization_id', orgId)
         .order('first_name', { ascending: true })
 
       if (error) {
@@ -26,9 +24,8 @@ export function useContacts() {
         throw error
       }
 
-      console.log('Contacts fetched successfully:', data?.length || 0, 'contacts')
       return data || []
     },
-    enabled: !!supabase && !!userData?.organization?.id,
+    enabled: !!supabase && !!orgId,
   })
 }
