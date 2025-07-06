@@ -1,7 +1,7 @@
 import React from 'react'
 import { cn } from '@/lib/utils'
 
-interface CustomCardProps {
+interface DataCardProps {
   children?: React.ReactNode
   title?: string
   description?: string
@@ -11,7 +11,7 @@ interface CustomCardProps {
   onClick?: () => void
 }
 
-export const CustomCard: React.FC<CustomCardProps> = ({
+export const DataCard: React.FC<DataCardProps> = ({
   children,
   title,
   description,
@@ -23,8 +23,8 @@ export const CustomCard: React.FC<CustomCardProps> = ({
   return (
     <div 
       className={cn(
-        `cursor-pointer transition-all duration-200 hover:shadow-lg`,
-        `rounded-lg`,
+        `border cursor-pointer transition-all duration-200 hover:shadow-lg`,
+        `rounded-lg border-border`,
         className
       )}
       onClick={onClick}
@@ -87,5 +87,3 @@ export const CustomCard: React.FC<CustomCardProps> = ({
     </div>
   )
 }
-
-export default CustomCard
