@@ -5,22 +5,12 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 export function useContacts() {
   const { data: userData, isLoading: userLoading } = useCurrentUser()
 
-  console.log('useContacts hook called:', {
-    hasSupabase: !!supabase,
-    hasUserData: !!userData,
-    hasOrganization: !!userData?.organization,
-    organizationId: userData?.organization?.id,
-    userLoading,
-    enabled: !!supabase && !!userData?.organization?.id && !userLoading
-  })
+
 
   return useQuery({
     queryKey: ['contacts', userData?.organization?.id],
     queryFn: async () => {
-      console.log('Fetching contacts for organization:', userData?.organization?.id)
-      
       if (!supabase || !userData?.organization?.id) {
-        console.log('Skipping contacts fetch - missing supabase or organization ID')
         return []
       }
 
@@ -34,18 +24,11 @@ export function useContacts() {
         console.error('Error fetching contacts:', error)
         throw error
       }
-
-      console.log('Contacts fetched successfully:', data?.length || 0, 'contacts')
-      console.log('Sample contact data:', data?.[0])
-      console.log('Filtering for organization_id:', userData.organization.id)
       
-      // Verificar si los contactos tienen el organization_id correcto
-      if (data && data.length > 0) {
-        const orgIds = [...new Set(data.map(contact => contact.organization_id))]
-        console.log('Organization IDs found in contacts:', orgIds)
-      }
+      // Additional frontend filter as security measure (similar to useMovements pattern)
+      const filteredData = data?.filter(contact => contact.organization_id === userData.organization.id) || []
       
-      return data || []
+      return filteredData
     },
     enabled: !!supabase && !!userData?.organization?.id && !userLoading,
   })
