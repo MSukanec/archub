@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase'
 import { useCurrentUser } from '@/hooks/use-current-user'
 
 export function useContacts() {
-  const { userData, isLoading: userLoading } = useCurrentUser()
+  const { data: userData, isLoading: userLoading } = useCurrentUser()
 
   console.log('useContacts hook called:', {
     hasSupabase: !!supabase,
