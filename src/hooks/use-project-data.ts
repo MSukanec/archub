@@ -159,12 +159,16 @@ export function useUpdateProjectData() {
         throw new Error('No current project selected');
       }
 
-      // First check if project_data exists
-      const { data: existingData } = await supabase
+      // First check if project_data exists using maybeSingle to avoid errors
+      const { data: existingData, error: checkError } = await supabase
         .from('project_data')
         .select('id')
         .eq('project_id', currentProjectId)
-        .single();
+        .maybeSingle();
+
+      if (checkError) {
+        throw checkError;
+      }
 
       if (existingData) {
         // Update existing record
@@ -184,14 +188,16 @@ export function useUpdateProjectData() {
 
         return data;
       } else {
-        // Create new record
+        // Create new record - use upsert to handle race conditions
         const { data, error } = await supabase
           .from('project_data')
-          .insert({
+          .upsert({
             project_id: currentProjectId,
             ...projectData,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'project_id'
           })
           .select()
           .single();
