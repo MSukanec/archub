@@ -810,20 +810,16 @@ export default function Movements() {
       render: (item: Movement | ConversionGroup) => {
         if ('is_conversion_group' in item) {
           return (
-            <div className="space-y-1">
-              <Badge variant="outline" className="text-xs">
-                {item.from_currency}
-              </Badge>
-              <Badge variant="outline" className="text-xs">
-                {item.to_currency}
-              </Badge>
+            <div className="text-xs space-y-1">
+              <div>{item.from_currency}</div>
+              <div>{item.to_currency}</div>
             </div>
           );
         }
         return (
-          <Badge variant="secondary" className="text-xs">
+          <div className="text-xs">
             {item.movement_data?.currency?.code || "USD"}
-          </Badge>
+          </div>
         );
       },
     },
