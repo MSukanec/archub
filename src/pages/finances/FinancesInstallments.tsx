@@ -581,15 +581,16 @@ export default function FinancesInstallments() {
           />
         )}
 
-        {/* Modal */}
-        <NewInstallmentModal
-          open={showModal}
-          onClose={handleCloseModal}
-          editingInstallment={editingInstallment}
-          organizationId={organizationId || ''}
-          projectId={projectId || ''}
-        />
       </div>
+
+      {/* Modal */}
+      <NewInstallmentModal
+        open={showModal}
+        onClose={handleCloseModal}
+        editingInstallment={editingInstallment}
+        organizationId={organizationId || ''}
+        projectId={projectId || ''}
+      />
     </Layout>
   )
 }
