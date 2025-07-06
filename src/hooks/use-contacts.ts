@@ -3,14 +3,15 @@ import { supabase } from '@/lib/supabase'
 import { useCurrentUser } from '@/hooks/use-current-user'
 
 export function useContacts() {
-  const { userData } = useCurrentUser()
+  const { userData, isLoading: userLoading } = useCurrentUser()
 
   console.log('useContacts hook called:', {
     hasSupabase: !!supabase,
     hasUserData: !!userData,
     hasOrganization: !!userData?.organization,
     organizationId: userData?.organization?.id,
-    enabled: !!supabase && !!userData?.organization?.id
+    userLoading,
+    enabled: !!supabase && !!userData?.organization?.id && !userLoading
   })
 
   return useQuery({
@@ -37,6 +38,6 @@ export function useContacts() {
       console.log('Contacts fetched successfully:', data?.length || 0, 'contacts')
       return data || []
     },
-    enabled: !!supabase && !!userData?.organization?.id,
+    enabled: !!supabase && !!userData?.organization?.id && !userLoading,
   })
 }
