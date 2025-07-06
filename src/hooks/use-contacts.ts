@@ -36,6 +36,15 @@ export function useContacts() {
       }
 
       console.log('Contacts fetched successfully:', data?.length || 0, 'contacts')
+      console.log('Sample contact data:', data?.[0])
+      console.log('Filtering for organization_id:', userData.organization.id)
+      
+      // Verificar si los contactos tienen el organization_id correcto
+      if (data && data.length > 0) {
+        const orgIds = [...new Set(data.map(contact => contact.organization_id))]
+        console.log('Organization IDs found in contacts:', orgIds)
+      }
+      
       return data || []
     },
     enabled: !!supabase && !!userData?.organization?.id && !userLoading,
