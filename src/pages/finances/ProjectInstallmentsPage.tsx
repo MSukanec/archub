@@ -252,30 +252,48 @@ export default function ProjectInstallmentsPage() {
     return sum + (installment.amount || 0)
   }, 0)
 
-  // Calculate installment summary by contact
-  const installmentSummary: InstallmentSummary[] = React.useMemo(() => {
-    const summaryMap = new Map<string, InstallmentSummary>()
+  // Calculate installment summary by contact with dynamic currencies
+  const { installmentSummary, availableCurrencies } = React.useMemo(() => {
+    const summaryMap = new Map<string, any>()
+    const currenciesSet = new Set<string>()
     
     installments.forEach(installment => {
-      const key = `${installment.contact_id}-${installment.currency_id}-${installment.wallet_id}`
+      const contactKey = installment.contact_id
+      const currencyCode = installment.currency?.code || 'N/A'
       
-      if (summaryMap.has(key)) {
-        const existing = summaryMap.get(key)!
-        existing.total_amount += installment.amount || 0
-      } else {
-        summaryMap.set(key, {
+      // Track available currencies
+      if (installment.currency?.code) {
+        currenciesSet.add(installment.currency.code)
+      }
+      
+      if (!summaryMap.has(contactKey)) {
+        summaryMap.set(contactKey, {
           contact_id: installment.contact_id,
           contact: installment.contact,
-          currency_id: installment.currency_id,
-          currency: installment.currency,
-          wallet_id: installment.wallet_id,
-          wallet: installment.wallet,
-          total_amount: installment.amount || 0
+          currencies: {}
         })
       }
+      
+      const contactSummary = summaryMap.get(contactKey)!
+      if (!contactSummary.currencies[currencyCode]) {
+        contactSummary.currencies[currencyCode] = {
+          amount: 0,
+          currency: installment.currency
+        }
+      }
+      
+      contactSummary.currencies[currencyCode].amount += installment.amount || 0
     })
     
-    return Array.from(summaryMap.values()).sort((a, b) => b.total_amount - a.total_amount)
+    const currencies = Array.from(currenciesSet).sort()
+    const summary = Array.from(summaryMap.values()).sort((a, b) => {
+      // Sort by total amount across all currencies (using first currency for comparison)
+      const aTotalFirstCurrency = Object.values(a.currencies)[0]?.amount || 0
+      const bTotalFirstCurrency = Object.values(b.currencies)[0]?.amount || 0
+      return bTotalFirstCurrency - aTotalFirstCurrency
+    })
+    
+    return { installmentSummary: summary, availableCurrencies: currencies }
   }, [installments])
 
   // Filter installments based on search
@@ -307,75 +325,67 @@ export default function ProjectInstallmentsPage() {
     setEditingInstallment(null)
   }
 
-  // Summary table columns (Contacto, Moneda, Billetera, Monto)
-  const summaryColumns = [
-    {
-      key: "contact",
-      label: "Contacto",
-      width: "35%",
-      render: (item: InstallmentSummary) => {
-        if (!item.contact) {
-          return <div className="text-sm text-muted-foreground">Sin contacto</div>
+  // Create dynamic columns based on available currencies
+  const summaryColumns = React.useMemo(() => {
+    const baseColumns = [
+      {
+        key: "contact",
+        label: "Contacto",
+        width: "40%",
+        render: (item: any) => {
+          if (!item.contact) {
+            return <div className="text-sm text-muted-foreground">Sin contacto</div>
+          }
+
+          const displayName = item.contact.company_name || 
+                             `${item.contact.first_name || ''} ${item.contact.last_name || ''}`.trim()
+          const initials = item.contact.company_name 
+            ? item.contact.company_name.charAt(0).toUpperCase()
+            : `${item.contact.first_name?.charAt(0) || ''}${item.contact.last_name?.charAt(0) || ''}`.toUpperCase()
+
+          return (
+            <div className="flex items-center gap-2">
+              <Avatar className="w-8 h-8">
+                <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+              </Avatar>
+              <div>
+                <div className="text-sm font-medium">{displayName}</div>
+                {item.contact.company_name && (
+                  <div className="text-xs text-muted-foreground">
+                    {item.contact.first_name} {item.contact.last_name}
+                  </div>
+                )}
+              </div>
+            </div>
+          )
+        }
+      }
+    ]
+
+    // Add dynamic currency columns
+    const currencyColumns = availableCurrencies.map(currencyCode => ({
+      key: `currency_${currencyCode}`,
+      label: currencyCode,
+      width: `${Math.max(60 / availableCurrencies.length, 15)}%`,
+      sortable: true,
+      sortType: 'number' as const,
+      render: (item: any) => {
+        const currencyData = item.currencies[currencyCode]
+        if (!currencyData || currencyData.amount === 0) {
+          return <div className="text-sm text-muted-foreground">-</div>
         }
 
-        const displayName = item.contact.company_name || 
-                           `${item.contact.first_name || ''} ${item.contact.last_name || ''}`.trim()
-        const initials = item.contact.company_name 
-          ? item.contact.company_name.charAt(0).toUpperCase()
-          : `${item.contact.first_name?.charAt(0) || ''}${item.contact.last_name?.charAt(0) || ''}`.toUpperCase()
+        const formattedAmount = new Intl.NumberFormat('es-AR').format(currencyData.amount)
+        return (
+          <div className="text-sm font-medium">
+            {currencyData.currency?.symbol || currencyCode} {formattedAmount}
+          </div>
+        )
+      }
+    }))
 
-        return (
-          <div className="flex items-center gap-2">
-            <Avatar className="w-8 h-8">
-              <AvatarImage src={item.contact.avatar_url || ''} />
-              <AvatarFallback className="text-xs">{initials}</AvatarFallback>
-            </Avatar>
-            <div>
-              <div className="text-sm font-medium">{displayName}</div>
-              {item.contact.company_name && (
-                <div className="text-xs text-muted-foreground">
-                  {item.contact.first_name} {item.contact.last_name}
-                </div>
-              )}
-            </div>
-          </div>
-        )
-      }
-    },
-    {
-      key: "currency",
-      label: "Moneda",
-      width: "15%",
-      render: (item: InstallmentSummary) => (
-        <Badge variant="outline" className="text-xs">
-          {item.currency?.code || 'N/A'}
-        </Badge>
-      )
-    },
-    {
-      key: "wallet",
-      label: "Billetera",
-      width: "25%",
-      render: (item: InstallmentSummary) => (
-        <div className="text-sm">{item.wallet?.name || 'Sin billetera'}</div>
-      )
-    },
-    {
-      key: "total_amount",
-      label: "Monto Total",
-      width: "25%",
-      sortable: true,
-      sortType: "number" as const,
-      render: (item: InstallmentSummary) => {
-        const symbol = item.currency?.symbol || '$'
-        return (
-          <div className="text-sm font-bold text-green-600">
-            {symbol}{Math.abs(item.total_amount || 0).toLocaleString('es-AR')}
-          </div>
-        )
-      }
-    }
-  ]
+    return [...baseColumns, ...currencyColumns]
+  }, [availableCurrencies])
 
   // Detailed table columns (Fecha, Creador, Moneda, Billetera, Monto)
   const detailColumns = [
