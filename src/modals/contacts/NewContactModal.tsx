@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { Calendar, User, Search, Check, X, Link, Unlink, CheckCircle } from "lucide-react";
+import { Calendar, User, Search, Check, X, Link, Unlink, CheckCircle, Mail, MessageSquare, UserPlus } from "lucide-react";
 
 import { CustomModalLayout } from "@/components/ui-custom/modal/CustomModalLayout";
 import { CustomModalHeader } from "@/components/ui-custom/modal/CustomModalHeader";
@@ -91,6 +91,10 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
   const [userSearchQuery, setUserSearchQuery] = useState("");
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [showUserSearch, setShowUserSearch] = useState(false);
+  
+  // Estados para invitaciones
+  const [existingInvitation, setExistingInvitation] = useState<any>(null);
+  const [checkingInvitation, setCheckingInvitation] = useState(false);
   
   const { data: searchResults = [] } = useSearchUsers(userSearchQuery);
 
@@ -235,6 +239,94 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
     }
   });
 
+  // Mutación para enviar invitación por email
+  const sendInvitationMutation = useMutation({
+    mutationFn: async ({ email, fullName }: { email: string; fullName: string }) => {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized');
+      }
+
+      if (!organizationId || !userData?.user?.id) {
+        throw new Error('Datos de usuario no disponibles');
+      }
+
+      const { error } = await supabase
+        .from('organization_invitations')
+        .insert({
+          organization_id: organizationId,
+          email: email,
+          full_name: fullName,
+          invited_by: userData.user.id,
+          status: 'pending'
+        });
+
+      if (error) {
+        throw new Error(`Error al enviar invitación: ${error.message}`);
+      }
+    },
+    onSuccess: () => {
+      toast({
+        title: "Invitación enviada",
+        description: "Se ha enviado la invitación por email exitosamente",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Función para copiar link de WhatsApp
+  const copyWhatsAppLink = async (email: string) => {
+    const whatsappLink = `https://archub.app/register?invited_email=${encodeURIComponent(email)}`;
+    
+    try {
+      await navigator.clipboard.writeText(whatsappLink);
+      toast({
+        title: "Link copiado",
+        description: "El link de invitación se ha copiado al portapapeles",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo copiar el link al portapapeles",
+        variant: "destructive",
+      });
+    }
+  };
+
+
+
+  // Verificar invitación existente cuando cambia el email
+  const emailValue = form.watch('email');
+  React.useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (emailValue && !selectedUser && supabase && organizationId) {
+        setCheckingInvitation(true);
+        supabase
+          .from('organization_invitations')
+          .select('*')
+          .eq('organization_id', organizationId)
+          .eq('email', emailValue)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .then(({ data, error }) => {
+            if (!error) {
+              setExistingInvitation(data?.[0] || null);
+            }
+            setCheckingInvitation(false);
+          });
+      } else {
+        setExistingInvitation(null);
+      }
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [emailValue, selectedUser, supabase, organizationId]);
+
   // Funciones auxiliares para vinculación de usuarios
   const handleUserSelect = (user: any) => {
     setSelectedUser(user);
@@ -274,6 +366,8 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
     setSelectedUser(null);
     setUserSearchQuery("");
     setShowUserSearch(false);
+    setExistingInvitation(null);
+    setCheckingInvitation(false);
   };
 
   return (
@@ -563,6 +657,71 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
                 />
               </form>
             </Form>
+
+            {/* Bloque de invitación para contactos sin usuario vinculado */}
+            {!selectedUser && form.watch('email') && (
+              <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+                <div className="flex items-center gap-2 mb-3">
+                  <UserPlus className="h-4 w-4 text-accent" />
+                  <h3 className="text-sm font-medium text-foreground">
+                    ¿Querés invitar a esta persona a Archub?
+                  </h3>
+                </div>
+                
+                {checkingInvitation ? (
+                  <div className="text-sm text-muted-foreground">
+                    Verificando invitaciones existentes...
+                  </div>
+                ) : existingInvitation ? (
+                  <div className="mb-3">
+                    <Badge variant="secondary" className="text-xs">
+                      {existingInvitation.status === 'pending' && 'Invitación pendiente'}
+                      {existingInvitation.status === 'accepted' && 'Invitación aceptada'}
+                      {existingInvitation.status === 'expired' && 'Invitación expirada'}
+                    </Badge>
+                  </div>
+                ) : null}
+                
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const email = form.getValues('email');
+                      const firstName = form.getValues('first_name');
+                      const lastName = form.getValues('last_name');
+                      const fullName = `${firstName} ${lastName || ''}`.trim();
+                      
+                      if (email && fullName) {
+                        sendInvitationMutation.mutate({ email, fullName });
+                      }
+                    }}
+                    disabled={sendInvitationMutation.isPending || existingInvitation?.status === 'pending'}
+                    className="flex items-center gap-2"
+                  >
+                    <Mail className="h-4 w-4" />
+                    {sendInvitationMutation.isPending ? 'Enviando...' : 'Enviar invitación por email'}
+                  </Button>
+                  
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const email = form.getValues('email');
+                      if (email) {
+                        copyWhatsAppLink(email);
+                      }
+                    }}
+                    className="flex items-center gap-2"
+                  >
+                    <MessageSquare className="h-4 w-4" />
+                    Copiar link para WhatsApp
+                  </Button>
+                </div>
+              </div>
+            )}
           </CustomModalBody>
         ),
         footer: (
