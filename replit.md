@@ -119,6 +119,14 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 6, 2025. Fixed Google OAuth redirect flow and Profile page auto-save functionality - COMPLETED
+  • Changed Google OAuth redirectTo from /organization/dashboard to / for proper onboarding flow handling
+  • Fixed Profile page auto-save by correcting hook parameters from saveFn to onSave with proper dependencies array
+  • Fixed sidebar toggle switch to use local state for immediate UI response instead of delayed database state
+  • Enhanced auto-save logging for debugging profile data persistence issues
+  • Google OAuth now properly redirects new users to onboarding flow while existing users go to dashboard
+  • Profile auto-save triggers with 750ms delay after changes to personal data, preferences, or theme settings
+  • Eliminated temporary fixUserPreferences utility after implementing proper onboarding detection logic
 - July 6, 2025. Complete ProjectBasicData page implementation with MI PERFIL layout pattern and real database fields - COMPLETED
   • Restructured ProjectData interface to include ALL 23 fields from actual project_data database table
   • Changed layout to match MI PERFIL pattern: title/description on left, form fields on right, separated by line dividers

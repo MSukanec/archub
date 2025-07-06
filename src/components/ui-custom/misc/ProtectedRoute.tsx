@@ -3,8 +3,6 @@ import { useLocation } from 'wouter'
 import { useAuthStore } from '@/stores/authStore'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { AuthModal } from '@/components/auth/AuthModal'
-import { fixUserPreferences } from '@/utils/fixUserPreferences'
-import { queryClient } from '@/lib/queryClient'
 
 interface ProtectedRouteProps {
   children: React.ReactNode
@@ -53,20 +51,8 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         currentLocation: location 
       });
       
-      // Si el usuario tiene datos personales pero no tiene preferencias configuradas correctamente
-      if (hasUserData && (!userData.preferences || !onboardingCompleted)) {
-        console.log('User has personal data but preferences are not configured correctly, fixing...');
-        fixUserPreferences(userData.user.id).then(() => {
-          console.log('Preferences fixed, refreshing user data');
-          queryClient.invalidateQueries({ queryKey: ['current-user'] });
-        }).catch((error) => {
-          console.error('Error fixing user preferences:', error);
-        });
-        return;
-      }
-      
       // Solo redirigir al onboarding si realmente no tiene datos personales básicos
-      if (!hasUserData) {
+      if (!hasUserData || (userData.preferences && !onboardingCompleted)) {
         console.log('User needs onboarding, redirecting to select-mode');
         navigate('/select-mode');
       }
