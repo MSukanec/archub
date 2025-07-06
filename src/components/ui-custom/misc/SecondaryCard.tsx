@@ -20,18 +20,21 @@ export const SecondaryCard: React.FC<SecondaryCardProps> = ({
     <div
       className={cn(
         `relative overflow-hidden cursor-pointer transition-all duration-200 hover:shadow-lg`,
-        `rounded-[var(--radius-lg)] bg-card border`,
+        `rounded-[var(--radius-lg)] border`,
         className,
       )}
       onClick={onClick}
-      style={{ borderColor: 'var(--secondary-card-border)' }}
+      style={{ 
+        borderColor: 'var(--secondary-card-border)',
+        backgroundColor: 'var(--secondary-card-bg)'
+      }}
     >
       {/* Header Section */}
       {(title || icon) && (
         <div className="p-4 flex items-center gap-3 z-10 relative">
           {icon && <div className="flex-shrink-0">{icon}</div>}
           {title && (
-            <h3 className="font-medium text-card-foreground">{title}</h3>
+            <h3 className="font-medium" style={{ color: 'var(--secondary-card-fg)' }}>{title}</h3>
           )}
         </div>
       )}

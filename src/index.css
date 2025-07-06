@@ -210,16 +210,16 @@
   --menues-active-fg: hsl(0, 0%, 98%);
 
   /* Cards */
-  --card-bg: hsl(0, 0%, 14%);
+  --card-bg: hsl(0, 50%, 50%);
   --card-fg: hsl(0, 0%, 90%);
   --card-text: hsl(0, 0%, 90%);
   --card-border: hsl(0, 0%, 16%);
   --card-hover-bg: hsl(0, 0%, 14%);
 
   /* Secondary Cards */
-  --secondary-card-bg: hsl(0, 0%, 50%);
+  --secondary-card-bg: hsl(0, 50%, 50%);
   --secondary-card-fg: hsl(0, 0%, 85%);
-  --secondary-card-border: hsl(250, 6%, 19%);
+  --secondary-card-border: hsl(0, 0%, 20%);
   --secondary-card-color-1: hsl(90, 50%, 50%);
   --secondary-card-color-2: hsl(90, 50%, 50%);
 
@@ -228,7 +228,7 @@
   --colorful-card-top-fg: hsl(0, 0%, 90%);
   --colorful-card-bot-bg: hsl(0, 0%, 10%);
   --colorful-card-text: hsl(0, 0%, 90%);
-  --colorful-card-border: hsl(0, 0%, 16%);
+  --colorful-card-border: hsl(0, 0%, 20%);
   --colorful-card-color-1: hsl(90, 50%, 20%);
   --colorful-card-color-2: hsl(90, 50%, 50%);
 
