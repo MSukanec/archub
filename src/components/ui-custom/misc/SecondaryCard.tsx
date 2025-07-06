@@ -20,7 +20,7 @@ export const SecondaryCard: React.FC<SecondaryCardProps> = ({
     <div 
       className={cn(
         `border cursor-pointer transition-all duration-200 hover:shadow-lg`,
-        `rounded-lg border-border bg-card`,
+        `rounded-[var(--radius-lg)] border-border bg-card`,
         className
       )}
       onClick={onClick}
@@ -46,7 +46,7 @@ export const SecondaryCard: React.FC<SecondaryCardProps> = ({
 
       {/* Bottom Gradient Border */}
       <div 
-        className="h-1 rounded-b-lg"
+        className="h-3 rounded-b-[var(--radius-lg)]"
         style={{
           background: `linear-gradient(to right, var(--secondary-card-color-1), var(--secondary-card-color-2))`
         }}

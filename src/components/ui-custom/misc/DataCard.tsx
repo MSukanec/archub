@@ -24,14 +24,14 @@ export const DataCard: React.FC<DataCardProps> = ({
     <div 
       className={cn(
         `border cursor-pointer transition-all duration-200 hover:shadow-lg`,
-        `rounded-lg border-border`,
+        `rounded-[var(--radius-lg)] border-border`,
         className
       )}
       onClick={onClick}
     >
       {/* Top Content Section */}
       <div 
-        className="rounded-t-lg p-4 min-h-[100px] flex flex-col justify-center"
+        className="rounded-t-[var(--radius-lg)] p-4 min-h-[100px] flex flex-col justify-center"
         style={{ 
           backgroundColor: `var(--colorful-card-top-bg)`,
           color: `var(--colorful-card-top-fg)`
@@ -58,7 +58,7 @@ export const DataCard: React.FC<DataCardProps> = ({
 
       {/* Bottom Description Section */}
       <div 
-        className="rounded-b-lg px-4 py-3 min-h-[60px] flex flex-col justify-center"
+        className="rounded-b-[var(--radius-lg)] px-4 py-3 min-h-[60px] flex flex-col justify-center"
         style={{ 
           backgroundColor: `var(--colorful-card-bot-bg)`
         }}
