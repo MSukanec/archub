@@ -678,16 +678,11 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  {members?.map((member: any) => {
-                                    const user = member.user;
-                                    const displayName = user?.full_name || user?.email || 'Usuario sin nombre';
-                                    
-                                    return (
-                                      <SelectItem key={member.id} value={member.id}>
-                                        {displayName}
-                                      </SelectItem>
-                                    );
-                                  })}
+                                  {members?.map((member: any) => (
+                                    <SelectItem key={member.id} value={member.id}>
+                                      {member.full_name || member.email || 'Usuario sin nombre'}
+                                    </SelectItem>
+                                  ))}
                                 </SelectContent>
                               </Select>
                               <FormMessage />
@@ -1031,16 +1026,11 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                {members?.map((member: any) => {
-                                  const user = member.user;
-                                  const displayName = user?.full_name || user?.email || 'Usuario sin nombre';
-                                  
-                                  return (
-                                    <SelectItem key={member.id} value={member.id}>
-                                      {displayName}
-                                    </SelectItem>
-                                  );
-                                })}
+                                {members?.map((member: any) => (
+                                  <SelectItem key={member.id} value={member.id}>
+                                    {member.full_name || member.email || 'Usuario sin nombre'}
+                                  </SelectItem>
+                                ))}
                               </SelectContent>
                             </Select>
                             <FormMessage />

@@ -119,6 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 6, 2025. Fixed NewMovementModal user display issue and created project "Datos Básicos" page - COMPLETED
+  • Fixed NewMovementModal user dropdown showing "Usuario sin nombre" by correcting data structure access in member mapping
+  • Modal now properly displays user names using member.full_name instead of member.user.full_name (useOrganizationMembers already flattens data)
+  • Created ProjectBasicData.tsx page following ai-page-template.md structure with proper Layout, headerProps and breadcrumb navigation
+  • Added "Datos Básicos" button to both desktop Sidebar.tsx and mobile MobileMenu.tsx below "Comercialización" in project context
+  • Configured /project/basic-data route in App.tsx with proper ProtectedRoute wrapper for authentication
+  • Renamed ProjectInstallmentsPage.tsx to FinancesInstallments.tsx with updated imports for better organization
+  • Page uses Database icon for consistency and includes demo section showing configuration capabilities
+  • All navigation changes applied consistently between desktop and mobile interfaces for seamless user experience
 - July 5, 2025. Fixed installments modal currency field and database column errors - COMPLETED
   • Resolved currency field showing "N/A - Sin nombre" by using existing useOrganizationCurrencies hook
   • Fixed database error by removing non-existent 'main_category_id' column and using correct movement table structure
