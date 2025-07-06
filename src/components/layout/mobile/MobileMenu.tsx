@@ -26,6 +26,7 @@ import {
   Database,
   Layout,
   Images,
+  Handshake,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -76,9 +77,21 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         throw new Error('No user preferences available');
       }
 
+      // Obtener el primer proyecto de la nueva organización
+      const { data: projectsData } = await supabase
+        .from('projects')
+        .select('id')
+        .eq('organization_id', organizationId)
+        .limit(1);
+
+      const firstProjectId = projectsData?.[0]?.id || null;
+
       const { error } = await supabase
         .from('user_preferences')
-        .update({ last_organization_id: organizationId })
+        .update({ 
+          last_organization_id: organizationId,
+          last_project_id: firstProjectId 
+        })
         .eq('id', userData.preferences.id);
 
       if (error) throw error;
@@ -192,11 +205,12 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },
       { icon: ArrowLeft, label: 'Volver a Organización', href: '#', onClick: () => handleNavigationWithAnimation('/organization/dashboard', 'organization', 'right') },
       { type: 'divider' },
+      { icon: Database, label: 'Datos Básicos', href: '#', onClick: () => handleNavigationWithAnimation('/project/basic-data', 'data', 'left') },
       { icon: FolderOpen, label: 'Diseño', href: '#', onClick: () => handleNavigationWithAnimation('/design/dashboard', 'design', 'left') },
       { icon: Building, label: 'Obra', href: '#', onClick: () => handleNavigationWithAnimation('/construction/dashboard', 'construction', 'left') },
       { icon: DollarSign, label: 'Finanzas', href: '#', onClick: () => handleNavigationWithAnimation('/finances/dashboard', 'finances', 'left') },
       { icon: Users, label: 'Comercialización', href: '#', onClick: () => handleNavigationWithAnimation('/commercialization/dashboard', 'commercialization', 'left'), restricted: true },
-      { icon: Database, label: 'Datos Básicos', href: '/project/basic-data' },
+      { icon: Handshake, label: 'Post-Venta', href: '#', onClick: () => handleNavigationWithAnimation('/postsale/dashboard', 'postsale', 'left'), restricted: true },
     ],
     design: [
       { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' },
@@ -233,6 +247,15 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: Building, label: 'Listado de unidades', href: '/commercialization/unidades' },
       { icon: Users, label: 'Clientes interesados', href: '/commercialization/clientes' },
       { icon: FileText, label: 'Estadísticas de venta', href: '/commercialization/estadisticas' },
+    ],
+    data: [
+      { icon: Database, label: 'Datos Básicos', href: '/project/basic-data' },
+      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => handleNavigationWithAnimation('/project/dashboard', 'project', 'right') },
+    ],
+    postsale: [
+      { icon: Handshake, label: 'Resumen de Post-Venta', href: '/postsale/dashboard' },
+      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => handleNavigationWithAnimation('/project/dashboard', 'project', 'right') },
+      { type: 'divider' },
     ],
     admin: [
       { icon: Home, label: 'Resumen de Administración', href: '/admin/dashboard' },
@@ -285,6 +308,8 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
           {currentSidebarContext === 'construction' && 'Obra'}
           {currentSidebarContext === 'finances' && 'Finanzas'}
           {currentSidebarContext === 'commercialization' && 'Comercialización'}
+          {currentSidebarContext === 'data' && 'Datos Básicos'}
+          {currentSidebarContext === 'postsale' && 'Post-Venta'}
           {currentSidebarContext === 'admin' && 'Administración'}
         </h1>
         <Button

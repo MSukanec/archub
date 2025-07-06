@@ -42,7 +42,8 @@ import {
   Images,
   Database,
   Layout,
-  CreditCard
+  CreditCard,
+  Handshake
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -199,11 +200,12 @@ export function Sidebar() {
       { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },
       { icon: ArrowLeft, label: 'Volver a Organización', href: '#', onClick: () => { setSidebarContext('organization'); navigate('/organization/dashboard'); } },
       { type: 'divider' },
+      { icon: Database, label: 'Datos Básicos', href: '#', onClick: () => { setSidebarContext('data'); navigate('/project/basic-data'); }, rightIcon: ChevronRight },
       { icon: FolderOpen, label: 'Diseño', href: '#', onClick: () => { setSidebarContext('design'); navigate('/design/dashboard'); }, rightIcon: ChevronRight },
       { icon: Building, label: 'Obra', href: '#', onClick: () => { setSidebarContext('construction'); navigate('/construction/dashboard'); }, rightIcon: ChevronRight },
       { icon: DollarSign, label: 'Finanzas', href: '#', onClick: () => { setSidebarContext('finances'); navigate('/finances/dashboard'); }, rightIcon: ChevronRight },
       { icon: Users, label: 'Comercialización', href: '#', onClick: () => { setSidebarContext('commercialization'); navigate('/commercialization/dashboard'); }, rightIcon: ChevronRight, restricted: true },
-      { icon: Database, label: 'Datos Básicos', href: '/project/basic-data' },
+      { icon: Handshake, label: 'Post-Venta', href: '#', onClick: () => { setSidebarContext('postsale'); navigate('/postsale/dashboard'); }, rightIcon: ChevronRight, restricted: true },
     ],
     design: [
       { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' },
@@ -241,6 +243,15 @@ export function Sidebar() {
       { icon: Building, label: 'Listado de unidades', href: '/commercialization/unidades' },
       { icon: Users, label: 'Clientes interesados', href: '/commercialization/clientes' },
       { icon: FileText, label: 'Estadísticas de venta', href: '/commercialization/estadisticas' },
+    ],
+    data: [
+      { icon: Database, label: 'Datos Básicos', href: '/project/basic-data' },
+      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
+    ],
+    postsale: [
+      { icon: Handshake, label: 'Resumen de Post-Venta', href: '/postsale/dashboard' },
+      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
+      { type: 'divider' },
     ],
     admin: [
       { icon: Home, label: 'Resumen de Administración', href: '/admin/dashboard' },

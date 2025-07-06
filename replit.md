@@ -119,6 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 6, 2025. Enhanced project navigation with new sidebar structure and mobile organization selector fix - COMPLETED
+  • Fixed mobile menu organization selector to automatically update project selection (like header behavior)
+  • Added "Datos Básicos" button above "Diseño" in project sidebar with new "data" context navigation
+  • Added "Post-Venta" button below "Comercialización" in project sidebar with restriction (coming soon)
+  • Created new sidebar contexts: "data" and "postsale" with proper navigation structure
+  • Reorganized project sidebar order: Datos Básicos → Diseño → Obra → Finanzas → Comercialización → Post-Venta
+  • Updated both desktop Sidebar.tsx and mobile MobileMenu.tsx with consistent navigation patterns
+  • Added proper context titles and animations for new mobile menu sections
+  • Enhanced mobile organization change to fetch and set first project from new organization automatically
 - July 6, 2025. Enhanced user linking system with improved display and automatic full_name generation - COMPLETED
   • Fixed contact list display to show linked user names and avatars properly instead of generic "Usuario de Archub" text
   • Updated contact creation/editing to automatically generate full_name field by combining first_name and last_name
