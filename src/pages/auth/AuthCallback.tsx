@@ -43,14 +43,9 @@ export default function AuthCallback() {
       console.log('Auth callback - user data received:', userData)
       setRedirecting(true)
       
-      // Check if user needs to complete onboarding
-      if (!userData.preferences.onboarding_completed) {
-        console.log('Redirecting to onboarding...')
-        setLocation('/select-mode')
-      } else {
-        console.log('Redirecting to dashboard...')
-        setLocation('/organization/dashboard')
-      }
+      // Redirect directly to dashboard (onboarding disabled temporarily)
+      console.log('Redirecting to dashboard...')
+      setLocation('/organization/dashboard')
     }
   }, [initialized, authUser, userData, isLoading, error, setLocation, redirecting])
 

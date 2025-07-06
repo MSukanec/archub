@@ -3,25 +3,18 @@ import { useLocation } from 'wouter'
 import { useAuthStore } from '@/stores/authStore'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { AuthModal } from '@/components/auth/AuthModal'
+import { Button } from '@/components/ui/button'
 
 export default function Home() {
-  const { user, loading, initialized } = useAuthStore()
+  const { user, loading, initialized, logout } = useAuthStore()
   const { data: userData, isLoading: userDataLoading } = useCurrentUser()
   const [, navigate] = useLocation()
 
   useEffect(() => {
     if (initialized && !loading && user && userData && !userDataLoading) {
-      // Usuario autenticado, verificar onboarding
-      const onboardingCompleted = userData.preferences?.onboarding_completed
-      const hasUserData = userData.user_data && userData.user_data.first_name && userData.user_data.last_name
-
-      if (!hasUserData && !onboardingCompleted) {
-        // Necesita onboarding
-        navigate('/select-mode')
-      } else {
-        // Ir al dashboard
-        navigate('/organization/dashboard')
-      }
+      // Usuario autenticado, ir directamente al dashboard (onboarding deshabilitado temporalmente)
+      console.log('User authenticated, redirecting to dashboard')
+      navigate('/organization/dashboard')
     }
   }, [initialized, loading, user, userData, userDataLoading, navigate])
 
@@ -39,6 +32,23 @@ export default function Home() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <AuthModal open={true} onOpenChange={() => {}} />
+      </div>
+    )
+  }
+
+  // Debug: Botón temporal para logout
+  if (user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center space-y-4">
+          <p>Usuario logueado: {user.email}</p>
+          <Button onClick={logout} variant="destructive">
+            Cerrar Sesión (Test)
+          </Button>
+          <Button onClick={() => (window as any).debugAuthFlow?.()} variant="outline">
+            Debug Auth Flow
+          </Button>
+        </div>
       </div>
     )
   }
