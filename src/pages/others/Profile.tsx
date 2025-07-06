@@ -73,8 +73,12 @@ export default function Profile() {
   // Centralized auto-save with debounce
   const { isSaving } = useDebouncedAutoSave({
     data: profileData,
-    saveFn: async (data) => {
-      if (!userData?.user?.id) return
+    onSave: async (data) => {
+      console.log('Auto-save triggered with data:', data)
+      if (!userData?.user?.id) {
+        console.log('No user ID, skipping save')
+        return
+      }
       
       const updates = {
         first_name: data.firstName,
@@ -84,35 +88,53 @@ export default function Profile() {
         updated_at: new Date().toISOString(),
       }
 
+      console.log('Updating user_data with:', updates)
+
       // Update user_data table
       const { error: userDataError } = await supabase
         .from('user_data')
         .update(updates)
         .eq('user_id', userData.user.id)
 
-      if (userDataError) throw userDataError
+      if (userDataError) {
+        console.error('User data update error:', userDataError)
+        throw userDataError
+      }
 
       // Update users table for avatar
       if (data.avatarUrl !== undefined) {
+        console.log('Updating avatar:', data.avatarUrl)
         const { error: userError } = await supabase
           .from('users')
           .update({ avatar_url: data.avatarUrl })
           .eq('id', userData.user.id)
 
-        if (userError) throw userError
+        if (userError) {
+          console.error('Avatar update error:', userError)
+          throw userError
+        }
       }
 
       // Update preferences table
+      const preferencesUpdate = {
+        sidebar_docked: data.sidebarDocked,
+        theme: data.theme,
+        updated_at: new Date().toISOString(),
+      }
+      
+      console.log('Updating preferences with:', preferencesUpdate)
+      
       const { error: preferencesError } = await supabase
         .from('user_preferences')
-        .update({
-          sidebar_docked: data.sidebarDocked,
-          theme: data.theme,
-          updated_at: new Date().toISOString(),
-        })
+        .update(preferencesUpdate)
         .eq('user_id', userData.user.id)
 
-      if (preferencesError) throw preferencesError
+      if (preferencesError) {
+        console.error('Preferences update error:', preferencesError)
+        throw preferencesError
+      }
+
+      console.log('Auto-save completed successfully')
 
       // Show success toast
       toast({
@@ -123,8 +145,8 @@ export default function Profile() {
       // Invalidate cache
       queryClient.invalidateQueries({ queryKey: ['current-user'] })
     },
-    delay: 300,
-    enabled: !!userData?.user?.id
+    dependencies: [firstName, lastName, country, birthdate, avatarUrl, sidebarDocked, isDark],
+    delay: 750
   })
 
   // Simple state setters (auto-save handles the persistence)
@@ -432,7 +454,7 @@ export default function Profile() {
                   </div>
                 </div>
                 <Switch
-                  checked={userData?.preferences?.sidebar_docked || false}
+                  checked={sidebarDocked}
                   onCheckedChange={handleSidebarDockedChange}
                 />
               </div>
