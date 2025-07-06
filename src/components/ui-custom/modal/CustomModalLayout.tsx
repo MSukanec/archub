@@ -13,6 +13,7 @@ interface CustomModalLayoutProps {
   onClose: () => void;
   children: ModalChildren;
   className?: string;
+  onEnterSubmit?: () => void;
 }
 
 export function CustomModalLayout({
@@ -20,24 +21,32 @@ export function CustomModalLayout({
   onClose,
   children,
   className,
+  onEnterSubmit,
 }: CustomModalLayoutProps) {
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && open) {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!open) return;
+      
+      if (e.key === "Escape") {
         onClose();
+      }
+      
+      if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && onEnterSubmit) {
+        e.preventDefault();
+        onEnterSubmit();
       }
     };
 
     if (open) {
-      document.addEventListener("keydown", handleEscape);
+      document.addEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "hidden";
     }
 
     return () => {
-      document.removeEventListener("keydown", handleEscape);
+      document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "unset";
     };
-  }, [open, onClose]);
+  }, [open, onClose, onEnterSubmit]);
 
   if (!open) return null;
 

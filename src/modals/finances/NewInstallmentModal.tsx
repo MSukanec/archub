@@ -220,13 +220,64 @@ export function NewInstallmentModal({
     }
   })
 
+  // Update installment mutation
+  const updateInstallmentMutation = useMutation({
+    mutationFn: async (data: InstallmentForm) => {
+      if (!supabase || !editingInstallment) {
+        throw new Error('Cliente Supabase no inicializado o no hay aporte para editar')
+      }
+
+      const movementData = {
+        movement_date: format(data.movement_date, 'yyyy-MM-dd'),
+        amount: data.amount,
+        description: data.description || 'Aporte de proyecto',
+        currency_id: data.currency_id,
+        wallet_id: data.wallet_id,
+        contact_id: data.contact_id,
+        created_by: data.created_by,
+        // Categorías automáticas para aportes: INGRESO > PREVENTA > CUOTAS
+        type_id: '8862eee7-dd00-4f01-9335-5ea0070d3403', // INGRESO
+        category_id: '5d5549d6-20d1-459b-a391-99295e65b6f2', // PREVENTA  
+        subcategory_id: 'e675eb59-3717-4451-89eb-0d838388238f' // CUOTAS
+      }
+
+      const { error } = await supabase
+        .from('movements')
+        .update(movementData)
+        .eq('id', editingInstallment.id)
+
+      if (error) throw error
+    },
+    onSuccess: () => {
+      toast({
+        title: "Aporte actualizado",
+        description: "El aporte se ha actualizado exitosamente",
+      })
+      queryClient.invalidateQueries({ queryKey: ['movements'] })
+      queryClient.invalidateQueries({ queryKey: ['installments'] })
+      handleClose()
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar el aporte",
+        variant: "destructive",
+      })
+      console.error('Error updating installment:', error)
+    }
+  })
+
   const handleClose = () => {
     form.reset()
     onClose()
   }
 
   const onSubmit = (data: InstallmentForm) => {
-    createInstallmentMutation.mutate(data)
+    if (editingInstallment) {
+      updateInstallmentMutation.mutate(data)
+    } else {
+      createInstallmentMutation.mutate(data)
+    }
   }
 
   // Set default values when data is loaded
@@ -258,8 +309,42 @@ export function NewInstallmentModal({
     }
   }, [organizationMembers, userData, form])
 
+  // Load editing data when modal opens for editing
+  useEffect(() => {
+    if (editingInstallment && open) {
+      form.setValue('movement_date', new Date(editingInstallment.movement_date))
+      form.setValue('amount', editingInstallment.amount)
+      form.setValue('description', editingInstallment.description || '')
+      form.setValue('contact_id', editingInstallment.contact_id)
+      form.setValue('currency_id', editingInstallment.currency_id)
+      form.setValue('wallet_id', editingInstallment.wallet_id)
+      // Find the created_by member ID by matching the user ID
+      if (organizationMembers) {
+        const creatorMember = organizationMembers.find(m => m.users?.id === editingInstallment.created_by)
+        if (creatorMember) {
+          form.setValue('created_by', creatorMember.id)
+        }
+      }
+    } else if (!editingInstallment && open) {
+      // Reset form for new installment
+      form.reset({
+        movement_date: new Date(),
+        amount: 0,
+        description: '',
+        contact_id: '',
+        currency_id: '',
+        wallet_id: '',
+        created_by: ''
+      })
+    }
+  }, [editingInstallment, open, form, organizationMembers])
+
   return (
-    <CustomModalLayout open={open} onClose={handleClose}>
+    <CustomModalLayout 
+      open={open} 
+      onClose={handleClose}
+      onEnterSubmit={form.handleSubmit(onSubmit)}
+    >
       {{
         header: (
           <CustomModalHeader

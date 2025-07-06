@@ -99,7 +99,6 @@ export default function ProjectInstallmentsPage() {
         .eq('organization_id', organizationId)
         .eq('project_id', projectId)
         .eq('subcategory_id', cuotasConcept.id)
-        .not('contact_id', 'is', null)
         .order('movement_date', { ascending: false })
 
       if (error) {
@@ -116,37 +115,56 @@ export default function ProjectInstallmentsPage() {
       const currencyIds = Array.from(new Set(movements.map(m => m.currency_id).filter(Boolean)))
       const walletIds = Array.from(new Set(movements.map(m => m.wallet_id).filter(Boolean)))
 
-      const [contactsResult, currenciesResult, walletsResult] = await Promise.all([
-        supabase
-          .from('contacts')
-          .select('id, first_name, last_name, company_name, avatar_url')
-          .in('id', contactIds),
-        
+      const promises = []
+      
+      // Only fetch contacts if there are contact IDs
+      if (contactIds.length > 0) {
+        promises.push(
+          supabase
+            .from('contacts')
+            .select('id, first_name, last_name, company_name, avatar_url')
+            .in('id', contactIds)
+        )
+      } else {
+        promises.push(Promise.resolve({ data: [] }))
+      }
+      
+      promises.push(
         supabase
           .from('currencies')
           .select('id, name, code, symbol')
           .in('id', currencyIds),
         
         supabase
-          .from('wallets')
-          .select('id, name')
-          .in('id', walletIds)
-      ])
+          .from('organization_wallets')
+          .select(`
+            wallets!inner (
+              id,
+              name
+            )
+          `)
+          .eq('organization_id', organizationId)
+          .in('wallet_id', walletIds)
+      )
+
+      const [contactsResult, currenciesResult, walletsResult] = await Promise.all(promises)
 
       // Create lookup maps
       const contactsMap = new Map()
-      contactsResult.data?.forEach(contact => {
+      contactsResult.data?.forEach((contact: any) => {
         contactsMap.set(contact.id, contact)
       })
 
       const currenciesMap = new Map()
-      currenciesResult.data?.forEach(currency => {
+      currenciesResult.data?.forEach((currency: any) => {
         currenciesMap.set(currency.id, currency)
       })
 
       const walletsMap = new Map()
-      walletsResult.data?.forEach(wallet => {
-        walletsMap.set(wallet.id, wallet)
+      walletsResult.data?.forEach((item: any) => {
+        if (item.wallets) {
+          walletsMap.set(item.wallets.id, item.wallets)
+        }
       })
 
       // Transform data with related information
