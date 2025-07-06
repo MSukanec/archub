@@ -138,6 +138,11 @@ Changelog:
   • Added click outside to close and focus/blur event handling for user search dropdown
   • Removed all hardcoded grid layouts from NewContactModal, now uses CustomModalBody columns={1} pattern
   • Improved user search dropdown: better styling, larger click areas, shadow effects, and proper z-index
+  • Added "CREAR CONTACTO" button in header actions replacing "Nuevo Contacto" text
+  • Implemented "Invitar a Archub" button with placeholder functionality showing development toast message
+  • Created ContactCard.tsx component for mobile view with avatar, full_name, email display and SwipeableCard integration
+  • Enhanced ContactCard with proper badge display for linked users and contact types
+  • Integrated ContactCard as renderCard function in CustomTable for mobile-first responsive design
 - July 6, 2025. Fixed NewMovementModal user display issue and created project "Datos Básicos" page - COMPLETED
   • Fixed NewMovementModal user dropdown showing "Usuario sin nombre" by correcting data structure access in member mapping
   • Modal now properly displays user names using member.full_name instead of member.user.full_name (useOrganizationMembers already flattens data)

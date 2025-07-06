@@ -6,7 +6,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import CustomTable from '@/components/ui-custom/misc/CustomTable'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useContacts } from '@/hooks/use-contacts'
-import { Users, Plus, Edit, Trash2, CheckCircle } from 'lucide-react'
+import { Users, Plus, Edit, Trash2, CheckCircle, Send } from 'lucide-react'
 import React, { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -15,6 +15,7 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { NewContactModal } from '@/modals/contacts/NewContactModal'
 import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState'
+import ContactCard from '@/components/cards/ContactCard'
 
 export default function OrganizationContacts() {
   const [searchValue, setSearchValue] = useState("")
@@ -251,10 +252,26 @@ export default function OrganizationContacts() {
     ],
     onClearFilters: handleClearFilters,
     actions: (
-      <Button className="h-8 px-3 text-sm" onClick={() => setShowCreateModal(true)}>
-        <Plus className="w-4 h-4 mr-2" />
-        Nuevo Contacto
-      </Button>
+      <div className="flex gap-2">
+        <Button 
+          variant="outline" 
+          className="h-8 px-3 text-sm" 
+          onClick={() => {
+            // TODO: Implementar funcionalidad de invitar
+            toast({
+              title: "Función en desarrollo",
+              description: "La funcionalidad de invitar a Archub estará disponible pronto",
+            })
+          }}
+        >
+          <Send className="w-4 h-4 mr-2" />
+          Invitar a Archub
+        </Button>
+        <Button className="h-8 px-3 text-sm" onClick={() => setShowCreateModal(true)}>
+          <Plus className="w-4 h-4 mr-2" />
+          CREAR CONTACTO
+        </Button>
+      </div>
     )
   }
 
@@ -276,7 +293,7 @@ export default function OrganizationContacts() {
           action={
             <Button onClick={() => setShowCreateModal(true)}>
               <Plus className="w-4 h-4 mr-2" />
-              Nuevo Contacto
+              CREAR CONTACTO
             </Button>
           }
         />
@@ -321,6 +338,15 @@ export default function OrganizationContacts() {
             variant: "destructive" as const
           }
         ]}
+        renderCard={(contact: any) => (
+          <ContactCard
+            key={contact.id}
+            contact={contact}
+            onEdit={handleEditContact}
+            onDelete={handleDeleteContact}
+            onClick={handleEditContact}
+          />
+        )}
       />
 
       {/* Modales */}
