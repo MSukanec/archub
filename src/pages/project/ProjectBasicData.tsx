@@ -34,13 +34,10 @@ export default function ProjectBasicData() {
   // Form states
   const [projectName, setProjectName] = useState('');
   const [projectDescription, setProjectDescription] = useState('');
-  const [projectType, setProjectType] = useState('');
-  const [projectModality, setProjectModality] = useState('');
+  const [projectTypeId, setProjectTypeId] = useState('');
+  const [modalityId, setModalityId] = useState('');
   const [projectStatus, setProjectStatus] = useState('');
   const [projectLocation, setProjectLocation] = useState('');
-  const [projectClient, setProjectClient] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
 
   // Set sidebar context on component mount
   useEffect(() => {
@@ -57,13 +54,10 @@ export default function ProjectBasicData() {
   useEffect(() => {
     if (projectData) {
       setProjectDescription(projectData.description || '');
-      setProjectType(projectData.project_type || '');
-      setProjectModality(projectData.project_modality || '');
+      setProjectTypeId(projectData.project_type_id || '');
+      setModalityId(projectData.modality_id || '');
       setProjectStatus(projectData.status || '');
       setProjectLocation(projectData.location || '');
-      setProjectClient(projectData.client || '');
-      setStartDate(projectData.start_date || '');
-      setEndDate(projectData.end_date || '');
     }
   }, [projectData]);
 
@@ -82,18 +76,15 @@ export default function ProjectBasicData() {
   const { isSaving: isSavingData } = useDebouncedAutoSave({
     data: {
       description: projectDescription,
-      project_type: projectType,
-      project_modality: projectModality,
+      project_type_id: projectTypeId || null,
+      modality_id: modalityId || null,
       status: projectStatus,
       location: projectLocation,
-      client: projectClient,
-      start_date: startDate || null,
-      end_date: endDate || null,
     },
     onSave: async (data) => {
       await updateProjectData.mutateAsync(data);
     },
-    dependencies: [projectDescription, projectType, projectModality, projectStatus, projectLocation, projectClient, startDate, endDate],
+    dependencies: [projectDescription, projectTypeId, modalityId, projectStatus, projectLocation],
   });
 
   const isLoading = projectInfoLoading || projectDataLoading || typesLoading || modalitiesLoading;
@@ -136,32 +127,52 @@ export default function ProjectBasicData() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Left Column - Titles and Descriptions */}
-          <div className="space-y-12">
-            {/* Información General Section */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Database className="h-5 w-5 text-[var(--accent)]" />
-                <h2 className="text-lg font-semibold">Información General</h2>
-                <HelpPopover 
-                  title="Información General"
-                  description="Esta información define las características principales de tu proyecto. El nombre y descripción se utilizan en reportes y documentos, mientras que el tipo y estado ayudan a categorizar y hacer seguimiento del progreso."
-                />
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Define las características principales y estado actual de tu proyecto
-              </p>
-            </div>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin" />
           </div>
-
-          {/* Right Column - Form Fields */}
-          <div className="space-y-8">
-            {isLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin" />
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+            {/* Left Column - Section Titles */}
+            <div className="space-y-16">
+              {/* Información General */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Database className="h-5 w-5 text-[var(--accent)]" />
+                  <h2 className="text-lg font-semibold">Información General</h2>
+                  <HelpPopover 
+                    title="Información General"
+                    description="Define las características principales de tu proyecto: nombre, descripción, tipo, modalidad y estado actual."
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Características principales y estado del proyecto
+                </p>
               </div>
-            ) : (
+
+              {/* Ubicación */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Database className="h-5 w-5 text-[var(--accent)]" />
+                  <h2 className="text-lg font-semibold">Ubicación</h2>
+                  <HelpPopover 
+                    title="Ubicación del Proyecto"
+                    description="Información detallada sobre la ubicación física donde se desarrollará el proyecto."
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Dirección y datos de ubicación del proyecto
+                </p>
+              </div>
+
+
+
+
+            </div>
+
+            {/* Right Column - Form Fields */}
+            <div className="space-y-16">
+              {/* Información General Section */}
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="project-name">Nombre del Proyecto</Label>
@@ -188,7 +199,7 @@ export default function ProjectBasicData() {
 
                 <div className="space-y-2">
                   <Label htmlFor="project-type">Tipo de Proyecto</Label>
-                  <Select value={projectType} onValueChange={setProjectType}>
+                  <Select value={projectTypeId} onValueChange={setProjectTypeId}>
                     <SelectTrigger id="project-type">
                       <SelectValue placeholder="Selecciona el tipo de proyecto" />
                     </SelectTrigger>
@@ -204,7 +215,7 @@ export default function ProjectBasicData() {
 
                 <div className="space-y-2">
                   <Label htmlFor="project-modality">Modalidad</Label>
-                  <Select value={projectModality} onValueChange={setProjectModality}>
+                  <Select value={modalityId} onValueChange={setModalityId}>
                     <SelectTrigger id="project-modality">
                       <SelectValue placeholder="Selecciona la modalidad" />
                     </SelectTrigger>
@@ -233,9 +244,12 @@ export default function ProjectBasicData() {
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
 
+              {/* Ubicación Section */}
+              <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="project-location">Ubicación</Label>
+                  <Label htmlFor="project-location">Ubicación del Proyecto</Label>
                   <Input
                     id="project-location"
                     value={projectLocation}
@@ -244,45 +258,12 @@ export default function ProjectBasicData() {
                     disabled={updateProjectData.isPending}
                   />
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="project-client">Cliente</Label>
-                  <Input
-                    id="project-client"
-                    value={projectClient}
-                    onChange={(e) => setProjectClient(e.target.value)}
-                    placeholder="Nombre del cliente o contratante"
-                    disabled={updateProjectData.isPending}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="start-date">Fecha de Inicio</Label>
-                    <Input
-                      id="start-date"
-                      type="date"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                      disabled={updateProjectData.isPending}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="end-date">Fecha de Finalización</Label>
-                    <Input
-                      id="end-date"
-                      type="date"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                      disabled={updateProjectData.isPending}
-                    />
-                  </div>
-                </div>
               </div>
-            )}
+
+
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </Layout>
   );

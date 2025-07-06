@@ -19,13 +19,10 @@ export interface ProjectData {
   id: string;
   project_id: string;
   description?: string;
-  project_type?: string;
-  project_modality?: string;
+  project_type_id?: string;
+  modality_id?: string;
   status?: string;
   location?: string;
-  client?: string;
-  start_date?: string;
-  end_date?: string;
   budget?: number;
   created_at: string;
   updated_at: string;

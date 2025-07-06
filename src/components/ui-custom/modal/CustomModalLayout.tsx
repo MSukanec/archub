@@ -51,23 +51,25 @@ export function CustomModalLayout({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center" style={{ zIndex: 99999 }}>
       {/* Overlay */}
       <div
         className="absolute inset-0 bg-black/85 transition-opacity duration-600 ease-in-out"
         onClick={onClose}
+        style={{ zIndex: 99998 }}
       />
 
       {/* Modal */}
       <div
         className={cn(
-          "relative z-10 flex flex-col bg-[var(--card-bg)] shadow-2xl transition-all duration-300 ease-in-out border border-[var(--card-border)]",
+          "relative z-[99999] flex flex-col bg-[var(--card-bg)] shadow-2xl transition-all duration-300 ease-in-out border border-[var(--card-border)]",
           // Mobile: fullscreen
           "w-full h-full",
           // Desktop: normal modal size with max width and rounded corners
           "md:w-auto md:h-auto md:max-w-2xl md:min-w-[600px] md:max-h-[90vh] md:rounded-lg",
           className,
         )}
+        style={{ zIndex: 99999 }}
       >
         {/* Layout vertical con header/footer fijos */}
         <div className="flex flex-col h-full">
