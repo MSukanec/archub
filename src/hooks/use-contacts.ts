@@ -28,6 +28,11 @@ export function useContacts() {
       // Additional frontend filter as security measure (similar to useMovements pattern)
       const filteredData = data?.filter(contact => contact.organization_id === userData.organization.id) || []
       
+      console.log('Data before filter:', data?.length || 0)
+      console.log('Data after filter:', filteredData.length)
+      console.log('Organization ID used for filtering:', userData.organization.id)
+      console.log('Sample unfiltered contact org IDs:', data?.slice(0, 3).map(c => c.organization_id))
+      
       return filteredData
     },
     enabled: !!supabase && !!userData?.organization?.id && !userLoading,
