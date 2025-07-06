@@ -119,20 +119,21 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- July 6, 2025. Complete ProjectBasicData page implementation with ALL real database fields from project_data table - COMPLETED
+- July 6, 2025. Complete ProjectBasicData page implementation with MI PERFIL layout pattern and real database fields - COMPLETED
   • Restructured ProjectData interface to include ALL 23 fields from actual project_data database table
-  • Organized page into 5 logical sections: Información General, Superficies, Ubicación, Datos del Cliente, Cronograma
+  • Changed layout to match MI PERFIL pattern: title/description on left, form fields on right, separated by line dividers
+  • Organized page into 5 logical sections with proper two-column grid layout: Información General, Superficies, Ubicación, Datos del Cliente, Cronograma
   • Información General: project name, description, project_type_id, modality_id, internal_notes, hero_image_url
   • Superficies: surface_total, surface_covered, surface_semi (all numeric fields with m² units)
   • Ubicación: address, city, state, country, zip_code, lat, lng (complete location data with coordinates)
   • Datos del Cliente: client_name, email, contact_phone (client contact information)
   • Cronograma: start_date, estimated_end (project timeline dates)
-  • Implemented comprehensive auto-save system with debounced updates for all 23 database fields
-  • Fixed field loading from database to populate all form fields correctly on page load
-  • Enhanced form layout with proper grid structures, input types (number for surfaces/coordinates, date for timeline)
+  • Implemented comprehensive auto-save system with debounced updates and data filtering to prevent empty saves
+  • Fixed field loading from database to populate all form fields correctly on page load with real-time updates
+  • Enhanced form layout with proper responsive grids (lg:grid-cols-2 for sections, md:grid-cols-2/3 for fields)
   • All fields now sync with real Supabase database using complete project_data table structure
-  • Eliminated references to non-existent database columns (status, location) that were causing auto-save errors
-  • Page now provides complete project configuration interface matching actual database capabilities
+  • Auto-save system filters empty values and only saves meaningful data to avoid database conflicts
+  • Page now provides complete project configuration interface with immediate data persistence matching MI PERFIL visual structure
 - July 6, 2025. Enhanced project navigation with new sidebar structure and mobile organization selector fix - COMPLETED
   • Fixed mobile menu organization selector to automatically update project selection (like header behavior)
   • Added "Datos Básicos" button above "Diseño" in project sidebar with new "data" context navigation

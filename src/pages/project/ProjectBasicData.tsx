@@ -120,9 +120,7 @@ export default function ProjectBasicData() {
     dependencies: [projectName],
   });
 
-  // Auto-save for project data - temporarily disabled to fix primary key issue
-  const isSavingData = false;
-  /*
+  // Auto-save for project data
   const { isSaving: isSavingData } = useDebouncedAutoSave({
     data: {
       // Información General
@@ -156,7 +154,13 @@ export default function ProjectBasicData() {
       estimated_end: estimatedEnd || null,
     },
     onSave: async (data) => {
-      await updateProjectData.mutateAsync(data);
+      // Filter out empty strings to avoid unnecessary saves
+      const cleanData = Object.fromEntries(
+        Object.entries(data).filter(([_, value]) => value !== '' && value !== null)
+      );
+      if (Object.keys(cleanData).length > 0) {
+        await updateProjectData.mutateAsync(cleanData);
+      }
     },
     dependencies: [
       projectDescription, projectTypeId, modalityId, internalNotes, heroImageUrl,
@@ -166,7 +170,6 @@ export default function ProjectBasicData() {
       startDate, estimatedEnd
     ],
   });
-  */
 
   const isLoading = projectInfoLoading || projectDataLoading || typesLoading || modalitiesLoading;
   const isSaving = isSavingName || isSavingData;
@@ -209,18 +212,20 @@ export default function ProjectBasicData() {
         ) : (
           <div className="space-y-6">
             {/* Información General Section */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Database className="h-5 w-5 text-[var(--accent)]" />
-                <h2 className="text-lg font-semibold">Información General</h2>
-                <HelpPopover 
-                  title="Información General"
-                  description="Datos básicos del proyecto: nombre, descripción, tipo, modalidad y notas internas."
-                />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Database className="h-5 w-5 text-[var(--accent)]" />
+                  <h2 className="text-lg font-semibold">Información General</h2>
+                  <HelpPopover 
+                    title="Información General"
+                    description="Datos básicos del proyecto: nombre, descripción, tipo, modalidad y notas internas."
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Datos básicos y descripción del proyecto
+                </p>
               </div>
-              <p className="text-sm text-muted-foreground mb-6">
-                Datos básicos y descripción del proyecto
-              </p>
 
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -308,18 +313,20 @@ export default function ProjectBasicData() {
             <Separator />
 
             {/* Superficies Section */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Database className="h-5 w-5 text-[var(--accent)]" />
-                <h2 className="text-lg font-semibold">Superficies</h2>
-                <HelpPopover 
-                  title="Superficies del Proyecto"
-                  description="Medidas del proyecto: superficie total, cubierta y semicubierta en metros cuadrados."
-                />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Database className="h-5 w-5 text-[var(--accent)]" />
+                  <h2 className="text-lg font-semibold">Superficies</h2>
+                  <HelpPopover 
+                    title="Superficies del Proyecto"
+                    description="Medidas del proyecto: superficie total, cubierta y semicubierta en metros cuadrados."
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Medidas y superficies del proyecto
+                </p>
               </div>
-              <p className="text-sm text-muted-foreground mb-6">
-                Medidas y superficies del proyecto
-              </p>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
@@ -363,18 +370,20 @@ export default function ProjectBasicData() {
             <Separator />
 
             {/* Ubicación Section */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Database className="h-5 w-5 text-[var(--accent)]" />
-                <h2 className="text-lg font-semibold">Ubicación</h2>
-                <HelpPopover 
-                  title="Ubicación del Proyecto"
-                  description="Dirección completa, coordenadas geográficas y datos de ubicación del proyecto."
-                />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Database className="h-5 w-5 text-[var(--accent)]" />
+                  <h2 className="text-lg font-semibold">Ubicación</h2>
+                  <HelpPopover 
+                    title="Ubicación del Proyecto"
+                    description="Dirección completa, coordenadas geográficas y datos de ubicación del proyecto."
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Dirección y coordenadas del proyecto
+                </p>
               </div>
-              <p className="text-sm text-muted-foreground mb-6">
-                Dirección y coordenadas del proyecto
-              </p>
 
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -469,18 +478,20 @@ export default function ProjectBasicData() {
             <Separator />
 
             {/* Datos del Cliente Section */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Database className="h-5 w-5 text-[var(--accent)]" />
-                <h2 className="text-lg font-semibold">Datos del Cliente</h2>
-                <HelpPopover 
-                  title="Información del Cliente"
-                  description="Datos de contacto del cliente: nombre, email y teléfono."
-                />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Database className="h-5 w-5 text-[var(--accent)]" />
+                  <h2 className="text-lg font-semibold">Datos del Cliente</h2>
+                  <HelpPopover 
+                    title="Información del Cliente"
+                    description="Datos de contacto del cliente: nombre, email y teléfono."
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Información de contacto del cliente
+                </p>
               </div>
-              <p className="text-sm text-muted-foreground mb-6">
-                Información de contacto del cliente
-              </p>
 
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -525,18 +536,20 @@ export default function ProjectBasicData() {
             <Separator />
 
             {/* Cronograma Section */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Database className="h-5 w-5 text-[var(--accent)]" />
-                <h2 className="text-lg font-semibold">Cronograma</h2>
-                <HelpPopover 
-                  title="Fechas del Proyecto"
-                  description="Fechas de inicio y finalización estimada del proyecto."
-                />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Database className="h-5 w-5 text-[var(--accent)]" />
+                  <h2 className="text-lg font-semibold">Cronograma</h2>
+                  <HelpPopover 
+                    title="Fechas del Proyecto"
+                    description="Fechas de inicio y finalización estimada del proyecto."
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Fechas de inicio y finalización
+                </p>
               </div>
-              <p className="text-sm text-muted-foreground mb-6">
-                Fechas de inicio y finalización
-              </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
