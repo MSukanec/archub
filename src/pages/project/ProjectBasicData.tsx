@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 import { HelpPopover } from '@/components/ui-custom/HelpPopover';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -119,7 +120,9 @@ export default function ProjectBasicData() {
     dependencies: [projectName],
   });
 
-  // Auto-save for project data
+  // Auto-save for project data - temporarily disabled to fix primary key issue
+  const isSavingData = false;
+  /*
   const { isSaving: isSavingData } = useDebouncedAutoSave({
     data: {
       // Información General
@@ -163,6 +166,7 @@ export default function ProjectBasicData() {
       startDate, estimatedEnd
     ],
   });
+  */
 
   const isLoading = projectInfoLoading || projectDataLoading || typesLoading || modalitiesLoading;
   const isSaving = isSavingName || isSavingData;
@@ -203,88 +207,21 @@ export default function ProjectBasicData() {
             <Loader2 className="h-8 w-8 animate-spin" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-            {/* Left Column - Section Titles */}
-            <div className="space-y-16">
-              {/* Información General */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Database className="h-5 w-5 text-[var(--accent)]" />
-                  <h2 className="text-lg font-semibold">Información General</h2>
-                  <HelpPopover 
-                    title="Información General"
-                    description="Datos básicos del proyecto: nombre, descripción, tipo, modalidad y notas internas."
-                  />
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Datos básicos y descripción del proyecto
-                </p>
+          <div className="space-y-6">
+            {/* Información General Section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Database className="h-5 w-5 text-[var(--accent)]" />
+                <h2 className="text-lg font-semibold">Información General</h2>
+                <HelpPopover 
+                  title="Información General"
+                  description="Datos básicos del proyecto: nombre, descripción, tipo, modalidad y notas internas."
+                />
               </div>
+              <p className="text-sm text-muted-foreground mb-6">
+                Datos básicos y descripción del proyecto
+              </p>
 
-              {/* Superficies */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Database className="h-5 w-5 text-[var(--accent)]" />
-                  <h2 className="text-lg font-semibold">Superficies</h2>
-                  <HelpPopover 
-                    title="Superficies del Proyecto"
-                    description="Medidas del proyecto: superficie total, cubierta y semicubierta en metros cuadrados."
-                  />
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Medidas y superficies del proyecto
-                </p>
-              </div>
-
-              {/* Ubicación */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Database className="h-5 w-5 text-[var(--accent)]" />
-                  <h2 className="text-lg font-semibold">Ubicación</h2>
-                  <HelpPopover 
-                    title="Ubicación del Proyecto"
-                    description="Dirección completa, coordenadas geográficas y datos de ubicación del proyecto."
-                  />
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Dirección y coordenadas del proyecto
-                </p>
-              </div>
-
-              {/* Datos del Cliente */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Database className="h-5 w-5 text-[var(--accent)]" />
-                  <h2 className="text-lg font-semibold">Datos del Cliente</h2>
-                  <HelpPopover 
-                    title="Información del Cliente"
-                    description="Datos de contacto del cliente: nombre, email y teléfono."
-                  />
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Información de contacto del cliente
-                </p>
-              </div>
-
-              {/* Cronograma */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Database className="h-5 w-5 text-[var(--accent)]" />
-                  <h2 className="text-lg font-semibold">Cronograma</h2>
-                  <HelpPopover 
-                    title="Fechas del Proyecto"
-                    description="Fechas de inicio y finalización estimada del proyecto."
-                  />
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Fechas de inicio y finalización
-                </p>
-              </div>
-            </div>
-
-            {/* Right Column - Form Fields */}
-            <div className="space-y-16">
-              {/* Información General Section */}
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="project-name">Nombre del Proyecto</Label>
@@ -309,7 +246,7 @@ export default function ProjectBasicData() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="project-type">Tipo de Proyecto</Label>
                     <Select value={projectTypeId} onValueChange={setProjectTypeId}>
@@ -366,49 +303,79 @@ export default function ProjectBasicData() {
                   />
                 </div>
               </div>
+            </div>
 
-              {/* Superficies Section */}
-              <div className="space-y-4">
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="surface-total">Superficie Total (m²)</Label>
-                    <Input
-                      id="surface-total"
-                      type="number"
-                      value={surfaceTotal}
-                      onChange={(e) => setSurfaceTotal(e.target.value)}
-                      placeholder="0"
-                      disabled={updateProjectData.isPending}
-                    />
-                  </div>
+            <Separator />
 
-                  <div className="space-y-2">
-                    <Label htmlFor="surface-covered">Superficie Cubierta (m²)</Label>
-                    <Input
-                      id="surface-covered"
-                      type="number"
-                      value={surfaceCovered}
-                      onChange={(e) => setSurfaceCovered(e.target.value)}
-                      placeholder="0"
-                      disabled={updateProjectData.isPending}
-                    />
-                  </div>
+            {/* Superficies Section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Database className="h-5 w-5 text-[var(--accent)]" />
+                <h2 className="text-lg font-semibold">Superficies</h2>
+                <HelpPopover 
+                  title="Superficies del Proyecto"
+                  description="Medidas del proyecto: superficie total, cubierta y semicubierta en metros cuadrados."
+                />
+              </div>
+              <p className="text-sm text-muted-foreground mb-6">
+                Medidas y superficies del proyecto
+              </p>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="surface-semi">Superficie Semicubierta (m²)</Label>
-                    <Input
-                      id="surface-semi"
-                      type="number"
-                      value={surfaceSemi}
-                      onChange={(e) => setSurfaceSemi(e.target.value)}
-                      placeholder="0"
-                      disabled={updateProjectData.isPending}
-                    />
-                  </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="surface-total">Superficie Total (m²)</Label>
+                  <Input
+                    id="surface-total"
+                    type="number"
+                    value={surfaceTotal}
+                    onChange={(e) => setSurfaceTotal(e.target.value)}
+                    placeholder="0"
+                    disabled={updateProjectData.isPending}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="surface-covered">Superficie Cubierta (m²)</Label>
+                  <Input
+                    id="surface-covered"
+                    type="number"
+                    value={surfaceCovered}
+                    onChange={(e) => setSurfaceCovered(e.target.value)}
+                    placeholder="0"
+                    disabled={updateProjectData.isPending}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="surface-semi">Superficie Semicubierta (m²)</Label>
+                  <Input
+                    id="surface-semi"
+                    type="number"
+                    value={surfaceSemi}
+                    onChange={(e) => setSurfaceSemi(e.target.value)}
+                    placeholder="0"
+                    disabled={updateProjectData.isPending}
+                  />
                 </div>
               </div>
+            </div>
 
-              {/* Ubicación Section */}
+            <Separator />
+
+            {/* Ubicación Section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Database className="h-5 w-5 text-[var(--accent)]" />
+                <h2 className="text-lg font-semibold">Ubicación</h2>
+                <HelpPopover 
+                  title="Ubicación del Proyecto"
+                  description="Dirección completa, coordenadas geográficas y datos de ubicación del proyecto."
+                />
+              </div>
+              <p className="text-sm text-muted-foreground mb-6">
+                Dirección y coordenadas del proyecto
+              </p>
+
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="address">Dirección</Label>
@@ -421,7 +388,7 @@ export default function ProjectBasicData() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="city">Ciudad</Label>
                     <Input
@@ -445,7 +412,7 @@ export default function ProjectBasicData() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="state">Provincia/Estado</Label>
                     <Input
@@ -469,7 +436,7 @@ export default function ProjectBasicData() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="lat">Latitud</Label>
                     <Input
@@ -497,8 +464,24 @@ export default function ProjectBasicData() {
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Cliente Section */}
+            <Separator />
+
+            {/* Datos del Cliente Section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Database className="h-5 w-5 text-[var(--accent)]" />
+                <h2 className="text-lg font-semibold">Datos del Cliente</h2>
+                <HelpPopover 
+                  title="Información del Cliente"
+                  description="Datos de contacto del cliente: nombre, email y teléfono."
+                />
+              </div>
+              <p className="text-sm text-muted-foreground mb-6">
+                Información de contacto del cliente
+              </p>
+
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="client-name">Nombre del Cliente</Label>
@@ -511,7 +494,7 @@ export default function ProjectBasicData() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="client-email">Email</Label>
                     <Input
@@ -537,31 +520,45 @@ export default function ProjectBasicData() {
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Cronograma Section */}
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="start-date">Fecha de Inicio</Label>
-                    <Input
-                      id="start-date"
-                      type="date"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                      disabled={updateProjectData.isPending}
-                    />
-                  </div>
+            <Separator />
 
-                  <div className="space-y-2">
-                    <Label htmlFor="estimated-end">Fecha Estimada de Finalización</Label>
-                    <Input
-                      id="estimated-end"
-                      type="date"
-                      value={estimatedEnd}
-                      onChange={(e) => setEstimatedEnd(e.target.value)}
-                      disabled={updateProjectData.isPending}
-                    />
-                  </div>
+            {/* Cronograma Section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Database className="h-5 w-5 text-[var(--accent)]" />
+                <h2 className="text-lg font-semibold">Cronograma</h2>
+                <HelpPopover 
+                  title="Fechas del Proyecto"
+                  description="Fechas de inicio y finalización estimada del proyecto."
+                />
+              </div>
+              <p className="text-sm text-muted-foreground mb-6">
+                Fechas de inicio y finalización
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="start-date">Fecha de Inicio</Label>
+                  <Input
+                    id="start-date"
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    disabled={updateProjectData.isPending}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="estimated-end">Fecha Estimada de Finalización</Label>
+                  <Input
+                    id="estimated-end"
+                    type="date"
+                    value={estimatedEnd}
+                    onChange={(e) => setEstimatedEnd(e.target.value)}
+                    disabled={updateProjectData.isPending}
+                  />
                 </div>
               </div>
             </div>
