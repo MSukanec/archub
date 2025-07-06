@@ -16,7 +16,21 @@ export function useContacts() {
 
       const { data, error } = await supabase
         .from('contacts')
-        .select('*')
+        .select(`
+          *,
+          linked_user:users(
+            id,
+            full_name,
+            email,
+            avatar_url,
+            organization_members!inner(
+              organizations(
+                id,
+                name
+              )
+            )
+          )
+        `)
         .eq('organization_id', userData.organization.id)
         .order('first_name', { ascending: true })
 

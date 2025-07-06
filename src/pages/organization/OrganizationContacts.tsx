@@ -1,13 +1,14 @@
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useContacts } from '@/hooks/use-contacts'
-import { Users, Plus, Edit, Trash2, Mail, Phone, Building, MapPin, MessageCircle } from 'lucide-react'
+import { Users, Plus, Edit, Trash2, Mail, Phone, Building, MapPin, MessageCircle, CheckCircle } from 'lucide-react'
 import React, { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -296,11 +297,26 @@ export default function OrganizationContacts() {
                       <div className="font-medium text-sm truncate">
                         {`${contact.first_name || ''} ${contact.last_name || ''}`.trim()}
                       </div>
+                      {contact.linked_user && (
+                        <div className="flex items-center gap-1 mt-1">
+                          <CheckCircle className="w-3 h-3 text-green-500" />
+                          <span className="text-xs text-muted-foreground">
+                            Usuario de Archub
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <Badge variant="secondary" className="text-xs">
-                    {contactTypes.find(t => t.id === contact.contact_type_id)?.name || 'Sin tipo'}
-                  </Badge>
+                  <div className="flex flex-col items-end gap-1">
+                    <Badge variant="secondary" className="text-xs">
+                      {contactTypes.find(t => t.id === contact.contact_type_id)?.name || 'Sin tipo'}
+                    </Badge>
+                    {contact.linked_user && (
+                      <Badge variant="outline" className="text-xs bg-green-50 border-green-200">
+                        Vinculado
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
@@ -323,9 +339,17 @@ export default function OrganizationContacts() {
                         <CardTitle className="text-xl">
                           {`${selectedContact.first_name || ''} ${selectedContact.last_name || ''}`.trim()}
                         </CardTitle>
-                        <p className="text-muted-foreground">
-                          {contactTypes.find(t => t.id === selectedContact.contact_type_id)?.name || 'Sin tipo'}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-muted-foreground">
+                            {contactTypes.find(t => t.id === selectedContact.contact_type_id)?.name || 'Sin tipo'}
+                          </p>
+                          {selectedContact.linked_user && (
+                            <Badge variant="secondary" className="text-xs bg-green-50 border-green-200">
+                              <CheckCircle className="w-3 h-3 mr-1" />
+                              Usuario de Archub
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -354,6 +378,46 @@ export default function OrganizationContacts() {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Card de usuario vinculado */}
+              {selectedContact.linked_user && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5 text-green-500" />
+                      Usuario de Archub Vinculado
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center gap-4">
+                      <Avatar className="w-12 h-12">
+                        <AvatarImage src={selectedContact.linked_user.avatar_url} />
+                        <AvatarFallback>
+                          {selectedContact.linked_user.full_name?.charAt(0) || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="font-medium">
+                          {selectedContact.linked_user.full_name}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {selectedContact.linked_user.email}
+                        </div>
+                        {selectedContact.linked_user.organization_members?.[0]?.organizations?.name && (
+                          <div className="text-sm text-muted-foreground">
+                            Organización: {selectedContact.linked_user.organization_members[0].organizations.name}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="mt-4 p-3 bg-muted rounded-lg">
+                      <p className="text-sm text-muted-foreground">
+                        Este contacto está vinculado con un usuario de Archub. Los campos de nombre y email se sincronizan automáticamente.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Card de métodos de contacto */}
               <Card>
