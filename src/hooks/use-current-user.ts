@@ -99,26 +99,71 @@ export function useCurrentUser() {
         throw new Error('User not authenticated')
       }
 
-      const { data, error } = await supabase.rpc('archub_get_user')
-      
-      if (error) {
-        console.error('Supabase RPC Error:', error)
-        console.error('Error details:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        })
+      try {
+        const { data, error } = await supabase.rpc('archub_get_user')
+        
+        if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+          console.error('Supabase RPC Error:', error)
+          throw error
+        }
+        
+        if (!data) {
+          console.log('New user detected, initializing user records...')
+          
+          // Create user record
+          const { data: newUser, error: userError } = await supabase
+            .from('users')
+            .insert({
+              auth_id: authUser.id,
+              email: authUser.email!,
+              full_name: authUser.user_metadata?.full_name || authUser.email!.split('@')[0],
+              avatar_url: authUser.user_metadata?.avatar_url || '',
+              avatar_source: authUser.user_metadata?.avatar_url ? 'google' : '',
+            })
+            .select()
+            .single()
+
+          if (userError) {
+            console.error('Error creating user record:', userError)
+            throw userError
+          }
+
+          // Create user_data record
+          await supabase
+            .from('user_data')
+            .insert({
+              user_id: newUser.id,
+              first_name: authUser.user_metadata?.given_name || '',
+              last_name: authUser.user_metadata?.family_name || '',
+            })
+
+          // Create user_preferences record
+          await supabase
+            .from('user_preferences')
+            .insert({
+              user_id: newUser.id,
+              theme: 'light',
+              sidebar_docked: true,
+              onboarding_completed: false,
+            })
+
+          console.log('User records initialized, fetching user data...')
+          
+          // Fetch the complete user data after initialization
+          const { data: userData, error: fetchError } = await supabase.rpc('archub_get_user')
+          
+          if (fetchError) throw fetchError
+          
+          console.log('User data received:', userData)
+          return userData as UserData
+        }
+
+        console.log('User data received:', data)
+        return data as UserData
+      } catch (error) {
+        console.error('Error in useCurrentUser:', error)
         throw error
       }
-      
-      if (!data) {
-        console.error('No user data returned from RPC function')
-        throw new Error('No user data returned')
-      }
-
-      console.log('User data received:', data)
-      return data as UserData
     },
     enabled: !!authUser && !!supabase,
     retry: 3,
