@@ -305,28 +305,31 @@ export default function OrganizationContacts() {
       }
     ],
     onClearFilters: handleClearFilters,
-    actions: (
-      <div className="flex gap-2">
-        <Button 
-          variant="outline" 
-          className="h-8 px-3 text-sm" 
-          onClick={() => {
-            // TODO: Implementar funcionalidad de invitar
-            toast({
-              title: "Función en desarrollo",
-              description: "La funcionalidad de invitar a Archub estará disponible pronto",
-            })
-          }}
-        >
-          <Send className="w-4 h-4 mr-2" />
-          Invitar a Archub
-        </Button>
-        <Button className="h-8 px-3 text-sm" onClick={() => setShowCreateModal(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          CREAR CONTACTO
-        </Button>
-      </div>
-    )
+    actions: [
+      <Button 
+        key="invite"
+        variant="outline" 
+        className="h-8 px-3 text-sm" 
+        onClick={() => {
+          // TODO: Implementar funcionalidad de invitar
+          toast({
+            title: "Función en desarrollo",
+            description: "La funcionalidad de invitar a Archub estará disponible pronto",
+          })
+        }}
+      >
+        <Send className="w-4 h-4 mr-2" />
+        Invitar a Archub
+      </Button>,
+      <Button 
+        key="create"
+        className="h-8 px-3 text-sm" 
+        onClick={() => setShowCreateModal(true)}
+      >
+        <Plus className="w-4 h-4 mr-2" />
+        CREAR CONTACTO
+      </Button>
+    ]
   }
 
   if (isLoading || contactsLoading) {
