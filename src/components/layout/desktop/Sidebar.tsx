@@ -245,8 +245,10 @@ export function Sidebar() {
       { icon: FileText, label: 'Estadísticas de venta', href: '/commercialization/estadisticas' },
     ],
     data: [
-      { icon: Database, label: 'Datos Básicos', href: '/project/basic-data' },
+      { icon: Database, label: 'Resumen de Datos', href: '/project/basic-data' },
       { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
+      { type: 'divider' },
+      { icon: Database, label: 'Datos Básicos', href: '/project/basic-data' },
     ],
     postsale: [
       { icon: Handshake, label: 'Resumen de Post-Venta', href: '/postsale/dashboard' },

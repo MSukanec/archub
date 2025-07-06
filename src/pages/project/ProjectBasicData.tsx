@@ -1,58 +1,178 @@
-import React from 'react'
-import { Layout } from '@/components/layout/desktop/Layout'
-import { Database } from 'lucide-react'
+import { useState, useEffect } from 'react';
+import { Database } from 'lucide-react';
+
+import { Layout } from '@/components/layout/desktop/Layout';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { HelpPopover } from '@/components/ui-custom/HelpPopover';
+
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { useNavigationStore } from '@/stores/navigationStore';
 
 export default function ProjectBasicData() {
-  const headerProps = {
-    title: "Datos Básicos",
-    breadcrumb: [
-      { label: "Organización", href: "/organization/dashboard" },
-      { label: "Proyecto", href: "/project/dashboard" },
-      { label: "Datos Básicos" }
-    ]
-  }
+  const { data: userData } = useCurrentUser();
+  const { setSidebarContext } = useNavigationStore();
+
+  // Form states (mock data for now)
+  const [projectName, setProjectName] = useState('');
+  const [projectDescription, setProjectDescription] = useState('');
+  const [projectType, setProjectType] = useState('');
+  const [projectStatus, setProjectStatus] = useState('');
+  const [projectLocation, setProjectLocation] = useState('');
+  const [projectClient, setProjectClient] = useState('');
+
+  // Set sidebar context on component mount
+  useEffect(() => {
+    setSidebarContext('data');
+  }, [setSidebarContext]);
+
+  // Initialize with mock data
+  useEffect(() => {
+    setProjectName('Casa Familiar Moderna');
+    setProjectDescription('Proyecto de vivienda unifamiliar de 150m² con diseño contemporáneo, incluye 3 dormitorios, 2 baños, living-comedor integrado y cocina moderna.');
+    setProjectType('residential');
+    setProjectStatus('design');
+    setProjectLocation('Buenos Aires, Argentina');
+    setProjectClient('Familia Rodríguez');
+  }, []);
+
+  const projectTypes = [
+    { id: 'residential', name: 'Residencial' },
+    { id: 'commercial', name: 'Comercial' },
+    { id: 'industrial', name: 'Industrial' },
+    { id: 'infrastructure', name: 'Infraestructura' }
+  ];
+
+  const projectStatuses = [
+    { id: 'planning', name: 'Planificación' },
+    { id: 'design', name: 'Diseño' },
+    { id: 'construction', name: 'Construcción' },
+    { id: 'finishing', name: 'Terminaciones' },
+    { id: 'completed', name: 'Completado' }
+  ];
 
   return (
-    <Layout headerProps={headerProps}>
-      <div className="space-y-6">
-        {/* Header Section */}
+    <Layout 
+      headerProps={{ 
+        title: "Datos Básicos",
+        breadcrumb: [
+          { label: "Organización", href: "/organization/dashboard" },
+          { label: "Proyecto", href: "/project/dashboard" },
+          { label: "Datos", href: "/project/basic-data" },
+          { label: "Datos Básicos" }
+        ]
+      }}
+    >
+      <div className="max-w-4xl mx-auto space-y-8">
+        {/* Header */}
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold">Datos Básicos del Proyecto</h1>
-          <p className="text-muted-foreground">
-            Administra la información fundamental y configuración básica del proyecto
+          <h1 className="text-2xl font-semibold">Datos Básicos</h1>
+          <p className="text-sm text-muted-foreground">
+            Configura la información básica de tu proyecto, incluyendo descripción, tipo y estado actual.
           </p>
         </div>
 
-        {/* Demo Section */}
-        <div className="bg-card border rounded-lg p-6">
-          <div className="flex items-start gap-4">
-            <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-lg">
-              <Database className="w-6 h-6 text-blue-600" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold mb-2">Configuración de Datos</h3>
-              <p className="text-muted-foreground mb-4">
-                En esta sección podrás gestionar todos los datos básicos del proyecto, 
-                incluyendo información general, configuraciones y parámetros fundamentales.
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          {/* Left Column - Titles and Descriptions */}
+          <div className="space-y-12">
+            {/* Información General Section */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Database className="h-5 w-5 text-[var(--accent)]" />
+                <h2 className="text-lg font-semibold">Información General</h2>
+                <HelpPopover 
+                  title="Información General"
+                  description="Esta información define las características principales de tu proyecto. El nombre y descripción se utilizan en reportes y documentos, mientras que el tipo y estado ayudan a categorizar y hacer seguimiento del progreso."
+                />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Define las características principales y estado actual de tu proyecto
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 border rounded-lg">
-                  <h4 className="font-medium mb-2">Información General</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Nombre, descripción, fechas y detalles básicos del proyecto
-                  </p>
-                </div>
-                <div className="p-4 border rounded-lg">
-                  <h4 className="font-medium mb-2">Configuraciones</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Parámetros y preferencias específicas del proyecto
-                  </p>
-                </div>
+            </div>
+          </div>
+
+          {/* Right Column - Form Fields */}
+          <div className="space-y-8">
+            {/* Información General */}
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="project-name">Nombre del Proyecto</Label>
+                <Input
+                  id="project-name"
+                  value={projectName}
+                  onChange={(e) => setProjectName(e.target.value)}
+                  placeholder="Ingresa el nombre del proyecto"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="project-description">Descripción</Label>
+                <Textarea
+                  id="project-description"
+                  value={projectDescription}
+                  onChange={(e) => setProjectDescription(e.target.value)}
+                  placeholder="Describe brevemente el proyecto"
+                  rows={4}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="project-type">Tipo de Proyecto</Label>
+                <Select value={projectType} onValueChange={setProjectType}>
+                  <SelectTrigger id="project-type">
+                    <SelectValue placeholder="Selecciona el tipo de proyecto" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {projectTypes.map((type) => (
+                      <SelectItem key={type.id} value={type.id}>
+                        {type.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="project-status">Estado Actual</Label>
+                <Select value={projectStatus} onValueChange={setProjectStatus}>
+                  <SelectTrigger id="project-status">
+                    <SelectValue placeholder="Selecciona el estado actual" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {projectStatuses.map((status) => (
+                      <SelectItem key={status.id} value={status.id}>
+                        {status.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="project-location">Ubicación</Label>
+                <Input
+                  id="project-location"
+                  value={projectLocation}
+                  onChange={(e) => setProjectLocation(e.target.value)}
+                  placeholder="Dirección o ubicación del proyecto"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="project-client">Cliente</Label>
+                <Input
+                  id="project-client"
+                  value={projectClient}
+                  onChange={(e) => setProjectClient(e.target.value)}
+                  placeholder="Nombre del cliente o contratante"
+                />
               </div>
             </div>
           </div>
         </div>
       </div>
     </Layout>
-  )
+  );
 }

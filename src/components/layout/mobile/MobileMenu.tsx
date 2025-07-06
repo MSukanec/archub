@@ -238,6 +238,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => handleNavigationWithAnimation('/project/dashboard', 'project', 'right') },
       { type: 'divider' },
       { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
+      { icon: CreditCard, label: 'Aportes', href: '/finances/installments' },
       { icon: Settings, label: 'Preferencias de Finanzas', href: '/finances/preferences' },
     ],
     commercialization: [
@@ -249,8 +250,10 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: FileText, label: 'Estadísticas de venta', href: '/commercialization/estadisticas' },
     ],
     data: [
-      { icon: Database, label: 'Datos Básicos', href: '/project/basic-data' },
+      { icon: Database, label: 'Resumen de Datos', href: '/project/basic-data' },
       { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => handleNavigationWithAnimation('/project/dashboard', 'project', 'right') },
+      { type: 'divider' },
+      { icon: Database, label: 'Datos Básicos', href: '/project/basic-data' },
     ],
     postsale: [
       { icon: Handshake, label: 'Resumen de Post-Venta', href: '/postsale/dashboard' },
