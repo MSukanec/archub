@@ -7,6 +7,8 @@ export function useProjectDashboardCharts() {
   const { userData } = useCurrentUser()
   const projectId = userData?.preferences?.last_project_id
 
+  console.log('Charts hook:', { userData, projectId, enabled: !!projectId })
+
   return useQuery({
     queryKey: ['/api/project-dashboard-charts', projectId],
     queryFn: async () => {

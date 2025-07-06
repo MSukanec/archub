@@ -14,6 +14,7 @@ import {
   FolderOpen, 
   Calendar, 
   Building, 
+  Building2,
   Calculator, 
   DollarSign, 
   Users,
@@ -52,7 +53,60 @@ export default function ProjectDashboard() {
   const projectId = userData?.preferences?.last_project_id
 
   // Fetch chart data
-  const { data: chartData, isLoading: chartsLoading } = useProjectDashboardCharts()
+  const { data: chartData, isLoading: chartsLoading, error: chartsError } = useProjectDashboardCharts()
+
+  // Debug logging
+  console.log('Charts data:', { chartData, chartsLoading, chartsError })
+
+  // Datos temporales para mostrar gráficos mientras se soluciona el hook
+  const tempChartData = {
+    progressData: [
+      { phase: 'Diseño', progress: 85, total: 12, completed: 10, icon: FileText },
+      { phase: 'Obra', progress: 60, total: 25, completed: 15, icon: Building2 },
+      { phase: 'Finanzas', progress: 90, total: 8, completed: 7, icon: DollarSign },
+      { phase: 'Comercial', progress: 45, total: 20, completed: 9, icon: Users }
+    ],
+    kpiData: [
+      { label: 'Presupuesto', value: 78, color: 'hsl(var(--chart-1))' },
+      { label: 'Cronograma', value: 82, color: 'hsl(var(--chart-2))' },
+      { label: 'Equipo', value: 95, color: 'hsl(var(--chart-3))' },
+      { label: 'Eficiencia', value: 88, color: 'hsl(var(--chart-4))' }
+    ],
+    timelineData: [
+      { date: '2025-01', value: 12 },
+      { date: '2025-02', value: 19 },
+      { date: '2025-03', value: 25 },
+      { date: '2025-04', value: 18 },
+      { date: '2025-05', value: 32 },
+      { date: '2025-06', value: 28 },
+      { date: '2025-07', value: 35 }
+    ],
+    activityData: [
+      { date: '2025-01-15', count: 5, type: 'medium' },
+      { date: '2025-01-16', count: 12, type: 'very_high' },
+      { date: '2025-01-17', count: 8, type: 'high' },
+      { date: '2025-01-18', count: 3, type: 'low' },
+      { date: '2025-01-19', count: 15, type: 'very_high' }
+    ],
+    recentActivities: [
+      { 
+        id: '1', 
+        type: 'document', 
+        title: 'Documento de Diseño Actualizado', 
+        user: { full_name: 'Juan Pérez', avatar_url: '' },
+        date: '2025-01-19',
+        icon: FileText 
+      },
+      { 
+        id: '2', 
+        type: 'budget', 
+        title: 'Presupuesto Revisado', 
+        user: { full_name: 'María García', avatar_url: '' },
+        date: '2025-01-18',
+        icon: DollarSign 
+      }
+    ]
+  }
 
   // Fetch project summary data
   const { data: projectSummary, isLoading: summaryLoading } = useQuery({
@@ -384,26 +438,31 @@ export default function ProjectDashboard() {
         </div>
 
         {/* Gráficos de Dashboard */}
-        {chartData && (
-          <div className="space-y-6 mt-8">
-            <h2 className="text-2xl font-bold text-foreground">Análisis del Proyecto</h2>
-            
-            {/* Primera fila de gráficos */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <ProjectProgressChart data={chartData.progressData} />
-              <ProjectKPIChart data={chartData.kpiData} />
+        <div className="space-y-6 mt-8">
+          <h2 className="text-2xl font-bold text-foreground">Análisis del Proyecto</h2>
+          
+          {chartsError && (
+            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+              <p className="text-destructive font-medium">Error cargando gráficos:</p>
+              <p className="text-sm text-destructive/80">{chartsError.message}</p>
             </div>
-
-            {/* Segunda fila de gráficos */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <ProjectTimelineChart data={chartData.timelineData} />
-              <ProjectActivityChart 
-                data={chartData.activityData} 
-                recentActivities={chartData.recentActivities}
-              />
-            </div>
+          )}
+          
+          {/* Primera fila de gráficos */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <ProjectProgressChart data={(chartData || tempChartData).progressData} />
+            <ProjectKPIChart data={(chartData || tempChartData).kpiData} />
           </div>
-        )}
+
+          {/* Segunda fila de gráficos */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <ProjectTimelineChart data={(chartData || tempChartData).timelineData} />
+            <ProjectActivityChart 
+              data={(chartData || tempChartData).activityData} 
+              recentActivities={(chartData || tempChartData).recentActivities}
+            />
+          </div>
+        </div>
 
         {chartsLoading && (
           <div className="mt-8">
