@@ -27,7 +27,6 @@
     opacity: 0;
     transform: translateY(5px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
@@ -35,44 +34,33 @@
 }
 
 @keyframes float-horizontal {
-
-  0%,
-  100% {
+  0%, 100% {
     transform: translateX(0px);
   }
-
   50% {
     transform: translateX(20px);
   }
 }
 
 @keyframes float-vertical {
-
-  0%,
-  100% {
+  0%, 100% {
     transform: translateY(0px);
   }
-
   50% {
     transform: translateY(-15px);
   }
 }
 
 @keyframes float-diagonal {
-
-  0%,
-  100% {
+  0%, 100% {
     transform: translate(0px, 0px);
   }
-
   25% {
     transform: translate(10px, -8px);
   }
-
   50% {
     transform: translate(-5px, -12px);
   }
-
   75% {
     transform: translate(-10px, 5px);
   }
@@ -104,7 +92,7 @@
   /* Secondary Cards */
   --secondary-card-bg: hsl(0, 0%, 95%);
   --secondary-card-fg: hsl(0, 0%, 35%);
-  --secondary-card-border: hsl(0, 50%, 50%);
+  --secondary-card-border: hsl(0, 0%, 50%);
   --secondary-card-color-1: hsl(70, 35%, 20%);
   --secondary-card-color-2: hsl(90, 50%, 50%);
 
@@ -113,7 +101,7 @@
   --colorful-card-top-fg: hsl(0, 0%, 35%);
   --colorful-card-bot-bg: hsl(0, 0%, 94%);
   --colorful-card-text: hsl(0, 0%, 35%);
-  --colorful-card-border: hsl(0, 50%, 50%);
+  --colorful-card-border: hsl(0, 0%, 85%);
   --colorful-card-color-1: hsl(70, 35%, 20%);
   --colorful-card-color-2: hsl(90, 50%, 50%);
 
@@ -229,9 +217,9 @@
   --card-hover-bg: hsl(0, 0%, 14%);
 
   /* Secondary Cards */
-  --secondary-card-bg: hsl(0, 50%, 50%);
+  --secondary-card-bg: hsl(0, 0%, 50%);
   --secondary-card-fg: hsl(0, 0%, 85%);
-  --secondary-card-border: hsl(0, 0%, 20%);
+  --secondary-card-border: hsl(250, 6%, 19%);
   --secondary-card-color-1: hsl(90, 50%, 50%);
   --secondary-card-color-2: hsl(90, 50%, 50%);
 
@@ -240,7 +228,7 @@
   --colorful-card-top-fg: hsl(0, 0%, 90%);
   --colorful-card-bot-bg: hsl(0, 0%, 10%);
   --colorful-card-text: hsl(0, 0%, 90%);
-  --colorful-card-border: hsl(0, 0%, 20%);
+  --colorful-card-border: hsl(0, 0%, 16%);
   --colorful-card-color-1: hsl(90, 50%, 20%);
   --colorful-card-color-2: hsl(90, 50%, 50%);
 
@@ -382,7 +370,7 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-
+  
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }

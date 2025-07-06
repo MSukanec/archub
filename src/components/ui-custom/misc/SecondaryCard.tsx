@@ -20,10 +20,11 @@ export const SecondaryCard: React.FC<SecondaryCardProps> = ({
     <div
       className={cn(
         `relative overflow-hidden cursor-pointer transition-all duration-200 hover:shadow-lg`,
-        `rounded-[var(--radius-lg)] bg-card outline outline-1 outline-border`,
+        `rounded-[var(--radius-lg)] bg-card border`,
         className,
       )}
       onClick={onClick}
+      style={{ borderColor: 'var(--secondary-card-border)' }}
     >
       {/* Header Section */}
       {(title || icon) && (
