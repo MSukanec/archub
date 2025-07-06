@@ -39,6 +39,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     if (user && userData && !userDataLoading && location !== '/select-mode') {
       const hasUserType = userData.preferences?.last_user_type;
       const onboardingCompleted = userData.preferences?.onboarding_completed;
+      const hasUserData = userData.user_data && userData.user_data.first_name && userData.user_data.last_name;
       
       console.log('Checking user type:', { 
         hasUser: !!user, 
@@ -46,11 +47,13 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         userDataLoading, 
         hasUserType: !!hasUserType,
         onboardingCompleted,
+        hasPersonalData: !!hasUserData,
         currentLocation: location 
       });
       
-      // Redirect to onboarding if not completed OR if no user type selected
-      if (!onboardingCompleted || !hasUserType) {
+      // Solo redirigir al onboarding si realmente no tiene datos personales básicos
+      // Si tiene nombre y apellido en user_data, asumimos que ya completó el onboarding antes
+      if (!hasUserData || (userData.preferences !== null && !onboardingCompleted)) {
         console.log('User needs onboarding or type selection, redirecting to select-mode');
         navigate('/select-mode');
       }
