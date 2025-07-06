@@ -18,14 +18,28 @@ export interface ProjectInfo {
 export interface ProjectData {
   id: string;
   project_id: string;
-  description?: string;
+  surface_total?: number;
+  surface_covered?: number;
+  surface_semi?: number;
+  start_date?: string;
+  estimated_end?: string;
   project_type_id?: string;
-  modality_id?: string;
-  status?: string;
-  location?: string;
-  budget?: number;
+  hero_image_url?: string;
+  lat?: number;
+  lng?: number;
+  zip_code?: string;
+  description?: string;
+  internal_notes?: string;
   created_at: string;
   updated_at: string;
+  country?: string;
+  state?: string;
+  address?: string;
+  city?: string;
+  client_name?: string;
+  contact_phone?: string;
+  email?: string;
+  modality_id?: string;
 }
 
 // Hook to get current project info
