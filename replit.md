@@ -126,6 +126,9 @@ Changelog:
   • Improved contact detail cards to use full_name for consistent display across all contact views
   • Added proper fallback logic: use full_name when available, otherwise combine first_name + last_name
   • Contact vinculación system now fully functional with proper data persistence and visual feedback
+  • Changed contacts page from wide layout to normal layout for better user experience
+  • Converted contact list from cards to CustomTable positioned below user detail cards
+  • Enhanced UI structure: contact detail cards above, CustomTable with full contact management below
 - July 6, 2025. Fixed NewMovementModal user display issue and created project "Datos Básicos" page - COMPLETED
   • Fixed NewMovementModal user dropdown showing "Usuario sin nombre" by correcting data structure access in member mapping
   • Modal now properly displays user names using member.full_name instead of member.user.full_name (useOrganizationMembers already flattens data)

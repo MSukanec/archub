@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
+import CustomTable from '@/components/ui-custom/misc/CustomTable'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useContacts } from '@/hooks/use-contacts'
 import { Users, Plus, Edit, Trash2, Mail, Phone, Building, MapPin, MessageCircle, CheckCircle } from 'lucide-react'
@@ -57,43 +58,62 @@ export default function OrganizationContacts() {
     }
   }, [contacts, selectedContact])
 
-  // Filtrar y ordenar contactos
-  const filteredContacts = React.useMemo(() => {
-    let filtered = contacts.filter((contact: any) => {
-      const fullName = `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
-      const matchesSearch = !searchValue || 
-        (fullName.toLowerCase().includes(searchValue.toLowerCase()) ||
-         contact.first_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
-         contact.last_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
-         contact.email?.toLowerCase().includes(searchValue.toLowerCase()))
-      
-      const matchesType = filterByType === 'all' || contact.contact_type_id === filterByType
-      
-      return matchesSearch && matchesType
-    })
+  const organizationName = userData?.organization?.name || "Organización"
 
-    // Ordenar
-    if (sortBy === 'name_asc') {
-      filtered.sort((a: any, b: any) => {
-        const nameA = `${a.first_name || ''} ${a.last_name || ''}`.trim()
-        const nameB = `${b.first_name || ''} ${b.last_name || ''}`.trim()
-        return nameA.localeCompare(nameB)
-      })
-    } else if (sortBy === 'name_desc') {
-      filtered.sort((a: any, b: any) => {
-        const nameA = `${a.first_name || ''} ${a.last_name || ''}`.trim()
-        const nameB = `${b.first_name || ''} ${b.last_name || ''}`.trim()
-        return nameB.localeCompare(nameA)
-      })
-    } else if (sortBy === 'date_desc') {
-      filtered.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+  // Filtros y búsqueda
+  const filteredContacts = React.useMemo(() => {
+    let filtered = [...contacts]
+
+    // Filtro por búsqueda
+    if (searchValue) {
+      filtered = filtered.filter(contact => 
+        (contact.full_name?.toLowerCase().includes(searchValue.toLowerCase())) ||
+        (contact.first_name?.toLowerCase().includes(searchValue.toLowerCase())) ||
+        (contact.last_name?.toLowerCase().includes(searchValue.toLowerCase())) ||
+        (contact.email?.toLowerCase().includes(searchValue.toLowerCase())) ||
+        (contact.company_name?.toLowerCase().includes(searchValue.toLowerCase()))
+      )
     }
 
+    // Filtro por tipo
+    if (filterByType !== 'all') {
+      filtered = filtered.filter(contact => contact.contact_type_id === filterByType)
+    }
+
+    // Ordenamiento
+    filtered.sort((a, b) => {
+      const nameA = a.full_name || `${a.first_name || ''} ${a.last_name || ''}`.trim()
+      const nameB = b.full_name || `${b.first_name || ''} ${b.last_name || ''}`.trim()
+      
+      switch (sortBy) {
+        case 'name_asc':
+          return nameA.localeCompare(nameB)
+        case 'name_desc':
+          return nameB.localeCompare(nameA)
+        case 'date_asc':
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        case 'date_desc':
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        default:
+          return 0
+      }
+    })
+
     return filtered
-  }, [contacts, searchValue, sortBy, filterByType])
+  }, [contacts, searchValue, filterByType, sortBy])
 
   const handleSelectContact = (contact: any) => {
     setSelectedContact(contact)
+  }
+
+  const handleEditContact = (contact: any) => {
+    setSelectedContact(contact)
+    setShowEditModal(true)
+  }
+
+  const handleDeleteContact = (contact: any) => {
+    setContactToDelete(contact)
+    setShowDeleteDialog(true)
   }
 
   const handleClearFilters = () => {
@@ -102,107 +122,144 @@ export default function OrganizationContacts() {
     setSortBy('name_asc')
   }
 
-  const handleEditContact = () => {
-    setShowEditModal(true)
-  }
-
-  const handleDeleteContact = () => {
-    setContactToDelete(selectedContact)
-    setShowDeleteDialog(true)
-  }
-
-  const deleteMutation = useMutation({
+  // Mutación para eliminar contacto
+  const deleteContactMutation = useMutation({
     mutationFn: async (contactId: string) => {
-      if (!supabase) throw new Error('Supabase no está disponible')
+      if (!supabase) throw new Error('Supabase not initialized')
       
       const { error } = await supabase
         .from('contacts')
         .delete()
         .eq('id', contactId)
-
+      
       if (error) throw error
     },
     onSuccess: () => {
       toast({
         title: "Contacto eliminado",
-        description: "El contacto ha sido eliminado correctamente."
+        description: "El contacto ha sido eliminado correctamente"
       })
       queryClient.invalidateQueries({ queryKey: ['contacts'] })
-      setSelectedContact(null)
       setShowDeleteDialog(false)
       setContactToDelete(null)
+      if (selectedContact?.id === contactToDelete?.id) {
+        setSelectedContact(null)
+      }
     },
-    onError: (error: any) => {
+    onError: (error) => {
       toast({
-        variant: "destructive",
         title: "Error",
-        description: "No se pudo eliminar el contacto. " + error.message
+        description: "No se pudo eliminar el contacto",
+        variant: "destructive"
       })
     }
   })
 
-  const handleWhatsApp = (phone: string) => {
-    if (phone) {
-      const cleanPhone = phone.replace(/\D/g, '')
-      window.open(`https://wa.me/${cleanPhone}`, '_blank')
-    }
-  }
-
-  const handleEmail = (email: string) => {
-    if (email) {
-      window.open(`mailto:${email}`, '_blank')
-    }
-  }
-
-  // Mostrar CustomEmptyState si no hay contactos
-  if (filteredContacts.length === 0 && !isLoading && !contactsLoading) {
-    return (
-      <Layout wide={true} headerProps={{
-        title: "Contactos",
-        showSearch: true,
-        searchValue,
-        onSearchChange: setSearchValue,
-        customFilters: (
-          <div className="flex flex-col gap-3 p-3 w-72">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="sort" className="text-xs font-medium">Ordenar por</Label>
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="h-8">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="name_asc">Nombre A-Z</SelectItem>
-                  <SelectItem value="name_desc">Nombre Z-A</SelectItem>
-                  <SelectItem value="date_desc">Más recientes</SelectItem>
-                </SelectContent>
-              </Select>
+  // Columnas para la tabla
+  const columns = [
+    {
+      key: "name" as const,
+      label: "Contacto",
+      sortable: true,
+      render: (contact: any) => (
+        <div className="flex items-center gap-3">
+          {contact.linked_user ? (
+            <Avatar className="w-8 h-8">
+              <AvatarImage src={contact.linked_user.avatar_url} />
+              <AvatarFallback>
+                {contact.linked_user.full_name?.charAt(0) || 'U'}
+              </AvatarFallback>
+            </Avatar>
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center text-sm font-medium">
+              {contact.first_name?.charAt(0) || 'C'}
             </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="type" className="text-xs font-medium">Filtrar por tipo</Label>
-              <Select value={filterByType} onValueChange={setFilterByType}>
-                <SelectTrigger className="h-8">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los tipos</SelectItem>
-                  {contactTypes.map((type) => (
-                    <SelectItem key={type.id} value={type.id}>
-                      {type.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          )}
+          <div>
+            <div className="font-medium text-sm">
+              {contact.full_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim()}
             </div>
+            {contact.linked_user && (
+              <div className="flex items-center gap-1">
+                <CheckCircle className="w-3 h-3 text-green-500" />
+                <span className="text-xs text-muted-foreground">Usuario de Archub</span>
+              </div>
+            )}
           </div>
-        ),
-        onClearFilters: handleClearFilters,
-        actions: [
-          <Button key="new" size="sm" onClick={() => setShowCreateModal(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Nuevo Contacto
-          </Button>
-        ]
-      }}>
+        </div>
+      )
+    },
+    {
+      key: "contact_type_id" as const,
+      label: "Tipo",
+      render: (contact: any) => (
+        <Badge variant="secondary" className="text-xs">
+          {contactTypes.find(t => t.id === contact.contact_type_id)?.name || 'Sin tipo'}
+        </Badge>
+      )
+    },
+    {
+      key: "email" as const,
+      label: "Email",
+      render: (contact: any) => (
+        <div className="text-sm text-muted-foreground">
+          {contact.email || '—'}
+        </div>
+      )
+    },
+    {
+      key: "company_name" as const,
+      label: "Empresa",
+      render: (contact: any) => (
+        <div className="text-sm text-muted-foreground">
+          {contact.company_name || '—'}
+        </div>
+      )
+    },
+    {
+      key: "created_at" as const,
+      label: "Fecha",
+      sortable: true,
+      sortType: "date" as const,
+      render: (contact: any) => (
+        <div className="text-sm text-muted-foreground">
+          {format(new Date(contact.created_at), 'dd/MM/yyyy', { locale: es })}
+        </div>
+      )
+    }
+  ]
+
+  if (isLoading || contactsLoading) {
+    return (
+      <Layout
+        headerProps={{
+          title: "Contactos",
+          description: "Gestiona los contactos de tu organización",
+          icon: Users,
+          breadcrumb: [
+            { label: organizationName, href: "/organization/dashboard" },
+            { label: "Contactos", href: "/organization/contacts" }
+          ]
+        }}
+      >
+        <div>Cargando...</div>
+      </Layout>
+    )
+  }
+
+  if (contacts.length === 0 && !searchValue && filterByType === 'all') {
+    return (
+      <Layout
+        headerProps={{
+          title: "Contactos",
+          description: "Gestiona los contactos de tu organización",
+          icon: Users,
+          breadcrumb: [
+            { label: organizationName, href: "/organization/dashboard" },
+            { label: "Contactos", href: "/organization/contacts" }
+          ]
+        }}
+      >
         <CustomEmptyState
           icon={<Users className="w-8 h-8 text-muted-foreground" />}
           title="No hay contactos"
@@ -230,285 +287,264 @@ export default function OrganizationContacts() {
   }
 
   return (
-    <Layout wide={true} headerProps={{
-      title: "Contactos",
-      showSearch: true,
-      searchValue,
-      onSearchChange: setSearchValue,
-      customFilters: (
-        <div className="flex flex-col gap-3 p-3 w-72">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="sort" className="text-xs font-medium">Ordenar por</Label>
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="h-8">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="name_asc">Nombre A-Z</SelectItem>
-                <SelectItem value="name_desc">Nombre Z-A</SelectItem>
-                <SelectItem value="date_desc">Más recientes</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="type" className="text-xs font-medium">Filtrar por tipo</Label>
-            <Select value={filterByType} onValueChange={setFilterByType}>
-              <SelectTrigger className="h-8">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos los tipos</SelectItem>
-                {contactTypes.map((type) => (
-                  <SelectItem key={type.id} value={type.id}>
-                    {type.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      ),
-      onClearFilters: handleClearFilters,
-      actions: [
-        <Button key="new" onClick={() => setShowCreateModal(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Nuevo Contacto
-        </Button>
-      ]
-    }}>
-      <div className="flex gap-6 h-full">
-        {/* Columna izquierda - Lista de contactos (33%) */}
-        <div className="w-1/3 border-r border-border pr-6">
-          <div className="space-y-2">
-            {filteredContacts.map((contact: any) => (
-              <div
-                key={contact.id}
-                className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                  selectedContact?.id === contact.id ? 'bg-accent border-accent-foreground' : 'hover:bg-muted'
-                }`}
-                onClick={() => handleSelectContact(contact)}
-              >
+    <Layout
+      headerProps={{
+        title: "Contactos",
+        description: "Gestiona los contactos de tu organización",
+        icon: Users,
+        breadcrumb: [
+          { label: organizationName, href: "/organization/dashboard" },
+          { label: "Contactos", href: "/organization/contacts" }
+        ]
+      }}
+    >
+      <div className="space-y-6">
+        {/* Detalle del contacto seleccionado */}
+        {selectedContact && (
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Card de información básica */}
+            <Card>
+              <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    {contact.linked_user ? (
-                      <Avatar className="w-8 h-8">
-                        <AvatarImage src={contact.linked_user.avatar_url} />
-                        <AvatarFallback>
-                          {contact.linked_user.full_name?.charAt(0) || 'U'}
-                        </AvatarFallback>
-                      </Avatar>
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center text-sm font-medium">
-                        {contact.first_name?.charAt(0) || 'C'}
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm truncate">
-                        {contact.full_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim()}
-                      </div>
-                      {contact.linked_user && (
-                        <div className="flex items-center gap-1 mt-1">
-                          <CheckCircle className="w-3 h-3 text-green-500" />
-                          <span className="text-xs text-muted-foreground">
+                    <div className="w-12 h-12 rounded-full bg-accent text-accent-foreground border border-border flex items-center justify-center text-lg font-medium">
+                      {selectedContact.first_name?.charAt(0) || 'C'}
+                    </div>
+                    <div>
+                      <CardTitle className="text-xl">
+                        {selectedContact.full_name || `${selectedContact.first_name || ''} ${selectedContact.last_name || ''}`.trim()}
+                      </CardTitle>
+                      <div className="flex items-center gap-2">
+                        <p className="text-muted-foreground">
+                          {contactTypes.find(t => t.id === selectedContact.contact_type_id)?.name || 'Sin tipo'}
+                        </p>
+                        {selectedContact.linked_user && (
+                          <Badge variant="secondary" className="text-xs bg-green-50 border-green-200">
+                            <CheckCircle className="w-3 h-3 mr-1" />
                             Usuario de Archub
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <Badge variant="secondary" className="text-xs">
-                      {contactTypes.find(t => t.id === contact.contact_type_id)?.name || 'Sin tipo'}
-                    </Badge>
-                    {contact.linked_user && (
-                      <Badge variant="outline" className="text-xs bg-green-50 border-green-200">
-                        Vinculado
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Columna derecha - Detalles del contacto (67%) */}
-        <div className="flex-1">
-          {selectedContact ? (
-            <div className="space-y-6">
-              {/* Card superior con información general y botones de acción */}
-              <Card>
-                <CardHeader className="pb-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-accent text-accent-foreground border border-border flex items-center justify-center text-lg font-medium">
-                        {selectedContact.first_name?.charAt(0) || 'C'}
-                      </div>
-                      <div>
-                        <CardTitle className="text-xl">
-                          {selectedContact.full_name || `${selectedContact.first_name || ''} ${selectedContact.last_name || ''}`.trim()}
-                        </CardTitle>
-                        <div className="flex items-center gap-2">
-                          <p className="text-muted-foreground">
-                            {contactTypes.find(t => t.id === selectedContact.contact_type_id)?.name || 'Sin tipo'}
-                          </p>
-                          {selectedContact.linked_user && (
-                            <Badge variant="secondary" className="text-xs bg-green-50 border-green-200">
-                              <CheckCircle className="w-3 h-3 mr-1" />
-                              Usuario de Archub
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={handleEditContact}
-                        className="h-8 w-8"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={handleDeleteContact}
-                        className="h-8 w-8 text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-sm text-muted-foreground">
-                    Creado el {format(new Date(selectedContact.created_at), 'dd/MM/yyyy', { locale: es })}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Card de usuario vinculado */}
-              {selectedContact.linked_user && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <CheckCircle className="w-5 h-5 text-green-500" />
-                      Usuario de Archub Vinculado
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center gap-4">
-                      <Avatar className="w-12 h-12">
-                        <AvatarImage src={selectedContact.linked_user.avatar_url} />
-                        <AvatarFallback>
-                          {selectedContact.linked_user.full_name?.charAt(0) || 'U'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="font-medium">
-                          {selectedContact.linked_user.full_name}
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          {selectedContact.linked_user.email}
-                        </div>
-                        {selectedContact.linked_user.organization_members?.[0]?.organizations?.name && (
-                          <div className="text-sm text-muted-foreground">
-                            Organización: {selectedContact.linked_user.organization_members[0].organizations.name}
-                          </div>
+                          </Badge>
                         )}
                       </div>
                     </div>
-                    <div className="mt-4 p-3 bg-muted rounded-lg">
-                      <p className="text-sm text-muted-foreground">
-                        Este contacto está vinculado con un usuario de Archub. Los campos de nombre y email se sincronizan automáticamente.
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditContact(selectedContact)}
+                    >
+                      <Edit className="w-4 h-4 mr-2" />
+                      Editar
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDeleteContact(selectedContact)}
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Eliminar
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div>
+                    <Label className="text-sm font-medium">Empresa</Label>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {selectedContact.company_name || 'No especificada'}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium">Ubicación</Label>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {selectedContact.location || 'No especificada'}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium">Notas</Label>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {selectedContact.notes || 'Sin notas'}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-              {/* Card de métodos de contacto */}
+            {/* Card de usuario vinculado */}
+            {selectedContact.linked_user && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Métodos de Contacto</CardTitle>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5 text-green-500" />
+                    Usuario de Archub Vinculado
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {selectedContact.email || selectedContact.phone ? (
-                    <div className="space-y-3">
-                      {selectedContact.email && (
-                        <div className="flex items-center gap-3">
-                          <Mail className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-sm">{selectedContact.email}</span>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEmail(selectedContact.email)}
-                            className="ml-auto h-7 px-2 text-xs"
-                          >
-                            Enviar email
-                          </Button>
-                        </div>
-                      )}
-                      {selectedContact.phone && (
-                        <div className="flex items-center gap-3">
-                          <Phone className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-sm">{selectedContact.phone}</span>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleWhatsApp(selectedContact.phone)}
-                            className="ml-auto h-7 px-2 text-xs"
-                          >
-                            <MessageCircle className="w-3 h-3 mr-1" />
-                            WhatsApp
-                          </Button>
+                  <div className="flex items-center gap-4">
+                    <Avatar className="w-12 h-12">
+                      <AvatarImage src={selectedContact.linked_user.avatar_url} />
+                      <AvatarFallback>
+                        {selectedContact.linked_user.full_name?.charAt(0) || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="font-medium">
+                        {selectedContact.linked_user.full_name}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {selectedContact.linked_user.email}
+                      </div>
+                      {selectedContact.linked_user.organization_members?.[0]?.organizations?.name && (
+                        <div className="text-sm text-muted-foreground">
+                          Organización: {selectedContact.linked_user.organization_members[0].organizations.name}
                         </div>
                       )}
                     </div>
-                  ) : (
-                    <p className="text-muted-foreground text-sm">No hay métodos de contacto disponibles</p>
-                  )}
+                  </div>
+                  <div className="mt-4 p-3 bg-muted rounded-lg">
+                    <p className="text-sm text-muted-foreground">
+                      Este contacto está vinculado con un usuario de Archub. Los campos de nombre y email se sincronizan automáticamente.
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
+            )}
 
-              {/* Card de información de empresa */}
-              {(selectedContact.company || selectedContact.location || selectedContact.notes) && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Información de Empresa</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {selectedContact.company && (
-                        <div className="flex items-center gap-3">
-                          <Building className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-sm">{selectedContact.company}</span>
-                        </div>
-                      )}
-                      {selectedContact.location && (
-                        <div className="flex items-center gap-3">
-                          <MapPin className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-sm">{selectedContact.location}</span>
-                        </div>
-                      )}
-                      {selectedContact.notes && (
-                        <div className="space-y-2">
-                          <h4 className="text-sm font-medium">Notas</h4>
-                          <p className="text-sm text-muted-foreground">{selectedContact.notes}</p>
-                        </div>
-                      )}
+            {/* Card de métodos de contacto */}
+            <Card className={selectedContact.linked_user ? "md:col-span-2" : ""}>
+              <CardHeader>
+                <CardTitle className="text-lg">Métodos de Contacto</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 md:grid-cols-2">
+                  {selectedContact.email && (
+                    <div className="flex items-center gap-3 p-3 border rounded-lg">
+                      <Mail className="w-5 h-5 text-muted-foreground" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">Email</p>
+                        <p className="text-sm text-muted-foreground">{selectedContact.email}</p>
+                      </div>
+                      <Button variant="outline" size="sm">
+                        Enviar email
+                      </Button>
                     </div>
-                  </CardContent>
-                </Card>
-              )}
+                  )}
+                  {selectedContact.phone && (
+                    <div className="flex items-center gap-3 p-3 border rounded-lg">
+                      <Phone className="w-5 h-5 text-muted-foreground" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">Teléfono</p>
+                        <p className="text-sm text-muted-foreground">{selectedContact.phone}</p>
+                      </div>
+                      <Button variant="outline" size="sm">
+                        Llamar
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Card de información adicional */}
+            <Card className={selectedContact.linked_user ? "md:col-span-2" : ""}>
+              <CardHeader>
+                <CardTitle className="text-lg">Información Adicional</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-sm text-muted-foreground">
+                  Creado el {format(new Date(selectedContact.created_at), 'dd/MM/yyyy', { locale: es })}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Tabla de contactos */}
+        <Card>
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg">Lista de Contactos</CardTitle>
+              <Button onClick={() => setShowCreateModal(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Nuevo Contacto
+              </Button>
             </div>
-          ) : (
-            <div className="flex items-center justify-center h-64">
-              <p className="text-muted-foreground">Selecciona un contacto para ver los detalles</p>
+            
+            {/* Filtros */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1">
+                <Label htmlFor="search" className="text-sm font-medium">Buscar</Label>
+                <input
+                  id="search"
+                  type="text"
+                  placeholder="Buscar contactos..."
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                  className="w-full px-3 py-2 border border-border rounded-md text-sm bg-background"
+                />
+              </div>
+              <div>
+                <Label htmlFor="sort-select" className="text-sm font-medium">Ordenar por</Label>
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="name_asc">Nombre (A-Z)</SelectItem>
+                    <SelectItem value="name_desc">Nombre (Z-A)</SelectItem>
+                    <SelectItem value="date_asc">Fecha (Más antiguo)</SelectItem>
+                    <SelectItem value="date_desc">Fecha (Más reciente)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="type-select" className="text-sm font-medium">Tipo</Label>
+                <Select value={filterByType} onValueChange={setFilterByType}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos los tipos</SelectItem>
+                    {contactTypes.map((type) => (
+                      <SelectItem key={type.id} value={type.id}>
+                        {type.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-          )}
-        </div>
+          </CardHeader>
+
+          <CardContent>
+            <CustomTable
+              data={filteredContacts}
+              columns={columns}
+              isLoading={contactsLoading}
+              onCardClick={handleSelectContact}
+              emptyState={
+                <div className="text-center py-8">
+                  <Users className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">No se encontraron contactos</p>
+                </div>
+              }
+              getRowActions={(contact: any) => [
+                {
+                  icon: <Edit className="w-4 h-4" />,
+                  label: "Editar",
+                  onClick: () => handleEditContact(contact)
+                },
+                {
+                  icon: <Trash2 className="w-4 h-4" />,
+                  label: "Eliminar", 
+                  onClick: () => handleDeleteContact(contact),
+                  variant: "destructive" as const
+                }
+              ]}
+            />
+          </CardContent>
+        </Card>
       </div>
 
       {/* Modales */}
@@ -536,24 +572,28 @@ export default function OrganizationContacts() {
         />
       )}
 
-      {/* Diálogo de confirmación de eliminación */}
+      {/* Diálogo de confirmación para eliminar */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+            <AlertDialogTitle>¿Eliminar contacto?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción no se puede deshacer. Se eliminará permanentemente el contacto
-              {contactToDelete && ` "${contactToDelete.first_name} ${contactToDelete.last_name}"`}
-              de la base de datos.
+              Esta acción no se puede deshacer. El contacto será eliminado permanentemente.
+              {contactToDelete && (
+                <span className="block mt-2 font-medium">
+                  {contactToDelete.full_name || `${contactToDelete.first_name || ''} ${contactToDelete.last_name || ''}`.trim()}
+                </span>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => contactToDelete && deleteMutation.mutate(contactToDelete.id)}
+              onClick={() => contactToDelete && deleteContactMutation.mutate(contactToDelete.id)}
+              disabled={deleteContactMutation.isPending}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Eliminar
+              {deleteContactMutation.isPending ? 'Eliminando...' : 'Eliminar'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
