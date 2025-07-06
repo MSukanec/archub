@@ -200,6 +200,12 @@ export default function ProjectInstallmentsPage() {
 
       const [contactsResult, currenciesResult, walletsResult, usersResult] = await Promise.all(promises)
 
+      console.log('Contacts result:', contactsResult)
+      console.log('Contact IDs to fetch:', contactIds)
+      console.log('Currencies result:', currenciesResult)
+      console.log('Wallets result:', walletsResult)
+      console.log('Users result:', usersResult)
+
       // Create lookup maps
       const contactsMap = new Map()
       contactsResult.data?.forEach((contact: any) => {
@@ -389,27 +395,32 @@ export default function ProjectInstallmentsPage() {
       }
     },
     {
-      key: "creator",
-      label: "Creador",
+      key: "contact",
+      label: "Contacto",
       width: "25%",
       render: (item: Installment) => {
-        if (!item.creator) {
-          return <div className="text-sm text-muted-foreground">Sin creador</div>
+        if (!item.contact) {
+          return <div className="text-sm text-muted-foreground">Sin contacto</div>
         }
 
-        const initials = item.creator.full_name
-          ? item.creator.full_name.split(' ').map(n => n.charAt(0)).join('').toUpperCase()
-          : item.creator.email?.charAt(0).toUpperCase() || 'U'
+        const displayName = item.contact.company_name || 
+                           `${item.contact.first_name || ''} ${item.contact.last_name || ''}`.trim()
+        const initials = item.contact.company_name 
+          ? item.contact.company_name.charAt(0).toUpperCase()
+          : `${item.contact.first_name?.charAt(0) || ''}${item.contact.last_name?.charAt(0) || ''}`.toUpperCase()
 
         return (
           <div className="flex items-center gap-2">
             <Avatar className="w-8 h-8">
+              <AvatarImage src={item.contact.avatar_url || ''} />
               <AvatarFallback className="text-xs">{initials}</AvatarFallback>
             </Avatar>
             <div>
-              <div className="text-sm font-medium">{item.creator.full_name || item.creator.email}</div>
-              {item.creator.full_name && (
-                <div className="text-xs text-muted-foreground">{item.creator.email}</div>
+              <div className="text-sm font-medium">{displayName}</div>
+              {item.contact.company_name && (
+                <div className="text-xs text-muted-foreground">
+                  {item.contact.first_name} {item.contact.last_name}
+                </div>
               )}
             </div>
           </div>
@@ -527,19 +538,8 @@ export default function ProjectInstallmentsPage() {
               columns={detailColumns}
               defaultSort={{ key: 'movement_date', direction: 'desc' }}
               onCardClick={handleCardClick}
-              actions={(item: Installment) => [
-                {
-                  icon: 'Edit',
-                  label: 'Editar',
-                  onClick: () => handleEdit(item)
-                },
-                {
-                  icon: 'Trash2',
-                  label: 'Eliminar',
-                  onClick: () => handleDelete(item),
-                  variant: 'destructive' as const
-                }
-              ]}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
             />
           </div>
         ) : installments.length === 0 ? (
