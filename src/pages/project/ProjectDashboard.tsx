@@ -5,16 +5,10 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { DataCard } from '@/components/ui-custom/misc/DataCard'
 import { SecondaryCard } from '@/components/ui-custom/misc/SecondaryCard'
-import { ProjectProgressChart } from '@/components/graphics/dashboard/ProjectProgressChart'
-import { ProjectTimelineChart } from '@/components/graphics/dashboard/ProjectTimelineChart'
-import { ProjectKPIChart } from '@/components/graphics/dashboard/ProjectKPIChart'
-import { ProjectActivityChart } from '@/components/graphics/dashboard/ProjectActivityChart'
-import { useProjectDashboardCharts } from '@/hooks/use-project-dashboard-charts'
 import { 
   FolderOpen, 
   Calendar, 
   Building, 
-  Building2,
   Calculator, 
   DollarSign, 
   Users,
@@ -51,60 +45,6 @@ export default function ProjectDashboard() {
 
   const organizationId = userData?.preferences?.last_organization_id
   const projectId = userData?.preferences?.last_project_id
-
-  // Fetch chart data
-  const { data: chartData, isLoading: chartsLoading, error: chartsError } = useProjectDashboardCharts()
-
-  // Debug logging
-  console.log('Charts data:', { chartData, chartsLoading, chartsError })
-
-  // Datos temporales para mostrar gráficos mientras se soluciona el hook
-  const tempChartData = {
-    progressData: [
-      { phase: 'Diseño', progress: 85, total: 12, completed: 10, icon: FileText },
-      { phase: 'Obra', progress: 60, total: 25, completed: 15, icon: Building2 },
-      { phase: 'Finanzas', progress: 90, total: 8, completed: 7, icon: DollarSign },
-      { phase: 'Comercial', progress: 45, total: 20, completed: 9, icon: Users }
-    ],
-    kpiData: {
-      budget: { used: 780000, total: 1000000 },
-      team: { active: 8, total: 10 },
-      timeline: { elapsed: 60, total: 90 },
-      efficiency: { score: 88, max: 100 }
-    },
-    timelineData: [
-      { month: 'Enero', activities: 12 },
-      { month: 'Febrero', activities: 19 },
-      { month: 'Marzo', activities: 25 },
-      { month: 'Abril', activities: 18 },
-      { month: 'Mayo', activities: 32 },
-      { month: 'Junio', activities: 28 },
-      { month: 'Julio', activities: 35 }
-    ],
-    activityData: [
-      { date: '2025-01-15', value: 5, type: 'medium' },
-      { date: '2025-01-16', value: 12, type: 'very_high' },
-      { date: '2025-01-17', value: 8, type: 'high' },
-      { date: '2025-01-18', value: 3, type: 'low' },
-      { date: '2025-01-19', value: 15, type: 'very_high' }
-    ],
-    recentActivities: [
-      { 
-        id: '1', 
-        user: 'Juan Pérez', 
-        action: 'Actualizó documento de diseño', 
-        timestamp: '2025-01-19T10:30:00Z',
-        type: 'design'
-      },
-      { 
-        id: '2', 
-        user: 'María García', 
-        action: 'Revisó presupuesto', 
-        timestamp: '2025-01-18T15:45:00Z',
-        type: 'finance'
-      }
-    ]
-  }
 
   // Fetch project summary data
   const { data: projectSummary, isLoading: summaryLoading } = useQuery({
@@ -434,50 +374,6 @@ export default function ProjectDashboard() {
             </div>
           </SecondaryCard>
         </div>
-
-        {/* Gráficos de Dashboard */}
-        <div className="space-y-6 mt-8">
-          <h2 className="text-2xl font-bold text-foreground">Análisis del Proyecto</h2>
-          
-          {chartsError && (
-            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
-              <p className="text-destructive font-medium">Error cargando gráficos:</p>
-              <p className="text-sm text-destructive/80">{chartsError.message}</p>
-            </div>
-          )}
-          
-          {/* Primera fila de gráficos */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <ProjectProgressChart data={(chartData || tempChartData).progressData} />
-            <ProjectKPIChart data={(chartData || tempChartData).kpiData} />
-          </div>
-
-          {/* Segunda fila de gráficos */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <ProjectTimelineChart data={(chartData || tempChartData).timelineData} />
-            <ProjectActivityChart 
-              data={(chartData || tempChartData).activityData} 
-              recentActivities={(chartData || tempChartData).recentActivities}
-            />
-          </div>
-        </div>
-
-        {chartsLoading && (
-          <div className="mt-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {[1, 2, 3, 4].map((i) => (
-                <Card key={i} className="h-[400px]">
-                  <CardContent className="p-6">
-                    <div className="animate-pulse space-y-4">
-                      <div className="h-4 bg-muted rounded w-1/3"></div>
-                      <div className="h-64 bg-muted rounded"></div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </Layout>
   )
