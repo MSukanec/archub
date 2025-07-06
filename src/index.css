@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .bg-texture {
+    background-color: var(--bg-texture-base);
+    background-image: radial-gradient(var(--bg-texture-dots) 1px, transparent 1px);
+    background-size: 2px 2px;
+  }
+}
+
 /* Gantt Timeline Scrollbar Styling */
 .gantt-timeline-scroll::-webkit-scrollbar {
   height: 12px;
@@ -71,6 +79,10 @@
   --layout-bg: hsl(0, 0%, 99%);
   --layout-text: hsl(0, 0%, 45%);
   --layout-border: hsl(0, 0%, 45%);
+  
+  /* Background Texture */
+  --bg-texture-base: hsl(0, 0%, 99%);
+  --bg-texture-dots: rgba(0, 0, 0, 0.015);
 
   /* Menus/Sidebar */
   --menues-bg: hsl(0, 0%, 97%);
@@ -92,8 +104,8 @@
   /* Secondary Cards */
   --secondary-card-bg: hsl(0, 0%, 95%);
   --secondary-card-fg: hsl(0, 0%, 35%);
-  --secondary-card-border: hsl(0, 0%, 50%);
-  --secondary-card-color-1: hsl(70, 35%, 20%);
+  --secondary-card-border: hsl(0, 0%, 85%);
+  --secondary-card-color-1: hsl(90, 50%, 50%);
   --secondary-card-color-2: hsl(90, 50%, 50%);
 
   /* Colorful Cards */
@@ -102,7 +114,7 @@
   --colorful-card-bot-bg: hsl(0, 0%, 94%);
   --colorful-card-text: hsl(0, 0%, 35%);
   --colorful-card-border: hsl(0, 0%, 85%);
-  --colorful-card-color-1: hsl(70, 35%, 20%);
+  --colorful-card-color-1: hsl(90, 50%, 35%);
   --colorful-card-color-2: hsl(90, 50%, 50%);
 
   /* Buttons - Primary */
@@ -195,12 +207,16 @@
 
 .dark {
   /* Layout */
-  --layout-bg: hsl(0, 0%, 16%);
+  --layout-bg: hsl(0, 0%, 14%);
   --layout-text: hsl(0, 0%, 90%);
   --layout-border: hsl(240, 8%, 15%);
+  
+  /* Background Texture */
+  --bg-texture-base: hsl(0, 0%, 7%);
+  --bg-texture-dots: rgba(255, 255, 255, 0.015);
 
   /* Menus/Sidebar */
-  --menues-bg: hsl(0, 0%, 14%);
+  --menues-bg: hsl(0, 0%, 20%);
   --menues-fg: hsl(0, 0%, 70%);
   --menues-secondary-fg: hsl(0, 0%, 60%);
   --menues-border: hsl(0, 0%, 16%);
@@ -217,7 +233,7 @@
   --card-hover-bg: hsl(0, 0%, 14%);
 
   /* Secondary Cards */
-  --secondary-card-bg: hsl(0, 50%, 50%);
+  --secondary-card-bg: hsl(0, 0%, 14%);
   --secondary-card-fg: hsl(0, 0%, 85%);
   --secondary-card-border: hsl(0, 0%, 20%);
   --secondary-card-color-1: hsl(90, 50%, 50%);
@@ -226,10 +242,10 @@
   /* Colorful Cards */
   --colorful-card-top-bg: hsl(0, 0%, 14%);
   --colorful-card-top-fg: hsl(0, 0%, 90%);
-  --colorful-card-bot-bg: hsl(0, 0%, 10%);
+  --colorful-card-bot-bg: hsl(0, 0%, 11%);
   --colorful-card-text: hsl(0, 0%, 90%);
   --colorful-card-border: hsl(0, 0%, 20%);
-  --colorful-card-color-1: hsl(90, 50%, 20%);
+  --colorful-card-color-1: hsl(90, 50%, 35%);
   --colorful-card-color-2: hsl(90, 50%, 50%);
 
   /* Buttons - Primary */
