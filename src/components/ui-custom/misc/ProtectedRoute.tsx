@@ -37,7 +37,6 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   // Check if user needs to complete onboarding or select a mode
   useEffect(() => {
     if (user && userData && !userDataLoading && location !== '/select-mode') {
-      const hasUserType = userData.preferences?.last_user_type;
       const onboardingCompleted = userData.preferences?.onboarding_completed;
       const hasUserData = userData.user_data && userData.user_data.first_name && userData.user_data.last_name;
       
@@ -45,14 +44,13 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         hasUser: !!user, 
         hasUserData: !!userData, 
         userDataLoading, 
-        hasUserType: !!hasUserType,
         onboardingCompleted,
         hasPersonalData: !!hasUserData,
         currentLocation: location 
       });
       
-      // Solo redirigir al onboarding si realmente no tiene datos personales básicos
-      if (!hasUserData || (userData.preferences && !onboardingCompleted)) {
+      // Solo redirigir al onboarding si NO tiene datos personales básicos Y NO ha completado onboarding
+      if (!hasUserData && !onboardingCompleted) {
         console.log('User needs onboarding, redirecting to select-mode');
         navigate('/select-mode');
       }
