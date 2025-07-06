@@ -5,6 +5,14 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 export function useContacts() {
   const { userData } = useCurrentUser()
 
+  console.log('useContacts hook called:', {
+    hasSupabase: !!supabase,
+    hasUserData: !!userData,
+    hasOrganization: !!userData?.organization,
+    organizationId: userData?.organization?.id,
+    enabled: !!supabase && !!userData?.organization?.id
+  })
+
   return useQuery({
     queryKey: ['contacts', userData?.organization?.id],
     queryFn: async () => {
