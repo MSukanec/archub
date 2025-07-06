@@ -165,6 +165,7 @@ export default function ProjectInstallmentsPage() {
           supabase
             .from('contacts')
             .select('id, first_name, last_name, company_name, avatar_url')
+            .eq('organization_id', organizationId)
             .in('id', contactIds)
         )
       } else {
@@ -223,13 +224,19 @@ export default function ProjectInstallmentsPage() {
       })
 
       // Transform data with related information
-      return movements.map(movement => ({
+      const result = movements.map(movement => ({
         ...movement,
         contact: contactsMap.get(movement.contact_id),
         currency: currenciesMap.get(movement.currency_id),
         wallet: walletsMap.get(movement.wallet_id),
         creator: usersMap.get(movement.created_by)
       })) as Installment[]
+
+      console.log('Installments result:', result)
+      console.log('Contacts map:', contactsMap)
+      console.log('Users map:', usersMap)
+      
+      return result
     },
     enabled: !!organizationId && !!projectId && !!cuotasConcept?.id
   })
@@ -520,6 +527,19 @@ export default function ProjectInstallmentsPage() {
               columns={detailColumns}
               defaultSort={{ key: 'movement_date', direction: 'desc' }}
               onCardClick={handleCardClick}
+              actions={(item: Installment) => [
+                {
+                  icon: 'Edit',
+                  label: 'Editar',
+                  onClick: () => handleEdit(item)
+                },
+                {
+                  icon: 'Trash2',
+                  label: 'Eliminar',
+                  onClick: () => handleDelete(item),
+                  variant: 'destructive' as const
+                }
+              ]}
             />
           </div>
         ) : installments.length === 0 ? (
