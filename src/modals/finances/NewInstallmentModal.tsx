@@ -156,6 +156,10 @@ export function NewInstallmentModal({
 
   // Get organization contacts using the fixed hook
   const { data: organizationContacts } = useContacts(organizationId)
+  
+  // Debug logging
+  console.log('Modal organizationId:', organizationId)
+  console.log('Modal organizationContacts:', organizationContacts)
 
   // Create installment mutation
   const createInstallmentMutation = useMutation({
