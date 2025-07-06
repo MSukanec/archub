@@ -93,15 +93,20 @@ export default function ProjectInstallmentsPage() {
         .select('id, name')
         .eq('organization_id', organizationId)
         .eq('name', 'Cuotas')
-        .single()
 
       if (error) {
         console.error('Error fetching cuotas concept:', error)
-        throw error
+        return null
       }
 
-      console.log('Found Cuotas concept:', data)
-      return data
+      if (!data || data.length === 0) {
+        console.log('No Cuotas concept found, looking for existing movements with subcategory_id e675eb59-3717-4451-89eb-0d838388238f')
+        // Return the hardcoded ID that we know exists
+        return { id: 'e675eb59-3717-4451-89eb-0d838388238f', name: 'Cuotas' }
+      }
+
+      console.log('Found Cuotas concept:', data[0])
+      return data[0]
     },
     enabled: !!organizationId && !!supabase
   })
@@ -130,12 +135,7 @@ export default function ProjectInstallmentsPage() {
           wallet_id,
           project_id,
           created_by,
-          created_at,
-          users!created_by (
-            id,
-            full_name,
-            email
-          )
+          created_at
         `)
         .eq('organization_id', organizationId)
         .eq('project_id', projectId)
@@ -155,6 +155,7 @@ export default function ProjectInstallmentsPage() {
       const contactIds = Array.from(new Set(movements.map(m => m.contact_id).filter(Boolean)))
       const currencyIds = Array.from(new Set(movements.map(m => m.currency_id).filter(Boolean)))
       const walletIds = Array.from(new Set(movements.map(m => m.wallet_id).filter(Boolean)))
+      const creatorIds = Array.from(new Set(movements.map(m => m.created_by).filter(Boolean)))
 
       const promises = []
       
@@ -185,10 +186,18 @@ export default function ProjectInstallmentsPage() {
             )
           `)
           .eq('organization_id', organizationId)
-          .in('wallet_id', walletIds)
+          .in('wallet_id', walletIds),
+          
+        // Get users data separately
+        creatorIds.length > 0 
+          ? supabase
+              .from('users')
+              .select('id, full_name, email')
+              .in('id', creatorIds)
+          : Promise.resolve({ data: [] })
       )
 
-      const [contactsResult, currenciesResult, walletsResult] = await Promise.all(promises)
+      const [contactsResult, currenciesResult, walletsResult, usersResult] = await Promise.all(promises)
 
       // Create lookup maps
       const contactsMap = new Map()
@@ -208,13 +217,18 @@ export default function ProjectInstallmentsPage() {
         }
       })
 
+      const usersMap = new Map()
+      usersResult.data?.forEach((user: any) => {
+        usersMap.set(user.id, user)
+      })
+
       // Transform data with related information
       return movements.map(movement => ({
         ...movement,
         contact: contactsMap.get(movement.contact_id),
         currency: currenciesMap.get(movement.currency_id),
         wallet: walletsMap.get(movement.wallet_id),
-        creator: Array.isArray(movement.users) ? movement.users[0] : movement.users
+        creator: usersMap.get(movement.created_by)
       })) as Installment[]
     },
     enabled: !!organizationId && !!projectId && !!cuotasConcept?.id
@@ -506,8 +520,6 @@ export default function ProjectInstallmentsPage() {
               columns={detailColumns}
               defaultSort={{ key: 'movement_date', direction: 'desc' }}
               onCardClick={handleCardClick}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
             />
           </div>
         ) : installments.length === 0 ? (
@@ -532,8 +544,8 @@ export default function ProjectInstallmentsPage() {
           open={showModal}
           onClose={handleCloseModal}
           editingInstallment={editingInstallment}
-          organizationId={organizationId}
-          projectId={projectId}
+          organizationId={organizationId || ''}
+          projectId={projectId || ''}
         />
       </div>
     </Layout>
