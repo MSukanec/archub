@@ -1,30 +1,29 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import { useCurrentUser } from '@/hooks/use-current-user'
 
-export function useContacts(organizationId?: string, contactTypeId?: string) {
+export function useContacts() {
+  const { userData } = useCurrentUser()
+
   return useQuery({
-    queryKey: ['contacts', organizationId, contactTypeId],
+    queryKey: ['contacts', userData?.organization?.id],
     queryFn: async () => {
-      if (!supabase || !organizationId) throw new Error('Supabase client or organization ID not available')
-      
-      let query = supabase
-        .from('contacts')
-        .select(`
-          *,
-          contact_type:contact_types(name)
-        `)
-        .eq('organization_id', organizationId)
-        .order('first_name')
+      if (!supabase || !userData?.organization?.id) return []
 
-      if (contactTypeId && contactTypeId !== 'all') {
-        query = query.eq('contact_type_id', contactTypeId)
+      const { data, error } = await supabase
+        .from('contacts')
+        .select('*')
+        .eq('organization_id', userData.organization.id)
+        .eq('is_active', true)
+        .order('full_name', { ascending: true })
+
+      if (error) {
+        console.error('Error fetching contacts:', error)
+        throw error
       }
-      
-      const { data, error } = await query
-      
-      if (error) throw error
+
       return data || []
     },
-    enabled: !!supabase && !!organizationId
+    enabled: !!supabase && !!userData?.organization?.id,
   })
 }

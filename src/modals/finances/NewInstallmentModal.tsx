@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { CalendarIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
@@ -136,10 +137,12 @@ export function NewInstallmentModal({
         .from('organization_members')
         .select(`
           id,
+          user_id,
           users (
             id,
             full_name,
-            email
+            email,
+            avatar_url
           )
         `)
         .eq('organization_id', organizationId)
@@ -162,7 +165,9 @@ export function NewInstallmentModal({
           id,
           first_name,
           last_name,
-          company_name
+          company_name,
+          email,
+          avatar_url
         `)
         .eq('organization_id', organizationId)
 
@@ -382,11 +387,25 @@ export function NewInstallmentModal({
                   <SelectValue placeholder="Seleccionar creador" />
                 </SelectTrigger>
                 <SelectContent>
-                  {organizationMembers?.map((member, index) => (
-                    <SelectItem key={`member-${member.id || index}`} value={member.id || ''}>
-                      {member.users?.full_name || member.users?.email || 'Usuario sin nombre'}
-                    </SelectItem>
-                  ))}
+                  {organizationMembers?.map((member, index) => {
+                    const user = member.users
+                    const displayName = user?.full_name || user?.email || 'Usuario sin nombre'
+                    const initials = user?.full_name 
+                      ? user.full_name.split(' ').map(n => n[0]).join('').toUpperCase()
+                      : user?.email?.[0]?.toUpperCase() || 'U'
+                    
+                    return (
+                      <SelectItem key={`member-${member.id || index}`} value={member.id || ''}>
+                        <div className="flex items-center gap-2">
+                          <Avatar className="h-6 w-6">
+                            <AvatarImage src={user?.avatar_url || ''} />
+                            <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+                          </Avatar>
+                          <span>{displayName}</span>
+                        </div>
+                      </SelectItem>
+                    )
+                  })}
                 </SelectContent>
               </Select>
               {form.formState.errors.created_by && (
@@ -406,12 +425,27 @@ export function NewInstallmentModal({
                   <SelectValue placeholder="Seleccionar contacto" />
                 </SelectTrigger>
                 <SelectContent>
-                  {organizationContacts?.map((contact, index) => (
-                    <SelectItem key={`contact-${contact.id || index}`} value={contact.id || ''}>
-                      {contact.company_name || 
-                       `${contact.first_name} ${contact.last_name}` || 'Contacto sin nombre'}
-                    </SelectItem>
-                  ))}
+                  {organizationContacts?.map((contact, index) => {
+                    const displayName = contact.company_name || 
+                      `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 'Contacto sin nombre'
+                    const initials = contact.company_name 
+                      ? contact.company_name.split(' ').map(n => n[0]).join('').toUpperCase()
+                      : contact.first_name && contact.last_name
+                        ? `${contact.first_name[0]}${contact.last_name[0]}`.toUpperCase()
+                        : contact.first_name?.[0]?.toUpperCase() || 'C'
+                    
+                    return (
+                      <SelectItem key={`contact-${contact.id || index}`} value={contact.id || ''}>
+                        <div className="flex items-center gap-2">
+                          <Avatar className="h-6 w-6">
+                            <AvatarImage src={contact.avatar_url || ''} />
+                            <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+                          </Avatar>
+                          <span>{displayName}</span>
+                        </div>
+                      </SelectItem>
+                    )
+                  })}
                 </SelectContent>
               </Select>
               {form.formState.errors.contact_id && (
