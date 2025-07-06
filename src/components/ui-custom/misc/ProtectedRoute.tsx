@@ -10,7 +10,7 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, loading, initialized, initialize } = useAuthStore()
-  const { data: userData, isLoading: userDataLoading } = useCurrentUser()
+  const { data: userData, isLoading: userDataLoading, error: userDataError } = useCurrentUser()
   const [location, navigate] = useLocation()
   const [showAuthModal, setShowAuthModal] = useState(false)
 
@@ -36,7 +36,14 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   // Check if user needs to complete onboarding or select a mode
   useEffect(() => {
-    if (user && userData && !userDataLoading && location !== '/select-mode') {
+    if (user && !userDataLoading && location !== '/select-mode') {
+      // Si userData es null o hay error, significa que es un usuario nuevo de OAuth
+      if (!userData || userDataError) {
+        console.log('New OAuth user detected, redirecting to onboarding');
+        navigate('/select-mode');
+        return;
+      }
+
       const hasUserType = userData.preferences?.last_user_type;
       const onboardingCompleted = userData.preferences?.onboarding_completed;
       const hasUserData = userData.user_data && userData.user_data.first_name && userData.user_data.last_name;
@@ -57,7 +64,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         navigate('/select-mode');
       }
     }
-  }, [user, userData, userDataLoading, location, navigate])
+  }, [user, userData, userDataLoading, userDataError, location, navigate])
 
   // Debug adicional
   console.log('ProtectedRoute render:', { initialized, loading, user: !!user, showAuthModal })
