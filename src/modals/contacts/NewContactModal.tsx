@@ -162,11 +162,16 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
 
       if (contact) {
         // Update existing contact
+        const fullName = selectedUser 
+          ? selectedUser.full_name 
+          : `${formData.first_name || ''} ${formData.last_name || ''}`.trim();
+          
         const { error } = await supabase
           .from('contacts')
           .update({
             first_name: formData.first_name,
             last_name: formData.last_name || null,
+            full_name: fullName || null,
             email: formData.email || null,
             phone: formData.phone || null,
             contact_type_id: formData.contact_type_id || null,
@@ -182,6 +187,9 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
         }
       } else {
         // Create new contact
+        const fullName = selectedUser 
+          ? selectedUser.full_name 
+          : `${formData.first_name || ''} ${formData.last_name || ''}`.trim();
 
         const { data: contactData, error } = await supabase
           .from('contacts')
@@ -189,6 +197,7 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
             organization_id: organizationId,
             first_name: formData.first_name,
             last_name: formData.last_name || null,
+            full_name: fullName || null,
             email: formData.email || null,
             phone: formData.phone || null,
             contact_type_id: formData.contact_type_id || null,

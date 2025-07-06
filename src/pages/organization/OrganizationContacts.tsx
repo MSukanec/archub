@@ -290,12 +290,21 @@ export default function OrganizationContacts() {
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center text-sm font-medium">
-                      {contact.first_name?.charAt(0) || 'C'}
-                    </div>
+                    {contact.linked_user ? (
+                      <Avatar className="w-8 h-8">
+                        <AvatarImage src={contact.linked_user.avatar_url} />
+                        <AvatarFallback>
+                          {contact.linked_user.full_name?.charAt(0) || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center text-sm font-medium">
+                        {contact.first_name?.charAt(0) || 'C'}
+                      </div>
+                    )}
                     <div className="flex-1 min-w-0">
                       <div className="font-medium text-sm truncate">
-                        {`${contact.first_name || ''} ${contact.last_name || ''}`.trim()}
+                        {contact.full_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim()}
                       </div>
                       {contact.linked_user && (
                         <div className="flex items-center gap-1 mt-1">
@@ -337,7 +346,7 @@ export default function OrganizationContacts() {
                       </div>
                       <div>
                         <CardTitle className="text-xl">
-                          {`${selectedContact.first_name || ''} ${selectedContact.last_name || ''}`.trim()}
+                          {selectedContact.full_name || `${selectedContact.first_name || ''} ${selectedContact.last_name || ''}`.trim()}
                         </CardTitle>
                         <div className="flex items-center gap-2">
                           <p className="text-muted-foreground">

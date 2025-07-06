@@ -119,6 +119,13 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 6, 2025. Enhanced user linking system with improved display and automatic full_name generation - COMPLETED
+  • Fixed contact list display to show linked user names and avatars properly instead of generic "Usuario de Archub" text
+  • Updated contact creation/editing to automatically generate full_name field by combining first_name and last_name
+  • Enhanced visual indicators in contact list: linked users show actual avatars and names from user data
+  • Improved contact detail cards to use full_name for consistent display across all contact views
+  • Added proper fallback logic: use full_name when available, otherwise combine first_name + last_name
+  • Contact vinculación system now fully functional with proper data persistence and visual feedback
 - July 6, 2025. Fixed NewMovementModal user display issue and created project "Datos Básicos" page - COMPLETED
   • Fixed NewMovementModal user dropdown showing "Usuario sin nombre" by correcting data structure access in member mapping
   • Modal now properly displays user names using member.full_name instead of member.user.full_name (useOrganizationMembers already flattens data)
