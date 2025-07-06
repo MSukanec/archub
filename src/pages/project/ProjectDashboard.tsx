@@ -180,7 +180,6 @@ export default function ProjectDashboard() {
         {/* Métricas Principales */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <CustomCard
-            colorScheme="blue"
             topContent={
               <div className="flex items-center justify-between">
                 <div className="text-4xl font-bold">{projectSummary?.totalDocuments || 0}</div>
@@ -192,7 +191,6 @@ export default function ProjectDashboard() {
           />
           
           <CustomCard
-            colorScheme="orange"
             topContent={
               <div className="flex items-center justify-between">
                 <div className="text-4xl font-bold">{projectSummary?.totalSiteLogs || 0}</div>
@@ -204,7 +202,6 @@ export default function ProjectDashboard() {
           />
           
           <CustomCard
-            colorScheme="purple"
             topContent={
               <div className="flex items-center justify-between">
                 <div className="text-4xl font-bold">{projectSummary?.totalBudgets || 0}</div>
@@ -216,7 +213,6 @@ export default function ProjectDashboard() {
           />
           
           <CustomCard
-            colorScheme="green"
             topContent={
               <div className="flex items-center justify-between">
                 <div className="text-4xl font-bold">{projectSummary?.totalMovements || 0}</div>
