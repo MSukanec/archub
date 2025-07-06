@@ -8,7 +8,7 @@ import { Building, Users, Crown, Activity } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext';
 import { useMobile } from '@/hooks/use-mobile';
-import { OrganizationGrowthChart } from '@/components/graphics/OrganizationGrowthChart';
+import { OrganizationGrowthChart } from '@/components/graphics/finances/OrganizationGrowthChart';
 
 // Hook para obtener estadísticas del sistema
 function useSystemStats() {

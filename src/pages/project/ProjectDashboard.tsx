@@ -5,6 +5,11 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { DataCard } from '@/components/ui-custom/misc/DataCard'
 import { SecondaryCard } from '@/components/ui-custom/misc/SecondaryCard'
+import { ProjectProgressChart } from '@/components/graphics/dashboard/ProjectProgressChart'
+import { ProjectTimelineChart } from '@/components/graphics/dashboard/ProjectTimelineChart'
+import { ProjectKPIChart } from '@/components/graphics/dashboard/ProjectKPIChart'
+import { ProjectActivityChart } from '@/components/graphics/dashboard/ProjectActivityChart'
+import { useProjectDashboardCharts } from '@/hooks/use-project-dashboard-charts'
 import { 
   FolderOpen, 
   Calendar, 
@@ -45,6 +50,9 @@ export default function ProjectDashboard() {
 
   const organizationId = userData?.preferences?.last_organization_id
   const projectId = userData?.preferences?.last_project_id
+
+  // Fetch chart data
+  const { data: chartData, isLoading: chartsLoading } = useProjectDashboardCharts()
 
   // Fetch project summary data
   const { data: projectSummary, isLoading: summaryLoading } = useQuery({
@@ -374,6 +382,45 @@ export default function ProjectDashboard() {
             </div>
           </SecondaryCard>
         </div>
+
+        {/* Gráficos de Dashboard */}
+        {chartData && (
+          <div className="space-y-6 mt-8">
+            <h2 className="text-2xl font-bold text-foreground">Análisis del Proyecto</h2>
+            
+            {/* Primera fila de gráficos */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <ProjectProgressChart data={chartData.progressData} />
+              <ProjectKPIChart data={chartData.kpiData} />
+            </div>
+
+            {/* Segunda fila de gráficos */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <ProjectTimelineChart data={chartData.timelineData} />
+              <ProjectActivityChart 
+                data={chartData.activityData} 
+                recentActivities={chartData.recentActivities}
+              />
+            </div>
+          </div>
+        )}
+
+        {chartsLoading && (
+          <div className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {[1, 2, 3, 4].map((i) => (
+                <Card key={i} className="h-[400px]">
+                  <CardContent className="p-6">
+                    <div className="animate-pulse space-y-4">
+                      <div className="h-4 bg-muted rounded w-1/3"></div>
+                      <div className="h-64 bg-muted rounded"></div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   )
