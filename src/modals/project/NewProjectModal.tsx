@@ -76,13 +76,13 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
     member.user_id === userData?.user?.id
   );
 
-  // Helper para mostrar el nombre del miembro - CORREGIDO: users es objeto, no array
+  // Helper para mostrar el nombre del miembro
   const getMemberLabel = (id: string) => {
     if (!id) return "";
     const member = organizationMembers.find(m => m.id === id);
     if (!member) return "";
-    const memberUser = member.users; // Es un objeto, no array
-    return memberUser?.full_name || memberUser?.email || 'Usuario';
+    // Los datos ya vienen con full_name, email, etc. directamente en member
+    return member.full_name || member.email || 'Usuario';
   };
 
   const form = useForm<CreateProjectForm>({
@@ -311,8 +311,8 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
                         </FormControl>
                         <SelectContent className="z-[100000]">
                           {organizationMembers.map((member) => {
-                            const memberUser = member.users; // Es un objeto, no array
-                            const memberName = memberUser?.full_name || memberUser?.email || 'Usuario';
+                            // Los datos ya vienen con full_name, email, etc. directamente en member
+                            const memberName = member.full_name || member.email || 'Usuario';
                             const memberInitials = memberName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
                             
                             return (
