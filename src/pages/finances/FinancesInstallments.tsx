@@ -73,7 +73,7 @@ interface InstallmentSummary {
   total_amount: number
 }
 
-export default function ProjectInstallmentsPage() {
+export default function FinancesInstallments() {
   const { data: userData } = useCurrentUser()
   const [searchValue, setSearchValue] = useState("")
   const [showModal, setShowModal] = useState(false)

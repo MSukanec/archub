@@ -203,6 +203,7 @@ export function Sidebar() {
       { icon: Building, label: 'Obra', href: '#', onClick: () => { setSidebarContext('construction'); navigate('/construction/dashboard'); }, rightIcon: ChevronRight },
       { icon: DollarSign, label: 'Finanzas', href: '#', onClick: () => { setSidebarContext('finances'); navigate('/finances/dashboard'); }, rightIcon: ChevronRight },
       { icon: Users, label: 'Comercialización', href: '#', onClick: () => { setSidebarContext('commercialization'); navigate('/commercialization/dashboard'); }, rightIcon: ChevronRight, restricted: true },
+      { icon: Database, label: 'Datos Básicos', href: '/project/basic-data' },
     ],
     design: [
       { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' },
