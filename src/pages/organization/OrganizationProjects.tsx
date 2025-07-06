@@ -516,6 +516,7 @@ export default function OrganizationProjects() {
                           .from('project_data')
                           .delete()
                           .eq('project_id', projectToDelete.id)
+                          .eq('organization_id', userData?.organization?.id) // SEGURIDAD EXTRA
                         
                         if (projectDataError) {
                           console.error('Error deleting project_data:', projectDataError)
