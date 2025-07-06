@@ -16,7 +16,6 @@ export interface ProjectInfo {
 
 // Project data interface (extended information)
 export interface ProjectData {
-  id: string;
   project_id: string;
   surface_total?: number;
   surface_covered?: number;
@@ -162,7 +161,7 @@ export function useUpdateProjectData() {
       // First check if project_data exists using maybeSingle to avoid errors
       const { data: existingData, error: checkError } = await supabase
         .from('project_data')
-        .select('id')
+        .select('project_id')
         .eq('project_id', currentProjectId)
         .maybeSingle();
 
