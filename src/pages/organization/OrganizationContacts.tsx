@@ -28,7 +28,7 @@ export default function OrganizationContacts() {
   const [contactToDelete, setContactToDelete] = useState<any>(null)
   
   const { data: userData, isLoading } = useCurrentUser()
-  const { data: contacts = [], isLoading: contactsLoading } = useContacts()
+  const { data: contacts = [], isLoading: contactsLoading } = useContacts(userData?.organization?.id)
   const { toast } = useToast()
   const queryClient = useQueryClient()
 

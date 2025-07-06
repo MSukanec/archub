@@ -22,7 +22,6 @@ import { cn } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
-import { useContacts } from '@/hooks/use-contacts'
 import { supabase } from '@/lib/supabase'
 
 const installmentSchema = z.object({
@@ -154,12 +153,29 @@ export function NewInstallmentModal({
     }
   })
 
-  // Get organization contacts using the fixed hook
-  const { data: organizationContacts } = useContacts(organizationId)
-  
-  // Debug logging
-  console.log('Modal organizationId:', organizationId)
-  console.log('Modal organizationContacts:', organizationContacts)
+  // Get organization contacts (not just project investors)
+  const { data: organizationContacts } = useQuery({
+    queryKey: ['organization-contacts', organizationId],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase client not initialized')
+      
+      const { data, error } = await supabase
+        .from('contacts')
+        .select(`
+          id,
+          first_name,
+          last_name,
+          company_name,
+          email,
+          avatar_url
+        `)
+        .eq('organization_id', organizationId)
+
+      if (error) throw error
+      return data || []
+    },
+    enabled: !!organizationId && !!supabase
+  })
 
   // Create installment mutation
   const createInstallmentMutation = useMutation({
