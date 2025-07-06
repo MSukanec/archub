@@ -651,15 +651,12 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
           </CustomModalBody>
         ),
         footer: (
-          <CustomModalFooter onCancel={handleClose}>
-            <Button 
-              type="submit" 
-              form="contact-form"
-              disabled={createContactMutation.isPending}
-            >
-              {createContactMutation.isPending ? 'Guardando...' : (contact ? 'Actualizar contacto' : 'Crear contacto')}
-            </Button>
-          </CustomModalFooter>
+          <CustomModalFooter 
+            onCancel={handleClose}
+            form="contact-form"
+            submitText={contact ? 'Actualizar contacto' : 'Crear contacto'}
+            isLoading={createContactMutation.isPending}
+          />
         )
       }}
     </CustomModalLayout>
