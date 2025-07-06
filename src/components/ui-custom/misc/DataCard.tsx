@@ -24,10 +24,11 @@ export const DataCard: React.FC<DataCardProps> = ({
     <div 
       className={cn(
         `border cursor-pointer transition-all duration-200 hover:shadow-lg`,
-        `rounded-[var(--radius-lg)] border-border`,
+        `rounded-[var(--radius-lg)]`,
         className
       )}
       onClick={onClick}
+      style={{ borderColor: 'var(--colorful-card-border)' }}
     >
       {/* Top Content Section */}
       <div 
