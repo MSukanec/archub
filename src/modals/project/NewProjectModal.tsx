@@ -248,7 +248,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
           />
         ),
         body: (
-          <CustomModalBody padding="md">
+          <CustomModalBody columns={1}>
             <Form {...form}>
               <div className="space-y-4">
                 {/* Fecha de creación */}
@@ -277,7 +277,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
                             </Button>
                           </FormControl>
                         </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
+                        <PopoverContent className="w-auto p-0 z-[100000]" align="start">
                           <CalendarComponent
                             mode="single"
                             selected={field.value}
@@ -309,7 +309,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
                             </SelectValue>
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent className="z-[100000]">
                           {organizationMembers.map((member) => {
                             const memberUser = member.users; // Es un objeto, no array
                             const memberName = memberUser?.full_name || memberUser?.email || 'Usuario';
@@ -361,7 +361,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
                             <SelectValue placeholder="Selecciona una tipología" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent className="z-[100000]">
                           <SelectItem value="none">Sin tipología</SelectItem>
                           {projectTypes?.map((type) => (
                             <SelectItem key={type.id} value={type.id}>
@@ -388,7 +388,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
                             <SelectValue placeholder="Selecciona una modalidad" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent className="z-[100000]">
                           <SelectItem value="none">Sin modalidad</SelectItem>
                           {projectModalities?.map((modality) => (
                             <SelectItem key={modality.id} value={modality.id}>
@@ -415,7 +415,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
                             <SelectValue placeholder="Selecciona un estado" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent className="z-[100000]">
                           <SelectItem value="planning">Planificación</SelectItem>
                           <SelectItem value="active">Activo</SelectItem>
                           <SelectItem value="on-hold">En pausa</SelectItem>
