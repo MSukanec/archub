@@ -16,6 +16,8 @@ import { es } from 'date-fns/locale'
 import { NewContactModal } from '@/modals/contacts/NewContactModal'
 import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState'
 import ContactCard from '@/components/cards/ContactCard'
+import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
+import { useMobile } from '@/hooks/use-mobile'
 
 export default function OrganizationContacts() {
   const [searchValue, setSearchValue] = useState("")
@@ -31,6 +33,8 @@ export default function OrganizationContacts() {
   const { data: contacts = [], isLoading: contactsLoading } = useContacts()
   const { toast } = useToast()
   const queryClient = useQueryClient()
+  const { setActions, setShowActionBar, clearActions } = useMobileActionBar()
+  const isMobile = useMobile()
 
   // Lista hardcoded de tipos de contacto
   const contactTypes = [
@@ -40,6 +44,56 @@ export default function OrganizationContacts() {
     { id: 'proveedor', name: 'Proveedor' },
     { id: 'cliente', name: 'Cliente' }
   ]
+
+  // Configure mobile action bar
+  useEffect(() => {
+    if (isMobile) {
+      setActions({
+        slot2: {
+          id: 'search',
+          icon: <Search className="h-5 w-5" />,
+          label: 'Buscar',
+          onClick: () => {
+            const searchInput = document.querySelector('input[placeholder*="Buscar"]') as HTMLInputElement
+            if (searchInput) {
+              searchInput.focus()
+            }
+          }
+        },
+        slot3: {
+          id: 'create',
+          icon: <UserPlus className="h-6 w-6" />,
+          label: 'Crear Contacto',
+          onClick: () => setShowCreateModal(true),
+          variant: 'primary'
+        },
+        slot4: {
+          id: 'filter',
+          icon: <Filter className="h-5 w-5" />,
+          label: 'Filtros',
+          onClick: () => {
+            console.log('Toggle filtros')
+          }
+        },
+        slot5: {
+          id: 'clear',
+          icon: <X className="h-5 w-5" />,
+          label: 'Limpiar',
+          onClick: () => {
+            setSearchValue('')
+            setFilterByType('all')
+          }
+        }
+      })
+      setShowActionBar(true)
+    }
+
+    return () => {
+      if (isMobile) {
+        clearActions()
+      }
+    }
+  }, [isMobile, setActions, setShowActionBar, clearActions])
 
   // Limpiar estado cuando cambia la organización
   React.useEffect(() => {
@@ -308,6 +362,8 @@ export default function OrganizationContacts() {
             }}
           />
         )}
+
+
       </Layout>
     )
   }
@@ -344,9 +400,9 @@ export default function OrganizationContacts() {
             contact={contact}
             onEdit={handleEditContact}
             onDelete={handleDeleteContact}
-            onClick={handleEditContact}
           />
         )}
+        cardSpacing="space-y-3"
       />
 
       {/* Modales */}

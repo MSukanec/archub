@@ -91,10 +91,7 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact, onEdit, onDelete, on
         }
       ]}
     >
-      <div 
-        className="p-4 bg-card border border-card-border rounded-lg hover:bg-accent/50 transition-colors"
-        onClick={() => onClick?.(contact)}
-      >
+      <div className="p-4 bg-card border border-card-border rounded-lg">
         <div className="flex items-center gap-3">
           {/* Avatar */}
           <Avatar className="w-10 h-10">
