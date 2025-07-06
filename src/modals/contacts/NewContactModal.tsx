@@ -503,7 +503,7 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
                             <SelectValue placeholder="Selecciona el tipo de contacto" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent className="bg-background">
                           {contactTypes.map((type) => (
                             <SelectItem key={type.id} value={type.id}>
                               {type.name}

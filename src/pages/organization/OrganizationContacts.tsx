@@ -6,7 +6,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import CustomTable from '@/components/ui-custom/misc/CustomTable'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useContacts } from '@/hooks/use-contacts'
-import { Users, Plus, Edit, Trash2, CheckCircle, Send } from 'lucide-react'
+import { Users, Plus, Edit, Trash2, CheckCircle, Send, Search, Filter, X, UserPlus } from 'lucide-react'
 import React, { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
