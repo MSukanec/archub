@@ -165,7 +165,12 @@ export function TaskParameterEditorModal({
   const { data: groupItemsWithSelection = [], isLoading: groupItemsLoading } = useQuery({
     queryKey: ['task-parameter-group-items-selection', parameter?.id, selectedGroupForItems?.id],
     queryFn: async () => {
-      if (!parameter?.id || !selectedGroupForItems?.id) return [];
+      if (!parameter?.id || !selectedGroupForItems?.id) {
+        console.log('No hay parameter.id o selectedGroupForItems.id:', { parameterId: parameter?.id, groupId: selectedGroupForItems?.id });
+        return [];
+      }
+      
+      console.log('Ejecutando query para parameter_id:', parameter.id);
       
       // Get all parameter values (these are the actual options we see in "Opciones Generales")
       const { data: allValues, error: valuesError } = await supabase
@@ -174,7 +179,13 @@ export function TaskParameterEditorModal({
         .eq('parameter_id', parameter.id)
         .order('label');
       
-      if (valuesError) throw valuesError;
+      console.log('Query terminada. Error:', valuesError);
+      console.log('Datos recibidos:', allValues);
+      
+      if (valuesError) {
+        console.error('Error en la query:', valuesError);
+        throw valuesError;
+      }
       
       // Get currently selected options for this group
       const { data: selectedValues, error: selectedError } = await supabase
