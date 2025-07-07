@@ -119,14 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- July 7, 2025. Fixed task parameter modals layout and generated task template refresh system - COMPLETED
-  • Eliminated hardcoded grid layouts from NewTaskParameterModal and NewTaskParameterOptionModal - now use columns={1} pattern
-  • Changed field order in NewTaskParameterOptionModal: "Nombre" for value field, "Etiqueta" for label field as requested
-  • Fixed generated task modal infinite loop by removing form dependency from useEffect that was causing "Maximum update depth exceeded" error
-  • Enhanced template change detection with proper query invalidation to force fresh parameter data when template changes
-  • Added refetchParameters functionality and queryClient.invalidateQueries for real-time updates without F5 refresh requirement
-  • Modal now properly updates parameter fields immediately when template changes in task categories page
-  • Improved logging for debugging template changes and parameter loading in generated task modal
+- July 7, 2025. TaskTemplateEditorModal restoration and functionality recovery - COMPLETED
+  • Successfully restored TaskTemplateEditorModal.tsx to working state after multiple failed repair attempts
+  • Fixed modal appearing as white line by using correct CustomModalLayout structure instead of problematic structure
+  • Restored complete CRUD functionality: create template, add parameters, toggle required status, delete parameters
+  • Modal now uses proper Card components, CustomModalHeader/Body/Footer, and columns={1} for single-column layout
+  • All parameter management features working: parameter selection, option groups for select types, position handling
+  • Switch toggles for required/optional parameters functional with proper database updates
+  • Template creation for categories without existing templates fully operational
+  • System stable and no longer requires checkpoint rollbacks for basic functionality
 - July 7, 2025. Complete mobile navigation fixes and financial movements sorting correction - COMPLETED
   • Fixed mobile menu layout to use 80vh height instead of 100vh to accommodate 20% top spacing with backdrop opacity
   • Added automatic scroll-to-top functionality when navigating on mobile - pages now always start from top instead of scrolled position
