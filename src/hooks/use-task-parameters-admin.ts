@@ -413,6 +413,7 @@ export function useTaskParameterOptionGroups(parameterId: string) {
   return useQuery({
     queryKey: ['task-parameter-option-groups', parameterId],
     queryFn: async () => {
+      console.log('Fetching groups for parameter ID:', parameterId);
       if (!parameterId) return [];
       
       const { data, error } = await supabase
@@ -421,6 +422,7 @@ export function useTaskParameterOptionGroups(parameterId: string) {
         .eq('parameter_id', parameterId)
         .order('position', { ascending: true });
 
+      console.log('Groups query result:', { data, error });
       if (error) throw error;
       return data || [];
     },

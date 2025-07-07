@@ -61,7 +61,9 @@ export function NewTaskParameterModal({
   const { data: units, isLoading: unitsLoading } = useUnits();
   
   // Load option groups for this parameter
-  const { data: optionGroups, isLoading: isLoadingGroups } = useTaskParameterOptionGroups(parameter?.id || '');
+  const parameterId = parameter?.parameter_id || '';
+  console.log('Loading groups for parameter:', { parameter, parameterId });
+  const { data: optionGroups, isLoading: isLoadingGroups } = useTaskParameterOptionGroups(parameterId);
   
   const form = useForm<TaskParameterFormData>({
     resolver: zodResolver(taskParameterSchema),
@@ -290,7 +292,7 @@ export function NewTaskParameterModal({
                               <Button
                                 type="button"
                                 size="sm"
-                                onClick={() => setIsGroupModalOpen(true)}
+                                onClick={() => setIsNewGroupModalOpen(true)}
                                 className="h-8"
                               >
                                 <Plus className="h-4 w-4 mr-1" />
