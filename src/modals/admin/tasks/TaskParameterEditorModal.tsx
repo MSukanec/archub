@@ -124,7 +124,7 @@ export function TaskParameterEditorModal({
 
   // Load option groups
   const { data: optionGroups = [], isLoading: groupsLoading } = useQuery({
-    queryKey: ['task-parameter-values', parameter?.id],
+    queryKey: ['task-parameter-option-groups', parameter?.id],
     queryFn: async () => {
       if (!parameter?.id) return [];
       
