@@ -141,6 +141,8 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       
       // Solo navegar, NO cerrar el menú para cambios de contexto
       navigate(href);
+      // Scroll to top on mobile navigation
+      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 200);
     } else {
       // Para navegación normal (sin cambio de contexto), cerrar menú
       if (newContext) {
@@ -148,6 +150,8 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       }
       navigate(href);
       onClose();
+      // Scroll to top on mobile navigation
+      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
     }
   };
 
@@ -156,10 +160,14 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       // Si hay cambio de contexto, no cerrar menú
       setSidebarContext(newContext as any);
       navigate(href);
+      // Scroll to top on mobile navigation
+      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
     } else {
       // Si no hay cambio de contexto, cerrar menú
       navigate(href);
       onClose();
+      // Scroll to top on mobile navigation
+      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
     }
   };
 
@@ -303,7 +311,8 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const navigationItems = sidebarContexts[currentSidebarContext as keyof typeof sidebarContexts] || sidebarContexts.organization;
 
   const menuContent = (
-    <div className="fixed inset-0 flex flex-col w-full h-full" style={{ backgroundColor: 'var(--menues-bg)', zIndex: 9999 }}>
+    <div className="fixed inset-0" style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', zIndex: 9999 }}>
+      <div className="flex flex-col w-full h-full mt-[20vh]" style={{ backgroundColor: 'var(--menues-bg)' }}>
       {/* Header */}
       <div className="h-14 flex items-center justify-between px-4 border-b" style={{ borderColor: 'var(--menues-border)' }}>
         <h1 className="text-lg font-semibold" style={{ color: 'var(--menues-fg)' }}>
@@ -451,7 +460,24 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
             {expandedOrgSelector && (
               <div className="absolute bottom-full left-0 right-0 mb-2 max-h-32 overflow-y-auto scrollbar-hide space-y-1 bg-[var(--card-bg)] border border-[var(--menues-border)] rounded-lg p-2 shadow-lg" style={{ zIndex: 10000 }}>
-                {sortedOrganizations.map((org: any) => (
+                {/* Current organization first */}
+                {currentOrganization && (
+                  <button
+                    key={currentOrganization.id}
+                    onClick={() => handleOrganizationSelect(currentOrganization.id)}
+                    className="flex w-full items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+                    style={{
+                      color: 'var(--menues-fg)',
+                      backgroundColor: 'var(--accent)',
+                      opacity: 1,
+                    }}
+                  >
+                    <span className="truncate">{currentOrganization.name}</span>
+                    <div className="h-2 w-2 rounded-full bg-green-500 flex-shrink-0" />
+                  </button>
+                )}
+                {/* Other organizations */}
+                {sortedOrganizations.filter((org: any) => org.id !== currentOrganization?.id).map((org: any) => (
                   <button
                     key={org.id}
                     onClick={() => handleOrganizationSelect(org.id)}
@@ -500,7 +526,24 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
             {expandedProjectSelector && (
               <div className="absolute bottom-full left-0 right-0 mb-2 max-h-32 overflow-y-auto scrollbar-hide space-y-1 bg-[var(--card-bg)] border border-[var(--menues-border)] rounded-lg p-2 shadow-lg" style={{ zIndex: 10000 }}>
-                {projectsData?.map((project: any) => (
+                {/* Current project first */}
+                {effectiveCurrentProject && projectsData?.find((p: any) => p.id === effectiveCurrentProject) && (
+                  <button
+                    key={effectiveCurrentProject}
+                    onClick={() => handleProjectSelect(effectiveCurrentProject)}
+                    className="flex w-full items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+                    style={{
+                      color: 'var(--menues-fg)',
+                      backgroundColor: 'var(--accent)',
+                      opacity: 1,
+                    }}
+                  >
+                    <span className="truncate">{projectsData?.find((p: any) => p.id === effectiveCurrentProject)?.name}</span>
+                    <div className="h-2 w-2 rounded-full bg-green-500 flex-shrink-0" />
+                  </button>
+                )}
+                {/* Other projects */}
+                {projectsData?.filter((project: any) => project.id !== effectiveCurrentProject).map((project: any) => (
                   <button
                     key={project.id}
                     onClick={() => handleProjectSelect(project.id)}
@@ -563,6 +606,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
             <span className="text-sm font-medium">Administración</span>
           </button>
         )}
+      </div>
       </div>
     </div>
   );
