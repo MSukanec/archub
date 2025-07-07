@@ -49,6 +49,22 @@ export interface CreateTaskParameterOptionData {
   label: string;
 }
 
+export interface TaskParameterOptionGroup {
+  id: string;
+  parameter_id: string;
+  name: string;
+  label: string;
+  position?: number;
+  created_at: string;
+}
+
+export interface TaskParameterOptionGroupItem {
+  id: string;
+  group_id: string;
+  parameter_value_id: string;
+  created_at: string;
+}
+
 export interface UpdateTaskParameterOptionData {
   id: string;
   parameter_id: string;
@@ -366,6 +382,154 @@ export function useDeleteTaskParameterOption() {
       toast({
         title: 'Error',
         description: 'No se pudo eliminar la opción.',
+        variant: 'destructive',
+      });
+    },
+  });
+}
+
+// Hook para obtener valores/opciones de un parámetro específico
+export function useTaskParameterValues(parameterId: string) {
+  return useQuery({
+    queryKey: ['task-parameter-values', parameterId],
+    queryFn: async () => {
+      if (!parameterId) return [];
+      
+      const { data, error } = await supabase
+        .from('task_parameter_values')
+        .select('*')
+        .eq('parameter_id', parameterId)
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!parameterId,
+  });
+}
+
+// Hook para obtener grupos de opciones de un parámetro
+export function useTaskParameterOptionGroups(parameterId: string) {
+  return useQuery({
+    queryKey: ['task-parameter-option-groups', parameterId],
+    queryFn: async () => {
+      if (!parameterId) return [];
+      
+      const { data, error } = await supabase
+        .from('task_parameter_option_groups')
+        .select('*')
+        .eq('parameter_id', parameterId)
+        .order('position', { ascending: true });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!parameterId,
+  });
+}
+
+// Hook para obtener items de un grupo
+export function useTaskParameterOptionGroupItems(groupId: string) {
+  return useQuery({
+    queryKey: ['task-parameter-option-group-items', groupId],
+    queryFn: async () => {
+      if (!groupId) return [];
+      
+      const { data, error } = await supabase
+        .from('task_parameter_option_group_items')
+        .select('*')
+        .eq('group_id', groupId);
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!groupId,
+  });
+}
+
+// Hook para crear grupo de opciones
+export function useCreateTaskParameterOptionGroup() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: {
+      parameter_id: string;
+      name: string;
+      label: string;
+      position?: number;
+    }) => {
+      const { data: result, error } = await supabase
+        .from('task_parameter_option_groups')
+        .insert([data])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return result;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-option-groups'] });
+      toast({
+        title: 'Grupo creado',
+        description: 'El grupo de opciones se ha creado correctamente.',
+      });
+    },
+    onError: (error) => {
+      console.error('Error creating option group:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo crear el grupo de opciones.',
+        variant: 'destructive',
+      });
+    },
+  });
+}
+
+// Hook para agregar/quitar opciones de un grupo
+export function useToggleTaskParameterOptionInGroup() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: {
+      groupId: string;
+      parameterValueId: string;
+      action: 'add' | 'remove';
+    }) => {
+      if (data.action === 'add') {
+        const { data: result, error } = await supabase
+          .from('task_parameter_option_group_items')
+          .insert([{
+            group_id: data.groupId,
+            parameter_value_id: data.parameterValueId
+          }])
+          .select()
+          .single();
+
+        if (error) throw error;
+        return result;
+      } else {
+        const { error } = await supabase
+          .from('task_parameter_option_group_items')
+          .delete()
+          .eq('group_id', data.groupId)
+          .eq('parameter_value_id', data.parameterValueId);
+
+        if (error) throw error;
+        return null;
+      }
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-option-group-items', variables.groupId] });
+      toast({
+        title: variables.action === 'add' ? 'Opción agregada' : 'Opción removida',
+        description: `La opción se ha ${variables.action === 'add' ? 'agregado al' : 'removido del'} grupo correctamente.`,
+      });
+    },
+    onError: (error) => {
+      console.error('Error toggling option in group:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo actualizar la asignación de la opción.',
         variant: 'destructive',
       });
     },

@@ -1,124 +1,85 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
 import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout';
 import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader';
 import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
 import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter';
 
-const taskParameterOptionGroupSchema = z.object({
-  parameter_id: z.string().min(1, 'Parameter ID es requerido'),
-  name: z.string().min(1, 'El nombre del grupo es requerido'),
-  label: z.string().min(1, 'La etiqueta del grupo es requerida'),
-  position: z.number().optional(),
+import { useCreateTaskParameterOptionGroup } from '@/hooks/use-task-parameters-admin';
+
+const optionGroupSchema = z.object({
+  name: z.string().min(1, 'El nombre es requerido'),
+  label: z.string().min(1, 'La etiqueta es requerida'),
 });
 
-type TaskParameterOptionGroupFormData = z.infer<typeof taskParameterOptionGroupSchema>;
-
-interface TaskParameterOptionGroup {
-  id: string;
-  parameter_id: string;
-  name: string;
-  label: string;
-  position?: number;
-  created_at: string;
-}
+type OptionGroupFormData = z.infer<typeof optionGroupSchema>;
 
 interface NewTaskParameterOptionGroupModalProps {
   open: boolean;
   onClose: () => void;
-  group?: TaskParameterOptionGroup;
   parameterId: string;
   parameterLabel: string;
-  onGroupCreated?: (groupId: string) => void;
 }
 
 export function NewTaskParameterOptionGroupModal({ 
   open, 
   onClose, 
-  group,
   parameterId,
-  parameterLabel,
-  onGroupCreated
+  parameterLabel
 }: NewTaskParameterOptionGroupModalProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const form = useForm<TaskParameterOptionGroupFormData>({
-    resolver: zodResolver(taskParameterOptionGroupSchema),
+  const createMutation = useCreateTaskParameterOptionGroup();
+  
+  const form = useForm<OptionGroupFormData>({
+    resolver: zodResolver(optionGroupSchema),
     defaultValues: {
-      parameter_id: parameterId,
       name: '',
       label: '',
-      position: 0
     },
   });
 
-  // Reset form when modal opens/closes or group changes
-  useEffect(() => {
-    if (open) {
-      if (group) {
-        form.reset({
-          parameter_id: group.parameter_id,
-          name: group.name,
-          label: group.label,
-          position: group.position || 0
-        });
-      } else {
-        form.reset({
-          parameter_id: parameterId,
-          name: '',
-          label: '',
-          position: 0
-        });
-      }
-    }
-  }, [open, group, parameterId, form]);
-
-  const onSubmit = async (data: TaskParameterOptionGroupFormData) => {
-    if (isSubmitting) return;
-    
+  const onSubmit = async (data: OptionGroupFormData) => {
     try {
-      setIsSubmitting(true);
+      await createMutation.mutateAsync({
+        parameter_id: parameterId,
+        name: data.name,
+        label: data.label,
+      });
       
-      // Mock implementation - would need actual backend hooks
-      console.log('Creating/updating option group:', data);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      if (onGroupCreated && !group) {
-        onGroupCreated('mock-group-id');
-      }
-      
+      form.reset();
       onClose();
     } catch (error) {
-      console.error('Error saving option group:', error);
-    } finally {
-      setIsSubmitting(false);
+      console.error('Error creating option group:', error);
     }
+  };
+
+  const handleClose = () => {
+    form.reset();
+    onClose();
   };
 
   return (
     <CustomModalLayout
       open={open}
-      onOpenChange={onClose}
+      onOpenChange={handleClose}
       content={{
         header: (
           <CustomModalHeader 
-            title={group ? 'Editar Grupo de Opciones' : 'Nuevo Grupo de Opciones'}
-            subtitle={`Parámetro: ${parameterLabel}`}
+            title="Nuevo Grupo de Opciones"
+            subtitle={`Para el parámetro: ${parameterLabel}`}
           />
         ),
         body: (
-          <Form {...form}>
-            <form id="group-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <CustomModalBody columns={1}>
+          <CustomModalBody columns={1}>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                   control={form.control}
                   name="name"
@@ -126,9 +87,9 @@ export function NewTaskParameterOptionGroupModal({
                     <FormItem>
                       <FormLabel>Nombre (código) *</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="ej: acabados_principales" 
-                          {...field} 
+                        <Input
+                          placeholder="ej: acabados_principales"
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
@@ -141,32 +102,31 @@ export function NewTaskParameterOptionGroupModal({
                   name="label"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Etiqueta (visible) *</FormLabel>
+                      <FormLabel>Etiqueta (mostrar) *</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="ej: Acabados Principales" 
-                          {...field} 
+                        <Input
+                          placeholder="ej: Acabados Principales"
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              </CustomModalBody>
-            </form>
-          </Form>
+              </form>
+            </Form>
+          </CustomModalBody>
         ),
         footer: (
           <CustomModalFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={handleClose}>
               Cancelar
             </Button>
             <Button 
-              type="submit"
-              form="group-form"
-              disabled={isSubmitting}
+              onClick={form.handleSubmit(onSubmit)} 
+              disabled={createMutation.isPending}
             >
-              {isSubmitting ? 'Guardando...' : (group ? 'Actualizar' : 'Crear')} Grupo
+              {createMutation.isPending ? 'Creando...' : 'Crear Grupo'}
             </Button>
           </CustomModalFooter>
         ),

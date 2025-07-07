@@ -18,7 +18,7 @@ import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeade
 import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
 import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter';
 
-import { useCreateTaskParameter, useUpdateTaskParameter, TaskParameter } from '@/hooks/use-task-parameters-admin';
+import { useCreateTaskParameter, useUpdateTaskParameter, TaskParameter, useTaskParameterOptionGroups } from '@/hooks/use-task-parameters-admin';
 import { NewTaskParameterOptionGroupModal } from './NewTaskParameterOptionGroupModal';
 import { TaskParameterGroupAssignmentModal } from './TaskParameterGroupAssignmentModal';
 import { useUnits } from '@/hooks/use-units';
@@ -59,6 +59,9 @@ export function NewTaskParameterModal({
   
   // Load units for the selector
   const { data: units, isLoading: unitsLoading } = useUnits();
+  
+  // Load option groups for this parameter
+  const { data: optionGroups, isLoading: isLoadingGroups } = useTaskParameterOptionGroups(parameter?.id || '');
   
   const form = useForm<TaskParameterFormData>({
     resolver: zodResolver(taskParameterSchema),
@@ -296,35 +299,40 @@ export function NewTaskParameterModal({
                             </div>
                             
                             <div className="space-y-2">
-                              {/* Mock grupos existentes */}
-                              {parameter && [
-                                { id: '1', name: 'acabados_principales', label: 'Acabados Principales', parameter_id: parameter.id },
-                                { id: '2', name: 'materiales_estructurales', label: 'Materiales Estructurales', parameter_id: parameter.id }
-                              ].map((group) => (
-                                <div key={group.id} className="flex items-center justify-between p-3 border rounded-lg">
-                                  <div>
-                                    <p className="text-sm font-medium">{group.label}</p>
-                                    <p className="text-xs text-muted-foreground">{group.name}</p>
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                    <Button
-                                      type="button"
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => {
-                                        setSelectedGroup(group);
-                                        setIsAssignmentModalOpen(true);
-                                      }}
-                                      className="h-7 px-2"
-                                    >
-                                      <Eye className="w-3 h-3 mr-1" />
-                                      Gestionar
-                                    </Button>
-                                  </div>
+                              {/* Grupos reales desde la base de datos */}
+                              {isLoadingGroups ? (
+                                <div className="text-sm text-muted-foreground text-center py-4">
+                                  Cargando grupos...
                                 </div>
-                              ))}
-                              
-                              {!parameter && (
+                              ) : optionGroups && optionGroups.length > 0 ? (
+                                optionGroups.map((group) => (
+                                  <div key={group.id} className="flex items-center justify-between p-3 border rounded-lg">
+                                    <div>
+                                      <p className="text-sm font-medium">{group.label}</p>
+                                      <p className="text-xs text-muted-foreground">{group.name}</p>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => {
+                                          setSelectedGroup(group);
+                                          setIsAssignmentModalOpen(true);
+                                        }}
+                                        className="h-7 px-2"
+                                      >
+                                        <Eye className="w-3 h-3 mr-1" />
+                                        Gestionar
+                                      </Button>
+                                    </div>
+                                  </div>
+                                ))
+                              ) : parameter ? (
+                                <div className="text-sm text-muted-foreground text-center py-4">
+                                  No hay grupos de opciones configurados para este parámetro.
+                                </div>
+                              ) : (
                                 <div className="text-sm text-muted-foreground text-center py-4">
                                   Los grupos se mostrarán después de crear el parámetro.
                                 </div>
@@ -365,16 +373,14 @@ export function NewTaskParameterModal({
       </CustomModalLayout>
 
       {/* Modal para crear grupos de opciones */}
-      <NewTaskParameterOptionGroupModal
-        open={isGroupModalOpen}
-        onClose={() => setIsGroupModalOpen(false)}
-        parameterId={parameter?.id || ''}
-        parameterLabel={parameter?.label || form.watch('label') || 'Nuevo parámetro'}
-        onGroupCreated={(groupId) => {
-          console.log('Grupo creado:', groupId);
-          setIsGroupModalOpen(false);
-        }}
-      />
+      {parameter && (
+        <NewTaskParameterOptionGroupModal
+          open={isNewGroupModalOpen}
+          onClose={() => setIsNewGroupModalOpen(false)}
+          parameterId={parameter.parameter_id}
+          parameterLabel={parameter.label}
+        />
+      )}
 
       {/* Modal de asignación de opciones a grupos */}
       {selectedGroup && (

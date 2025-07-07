@@ -10,22 +10,15 @@ import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeade
 import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
 import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter';
 
-interface TaskParameterOption {
-  id: string;
-  parameter_id: string;
-  name: string;
-  label: string;
-  created_at: string;
-}
+import { 
+  TaskParameterOptionGroup, 
+  TaskParameterOptionGroupItem,
+  useTaskParameterValues,
+  useTaskParameterOptionGroupItems,
+  useToggleTaskParameterOptionInGroup 
+} from '@/hooks/use-task-parameters-admin';
 
-interface TaskParameterOptionGroup {
-  id: string;
-  parameter_id: string;
-  name: string;
-  label: string;
-  position?: number;
-  created_at: string;
-}
+// Las interfaces se importan desde el hook
 
 interface TaskParameterGroupAssignmentModalProps {
   open: boolean;
@@ -41,54 +34,41 @@ export function TaskParameterGroupAssignmentModal({
   parameterLabel
 }: TaskParameterGroupAssignmentModalProps) {
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
 
-  // Mock data - would be replaced with real hooks
-  const mockOptions: TaskParameterOption[] = [
-    { id: '1', parameter_id: group.parameter_id, name: 'ladrillo_comun', label: 'Ladrillo Común', created_at: '2025-01-01' },
-    { id: '2', parameter_id: group.parameter_id, name: 'ladrillo_visto', label: 'Ladrillo Visto', created_at: '2025-01-01' },
-    { id: '3', parameter_id: group.parameter_id, name: 'bloque_hormigon', label: 'Bloque de Hormigón', created_at: '2025-01-01' },
-    { id: '4', parameter_id: group.parameter_id, name: 'madera_pino', label: 'Madera de Pino', created_at: '2025-01-01' },
-    { id: '5', parameter_id: group.parameter_id, name: 'madera_eucalipto', label: 'Madera de Eucalipto', created_at: '2025-01-01' },
-  ];
+  // Real hooks for data fetching
+  const { data: parameterOptions, isLoading: isLoadingOptions } = useTaskParameterValues(group.parameter_id);
+  const { data: groupItems, isLoading: isLoadingItems } = useTaskParameterOptionGroupItems(group.id);
+  const toggleMutation = useToggleTaskParameterOptionInGroup();
 
-  // Load selected options for this group
+  // Update selected options when group items load
   useEffect(() => {
-    if (open) {
-      setIsLoading(true);
-      // Mock loading delay
-      setTimeout(() => {
-        // Mock some selected options
-        setSelectedOptions(['1', '3']);
-        setIsLoading(false);
-      }, 500);
+    if (groupItems) {
+      setSelectedOptions(groupItems.map(item => item.parameter_value_id));
     }
-  }, [open, group.id]);
+  }, [groupItems]);
 
-  const handleOptionToggle = (optionId: string, checked: boolean) => {
+  const handleOptionToggle = async (optionId: string, checked: boolean) => {
+    // Optimistic update
     if (checked) {
       setSelectedOptions(prev => [...prev, optionId]);
     } else {
       setSelectedOptions(prev => prev.filter(id => id !== optionId));
     }
-  };
 
-  const handleSave = async () => {
-    setIsSaving(true);
+    // Real API call
     try {
-      // Mock save operation
-      console.log('Saving group assignments:', {
+      await toggleMutation.mutateAsync({
         groupId: group.id,
-        optionIds: selectedOptions
+        parameterValueId: optionId,
+        action: checked ? 'add' : 'remove'
       });
-      
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      onClose();
     } catch (error) {
-      console.error('Error saving assignments:', error);
-    } finally {
-      setIsSaving(false);
+      // Revert on error
+      if (checked) {
+        setSelectedOptions(prev => prev.filter(id => id !== optionId));
+      } else {
+        setSelectedOptions(prev => [...prev, optionId]);
+      }
     }
   };
 
@@ -104,70 +84,72 @@ export function TaskParameterGroupAssignmentModal({
           />
         ),
         body: (
-          <CustomModalBody columns={1}>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium">Opciones disponibles</p>
-                  <p className="text-xs text-muted-foreground">
-                    Selecciona las opciones que pertenecen a este grupo
-                  </p>
-                </div>
-                <Badge variant="outline">
-                  {selectedOptions.length} seleccionadas
-                </Badge>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Opciones disponibles</p>
+                <p className="text-xs text-muted-foreground">
+                  Selecciona las opciones que pertenecen a este grupo
+                </p>
               </div>
-
-              {isLoading ? (
-                <div className="space-y-3">
-                  {[1, 2, 3].map(i => (
-                    <div key={i} className="flex items-center space-x-3 p-3 border rounded-lg animate-pulse">
-                      <div className="w-4 h-4 bg-muted rounded"></div>
-                      <div className="flex-1">
-                        <div className="w-24 h-4 bg-muted rounded mb-1"></div>
-                        <div className="w-32 h-3 bg-muted/50 rounded"></div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {mockOptions.map((option) => {
-                    const isSelected = selectedOptions.includes(option.id);
-                    return (
-                      <div
-                        key={option.id}
-                        className={`flex items-center space-x-3 p-3 border rounded-lg transition-colors cursor-pointer hover:bg-muted/50 ${
-                          isSelected ? 'border-primary bg-primary/5' : ''
-                        }`}
-                        onClick={() => handleOptionToggle(option.id, !isSelected)}
-                      >
-                        <Checkbox
-                          checked={isSelected}
-                          onCheckedChange={(checked) => handleOptionToggle(option.id, !!checked)}
-                        />
-                        <div className="flex-1">
-                          <p className="text-sm font-medium">{option.label}</p>
-                          <p className="text-xs text-muted-foreground">{option.name}</p>
-                        </div>
-                        {isSelected && (
-                          <CheckCircle className="w-4 h-4 text-primary" />
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+              <Badge variant="outline">
+                {selectedOptions.length} seleccionadas
+              </Badge>
             </div>
-          </CustomModalBody>
+
+            {isLoadingOptions || isLoadingItems ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="flex items-center space-x-3 p-3 border rounded-lg animate-pulse">
+                    <div className="w-4 h-4 bg-muted rounded"></div>
+                    <div className="flex-1">
+                      <div className="w-24 h-4 bg-muted rounded mb-1"></div>
+                      <div className="w-32 h-3 bg-muted/50 rounded"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : parameterOptions && parameterOptions.length > 0 ? (
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {parameterOptions.map((option) => {
+                  const isSelected = selectedOptions.includes(option.id);
+                  return (
+                    <div
+                      key={option.id}
+                      className={`flex items-center space-x-3 p-3 border rounded-lg transition-colors cursor-pointer hover:bg-muted/50 ${
+                        isSelected ? 'border-primary bg-primary/5' : ''
+                      }`}
+                      onClick={() => handleOptionToggle(option.id, !isSelected)}
+                    >
+                      <Checkbox
+                        checked={isSelected}
+                        onCheckedChange={(checked) => handleOptionToggle(option.id, !!checked)}
+                      />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">{option.label}</p>
+                        <p className="text-xs text-muted-foreground">{option.name}</p>
+                      </div>
+                      {isSelected && (
+                        <CheckCircle className="w-4 h-4 text-primary" />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-sm text-muted-foreground text-center py-4">
+                No hay opciones disponibles para este parámetro.
+              </div>
+            )}
+          </div>
         ),
         footer: (
           <CustomModalFooter>
             <Button type="button" variant="outline" onClick={onClose}>
               Cancelar
             </Button>
-            <Button onClick={handleSave} disabled={isSaving}>
-              {isSaving ? 'Guardando...' : 'Guardar Asignaciones'}
+            <Button onClick={onClose} disabled={toggleMutation.isPending}>
+              {toggleMutation.isPending ? 'Guardando...' : 'Cerrar'}
             </Button>
           </CustomModalFooter>
         ),
