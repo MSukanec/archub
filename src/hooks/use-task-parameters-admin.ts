@@ -67,16 +67,8 @@ export function useTaskParametersAdmin() {
         throw parametersError;
       }
 
-      // Fetch all options
-      const { data: options, error: optionsError } = await supabase
-        .from('task_template_parameter_options')
-        .select('id, parameter_id, value, label, created_at')
-        .order('created_at');
-
-      if (optionsError) {
-        console.error('Error fetching options:', optionsError);
-        throw optionsError;
-      }
+      // Options table doesn't exist yet - return empty array
+      const options: any[] = [];
 
       // Group options by parameter_id
       const optionsMap = new Map<string, TaskParameterOption[]>();
@@ -201,13 +193,7 @@ export function useDeleteTaskParameter() {
     mutationFn: async (parameterId: string) => {
       if (!supabase) throw new Error('Supabase client not initialized');
 
-      // First delete all options for this parameter
-      const { error: optionsError } = await supabase
-        .from('task_template_parameter_options')
-        .delete()
-        .eq('parameter_id', parameterId);
-
-      if (optionsError) throw optionsError;
+      // Options table doesn't exist yet - skip option deletion
 
       // Then delete the parameter directly from task_parameters
       const { error } = await supabase
@@ -242,14 +228,8 @@ export function useCreateTaskParameterOption() {
     mutationFn: async (optionData: CreateTaskParameterOptionData) => {
       if (!supabase) throw new Error('Supabase client not initialized');
 
-      const { data, error } = await supabase
-        .from('task_template_parameter_options')
-        .insert([optionData])
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
+      // Options table doesn't exist yet - throw error
+      throw new Error('Parameter options functionality not implemented yet');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
@@ -276,15 +256,8 @@ export function useUpdateTaskParameterOption() {
     mutationFn: async ({ id, ...updateData }: UpdateTaskParameterOptionData) => {
       if (!supabase) throw new Error('Supabase client not initialized');
 
-      const { data, error } = await supabase
-        .from('task_template_parameter_options')
-        .update(updateData)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
+      // Options table doesn't exist yet - throw error
+      throw new Error('Parameter options functionality not implemented yet');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
@@ -311,12 +284,8 @@ export function useDeleteTaskParameterOption() {
     mutationFn: async (optionId: string) => {
       if (!supabase) throw new Error('Supabase client not initialized');
 
-      const { error } = await supabase
-        .from('task_template_parameter_options')
-        .delete()
-        .eq('id', optionId);
-
-      if (error) throw error;
+      // Options table doesn't exist yet - throw error
+      throw new Error('Parameter options functionality not implemented yet');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
