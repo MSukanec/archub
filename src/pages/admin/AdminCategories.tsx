@@ -11,7 +11,7 @@ import { HierarchicalCategoryTree } from '@/components/ui-custom/misc/Hierarchic
 
 import { useTaskCategoriesAdmin, useAllTaskCategories, useDeleteTaskCategory, TaskCategoryAdmin } from '@/hooks/use-task-categories-admin';
 import { NewAdminTaskCategoryModal } from '@/modals/admin/NewAdminTaskCategoryModal';
-import { NewTaskCategoryTemplateModal } from '@/modals/admin/NewTaskCategoryTemplateModal';
+import TaskTemplateEditorModal from '@/modals/admin/tasks/TaskTemplateEditorModal';
 
 export default function AdminCategories() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -289,13 +289,15 @@ export default function AdminCategories() {
 
       {/* Template Modal */}
       {templateCategory && (
-        <NewTaskCategoryTemplateModal
+        <TaskTemplateEditorModal
           open={isTemplateModalOpen}
           onClose={() => {
             setIsTemplateModalOpen(false);
             setTemplateCategory(null);
           }}
-          category={templateCategory}
+          categoryId={templateCategory.id}
+          categoryCode={templateCategory.code}
+          categoryName={templateCategory.name}
         />
       )}
 
