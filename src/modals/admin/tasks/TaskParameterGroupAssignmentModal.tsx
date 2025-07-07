@@ -1,13 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
 
 import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout';
 import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader';
 import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
 import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter';
 
-import { useTaskParameterValues } from '@/hooks/use-task-parameters-admin';
+import { useTaskParameterValues, useTaskParameterOptionGroupItems, useToggleTaskParameterOptionInGroup } from '@/hooks/use-task-parameters-admin';
 
 interface TaskParameterGroupAssignmentModalProps {
   open: boolean;
@@ -23,8 +24,22 @@ export function TaskParameterGroupAssignmentModal({
   parameterLabel
 }: TaskParameterGroupAssignmentModalProps) {
   const [selectedOptions, setSelectedOptions] = useState<Set<string>>(new Set());
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
   
-  const { data: parameterValues, isLoading } = useTaskParameterValues(group?.parameter_id || '');
+  const { data: parameterValues, isLoading: isLoadingValues } = useTaskParameterValues(group?.parameter_id || '');
+  const { data: groupItems, isLoading: isLoadingItems } = useTaskParameterOptionGroupItems(group?.id || '');
+  const toggleMutation = useToggleTaskParameterOptionInGroup();
+
+  // Initialize selected options when group items load
+  useEffect(() => {
+    if (groupItems && groupItems.length > 0) {
+      const initialSelections = new Set(groupItems.map(item => item.parameter_value_id));
+      setSelectedOptions(initialSelections);
+    } else {
+      setSelectedOptions(new Set());
+    }
+  }, [groupItems]);
   
   const handleOptionToggle = (optionId: string, isChecked: boolean) => {
     const newSelection = new Set(selectedOptions);
@@ -36,6 +51,64 @@ export function TaskParameterGroupAssignmentModal({
     }
     
     setSelectedOptions(newSelection);
+  };
+
+  const handleSave = async () => {
+    if (!group?.id) {
+      toast({
+        title: "Error",
+        description: "No se pudo identificar el grupo",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    
+    try {
+      // Get current selections from database
+      const currentSelections = new Set(groupItems?.map(item => item.parameter_value_id) || []);
+      
+      // Find additions and removals
+      const additions = Array.from(selectedOptions).filter(id => !currentSelections.has(id));
+      const removals = Array.from(currentSelections).filter(id => !selectedOptions.has(id));
+      
+      // Process all changes
+      const promises = [
+        ...additions.map(parameterValueId => 
+          toggleMutation.mutateAsync({
+            groupId: group.id,
+            parameterValueId,
+            action: 'add'
+          })
+        ),
+        ...removals.map(parameterValueId => 
+          toggleMutation.mutateAsync({
+            groupId: group.id,
+            parameterValueId,
+            action: 'remove'
+          })
+        )
+      ];
+      
+      await Promise.all(promises);
+      
+      toast({
+        title: "Opciones actualizadas",
+        description: `Se asignaron ${selectedOptions.size} opciones al grupo "${group.name}"`
+      });
+      
+      onClose();
+    } catch (error) {
+      console.error('Error saving group assignments:', error);
+      toast({
+        title: "Error al guardar",
+        description: "No se pudieron actualizar las asignaciones",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (!group) return null;
@@ -64,7 +137,7 @@ export function TaskParameterGroupAssignmentModal({
               </div>
 
               <div className="space-y-2 max-h-60 overflow-y-auto">
-                {isLoading ? (
+                {isLoadingValues || isLoadingItems ? (
                   <div className="text-center py-8 text-muted-foreground">
                     Cargando opciones...
                   </div>
@@ -96,9 +169,10 @@ export function TaskParameterGroupAssignmentModal({
         footer: (
           <CustomModalFooter
             onCancel={onClose}
-            saveText="Cerrar"
+            saveText="Guardar"
             showSave={true}
-            onSave={onClose}
+            onSave={handleSave}
+            isLoading={isLoading}
           />
         ),
       }}
