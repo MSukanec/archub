@@ -147,7 +147,7 @@ export function TaskParameterEditorModal({
           const { count } = await supabase
             .from('task_parameter_option_group_items')
             .select('*', { count: 'exact', head: true })
-            .eq('option_group_id', group.id);
+            .eq('group_id', group.id);
           
           return {
             ...group,
@@ -192,7 +192,7 @@ export function TaskParameterEditorModal({
       const { data: selectedValues, error: selectedError } = await supabase
         .from('task_parameter_option_group_items')
         .select('*') // Seleccionar todo para ver qué columnas existen realmente
-        .eq('option_group_id', selectedGroupForItems.id);
+        .eq('group_id', selectedGroupForItems.id);
         
       console.log('Datos de task_parameter_option_group_items:', selectedValues);
       console.log('Error en selectedValues:', selectedError);
@@ -389,7 +389,7 @@ export function TaskParameterEditorModal({
       const { data, error } = await supabase
         .from('task_parameter_option_group_items')
         .insert({
-          option_group_id: groupId,
+          group_id: groupId,
           parameter_value_id: valueId,
         })
         .select()
@@ -413,7 +413,7 @@ export function TaskParameterEditorModal({
       const { error } = await supabase
         .from('task_parameter_option_group_items')
         .delete()
-        .match({ option_group_id: groupId, parameter_value_id: valueId });
+        .match({ group_id: groupId, parameter_value_id: valueId });
       
       if (error) throw error;
     },
