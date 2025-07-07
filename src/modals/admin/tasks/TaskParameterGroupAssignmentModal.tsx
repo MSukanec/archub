@@ -47,7 +47,7 @@ export function TaskParameterGroupAssignmentModal({
     <CustomModalLayout
       open={open}
       onClose={onClose}
-      content={{
+      children={{
         header: (
           <CustomModalHeader
             title={`Gestionar Grupo: ${group.name}`}
