@@ -473,7 +473,7 @@ export default function AdminTaskParameters() {
         onClose={() => {
           setIsOptionModalOpen(false);
           setEditingOption(null);
-          setSelectedParameterId('');
+          // No limpiar selectedParameterId para mantener el parámetro seleccionado
         }}
         parameterId={selectedParameterId}
         parameterLabel={selectedParameter?.label || ''}
