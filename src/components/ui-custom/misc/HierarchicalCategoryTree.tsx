@@ -42,11 +42,37 @@ export function HierarchicalCategoryTree({
     // Calculate indentation based on level
     const indentation = currentLevel * 24; // 24px per level for better hierarchy
     
+    // Calculate template completion for parent categories
+    const getTemplateCompletion = (cat: CategoryTreeNode): { completed: number; total: number } => {
+      if (cat.code && cat.code.length === 3) {
+        // Es categoría final
+        return { completed: cat.template ? 1 : 0, total: 1 };
+      }
+      
+      if (cat.children && cat.children.length > 0) {
+        let completed = 0;
+        let total = 0;
+        cat.children.forEach(child => {
+          const childCompletion = getTemplateCompletion(child);
+          completed += childCompletion.completed;
+          total += childCompletion.total;
+        });
+        return { completed, total };
+      }
+      
+      return { completed: 0, total: 0 };
+    };
+    
+    const templateCompletion = getTemplateCompletion(category);
+    const hasIncompleteTemplates = templateCompletion.total > 0 && templateCompletion.completed < templateCompletion.total;
+    
     return (
       <div key={category.id} className="w-full">
         {/* Category Item */}
         <div 
-          className="group flex items-center justify-between bg-card border border-border rounded-md p-2 mb-1 hover:bg-accent/50 transition-colors"
+          className={`group flex items-center justify-between rounded-md p-2 mb-1 hover:bg-accent/50 transition-colors ${
+            hasIncompleteTemplates ? 'bg-orange-50 border border-orange-200 dark:bg-orange-950/20 dark:border-orange-800' : 'bg-card border border-border'
+          }`}
           style={{ marginLeft: `${indentation}px` }}
         >
           {/* Left side: Chevron + Category info */}
@@ -75,9 +101,16 @@ export function HierarchicalCategoryTree({
             <div className="flex items-center space-x-2 flex-1">
               <span className="text-sm font-medium text-foreground">{category.name}</span>
               {category.code && (
-                <Badge variant="outline" className="text-xs px-1.5 py-0.5">
-                  {category.code}
-                </Badge>
+                <div className="flex items-center space-x-1">
+                  <Badge variant="outline" className="text-xs px-1.5 py-0.5">
+                    {category.code}
+                  </Badge>
+                  {templateCompletion.total > 0 && (
+                    <span className="text-xs text-muted-foreground">
+                      ({templateCompletion.completed}/{templateCompletion.total})
+                    </span>
+                  )}
+                </div>
               )}
               {category.template && (
                 <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
@@ -87,18 +120,8 @@ export function HierarchicalCategoryTree({
             </div>
           </div>
           
-          {/* Right side: Action buttons */}
+          {/* Right side: Action buttons - PLANTILLA, EDITAR, BORRAR */}
           <div className="flex items-center space-x-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onEdit(category)}
-              className="h-6 w-6 p-0 hover:bg-accent text-muted-foreground hover:text-foreground"
-              title="Editar"
-            >
-              <Edit className="h-3 w-3" />
-            </Button>
-            
             {/* Solo mostrar botón PLANTILLA en categorías finales (3 letras) */}
             {category.code && category.code.length === 3 && (
               <Button
@@ -111,6 +134,16 @@ export function HierarchicalCategoryTree({
                 <FileText className="h-3 w-3" />
               </Button>
             )}
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onEdit(category)}
+              className="h-6 w-6 p-0 hover:bg-accent text-muted-foreground hover:text-foreground"
+              title="Editar"
+            >
+              <Edit className="h-3 w-3" />
+            </Button>
             
             <Button
               variant="ghost"

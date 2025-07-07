@@ -96,6 +96,7 @@ export function NewTaskCategoryTemplateModal({
           category_id: category.id,
         });
       }
+      form.reset();
       onClose();
     } catch (error) {
       console.error('Error saving task template:', error);

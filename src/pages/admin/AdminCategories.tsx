@@ -33,22 +33,27 @@ export default function AdminCategories() {
   const { data: allCategories = [] } = useAllTaskCategories();
   const deleteCategoryMutation = useDeleteTaskCategory();
 
-  // Calculate statistics
+  // Calculate statistics - solo categorías NIETAS (finales con código de 3 letras)
   const calculateStats = (categories: TaskCategoryAdmin[]) => {
     let totalCategories = 0;
-    let categoriesWithTemplates = 0;
-    let categoriesWithoutTemplates = 0;
-    let totalTemplates = 0;
+    let finalCategories = 0; // Categorías NIETAS (3 letras)
+    let finalCategoriesWithTemplates = 0;
+    let finalCategoriesWithoutTemplates = 0;
 
     const countRecursive = (cats: TaskCategoryAdmin[]) => {
       cats.forEach(cat => {
         totalCategories++;
-        if (cat.template) {
-          categoriesWithTemplates++;
-          totalTemplates++;
-        } else {
-          categoriesWithoutTemplates++;
+        
+        // Solo contar estadísticas de plantillas para categorías NIETAS (3 letras)
+        if (cat.code && cat.code.length === 3) {
+          finalCategories++;
+          if (cat.template) {
+            finalCategoriesWithTemplates++;
+          } else {
+            finalCategoriesWithoutTemplates++;
+          }
         }
+        
         if (cat.children && cat.children.length > 0) {
           countRecursive(cat.children);
         }
@@ -56,7 +61,12 @@ export default function AdminCategories() {
     };
 
     countRecursive(categories);
-    return { totalCategories, categoriesWithTemplates, categoriesWithoutTemplates, totalTemplates };
+    return { 
+      totalCategories, 
+      finalCategories,
+      finalCategoriesWithTemplates, 
+      finalCategoriesWithoutTemplates 
+    };
   };
 
   const stats = calculateStats(categories);
@@ -207,13 +217,26 @@ export default function AdminCategories() {
           
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Categorías Finales</CardTitle>
+              <Settings className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.finalCategories}</div>
+              <p className="text-xs text-muted-foreground">
+                Categorías nietas (código 3 letras)
+              </p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Con Plantillas</CardTitle>
               <CheckCircle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.categoriesWithTemplates}</div>
+              <div className="text-2xl font-bold">{stats.finalCategoriesWithTemplates}</div>
               <p className="text-xs text-muted-foreground">
-                Categorías con plantillas asignadas
+                Categorías finales con plantillas
               </p>
             </CardContent>
           </Card>
@@ -224,22 +247,9 @@ export default function AdminCategories() {
               <XCircle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.categoriesWithoutTemplates}</div>
+              <div className="text-2xl font-bold">{stats.finalCategoriesWithoutTemplates}</div>
               <p className="text-xs text-muted-foreground">
-                Categorías sin plantillas
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Plantillas</CardTitle>
-              <Settings className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalTemplates}</div>
-              <p className="text-xs text-muted-foreground">
-                Total de plantillas creadas
+                Categorías finales sin plantillas
               </p>
             </CardContent>
           </Card>
