@@ -379,6 +379,7 @@ export function TaskParameterEditorModal({
   };
 
   const handleClose = () => {
+    console.log('TaskParameterEditorModal handleClose called');
     form.reset();
     setNewOptionValue('');
     setNewGroupName('');

@@ -124,8 +124,17 @@ export function useCreateTaskParameter() {
       return parameter;
     },
     onSuccess: () => {
+      // Invalidate all related queries
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin-clean'] });
-      queryClient.refetchQueries({ queryKey: ['task-parameters-admin-clean'] });
+      queryClient.removeQueries({ queryKey: ['task-parameters-admin-clean'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
+      queryClient.removeQueries({ queryKey: ['task-parameter-values'] });
+      
+      // Force refetch immediately
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ['task-parameters-admin-clean'] });
+      }, 100);
+      
       toast({
         title: 'Parámetro creado',
         description: 'El parámetro se ha creado correctamente.',
@@ -166,8 +175,17 @@ export function useUpdateTaskParameter() {
       return parameter;
     },
     onSuccess: () => {
+      // Invalidate all related queries
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin-clean'] });
-      queryClient.refetchQueries({ queryKey: ['task-parameters-admin-clean'] });
+      queryClient.removeQueries({ queryKey: ['task-parameters-admin-clean'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
+      queryClient.removeQueries({ queryKey: ['task-parameter-values'] });
+      
+      // Force refetch immediately
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ['task-parameters-admin-clean'] });
+      }, 100);
+      
       toast({
         title: 'Parámetro actualizado',
         description: 'El parámetro se ha actualizado correctamente.',
