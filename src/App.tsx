@@ -17,7 +17,6 @@ import Register from "@/pages/auth/Register";
 import ForgotPassword from "@/pages/auth/ForgotPassword";
 
 // Protected Pages
-import DashboardHome from "@/pages/dashboard/DashboardHome";
 import OrganizationDashboard from "@/pages/organization/OrganizationDashboard";
 import OrganizationProjects from "@/pages/organization/OrganizationProjects";
 import OrganizationContacts from "@/pages/organization/OrganizationContacts";
@@ -75,10 +74,10 @@ function Router() {
           </ProtectedRoute>
         </Route>
 
-        {/* Main Dashboard */}
+        {/* Main Dashboard - redirects to Organization Dashboard */}
         <Route path="/dashboard">
           <ProtectedRoute>
-            <DashboardHome />
+            <OrganizationDashboard />
           </ProtectedRoute>
         </Route>
 

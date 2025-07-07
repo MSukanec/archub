@@ -501,9 +501,9 @@ export function Sidebar() {
           <SidebarButton
             icon={<UserCircle className="w-[18px] h-[18px]" />}
             label="Mi Perfil"
-            isActive={location === '/perfil'}
+            isActive={location === '/profile'}
             isExpanded={isExpanded}
-            onClick={() => navigate('/perfil')}
+            onClick={() => navigate('/profile')}
             avatarUrl={userData?.user?.avatar_url}
           />
         </div>
