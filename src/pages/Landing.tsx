@@ -61,7 +61,7 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen" style={{ 
+    <div className="min-h-screen dark" style={{ 
       backgroundColor: 'var(--layout-bg)', 
       color: 'var(--text-default)' 
     }}>
@@ -107,9 +107,6 @@ export default function Landing() {
                 user ? (
                   // Usuario autenticado
                   <div className="flex items-center space-x-3">
-                    <Github className="h-5 w-5" style={{ color: 'var(--text-muted)' }} />
-                    <span className="text-sm" style={{ color: 'var(--text-muted)' }}>85.2K</span>
-                    
                     <Link href="/dashboard">
                       <Button 
                         size="sm" 
@@ -158,9 +155,6 @@ export default function Landing() {
                 ) : (
                   // Usuario no autenticado
                   <div className="flex items-center space-x-3">
-                    <Github className="h-5 w-5" style={{ color: 'var(--text-muted)' }} />
-                    <span className="text-sm" style={{ color: 'var(--text-muted)' }}>85.2K</span>
-                    
                     <Link href="/login">
                       <Button 
                         variant="ghost" 
@@ -215,16 +209,17 @@ export default function Landing() {
           </div>
           
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-8 leading-tight">
-            Construye en un fin de semana{" "}
+            Gestiona tus proyectos de{" "}
             <span style={{ color: 'var(--accent)' }}>
-              Escala a millones
+              construcción
             </span>
+            {" "}de forma inteligente
           </h1>
           
           <p className="text-xl mb-12 max-w-3xl mx-auto leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-            Archub es la plataforma de desarrollo de construcción. 
-            Comienza tu proyecto con una base de datos Postgres, Autenticación, APIs instantáneas, 
-            Funciones Edge, suscripciones en tiempo real, almacenamiento y embeddings vectoriales.
+            La plataforma completa para administrar proyectos de construcción. 
+            Controla presupuestos, coordina equipos, gestiona documentos y 
+            supervisa el progreso de tus obras en tiempo real.
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
@@ -238,7 +233,7 @@ export default function Landing() {
                   border: 'none'
                 }}
               >
-                Comienza tu proyecto
+                Comenzar Gratis
               </Button>
             </Link>
             <Button 
@@ -251,22 +246,8 @@ export default function Landing() {
                 border: '1px solid var(--layout-border)'
               }}
             >
-              Solicitar una demo
+              Ver Demo
             </Button>
-          </div>
-          
-          {/* Logos de empresas */}
-          <div className="mb-16">
-            <p className="text-sm mb-8" style={{ color: 'var(--text-muted)' }}>
-              Confiado por empresas de rápido crecimiento en todo el mundo
-            </p>
-            <div className="flex items-center justify-center space-x-12 opacity-60">
-              <div className="text-lg font-semibold" style={{ color: 'var(--text-muted)' }}>GitHub</div>
-              <div className="text-lg font-semibold" style={{ color: 'var(--text-muted)' }}>1Password</div>
-              <div className="text-lg font-semibold" style={{ color: 'var(--text-muted)' }}>PIKA</div>
-              <div className="text-lg font-semibold" style={{ color: 'var(--text-muted)' }}>Humata</div>
-              <div className="text-lg font-semibold" style={{ color: 'var(--text-muted)' }}>Vidio</div>
-            </div>
           </div>
 
           {/* Stats */}
