@@ -2,12 +2,16 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { Plus, Edit, Trash2, Eye, Settings, Package } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 
 import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout';
 import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader';
@@ -23,6 +27,7 @@ const taskParameterSchema = z.object({
   type: z.enum(['text', 'number', 'select', 'boolean'], { 
     required_error: 'El tipo es requerido' 
   }),
+  semantic_role: z.string().optional(),
   unit_id: z.string().optional(),
   is_required: z.boolean(),
 });
@@ -54,6 +59,7 @@ export function NewTaskParameterModal({
       name: '',
       label: '',
       type: 'text',
+      semantic_role: '',
       unit_id: undefined,
       is_required: false,
     },
@@ -66,6 +72,7 @@ export function NewTaskParameterModal({
         name: parameter.name,
         label: parameter.label,
         type: parameter.type,
+        semantic_role: parameter.semantic_role || '',
         unit_id: parameter.unit_id || undefined,
         is_required: parameter.is_required,
       });
@@ -74,6 +81,7 @@ export function NewTaskParameterModal({
         name: '',
         label: '',
         type: 'text',
+        semantic_role: '',
         unit_id: undefined,
         is_required: false,
       });
@@ -86,6 +94,7 @@ export function NewTaskParameterModal({
     try {
       const submitData = {
         ...data,
+        semantic_role: data.semantic_role?.trim() || undefined,
         unit_id: data.unit_id?.trim() || undefined,
       };
 
@@ -112,163 +121,193 @@ export function NewTaskParameterModal({
   };
 
   return (
-    <CustomModalLayout open={open} onClose={handleClose}>
-      {{
-        header: (
-          <CustomModalHeader
-            title={parameter ? 'Editar Parámetro' : 'Nuevo Parámetro'}
-            description={parameter ? 'Modifica los datos del parámetro' : 'Crea un nuevo parámetro de plantilla'}
-            onClose={handleClose}
-          />
-        ),
-        body: (
-          <CustomModalBody columns={1}>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id="parameter-form">
-                <FormField
-                  control={form.control}
-                  name="label"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="required-asterisk">Etiqueta</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="Ej: Longitud, Cantidad, Material..."
-                          disabled={isSubmitting}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="required-asterisk">Nombre (clave)</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="Ej: length, quantity, material..."
-                          disabled={isSubmitting}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="type"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="required-asterisk">Tipo</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        disabled={isSubmitting}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar tipo" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="z-[9999]">
-                          <SelectItem value="text">Texto</SelectItem>
-                          <SelectItem value="number">Número</SelectItem>
-                          <SelectItem value="select">Selección</SelectItem>
-                          <SelectItem value="boolean">Booleano</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="unit_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Unidad (opcional)</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value || ''} disabled={isSubmitting}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecciona una unidad" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="z-[9999]">
-                          <SelectItem value="">Sin unidad</SelectItem>
-                          {unitsLoading ? (
-                            <SelectItem value="loading" disabled>Cargando unidades...</SelectItem>
-                          ) : units && units.length > 0 ? (
-                            units.map((unit) => (
-                              <SelectItem key={unit.id} value={unit.id}>
-                                {unit.name}
-                              </SelectItem>
-                            ))
-                          ) : (
-                            <SelectItem value="no-units" disabled>No hay unidades disponibles</SelectItem>
-                          )}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="is_required"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                      <div className="space-y-0.5">
-                        <FormLabel>Campo obligatorio</FormLabel>
-                        <div className="text-xs text-muted-foreground">
-                          ¿Este parámetro es requerido?
+    <>
+      <CustomModalLayout open={open} onClose={handleClose}>
+        {{
+          header: (
+            <CustomModalHeader
+              title={parameter ? 'Editar Parámetro' : 'Nuevo Parámetro'}
+              description={parameter ? 'Modifica los datos del parámetro' : 'Crea un nuevo parámetro de plantilla'}
+              onClose={handleClose}
+            />
+          ),
+          body: (
+            <CustomModalBody columns={1}>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id="parameter-form">
+                  <Accordion type="single" collapsible defaultValue="basic-data" className="w-full">
+                    {/* Acordeón Datos Básicos */}
+                    <AccordionItem value="basic-data">
+                      <AccordionTrigger className="text-sm font-medium px-3 py-2 border rounded-lg mb-2">
+                        <div className="flex items-center gap-2">
+                          <Settings className="w-4 h-4" />
+                          <span>Configuración del Parámetro</span>
                         </div>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={isSubmitting}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </form>
-            </Form>
-          </CustomModalBody>
-        ),
-        footer: (
-          <div className="p-2 border-t border-[var(--card-border)] mt-auto">
-            <div className="flex gap-2 w-full">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={handleClose}
-                className="w-1/4"
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                form="parameter-form"
-                className="w-3/4"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Guardando...' : (parameter ? "Actualizar" : "Guardar")}
-              </Button>
+                      </AccordionTrigger>
+                      <AccordionContent className="px-0 pt-2">
+                        <div className="space-y-4">
+                          <FormField
+                            control={form.control}
+                            name="label"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="required-asterisk">Etiqueta (Visible)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    {...field}
+                                    placeholder="Ej: Ladrillos y Bloques"
+                                    disabled={isSubmitting}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name="name"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="required-asterisk">Nombre (Clave)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    {...field}
+                                    placeholder="Ej: brick-type"
+                                    disabled={isSubmitting}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name="type"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="required-asterisk">Tipo</FormLabel>
+                                <Select
+                                  onValueChange={field.onChange}
+                                  value={field.value}
+                                  disabled={isSubmitting}
+                                >
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Seleccionar tipo" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent className="z-[9999]">
+                                    <SelectItem value="text">Texto</SelectItem>
+                                    <SelectItem value="number">Número</SelectItem>
+                                    <SelectItem value="select">Selección</SelectItem>
+                                    <SelectItem value="boolean">Booleano</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name="semantic_role"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Rol Semántico</FormLabel>
+                                <Select onValueChange={field.onChange} value={field.value || ''} disabled={isSubmitting}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Seleccionar rol" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent className="z-[9999]">
+                                    <SelectItem value="">Sin rol específico</SelectItem>
+                                    <SelectItem value="material">Material</SelectItem>
+                                    <SelectItem value="dimension">Dimensión</SelectItem>
+                                    <SelectItem value="quantity">Cantidad</SelectItem>
+                                    <SelectItem value="quality">Calidad</SelectItem>
+                                    <SelectItem value="specification">Especificación</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name="is_required"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                                <div className="space-y-0.5">
+                                  <FormLabel>Campo Obligatorio</FormLabel>
+                                  <div className="text-xs text-muted-foreground">
+                                    Este parámetro será requerido en las tareas
+                                  </div>
+                                </div>
+                                <FormControl>
+                                  <Switch
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                    disabled={isSubmitting}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    {/* Acordeón Grupos de Opciones */}
+                    {form.watch('type') === 'select' && (
+                      <AccordionItem value="option-groups">
+                        <AccordionTrigger className="text-sm font-medium px-3 py-2 border rounded-lg mb-2">
+                          <div className="flex items-center gap-2">
+                            <Package className="w-4 h-4" />
+                            <span>Grupos de Opciones</span>
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="px-0 pt-2">
+                          <div className="space-y-4">
+                            <div className="text-center py-6 text-muted-foreground text-sm">
+                              Las opciones se gestionan desde la página principal después de crear el parámetro
+                            </div>
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    )}
+                  </Accordion>
+                </form>
+              </Form>
+            </CustomModalBody>
+          ),
+          footer: (
+            <div className="p-2 border-t border-[var(--card-border)] mt-auto">
+              <div className="flex gap-2 w-full">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={handleClose}
+                  className="w-1/4"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  form="parameter-form"
+                  className="w-3/4"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Guardando...' : (parameter ? "Actualizar" : "Guardar")}
+                </Button>
+              </div>
             </div>
-          </div>
-        ),
-      }}
-    </CustomModalLayout>
+          ),
+        }}
+      </CustomModalLayout>
+    </>
   );
 }

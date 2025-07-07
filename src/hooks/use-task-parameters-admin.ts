@@ -9,7 +9,9 @@ export interface TaskParameter {
   name: string;
   label: string;
   type: 'text' | 'number' | 'select' | 'boolean';
-  required: boolean;
+  semantic_role?: string;
+  unit_id?: string;
+  is_required: boolean;
   created_at: string;
   options?: TaskParameterOption[];
 }
@@ -26,7 +28,9 @@ export interface CreateTaskParameterData {
   name: string;
   label: string;
   type: 'text' | 'number' | 'select' | 'boolean';
-  required: boolean;
+  semantic_role?: string;
+  unit_id?: string;
+  is_required: boolean;
 }
 
 export interface UpdateTaskParameterData {
@@ -34,7 +38,9 @@ export interface UpdateTaskParameterData {
   name: string;
   label: string;
   type: 'text' | 'number' | 'select' | 'boolean';
-  required: boolean;
+  semantic_role?: string;
+  unit_id?: string;
+  is_required: boolean;
 }
 
 export interface CreateTaskParameterOptionData {

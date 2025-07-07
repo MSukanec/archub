@@ -15,7 +15,7 @@ import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState';
 import { useTaskParametersAdmin, useDeleteTaskParameter, useDeleteTaskParameterOption, TaskParameter, TaskParameterOption } from '@/hooks/use-task-parameters-admin';
 import { NewTaskParameterModal } from '@/modals/tasks/NewTaskParameterModal';
 import { NewTaskParameterOptionModal } from '@/modals/tasks/NewTaskParameterOptionModal';
-import { TaskParameterEditorModal } from '@/modals/admin/tasks/TaskParameterEditorModal';
+
 
 export default function AdminTaskParameters() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -24,7 +24,7 @@ export default function AdminTaskParameters() {
   
   // Modal states
   const [isParameterModalOpen, setIsParameterModalOpen] = useState(false);
-  const [isEditorModalOpen, setIsEditorModalOpen] = useState(false);
+
   const [isOptionModalOpen, setIsOptionModalOpen] = useState(false);
   const [editingParameter, setEditingParameter] = useState<TaskParameter | null>(null);
   const [editingOption, setEditingOption] = useState<TaskParameterOption | null>(null);
@@ -404,7 +404,7 @@ export default function AdminTaskParameters() {
                     className="h-7 px-2 text-xs"
                     onClick={() => {
                       setEditingParameter(selectedParameter);
-                      setIsEditorModalOpen(true);
+                      setIsParameterModalOpen(true);
                     }}
                   >
                     <Eye className="w-3 h-3 mr-1" />
@@ -454,15 +454,6 @@ export default function AdminTaskParameters() {
         open={isParameterModalOpen}
         onClose={() => {
           setIsParameterModalOpen(false);
-          setEditingParameter(null);
-        }}
-        parameter={editingParameter}
-      />
-
-      <TaskParameterEditorModal
-        open={isEditorModalOpen}
-        onClose={() => {
-          setIsEditorModalOpen(false);
           setEditingParameter(null);
         }}
         parameter={editingParameter}
