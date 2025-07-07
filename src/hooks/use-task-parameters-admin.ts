@@ -87,9 +87,9 @@ export function useTaskParametersAdmin() {
         optionsMap.get(option.parameter_id)!.push({
           id: option.id,
           parameter_id: option.parameter_id,
-          value: option.name, // Using name as value for backward compatibility
-          label: option.label, // Using label for display
-          created_at: option.created_at
+          name: option.name,
+          label: option.label,
+          created_at: option.created_at,
         });
       });
 
