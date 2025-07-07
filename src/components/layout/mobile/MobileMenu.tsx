@@ -299,18 +299,15 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const navigationItems = sidebarContexts[currentSidebarContext as keyof typeof sidebarContexts] || sidebarContexts.organization;
 
   const menuContent = (
-    <div className="fixed inset-0 flex flex-col w-full h-full" style={{ zIndex: 9999 }}>
+    <div className="fixed inset-0" style={{ zIndex: 9999 }}>
       {/* Overlay transparente como en modales - responde al theme */}
       <div 
         className="absolute inset-0 bg-black/50 dark:bg-black/70" 
         onClick={onClose}
       />
       
-      {/* Spacer to leave room at the top */}
-      <div className="h-16 relative z-10" onClick={onClose} />
-      
-      {/* Menu Container - usando variables sidebar */}
-      <div className="flex-1 mx-0 mb-0 rounded-none overflow-hidden relative z-10 flex flex-col" style={{ backgroundColor: 'var(--sidebar-background)' }}>
+      {/* Menu Container - posicionado correctamente */}
+      <div className="absolute top-16 left-0 right-0 bottom-0 flex flex-col" style={{ backgroundColor: 'var(--sidebar-background)' }}>
 
         {/* Navigation Menu - usando variables sidebar */}
         <div className="flex-1 px-0 py-0 overflow-y-auto">
