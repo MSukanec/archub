@@ -1,16 +1,16 @@
-import { useState } from 'react';
-import { Search, Plus, ChevronRight, ChevronDown, Edit, Trash2, Settings, List, Hash } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Settings, Plus, Edit, Trash2, Eye, Building2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 
 import { Layout } from '@/components/layout/desktop/Layout';
+import { CustomTable } from '@/components/ui-custom/misc/CustomTable';
+import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState';
 
 import { useTaskParametersAdmin, useDeleteTaskParameter, useDeleteTaskParameterOption, TaskParameter, TaskParameterOption } from '@/hooks/use-task-parameters-admin';
 import { NewTaskParameterModal } from '@/modals/tasks/NewTaskParameterModal';
@@ -20,7 +20,7 @@ import { TaskParameterEditorModal } from '@/modals/admin/tasks/TaskParameterEdit
 export default function AdminTaskParameters() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('name_asc');
-  const [expandedParameters, setExpandedParameters] = useState<Set<string>>(new Set());
+  const [selectedParameterId, setSelectedParameterId] = useState<string>('');
   
   // Modal states
   const [isParameterModalOpen, setIsParameterModalOpen] = useState(false);
@@ -28,7 +28,6 @@ export default function AdminTaskParameters() {
   const [isOptionModalOpen, setIsOptionModalOpen] = useState(false);
   const [editingParameter, setEditingParameter] = useState<TaskParameter | null>(null);
   const [editingOption, setEditingOption] = useState<TaskParameterOption | null>(null);
-  const [selectedParameterId, setSelectedParameterId] = useState<string>('');
   
   // Delete confirmation states
   const [deleteParameterId, setDeleteParameterId] = useState<string | null>(null);
@@ -37,8 +36,6 @@ export default function AdminTaskParameters() {
   const { data: parameters = [], isLoading } = useTaskParametersAdmin();
   const deleteParameterMutation = useDeleteTaskParameter();
   const deleteOptionMutation = useDeleteTaskParameterOption();
-
-  // Parameters are now created independently without template association
 
   // Calculate statistics
   const calculateStats = (parameters: TaskParameter[]) => {
@@ -73,14 +70,18 @@ export default function AdminTaskParameters() {
       }
     });
 
-  // Toggle parameter expansion (single accordion behavior)
-  const toggleParameter = (parameterId: string) => {
-    const newExpanded = new Set<string>();
-    if (!expandedParameters.has(parameterId)) {
-      newExpanded.add(parameterId);
+  // Auto-select first parameter when parameters load
+  useEffect(() => {
+    if (filteredAndSortedParameters.length > 0 && selectedParameterId === '') {
+      setSelectedParameterId(filteredAndSortedParameters[0].id);
     }
-    setExpandedParameters(newExpanded);
-  };
+  }, [filteredAndSortedParameters.length, selectedParameterId]);
+
+  // Get selected parameter
+  const selectedParameter = filteredAndSortedParameters.find(param => param.id === selectedParameterId);
+  
+  // Get filtered parameter values (options) for the selected parameter
+  const filteredParameterValues = selectedParameter?.options || [];
 
   // Clear all filters
   const clearFilters = () => {
@@ -108,17 +109,7 @@ export default function AdminTaskParameters() {
     }
   };
 
-  // Get parameter type label for display
-  const getParameterTypeLabel = (type: string) => {
-    switch (type) {
-      case 'text': return 'Texto';
-      case 'number': return 'Número';
-      case 'select': return 'Selección';
-      case 'boolean': return 'Booleano';
-      default: return type;
-    }
-  };
-
+  // Helper functions for parameter type styling
   const getParameterTypeVariant = (type: string) => {
     switch (type) {
       case 'text': return 'default';
@@ -129,307 +120,360 @@ export default function AdminTaskParameters() {
     }
   };
 
+  const getParameterTypeLabel = (type: string) => {
+    switch (type) {
+      case 'text': return 'Texto';
+      case 'number': return 'Número';
+      case 'select': return 'Selección';
+      case 'boolean': return 'Booleano';
+      default: return type;
+    }
+  };
+
+  // Custom filters for the header
+  const customFilters = (
+    <div className="flex gap-4">
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Ordenar por</Label>
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger className="w-[140px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="name_asc">Nombre A-Z</SelectItem>
+            <SelectItem value="name_desc">Nombre Z-A</SelectItem>
+            <SelectItem value="type_asc">Tipo A-Z</SelectItem>
+            <SelectItem value="type_desc">Tipo Z-A</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  );
+
+  // Header actions
+  const actions = [
+    <Button 
+      key="new-parameter"
+      className="h-8 px-3 text-sm"
+      onClick={() => setIsParameterModalOpen(true)}
+    >
+      <Plus className="w-4 h-4 mr-2" />
+      Nuevo Parámetro
+    </Button>
+  ];
+
+  const headerProps = {
+    icon: Settings,
+    title: "Parámetros de Tareas",
+    showSearch: true,
+    searchValue: searchTerm,
+    onSearchChange: setSearchTerm,
+    showFilters: true,
+    customFilters,
+    onClearFilters: clearFilters,
+    actions
+  };
+
   if (isLoading) {
     return (
-      <Layout headerProps={{
-        title: "Parámetros de Tarea",
-        showSearch: true,
-        searchValue: searchTerm,
-        onSearchChange: setSearchTerm,
-        actions: [
-          <Button
-            key="new-parameter"
-            onClick={() => {
-              setEditingParameter(null);
-              setIsEditorModalOpen(true);
-            }}
-            size="sm"
-            className="gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Nuevo Parámetro
-          </Button>
-        ]
-      }}>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="text-lg font-semibold">Cargando parámetros...</div>
-          </div>
+      <Layout wide={true} headerProps={headerProps}>
+        <div className="p-8 text-center text-muted-foreground">
+          Cargando parámetros...
         </div>
       </Layout>
     );
   }
 
-  return (
-    <>
-      <Layout wide={true} headerProps={{
-        title: "Parámetros de Tarea",
-        showSearch: true,
-        searchValue: searchTerm,
-        onSearchChange: setSearchTerm,
-        customFilters: (
-          <div className="space-y-3">
-            <div>
-              <Label className="text-xs font-medium">Ordenar por</Label>
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Seleccionar orden" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="name_asc">Nombre (A-Z)</SelectItem>
-                  <SelectItem value="name_desc">Nombre (Z-A)</SelectItem>
-                  <SelectItem value="type_asc">Tipo (A-Z)</SelectItem>
-                  <SelectItem value="type_desc">Tipo (Z-A)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        ),
-        onClearFilters: clearFilters,
-        actions: [
-          <Button
-            key="new-parameter"
-            onClick={() => {
-              setEditingParameter(null);
-              setIsEditorModalOpen(true);
-            }}
-            size="sm"
-            className="gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Nuevo Parámetro
-          </Button>
-        ]
-      }}>
-        <div className="space-y-6">
-          {/* Statistics Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="p-3">
-              <CardContent className="p-0">
-                <div className="flex items-center space-x-2">
-                  <List className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Total Parámetros</p>
-                    <p className="text-lg font-semibold">{stats.totalParameters}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+  // Parameter Values Table Component
+  function ParameterValuesTable({ parameterId }: { parameterId: string }) {
+    const parameter = filteredAndSortedParameters.find(p => p.id === parameterId);
+    const parameterValues = parameter?.options || [];
 
-            <Card className="p-3">
-              <CardContent className="p-0">
-                <div className="flex items-center space-x-2">
-                  <Search className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Tipo Select</p>
-                    <p className="text-lg font-semibold">{stats.selectParameters}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="p-3">
-              <CardContent className="p-0">
-                <div className="flex items-center space-x-2">
-                  <Hash className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Total Opciones</p>
-                    <p className="text-lg font-semibold">{stats.totalOptions}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="p-3">
-              <CardContent className="p-0">
-                <div className="flex items-center space-x-2">
-                  <Settings className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Obligatorios</p>
-                    <p className="text-lg font-semibold">{stats.requiredParameters}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Parameters Accordion */}
-          <div className="space-y-2">
-            {filteredAndSortedParameters.length === 0 ? (
-              <Card className="p-8">
-                <div className="text-center text-muted-foreground">
-                  {searchTerm ? 'No se encontraron parámetros que coincidan con la búsqueda' : 'No hay parámetros creados'}
-                </div>
-              </Card>
-            ) : (
-              filteredAndSortedParameters.map(parameter => {
-                const isExpanded = expandedParameters.has(parameter.id);
-                const optionsCount = parameter.options?.length || 0;
-
-                return (
-                  <Collapsible
-                    key={parameter.id}
-                    open={isExpanded}
-                    onOpenChange={() => toggleParameter(parameter.id)}
-                  >
-                    <Card>
-                      <CollapsibleTrigger asChild>
-                        <div className="p-3 cursor-pointer hover:bg-muted/50 transition-colors">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              {isExpanded ? (
-                                <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                              ) : (
-                                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                              )}
-                              <div className="flex-1">
-                                <div className="flex items-center space-x-2">
-                                  <h3 className="font-medium text-sm">{parameter.label}</h3>
-                                  <Badge variant={getParameterTypeVariant(parameter.type)} className="text-xs">
-                                    {getParameterTypeLabel(parameter.type)}
-                                  </Badge>
-                                </div>
-                                <p className="text-xs text-muted-foreground">
-                                  {parameter.name} • {optionsCount} opciones
-                                </p>
-                              </div>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              {parameter.type === 'select' && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedParameterId(parameter.parameter_id);
-                                    setEditingOption(null);
-                                    setIsOptionModalOpen(true);
-                                  }}
-                                >
-                                  <Plus className="h-3 w-3" />
-                                </Button>
-                              )}
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setEditingParameter(parameter);
-                                  setIsEditorModalOpen(true);
-                                }}
-                              >
-                                <Edit className="h-3 w-3" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setDeleteParameterId(parameter.id);
-                                }}
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </CollapsibleTrigger>
-
-                      <CollapsibleContent>
-                        <div className="px-3 pb-3 border-t border-border">
-                          <div className="pt-3">
-                            <div className="space-y-2">
-                              {parameter.options && parameter.options.length > 0 ? (
-                                parameter.options
-                                  .sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }))
-                                  .map((option) => (
-                                  <Card key={option.id} className="p-3">
-                                    <div className="flex items-center justify-between">
-                                      <div className="flex-1">
-                                        <span className="text-xs font-medium">{option.label}</span>
-                                        {option.name && (
-                                          <span className="text-xs text-muted-foreground ml-2">
-                                            ({option.name})
-                                          </span>
-                                        )}
-                                      </div>
-                                      <div className="flex items-center space-x-1">
-                                        <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          onClick={() => {
-                                            setSelectedParameterId(parameter.parameter_id);
-                                            setEditingOption(option);
-                                            setIsOptionModalOpen(true);
-                                          }}
-                                        >
-                                          <Edit className="h-3 w-3" />
-                                        </Button>
-                                        <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          onClick={() => setDeleteOptionId(option.id)}
-                                        >
-                                          <Trash2 className="h-3 w-3" />
-                                        </Button>
-                                      </div>
-                                    </div>
-                                  </Card>
-                                ))
-                              ) : (
-                                <div className="text-center py-2 text-xs text-muted-foreground">
-                                  No hay opciones definidas
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </CollapsibleContent>
-                    </Card>
-                  </Collapsible>
-                );
-              })
-            )}
-          </div>
+    if (!parameter) {
+      return (
+        <div className="text-center py-8 text-muted-foreground">
+          Selecciona un parámetro para ver sus opciones
         </div>
-      </Layout>
+      );
+    }
 
-      {/* Parameter Editor Modal */}
-      {isEditorModalOpen && (
-        <TaskParameterEditorModal
-          open={isEditorModalOpen}
-          onClose={() => {
-            setIsEditorModalOpen(false);
-            setEditingParameter(null);
-          }}
-          parameter={editingParameter || undefined}
-        />
-      )}
-
-      {/* Option Modal */}
-      {isOptionModalOpen && (
-        <NewTaskParameterOptionModal
-          open={isOptionModalOpen}
-          onClose={() => {
-            setIsOptionModalOpen(false);
-            setEditingOption(null);
-            setSelectedParameterId('');
-          }}
-          option={editingOption || undefined}
-          parameterId={selectedParameterId}
-          parameterLabel={
-            parameters.find(p => p.id === selectedParameterId)?.label || ''
+    if (parameterValues.length === 0) {
+      return (
+        <CustomEmptyState
+          icon={<Settings className="w-8 h-8 text-muted-foreground" />}
+          title="No hay opciones en este parámetro"
+          description="Comienza agregando la primera opción para este parámetro"
+          action={
+            parameter.type === 'select' && (
+              <Button 
+                size="sm" 
+                onClick={() => {
+                  setSelectedParameterId(parameter.parameter_id);
+                  setEditingOption(null);
+                  setIsOptionModalOpen(true);
+                }}
+                className="h-8 px-3 text-xs"
+              >
+                <Plus className="w-3 h-3 mr-1" />
+                Agregar Opción
+              </Button>
+            )
           }
         />
-      )}
+      );
+    }
+
+    // CustomTable columns for parameter values
+    const columns = [
+      {
+        key: 'label',
+        label: 'Etiqueta',
+        render: (value: TaskParameterOption) => (
+          <div className="font-medium text-sm">{value.label}</div>
+        )
+      },
+      {
+        key: 'name',
+        label: 'Nombre',
+        render: (value: TaskParameterOption) => (
+          <div className="text-sm text-muted-foreground">{value.name}</div>
+        )
+      }
+    ];
+
+    const tableActions = [
+      {
+        label: "Editar",
+        onClick: (value: TaskParameterOption) => {
+          setEditingOption(value);
+          setSelectedParameterId(parameter.parameter_id);
+          setIsOptionModalOpen(true);
+        }
+      },
+      {
+        label: "Eliminar",
+        onClick: (value: TaskParameterOption) => setDeleteOptionId(value.id),
+        variant: "destructive" as const
+      }
+    ];
+
+    return (
+      <CustomTable
+        data={parameterValues}
+        columns={columns}
+        actions={tableActions}
+        searchPlaceholder="Buscar opciones..."
+      />
+    );
+  }
+
+  return (
+    <Layout wide={true} headerProps={headerProps}>
+      <div className="space-y-6">
+        {filteredAndSortedParameters.length === 0 ? (
+          <CustomEmptyState
+            icon={<Settings className="w-12 h-12 text-muted-foreground" />}
+            title={searchTerm ? "No se encontraron parámetros" : "No hay parámetros creados"}
+            description={searchTerm 
+              ? 'Prueba ajustando los filtros de búsqueda' 
+              : 'Comienza creando tu primer parámetro para gestionar las opciones de tareas'
+            }
+            action={
+              !searchTerm && (
+                <Button onClick={() => setIsParameterModalOpen(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Crear Primer Parámetro
+                </Button>
+              )
+            }
+          />
+        ) : (
+          <>
+            {/* Summary Cards */}
+            <div className="grid grid-cols-4 gap-4 mb-6">
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Total Parámetros</p>
+                      <p className="text-2xl font-semibold">{stats.totalParameters}</p>
+                    </div>
+                    <Settings className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Parámetros de Selección</p>
+                      <p className="text-2xl font-semibold">{stats.selectParameters}</p>
+                    </div>
+                    <Building2 className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Total Opciones</p>
+                      <p className="text-2xl font-semibold">{stats.totalOptions}</p>
+                    </div>
+                    <Eye className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Obligatorios</p>
+                      <p className="text-2xl font-semibold">{stats.requiredParameters}</p>
+                    </div>
+                    <Plus className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Single Parameter Card with Selector */}
+            <Card className="border rounded-lg overflow-hidden">
+              <div className="flex items-center justify-between w-full p-4 border-b">
+                <div className="flex items-center gap-3 flex-1">
+                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Building2 className="h-4 w-4 text-primary" />
+                  </div>
+                  
+                  {/* Parameter Selector */}
+                  <div className="flex-1">
+                    <Select value={selectedParameterId} onValueChange={setSelectedParameterId}>
+                      <SelectTrigger className="w-full max-w-sm">
+                        <SelectValue placeholder="Selecciona un parámetro" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {filteredAndSortedParameters.map((parameter: TaskParameter) => (
+                          <SelectItem key={parameter.id} value={parameter.id}>
+                            <div>
+                              <div className="font-medium text-sm">{parameter.label}</div>
+                              <div className="text-xs text-muted-foreground">
+                                {parameter.name} • {getParameterTypeLabel(parameter.type)} • {parameter.options?.length || 0} opciones
+                              </div>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  {selectedParameter?.type === 'select' && (
+                    <Button
+                      size="sm"
+                      className="h-7 px-2 text-xs"
+                      onClick={() => {
+                        setSelectedParameterId(selectedParameter.parameter_id);
+                        setEditingOption(null);
+                        setIsOptionModalOpen(true);
+                      }}
+                    >
+                      <Plus className="w-3 h-3 mr-1" />
+                      Agregar Opción
+                    </Button>
+                  )}
+                  
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 px-2 text-xs"
+                    onClick={() => {
+                      setEditingParameter(selectedParameter);
+                      setIsEditorModalOpen(true);
+                    }}
+                  >
+                    <Eye className="w-3 h-3 mr-1" />
+                    Gestionar Grupos
+                  </Button>
+                  
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 px-2 text-xs"
+                    onClick={() => {
+                      setEditingParameter(selectedParameter);
+                      setIsParameterModalOpen(true);
+                    }}
+                  >
+                    <Edit className="w-3 h-3" />
+                  </Button>
+                  
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 px-2 text-xs text-destructive hover:text-destructive"
+                    onClick={() => setDeleteParameterId(selectedParameter?.id || '')}
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Parameter Values Table */}
+              <div className="p-4">
+                {selectedParameter ? (
+                  <ParameterValuesTable parameterId={selectedParameter.id} />
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    Selecciona un parámetro para ver sus opciones
+                  </div>
+                )}
+              </div>
+            </Card>
+          </>
+        )}
+      </div>
+
+      {/* Modals */}
+      <NewTaskParameterModal
+        isOpen={isParameterModalOpen}
+        onClose={() => {
+          setIsParameterModalOpen(false);
+          setEditingParameter(null);
+        }}
+        editingParameter={editingParameter}
+      />
+
+      <TaskParameterEditorModal
+        isOpen={isEditorModalOpen}
+        onClose={() => {
+          setIsEditorModalOpen(false);
+          setEditingParameter(null);
+        }}
+        parameter={editingParameter}
+      />
+
+      <NewTaskParameterOptionModal
+        isOpen={isOptionModalOpen}
+        onClose={() => {
+          setIsOptionModalOpen(false);
+          setEditingOption(null);
+          setSelectedParameterId('');
+        }}
+        parameterId={selectedParameterId}
+        editingOption={editingOption}
+      />
 
       {/* Delete Parameter Confirmation */}
-      <AlertDialog open={!!deleteParameterId} onOpenChange={() => setDeleteParameterId(null)}>
+      <AlertDialog open={deleteParameterId !== null} onOpenChange={() => setDeleteParameterId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar parámetro?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción no se puede deshacer. Se eliminará el parámetro y todas sus opciones permanentemente.
+              Esta acción no se puede deshacer. Se eliminará el parámetro y todas sus opciones asociadas.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -445,12 +489,12 @@ export default function AdminTaskParameters() {
       </AlertDialog>
 
       {/* Delete Option Confirmation */}
-      <AlertDialog open={!!deleteOptionId} onOpenChange={() => setDeleteOptionId(null)}>
+      <AlertDialog open={deleteOptionId !== null} onOpenChange={() => setDeleteOptionId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar opción?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción no se puede deshacer. Se eliminará la opción permanentemente.
+              Esta acción no se puede deshacer. Se eliminará la opción del parámetro.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -464,6 +508,6 @@ export default function AdminTaskParameters() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+    </Layout>
   );
 }
