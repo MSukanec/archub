@@ -49,7 +49,7 @@ export interface UpdateTaskParameterOptionData extends CreateTaskParameterOption
 
 export function useTaskParametersAdmin() {
   return useQuery({
-    queryKey: ['task-parameters-admin-clean-clean'],
+    queryKey: ['task-parameters-admin-clean'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase client not initialized');
 
@@ -64,16 +64,30 @@ export function useTaskParametersAdmin() {
         throw parametersError;
       }
 
-      // Options table doesn't exist yet - return empty array
-      const options: any[] = [];
+      // Fetch options from task_parameter_values table
+      const { data: options, error: optionsError } = await supabase
+        .from('task_parameter_values')
+        .select('id, parameter_id, value, created_at')
+        .order('value');
+
+      if (optionsError) {
+        console.error('Error fetching options:', optionsError);
+        // Don't throw error, just log it and continue with empty options
+      }
 
       // Group options by parameter_id
       const optionsMap = new Map<string, TaskParameterOption[]>();
-      options.forEach(option => {
+      (options || []).forEach((option: any) => {
         if (!optionsMap.has(option.parameter_id)) {
           optionsMap.set(option.parameter_id, []);
         }
-        optionsMap.get(option.parameter_id)!.push(option);
+        optionsMap.get(option.parameter_id)!.push({
+          id: option.id,
+          parameter_id: option.parameter_id,
+          value: option.value,
+          label: option.value, // Using value as label for now
+          created_at: option.created_at
+        });
       });
 
       // Transform the data to include options
