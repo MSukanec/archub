@@ -9,9 +9,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { Package, Plus, Edit3, Trash2 } from 'lucide-react';
+import { Package, Plus, Settings, Edit3, Trash2 } from 'lucide-react';
 import { useTaskParametersAdmin } from '@/hooks/use-task-parameters-admin';
 
 export interface TaskTemplate {
@@ -209,100 +210,99 @@ export default function TaskTemplateEditorModal({
         onClose={onClose}
       />
       
-      <CustomModalBody>
-        <div className="space-y-6">
-          {/* Estado de la Plantilla */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Package className="h-5 w-5 text-muted-foreground" />
-              <h3 className="font-semibold">Estado de la Plantilla</h3>
-            </div>
-            
-            <div className="rounded-lg border bg-card p-4">
-              {templateLoading ? (
-                <div className="text-sm text-muted-foreground">Cargando plantilla...</div>
-              ) : template ? (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Badge variant="default">Plantilla Existente</Badge>
-                    <span className="text-sm">{template.name}</span>
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    Creada: {new Date(template.created_at).toLocaleDateString()}
-                  </div>
+      <CustomModalBody columns={1}>
+        {/* Estado de la Plantilla */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Package className="h-5 w-5" />
+              Estado de la Plantilla
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {templateLoading ? (
+              <div className="text-sm text-muted-foreground">Cargando plantilla...</div>
+            ) : template ? (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Badge variant="default">Plantilla Existente</Badge>
+                  <span className="text-sm">{template.name}</span>
                 </div>
-              ) : (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Badge variant="secondary">Sin Plantilla</Badge>
-                    <span className="text-sm text-muted-foreground">
-                      No existe plantilla para esta categoría
-                    </span>
-                  </div>
-                  <Button 
-                    onClick={handleCreateTemplate}
-                    disabled={createTemplateMutation.isPending}
-                    size="sm"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Crear Plantilla
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {template && (
-            <>
-              <Separator />
-              
-              {/* Agregar Parámetro */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Plus className="h-5 w-5 text-muted-foreground" />
-                  <h3 className="font-semibold">Agregar Parámetro</h3>
-                </div>
-                
-                <div className="rounded-lg border bg-card p-4">
-                  <div className="flex gap-4 items-end">
-                    <div className="flex-1">
-                      <Label>Parámetro</Label>
-                      <Select value={newParameterId} onValueChange={setNewParameterId}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar parámetro" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {availableParameters
-                            .filter(p => !templateParameters.some(tp => tp.parameter_id === p.id))
-                            .map((parameter) => (
-                              <SelectItem key={parameter.id} value={parameter.id}>
-                                {parameter.name} ({parameter.type})
-                              </SelectItem>
-                            ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <Button 
-                      onClick={handleAddParameter}
-                      disabled={!newParameterId || addParameterMutation.isPending}
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Agregar
-                    </Button>
-                  </div>
+                <div className="text-xs text-muted-foreground">
+                  Creada: {new Date(template.created_at).toLocaleDateString()}
                 </div>
               </div>
-
-              <Separator />
-
-              {/* Lista de Parámetros */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Edit3 className="h-5 w-5 text-muted-foreground" />
-                  <h3 className="font-semibold">Parámetros de la Plantilla</h3>
+            ) : (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Badge variant="secondary">Sin Plantilla</Badge>
+                  <span className="text-sm text-muted-foreground">
+                    No existe plantilla para esta categoría
+                  </span>
                 </div>
-                
+                <Button 
+                  onClick={handleCreateTemplate}
+                  disabled={createTemplateMutation.isPending}
+                  size="sm"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Crear Plantilla
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {template && (
+          <>
+            {/* Agregar Parámetro */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Plus className="h-5 w-5" />
+                  Agregar Parámetro
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-4 items-end">
+                  <div className="flex-1">
+                    <Label>Parámetro</Label>
+                    <Select value={newParameterId} onValueChange={setNewParameterId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar parámetro" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableParameters
+                          .filter(p => !templateParameters.some(tp => tp.parameter_id === p.id))
+                          .map((parameter) => (
+                            <SelectItem key={parameter.id} value={parameter.id}>
+                              {parameter.name} ({parameter.type})
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <Button 
+                    onClick={handleAddParameter}
+                    disabled={!newParameterId || addParameterMutation.isPending}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Agregar
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Lista de Parámetros */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Edit3 className="h-5 w-5" />
+                  Parámetros de la Plantilla
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
                 <div className="space-y-3">
                   {templateParameters.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
@@ -333,10 +333,10 @@ export default function TaskTemplateEditorModal({
                     })
                   )}
                 </div>
-              </div>
-            </>
-          )}
-        </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
       </CustomModalBody>
       
       <CustomModalFooter onClose={onClose}>
