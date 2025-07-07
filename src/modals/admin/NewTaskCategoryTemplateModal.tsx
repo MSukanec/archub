@@ -10,7 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { useCreateTaskTemplate, useUpdateTaskTemplate, type TaskTemplate } from "@/hooks/use-task-templates-admin";
 import { useTaskParametersAdmin } from "@/hooks/use-task-parameters-admin";
-import { TemplateNameBuilder, type TaskTemplateParameter } from "@/components/ui-custom/misc/TemplateNameBuilder";
+import { Textarea } from "@/components/ui/textarea";
 import { type TaskCategoryAdmin } from "@/hooks/use-task-categories-admin";
 
 const formSchema = z.object({
@@ -37,20 +37,8 @@ export function NewTaskCategoryTemplateModal({
 }: NewTaskCategoryTemplateModalProps) {
   const isEditing = !!template;
   
-  const { data: parameters = [] } = useTaskParametersAdmin();
   const createTaskTemplate = useCreateTaskTemplate();
   const updateTaskTemplate = useUpdateTaskTemplate();
-
-  // Transform parameters to TaskTemplateParameter format
-  const templateParameters: TaskTemplateParameter[] = parameters.map(param => ({
-    id: param.id,
-    name: param.name,
-    label: param.label || param.name,
-    type: param.type as 'text' | 'number' | 'select' | 'boolean',
-    is_required: param.is_required || false,
-    unit: param.unit || undefined,
-    default_value: param.default_value || undefined
-  }));
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -166,13 +154,15 @@ export function NewTaskCategoryTemplateModal({
                   <FormItem>
                     <FormLabel>Plantilla de Nombre</FormLabel>
                     <FormControl>
-                      <TemplateNameBuilder
-                        value={field.value}
-                        onChange={field.onChange}
-                        parameters={templateParameters}
-                        placeholder="Construye tu plantilla usando parámetros..."
+                      <Textarea 
+                        {...field} 
+                        placeholder="Ej: Ejecución de {{tipo_muro}} de {{material}} en {{ubicacion}}"
+                        className="min-h-[80px]"
                       />
                     </FormControl>
+                    <p className="text-xs text-muted-foreground">
+                      Usa dobles llaves para parámetros: {`{{nombre_parametro}}`}
+                    </p>
                     <FormMessage />
                   </FormItem>
                 )}
