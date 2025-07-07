@@ -100,8 +100,20 @@ export default function TaskTemplateEditorModal({
       const { data, error } = await supabase
         .from('task_template_parameters')
         .select(`
-          *,
-          parameter:task_parameters(*)
+          id,
+          template_id,
+          parameter_id,
+          option_group_id,
+          is_required,
+          position,
+          role,
+          expression_template,
+          parameter:task_parameters(
+            id,
+            name,
+            type,
+            unit
+          )
         `)
         .eq('template_id', template.id)
         .order('position');
@@ -387,6 +399,13 @@ export default function TaskTemplateEditorModal({
     // Sort parameters by position
     const sortedParams = [...templateParameters].sort((a, b) => a.position - b.position);
     
+    // Debug: log parameters to see their structure
+    console.log('Template parameters for preview:', sortedParams.map(p => ({
+      name: p.parameter?.name,
+      expression_template: p.expression_template,
+      position: p.position
+    })));
+    
     // Get sample values for different parameter types
     const getSampleValue = (param: TaskTemplateParameter) => {
       if (!param.parameter) return "Ejemplo";
@@ -414,9 +433,9 @@ export default function TaskTemplateEditorModal({
     const missingTemplates: string[] = [];
 
     sortedParams.forEach(param => {
-      if (param.expression_template && param.expression_template.trim()) {
+      if (param.expression_template && param.expression_template.trim() && param.expression_template !== 'NULL') {
         const sampleValue = getSampleValue(param);
-        const fragment = param.expression_template.replace('{value}', sampleValue);
+        const fragment = param.expression_template.replace(/{value}/g, sampleValue);
         sentence += ` ${fragment}`;
       } else {
         missingTemplates.push(param.parameter?.name || 'parámetro');
