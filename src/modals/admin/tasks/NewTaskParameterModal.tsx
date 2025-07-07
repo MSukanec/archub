@@ -29,9 +29,8 @@ const taskParameterSchema = z.object({
   type: z.enum(['text', 'number', 'select', 'boolean'], { 
     required_error: 'El tipo es requerido' 
   }),
-  semantic_role: z.string().optional(),
+  role: z.string().optional(),
   expression_template: z.string().optional(),
-  unit_id: z.string().optional(),
   is_required: z.boolean().optional(),
 });
 
@@ -86,9 +85,8 @@ export function NewTaskParameterModal({
         name: parameter.name,
         label: parameter.label,
         type: parameter.type,
-        semantic_role: parameter.semantic_role || '',
+        role: parameter.role || '',
         expression_template: parameter.expression_template || '',
-        unit_id: parameter.unit_id || undefined,
         is_required: parameter.is_required,
       });
     } else if (!parameter && open) {
@@ -96,9 +94,8 @@ export function NewTaskParameterModal({
         name: '',
         label: '',
         type: 'text',
-        semantic_role: '',
+        role: '',
         expression_template: '',
-        unit_id: undefined,
         is_required: false,
       });
     }
@@ -110,9 +107,8 @@ export function NewTaskParameterModal({
     try {
       const submitData = {
         ...data,
-        semantic_role: data.semantic_role?.trim() || undefined,
+        role: data.role?.trim() || undefined,
         expression_template: data.expression_template?.trim() || undefined,
-        unit_id: data.unit_id?.trim() || undefined,
       };
 
       if (parameter) {
@@ -232,7 +228,7 @@ export function NewTaskParameterModal({
 
                           <FormField
                             control={form.control}
-                            name="semantic_role"
+                            name="role"
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Rol Semántico</FormLabel>
