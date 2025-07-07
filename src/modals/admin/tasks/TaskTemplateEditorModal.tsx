@@ -77,7 +77,7 @@ export default function TaskTemplateEditorModal({
     queryFn: async () => {
       const { data, error } = await supabase
         .from('task_templates')
-        .select('*')
+        .select('id, code, name, name_template, category_id, created_at')
         .eq('code', categoryCode)
         .single();
       

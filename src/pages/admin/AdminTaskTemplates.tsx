@@ -31,15 +31,15 @@ export default function AdminTaskTemplates() {
   const filteredAndSortedTemplates = templates
     .filter(template => 
       template.name.toLowerCase().includes(searchValue.toLowerCase()) ||
-      template.code_prefix.toLowerCase().includes(searchValue.toLowerCase()) ||
+      template.code.toLowerCase().includes(searchValue.toLowerCase()) ||
       template.task_categories?.name.toLowerCase().includes(searchValue.toLowerCase())
     )
     .sort((a, b) => {
       switch (sortBy) {
         case 'name':
           return a.name.localeCompare(b.name)
-        case 'code_prefix':
-          return a.code_prefix.localeCompare(b.code_prefix)
+        case 'code':
+          return a.code.localeCompare(b.code)
         case 'category':
           return (a.task_categories?.name || '').localeCompare(b.task_categories?.name || '')
         case 'created_at':
@@ -110,12 +110,12 @@ export default function AdminTaskTemplates() {
       )
     },
     {
-      key: 'code_prefix',
-      label: 'Prefijo',
+      key: 'code',
+      label: 'Código',
       width: '10%',
       render: (template: TaskTemplate) => (
         <Badge variant="outline" className="font-mono">
-          {template.code_prefix}
+          {template.code}
         </Badge>
       )
     },
@@ -201,7 +201,7 @@ export default function AdminTaskTemplates() {
           <SelectContent>
             <SelectItem value="created_at">Fecha de creación</SelectItem>
             <SelectItem value="name">Nombre</SelectItem>
-            <SelectItem value="code_prefix">Prefijo</SelectItem>
+            <SelectItem value="code">Código</SelectItem>
             <SelectItem value="category">Categoría</SelectItem>
           </SelectContent>
         </Select>

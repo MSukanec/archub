@@ -4,7 +4,7 @@ import { supabase } from "@/lib/supabase";
 export interface TaskTemplate {
   id: string;
   name: string;
-  code_prefix: string;
+  code: string;
   name_template: string;
   category_id: string;
   action_id?: string;

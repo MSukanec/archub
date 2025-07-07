@@ -15,7 +15,7 @@ import { type TaskCategoryAdmin, useTaskCategoriesAdmin } from "@/hooks/use-task
 
 const formSchema = z.object({
   name: z.string().min(1, "El nombre es requerido"),
-  code_prefix: z.string().min(1, "El prefijo de código es requerido"),
+  code: z.string().min(1, "El código es requerido"),
   name_template: z.string().min(1, "La plantilla de nombre es requerida"),
   action_id: z.string().optional().nullable(),
 });
@@ -62,7 +62,7 @@ export function NewTaskTemplateModal({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      code_prefix: "",
+      code: "",
       name_template: "",
       action_id: null,
     },
@@ -79,14 +79,14 @@ export function NewTaskTemplateModal({
       if (template) {
         form.reset({
           name: template.name || "",
-          code_prefix: template.code_prefix || "",
+          code: template.code || "",
           name_template: template.name_template || "",
           action_id: template.action_id || null,
         });
       } else {
         form.reset({
           name: templateCategory?.name || "",
-          code_prefix: templateCategory?.code || "",
+          code: templateCategory?.code || "",
           name_template: "",
           action_id: null,
         });
@@ -155,10 +155,10 @@ export function NewTaskTemplateModal({
 
                 <FormField
                   control={form.control}
-                  name="code_prefix"
+                  name="code"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="required-asterisk">Prefijo de Código</FormLabel>
+                      <FormLabel className="required-asterisk">Código</FormLabel>
                       <FormControl>
                         <Input 
                           placeholder="Ej: EXC, COL, INS" 
