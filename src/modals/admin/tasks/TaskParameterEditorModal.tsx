@@ -206,10 +206,14 @@ export function TaskParameterEditorModal({
       console.log('Valores del parámetro:', allValues);
       console.log('IDs seleccionados:', Array.from(selectedValueIds));
       console.log('Resultado final con selección:', result);
+      console.log('Devolviendo array con length:', result.length);
+      console.log('Query enabled?', !!parameter?.id && !!selectedGroupForItems?.id && showGroupItemsModal);
+      console.log('showGroupItemsModal:', showGroupItemsModal);
       
       return result;
     },
     enabled: !!parameter?.id && !!selectedGroupForItems?.id && showGroupItemsModal,
+    refetchOnWindowFocus: false,
   });
 
   // Mutations for parameter values
@@ -991,6 +995,8 @@ export function TaskParameterEditorModal({
               </CardDescription>
             </CardHeader>
             <CardContent className="overflow-y-auto max-h-[50vh]">
+              {console.log('groupItemsWithSelection en render:', groupItemsWithSelection)}
+              {console.log('groupItemsLoading:', groupItemsLoading)}
               {groupItemsLoading ? (
                 <div className="text-sm text-muted-foreground">Cargando opciones...</div>
               ) : groupItemsWithSelection.length === 0 ? (
