@@ -105,63 +105,72 @@ export function NewTaskParameterOptionGroupModal({
   };
 
   return (
-    <CustomModalLayout open={open} onOpenChange={onClose}>
-      <CustomModalHeader 
-        title={group ? 'Editar Grupo de Opciones' : 'Nuevo Grupo de Opciones'}
-        subtitle={`Parámetro: ${parameterLabel}`}
-      />
-      
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <CustomModalBody columns={1}>
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nombre (código) *</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="ej: acabados_principales" 
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+    <CustomModalLayout
+      open={open}
+      onOpenChange={onClose}
+      content={{
+        header: (
+          <CustomModalHeader 
+            title={group ? 'Editar Grupo de Opciones' : 'Nuevo Grupo de Opciones'}
+            subtitle={`Parámetro: ${parameterLabel}`}
+          />
+        ),
+        body: (
+          <Form {...form}>
+            <form id="group-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <CustomModalBody columns={1}>
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nombre (código) *</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="ej: acabados_principales" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <FormField
-              control={form.control}
-              name="label"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Etiqueta (visible) *</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="ej: Acabados Principales" 
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CustomModalBody>
-
+                <FormField
+                  control={form.control}
+                  name="label"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Etiqueta (visible) *</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="ej: Acabados Principales" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CustomModalBody>
+            </form>
+          </Form>
+        ),
+        footer: (
           <CustomModalFooter>
             <Button type="button" variant="outline" onClick={onClose}>
               Cancelar
             </Button>
             <Button 
-              type="submit" 
+              type="submit"
+              form="group-form"
               disabled={isSubmitting}
             >
               {isSubmitting ? 'Guardando...' : (group ? 'Actualizar' : 'Crear')} Grupo
             </Button>
           </CustomModalFooter>
-        </form>
-      </Form>
-    </CustomModalLayout>
+        ),
+      }}
+    />
   );
 }

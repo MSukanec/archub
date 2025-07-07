@@ -20,6 +20,7 @@ import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFoote
 
 import { useCreateTaskParameter, useUpdateTaskParameter, TaskParameter } from '@/hooks/use-task-parameters-admin';
 import { NewTaskParameterOptionGroupModal } from './NewTaskParameterOptionGroupModal';
+import { TaskParameterGroupAssignmentModal } from './TaskParameterGroupAssignmentModal';
 import { useUnits } from '@/hooks/use-units';
 
 const taskParameterSchema = z.object({
@@ -50,6 +51,8 @@ export function NewTaskParameterModal({
 }: NewTaskParameterModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
+  const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState<any>(null);
   
   const createMutation = useCreateTaskParameter();
   const updateMutation = useUpdateTaskParameter();
@@ -293,9 +296,39 @@ export function NewTaskParameterModal({
                             </div>
                             
                             <div className="space-y-2">
-                              <div className="text-sm text-muted-foreground text-center py-4">
-                                No hay grupos de opciones configurados para este parámetro.
-                              </div>
+                              {/* Mock grupos existentes */}
+                              {parameter && [
+                                { id: '1', name: 'acabados_principales', label: 'Acabados Principales', parameter_id: parameter.id },
+                                { id: '2', name: 'materiales_estructurales', label: 'Materiales Estructurales', parameter_id: parameter.id }
+                              ].map((group) => (
+                                <div key={group.id} className="flex items-center justify-between p-3 border rounded-lg">
+                                  <div>
+                                    <p className="text-sm font-medium">{group.label}</p>
+                                    <p className="text-xs text-muted-foreground">{group.name}</p>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => {
+                                        setSelectedGroup(group);
+                                        setIsAssignmentModalOpen(true);
+                                      }}
+                                      className="h-7 px-2"
+                                    >
+                                      <Eye className="w-3 h-3 mr-1" />
+                                      Gestionar
+                                    </Button>
+                                  </div>
+                                </div>
+                              ))}
+                              
+                              {!parameter && (
+                                <div className="text-sm text-muted-foreground text-center py-4">
+                                  Los grupos se mostrarán después de crear el parámetro.
+                                </div>
+                              )}
                             </div>
                           </div>
                         </AccordionContent>
@@ -342,6 +375,19 @@ export function NewTaskParameterModal({
           setIsGroupModalOpen(false);
         }}
       />
+
+      {/* Modal de asignación de opciones a grupos */}
+      {selectedGroup && (
+        <TaskParameterGroupAssignmentModal
+          open={isAssignmentModalOpen}
+          onClose={() => {
+            setIsAssignmentModalOpen(false);
+            setSelectedGroup(null);
+          }}
+          group={selectedGroup}
+          parameterLabel={parameter?.label || form.watch('label') || 'Nuevo parámetro'}
+        />
+      )}
     </>
   );
 }
