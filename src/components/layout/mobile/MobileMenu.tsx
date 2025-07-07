@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import {
-  X,
   Building,
   FolderOpen,
-  UserCircle,
   CheckSquare,
   Shield,
   Home,
@@ -21,7 +19,6 @@ import {
   ChevronRight,
   ArrowRight,
   ArrowLeft,
-  History,
   Contact,
   Database,
   Layout,
@@ -302,14 +299,20 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const navigationItems = sidebarContexts[currentSidebarContext as keyof typeof sidebarContexts] || sidebarContexts.organization;
 
   const menuContent = (
-    <div className="fixed inset-0 flex flex-col w-full h-full" style={{ backgroundColor: 'var(--menues-bg)', zIndex: 9999 }}>
-      {/* Spacer to leave room at the top */}
-      <div className="h-16" onClick={onClose} />
+    <div className="fixed inset-0 flex flex-col w-full h-full" style={{ zIndex: 9999 }}>
+      {/* Overlay transparente como en modales - responde al theme */}
+      <div 
+        className="absolute inset-0 bg-black/50 dark:bg-black/70" 
+        onClick={onClose}
+      />
       
-      {/* Menu Container - exactly like Supabase */}
-      <div className="flex-1 mx-0 mb-0 rounded-none overflow-hidden" style={{ backgroundColor: 'var(--menues-bg)' }}>
+      {/* Spacer to leave room at the top */}
+      <div className="h-16 relative z-10" onClick={onClose} />
+      
+      {/* Menu Container - usando variables sidebar */}
+      <div className="flex-1 mx-0 mb-0 rounded-none overflow-hidden relative z-10 flex flex-col" style={{ backgroundColor: 'var(--sidebar-background)' }}>
 
-        {/* Navigation Menu - exactly like Supabase */}
+        {/* Navigation Menu - usando variables sidebar */}
         <div className="flex-1 px-0 py-0 overflow-y-auto">
         <nav className={cn(
           "space-y-1 transition-all duration-300 ease-in-out",
@@ -329,12 +332,11 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                     <CustomRestricted reason="coming_soon">
                       <button
                         onClick={item.isAccordion ? item.onToggle : (item.onClick || (() => handleNavigation(item.href)))}
-                        className={cn(
-                          "flex w-full items-center gap-3 px-4 py-3 text-sm font-medium border border-transparent transition-all duration-200",
-                          location === item.href 
-                            ? "bg-gray-700 border-gray-600 text-white" 
-                            : "hover:bg-gray-800 hover:border-gray-700 text-gray-300 hover:text-white"
-                        )}
+                        className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium transition-all duration-200 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                        style={{
+                          color: location === item.href ? 'var(--sidebar-accent-foreground)' : 'var(--sidebar-foreground)',
+                          backgroundColor: location === item.href ? 'var(--sidebar-accent)' : 'transparent'
+                        }}
                       >
                         <item.icon className="h-4 w-4" />
                         {item.label}
@@ -352,12 +354,11 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                   ) : (
                     <button
                       onClick={item.isAccordion ? item.onToggle : (item.onClick || (() => handleNavigation(item.href)))}
-                      className={cn(
-                        "flex w-full items-center gap-3 px-4 py-3 text-sm font-medium border border-transparent transition-all duration-200",
-                        location === item.href 
-                          ? "bg-gray-700 border-gray-600 text-white" 
-                          : "hover:bg-gray-800 hover:border-gray-700 text-gray-300 hover:text-white"
-                      )}
+                      className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium transition-all duration-200 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                      style={{
+                        color: location === item.href ? 'var(--sidebar-accent-foreground)' : 'var(--sidebar-foreground)',
+                        backgroundColor: location === item.href ? 'var(--sidebar-accent)' : 'transparent'
+                      }}
                     >
                       <item.icon className="h-4 w-4" />
                       {item.label}
@@ -380,12 +381,12 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                         <button
                           key={subIndex}
                           onClick={() => handleNavigation(subItem.href)}
-                          className={cn(
-                            "flex w-full items-center gap-3 px-8 py-2 text-sm font-medium border border-transparent transition-all duration-200",
-                            location === subItem.href 
-                              ? "bg-gray-700 border-gray-600 text-white" 
-                              : "hover:bg-gray-800 hover:border-gray-700 text-gray-400 hover:text-white"
-                          )}
+                          className="flex w-full items-center gap-3 px-8 py-2 text-sm font-medium transition-all duration-200 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                          style={{
+                            color: location === subItem.href ? 'var(--sidebar-accent-foreground)' : 'var(--sidebar-foreground)',
+                            backgroundColor: location === subItem.href ? 'var(--sidebar-accent)' : 'transparent',
+                            opacity: 0.8
+                          }}
                         >
                           <subItem.icon className="h-4 w-4" />
                           {subItem.label}
@@ -398,6 +399,96 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
             </div>
           ))}
         </nav>
+        </div>
+
+        {/* Footer con selectores - usando variables sidebar */}
+        <div className="p-4 border-t space-y-3" style={{ borderColor: 'var(--sidebar-border)' }}>
+          {/* Organization Selector */}
+          <div className="relative">
+            <button
+              onClick={() => setExpandedOrgSelector(!expandedOrgSelector)}
+              className="flex w-full items-center justify-between px-3 py-2 text-sm rounded-lg border transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              style={{
+                color: 'var(--sidebar-foreground)',
+                backgroundColor: 'transparent',
+                borderColor: 'var(--sidebar-border)'
+              }}
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <Building className="h-4 w-4 flex-shrink-0" />
+                <span className="truncate font-medium">
+                  {currentOrganization?.name || 'Seleccionar Organización'}
+                </span>
+              </div>
+              <ChevronDown className={cn("h-4 w-4 transition-transform", expandedOrgSelector && "rotate-180")} />
+            </button>
+
+            {expandedOrgSelector && (
+              <div className="absolute bottom-full left-0 right-0 mb-2 max-h-32 overflow-y-auto scrollbar-hide space-y-1 rounded-lg p-2 shadow-lg" style={{ backgroundColor: 'var(--sidebar-background)', border: `1px solid var(--sidebar-border)`, zIndex: 10000 }}>
+                {sortedOrganizations.map((org: any) => (
+                  <button
+                    key={org.id}
+                    onClick={() => handleOrganizationSelect(org.id)}
+                    className="flex w-full items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                    style={{
+                      color: 'var(--sidebar-foreground)',
+                      backgroundColor: org.id === currentOrganization?.id ? 'var(--sidebar-accent)' : 'transparent'
+                    }}
+                  >
+                    <span className="truncate">{org.name}</span>
+                    {org.id === currentOrganization?.id && (
+                      <div className="h-2 w-2 rounded-full bg-green-500 flex-shrink-0" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Project Selector */}
+          <div className="relative">
+            <button
+              onClick={() => setExpandedProjectSelector(!expandedProjectSelector)}
+              className="flex w-full items-center justify-between px-3 py-2 text-sm rounded-lg border transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              style={{
+                color: 'var(--sidebar-foreground)',
+                backgroundColor: 'transparent',
+                borderColor: 'var(--sidebar-border)'
+              }}
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <FolderOpen className="h-4 w-4 flex-shrink-0" />
+                <span className="truncate font-medium">
+                  {effectiveCurrentProject 
+                    ? projectsData?.find((p: any) => p.id === effectiveCurrentProject)?.name || 'Sin proyecto'
+                    : 'Seleccionar Proyecto'
+                  }
+                </span>
+              </div>
+              <ChevronDown className={cn("h-4 w-4 transition-transform", expandedProjectSelector && "rotate-180")} />
+            </button>
+
+            {expandedProjectSelector && (
+              <div className="absolute bottom-full left-0 right-0 mb-2 max-h-32 overflow-y-auto scrollbar-hide space-y-1 rounded-lg p-2 shadow-lg" style={{ backgroundColor: 'var(--sidebar-background)', border: `1px solid var(--sidebar-border)`, zIndex: 10000 }}>
+                {projectsData?.map((project: any) => (
+                  <button
+                    key={project.id}
+                    onClick={() => handleProjectSelect(project.id)}
+                    className="flex w-full items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                    style={{
+                      color: 'var(--sidebar-foreground)',
+                      backgroundColor: project.id === effectiveCurrentProject ? 'var(--sidebar-accent)' : 'transparent'
+                    }}
+                  >
+                    <span className="truncate">{project.name}</span>
+                    {project.id === effectiveCurrentProject && (
+                      <div className="h-2 w-2 rounded-full bg-green-500 flex-shrink-0" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
