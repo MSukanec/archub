@@ -119,6 +119,13 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 7, 2025. Complete mobile navigation fixes and financial movements sorting correction - COMPLETED
+  • Fixed mobile menu layout to use 80vh height instead of 100vh to accommodate 20% top spacing with backdrop opacity
+  • Added automatic scroll-to-top functionality when navigating on mobile - pages now always start from top instead of scrolled position
+  • Corrected financial movements table sorting to properly use CustomTable defaultSort instead of overriding with manual sorting
+  • Removed manual sorting logic that was using created_at instead of movement_date field for chronological ordering
+  • Fixed default sort order to show newest movements first (desc) instead of oldest first, matching user expectations
+  • Enhanced mobile navigation UX with smooth scroll behavior and proper timing for context changes
 - July 7, 2025. Modern Landing page redesign with dark theme and authentication state detection - COMPLETED
   • Completely rebuilt Landing.tsx using dark theme with CSS variables from index.css (--layout-bg, --text-default, --accent, etc.)
   • Implemented authentication state detection to show user avatar and Dashboard button when logged in

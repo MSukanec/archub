@@ -312,7 +312,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
   const menuContent = (
     <div className="fixed inset-0" style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', zIndex: 9999 }}>
-      <div className="flex flex-col w-full h-full mt-[20vh]" style={{ backgroundColor: 'var(--menues-bg)' }}>
+      <div className="flex flex-col w-full mt-[20vh]" style={{ backgroundColor: 'var(--menues-bg)', height: '80vh' }}>
       {/* Header */}
       <div className="h-14 flex items-center justify-between px-4 border-b" style={{ borderColor: 'var(--menues-border)' }}>
         <h1 className="text-lg font-semibold" style={{ color: 'var(--menues-fg)' }}>

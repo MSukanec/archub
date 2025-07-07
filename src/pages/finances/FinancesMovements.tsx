@@ -174,7 +174,6 @@ export default function Movements() {
           label: 'Limpiar',
           onClick: () => {
             setSearchValue("");
-            setSortBy("date");
             setFilterByType("all");
             setFilterByCategory("all");
             setShowConversions(false);
@@ -193,7 +192,6 @@ export default function Movements() {
   }, [isMobile]); // Removed unstable dependencies
 
   // Filter states
-  const [sortBy, setSortBy] = useState("date");
   const [filterByType, setFilterByType] = useState("all");
   const [filterByCategory, setFilterByCategory] = useState("all");
   const [showConversions, setShowConversions] = useState(false);
@@ -509,41 +507,8 @@ export default function Movements() {
       );
     });
 
-  // Group conversions and sort
-  const processedMovements = groupConversions(filteredMovements)
-    .sort((a, b) => {
-      let comparison = 0;
-
-      switch (sortBy) {
-        case "date":
-          comparison =
-            new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-          break;
-        case "amount":
-          if ('is_conversion_group' in a && 'is_conversion_group' in b) {
-            comparison = a.from_amount - b.from_amount;
-          } else if ('is_conversion_group' in a) {
-            comparison = a.from_amount - (b as Movement).amount;
-          } else if ('is_conversion_group' in b) {
-            comparison = (a as Movement).amount - b.from_amount;
-          } else {
-            comparison = (a as Movement).amount - (b as Movement).amount;
-          }
-          break;
-        case "type":
-          const aType = 'is_conversion_group' in a ? 'Conversión' : (a as Movement).movement_data?.type?.name || '';
-          const bType = 'is_conversion_group' in b ? 'Conversión' : (b as Movement).movement_data?.type?.name || '';
-          comparison = aType.localeCompare(bType);
-          break;
-        case "category":
-          const aCategory = 'is_conversion_group' in a ? 'Conversión' : (a as Movement).movement_data?.category?.name || '';
-          const bCategory = 'is_conversion_group' in b ? 'Conversión' : (b as Movement).movement_data?.category?.name || '';
-          comparison = aCategory.localeCompare(bCategory);
-          break;
-      }
-
-      return comparison;
-    });
+  // Group conversions - let CustomTable handle sorting
+  const processedMovements = groupConversions(filteredMovements);
 
   // Custom filters component
   const customFilters = (
