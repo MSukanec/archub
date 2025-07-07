@@ -35,16 +35,7 @@ const taskParameterSchema = z.object({
     required_error: 'El tipo es requerido' 
   }),
   unit_id: z.string().optional(),
-  is_required: z.boolean(),
-  role: z.enum(['material', 'ubicacion', 'espesor', 'terminacion', 'uso', 'otro'], {
-    required_error: 'El rol semántico es requerido'
-  }),
-  expression_template: z.string().min(1, 'La plantilla de expresión es requerida').refine(
-    (value) => value.includes('{value}'),
-    {
-      message: 'La plantilla debe contener {value}',
-    }
-  ),
+  required: z.boolean(),
 });
 
 type TaskParameterFormData = z.infer<typeof taskParameterSchema>;
@@ -75,7 +66,7 @@ interface TaskParameterOptionGroupItem {
 interface TaskParameterEditorModalProps {
   open: boolean;
   onClose: () => void;
-  parameter?: TaskParameter & { role?: string; expression_template?: string };
+  parameter?: TaskParameter;
 }
 
 export function TaskParameterEditorModal({ 
@@ -84,7 +75,7 @@ export function TaskParameterEditorModal({
   parameter
 }: TaskParameterEditorModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showPreview, setShowPreview] = useState(true);
+
   const [newOptionValue, setNewOptionValue] = useState('');
   const [newGroupName, setNewGroupName] = useState('');
   const [showNewGroupModal, setShowNewGroupModal] = useState(false);
@@ -111,14 +102,10 @@ export function TaskParameterEditorModal({
       label: '',
       type: 'text',
       unit_id: undefined,
-      is_required: false,
-      role: 'material',
-      expression_template: 'de {value}',
+      required: false,
     },
   });
 
-  // Watch expression template for preview
-  const expressionTemplate = form.watch('expression_template');
   const parameterType = form.watch('type');
 
   // Load parameter values
@@ -339,9 +326,7 @@ export function TaskParameterEditorModal({
         label: parameter.label,
         type: parameter.type,
         unit_id: parameter.unit_id || undefined,
-        is_required: parameter.is_required,
-        role: (parameter.role as any) || 'material',
-        expression_template: parameter.expression_template || 'de {value}',
+        required: parameter.required,
       });
     } else if (!parameter && open) {
       form.reset({
@@ -349,9 +334,7 @@ export function TaskParameterEditorModal({
         label: '',
         type: 'text',
         unit_id: undefined,
-        is_required: false,
-        role: 'material',
-        expression_template: 'de {value}',
+        required: false,
       });
     }
   }, [parameter, open, form]);
@@ -409,11 +392,7 @@ export function TaskParameterEditorModal({
     onClose();
   };
 
-  const generatePreview = () => {
-    if (!expressionTemplate) return '';
-    const example = 'Ladrillo hueco';
-    return expressionTemplate.replace('{value}', example);
-  };
+
 
   const handleAddOption = () => {
     if (!newOptionValue.trim()) return;
@@ -613,7 +592,7 @@ export function TaskParameterEditorModal({
 
                       <FormField
                         control={form.control}
-                        name="is_required"
+                        name="required"
                         render={({ field }) => (
                           <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
                             <div className="space-y-0.5">
@@ -633,25 +612,7 @@ export function TaskParameterEditorModal({
                       />
                     </div>
 
-                    <FormField
-                      control={form.control}
-                      name="expression_template"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Plantilla de Expresión *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Ej: de {value}" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                          {showPreview && expressionTemplate && (
-                            <div className="mt-2 p-2 bg-muted rounded-md">
-                              <span className="text-sm text-muted-foreground">Preview: </span>
-                              <span className="text-sm font-medium">"{generatePreview()}"</span>
-                            </div>
-                          )}
-                        </FormItem>
-                      )}
-                    />
+
                   </CardContent>
                 </Card>
 
