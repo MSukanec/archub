@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, Edit, Trash2, Eye, Package, Settings } from 'lucide-react';
+import { Plus, Edit, Trash2, Square, Package, Settings } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -186,11 +186,17 @@ export function TaskParameterEditorModal({
       
       const selectedValueIds = new Set(selectedValues?.map(item => item.value_id) || []);
       
-      return (allValues || []).map(value => ({
+      const result = (allValues || []).map(value => ({
         id: value.id,
         value: value.value,
         selected: selectedValueIds.has(value.id)
       }));
+      
+      console.log('Valores del parámetro:', allValues);
+      console.log('IDs seleccionados:', Array.from(selectedValueIds));
+      console.log('Resultado final con selección:', result);
+      
+      return result;
     },
     enabled: !!parameter?.id && !!selectedGroupForItems?.id && showGroupItemsModal,
   });
@@ -762,11 +768,13 @@ export function TaskParameterEditorModal({
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => {
+                                          console.log('Abriendo modal para grupo:', group);
+                                          console.log('Parámetro actual:', parameter);
                                           setSelectedGroupForItems(group);
                                           setShowGroupItemsModal(true);
                                         }}
                                       >
-                                        <Eye className="h-4 w-4" />
+                                        <Square className="h-4 w-4" />
                                       </Button>
                                       <Button
                                         type="button"
