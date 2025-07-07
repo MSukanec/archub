@@ -39,6 +39,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     if (user && userData && !userDataLoading && location !== '/select-mode') {
       const hasUserType = userData.preferences?.last_user_type;
       const onboardingCompleted = userData.preferences?.onboarding_completed;
+      const hasPersonalData = userData.user_data?.first_name && userData.user_data?.last_name;
       
       console.log('Checking user type:', { 
         hasUser: !!user, 
@@ -46,12 +47,18 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         userDataLoading, 
         hasUserType: !!hasUserType,
         onboardingCompleted,
+        hasPersonalData: !!hasPersonalData,
         currentLocation: location 
       });
       
-      // Redirect to onboarding if not completed OR if no user type selected
-      if (!onboardingCompleted || !hasUserType) {
-        console.log('User needs onboarding or type selection, redirecting to select-mode');
+      // Only redirect if onboarding is NOT completed
+      // If onboarding is completed but no user type, let them continue (they can change it later)
+      if (!onboardingCompleted) {
+        console.log('User needs to complete onboarding, redirecting to select-mode');
+        navigate('/select-mode');
+      } else if (!hasPersonalData) {
+        // Edge case: onboarding marked complete but missing basic data
+        console.log('Onboarding completed but missing personal data, redirecting to select-mode');
         navigate('/select-mode');
       }
     }
