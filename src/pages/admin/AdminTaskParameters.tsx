@@ -295,6 +295,20 @@ export default function AdminTaskParameters() {
                               </div>
                             </div>
                             <div className="flex items-center space-x-1">
+                              {parameter.type === 'select' && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedParameterId(parameter.parameter_id);
+                                    setEditingOption(null);
+                                    setIsOptionModalOpen(true);
+                                  }}
+                                >
+                                  <Plus className="h-3 w-3" />
+                                </Button>
+                              )}
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -324,24 +338,6 @@ export default function AdminTaskParameters() {
                       <CollapsibleContent>
                         <div className="px-3 pb-3 border-t border-muted">
                           <div className="pt-3">
-                            <div className="flex items-center justify-between mb-2">
-                              <h4 className="text-xs font-medium text-muted-foreground">
-                                Opciones ({optionsCount})
-                              </h4>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedParameterId(parameter.parameter_id);
-                                  setEditingOption(null);
-                                  setIsOptionModalOpen(true);
-                                }}
-                              >
-                                <Plus className="h-3 w-3 mr-1" />
-                                Agregar
-                              </Button>
-                            </div>
-
                             <div className="space-y-2">
                               {parameter.options && parameter.options.length > 0 ? (
                                 parameter.options
