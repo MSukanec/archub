@@ -123,7 +123,7 @@ export function TaskParameterEditorModal({
 
   // Load option groups
   const { data: optionGroups = [], isLoading: groupsLoading } = useQuery({
-    queryKey: ['task-parameter-option-groups', parameter?.id],
+    queryKey: ['task-parameter-values', parameter?.id],
     queryFn: async () => {
       if (!parameter?.id) return [];
       
@@ -254,7 +254,9 @@ export function TaskParameterEditorModal({
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['task-parameter-option-groups'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameters-admin-clean'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
+      queryClient.refetchQueries({ queryKey: ['task-parameters-admin-clean'] });
       setNewGroupName('');
       setShowNewGroupModal(false);
       toast({
@@ -277,7 +279,9 @@ export function TaskParameterEditorModal({
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['task-parameter-option-groups'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameters-admin-clean'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
+      queryClient.refetchQueries({ queryKey: ['task-parameters-admin-clean'] });
       setEditingGroup(null);
       toast({
         title: 'Grupo actualizado',
@@ -303,7 +307,9 @@ export function TaskParameterEditorModal({
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['task-parameter-option-groups'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameters-admin-clean'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
+      queryClient.refetchQueries({ queryKey: ['task-parameters-admin-clean'] });
       setDeleteDialogOpen(false);
       setDeleteTarget(null);
       toast({

@@ -125,6 +125,7 @@ export function useCreateTaskParameter() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin-clean'] });
+      queryClient.refetchQueries({ queryKey: ['task-parameters-admin-clean'] });
       toast({
         title: 'Parámetro creado',
         description: 'El parámetro se ha creado correctamente.',
@@ -166,6 +167,7 @@ export function useUpdateTaskParameter() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin-clean'] });
+      queryClient.refetchQueries({ queryKey: ['task-parameters-admin-clean'] });
       toast({
         title: 'Parámetro actualizado',
         description: 'El parámetro se ha actualizado correctamente.',
