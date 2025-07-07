@@ -238,7 +238,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
       setExistingFiles([])
       
       // Seleccionar usuario actual por defecto en modo creación
-      const currentUserMember = members?.find((member: any) => member.users.id === userData?.user?.id);
+      const currentUserMember = members?.find((member: any) => member.users?.id === userData?.user?.id);
       if (currentUserMember?.id) {
         form.setValue('created_by', currentUserMember.id)
       }
@@ -312,14 +312,14 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
       
       const siteLogData = {
         log_date: data.log_date.toISOString().split('T')[0],
-        created_by: selectedMember?.user_id || userData.user.id,
+        created_by: selectedMember?.user_id || userData?.user?.id || '',
         entry_type: data.entry_type,
         weather: data.weather,
         comments: data.comments,
         is_public: data.is_public,
         is_favorite: data.is_favorite,
-        project_id: userData.preferences.last_project_id,
-        organization_id: userData.preferences.last_organization_id
+        project_id: userData?.preferences?.last_project_id || '',
+        organization_id: userData?.preferences?.last_organization_id || ''
       }
 
       if (!supabase) {
@@ -439,8 +439,8 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
           await uploadSiteLogFiles(
             files, 
             siteLogResult.data.id, 
-            userData.user.id, 
-            userData.preferences.last_organization_id
+            userData?.user?.id || '', 
+            userData?.preferences?.last_organization_id || ''
           )
         } catch (error) {
           console.error('Error uploading files:', error)

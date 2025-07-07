@@ -19,6 +19,7 @@ import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
 import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter';
 
 import { useCreateTaskParameter, useUpdateTaskParameter, TaskParameter } from '@/hooks/use-task-parameters-admin';
+import { NewTaskParameterOptionGroupModal } from './NewTaskParameterOptionGroupModal';
 import { useUnits } from '@/hooks/use-units';
 
 const taskParameterSchema = z.object({
@@ -48,6 +49,7 @@ export function NewTaskParameterModal({
   onParameterCreated
 }: NewTaskParameterModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
   
   const createMutation = useCreateTaskParameter();
   const updateMutation = useUpdateTaskParameter();
@@ -277,8 +279,23 @@ export function NewTaskParameterModal({
                         </AccordionTrigger>
                         <AccordionContent className="px-0 pt-2">
                           <div className="space-y-4">
-                            <div className="text-center py-6 text-muted-foreground text-sm">
-                              Las opciones se gestionan desde la página principal después de crear el parámetro
+                            <div className="flex justify-between items-center">
+                              <h4 className="text-sm font-medium">Grupos existentes</h4>
+                              <Button
+                                type="button"
+                                size="sm"
+                                onClick={() => setIsGroupModalOpen(true)}
+                                className="h-8"
+                              >
+                                <Plus className="h-4 w-4 mr-1" />
+                                Crear Grupo de Opción
+                              </Button>
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <div className="text-sm text-muted-foreground text-center py-4">
+                                No hay grupos de opciones configurados para este parámetro.
+                              </div>
                             </div>
                           </div>
                         </AccordionContent>
@@ -313,6 +330,18 @@ export function NewTaskParameterModal({
           ),
         }}
       </CustomModalLayout>
+
+      {/* Modal para crear grupos de opciones */}
+      <NewTaskParameterOptionGroupModal
+        open={isGroupModalOpen}
+        onClose={() => setIsGroupModalOpen(false)}
+        parameterId={parameter?.id || ''}
+        parameterLabel={parameter?.label || form.watch('label') || 'Nuevo parámetro'}
+        onGroupCreated={(groupId) => {
+          console.log('Grupo creado:', groupId);
+          setIsGroupModalOpen(false);
+        }}
+      />
     </>
   );
 }
