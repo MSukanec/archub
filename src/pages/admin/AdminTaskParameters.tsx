@@ -383,6 +383,27 @@ export default function AdminTaskParameters() {
                 </div>
                 
                 <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 w-7 p-0"
+                    onClick={() => {
+                      setEditingParameter(selectedParameter);
+                      setIsParameterModalOpen(true);
+                    }}
+                  >
+                    <Edit className="w-3 h-3" />
+                  </Button>
+                  
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                    onClick={() => setDeleteParameterId(selectedParameter?.id || '')}
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+
                   {selectedParameter?.type === 'select' && (
                     <Button
                       size="sm"
@@ -394,32 +415,9 @@ export default function AdminTaskParameters() {
                       }}
                     >
                       <Plus className="w-3 h-3 mr-1" />
-                      Agregar Opción
+                      AGREGAR OPCIÓN
                     </Button>
                   )}
-                  
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-7 px-2 text-xs"
-                    onClick={() => {
-                      setEditingParameter(selectedParameter);
-                      setIsParameterModalOpen(true);
-                    }}
-                  >
-                    <Edit className="w-3 h-3 mr-1" />
-                    Editar
-                  </Button>
-                  
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-7 px-2 text-xs text-destructive hover:text-destructive"
-                    onClick={() => setDeleteParameterId(selectedParameter?.id || '')}
-                  >
-                    <Trash2 className="w-3 h-3 mr-1" />
-                    Borrar
-                  </Button>
                 </div>
               </div>
 

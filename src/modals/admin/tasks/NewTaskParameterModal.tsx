@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, Edit, Trash2, Eye, Settings, Package } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Settings, Package, Pencil } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,7 +31,7 @@ const taskParameterSchema = z.object({
   }),
   semantic_role: z.string().optional(),
   unit_id: z.string().optional(),
-  is_required: z.boolean(),
+  is_required: z.boolean().optional(),
 });
 
 type TaskParameterFormData = z.infer<typeof taskParameterSchema>;
@@ -319,13 +319,35 @@ export function NewTaskParameterModal({
                                         size="sm"
                                         variant="ghost"
                                         onClick={() => {
+                                          // TODO: Implementar edición de grupo
+                                        }}
+                                        className="h-7 w-7 p-0"
+                                      >
+                                        <Pencil className="w-3 h-3" />
+                                      </Button>
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => {
+                                          // TODO: Implementar eliminación de grupo
+                                        }}
+                                        className="h-7 w-7 p-0"
+                                      >
+                                        <Trash2 className="w-3 h-3" />
+                                      </Button>
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => {
                                           setSelectedGroup(group);
                                           setIsAssignmentModalOpen(true);
                                         }}
                                         className="h-7 px-2"
                                       >
                                         <Eye className="w-3 h-3 mr-1" />
-                                        Gestionar
+                                        Gestionar Opciones
                                       </Button>
                                     </div>
                                   </div>

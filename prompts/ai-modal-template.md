@@ -30,18 +30,19 @@ Todos los modales deben seguir esta estructura:
     />
   </form>
 </CustomModal>
-Comportamientos obligatorios
-El formulario debe ser controlado con react-hook-form
 
-Al abrir el modal en modo edición (editingItem), los campos deben precargarse con form.reset(...)
+A. Comportamientos obligatorios
 
-Al cerrar el modal, debe resetearse el formulario (opcional: en onClose)
+1. El formulario debe ser controlado con react-hook-form
+2. Al abrir el modal en modo edición (editingItem), los campos deben precargarse con form.reset(...)
+3. Al cerrar el modal, debe resetearse el formulario (opcional: en onClose)
+4. El botón de guardar debe desactivarse mientras se envía (isSubmitting)
+5. El modal debe funcionar tanto para crear como para editar
+6. Asegurate de que el modal NUNCA este dentro del Layout de la página.
+7. CustomModalLayout espera children, no envies content.
+8. Asegurate de que no haya errores de select item.
 
-El botón de guardar debe desactivarse mientras se envía (isSubmitting)
-
-El modal debe funcionar tanto para crear como para editar
-
-Estilo visual
+B. Estilo visual
 
 Todos los campos deben tener separación y alineación vertical consistente
 
@@ -57,5 +58,3 @@ Componentes compatibles
 <DatePicker /> para fechas
 
 <FileInput /> si se requieren archivos
-
-## Asegurate de que el modal NUNCA este dentro del Layout de la página, y que no haya errores de SELECT ITEM. ##
