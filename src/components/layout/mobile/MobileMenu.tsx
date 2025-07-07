@@ -27,8 +27,10 @@ import {
   Layout,
   Images,
   Handshake,
+  CreditCard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useNavigationStore } from "@/stores/navigationStore";
@@ -520,46 +522,47 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
           </div>
         </div>
 
-        {/* Action Buttons Grid - Optimized height */}
-        <div className={cn("h-10 grid gap-2 items-center", isAdmin ? "grid-cols-3" : "grid-cols-2")}>
+        {/* User Profile Button - Full width */}
+        <button
+          onClick={() => handleNavigation('/profile')}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+          style={{ 
+            color: 'var(--menues-fg)',
+            backgroundColor: 'transparent',
+            border: '1px solid var(--menues-border)'
+          }}
+        >
+          <Avatar className="h-10 w-10">
+            <AvatarImage src={userData?.user?.avatar_url || ''} />
+            <AvatarFallback style={{ backgroundColor: 'var(--accent)', color: 'var(--accent-foreground)' }}>
+              {userData?.user?.full_name?.charAt(0) || userData?.user?.email?.charAt(0) || 'U'}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 text-left">
+            <div className="font-medium" style={{ color: 'var(--menues-fg)' }}>
+              {userData?.user?.full_name || 'Usuario'}
+            </div>
+            <div className="text-xs opacity-70" style={{ color: 'var(--menues-fg)' }}>
+              Mi Perfil
+            </div>
+          </div>
+          <ChevronRight className="h-4 w-4 opacity-50" />
+        </button>
+        
+        {/* Admin Button - Only for admin users */}
+        {isAdmin && (
           <button
-            onClick={() => handleNavigation('/profile')}
-            className="flex flex-col items-center justify-center py-1 px-2 rounded-md transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+            onClick={() => handleNavigation('/admin/dashboard', 'admin')}
+            className="w-full flex items-center gap-3 px-4 py-2 mt-2 rounded-lg transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
             style={{ 
               color: 'var(--menues-fg)',
               backgroundColor: 'transparent'
             }}
           >
-            <UserCircle className="h-4 w-4" />
-            <span className="text-xs font-medium mt-0.5">Perfil</span>
+            <Shield className="h-5 w-5" />
+            <span className="text-sm font-medium">Administración</span>
           </button>
-          
-          <button
-            onClick={() => handleNavigation('/changelog')}
-            className="flex flex-col items-center justify-center py-1 px-2 rounded-md transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
-            style={{ 
-              color: 'var(--menues-fg)',
-              backgroundColor: 'transparent'
-            }}
-          >
-            <History className="h-4 w-4" />
-            <span className="text-xs font-medium mt-0.5">Changelog</span>
-          </button>
-          
-          {isAdmin && (
-            <button
-              onClick={() => handleNavigation('/admin/dashboard', 'admin')}
-              className="flex flex-col items-center justify-center py-1 px-2 rounded-md transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
-              style={{ 
-                color: 'var(--menues-fg)',
-                backgroundColor: 'transparent'
-              }}
-            >
-              <Shield className="h-4 w-4" />
-              <span className="text-xs font-medium mt-0.5">Admin</span>
-            </button>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );
