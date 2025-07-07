@@ -17,7 +17,7 @@ export interface TaskParameter {
 export interface TaskParameterOption {
   id: string;
   parameter_id: string;
-  value: string;
+  name: string;
   label: string;
   created_at: string;
 }

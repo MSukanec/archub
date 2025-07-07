@@ -348,7 +348,7 @@ export default function AdminTaskParameters() {
                                       <div className="flex-1">
                                         <span className="text-xs font-medium">{option.label}</span>
                                         <span className="text-xs text-muted-foreground ml-2">
-                                          ({option.value})
+                                          ({option.name})
                                         </span>
                                       </div>
                                       <div className="flex items-center space-x-1">

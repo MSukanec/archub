@@ -119,6 +119,14 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 7, 2025. Fixed task parameter options system with proper database mapping and UI improvements - COMPLETED
+  • Updated database schema mapping: TaskParameterOption interface now uses 'name' field instead of 'value' to match task_parameter_values table
+  • Fixed modal field titles to show "Nombre (código)" and "Etiqueta (visible)" for better user clarity
+  • Implemented complete CRUD operations for task parameter options with proper React Query integration
+  • Corrected border styling from black (border-muted) to proper theme border (border-border) for accordion dividers
+  • Added missing Tailwind CSS variables (--border, --card, --card-foreground, --background, --foreground) for both light and dark themes
+  • Fixed form data mapping in NewTaskParameterOptionModal to send 'name' field to database instead of 'value'
+  • Resolved all TypeScript errors and null value warnings in parameter options management system
 - July 7, 2025. TaskTemplateEditorModal restoration and functionality recovery - COMPLETED
   • Successfully restored TaskTemplateEditorModal.tsx to working state after multiple failed repair attempts
   • Fixed modal appearing as white line by using correct CustomModalLayout structure instead of problematic structure

@@ -56,7 +56,7 @@ export function NewTaskParameterOptionModal({
     if (option && open) {
       form.reset({
         parameter_id: option.parameter_id,
-        value: option.value,
+        value: option.name,
         label: option.label,
       });
     } else if (!option && open) {

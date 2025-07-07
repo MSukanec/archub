@@ -176,6 +176,13 @@
   --border-strong: hsl(240, 8%, 80%);
   --ring-default: hsl(90, 50%, 50%);
 
+  /* Tailwind variables */
+  --border: hsl(240, 6%, 90%);
+  --card: hsl(0, 0%, 97%);
+  --card-foreground: hsl(0, 0%, 35%);
+  --background: hsl(0, 0%, 99%);
+  --foreground: hsl(0, 0%, 45%);
+
   /* Radius */
   --radius-sm: 6px;
   --radius-md: 8px;
@@ -290,6 +297,13 @@
   /* Borders and Rings */
   --border-default: hsl(0, 0%, 16%);
   --border-strong: hsl(0, 50%, 50%);
+
+  /* Tailwind variables */
+  --border: hsl(0, 0%, 22%);
+  --card: hsl(0, 0%, 14%);
+  --card-foreground: hsl(0, 0%, 70%);
+  --background: hsl(0, 0%, 16%);
+  --foreground: hsl(0, 0%, 90%);
   --ring-default: hsl(0, 50%, 50%);
 
   /* Radius */
