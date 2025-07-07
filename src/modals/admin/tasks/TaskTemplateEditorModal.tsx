@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -6,7 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Trash2, Edit3, Package, Settings, GripVertical } from 'lucide-react';
+import { Plus, Trash2, GripVertical } from 'lucide-react';
+import type { DropResult } from 'react-beautiful-dnd';
 import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout';
 import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader';
 import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
@@ -270,6 +272,36 @@ export default function TaskTemplateEditorModal({
     }
   });
 
+  const updatePositionsMutation = useMutation({
+    mutationFn: async (updates: { id: string; position: number }[]) => {
+      if (!supabase) throw new Error('Supabase not available');
+      
+      // Update positions in batch
+      for (const update of updates) {
+        const { error } = await supabase
+          .from('task_template_parameters')
+          .update({ position: update.position })
+          .eq('id', update.id);
+        
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['task-template-parameters', template?.id] });
+      toast({
+        title: 'Orden actualizado',
+        description: 'El orden de los parámetros ha sido actualizado correctamente.'
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'No se pudo actualizar el orden',
+        variant: 'destructive'
+      });
+    }
+  });
+
   const handleCreateTemplate = () => {
     createTemplateMutation.mutate();
   };
@@ -306,6 +338,26 @@ export default function TaskTemplateEditorModal({
     deleteParameterMutation.mutate(id);
   };
 
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination || !template) return
+
+    const items = Array.from(templateParameters)
+    const [reorderedItem] = items.splice(result.source.index, 1)
+    items.splice(result.destination.index, 0, reorderedItem)
+
+    // Update positions locally first for immediate UI feedback
+    const updatedItems = items.map((item, index) => ({
+      ...item,
+      position: index + 1
+    }))
+
+    // Update positions in database
+    updatePositionsMutation.mutate(updatedItems.map(item => ({
+      id: item.id,
+      position: item.position
+    })))
+  };
+
   if (!open) return null;
 
   const selectedParameter = availableParameters.find(p => p.id === newParameterId);
@@ -324,167 +376,129 @@ export default function TaskTemplateEditorModal({
         body: (
           <CustomModalBody columns={1}>
             <div className="space-y-6">
-              {/* Estado de la Plantilla */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 mb-3">
-                  <Package className="h-4 w-4" />
-                  <span className="font-medium text-muted-foreground">Estado de la Plantilla</span>
+              {/* Agregar Parámetro */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label>Parámetro</Label>
+                  <Select value={newParameterId} onValueChange={setNewParameterId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar parámetro" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableParameters
+                        .filter(p => !templateParameters.some(tp => tp.parameter_id === p.id))
+                        .map((parameter) => (
+                          <SelectItem key={parameter.id} value={parameter.id}>
+                            {parameter.name} ({parameter.type})
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-                {templateLoading ? (
-                  <div className="text-sm text-muted-foreground">Cargando plantilla...</div>
-                ) : template ? (
-                  <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/30">
-                    <div className="flex items-center gap-3">
-                      <Badge variant="default">Plantilla Existente</Badge>
-                      <span className="text-sm text-muted-foreground">
-                        Código: {template.code} • {templateParameters.length} parámetros
-                      </span>
-                    </div>
-                    <Badge variant="outline" className="text-green-600 border-green-600">
-                      Activa
-                    </Badge>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/30">
-                    <div className="flex items-center gap-3">
-                      <Badge variant="secondary">Sin Plantilla</Badge>
-                      <span className="text-sm text-muted-foreground">
-                        No existe plantilla para esta categoría
-                      </span>
-                    </div>
-                    <Button 
-                      onClick={handleCreateTemplate}
-                      disabled={createTemplateMutation.isPending}
-                      size="sm"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Crear Plantilla
-                    </Button>
+                
+                {showOptionGroups && (
+                  <div className="space-y-2">
+                    <Label>Grupo de Opciones</Label>
+                    <Select value={newOptionGroupId} onValueChange={setNewOptionGroupId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar grupo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {optionGroups.map((group) => (
+                          <SelectItem key={group.id} value={group.id}>
+                            {group.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 )}
+                
+                <div className="flex items-end">
+                  <Button 
+                    onClick={handleAddParameter}
+                    disabled={!newParameterId || addParameterMutation.isPending || (showOptionGroups && !newOptionGroupId)}
+                    className="w-full"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Agregar
+                  </Button>
+                </div>
               </div>
 
-              {template && (
-                <>
-                  {/* Agregar Parámetro */}
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Plus className="h-4 w-4" />
-                      <span className="font-medium text-muted-foreground">Agregar Parámetro</span>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <Label>Parámetro</Label>
-                        <Select value={newParameterId} onValueChange={setNewParameterId}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar parámetro" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {availableParameters
-                              .filter(p => !templateParameters.some(tp => tp.parameter_id === p.id))
-                              .map((parameter) => (
-                                <SelectItem key={parameter.id} value={parameter.id}>
-                                  {parameter.name} ({parameter.type})
-                                </SelectItem>
-                              ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      
-                      {showOptionGroups && (
-                        <div className="space-y-2">
-                          <Label>Grupo de Opciones</Label>
-                          <Select value={newOptionGroupId} onValueChange={setNewOptionGroupId}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Seleccionar grupo" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {optionGroups.map((group) => (
-                                <SelectItem key={group.id} value={group.id}>
-                                  {group.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      )}
-                      
-                      <div className="flex items-end">
-                        <Button 
-                          onClick={handleAddParameter}
-                          disabled={!newParameterId || addParameterMutation.isPending || (showOptionGroups && !newOptionGroupId)}
-                          className="w-full"
-                        >
-                          <Plus className="h-4 w-4 mr-2" />
-                          Agregar
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Lista de Parámetros */}
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Edit3 className="h-4 w-4" />
-                      <span className="font-medium text-muted-foreground">Parámetros de la Plantilla ({templateParameters.length})</span>
-                    </div>
-                    {parametersLoading ? (
-                      <div className="text-sm text-muted-foreground">Cargando parámetros...</div>
-                    ) : templateParameters.length === 0 ? (
-                      <div className="text-center py-8 text-muted-foreground">
-                        <Package className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                        <p>No hay parámetros agregados a esta plantilla</p>
-                        <p className="text-xs">Usa la sección "Agregar Parámetro" para agregar parámetros</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
+              {/* Lista de Parámetros con Drag and Drop */}
+              {parametersLoading ? (
+                <div className="text-sm text-muted-foreground">Cargando parámetros...</div>
+              ) : templateParameters.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p>No hay parámetros agregados a esta plantilla</p>
+                </div>
+              ) : (
+                <DragDropContext onDragEnd={handleDragEnd}>
+                  <Droppable droppableId="parameters">
+                    {(provided) => (
+                      <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-3">
                         {templateParameters.map((param, index) => (
-                          <div key={param.id} className="flex items-center gap-3 p-4 border rounded-lg bg-muted/30">
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <GripVertical className="h-4 w-4" />
-                              <span className="text-xs font-mono">{index + 1}</span>
-                            </div>
-                            
-                            <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                              <div>
-                                <div className="font-medium">{param.parameter.name}</div>
-                                <div className="text-xs text-muted-foreground flex items-center gap-2">
-                                  <Badge variant="outline" className="text-xs">
-                                    {param.parameter.type}
-                                  </Badge>
-                                  {param.parameter.unit && (
-                                    <span className="text-xs">({param.parameter.unit})</span>
-                                  )}
+                          <Draggable key={param.id} draggableId={param.id} index={index}>
+                            {(provided, snapshot) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                className={`flex items-center gap-3 p-4 border rounded-lg bg-muted/30 ${
+                                  snapshot.isDragging ? 'shadow-lg bg-card' : ''
+                                }`}
+                              >
+                                <div 
+                                  {...provided.dragHandleProps}
+                                  className="flex items-center gap-2 text-muted-foreground cursor-grab active:cursor-grabbing"
+                                >
+                                  <GripVertical className="h-4 w-4" />
+                                  <span className="text-xs font-mono">{index + 1}</span>
+                                </div>
+                                
+                                <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                                  <div>
+                                    <div className="font-medium">{param.parameter.name}</div>
+                                    <div className="text-xs text-muted-foreground flex items-center gap-2">
+                                      <Badge variant="outline" className="text-xs">
+                                        {param.parameter.type}
+                                      </Badge>
+                                      {param.parameter.unit && (
+                                        <span className="text-xs">({param.parameter.unit})</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="flex items-center gap-2">
+                                    <Label className="text-xs">Obligatorio:</Label>
+                                    <Switch
+                                      checked={param.is_required}
+                                      onCheckedChange={() => handleToggleRequired(param)}
+                                      disabled={updateParameterMutation.isPending}
+                                    />
+                                  </div>
+                                  
+                                  <div className="flex items-center justify-end">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleDeleteParameter(param.id)}
+                                      disabled={deleteParameterMutation.isPending}
+                                      className="text-destructive hover:text-destructive"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </div>
                                 </div>
                               </div>
-                              
-                              <div className="flex items-center gap-2">
-                                <Label className="text-xs">Obligatorio:</Label>
-                                <Switch
-                                  checked={param.is_required}
-                                  onCheckedChange={() => handleToggleRequired(param)}
-                                  disabled={updateParameterMutation.isPending}
-                                />
-                              </div>
-                              
-                              <div className="flex items-center justify-end">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleDeleteParameter(param.id)}
-                                  disabled={deleteParameterMutation.isPending}
-                                  className="text-destructive hover:text-destructive"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
+                            )}
+                          </Draggable>
                         ))}
+                        {provided.placeholder}
                       </div>
                     )}
-                  </div>
-                </>
+                  </Droppable>
+                </DragDropContext>
               )}
             </div>
           </CustomModalBody>
