@@ -9,7 +9,6 @@ export interface TaskParameter {
   name: string;
   label: string;
   type: 'text' | 'number' | 'select' | 'boolean';
-  unit_id?: string;
   required: boolean;
   created_at: string;
   options?: TaskParameterOption[];
@@ -27,7 +26,6 @@ export interface CreateTaskParameterData {
   name: string;
   label: string;
   type: 'text' | 'number' | 'select' | 'boolean';
-  unit_id?: string;
   required: boolean;
 }
 
@@ -36,7 +34,6 @@ export interface UpdateTaskParameterData {
   name: string;
   label: string;
   type: 'text' | 'number' | 'select' | 'boolean';
-  unit_id?: string;
   required: boolean;
 }
 
@@ -52,14 +49,14 @@ export interface UpdateTaskParameterOptionData extends CreateTaskParameterOption
 
 export function useTaskParametersAdmin() {
   return useQuery({
-    queryKey: ['task-parameters-admin'],
+    queryKey: ['task-parameters-admin-clean-clean'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase client not initialized');
 
       // Fetch parameters directly from task_parameters table
       const { data: parameters, error: parametersError } = await supabase
         .from('task_parameters')
-        .select('id, name, label, type, unit_id, required, created_at')
+        .select('id, name, label, type, required, created_at')
         .order('created_at');
 
       if (parametersError) {
@@ -87,7 +84,6 @@ export function useTaskParametersAdmin() {
         name: param.name,
         label: param.label,
         type: param.type,
-        unit_id: param.unit_id,
         required: param.required || false,
         created_at: param.created_at,
         options: optionsMap.get(param.id) || []
@@ -114,7 +110,6 @@ export function useCreateTaskParameter() {
           name: parameterData.name,
           label: parameterData.label,
           type: parameterData.type,
-          unit_id: parameterData.unit_id || null,
           required: parameterData.required
         }])
         .select()
@@ -129,7 +124,7 @@ export function useCreateTaskParameter() {
       return parameter;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameters-admin-clean'] });
       toast({
         title: 'Parámetro creado',
         description: 'El parámetro se ha creado correctamente.',
@@ -160,7 +155,6 @@ export function useUpdateTaskParameter() {
           name: updateData.name,
           label: updateData.label,
           type: updateData.type,
-          unit_id: updateData.unit_id || null,
           required: updateData.required
         })
         .eq('id', id)
@@ -171,7 +165,7 @@ export function useUpdateTaskParameter() {
       return parameter;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameters-admin-clean'] });
       toast({
         title: 'Parámetro actualizado',
         description: 'El parámetro se ha actualizado correctamente.',
@@ -206,7 +200,7 @@ export function useDeleteTaskParameter() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameters-admin-clean'] });
       toast({
         title: 'Parámetro eliminado',
         description: 'El parámetro y sus opciones se han eliminado correctamente.',
@@ -234,7 +228,7 @@ export function useCreateTaskParameterOption() {
       throw new Error('Parameter options functionality not implemented yet');
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameters-admin-clean'] });
       toast({
         title: 'Opción creada',
         description: 'La opción se ha creado correctamente.',
@@ -262,7 +256,7 @@ export function useUpdateTaskParameterOption() {
       throw new Error('Parameter options functionality not implemented yet');
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameters-admin-clean'] });
       toast({
         title: 'Opción actualizada',
         description: 'La opción se ha actualizado correctamente.',
@@ -290,7 +284,7 @@ export function useDeleteTaskParameterOption() {
       throw new Error('Parameter options functionality not implemented yet');
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameters-admin-clean'] });
       toast({
         title: 'Opción eliminada',
         description: 'La opción se ha eliminado correctamente.',
