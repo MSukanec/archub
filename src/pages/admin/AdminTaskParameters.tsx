@@ -400,19 +400,6 @@ export default function AdminTaskParameters() {
                   
                   <Button
                     size="sm"
-                    variant="outline"
-                    className="h-7 px-2 text-xs"
-                    onClick={() => {
-                      setEditingParameter(selectedParameter);
-                      setIsParameterModalOpen(true);
-                    }}
-                  >
-                    <Eye className="w-3 h-3 mr-1" />
-                    Gestionar Grupos
-                  </Button>
-                  
-                  <Button
-                    size="sm"
                     variant="ghost"
                     className="h-7 px-2 text-xs"
                     onClick={() => {
@@ -420,7 +407,8 @@ export default function AdminTaskParameters() {
                       setIsParameterModalOpen(true);
                     }}
                   >
-                    <Edit className="w-3 h-3" />
+                    <Edit className="w-3 h-3 mr-1" />
+                    Editar
                   </Button>
                   
                   <Button
@@ -429,7 +417,8 @@ export default function AdminTaskParameters() {
                     className="h-7 px-2 text-xs text-destructive hover:text-destructive"
                     onClick={() => setDeleteParameterId(selectedParameter?.id || '')}
                   >
-                    <Trash2 className="w-3 h-3" />
+                    <Trash2 className="w-3 h-3 mr-1" />
+                    Borrar
                   </Button>
                 </div>
               </div>
@@ -457,6 +446,9 @@ export default function AdminTaskParameters() {
           setEditingParameter(null);
         }}
         parameter={editingParameter}
+        onParameterCreated={(parameterId) => {
+          setSelectedParameterId(parameterId);
+        }}
       />
 
       <NewTaskParameterOptionModal

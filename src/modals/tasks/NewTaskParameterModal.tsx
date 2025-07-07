@@ -38,12 +38,14 @@ interface NewTaskParameterModalProps {
   open: boolean;
   onClose: () => void;
   parameter?: TaskParameter;
+  onParameterCreated?: (parameterId: string) => void;
 }
 
 export function NewTaskParameterModal({ 
   open, 
   onClose, 
-  parameter
+  parameter,
+  onParameterCreated
 }: NewTaskParameterModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -104,7 +106,10 @@ export function NewTaskParameterModal({
           ...submitData,
         });
       } else {
-        await createMutation.mutateAsync(submitData);
+        const newParameter = await createMutation.mutateAsync(submitData);
+        if (onParameterCreated && newParameter?.id) {
+          onParameterCreated(newParameter.id);
+        }
       }
       
       onClose();
