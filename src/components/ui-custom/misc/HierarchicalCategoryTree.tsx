@@ -70,27 +70,23 @@ export function HierarchicalCategoryTree({
       <div key={category.id} className="w-full">
         {/* Category Item */}
         <div 
-          className={`group flex items-center justify-between rounded-md p-2 mb-1 hover:bg-accent/50 transition-colors ${
+          className={`group flex items-center justify-between rounded-md p-2 mb-1 hover:bg-accent/50 transition-colors cursor-pointer ${
             hasIncompleteTemplates ? 'bg-orange-50 border border-orange-200 dark:bg-orange-950/20 dark:border-orange-800' : 'bg-card border border-border'
           }`}
           style={{ marginLeft: `${indentation}px` }}
+          onClick={() => hasChildCategories && onToggleExpanded(category.id)}
         >
           {/* Left side: Chevron + Category info */}
           <div className="flex items-center space-x-2 flex-1">
             {/* Chevron or placeholder */}
             {hasChildCategories ? (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-5 w-5 p-0 hover:bg-accent"
-                onClick={() => onToggleExpanded(category.id)}
-              >
+              <div className="h-5 w-5 flex items-center justify-center">
                 {isExpanded ? (
                   <ChevronDown className="h-3 w-3" />
                 ) : (
                   <ChevronRight className="h-3 w-3" />
                 )}
-              </Button>
+              </div>
             ) : (
               <div className="w-5 flex justify-center">
                 <div className="w-2 h-2 rounded-full bg-muted-foreground/30" />
@@ -121,7 +117,7 @@ export function HierarchicalCategoryTree({
           </div>
           
           {/* Right side: Action buttons - PLANTILLA, EDITAR, BORRAR */}
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-1" onClick={(e) => e.stopPropagation()}>
             {/* Solo mostrar botón PLANTILLA en categorías finales (3 letras) */}
             {category.code && category.code.length === 3 && (
               <Button

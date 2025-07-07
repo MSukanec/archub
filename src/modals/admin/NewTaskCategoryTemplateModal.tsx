@@ -9,6 +9,7 @@ import { CustomModalFooter } from "@/components/ui-custom/modal/CustomModalFoote
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useCreateTaskTemplate, useUpdateTaskTemplate, type TaskTemplate } from "@/hooks/use-task-templates-admin";
+import { useState } from "react";
 import { useTaskParametersAdmin } from "@/hooks/use-task-parameters-admin";
 import { Textarea } from "@/components/ui/textarea";
 import { type TaskCategoryAdmin } from "@/hooks/use-task-categories-admin";
@@ -36,6 +37,7 @@ export function NewTaskCategoryTemplateModal({
   category
 }: NewTaskCategoryTemplateModalProps) {
   const isEditing = !!template;
+  const [isLoading, setIsLoading] = useState(false);
   
   const createTaskTemplate = useCreateTaskTemplate();
   const updateTaskTemplate = useUpdateTaskTemplate();
@@ -72,6 +74,9 @@ export function NewTaskCategoryTemplateModal({
 
   const onSubmit = async (data: FormData) => {
     try {
+      setIsLoading(true);
+      console.log('Submitting template data:', data);
+      
       if (isEditing && template) {
         await updateTaskTemplate.mutateAsync({
           id: template.id,
@@ -88,6 +93,8 @@ export function NewTaskCategoryTemplateModal({
       onClose();
     } catch (error) {
       console.error('Error saving task template:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -174,7 +181,7 @@ export function NewTaskCategoryTemplateModal({
             onCancel={onClose}
             onSave={form.handleSubmit(onSubmit)}
             saveText={isEditing ? "Actualizar Plantilla" : "Crear Plantilla"}
-            loading={createTaskTemplate.isPending || updateTaskTemplate.isPending}
+            loading={isLoading || createTaskTemplate.isPending || updateTaskTemplate.isPending}
           />
         </form>
       </Form>
