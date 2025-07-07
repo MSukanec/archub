@@ -12,7 +12,7 @@ import { Layout } from '@/components/layout/desktop/Layout';
 import { CustomTable } from '@/components/ui-custom/misc/CustomTable';
 import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState';
 
-import { useTaskParametersAdmin, useDeleteTaskParameter, useDeleteTaskParameterOption, TaskParameter, TaskParameterOption } from '@/hooks/use-task-parameters-admin';
+import { useTaskParametersAdmin, useDeleteTaskParameter, useDeleteTaskParameterOption, useTaskParameterOptionGroups, useTaskParameterOptionGroupItems, TaskParameter, TaskParameterOption } from '@/hooks/use-task-parameters-admin';
 import { NewTaskParameterModal } from '@/modals/admin/tasks/NewTaskParameterModal';
 import { NewTaskParameterOptionModal } from '@/modals/admin/tasks/NewTaskParameterOptionModal';
 
@@ -36,6 +36,12 @@ export default function AdminTaskParameters() {
   const { data: parameters = [], isLoading, error } = useTaskParametersAdmin();
   const deleteParameterMutation = useDeleteTaskParameter();
   const deleteOptionMutation = useDeleteTaskParameterOption();
+  
+  // Get selected parameter
+  const selectedParameter = parameters.find(param => param.id === selectedParameterId);
+  
+  // Load groups for selected parameter
+  const { data: optionGroupsData = [] } = useTaskParameterOptionGroups(selectedParameter?.parameter_id || '');
 
   // Calculate statistics
   const calculateStats = (parameters: TaskParameter[]) => {
@@ -77,8 +83,7 @@ export default function AdminTaskParameters() {
     }
   }, [filteredAndSortedParameters.length, selectedParameterId]);
 
-  // Get selected parameter
-  const selectedParameter = filteredAndSortedParameters.find(param => param.id === selectedParameterId);
+
   
   // Get filtered parameter values (options) for the selected parameter
   const filteredParameterValues = selectedParameter?.options || [];
@@ -238,6 +243,16 @@ export default function AdminTaskParameters() {
         render: (value: TaskParameterOption) => (
           <div className="text-sm text-muted-foreground">{value.name}</div>
         )
+      },
+      {
+        key: 'groups',
+        label: 'Grupos',
+        render: (value: TaskParameterOption) => (
+          <div className="flex flex-wrap gap-1">
+            <span className="text-xs text-muted-foreground">Por implementar</span>
+          </div>
+        ),
+        sortable: false
       },
       {
         key: 'actions',

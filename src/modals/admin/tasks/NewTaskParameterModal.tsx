@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, Edit, Trash2, Eye, Settings, Package, Pencil } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Settings, Package, Pencil, CheckSquare } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -319,17 +319,6 @@ export function NewTaskParameterModal({
                                         size="sm"
                                         variant="ghost"
                                         onClick={() => {
-                                          // TODO: Implementar edición de grupo
-                                        }}
-                                        className="h-7 w-7 p-0"
-                                      >
-                                        <Pencil className="w-3 h-3" />
-                                      </Button>
-                                      <Button
-                                        type="button"
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() => {
                                           // TODO: Implementar eliminación de grupo
                                         }}
                                         className="h-7 w-7 p-0"
@@ -344,10 +333,9 @@ export function NewTaskParameterModal({
                                           setSelectedGroup(group);
                                           setIsAssignmentModalOpen(true);
                                         }}
-                                        className="h-7 px-2"
+                                        className="h-7 w-7 p-0"
                                       >
-                                        <Eye className="w-3 h-3 mr-1" />
-                                        Gestionar Opciones
+                                        <CheckSquare className="w-3 h-3" />
                                       </Button>
                                     </div>
                                   </div>
