@@ -1,28 +1,16 @@
-import { Switch, Route, Redirect } from "wouter";
+import { Switch, Route, Redirect } from "wouter"; // 👈 asegurate de importar Redirect
 import { useEffect } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Layout } from "@/components/layout/desktop/Layout";
 import { ProtectedRoute } from "@/components/ui-custom/misc/ProtectedRoute";
 import { AdminProtectedRoute } from "@/components/ui-custom/misc/AdminProtectedRoute";
 import { useAuthStore } from "@/stores/authStore";
 import { MobileActionBarProvider } from "@/components/layout/mobile/MobileActionBarContext";
 
-// Public Pages
-import Landing from "@/pages/Landing";
-import Login from "@/pages/auth/Login";
-import Register from "@/pages/auth/Register";
-import ForgotPassword from "@/pages/auth/ForgotPassword";
-import NotFound from "@/pages/NotFound";
-
-// Dashboard Pages
-import DashboardHome from "@/pages/dashboard/DashboardHome";
-import OrganizationHome from "@/pages/organization/OrganizationHome";
-import ProjectsHome from "@/pages/projects/ProjectsHome";
-import FinancesHome from "@/pages/finances/FinancesHome";
-
-// Existing Protected Pages
+// Páginas
 import OrganizationManagement from "@/pages/organization/OrganizationList";
 import OrganizationProjects from "@/pages/organization/OrganizationProjects";
 import OrganizationContacts from "@/pages/organization/OrganizationContacts";
@@ -59,86 +47,17 @@ import DesignTimeline from "@/pages/design/DesignTimeline";
 import DesignDashboard from "@/pages/design/DesignDashboard";
 import DesignDocumentation from "@/pages/design/DesignDocumentation";
 import SelectMode from "@/pages/others/SelectMode";
-
-// Component to handle authentication redirections
-function AuthRedirect() {
-  const { user } = useAuthStore();
-  
-  if (user) {
-    return <Redirect to="/dashboard" />;
-  }
-  
-  return <Landing />;
-}
-
-// Component to handle authenticated user redirection from auth pages
-function AuthPageRedirect({ children }: { children: React.ReactNode }) {
-  const { user } = useAuthStore();
-  
-  if (user) {
-    return <Redirect to="/dashboard" />;
-  }
-  
-  return <>{children}</>;
-}
+import NotFound from "@/pages/others/NotFound";
 
 function Router() {
   return (
     <Switch>
-      {/* Public Routes */}
-      <Route path="/" component={AuthRedirect} />
-      
-      <Route path="/login">
-        <AuthPageRedirect>
-          <Login />
-        </AuthPageRedirect>
-      </Route>
-
-      <Route path="/register">
-        <AuthPageRedirect>
-          <Register />
-        </AuthPageRedirect>
-      </Route>
-
-      <Route path="/forgot-password">
-        <AuthPageRedirect>
-          <ForgotPassword />
-        </AuthPageRedirect>
-      </Route>
-
-      {/* Onboarding Route */}
       <Route path="/select-mode">
         <ProtectedRoute>
           <SelectMode />
         </ProtectedRoute>
       </Route>
 
-      {/* Main Dashboard Routes */}
-      <Route path="/dashboard">
-        <ProtectedRoute>
-          <DashboardHome />
-        </ProtectedRoute>
-      </Route>
-
-      <Route path="/organization">
-        <ProtectedRoute>
-          <OrganizationHome />
-        </ProtectedRoute>
-      </Route>
-
-      <Route path="/projects">
-        <ProtectedRoute>
-          <ProjectsHome />
-        </ProtectedRoute>
-      </Route>
-
-      <Route path="/finances">
-        <ProtectedRoute>
-          <FinancesHome />
-        </ProtectedRoute>
-      </Route>
-
-      {/* Legacy Routes - Organization */}
       <Route path="/organizations">
         <ProtectedRoute>
           <OrganizationManagement />
@@ -151,49 +70,6 @@ function Router() {
         </ProtectedRoute>
       </Route>
 
-      <Route path="/proyectos">
-        <ProtectedRoute>
-          <OrganizationProjects />
-        </ProtectedRoute>
-      </Route>
-
-      <Route path="/organization/projects">
-        <ProtectedRoute>
-          <OrganizationProjects />
-        </ProtectedRoute>
-      </Route>
-
-      <Route path="/organization/contacts">
-        <ProtectedRoute>
-          <OrganizationContacts />
-        </ProtectedRoute>
-      </Route>
-
-      <Route path="/organization/contactos">
-        <ProtectedRoute>
-          <OrganizationContacts />
-        </ProtectedRoute>
-      </Route>
-
-      <Route path="/organization/dashboard">
-        <ProtectedRoute>
-          <OrganizationDashboard />
-        </ProtectedRoute>
-      </Route>
-
-      <Route path="/organization/members">
-        <ProtectedRoute>
-          <OrganizationMembers />
-        </ProtectedRoute>
-      </Route>
-
-      <Route path="/organization/activity">
-        <ProtectedRoute>
-          <OrganizationActivity />
-        </ProtectedRoute>
-      </Route>
-
-      {/* Legacy Routes - Finances */}
       <Route path="/movimientos">
         <ProtectedRoute>
           <FinancesMovements />
@@ -236,13 +112,6 @@ function Router() {
         </ProtectedRoute>
       </Route>
 
-      <Route path="/finanzas/dashboard">
-        <ProtectedRoute>
-          <FinancesDashboard />
-        </ProtectedRoute>
-      </Route>
-
-      {/* Legacy Routes - Construction */}
       <Route path="/bitacora">
         <ProtectedRoute>
           <ConstructionLogs />
@@ -303,7 +172,52 @@ function Router() {
         </ProtectedRoute>
       </Route>
 
-      {/* Legacy Routes - Projects */}
+
+
+      <Route path="/proyectos">
+        <ProtectedRoute>
+          <OrganizationProjects />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/organization/projects">
+        <ProtectedRoute>
+          <OrganizationProjects />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/organization/contacts">
+        <ProtectedRoute>
+          <OrganizationContacts />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/organization/contactos">
+        <ProtectedRoute>
+          <OrganizationContacts />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/organization/dashboard">
+        <ProtectedRoute>
+          <OrganizationDashboard />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/organization/members">
+        <ProtectedRoute>
+          <OrganizationMembers />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/organization/activity">
+        <ProtectedRoute>
+          <OrganizationActivity />
+        </ProtectedRoute>
+      </Route>
+
+
+
       <Route path="/project/dashboard">
         <ProtectedRoute>
           <ProjectDashboard />
@@ -316,7 +230,6 @@ function Router() {
         </ProtectedRoute>
       </Route>
 
-      {/* Legacy Routes - Design */}
       <Route path="/design/dashboard">
         <ProtectedRoute>
           <DesignDashboard />
@@ -335,7 +248,18 @@ function Router() {
         </ProtectedRoute>
       </Route>
 
-      {/* Profile Routes */}
+      <Route path="/finances/dashboard">
+        <ProtectedRoute>
+          <FinancesDashboard />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/finanzas/dashboard">
+        <ProtectedRoute>
+          <FinancesDashboard />
+        </ProtectedRoute>
+      </Route>
+
       <Route path="/perfil">
         <ProtectedRoute>
           <Profile />
@@ -348,7 +272,7 @@ function Router() {
         </ProtectedRoute>
       </Route>
 
-      {/* Admin Routes - Solo para administradores */}
+      {/* Rutas de administración - Solo para administradores */}
       <Route path="/admin/dashboard">
         <ProtectedRoute>
           <AdminProtectedRoute>
@@ -437,7 +361,6 @@ function Router() {
         </ProtectedRoute>
       </Route>
 
-      {/* Other Protected Routes */}
       <Route path="/tasks">
         <ProtectedRoute>
           <Tasks />
@@ -450,8 +373,20 @@ function Router() {
         </ProtectedRoute>
       </Route>
 
-      {/* 404 Route - Must be last */}
-      <Route path="*" component={NotFound} />
+      {/* Redirección de /dashboard por compatibilidad */}
+      <Route path="/dashboard">
+        <Redirect to="/organization/dashboard" />
+      </Route>
+
+      {/* Redirección principal */}
+      <Route path="/">
+        <Redirect to="/organization/dashboard" />
+      </Route>
+
+      {/* Página 404 - debe ir al final */}
+      <Route>
+        <NotFound />
+      </Route>
     </Switch>
   );
 }
