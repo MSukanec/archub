@@ -122,43 +122,9 @@ export function TaskParameterEditorModal({
   });
 
   // Load option groups
-  const { data: optionGroups = [], isLoading: groupsLoading } = useQuery({
-    queryKey: ['task-parameter-values', parameter?.id],
-    queryFn: async () => {
-      if (!parameter?.id) return [];
-      
-      const { data, error } = await supabase
-        .from('task_parameter_option_groups')
-        .select(`
-          id,
-          parameter_id,
-          name,
-          created_at
-        `)
-        .eq('parameter_id', parameter.id)
-        .order('name');
-      
-      if (error) throw error;
-      
-      // Get item counts for each group
-      const groupsWithCounts = await Promise.all(
-        data.map(async (group) => {
-          const { count } = await supabase
-            .from('task_parameter_option_group_items')
-            .select('*', { count: 'exact', head: true })
-            .eq('option_group_id', group.id);
-          
-          return {
-            ...group,
-            items_count: count || 0
-          };
-        })
-      );
-      
-      return groupsWithCounts as TaskParameterOptionGroup[];
-    },
-    enabled: !!parameter?.id,
-  });
+  // Simplified option groups (disable complex queries for now)
+  const optionGroups: TaskParameterOptionGroup[] = [];
+  const groupsLoading = false;
 
   // Mutations for parameter values
   const createValueMutation = useMutation({
