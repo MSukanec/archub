@@ -188,10 +188,14 @@ export function TaskParameterEditorModal({
       }
       
       // Get currently selected options for this group
+      console.log('Verificando estructura de tabla task_parameter_option_group_items');
       const { data: selectedValues, error: selectedError } = await supabase
         .from('task_parameter_option_group_items')
-        .select('parameter_value_id')
+        .select('*') // Seleccionar todo para ver qué columnas existen realmente
         .eq('option_group_id', selectedGroupForItems.id);
+        
+      console.log('Datos de task_parameter_option_group_items:', selectedValues);
+      console.log('Error en selectedValues:', selectedError);
       
       if (selectedError) throw selectedError;
       

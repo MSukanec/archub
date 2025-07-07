@@ -111,7 +111,67 @@ export type User = typeof users.$inferSelect;
 export type Country = typeof countries.$inferSelect;
 export type UserData = typeof user_data.$inferSelect;
 export type UserPreferences = typeof user_preferences.$inferSelect;
+// Task Parameters System
+export const task_parameters = pgTable("task_parameters", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(), // e.g., "brick-type"
+  label: text("label").notNull(), // e.g., "Tipo de Ladrillo / Bloque"
+  type: text("type", { enum: ["text", "number", "select", "boolean"] }).notNull(),
+  required: boolean("required").default(false),
+  created_at: timestamp("created_at").defaultNow(),
+});
+
+export const task_parameter_values = pgTable("task_parameter_values", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  parameter_id: uuid("parameter_id").notNull(),
+  name: text("name").notNull(), // e.g., "acindar"
+  label: text("label").notNull(), // e.g., "Acindar"
+  created_at: timestamp("created_at").defaultNow(),
+});
+
+export const task_parameter_option_groups = pgTable("task_parameter_option_groups", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  parameter_id: uuid("parameter_id").notNull(),
+  name: text("name").notNull(), // e.g., "Griferías"
+  created_at: timestamp("created_at").defaultNow(),
+});
+
+export const task_parameter_option_group_items = pgTable("task_parameter_option_group_items", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  option_group_id: uuid("option_group_id").notNull(),
+  parameter_value_id: uuid("parameter_value_id").notNull(),
+  created_at: timestamp("created_at").defaultNow(),
+});
+
+export const insertTaskParameterSchema = createInsertSchema(task_parameters).omit({
+  id: true,
+  created_at: true,
+});
+
+export const insertTaskParameterValueSchema = createInsertSchema(task_parameter_values).omit({
+  id: true,
+  created_at: true,
+});
+
+export const insertTaskParameterOptionGroupSchema = createInsertSchema(task_parameter_option_groups).omit({
+  id: true,
+  created_at: true,
+});
+
+export const insertTaskParameterOptionGroupItemSchema = createInsertSchema(task_parameter_option_group_items).omit({
+  id: true,
+  created_at: true,
+});
+
 export type InsertUserData = z.infer<typeof insertUserDataSchema>;
 export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;
 export type DesignDocument = typeof design_documents.$inferSelect;
 export type InsertDesignDocument = z.infer<typeof insertDesignDocumentSchema>;
+export type TaskParameter = typeof task_parameters.$inferSelect;
+export type TaskParameterValue = typeof task_parameter_values.$inferSelect;
+export type TaskParameterOptionGroup = typeof task_parameter_option_groups.$inferSelect;
+export type TaskParameterOptionGroupItem = typeof task_parameter_option_group_items.$inferSelect;
+export type InsertTaskParameter = z.infer<typeof insertTaskParameterSchema>;
+export type InsertTaskParameterValue = z.infer<typeof insertTaskParameterValueSchema>;
+export type InsertTaskParameterOptionGroup = z.infer<typeof insertTaskParameterOptionGroupSchema>;
+export type InsertTaskParameterOptionGroupItem = z.infer<typeof insertTaskParameterOptionGroupItemSchema>;
