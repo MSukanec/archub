@@ -38,6 +38,7 @@ interface TaskTemplate {
 interface TaskParameter {
   id: string;
   name: string;
+  label?: string;
   type: string;
   unit?: string;
 }
@@ -111,6 +112,7 @@ export default function TaskTemplateEditorModal({
           parameter:task_parameters(
             id,
             name,
+            label,
             type,
             unit
           )
@@ -431,7 +433,7 @@ export default function TaskTemplateEditorModal({
         const fragment = param.expression_template.replace(/{value}/g, sampleValue);
         sentence += ` ${fragment}`;
       } else {
-        missingTemplates.push(param.parameter?.name || 'parámetro');
+        missingTemplates.push(param.parameter?.label || param.parameter?.name || 'parámetro');
       }
     });
 
@@ -473,7 +475,7 @@ export default function TaskTemplateEditorModal({
                         .filter(p => !templateParameters.some(tp => tp.parameter_id === p.id))
                         .map((parameter) => (
                           <SelectItem key={parameter.id} value={parameter.id}>
-                            {parameter.name} ({parameter.type})
+                            {parameter.label || parameter.name} ({parameter.type})
                           </SelectItem>
                         ))}
                     </SelectContent>
@@ -542,7 +544,7 @@ export default function TaskTemplateEditorModal({
                                 
                                 <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
                                   <div>
-                                    <div className="font-medium">{param.parameter.name}</div>
+                                    <div className="font-medium">{param.parameter.label || param.parameter.name}</div>
                                     <div className="text-xs text-muted-foreground flex items-center gap-2">
                                       <Badge variant="outline" className="text-xs">
                                         {param.parameter.type}
