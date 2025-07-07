@@ -185,6 +185,21 @@ export default function AdminTaskParameters() {
         customFilters: (
           <div className="space-y-3">
             <div>
+              <Label className="text-xs font-medium">Filtrar por Parámetro</Label>
+              <Select value={selectedParameterId} onValueChange={setSelectedParameterId}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Seleccionar parámetro" />
+                </SelectTrigger>
+                <SelectContent>
+                  {filteredAndSortedParameters.map(param => (
+                    <SelectItem key={param.id} value={param.id}>
+                      {param.label || param.name} ({param.options?.length || 0} opciones)
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
               <Label className="text-xs font-medium">Ordenar por</Label>
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="w-full">
@@ -267,6 +282,85 @@ export default function AdminTaskParameters() {
               </CardContent>
             </Card>
           </div>
+
+          {/* CustomTable for Parameter Options */}
+          {selectedParameterId && filteredParameterValues.length > 0 && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Hash className="h-4 w-4" />
+                      Opciones del Parámetro: {selectedParameter?.label || selectedParameter?.name}
+                    </CardTitle>
+                    <CardDescription>
+                      Gestiona las opciones para el parámetro seleccionado. Filtra por parámetro en la sección de abajo.
+                    </CardDescription>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      setEditingOption(null);
+                      setIsOptionModalOpen(true);
+                    }}
+                    className="gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Nueva Opción
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <CustomTable
+                  data={filteredParameterValues}
+                  columns={[
+                    {
+                      key: 'label',
+                      label: 'Etiqueta',
+                      render: (value: TaskParameterOption) => value.label || value.name
+                    },
+                    {
+                      key: 'name',
+                      label: 'Nombre',
+                      render: (value: TaskParameterOption) => (
+                        <Badge variant="outline">{value.name}</Badge>
+                      )
+                    },
+                    {
+                      key: 'actions',
+                      label: 'Acciones',
+                      render: (value: TaskParameterOption) => (
+                        <div className="flex items-center gap-2">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 w-6 p-0"
+                            onClick={() => {
+                              setEditingOption(value);
+                              setSelectedParameterId(value.parameter_id);
+                              setIsOptionModalOpen(true);
+                            }}
+                          >
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                            onClick={() => setDeleteOptionId(value.id)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      )
+                    }
+                  ]}
+                  searchPlaceholder="Buscar opciones..."
+                  emptyStateMessage="No hay opciones para este parámetro"
+                />
+              </CardContent>
+            </Card>
+          )}
 
           {/* Parameters Accordion */}
           <div className="space-y-2">
