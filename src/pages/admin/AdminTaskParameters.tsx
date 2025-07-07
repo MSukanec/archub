@@ -33,7 +33,7 @@ export default function AdminTaskParameters() {
   const [deleteParameterId, setDeleteParameterId] = useState<string | null>(null);
   const [deleteOptionId, setDeleteOptionId] = useState<string | null>(null);
 
-  const { data: parameters = [], isLoading } = useTaskParametersAdmin();
+  const { data: parameters = [], isLoading, error } = useTaskParametersAdmin();
   const deleteParameterMutation = useDeleteTaskParameter();
   const deleteOptionMutation = useDeleteTaskParameterOption();
 
@@ -174,11 +174,11 @@ export default function AdminTaskParameters() {
     actions
   };
 
-  if (isLoading) {
+  if (isLoading || !parameters || parameters.length === 0) {
     return (
       <Layout wide={true} headerProps={headerProps}>
         <div className="p-8 text-center text-muted-foreground">
-          Cargando parámetros...
+          {isLoading ? 'Cargando parámetros...' : 'No hay parámetros disponibles'}
         </div>
       </Layout>
     );

@@ -73,8 +73,6 @@ export function useTaskParametersAdmin() {
         .select('id, parameter_id, name, label, created_at')
         .order('label');
 
-
-
       if (optionsError) {
         console.error('Error fetching options:', optionsError);
         // Don't throw error, just log it and continue with empty options
