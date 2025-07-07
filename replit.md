@@ -119,6 +119,22 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 7, 2025. TaskTemplateEditorModal modal aesthetics simplified with accordion structure and clean parameter display - COMPLETED
+  • Refactored modal to follow ai-modal-template.md standards using Accordion components for better organization
+  • Replaced Card-based layout with three main accordion sections: Estado de la Plantilla, Agregar Parámetro, and Parámetros de la Plantilla
+  • Cleaned up parameter display in "Parámetros de la Plantilla" section to show only essential information
+  • Removed position value and UUID group display as requested - now shows only parameter name, type, required status
+  • Simplified grid layout from 4 columns to 3 columns for cleaner parameter visualization
+  • Enhanced visual consistency with other modals using accordion collapsible interface
+  • Modal now opens with "Estado de la Plantilla" accordion expanded by default for immediate context
+  • Parameter cards use streamlined layout: name/type badges (left), required toggle (center), delete button (right)
+- July 7, 2025. Enhanced AdminTaskParameters with "Grupos" column and UI improvements - COMPLETED
+  • Added "Grupos" column in third position of CustomTable before Actions column
+  • Fixed "GESTIONAR OPCIONES" button to show only CheckSquare icon without pencil button
+  • Column currently shows "Por implementar" placeholder - ready for group badges implementation
+  • Updated button styling to be cleaner with single checkbox icon for group management
+  • Removed non-functional pencil edit button for group names as requested
+  • Table now properly displays parameter options with groups association preview
 - July 7, 2025. Fixed TaskParameterEditorModal structure and group assignment modal functionality - COMPLETED
   • Corrected modal structure issue that was causing main modal to appear as horizontal line
   • Fixed CustomModalLayout syntax with proper {{ }} structure for header/body/footer props
