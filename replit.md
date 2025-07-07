@@ -119,15 +119,16 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- July 7, 2025. Complete task parameter system fixes with proper database separation and clean UI display - COMPLETED
-  • Fixed TaskParameterEditorModal to properly separate Opciones Generales (task_parameter_values) from Grupos de Opciones (task_parameter_option_groups)
-  • Corrected query keys and data mapping to display actual option groups instead of individual parameter values in groups section
-  • Updated UI to show only labels without empty parentheses in options display for cleaner presentation
-  • Enhanced options display to show label as primary text with optional name in parentheses for better user clarity
-  • Eliminated all debugging console logs for production-ready code
-  • Fixed database schema mapping: TaskParameterOption interface uses 'name' (code) and 'label' (visible text) fields
-  • Added missing Tailwind CSS variables (--border, --card, --card-foreground, --background, --foreground) for proper theming
-  • Resolved all TypeScript errors and null value warnings throughout parameter management system
+- July 7, 2025. Complete task parameter system redesign with dynamic table interface - COMPLETED
+  • Restructured AdminTaskParameters page from card-based layout to dynamic CustomTable with parameter selector
+  • Added parameter selector dropdown in filters allowing users to choose which parameter's options to display in table
+  • Implemented comprehensive statistics cards showing total parameters, select types, total options, and required parameters
+  • Created unified table interface with columns for label, position, and actions (edit/delete) for parameter options
+  • Added parameter information card showing selected parameter details, type, unit, and option count
+  • Enhanced UI with proper empty states for no parameters, no selection, and non-select parameter types
+  • Fixed cache invalidation for task-parameter-option-groups to ensure real-time updates without F5 refresh
+  • Added type="button" attributes to all action buttons preventing accidental form submissions
+  • System now provides single dynamic table view instead of multiple expandable cards for better data management
 - July 7, 2025. TaskTemplateEditorModal restoration and functionality recovery - COMPLETED
   • Successfully restored TaskTemplateEditorModal.tsx to working state after multiple failed repair attempts
   • Fixed modal appearing as white line by using correct CustomModalLayout structure instead of problematic structure
