@@ -513,22 +513,7 @@ export default function Movements() {
   // Custom filters component
   const customFilters = (
     <div className="space-y-4">
-      <div>
-        <Label className="text-xs font-medium text-muted-foreground">
-          Ordenar por
-        </Label>
-        <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="mt-1">
-            <SelectValue placeholder="Seleccionar orden" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="date">Fecha</SelectItem>
-            <SelectItem value="amount">Monto</SelectItem>
-            <SelectItem value="type">Tipo</SelectItem>
-            <SelectItem value="category">Categoría</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+
 
       <div>
         <Label className="text-xs font-medium text-muted-foreground">
