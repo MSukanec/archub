@@ -30,6 +30,7 @@ const taskParameterSchema = z.object({
     required_error: 'El tipo es requerido' 
   }),
   semantic_role: z.string().optional(),
+  expression_template: z.string().optional(),
   unit_id: z.string().optional(),
   is_required: z.boolean().optional(),
 });
@@ -72,6 +73,7 @@ export function NewTaskParameterModal({
       label: '',
       type: 'text',
       semantic_role: '',
+      expression_template: '',
       unit_id: undefined,
       is_required: false,
     },
@@ -85,6 +87,7 @@ export function NewTaskParameterModal({
         label: parameter.label,
         type: parameter.type,
         semantic_role: parameter.semantic_role || '',
+        expression_template: parameter.expression_template || '',
         unit_id: parameter.unit_id || undefined,
         is_required: parameter.is_required,
       });
@@ -94,6 +97,7 @@ export function NewTaskParameterModal({
         label: '',
         type: 'text',
         semantic_role: '',
+        expression_template: '',
         unit_id: undefined,
         is_required: false,
       });
@@ -107,6 +111,7 @@ export function NewTaskParameterModal({
       const submitData = {
         ...data,
         semantic_role: data.semantic_role?.trim() || undefined,
+        expression_template: data.expression_template?.trim() || undefined,
         unit_id: data.unit_id?.trim() || undefined,
       };
 
@@ -246,6 +251,34 @@ export function NewTaskParameterModal({
                                     <SelectItem value="specification">Especificación</SelectItem>
                                   </SelectContent>
                                 </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name="expression_template"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Plantilla de frase</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    {...field}
+                                    placeholder="de {value}"
+                                    disabled={isSubmitting}
+                                  />
+                                </FormControl>
+                                {field.value && !field.value.includes('{value}') && (
+                                  <div className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded p-2">
+                                    ⚠️ La plantilla debería incluir {'{value}'} como placeholder
+                                  </div>
+                                )}
+                                {field.value && field.value.includes('{value}') && (
+                                  <div className="text-xs text-muted-foreground">
+                                    <span className="font-medium">Frase resultante:</span> {field.value.replace('{value}', 'Ladrillo hueco')}
+                                  </div>
+                                )}
                                 <FormMessage />
                               </FormItem>
                             )}

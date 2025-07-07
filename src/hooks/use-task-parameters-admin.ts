@@ -10,6 +10,7 @@ export interface TaskParameter {
   label: string;
   type: 'text' | 'number' | 'select' | 'boolean';
   semantic_role?: string;
+  expression_template?: string;
   unit_id?: string;
   is_required: boolean;
   created_at: string;
@@ -29,6 +30,7 @@ export interface CreateTaskParameterData {
   label: string;
   type: 'text' | 'number' | 'select' | 'boolean';
   semantic_role?: string;
+  expression_template?: string;
   unit_id?: string;
   is_required: boolean;
 }
@@ -39,6 +41,7 @@ export interface UpdateTaskParameterData {
   label: string;
   type: 'text' | 'number' | 'select' | 'boolean';
   semantic_role?: string;
+  expression_template?: string;
   unit_id?: string;
   is_required: boolean;
 }
@@ -81,7 +84,7 @@ export function useTaskParametersAdmin() {
       // Fetch parameters directly from task_parameters table
       const { data: parameters, error: parametersError } = await supabase
         .from('task_parameters')
-        .select('id, name, label, type, required, created_at')
+        .select('id, name, label, type, semantic_role, expression_template, unit_id, required, created_at')
         .order('created_at');
 
       if (parametersError) {
@@ -152,7 +155,10 @@ export function useCreateTaskParameter() {
           name: parameterData.name,
           label: parameterData.label,
           type: parameterData.type,
-          required: parameterData.required
+          semantic_role: parameterData.semantic_role,
+          expression_template: parameterData.expression_template,
+          unit_id: parameterData.unit_id,
+          required: parameterData.is_required
         }])
         .select()
         .single();
@@ -207,7 +213,10 @@ export function useUpdateTaskParameter() {
           name: updateData.name,
           label: updateData.label,
           type: updateData.type,
-          required: updateData.required
+          semantic_role: updateData.semantic_role,
+          expression_template: updateData.expression_template,
+          unit_id: updateData.unit_id,
+          required: updateData.is_required
         })
         .eq('id', id)
         .select()
