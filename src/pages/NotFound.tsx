@@ -8,10 +8,10 @@ export default function NotFound() {
   const { data: currentUser } = useCurrentUser()
 
   const handleGoHome = () => {
-    if (currentUser?.organization?.id) {
-      setLocation("/organization/dashboard")
+    if (currentUser?.user?.id) {
+      setLocation("/dashboard")
     } else {
-      setLocation("/organizations")
+      setLocation("/")
     }
   }
 
@@ -46,7 +46,7 @@ export default function NotFound() {
             </Button>
             <Button onClick={handleGoHome} className="flex items-center gap-2">
               <Home className="h-4 w-4" />
-              Ir al Dashboard
+              {currentUser?.user?.id ? "Ir al Dashboard" : "Ir al Inicio"}
             </Button>
           </div>
 

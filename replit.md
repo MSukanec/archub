@@ -119,6 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 7, 2025. File reorganization and routing structure cleanup - COMPLETED
+  • Moved Tasks.tsx to OrganizationTasks.tsx in organization directory for better organization
+  • Moved NotFound.tsx to root pages directory for proper 404 handling across all routes
+  • Moved SelectMode.tsx to Onboarding.tsx in root pages directory following naming convention
+  • Updated NotFound.tsx to intelligently redirect based on authentication: unauthenticated users → "/" (landing), authenticated users → "/dashboard"
+  • Fixed Route path="*" component={NotFound} for proper 404 handling of undefined routes
+  • Updated all imports and references in App.tsx to match new file structure
+  • Fixed "Mi Perfil" sidebar button route from /perfil to /profile for proper navigation
+  • Verified all mobile menu routes are correctly configured for new file structure
 - July 7, 2025. Complete route structure reorganization with landing page and authentication system - COMPLETED
   • Created Landing.tsx as public homepage with Supabase-style presentation, features showcase, and strong CTAs
   • Built complete authentication system: Login.tsx, Register.tsx, ForgotPassword.tsx with proper form validation

@@ -37,10 +37,10 @@ import ConstructionGallery from "@/pages/construction/ConstructionGallery";
 import DesignDashboard from "@/pages/design/DesignDashboard";
 import DesignTimeline from "@/pages/design/DesignTimeline";
 import DesignDocumentation from "@/pages/design/DesignDocumentation";
-import Tasks from "@/pages/others/Tasks";
+import OrganizationTasks from "@/pages/organization/OrganizationTasks";
 import Changelog from "@/pages/others/Changelog";
 import Profile from "@/pages/others/Profile";
-import SelectMode from "@/pages/others/SelectMode";
+import Onboarding from "@/pages/Onboarding";
 
 // Admin Pages
 import AdminDashboard from "@/pages/admin/AdminDashboard";
@@ -55,7 +55,7 @@ import AdminMaterialCategories from "@/pages/admin/AdminMaterialCategories";
 import AdminMovementConcepts from "@/pages/admin/AdminMovementConcepts";
 import AdminChangelogs from "@/pages/admin/AdminChangelogs";
 
-import NotFound from "@/pages/others/NotFound";
+import NotFound from "@/pages/NotFound";
 
 function Router() {
   return (
@@ -70,7 +70,7 @@ function Router() {
         {/* Onboarding Route */}
         <Route path="/select-mode">
           <ProtectedRoute>
-            <SelectMode />
+            <Onboarding />
           </ProtectedRoute>
         </Route>
 
@@ -209,7 +209,7 @@ function Router() {
         {/* Other Routes */}
         <Route path="/tasks">
           <ProtectedRoute>
-            <Tasks />
+            <OrganizationTasks />
           </ProtectedRoute>
         </Route>
         <Route path="/changelog">
@@ -303,7 +303,7 @@ function Router() {
         </Route>
 
         {/* 404 Route - Must be last */}
-        <Route component={NotFound} />
+        <Route path="*" component={NotFound} />
       </Switch>
     </AuthRedirect>
   );
