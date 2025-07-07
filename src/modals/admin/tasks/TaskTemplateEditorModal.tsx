@@ -393,18 +393,11 @@ export default function TaskTemplateEditorModal({
   // Generate preview sentence
   const generatePreviewSentence = () => {
     if (!templateParameters.length) {
-      return `${categoryName}.`;
+      return { sentence: `${categoryName}.`, missingTemplates: [] };
     }
 
     // Sort parameters by position
     const sortedParams = [...templateParameters].sort((a, b) => a.position - b.position);
-    
-    // Debug: log parameters to see their structure
-    console.log('Template parameters for preview:', sortedParams.map(p => ({
-      name: p.parameter?.name,
-      expression_template: p.expression_template,
-      position: p.position
-    })));
     
     // Get sample values for different parameter types
     const getSampleValue = (param: TaskTemplateParameter) => {
@@ -602,12 +595,12 @@ export default function TaskTemplateEditorModal({
                       </Label>
                       <div className="text-sm bg-background p-3 rounded border">
                         <span className="font-medium text-foreground">
-                          {typeof previewResult === 'string' ? previewResult : previewResult.sentence}
+                          {previewResult.sentence}
                         </span>
                       </div>
                       
                       {/* Advertencias si faltan expression_template */}
-                      {typeof previewResult === 'object' && previewResult.missingTemplates.length > 0 && (
+                      {previewResult.missingTemplates.length > 0 && (
                         <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded">
                           <div className="flex items-start gap-2">
                             <div className="w-4 h-4 rounded-full bg-yellow-500 flex-shrink-0 mt-0.5">
