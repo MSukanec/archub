@@ -304,50 +304,19 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const menuContent = (
     <div className="fixed inset-0 flex flex-col w-full h-full" style={{ backgroundColor: 'var(--menues-bg)', zIndex: 9999 }}>
       {/* Spacer to leave room at the top */}
-      <div className="h-16" />
+      <div className="h-16" onClick={onClose} />
       
-      {/* Menu Container - not full screen */}
-      <div className="flex-1 mx-4 mb-4 rounded-lg border shadow-lg overflow-hidden" style={{ backgroundColor: 'var(--menues-bg)', borderColor: 'var(--menues-border)' }}>
-        {/* Header */}
-        <div className="h-14 flex items-center justify-between px-4 border-b" style={{ borderColor: 'var(--menues-border)' }}>
-          <h1 className="text-lg font-semibold" style={{ color: 'var(--menues-fg)' }}>
-            {currentSidebarContext === 'organization' && 'Organización'}
-            {currentSidebarContext === 'project' && 'Proyecto'}
-            {currentSidebarContext === 'design' && 'Diseño'}
-            {currentSidebarContext === 'construction' && 'Obra'}
-            {currentSidebarContext === 'finances' && 'Finanzas'}
-            {currentSidebarContext === 'commercialization' && 'Comercialización'}
-            {currentSidebarContext === 'data' && 'Datos Básicos'}
-            {currentSidebarContext === 'postsale' && 'Post-Venta'}
-            {currentSidebarContext === 'admin' && 'Administración'}
-          </h1>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="hover:bg-transparent"
-            style={{ color: 'var(--menues-fg)' }}
-          >
-            <X className="h-5 w-5" />
-          </Button>
-        </div>
+      {/* Menu Container - exactly like Supabase */}
+      <div className="flex-1 mx-0 mb-0 rounded-none overflow-hidden" style={{ backgroundColor: 'var(--menues-bg)' }}>
 
-        {/* Navigation Menu - Flex grow para ocupar el espacio disponible */}
-        <div className="flex-1 px-4 py-3 overflow-y-auto">
+        {/* Navigation Menu - exactly like Supabase */}
+        <div className="flex-1 px-0 py-0 overflow-y-auto">
         <nav className={cn(
-          "space-y-0.5 transition-all duration-300 ease-in-out",
+          "space-y-1 transition-all duration-300 ease-in-out",
           isAnimating && animationDirection === 'left' && "transform translate-x-full opacity-0",
           isAnimating && animationDirection === 'right' && "transform -translate-x-full opacity-0",
           !isAnimating && "transform translate-x-0 opacity-100"
         )}>
-          {/* Context Title */}
-          {sidebarContextTitles[currentSidebarContext] && (
-            <div className="px-3 py-2 mb-2">
-              <span className="text-xs font-medium text-[var(--menues-fg)] opacity-60">
-                {sidebarContextTitles[currentSidebarContext]}
-              </span>
-            </div>
-          )}
           {navigationItems.map((item: any, index: number) => (
             <div key={`${item.label || 'divider'}-${index}`}>
               {/* Divider */}
@@ -360,11 +329,12 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                     <CustomRestricted reason="coming_soon">
                       <button
                         onClick={item.isAccordion ? item.onToggle : (item.onClick || (() => handleNavigation(item.href)))}
-                        className="flex w-full items-center gap-2.5 px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                        style={{
-                          color: 'var(--sidebar-foreground)',
-                          backgroundColor: location === item.href ? 'var(--sidebar-accent)' : 'transparent'
-                        }}
+                        className={cn(
+                          "flex w-full items-center gap-3 px-4 py-3 text-sm font-medium border border-transparent transition-all duration-200",
+                          location === item.href 
+                            ? "bg-gray-700 border-gray-600 text-white" 
+                            : "hover:bg-gray-800 hover:border-gray-700 text-gray-300 hover:text-white"
+                        )}
                       >
                         <item.icon className="h-4 w-4" />
                         {item.label}
@@ -382,11 +352,12 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                   ) : (
                     <button
                       onClick={item.isAccordion ? item.onToggle : (item.onClick || (() => handleNavigation(item.href)))}
-                      className="flex w-full items-center gap-2.5 px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                      style={{
-                        color: 'var(--sidebar-foreground)',
-                        backgroundColor: location === item.href ? 'var(--sidebar-accent)' : 'transparent'
-                      }}
+                      className={cn(
+                        "flex w-full items-center gap-3 px-4 py-3 text-sm font-medium border border-transparent transition-all duration-200",
+                        location === item.href 
+                          ? "bg-gray-700 border-gray-600 text-white" 
+                          : "hover:bg-gray-800 hover:border-gray-700 text-gray-300 hover:text-white"
+                      )}
                     >
                       <item.icon className="h-4 w-4" />
                       {item.label}
@@ -404,17 +375,17 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
                   {/* Accordion content */}
                   {item.isAccordion && item.expanded && item.items && (
-                    <div className="ml-6 mt-1 space-y-1">
+                    <div className="mt-0 space-y-0">
                       {item.items.map((subItem: any, subIndex: number) => (
                         <button
                           key={subIndex}
                           onClick={() => handleNavigation(subItem.href)}
-                          className="flex w-full items-center gap-2 px-3 py-1.5 text-sm rounded-md transition-all duration-200 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                          style={{
-                            color: 'var(--sidebar-foreground)',
-                            backgroundColor: location === subItem.href ? 'var(--sidebar-accent)' : 'transparent',
-                            opacity: 0.8
-                          }}
+                          className={cn(
+                            "flex w-full items-center gap-3 px-8 py-2 text-sm font-medium border border-transparent transition-all duration-200",
+                            location === subItem.href 
+                              ? "bg-gray-700 border-gray-600 text-white" 
+                              : "hover:bg-gray-800 hover:border-gray-700 text-gray-400 hover:text-white"
+                          )}
                         >
                           <subItem.icon className="h-4 w-4" />
                           {subItem.label}
@@ -427,146 +398,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
             </div>
           ))}
         </nav>
-        </div>
-
-        {/* Footer - Fijo en la parte inferior */}
-        <div className="px-4 py-3 border-t relative" style={{ borderColor: 'var(--menues-border)' }}>
-        {/* Organization and Project Selectors */}
-        <div className="space-y-3 mb-4">
-          {/* Organization Selector */}
-          <div className="relative">
-            <div className="text-xs font-medium opacity-70 mb-2" style={{ color: 'var(--menues-fg)' }}>
-              Organización activa:
-            </div>
-            <button
-              onClick={() => setExpandedOrgSelector(!expandedOrgSelector)}
-              className="flex w-full items-center justify-between px-3 py-2 text-sm font-medium rounded-lg border transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
-              style={{
-                color: 'var(--menues-fg)',
-                backgroundColor: 'transparent',
-                borderColor: 'var(--menues-border)'
-              }}
-            >
-              <div className="flex items-center gap-2">
-                <Building className="h-4 w-4" />
-                <span className="truncate">{currentOrganization?.name || 'Sin organización'}</span>
-              </div>
-              <ChevronDown className={cn("h-4 w-4 transition-transform", expandedOrgSelector && "rotate-180")} />
-            </button>
-
-            {expandedOrgSelector && (
-              <div className="absolute bottom-full left-0 right-0 mb-2 max-h-32 overflow-y-auto scrollbar-hide space-y-1 bg-[var(--card-bg)] border border-[var(--menues-border)] rounded-lg p-2 shadow-lg" style={{ zIndex: 10000 }}>
-                {sortedOrganizations.map((org: any) => (
-                  <button
-                    key={org.id}
-                    onClick={() => handleOrganizationSelect(org.id)}
-                    className="flex w-full items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
-                    style={{
-                      color: 'var(--menues-fg)',
-                      backgroundColor: org.id === currentOrganization?.id ? 'var(--accent)' : 'transparent',
-                      opacity: org.id === currentOrganization?.id ? 1 : 0.8,
-                    }}
-                  >
-                    <span className="truncate">{org.name}</span>
-                    {org.id === currentOrganization?.id && (
-                      <div className="h-2 w-2 rounded-full bg-green-500 flex-shrink-0" />
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Project Selector */}
-          <div className="relative">
-            <div className="text-xs font-medium opacity-70 mb-2" style={{ color: 'var(--menues-fg)' }}>
-              Proyecto activo:
-            </div>
-            <button
-              onClick={() => setExpandedProjectSelector(!expandedProjectSelector)}
-              className="flex w-full items-center justify-between px-3 py-2 text-sm font-medium rounded-lg border transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
-              style={{
-                color: 'var(--menues-fg)',
-                backgroundColor: 'transparent',
-                borderColor: 'var(--menues-border)'
-              }}
-            >
-              <div className="flex items-center gap-2">
-                <FolderOpen className="h-4 w-4" />
-                <span className="truncate">
-                  {effectiveCurrentProject 
-                    ? projectsData?.find((p: any) => p.id === effectiveCurrentProject)?.name || 'Sin proyecto'
-                    : 'Sin proyecto'
-                  }
-                </span>
-              </div>
-              <ChevronDown className={cn("h-4 w-4 transition-transform", expandedProjectSelector && "rotate-180")} />
-            </button>
-
-            {expandedProjectSelector && (
-              <div className="absolute bottom-full left-0 right-0 mb-2 max-h-32 overflow-y-auto scrollbar-hide space-y-1 bg-[var(--card-bg)] border border-[var(--menues-border)] rounded-lg p-2 shadow-lg" style={{ zIndex: 10000 }}>
-                {projectsData?.map((project: any) => (
-                  <button
-                    key={project.id}
-                    onClick={() => handleProjectSelect(project.id)}
-                    className="flex w-full items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
-                    style={{
-                      color: 'var(--menues-fg)',
-                      backgroundColor: project.id === effectiveCurrentProject ? 'var(--accent)' : 'transparent',
-                      opacity: project.id === effectiveCurrentProject ? 1 : 0.8,
-                    }}
-                  >
-                    <span className="truncate">{project.name}</span>
-                    {project.id === effectiveCurrentProject && (
-                      <div className="h-2 w-2 rounded-full bg-green-500 flex-shrink-0" />
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Action Buttons Grid - Optimized height */}
-        <div className={cn("h-10 grid gap-2 items-center", isAdmin ? "grid-cols-3" : "grid-cols-2")}>
-          <button
-            onClick={() => handleNavigation('/profile')}
-            className="flex flex-col items-center justify-center py-1 px-2 rounded-md transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
-            style={{ 
-              color: 'var(--menues-fg)',
-              backgroundColor: 'transparent'
-            }}
-          >
-            <UserCircle className="h-4 w-4" />
-            <span className="text-xs font-medium mt-0.5">Perfil</span>
-          </button>
-          
-          <button
-            onClick={() => handleNavigation('/changelog')}
-            className="flex flex-col items-center justify-center py-1 px-2 rounded-md transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
-            style={{ 
-              color: 'var(--menues-fg)',
-              backgroundColor: 'transparent'
-            }}
-          >
-            <History className="h-4 w-4" />
-            <span className="text-xs font-medium mt-0.5">Changelog</span>
-          </button>
-          
-          {isAdmin && (
-            <button
-              onClick={() => handleNavigation('/admin/dashboard', 'admin')}
-              className="flex flex-col items-center justify-center py-1 px-2 rounded-md transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
-              style={{ 
-                color: 'var(--menues-fg)',
-                backgroundColor: 'transparent'
-              }}
-            >
-              <Shield className="h-4 w-4" />
-              <span className="text-xs font-medium mt-0.5">Admin</span>
-            </button>
-          )}
-        </div>
         </div>
       </div>
     </div>
