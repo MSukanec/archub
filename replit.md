@@ -119,6 +119,16 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 7, 2025. Modern Landing page redesign with dark theme and authentication state detection - COMPLETED
+  • Completely rebuilt Landing.tsx using dark theme with CSS variables from index.css (--layout-bg, --text-default, --accent, etc.)
+  • Implemented authentication state detection to show user avatar and Dashboard button when logged in
+  • Reorganized header layout like Supabase: logo + navigation (left), GitHub stars + auth buttons (right)
+  • Updated all buttons to use proper CSS variables: --accent for primary, --button-secondary-bg for secondary, --button-ghost-bg for ghost
+  • Added user dropdown menu with logout functionality when authenticated
+  • Replaced hardcoded blue colors with --accent variable throughout all authentication pages (Login, Register, ForgotPassword)
+  • Enhanced Google OAuth functionality in Login and Register pages using existing signInWithGoogle from authStore
+  • Applied professional dark theme styling matching Supabase aesthetic with proper contrast and readability
+  • Hero section follows "Build in a weekend, Scale to millions" messaging pattern with construction industry focus
 - July 7, 2025. File reorganization and routing structure cleanup - COMPLETED
   • Moved Tasks.tsx to OrganizationTasks.tsx in organization directory for better organization
   • Moved NotFound.tsx to root pages directory for proper 404 handling across all routes
