@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Settings, Plus, Edit, Trash2, Eye, Building2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -15,25 +15,6 @@ import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState';
 import { useTaskParametersAdmin, useDeleteTaskParameter, useDeleteTaskParameterOption, useTaskParameterOptionGroups, useTaskParameterOptionGroupItems, TaskParameter, TaskParameterOption } from '@/hooks/use-task-parameters-admin';
 import { NewTaskParameterModal } from '@/modals/admin/tasks/NewTaskParameterModal';
 import { NewTaskParameterOptionModal } from '@/modals/admin/tasks/NewTaskParameterOptionModal';
-
-// Component to display group badges for an option
-function GroupBadges({ optionId, optionToGroupsMap }: { optionId: string, optionToGroupsMap: Record<string, string[]> }) {
-  const groups = optionToGroupsMap[optionId] || [];
-  
-  return (
-    <div className="flex flex-wrap gap-1">
-      {groups.length > 0 ? (
-        groups.map((groupName, index) => (
-          <Badge key={index} variant="secondary" className="text-xs">
-            {groupName}
-          </Badge>
-        ))
-      ) : (
-        <span className="text-xs text-muted-foreground">Sin grupos</span>
-      )}
-    </div>
-  );
-}
 
 
 export default function AdminTaskParameters() {
@@ -266,14 +247,11 @@ export default function AdminTaskParameters() {
       {
         key: 'groups',
         label: 'Grupos',
-        render: (value: TaskParameterOption) => {
-          return (
-            <GroupBadges 
-              optionId={value.id}
-              optionToGroupsMap={optionToGroupsMap}
-            />
-          );
-        },
+        render: (value: TaskParameterOption) => (
+          <div className="flex flex-wrap gap-1">
+            <span className="text-xs text-muted-foreground">Por implementar</span>
+          </div>
+        ),
         sortable: false
       },
       {
