@@ -400,19 +400,6 @@ export default function AdminTaskParameters() {
                   
                   <Button
                     size="sm"
-                    variant="outline"
-                    className="h-7 px-2 text-xs"
-                    onClick={() => {
-                      setEditingParameter(selectedParameter);
-                      setIsEditorModalOpen(true);
-                    }}
-                  >
-                    <Eye className="w-3 h-3 mr-1" />
-                    Gestionar Grupos
-                  </Button>
-                  
-                  <Button
-                    size="sm"
                     variant="ghost"
                     className="h-7 px-2 text-xs"
                     onClick={() => {
@@ -473,7 +460,7 @@ export default function AdminTaskParameters() {
         onClose={() => {
           setIsOptionModalOpen(false);
           setEditingOption(null);
-          setSelectedParameterId('');
+          // NO deseleccionar el parámetro: setSelectedParameterId('');
         }}
         parameterId={selectedParameterId}
         parameterLabel={selectedParameter?.label || ''}
