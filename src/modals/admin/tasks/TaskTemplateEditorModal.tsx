@@ -378,6 +378,58 @@ export default function TaskTemplateEditorModal({
     })))
   };
 
+  // Generate preview sentence
+  const generatePreviewSentence = () => {
+    if (!templateParameters.length) {
+      return `${categoryName}.`;
+    }
+
+    // Sort parameters by position
+    const sortedParams = [...templateParameters].sort((a, b) => a.position - b.position);
+    
+    // Get sample values for different parameter types
+    const getSampleValue = (param: TaskTemplateParameter) => {
+      if (!param.parameter) return "Ejemplo";
+      
+      switch (param.parameter.type) {
+        case 'text':
+          return param.parameter.name === 'brick_type' ? 'Ladrillo Hueco' : 
+                 param.parameter.name === 'material' ? 'Hormigón' : 'Ejemplo';
+        case 'number':
+          return param.parameter.name.includes('thickness') || param.parameter.name.includes('espesor') ? '12cm' :
+                 param.parameter.name.includes('height') || param.parameter.name.includes('altura') ? '2.50m' : '10';
+        case 'select':
+          return param.parameter.name === 'marcas' ? 'Klaukol' :
+                 param.parameter.name === 'brands' ? 'Klaukol' :
+                 param.parameter.name === 'colors' ? 'Blanco' : 'Opción';
+        case 'boolean':
+          return 'Sí';
+        default:
+          return 'Ejemplo';
+      }
+    };
+
+    // Build sentence parts
+    let sentence = categoryName;
+    const missingTemplates: string[] = [];
+
+    sortedParams.forEach(param => {
+      if (param.expression_template && param.expression_template.trim()) {
+        const sampleValue = getSampleValue(param);
+        const fragment = param.expression_template.replace('{value}', sampleValue);
+        sentence += ` ${fragment}`;
+      } else {
+        missingTemplates.push(param.parameter?.name || 'parámetro');
+      }
+    });
+
+    sentence += '.';
+    
+    return { sentence, missingTemplates };
+  };
+
+  const previewResult = generatePreviewSentence();
+
   if (!open) return null;
 
   const selectedParameter = availableParameters.find(p => p.id === newParameterId);
@@ -519,6 +571,53 @@ export default function TaskTemplateEditorModal({
                     )}
                   </Droppable>
                 </DragDropContext>
+              )}
+
+              {/* Vista Previa de la Frase Generada */}
+              {template && (
+                <div className="mt-6 p-4 bg-muted/30 rounded-lg border">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-1">
+                      <Label className="text-sm font-medium text-foreground mb-2 block">
+                        Vista previa de la frase generada:
+                      </Label>
+                      <div className="text-sm bg-background p-3 rounded border">
+                        <span className="font-medium text-foreground">
+                          {typeof previewResult === 'string' ? previewResult : previewResult.sentence}
+                        </span>
+                      </div>
+                      
+                      {/* Advertencias si faltan expression_template */}
+                      {typeof previewResult === 'object' && previewResult.missingTemplates.length > 0 && (
+                        <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded">
+                          <div className="flex items-start gap-2">
+                            <div className="w-4 h-4 rounded-full bg-yellow-500 flex-shrink-0 mt-0.5">
+                              <span className="text-xs text-white font-bold block text-center">!</span>
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                                Parámetros sin plantilla de expresión:
+                              </p>
+                              <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-1">
+                                {previewResult.missingTemplates.join(', ')}
+                              </p>
+                              <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
+                                Agrega un <code className="bg-yellow-100 dark:bg-yellow-800 px-1 rounded">expression_template</code> para que aparezcan en la frase final.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Información de ayuda */}
+                      <div className="mt-3 text-xs text-muted-foreground">
+                        <p>• La frase se genera automáticamente al crear tareas usando esta plantilla</p>
+                        <p>• Los valores mostrados son ejemplos - en tareas reales se usarán los valores seleccionados</p>
+                        <p>• Los parámetros se ordenan según su posición (arrastra para reordenar)</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
           </CustomModalBody>
