@@ -15,6 +15,7 @@ import {
   DollarSign,
   Calculator,
   Package,
+  Package2,
   FileText,
   Calendar,
   ChevronDown,
@@ -291,8 +292,9 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         items: [
           { icon: CheckSquare, label: 'Tareas', href: '/admin/tasks' },
           { icon: CheckSquare, label: 'Tareas Generadas', href: '/admin/generated-tasks' },
-          { icon: FileText, label: 'Plantillas de Tareas', href: '/admin/task-templates' },
           { icon: Settings, label: 'Parámetros', href: '/admin/task-parameters' },
+          { icon: Package2, label: 'Categorías', href: '/admin/categories' },
+          { icon: FileText, label: 'Plantillas de Tareas', href: '/admin/task-templates' },
         ]
       },
       {

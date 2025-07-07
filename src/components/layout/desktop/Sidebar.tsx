@@ -27,6 +27,7 @@ import {
   Search,
   Crown,
   Package,
+  Package2,
   Shield,
   Star,
   Zap,
@@ -280,6 +281,7 @@ export function Sidebar() {
           { icon: CheckSquare, label: 'Tareas', href: '/admin/tasks' },
           { icon: Zap, label: 'Tareas Generadas', href: '/admin/generated-tasks' },
           { icon: Settings, label: 'Parámetros', href: '/admin/task-parameters' },
+          { icon: Package2, label: 'Categorías', href: '/admin/categories' },
           { icon: FileCode, label: 'Categorías de Tareas', href: '/admin/task-categories-templates' }
         ]
       },

@@ -54,6 +54,7 @@ import AdminMaterials from "@/pages/admin/AdminMaterials";
 import AdminMaterialCategories from "@/pages/admin/AdminMaterialCategories";
 import AdminMovementConcepts from "@/pages/admin/AdminMovementConcepts";
 import AdminChangelogs from "@/pages/admin/AdminChangelogs";
+import AdminCategories from "@/pages/admin/AdminCategories";
 
 import NotFound from "@/pages/NotFound";
 
@@ -270,6 +271,13 @@ function Router() {
           <ProtectedRoute>
             <AdminProtectedRoute>
               <AdminTaskCategoriesTemplates />
+            </AdminProtectedRoute>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/admin/categories">
+          <ProtectedRoute>
+            <AdminProtectedRoute>
+              <AdminCategories />
             </AdminProtectedRoute>
           </ProtectedRoute>
         </Route>
