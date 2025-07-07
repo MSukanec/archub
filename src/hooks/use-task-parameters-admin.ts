@@ -84,7 +84,7 @@ export function useTaskParametersAdmin() {
       // Fetch parameters directly from task_parameters table
       const { data: parameters, error: parametersError } = await supabase
         .from('task_parameters')
-        .select('id, name, label, type, semantic_role, expression_template, unit_id, required, created_at')
+        .select('id, name, label, type, required, created_at')
         .order('created_at');
 
       if (parametersError) {
@@ -155,9 +155,6 @@ export function useCreateTaskParameter() {
           name: parameterData.name,
           label: parameterData.label,
           type: parameterData.type,
-          semantic_role: parameterData.semantic_role,
-          expression_template: parameterData.expression_template,
-          unit_id: parameterData.unit_id,
           required: parameterData.is_required
         }])
         .select()
@@ -213,9 +210,6 @@ export function useUpdateTaskParameter() {
           name: updateData.name,
           label: updateData.label,
           type: updateData.type,
-          semantic_role: updateData.semantic_role,
-          expression_template: updateData.expression_template,
-          unit_id: updateData.unit_id,
           required: updateData.is_required
         })
         .eq('id', id)
