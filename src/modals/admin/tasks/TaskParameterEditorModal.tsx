@@ -167,29 +167,29 @@ export function TaskParameterEditorModal({
     queryFn: async () => {
       if (!parameter?.id || !selectedGroupForItems?.id) return [];
       
-      // Get all parameter values
+      // Get all parameter options (these are the actual options we see in "Opciones Generales")
       const { data: allValues, error: valuesError } = await supabase
-        .from('task_parameter_values')
-        .select('id, value')
+        .from('task_parameter_options')
+        .select('id, name, label')
         .eq('parameter_id', parameter.id)
-        .order('value');
+        .order('label');
       
       if (valuesError) throw valuesError;
       
-      // Get currently selected values for this group
+      // Get currently selected options for this group
       const { data: selectedValues, error: selectedError } = await supabase
         .from('task_parameter_option_group_items')
-        .select('value_id')
+        .select('parameter_value_id')
         .eq('option_group_id', selectedGroupForItems.id);
       
       if (selectedError) throw selectedError;
       
-      const selectedValueIds = new Set(selectedValues?.map(item => item.value_id) || []);
+      const selectedValueIds = new Set(selectedValues?.map(item => item.parameter_value_id) || []);
       
-      const result = (allValues || []).map(value => ({
-        id: value.id,
-        value: value.value,
-        selected: selectedValueIds.has(value.id)
+      const result = (allValues || []).map(option => ({
+        id: option.id,
+        value: option.label, // Use label for display
+        selected: selectedValueIds.has(option.id)
       }));
       
       console.log('Valores del parámetro:', allValues);
@@ -364,7 +364,7 @@ export function TaskParameterEditorModal({
         .from('task_parameter_option_group_items')
         .insert({
           option_group_id: groupId,
-          value_id: valueId,
+          parameter_value_id: valueId,
         })
         .select()
         .single();
@@ -387,7 +387,7 @@ export function TaskParameterEditorModal({
       const { error } = await supabase
         .from('task_parameter_option_group_items')
         .delete()
-        .match({ option_group_id: groupId, value_id: valueId });
+        .match({ option_group_id: groupId, parameter_value_id: valueId });
       
       if (error) throw error;
     },
