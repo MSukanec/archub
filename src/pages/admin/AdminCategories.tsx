@@ -11,6 +11,7 @@ import { HierarchicalCategoryTree } from '@/components/ui-custom/misc/Hierarchic
 
 import { useTaskCategoriesAdmin, useAllTaskCategories, useDeleteTaskCategory, TaskCategoryAdmin } from '@/hooks/use-task-categories-admin';
 import { NewAdminTaskCategoryModal } from '@/modals/admin/NewAdminTaskCategoryModal';
+import { NewTaskCategoryTemplateModal } from '@/modals/admin/NewTaskCategoryTemplateModal';
 
 export default function AdminCategories() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -20,6 +21,10 @@ export default function AdminCategories() {
   // Modal states
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<TaskCategoryAdmin | null>(null);
+  
+  // Template modal states
+  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
+  const [templateCategory, setTemplateCategory] = useState<TaskCategoryAdmin | null>(null);
   
   // Delete confirmation state
   const [deleteCategoryId, setDeleteCategoryId] = useState<string | null>(null);
@@ -122,10 +127,12 @@ export default function AdminCategories() {
     }
   };
 
-  // Handle template action (placeholder)
+  // Handle template action - solo para categorías finales (3 letras)
   const handleTemplateAction = (category: TaskCategoryAdmin) => {
-    console.log('Template action for category:', category.name);
-    // TODO: Implementar funcionalidad de plantilla
+    if (category.code && category.code.length === 3) {
+      setTemplateCategory(category);
+      setIsTemplateModalOpen(true);
+    }
   };
 
   // Clear filters
@@ -269,6 +276,18 @@ export default function AdminCategories() {
         category={editingCategory || undefined}
         allCategories={allCategories}
       />
+
+      {/* Template Modal */}
+      {templateCategory && (
+        <NewTaskCategoryTemplateModal
+          open={isTemplateModalOpen}
+          onClose={() => {
+            setIsTemplateModalOpen(false);
+            setTemplateCategory(null);
+          }}
+          category={templateCategory}
+        />
+      )}
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!deleteCategoryId} onOpenChange={() => setDeleteCategoryId(null)}>

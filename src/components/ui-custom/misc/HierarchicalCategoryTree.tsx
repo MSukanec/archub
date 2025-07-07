@@ -99,16 +99,18 @@ export function HierarchicalCategoryTree({
               <Edit className="h-3 w-3" />
             </Button>
             
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onTemplate(category)}
-              className="h-6 w-6 p-0 hover:bg-accent text-muted-foreground hover:text-foreground"
-              disabled // Por ahora sin función
-              title="Plantilla"
-            >
-              <FileText className="h-3 w-3" />
-            </Button>
+            {/* Solo mostrar botón PLANTILLA en categorías finales (3 letras) */}
+            {category.code && category.code.length === 3 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onTemplate(category)}
+                className="h-6 w-6 p-0 hover:bg-accent text-muted-foreground hover:text-foreground"
+                title="Plantilla"
+              >
+                <FileText className="h-3 w-3" />
+              </Button>
+            )}
             
             <Button
               variant="ghost"
