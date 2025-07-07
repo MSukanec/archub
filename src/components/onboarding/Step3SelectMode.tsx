@@ -78,7 +78,7 @@ export function Step3SelectMode({ isOnboarding = true, onFinish, isLoading = fal
     if (onFinish) {
       setTimeout(() => {
         onFinish();
-      }, 100);
+      }, 300); // Aumentar el delay para asegurar que el estado se actualice
     }
   };
 

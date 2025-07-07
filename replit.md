@@ -119,6 +119,14 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 7, 2025. Fixed onboarding system redirect loop and double-click issue - COMPLETED
+  • Fixed ProtectedRoute.tsx logic that was incorrectly redirecting users with completed onboarding back to select-mode
+  • Changed redirect condition to only check onboarding_completed status instead of both completion and user_type
+  • Users with onboarding_completed: TRUE are no longer redirected to onboarding regardless of user_type status
+  • Added personal data verification as additional safety check for edge cases
+  • Increased Step3SelectMode setTimeout delay from 100ms to 300ms to fix double-click requirement
+  • Step 3 mode selection now properly completes onboarding with single click and redirects to dashboard
+  • Enhanced console logging to debug onboarding flow and user state verification
 - July 6, 2025. Enhanced project navigation with new sidebar structure and mobile organization selector fix - COMPLETED
   • Fixed mobile menu organization selector to automatically update project selection (like header behavior)
   • Added "Datos Básicos" button above "Diseño" in project sidebar with new "data" context navigation
