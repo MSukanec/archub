@@ -8,10 +8,8 @@ import { CustomModalBody } from "@/components/ui-custom/modal/CustomModalBody";
 import { CustomModalFooter } from "@/components/ui-custom/modal/CustomModalFooter";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useCreateTaskTemplate, useUpdateTaskTemplate, type TaskTemplate } from "@/hooks/use-task-templates-admin";
-import { useState } from "react";
-import { useTaskParametersAdmin } from "@/hooks/use-task-parameters-admin";
 import { Textarea } from "@/components/ui/textarea";
+import { useCreateTaskTemplate, useUpdateTaskTemplate, type TaskTemplate } from "@/hooks/use-task-templates-admin";
 import { type TaskCategoryAdmin } from "@/hooks/use-task-categories-admin";
 
 const formSchema = z.object({
@@ -37,7 +35,6 @@ export function NewTaskCategoryTemplateModal({
   category
 }: NewTaskCategoryTemplateModalProps) {
   const isEditing = !!template;
-  const [isLoading, setIsLoading] = useState(false);
   
   const createTaskTemplate = useCreateTaskTemplate();
   const updateTaskTemplate = useUpdateTaskTemplate();
@@ -52,20 +49,19 @@ export function NewTaskCategoryTemplateModal({
     },
   });
 
-  // Set form values when editing
+  // Update form when template changes
   useEffect(() => {
-    if (template && isEditing) {
+    if (isEditing && template) {
       form.reset({
-        name: template.name,
-        code_prefix: template.code_prefix,
-        name_template: template.name_template,
-        action_id: template.action_id,
+        name: template.name || "",
+        code_prefix: template.code_prefix || "",
+        name_template: template.name_template || "",
+        action_id: template.action_id || null,
       });
-    } else if (category) {
-      // Auto-fill code_prefix with category code when creating new template
+    } else if (!isEditing) {
       form.reset({
         name: "",
-        code_prefix: category.code || "",
+        code_prefix: "",
         name_template: "",
         action_id: null,
       });
@@ -74,9 +70,6 @@ export function NewTaskCategoryTemplateModal({
 
   const onSubmit = async (data: FormData) => {
     try {
-      setIsLoading(true);
-      console.log('Submitting template data:', data);
-      
       if (isEditing && template) {
         await updateTaskTemplate.mutateAsync({
           id: template.id,
@@ -93,98 +86,91 @@ export function NewTaskCategoryTemplateModal({
       onClose();
     } catch (error) {
       console.error('Error saving task template:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
   return (
-    <CustomModalLayout open={open} onClose={onClose}>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <CustomModalHeader
-            title={isEditing ? "Editar Plantilla de Tarea" : "Nueva Plantilla de Tarea"}
-            onClose={onClose}
-          />
+    <CustomModalLayout open={open} onOpenChange={onClose}>
+      <CustomModalHeader
+        title={isEditing ? "Editar Plantilla de Tarea" : "Nueva Plantilla de Tarea"}
+        onClose={onClose}
+      />
 
-          <CustomModalBody columns={1}>
-            <div className="space-y-4">
-              {/* Category Info */}
-              <div className="p-3 bg-muted/50 rounded-md border">
-                <p className="text-sm font-medium">Categoría: {category.name}</p>
-                {category.code && (
-                  <p className="text-xs text-muted-foreground">Código: {category.code}</p>
-                )}
-              </div>
-
-              {/* Template Name */}
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nombre de la Plantilla</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Ej: Plantilla para muros de ladrillo" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Code Prefix */}
-              <FormField
-                control={form.control}
-                name="code_prefix"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Prefijo de Código</FormLabel>
-                    <FormControl>
-                      <Input 
-                        {...field} 
-                        placeholder="Ej: MUR" 
-                        maxLength={4}
-                        style={{ textTransform: 'uppercase' }}
-                        onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Template Builder */}
-              <FormField
-                control={form.control}
-                name="name_template"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Plantilla de Nombre</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        {...field} 
-                        placeholder="Ej: Ejecución de {{tipo_muro}} de {{material}} en {{ubicacion}}"
-                        className="min-h-[80px]"
-                      />
-                    </FormControl>
-                    <p className="text-xs text-muted-foreground">
-                      Usa dobles llaves para parámetros: {`{{nombre_parametro}}`}
-                    </p>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+      <CustomModalBody columns={1}>
+        <Form {...form}>
+          <div className="space-y-4">
+            {/* Category Info */}
+            <div className="p-3 bg-muted/50 rounded-md border">
+              <p className="text-sm font-medium">Categoría: {category.name}</p>
+              {category.code && (
+                <p className="text-xs text-muted-foreground">Código: {category.code}</p>
+              )}
             </div>
-          </CustomModalBody>
 
-          <CustomModalFooter
-            onCancel={onClose}
-            onSave={form.handleSubmit(onSubmit)}
-            saveText={isEditing ? "Actualizar Plantilla" : "Crear Plantilla"}
-            loading={isLoading || createTaskTemplate.isPending || updateTaskTemplate.isPending}
-          />
-        </form>
-      </Form>
+            {/* Template Name */}
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nombre de la Plantilla</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Ej: Plantilla para muros de ladrillo" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Code Prefix */}
+            <FormField
+              control={form.control}
+              name="code_prefix"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Prefijo del Código <span className="text-destructive">*</span></FormLabel>
+                  <FormControl>
+                    <Input 
+                      {...field} 
+                      placeholder="Ej: MSM" 
+                      maxLength={4}
+                      className="uppercase"
+                      onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Name Template */}
+            <FormField
+              control={form.control}
+              name="name_template"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Plantilla de Nombre <span className="text-destructive">*</span></FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      {...field} 
+                      placeholder="Ej: Ejecución de {{tipo_muro}} de {{material}}"
+                      rows={3}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </Form>
+      </CustomModalBody>
+
+      <CustomModalFooter
+        onCancel={onClose}
+        onSave={form.handleSubmit(onSubmit)}
+        saveText={isEditing ? "Actualizar Plantilla" : "Crear Plantilla"}
+        loading={createTaskTemplate.isPending || updateTaskTemplate.isPending}
+      />
     </CustomModalLayout>
   );
 }
