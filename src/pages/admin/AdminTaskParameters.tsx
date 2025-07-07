@@ -238,22 +238,35 @@ export default function AdminTaskParameters() {
         render: (value: TaskParameterOption) => (
           <div className="text-sm text-muted-foreground">{value.name}</div>
         )
-      }
-    ];
-
-    const tableActions = [
-      {
-        label: "Editar",
-        onClick: (value: TaskParameterOption) => {
-          setEditingOption(value);
-          setSelectedParameterId(parameter.parameter_id);
-          setIsOptionModalOpen(true);
-        }
       },
       {
-        label: "Eliminar",
-        onClick: (value: TaskParameterOption) => setDeleteOptionId(value.id),
-        variant: "destructive" as const
+        key: 'actions',
+        label: 'Acciones',
+        render: (value: TaskParameterOption) => (
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-6 w-6 p-0"
+              onClick={() => {
+                setEditingOption(value);
+                setSelectedParameterId(parameter.parameter_id);
+                setIsOptionModalOpen(true);
+              }}
+            >
+              <Edit className="h-3 w-3" />
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+              onClick={() => setDeleteOptionId(value.id)}
+            >
+              <Trash2 className="h-3 w-3" />
+            </Button>
+          </div>
+        ),
+        sortable: false
       }
     ];
 
@@ -261,7 +274,6 @@ export default function AdminTaskParameters() {
       <CustomTable
         data={parameterValues}
         columns={columns}
-        actions={tableActions}
         searchPlaceholder="Buscar opciones..."
       />
     );
