@@ -1,0 +1,75 @@
+Quiero que mejores el modal `EditTaskParameterModal.tsx` para que permita asignar qué opciones (`task_parameter_values`) pertenecen a cada grupo (`task_parameter_option_groups`) de un parámetro de tipo `select`.
+
+Actualmente puedo crear grupos, pero necesito que al hacer clic en el icono 👁️ o ✏️ de un grupo se despliegue una interfaz que permita seleccionar las opciones asociadas a ese grupo (como un checklist).
+
+---
+
+### 🧩 Requisitos funcionales:
+
+#### 1. Al hacer clic en un grupo:
+
+- Mostrá todas las opciones generales (`task_parameter_values`) del parámetro actual
+- Por cada opción, un `checkbox` que indique si esa opción pertenece al grupo
+
+#### 2. Al marcar/desmarcar:
+
+- Si se marca ➕, insertar en `task_parameter_option_group_items`
+  - `group_id`: el id del grupo actual
+  - `value_id`: el id de la opción
+- Si se desmarca ➖, eliminar de `task_parameter_option_group_items` el ítem correspondiente
+
+---
+
+### 🧮 Consultas necesarias a Supabase:
+
+#### Para mostrar los valores con check:
+```sql
+select 
+  tpv.id, 
+  tpv.value,
+  (tpo.id is not null) as selected
+from task_parameter_values tpv
+left join task_parameter_option_group_items tpo 
+  on tpv.id = tpo.value_id and tpo.group_id = 'GROUP_ID_AQUI'
+where tpv.parameter_id = 'PARAMETER_ID_AQUI'
+order by tpv.value;
+Esto te devuelve todos los valores posibles del parámetro, con selected = true/false según si pertenecen al grupo.
+
+💾 Mutaciones:
+Insertar una relación (al marcar checkbox):
+ts
+Copiar
+Editar
+await supabase.from('task_parameter_option_group_items').insert({
+  group_id: groupId,
+  value_id: valueId
+});
+Eliminar una relación (al desmarcar checkbox):
+ts
+Copiar
+Editar
+await supabase.from('task_parameter_option_group_items')
+  .delete()
+  .match({ group_id: groupId, value_id: valueId });
+🧑‍🎨 Interfaz recomendada:
+Usá un Accordion, Dialog o bloque expandible
+
+Mostrá la lista con:
+
+✔️ Checkbox
+
+Nombre del valor (value)
+
+En subtítulo, si querés, el id o slug
+
+Botón “Cerrar” o "Listo" abajo
+
+📍 Colocación:
+Todo esto debe ir dentro del modal EditTaskParameterModal.tsx, debajo del grupo seleccionado dentro del bloque "Grupos de Opciones".
+
+🧠 Extra opcional:
+Mostrar contador: “3 de 7 seleccionados”
+
+Permitir búsqueda si hay más de 10 opciones
+
+Esto completa la funcionalidad esperada de gestión de opciones dentro de grupos para parámetros select.

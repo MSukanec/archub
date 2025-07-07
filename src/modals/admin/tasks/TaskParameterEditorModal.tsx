@@ -161,6 +161,40 @@ export function TaskParameterEditorModal({
     enabled: !!parameter?.id,
   });
 
+  // Load group items for selection
+  const { data: groupItemsWithSelection = [], isLoading: groupItemsLoading } = useQuery({
+    queryKey: ['task-parameter-group-items-selection', parameter?.id, selectedGroupForItems?.id],
+    queryFn: async () => {
+      if (!parameter?.id || !selectedGroupForItems?.id) return [];
+      
+      // Get all parameter values
+      const { data: allValues, error: valuesError } = await supabase
+        .from('task_parameter_values')
+        .select('id, value')
+        .eq('parameter_id', parameter.id)
+        .order('value');
+      
+      if (valuesError) throw valuesError;
+      
+      // Get currently selected values for this group
+      const { data: selectedValues, error: selectedError } = await supabase
+        .from('task_parameter_option_group_items')
+        .select('value_id')
+        .eq('option_group_id', selectedGroupForItems.id);
+      
+      if (selectedError) throw selectedError;
+      
+      const selectedValueIds = new Set(selectedValues?.map(item => item.value_id) || []);
+      
+      return (allValues || []).map(value => ({
+        id: value.id,
+        value: value.value,
+        selected: selectedValueIds.has(value.id)
+      }));
+    },
+    enabled: !!parameter?.id && !!selectedGroupForItems?.id && showGroupItemsModal,
+  });
+
   // Mutations for parameter values
   const createValueMutation = useMutation({
     mutationFn: async (value: string) => {
@@ -317,6 +351,50 @@ export function TaskParameterEditorModal({
     },
   });
 
+  // Mutations for group items
+  const assignOptionToGroupMutation = useMutation({
+    mutationFn: async ({ groupId, valueId }: { groupId: string; valueId: string }) => {
+      const { data, error } = await supabase
+        .from('task_parameter_option_group_items')
+        .insert({
+          option_group_id: groupId,
+          value_id: valueId,
+        })
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-group-items-selection'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-option-groups'] });
+      toast({
+        title: 'Opción asignada',
+        description: 'La opción se asignó al grupo correctamente.',
+      });
+    },
+  });
+
+  const removeOptionFromGroupMutation = useMutation({
+    mutationFn: async ({ groupId, valueId }: { groupId: string; valueId: string }) => {
+      const { error } = await supabase
+        .from('task_parameter_option_group_items')
+        .delete()
+        .match({ option_group_id: groupId, value_id: valueId });
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-group-items-selection'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-option-groups'] });
+      toast({
+        title: 'Opción removida',
+        description: 'La opción se removió del grupo correctamente.',
+      });
+    },
+  });
+
   // Reset form when modal opens/closes or parameter changes
   useEffect(() => {
     if (parameter && open) {
@@ -421,6 +499,27 @@ export function TaskParameterEditorModal({
   const handleCreateGroup = () => {
     if (!newGroupName.trim()) return;
     createGroupMutation.mutate(newGroupName);
+  };
+
+  const handleToggleOptionInGroup = (valueId: string, isCurrentlySelected: boolean) => {
+    if (!selectedGroupForItems?.id) return;
+    
+    if (isCurrentlySelected) {
+      removeOptionFromGroupMutation.mutate({
+        groupId: selectedGroupForItems.id,
+        valueId: valueId,
+      });
+    } else {
+      assignOptionToGroupMutation.mutate({
+        groupId: selectedGroupForItems.id,
+        valueId: valueId,
+      });
+    }
+  };
+
+  const handleCloseGroupItemsModal = () => {
+    setShowGroupItemsModal(false);
+    setSelectedGroupForItems(null);
   };
 
   const handleEditGroup = (group: TaskParameterOptionGroup) => {
@@ -812,6 +911,75 @@ export function TaskParameterEditorModal({
                       </Button>
                     </div>
                   </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* Group Items Assignment Modal */}
+            {showGroupItemsModal && selectedGroupForItems && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                <Card className="w-full max-w-2xl max-h-[80vh] overflow-hidden">
+                  <CardHeader>
+                    <CardTitle>Asignar Opciones al Grupo</CardTitle>
+                    <CardDescription>
+                      Selecciona qué opciones pertenecen al grupo "{selectedGroupForItems.name}"
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="overflow-y-auto max-h-[50vh]">
+                    {groupItemsLoading ? (
+                      <div className="text-sm text-muted-foreground">Cargando opciones...</div>
+                    ) : groupItemsWithSelection.length === 0 ? (
+                      <div className="text-center py-6 text-muted-foreground">
+                        <Settings className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                        <p>No hay opciones disponibles para este parámetro</p>
+                        <p className="text-xs">Agrega opciones en la sección "Opciones Generales" primero</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between text-sm text-muted-foreground border-b pb-2">
+                          <span>Opciones disponibles</span>
+                          <span>
+                            {groupItemsWithSelection.filter(item => item.selected).length} de {groupItemsWithSelection.length} seleccionados
+                          </span>
+                        </div>
+                        {groupItemsWithSelection.map((item) => (
+                          <div 
+                            key={item.id} 
+                            className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                          >
+                            <Checkbox
+                              id={`option-${item.id}`}
+                              checked={item.selected}
+                              onCheckedChange={() => handleToggleOptionInGroup(item.id, item.selected)}
+                              disabled={assignOptionToGroupMutation.isPending || removeOptionFromGroupMutation.isPending}
+                            />
+                            <Label 
+                              htmlFor={`option-${item.id}`} 
+                              className="flex-1 cursor-pointer font-medium"
+                            >
+                              {item.value}
+                            </Label>
+                            {item.selected && (
+                              <Badge variant="secondary" className="text-xs">
+                                Seleccionado
+                              </Badge>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                  <div className="p-4 border-t">
+                    <div className="flex justify-end gap-2">
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={handleCloseGroupItemsModal}
+                      >
+                        Cerrar
+                      </Button>
+                    </div>
+                  </div>
                 </Card>
               </div>
             )}
