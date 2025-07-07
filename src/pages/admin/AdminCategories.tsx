@@ -182,7 +182,7 @@ export default function AdminCategories() {
         className="h-8 px-3 text-sm font-medium"
       >
         <Plus className="mr-2 h-4 w-4" />
-        Nueva Categoría
+        CREAR CATEGORÍAS
       </Button>
     )
   };
