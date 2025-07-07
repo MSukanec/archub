@@ -8,6 +8,10 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Trash2, GripVertical } from 'lucide-react';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout';
 import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader';
 import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
@@ -32,6 +36,67 @@ interface TaskParameterOptionGroup {
   name: string;
 }
 
+// Sortable Parameter Item Component
+function SortableParameterItem({ 
+  parameter, 
+  index, 
+  onDelete 
+}: { 
+  parameter: any; 
+  index: number; 
+  onDelete: (id: string) => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: parameter.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div 
+      ref={setNodeRef} 
+      style={style} 
+      className="flex items-center justify-between bg-muted/30 p-2 rounded border"
+    >
+      <div className="flex items-center gap-2">
+        <div 
+          {...attributes} 
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing p-1 hover:bg-muted rounded"
+        >
+          <GripVertical className="h-4 w-4 text-muted-foreground" />
+        </div>
+        <div className="w-6 h-6 bg-accent/20 text-accent-foreground rounded text-xs flex items-center justify-center font-medium">
+          {index + 1}
+        </div>
+        <span className="text-sm font-medium">
+          {parameter.task_parameters?.label || parameter.task_parameters?.name}
+        </span>
+        <Badge variant="outline" className="text-xs">
+          {parameter.task_parameters?.type}
+        </Badge>
+      </div>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => onDelete(parameter.id)}
+        className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+      >
+        <Trash2 className="h-3 w-3" />
+      </Button>
+    </div>
+  );
+}
+
 export default function TaskTemplateEditorModal({
   open,
   onClose,
@@ -42,6 +107,14 @@ export default function TaskTemplateEditorModal({
   const [newParameterId, setNewParameterId] = useState('');
   const [newOptionGroupId, setNewOptionGroupId] = useState('');
   const queryClient = useQueryClient();
+
+  // Drag & drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   // Generate dynamic preview based on category name and added parameters
   const generatePreview = () => {
@@ -56,6 +129,68 @@ export default function TaskTemplateEditorModal({
       .join(' ');
     
     return `${categoryName} ${parameterPlaceholders}.`;
+  };
+
+  // Update parameter positions mutation
+  const updatePositionsMutation = useMutation({
+    mutationFn: async (parameters: any[]) => {
+      const updates = parameters.map((param, index) => 
+        supabase
+          .from('task_template_parameters')
+          .update({ position: index })
+          .eq('id', param.id)
+      );
+      
+      const results = await Promise.all(updates);
+      const errors = results.filter(result => result.error);
+      if (errors.length > 0) {
+        throw new Error('Error updating positions');
+      }
+      
+      return results;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['task-template-parameters', template?.id] });
+    }
+  });
+
+  // Delete parameter mutation
+  const deleteParameterMutation = useMutation({
+    mutationFn: async (parameterId: string) => {
+      const { error } = await supabase
+        .from('task_template_parameters')
+        .delete()
+        .eq('id', parameterId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['task-template-parameters', template?.id] });
+      toast({
+        title: 'Parámetro eliminado',
+        description: 'Parámetro eliminado exitosamente de la plantilla'
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error.message || 'Error al eliminar parámetro'
+      });
+    }
+  });
+
+  // Handle drag end
+  const handleDragEnd = (event: any) => {
+    const { active, over } = event;
+
+    if (active.id !== over.id) {
+      const oldIndex = templateParameters.findIndex(param => param.id === active.id);
+      const newIndex = templateParameters.findIndex(param => param.id === over.id);
+      
+      const reorderedParameters = arrayMove(templateParameters, oldIndex, newIndex);
+      updatePositionsMutation.mutate(reorderedParameters);
+    }
   };
 
   // Check if template exists
@@ -87,6 +222,24 @@ export default function TaskTemplateEditorModal({
       return data || [];
     },
     enabled: open
+  });
+
+  // Fetch option groups for selected parameter
+  const { data: parameterOptionGroups = [] } = useQuery({
+    queryKey: ['task-parameter-option-groups', newParameterId],
+    queryFn: async () => {
+      if (!newParameterId) return [];
+      
+      const { data, error } = await supabase
+        .from('task_parameter_option_groups')
+        .select('*')
+        .eq('parameter_id', newParameterId)
+        .order('name');
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: open && !!newParameterId
   });
 
   // Fetch template parameters if template exists
@@ -236,10 +389,16 @@ export default function TaskTemplateEditorModal({
                 <div className="space-y-4">
                   <div className="bg-card border border-border rounded-lg p-4">
                     <h3 className="text-sm font-medium mb-3">Paso 2: Agregar Parámetros</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-2">
                         <Label>Parámetro</Label>
-                        <Select value={newParameterId} onValueChange={setNewParameterId}>
+                        <Select 
+                          value={newParameterId} 
+                          onValueChange={(value) => {
+                            setNewParameterId(value);
+                            setNewOptionGroupId(''); // Reset option group when parameter changes
+                          }}
+                        >
                           <SelectTrigger>
                             <SelectValue placeholder="Seleccionar parámetro" />
                           </SelectTrigger>
@@ -247,6 +406,32 @@ export default function TaskTemplateEditorModal({
                             {availableParameters.map((parameter) => (
                               <SelectItem key={parameter.id} value={parameter.id}>
                                 {parameter.label || parameter.name} ({parameter.type})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Grupo de Opciones</Label>
+                        <Select 
+                          value={newOptionGroupId} 
+                          onValueChange={setNewOptionGroupId}
+                          disabled={!newParameterId || parameterOptionGroups.length === 0}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder={
+                              !newParameterId 
+                                ? "Primero selecciona parámetro"
+                                : parameterOptionGroups.length === 0
+                                ? "Sin grupos disponibles"
+                                : "Seleccionar grupo"
+                            } />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {parameterOptionGroups.map((group) => (
+                              <SelectItem key={group.id} value={group.id}>
+                                {group.name}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -261,7 +446,7 @@ export default function TaskTemplateEditorModal({
                               optionGroupId: newOptionGroupId || undefined
                             });
                           }}
-                          disabled={!newParameterId || addParameterMutation.isPending}
+                          disabled={!newParameterId || !newOptionGroupId || addParameterMutation.isPending}
                           className="w-full"
                         >
                           <Plus className="h-4 w-4 mr-2" />
@@ -269,45 +454,41 @@ export default function TaskTemplateEditorModal({
                         </Button>
                       </div>
                     </div>
+                    
+                    {newParameterId && parameterOptionGroups.length === 0 && (
+                      <div className="mt-2 text-xs text-muted-foreground">
+                        ⚠️ Este parámetro no tiene grupos de opciones configurados
+                      </div>
+                    )}
                   </div>
 
-                  {/* Lista de parámetros agregados */}
+                  {/* Lista de parámetros agregados con drag & drop */}
                   {templateParameters.length > 0 && (
                     <div className="bg-card border border-border rounded-lg p-4">
                       <Label className="text-sm font-medium mb-3 block">
                         Parámetros de la plantilla ({templateParameters.length}):
                       </Label>
-                      <div className="space-y-2">
-                        {templateParameters.map((tp, index) => (
-                          <div key={tp.id} className="flex items-center justify-between bg-muted/30 p-2 rounded">
-                            <div className="flex items-center gap-2">
-                              <div className="w-6 h-6 bg-accent/20 text-accent-foreground rounded text-xs flex items-center justify-center font-medium">
-                                {index + 1}
-                              </div>
-                              <span className="text-sm font-medium">
-                                {tp.task_parameters?.label || tp.task_parameters?.name}
-                              </span>
-                              <Badge variant="outline" className="text-xs">
-                                {tp.task_parameters?.type}
-                              </Badge>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                // TODO: Delete parameter functionality
-                                toast({
-                                  title: 'Función pendiente',
-                                  description: 'Funcionalidad de eliminar parámetro próximamente'
-                                });
-                              }}
-                              className="h-6 w-6 p-0 text-destructive hover:text-destructive"
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
+                      <DndContext 
+                        sensors={sensors}
+                        collisionDetection={closestCenter}
+                        onDragEnd={handleDragEnd}
+                      >
+                        <SortableContext 
+                          items={templateParameters.map(p => p.id)}
+                          strategy={verticalListSortingStrategy}
+                        >
+                          <div className="space-y-2">
+                            {templateParameters.map((tp, index) => (
+                              <SortableParameterItem
+                                key={tp.id}
+                                parameter={tp}
+                                index={index}
+                                onDelete={(parameterId) => deleteParameterMutation.mutate(parameterId)}
+                              />
+                            ))}
                           </div>
-                        ))}
-                      </div>
+                        </SortableContext>
+                      </DndContext>
                     </div>
                   )}
 
