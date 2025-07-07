@@ -9,6 +9,9 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Trash2, Edit3, Package, Settings, GripVertical } from 'lucide-react';
 import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout';
+import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader';
+import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
+import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 
@@ -310,219 +313,219 @@ export default function TaskTemplateEditorModal({
   const showOptionGroups = selectedParameter?.type === 'select';
 
   return (
-    <CustomModalLayout 
-      open={open} 
-      onClose={onClose}
-      className="md:max-w-5xl"
-    >
+    <CustomModalLayout open={open} onClose={onClose} className="md:max-w-5xl">
       {{
         header: (
-          <div className="flex items-center gap-3 px-6 py-4 border-b border-[var(--card-border)]">
-            <Settings className="h-5 w-5 text-[var(--accent)]" />
-            <div>
-              <h2 className="text-lg font-semibold text-[var(--text-default)]">
-                Editor de Plantilla - {categoryCode}
-              </h2>
-              <p className="text-sm text-[var(--text-muted)]">
-                {categoryName} • Gestionar parámetros de la plantilla
-              </p>
-            </div>
-          </div>
+          <CustomModalHeader
+            title={`Editor de Plantilla - ${categoryCode}`}
+            description={`${categoryName} • Gestionar parámetros de la plantilla`}
+            onClose={onClose}
+          />
         ),
         body: (
-          <div className="p-6 space-y-6">
-        {/* Template Status */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Package className="h-5 w-5" />
-              Estado de la Plantilla
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {templateLoading ? (
-              <div className="text-sm text-muted-foreground">Cargando plantilla...</div>
-            ) : template ? (
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Badge variant="default">Plantilla Existente</Badge>
-                  <span className="text-sm text-muted-foreground">
-                    Código: {template.code} • {templateParameters.length} parámetros
-                  </span>
-                </div>
-                <Badge variant="outline" className="text-green-600 border-green-600">
-                  Activa
-                </Badge>
-              </div>
-            ) : (
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Badge variant="secondary">Sin Plantilla</Badge>
-                  <span className="text-sm text-muted-foreground">
-                    No existe plantilla para esta categoría
-                  </span>
-                </div>
-                <Button 
-                  onClick={handleCreateTemplate}
-                  disabled={createTemplateMutation.isPending}
-                  size="sm"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Crear Plantilla
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {template && (
-          <>
-            <Separator />
-            
-            {/* Add Parameter Section */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Plus className="h-5 w-5" />
-                  Agregar Parámetro
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label>Parámetro</Label>
-                    <Select value={newParameterId} onValueChange={setNewParameterId}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar parámetro" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableParameters
-                          .filter(p => !templateParameters.some(tp => tp.parameter_id === p.id))
-                          .map((parameter) => (
-                            <SelectItem key={parameter.id} value={parameter.id}>
-                              {parameter.name} ({parameter.type})
-                            </SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  {showOptionGroups && (
-                    <div className="space-y-2">
-                      <Label>Grupo de Opciones</Label>
-                      <Select value={newOptionGroupId} onValueChange={setNewOptionGroupId}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar grupo" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {optionGroups.map((group) => (
-                            <SelectItem key={group.id} value={group.id}>
-                              {group.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+          <CustomModalBody padding="md" columns={1}>
+            {/* Template Status */}
+            <div className="col-span-1">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Package className="h-5 w-5" />
+                    Estado de la Plantilla
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {templateLoading ? (
+                    <div className="text-sm text-muted-foreground">Cargando plantilla...</div>
+                  ) : template ? (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Badge variant="default">Plantilla Existente</Badge>
+                        <span className="text-sm text-muted-foreground">
+                          Código: {template.code} • {templateParameters.length} parámetros
+                        </span>
+                      </div>
+                      <Badge variant="outline" className="text-green-600 border-green-600">
+                        Activa
+                      </Badge>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Badge variant="secondary">Sin Plantilla</Badge>
+                        <span className="text-sm text-muted-foreground">
+                          No existe plantilla para esta categoría
+                        </span>
+                      </div>
+                      <Button 
+                        onClick={handleCreateTemplate}
+                        disabled={createTemplateMutation.isPending}
+                        size="sm"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Crear Plantilla
+                      </Button>
                     </div>
                   )}
-                  
-                  <div className="flex items-end">
-                    <Button 
-                      onClick={handleAddParameter}
-                      disabled={!newParameterId || addParameterMutation.isPending || (showOptionGroups && !newOptionGroupId)}
-                      className="w-full"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Agregar
-                    </Button>
-                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {template && (
+              <>
+                <div className="col-span-1">
+                  <Separator />
                 </div>
-              </CardContent>
-            </Card>
-
-            <Separator />
-
-            {/* Parameters List */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Edit3 className="h-5 w-5" />
-                  Parámetros de la Plantilla ({templateParameters.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {parametersLoading ? (
-                  <div className="text-sm text-muted-foreground">Cargando parámetros...</div>
-                ) : templateParameters.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Package className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p>No hay parámetros agregados a esta plantilla</p>
-                    <p className="text-xs">Usa el formulario de arriba para agregar parámetros</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {templateParameters.map((param, index) => (
-                      <div key={param.id} className="flex items-center gap-3 p-3 border rounded-lg bg-muted/30">
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <GripVertical className="h-4 w-4" />
-                          <span className="text-xs font-mono">{index + 1}</span>
+                
+                {/* Add Parameter Section */}
+                <div className="col-span-1">
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="flex items-center gap-2 text-lg">
+                        <Plus className="h-5 w-5" />
+                        Agregar Parámetro
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                          <Label>Parámetro</Label>
+                          <Select value={newParameterId} onValueChange={setNewParameterId}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Seleccionar parámetro" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {availableParameters
+                                .filter(p => !templateParameters.some(tp => tp.parameter_id === p.id))
+                                .map((parameter) => (
+                                  <SelectItem key={parameter.id} value={parameter.id}>
+                                    {parameter.name} ({parameter.type})
+                                  </SelectItem>
+                                ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                         
-                        <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-3 items-center">
-                          <div>
-                            <div className="font-medium">{param.parameter.name}</div>
-                            <div className="text-xs text-muted-foreground flex items-center gap-2">
-                              <Badge variant="outline" className="text-xs">
-                                {param.parameter.type}
-                              </Badge>
-                              {param.parameter.unit && (
-                                <span className="text-xs">({param.parameter.unit})</span>
-                              )}
-                            </div>
+                        {showOptionGroups && (
+                          <div className="space-y-2">
+                            <Label>Grupo de Opciones</Label>
+                            <Select value={newOptionGroupId} onValueChange={setNewOptionGroupId}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Seleccionar grupo" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {optionGroups.map((group) => (
+                                  <SelectItem key={group.id} value={group.id}>
+                                    {group.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </div>
-                          
-                          <div className="text-xs text-muted-foreground">
-                            Posición: {param.position}
-                            {param.option_group_id && (
-                              <div>Grupo: {param.option_group_id}</div>
-                            )}
-                          </div>
-                          
-                          <div className="flex items-center gap-2">
-                            <Label className="text-xs">Obligatorio:</Label>
-                            <Switch
-                              checked={param.is_required}
-                              onCheckedChange={() => handleToggleRequired(param)}
-                              disabled={updateParameterMutation.isPending}
-                            />
-                          </div>
-                          
-                          <div className="flex justify-end">
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => handleDeleteParameter(param.id)}
-                              disabled={deleteParameterMutation.isPending}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
+                        )}
+                        
+                        <div className="flex items-end">
+                          <Button 
+                            onClick={handleAddParameter}
+                            disabled={!newParameterId || addParameterMutation.isPending || (showOptionGroups && !newOptionGroupId)}
+                            className="w-full"
+                          >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Agregar
+                          </Button>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </>
-        )}
-          </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="col-span-1">
+                  <Separator />
+                </div>
+
+                {/* Parameters List */}
+                <div className="col-span-1">
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="flex items-center gap-2 text-lg">
+                        <Edit3 className="h-5 w-5" />
+                        Parámetros de la Plantilla ({templateParameters.length})
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {parametersLoading ? (
+                        <div className="text-sm text-muted-foreground">Cargando parámetros...</div>
+                      ) : templateParameters.length === 0 ? (
+                        <div className="text-center py-8 text-muted-foreground">
+                          <Package className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                          <p>No hay parámetros agregados a esta plantilla</p>
+                          <p className="text-xs">Usa el formulario de arriba para agregar parámetros</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          {templateParameters.map((param, index) => (
+                            <div key={param.id} className="flex items-center gap-3 p-3 border rounded-lg bg-muted/30">
+                              <div className="flex items-center gap-2 text-muted-foreground">
+                                <GripVertical className="h-4 w-4" />
+                                <span className="text-xs font-mono">{index + 1}</span>
+                              </div>
+                              
+                              <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-3 items-center">
+                                <div>
+                                  <div className="font-medium">{param.parameter.name}</div>
+                                  <div className="text-xs text-muted-foreground flex items-center gap-2">
+                                    <Badge variant="outline" className="text-xs">
+                                      {param.parameter.type}
+                                    </Badge>
+                                    {param.parameter.unit && (
+                                      <span className="text-xs">({param.parameter.unit})</span>
+                                    )}
+                                  </div>
+                                </div>
+                                
+                                <div className="text-xs text-muted-foreground">
+                                  Posición: {param.position}
+                                  {param.option_group_id && (
+                                    <div>Grupo: {param.option_group_id}</div>
+                                  )}
+                                </div>
+                                
+                                <div className="flex items-center gap-2">
+                                  <Label className="text-xs">Obligatorio:</Label>
+                                  <Switch
+                                    checked={param.is_required}
+                                    onCheckedChange={() => handleToggleRequired(param)}
+                                    disabled={updateParameterMutation.isPending}
+                                  />
+                                </div>
+                                
+                                <div className="flex justify-end">
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={() => handleDeleteParameter(param.id)}
+                                    disabled={deleteParameterMutation.isPending}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+              </>
+            )}
+          </CustomModalBody>
         ),
         footer: (
-          <div className="flex justify-end gap-3 px-6 py-4 border-t border-[var(--card-border)]">
+          <CustomModalFooter>
             <Button variant="outline" onClick={onClose}>
               Cerrar
             </Button>
-          </div>
+          </CustomModalFooter>
         )
       }}
     </CustomModalLayout>
