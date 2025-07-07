@@ -11,6 +11,8 @@ export interface TaskParameter {
   type: 'text' | 'number' | 'select' | 'boolean';
   unit_id?: string;
   is_required: boolean;
+  role?: 'material' | 'ubicacion' | 'espesor' | 'terminacion' | 'uso' | 'otro';
+  expression_template?: string;
   created_at: string;
   options?: TaskParameterOption[];
 }
@@ -29,6 +31,8 @@ export interface CreateTaskParameterData {
   type: 'text' | 'number' | 'select' | 'boolean';
   unit_id?: string;
   is_required: boolean;
+  role: 'material' | 'ubicacion' | 'espesor' | 'terminacion' | 'uso' | 'otro';
+  expression_template: string;
 }
 
 export interface UpdateTaskParameterData {
@@ -38,6 +42,8 @@ export interface UpdateTaskParameterData {
   type: 'text' | 'number' | 'select' | 'boolean';
   unit_id?: string;
   is_required: boolean;
+  role: 'material' | 'ubicacion' | 'espesor' | 'terminacion' | 'uso' | 'otro';
+  expression_template: string;
 }
 
 export interface CreateTaskParameterOptionData {
@@ -59,7 +65,7 @@ export function useTaskParametersAdmin() {
       // Fetch parameters directly from task_parameters table
       const { data: parameters, error: parametersError } = await supabase
         .from('task_parameters')
-        .select('id, name, label, type, unit_id, created_at')
+        .select('id, name, label, type, unit_id, role, expression_template, created_at')
         .order('created_at');
 
       if (parametersError) {
@@ -89,6 +95,8 @@ export function useTaskParametersAdmin() {
         type: param.type,
         unit_id: param.unit_id,
         is_required: false, // Default for standalone parameters
+        role: param.role,
+        expression_template: param.expression_template,
         created_at: param.created_at,
         options: optionsMap.get(param.id) || []
       }));
@@ -114,7 +122,9 @@ export function useCreateTaskParameter() {
           name: parameterData.name,
           label: parameterData.label,
           type: parameterData.type,
-          unit_id: parameterData.unit_id || null
+          unit_id: parameterData.unit_id || null,
+          role: parameterData.role,
+          expression_template: parameterData.expression_template
         }])
         .select()
         .single();
@@ -159,7 +169,9 @@ export function useUpdateTaskParameter() {
           name: updateData.name,
           label: updateData.label,
           type: updateData.type,
-          unit_id: updateData.unit_id
+          unit_id: updateData.unit_id || null,
+          role: updateData.role,
+          expression_template: updateData.expression_template
         })
         .eq('id', id)
         .select()

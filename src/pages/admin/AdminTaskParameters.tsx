@@ -15,6 +15,7 @@ import { Layout } from '@/components/layout/desktop/Layout';
 import { useTaskParametersAdmin, useDeleteTaskParameter, useDeleteTaskParameterOption, TaskParameter, TaskParameterOption } from '@/hooks/use-task-parameters-admin';
 import { NewTaskParameterModal } from '@/modals/tasks/NewTaskParameterModal';
 import { NewTaskParameterOptionModal } from '@/modals/tasks/NewTaskParameterOptionModal';
+import { TaskParameterEditorModal } from '@/modals/admin/tasks/TaskParameterEditorModal';
 
 export default function AdminTaskParameters() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -23,6 +24,7 @@ export default function AdminTaskParameters() {
   
   // Modal states
   const [isParameterModalOpen, setIsParameterModalOpen] = useState(false);
+  const [isEditorModalOpen, setIsEditorModalOpen] = useState(false);
   const [isOptionModalOpen, setIsOptionModalOpen] = useState(false);
   const [editingParameter, setEditingParameter] = useState<TaskParameter | null>(null);
   const [editingOption, setEditingOption] = useState<TaskParameterOption | null>(null);
@@ -139,7 +141,7 @@ export default function AdminTaskParameters() {
             key="new-parameter"
             onClick={() => {
               setEditingParameter(null);
-              setIsParameterModalOpen(true);
+              setIsEditorModalOpen(true);
             }}
             size="sm"
             className="gap-2"
@@ -189,7 +191,7 @@ export default function AdminTaskParameters() {
             key="new-parameter"
             onClick={() => {
               setEditingParameter(null);
-              setIsParameterModalOpen(true);
+              setIsEditorModalOpen(true);
             }}
             size="sm"
             className="gap-2"
@@ -299,7 +301,7 @@ export default function AdminTaskParameters() {
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setEditingParameter(parameter);
-                                  setIsParameterModalOpen(true);
+                                  setIsEditorModalOpen(true);
                                 }}
                               >
                                 <Edit className="h-3 w-3" />
@@ -394,12 +396,12 @@ export default function AdminTaskParameters() {
         </div>
       </Layout>
 
-      {/* Parameter Modal */}
-      {isParameterModalOpen && (
-        <NewTaskParameterModal
-          open={isParameterModalOpen}
+      {/* Parameter Editor Modal */}
+      {isEditorModalOpen && (
+        <TaskParameterEditorModal
+          open={isEditorModalOpen}
           onClose={() => {
-            setIsParameterModalOpen(false);
+            setIsEditorModalOpen(false);
             setEditingParameter(null);
           }}
           parameter={editingParameter || undefined}
