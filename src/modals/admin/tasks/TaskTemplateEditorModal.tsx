@@ -27,9 +27,10 @@ interface TaskTemplate {
   id: string;
   code: string;
   name: string;
+  name_template?: string;
   category_id: string;
-  is_public: boolean;
-  scope: string;
+  is_public?: boolean;
+  scope?: string;
   created_at: string;
 }
 
@@ -150,9 +151,8 @@ export default function TaskTemplateEditorModal({
         .insert({
           code: categoryCode,
           name: categoryName,
-          category_id: categoryId,
-          is_public: true,
-          scope: 'organization'
+          name_template: `{{nombre}} de ${categoryName}`,
+          category_id: categoryId
         })
         .select()
         .single();
