@@ -10,7 +10,7 @@ import { Layout } from '@/components/layout/desktop/Layout';
 import { HierarchicalCategoryTree } from '@/components/ui-custom/misc/HierarchicalCategoryTree';
 
 import { useTaskCategoriesAdmin, useAllTaskCategories, useDeleteTaskCategory, TaskCategoryAdmin } from '@/hooks/use-task-categories-admin';
-import { NewAdminCategoriesModal } from '@/modals/admin/NewAdminCategories';
+import { NewAdminTaskCategoryModal } from '@/modals/admin/NewAdminTaskCategoryModal';
 
 export default function AdminCategories() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -18,7 +18,7 @@ export default function AdminCategories() {
   const [templateFilter, setTemplateFilter] = useState<'all' | 'with-template' | 'without-template'>('all');
   
   // Modal states
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<TaskCategoryAdmin | null>(null);
   
   // Delete confirmation state
@@ -106,7 +106,7 @@ export default function AdminCategories() {
   // Handle edit category
   const handleEditCategory = (category: TaskCategoryAdmin) => {
     setEditingCategory(category);
-    setIsModalOpen(true);
+    setIsCategoryModalOpen(true);
   };
 
   // Handle delete category
@@ -122,7 +122,11 @@ export default function AdminCategories() {
     }
   };
 
-
+  // Handle template action (placeholder)
+  const handleTemplateAction = (category: TaskCategoryAdmin) => {
+    console.log('Template action for category:', category.name);
+    // TODO: Implementar funcionalidad de plantilla
+  };
 
   // Clear filters
   const clearFilters = () => {
@@ -157,7 +161,7 @@ export default function AdminCategories() {
     onClearFilters: clearFilters,
     actions: (
       <Button 
-        onClick={() => setIsModalOpen(true)}
+        onClick={() => setIsCategoryModalOpen(true)}
         className="h-8 px-3 text-sm font-medium"
       >
         <Plus className="mr-2 h-4 w-4" />
@@ -249,16 +253,17 @@ export default function AdminCategories() {
               onToggleExpanded={toggleCategoryExpansion}
               onEdit={handleEditCategory}
               onDelete={setDeleteCategoryId}
+              onTemplate={handleTemplateAction}
             />
           )}
         </div>
       </Layout>
 
-      {/* Unified Modal */}
-      <NewAdminCategoriesModal
-        open={isModalOpen}
+      {/* Category Modal */}
+      <NewAdminTaskCategoryModal
+        open={isCategoryModalOpen}
         onClose={() => {
-          setIsModalOpen(false);
+          setIsCategoryModalOpen(false);
           setEditingCategory(null);
         }}
         category={editingCategory || undefined}

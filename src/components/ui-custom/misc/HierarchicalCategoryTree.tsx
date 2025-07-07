@@ -20,6 +20,7 @@ interface HierarchicalCategoryTreeProps {
   onToggleExpanded: (categoryId: string) => void;
   onEdit: (category: CategoryTreeNode) => void;
   onDelete: (categoryId: string) => void;
+  onTemplate: (category: CategoryTreeNode) => void;
   level?: number;
 }
 
@@ -29,6 +30,7 @@ export function HierarchicalCategoryTree({
   onToggleExpanded,
   onEdit,
   onDelete,
+  onTemplate,
   level = 0
 }: HierarchicalCategoryTreeProps) {
   const hasChildren = (category: CategoryTreeNode) => category.children && category.children.length > 0;
@@ -97,7 +99,16 @@ export function HierarchicalCategoryTree({
               <Edit className="h-3 w-3" />
             </Button>
             
-
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onTemplate(category)}
+              className="h-6 w-6 p-0 hover:bg-accent text-muted-foreground hover:text-foreground"
+              disabled // Por ahora sin función
+              title="Plantilla"
+            >
+              <FileText className="h-3 w-3" />
+            </Button>
             
             <Button
               variant="ghost"
@@ -120,6 +131,7 @@ export function HierarchicalCategoryTree({
               onToggleExpanded={onToggleExpanded}
               onEdit={onEdit}
               onDelete={onDelete}
+              onTemplate={onTemplate}
               level={currentLevel + 1}
             />
           </div>
