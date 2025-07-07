@@ -123,7 +123,7 @@ export function TaskParameterEditorModal({
       if (error) throw error;
       return data as TaskParameterValue[];
     },
-    enabled: !!parameter?.id && parameterType === 'select',
+    enabled: !!parameter?.id,
   });
 
   // Load option groups
@@ -162,7 +162,7 @@ export function TaskParameterEditorModal({
       
       return groupsWithCounts as TaskParameterOptionGroup[];
     },
-    enabled: !!parameter?.id && parameterType === 'select',
+    enabled: !!parameter?.id,
   });
 
   // Mutations for parameter values
@@ -891,7 +891,7 @@ export function TaskParameterEditorModal({
           </CustomModalBody>
         ),
         footer: (
-          <CustomModalFooter onClose={handleClose}>
+          <div className="flex justify-end gap-3 p-6 border-t">
             <Button variant="outline" onClick={handleClose}>
               Cancelar
             </Button>
@@ -901,7 +901,7 @@ export function TaskParameterEditorModal({
             >
               {isSubmitting ? 'Guardando...' : parameter ? 'Actualizar' : 'Crear'}
             </Button>
-          </CustomModalFooter>
+          </div>
         )
       }}
     </CustomModalLayout>
