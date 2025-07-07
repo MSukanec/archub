@@ -174,11 +174,11 @@ export default function AdminTaskParameters() {
     actions
   };
 
-  if (isLoading || !parameters || parameters.length === 0) {
+  if (isLoading) {
     return (
       <Layout wide={true} headerProps={headerProps}>
         <div className="p-8 text-center text-muted-foreground">
-          {isLoading ? 'Cargando parámetros...' : 'No hay parámetros disponibles'}
+          Cargando parámetros...
         </div>
       </Layout>
     );
@@ -451,16 +451,16 @@ export default function AdminTaskParameters() {
 
       {/* Modals */}
       <NewTaskParameterModal
-        isOpen={isParameterModalOpen}
+        open={isParameterModalOpen}
         onClose={() => {
           setIsParameterModalOpen(false);
           setEditingParameter(null);
         }}
-        editingParameter={editingParameter}
+        parameter={editingParameter}
       />
 
       <TaskParameterEditorModal
-        isOpen={isEditorModalOpen}
+        open={isEditorModalOpen}
         onClose={() => {
           setIsEditorModalOpen(false);
           setEditingParameter(null);
@@ -469,14 +469,15 @@ export default function AdminTaskParameters() {
       />
 
       <NewTaskParameterOptionModal
-        isOpen={isOptionModalOpen}
+        open={isOptionModalOpen}
         onClose={() => {
           setIsOptionModalOpen(false);
           setEditingOption(null);
           setSelectedParameterId('');
         }}
         parameterId={selectedParameterId}
-        editingOption={editingOption}
+        parameterLabel={selectedParameter?.label || ''}
+        option={editingOption}
       />
 
       {/* Delete Parameter Confirmation */}
