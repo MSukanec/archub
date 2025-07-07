@@ -194,13 +194,13 @@ export default function TaskTemplateEditorModal({
   };
 
   // Check if template exists
-  const { data: template, isLoading: templateLoading } = useQuery<TaskTemplate | null>({
+  const { data: template, isLoading: templateLoading, error: templateError } = useQuery<TaskTemplate | null>({
     queryKey: ['task-template', categoryCode],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('task_templates')
         .select('*')
-        .eq('code_prefix', categoryCode)
+        .eq('code', categoryCode)
         .maybeSingle();
       
       if (error && error.code !== 'PGRST116') throw error;
@@ -208,6 +208,8 @@ export default function TaskTemplateEditorModal({
     },
     enabled: open
   });
+
+
 
   // Fetch all available parameters
   const { data: availableParameters = [] } = useQuery({
@@ -313,7 +315,7 @@ export default function TaskTemplateEditorModal({
       const { data, error } = await supabase
         .from('task_templates')
         .insert({
-          code_prefix: categoryCode,
+          code: categoryCode,
           name: `Plantilla de ${categoryName}`,
           name_template: `${categoryName}.`,
           category_id: categoryId
@@ -326,6 +328,7 @@ export default function TaskTemplateEditorModal({
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['task-template', categoryCode] });
+      queryClient.invalidateQueries({ queryKey: ['task-template-parameters'] });
       toast({
         title: 'Plantilla creada',
         description: `Plantilla ${categoryCode} creada exitosamente`
@@ -424,7 +427,7 @@ export default function TaskTemplateEditorModal({
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-sm font-medium text-emerald-900 mb-1">
-                        ✓ Plantilla Creada: {template.code_prefix}
+                        ✓ Plantilla Creada: {template.code}
                       </h3>
                       <p className="text-xs text-emerald-700">
                         Nombre: {template.name} | Parámetros: {templateParameters.length}
