@@ -154,6 +154,29 @@ export default function TaskTemplateEditorModal({
     }
   });
 
+  // Update template name_template mutation
+  const updateTemplateNameMutation = useMutation({
+    mutationFn: async (newNameTemplate: string) => {
+      if (!template?.id) throw new Error('No template selected');
+      
+      const { error } = await supabase
+        .from('task_templates')
+        .update({ name_template: newNameTemplate })
+        .eq('id', template.id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['task-template', categoryCode] });
+      queryClient.invalidateQueries({ queryKey: ['admin-task-templates'] });
+      toast({
+        title: "Plantilla actualizada",
+        description: "La vista previa se ha guardado correctamente",
+        variant: "default"
+      });
+    }
+  });
+
   // Delete parameter mutation
   const deleteParameterMutation = useMutation({
     mutationFn: async (parameterId: string) => {
@@ -166,10 +189,20 @@ export default function TaskTemplateEditorModal({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-template-parameters', template?.id] });
+      queryClient.invalidateQueries({ queryKey: ['admin-task-templates'] });
+      queryClient.invalidateQueries({ queryKey: ['task-template', categoryCode] });
       toast({
         title: 'Parámetro eliminado',
         description: 'Parámetro eliminado exitosamente de la plantilla'
       });
+      
+      // Auto-update name_template after parameter is deleted
+      setTimeout(() => {
+        const newNameTemplate = generatePreview();
+        if (template?.id) {
+          updateTemplateNameMutation.mutate(newNameTemplate);
+        }
+      }, 500);
     },
     onError: (error: any) => {
       toast({
@@ -292,12 +325,22 @@ export default function TaskTemplateEditorModal({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-template-parameters', template?.id] });
+      queryClient.invalidateQueries({ queryKey: ['admin-task-templates'] });
+      queryClient.invalidateQueries({ queryKey: ['task-template', categoryCode] });
       setNewParameterId('');
       setNewOptionGroupId('');
       toast({
         title: 'Parámetro agregado',
         description: 'Parámetro agregado exitosamente a la plantilla'
       });
+      
+      // Auto-update name_template after parameter is added
+      setTimeout(() => {
+        const newNameTemplate = generatePreview();
+        if (template?.id) {
+          updateTemplateNameMutation.mutate(newNameTemplate);
+        }
+      }, 500);
     },
     onError: (error: any) => {
       toast({
@@ -362,6 +405,7 @@ export default function TaskTemplateEditorModal({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-template', categoryCode] });
       queryClient.invalidateQueries({ queryKey: ['task-template-parameters'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-task-templates'] });
       toast({
         title: 'Plantilla eliminada',
         description: 'Plantilla y todos sus parámetros eliminados exitosamente'
@@ -560,9 +604,24 @@ export default function TaskTemplateEditorModal({
 
                   {/* Preview de la plantilla */}
                   <div className="bg-muted/30 rounded-lg border p-4">
-                    <Label className="text-sm font-medium mb-2 block">
-                      Vista previa de la plantilla:
-                    </Label>
+                    <div className="flex items-center justify-between mb-2">
+                      <Label className="text-sm font-medium">
+                        Vista previa de la plantilla:
+                      </Label>
+                      {template && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const newNameTemplate = generatePreview();
+                            updateTemplateNameMutation.mutate(newNameTemplate);
+                          }}
+                          disabled={updateTemplateNameMutation.isPending}
+                        >
+                          {updateTemplateNameMutation.isPending ? 'Guardando...' : 'Guardar Vista Previa'}
+                        </Button>
+                      )}
+                    </div>
                     <div className="text-sm bg-background p-3 rounded border">
                       <span className="font-medium">
                         {generatePreview()}
@@ -571,6 +630,7 @@ export default function TaskTemplateEditorModal({
                     <div className="mt-2 text-xs text-muted-foreground">
                       <p>• Estructura: {categoryName} + parámetros + punto final</p>
                       <p>• Los parámetros se insertan automáticamente entre el nombre y el punto</p>
+                      <p>• Se guarda automáticamente al agregar/eliminar parámetros</p>
                     </div>
                   </div>
                 </div>
