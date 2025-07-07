@@ -255,9 +255,8 @@ export function TaskParameterEditorModal({
       return data;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-option-groups'] });
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin-clean'] });
-      queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
-      queryClient.refetchQueries({ queryKey: ['task-parameters-admin-clean'] });
       setNewGroupName('');
       setShowNewGroupModal(false);
       toast({
@@ -280,9 +279,8 @@ export function TaskParameterEditorModal({
       return data;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-option-groups'] });
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin-clean'] });
-      queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
-      queryClient.refetchQueries({ queryKey: ['task-parameters-admin-clean'] });
       setEditingGroup(null);
       toast({
         title: 'Grupo actualizado',
@@ -308,9 +306,8 @@ export function TaskParameterEditorModal({
       if (error) throw error;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-option-groups'] });
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin-clean'] });
-      queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
-      queryClient.refetchQueries({ queryKey: ['task-parameters-admin-clean'] });
       setDeleteDialogOpen(false);
       setDeleteTarget(null);
       toast({
@@ -642,6 +639,7 @@ export function TaskParameterEditorModal({
                                 <div className="flex items-center gap-2">
                                   {editingGroup?.id === group.id ? (
                                     <Button
+                                      type="button"
                                       variant="ghost"
                                       size="sm"
                                       onClick={handleSaveEditGroup}
@@ -652,6 +650,7 @@ export function TaskParameterEditorModal({
                                   ) : (
                                     <>
                                       <Button
+                                        type="button"
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => handleEditGroup(group)}
@@ -659,6 +658,7 @@ export function TaskParameterEditorModal({
                                         <Edit className="h-4 w-4" />
                                       </Button>
                                       <Button
+                                        type="button"
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => {
@@ -669,6 +669,7 @@ export function TaskParameterEditorModal({
                                         <Eye className="h-4 w-4" />
                                       </Button>
                                       <Button
+                                        type="button"
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => handleDeleteGroup(group.id)}
@@ -743,6 +744,7 @@ export function TaskParameterEditorModal({
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <Button
+                                    type="button"
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => console.log('Edit option:', option)}
@@ -750,6 +752,7 @@ export function TaskParameterEditorModal({
                                     <Edit className="h-4 w-4" />
                                   </Button>
                                   <Button
+                                    type="button"
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => {
@@ -797,10 +800,11 @@ export function TaskParameterEditorModal({
                       />
                     </div>
                     <div className="flex justify-end gap-2">
-                      <Button variant="outline" onClick={() => setShowNewGroupModal(false)}>
+                      <Button type="button" variant="outline" onClick={() => setShowNewGroupModal(false)}>
                         Cancelar
                       </Button>
                       <Button 
+                        type="button"
                         onClick={handleCreateGroup}
                         disabled={!newGroupName.trim() || createGroupMutation.isPending}
                       >
