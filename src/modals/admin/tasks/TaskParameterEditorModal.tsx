@@ -547,12 +547,12 @@ export function TaskParameterEditorModal({
   if (!open) return null;
 
   return (
-    <CustomModalLayout 
-      open={open} 
-      onClose={handleClose}
-      className="md:max-w-4xl"
-    >
-      {{
+    <>
+      <CustomModalLayout 
+        open={open} 
+        onClose={handleClose}
+        className="md:max-w-4xl"
+        content={{
         header: (
           <CustomModalHeader
             title={parameter ? `Editar Parámetro - ${parameter.name}` : 'Nuevo Parámetro de Tarea'}
@@ -761,8 +761,11 @@ export function TaskParameterEditorModal({
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => {
+                                          console.log('Abriendo modal para grupo:', group.name);
+                                          console.log('Estado actual showGroupItemsModal:', showGroupItemsModal);
                                           setSelectedGroupForItems(group);
                                           setShowGroupItemsModal(true);
+                                          console.log('Modal debería abrirse ahora');
                                         }}
                                       >
                                         <Eye className="h-4 w-4" />
@@ -915,74 +918,7 @@ export function TaskParameterEditorModal({
               </div>
             )}
 
-            {/* Group Items Assignment Modal */}
-            {showGroupItemsModal && selectedGroupForItems && (
-              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                <Card className="w-full max-w-2xl max-h-[80vh] overflow-hidden">
-                  <CardHeader>
-                    <CardTitle>Asignar Opciones al Grupo</CardTitle>
-                    <CardDescription>
-                      Selecciona qué opciones pertenecen al grupo "{selectedGroupForItems.name}"
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="overflow-y-auto max-h-[50vh]">
-                    {groupItemsLoading ? (
-                      <div className="text-sm text-muted-foreground">Cargando opciones...</div>
-                    ) : groupItemsWithSelection.length === 0 ? (
-                      <div className="text-center py-6 text-muted-foreground">
-                        <Settings className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                        <p>No hay opciones disponibles para este parámetro</p>
-                        <p className="text-xs">Agrega opciones en la sección "Opciones Generales" primero</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between text-sm text-muted-foreground border-b pb-2">
-                          <span>Opciones disponibles</span>
-                          <span>
-                            {groupItemsWithSelection.filter(item => item.selected).length} de {groupItemsWithSelection.length} seleccionados
-                          </span>
-                        </div>
-                        {groupItemsWithSelection.map((item) => (
-                          <div 
-                            key={item.id} 
-                            className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors"
-                          >
-                            <Checkbox
-                              id={`option-${item.id}`}
-                              checked={item.selected}
-                              onCheckedChange={() => handleToggleOptionInGroup(item.id, item.selected)}
-                              disabled={assignOptionToGroupMutation.isPending || removeOptionFromGroupMutation.isPending}
-                            />
-                            <Label 
-                              htmlFor={`option-${item.id}`} 
-                              className="flex-1 cursor-pointer font-medium"
-                            >
-                              {item.value}
-                            </Label>
-                            {item.selected && (
-                              <Badge variant="secondary" className="text-xs">
-                                Seleccionado
-                              </Badge>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                  <div className="p-4 border-t">
-                    <div className="flex justify-end gap-2">
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        onClick={handleCloseGroupItemsModal}
-                      >
-                        Cerrar
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              </div>
-            )}
+
 
             {/* Delete Confirmation Dialog */}
             <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
@@ -1024,7 +960,77 @@ export function TaskParameterEditorModal({
             </Button>
           </div>
         )
-      }}
-    </CustomModalLayout>
+        }}
+      />
+
+      {/* Group Items Assignment Modal - Outside main modal */}
+      {showGroupItemsModal && selectedGroupForItems && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999]">
+          <Card className="w-full max-w-2xl max-h-[80vh] overflow-hidden mx-4">
+            <CardHeader>
+              <CardTitle>Asignar Opciones al Grupo</CardTitle>
+              <CardDescription>
+                Selecciona qué opciones pertenecen al grupo "{selectedGroupForItems.name}"
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="overflow-y-auto max-h-[50vh]">
+              {groupItemsLoading ? (
+                <div className="text-sm text-muted-foreground">Cargando opciones...</div>
+              ) : groupItemsWithSelection.length === 0 ? (
+                <div className="text-center py-6 text-muted-foreground">
+                  <Settings className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p>No hay opciones disponibles para este parámetro</p>
+                  <p className="text-xs">Agrega opciones en la sección "Opciones Generales" primero</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between text-sm text-muted-foreground border-b pb-2">
+                    <span>Opciones disponibles</span>
+                    <span>
+                      {groupItemsWithSelection.filter(item => item.selected).length} de {groupItemsWithSelection.length} seleccionados
+                    </span>
+                  </div>
+                  {groupItemsWithSelection.map((item) => (
+                    <div 
+                      key={item.id} 
+                      className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                    >
+                      <Checkbox
+                        id={`option-${item.id}`}
+                        checked={item.selected}
+                        onCheckedChange={() => handleToggleOptionInGroup(item.id, item.selected)}
+                        disabled={assignOptionToGroupMutation.isPending || removeOptionFromGroupMutation.isPending}
+                      />
+                      <Label 
+                        htmlFor={`option-${item.id}`} 
+                        className="flex-1 cursor-pointer font-medium"
+                      >
+                        {item.value}
+                      </Label>
+                      {item.selected && (
+                        <Badge variant="secondary" className="text-xs">
+                          Seleccionado
+                        </Badge>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+            <div className="p-4 border-t">
+              <div className="flex justify-end gap-2">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={handleCloseGroupItemsModal}
+                >
+                  Cerrar
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+    </>
   );
 }
