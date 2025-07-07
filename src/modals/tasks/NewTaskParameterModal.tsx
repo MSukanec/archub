@@ -122,10 +122,9 @@ export function NewTaskParameterModal({
           />
         ),
         body: (
-          <CustomModalBody padding="md">
+          <CustomModalBody columns={1}>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id="parameter-form">
-                <div className="space-y-4">
                 <FormField
                   control={form.control}
                   name="label"
@@ -243,7 +242,6 @@ export function NewTaskParameterModal({
                     </FormItem>
                   )}
                 />
-                </div>
               </form>
             </Form>
           </CustomModalBody>

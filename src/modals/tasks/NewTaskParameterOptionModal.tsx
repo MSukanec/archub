@@ -105,10 +105,27 @@ export function NewTaskParameterOptionModal({
           />
         ),
         body: (
-          <CustomModalBody padding="md">
+          <CustomModalBody columns={1}>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id="option-form">
-                <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="value"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="required-asterisk">Nombre</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Ej: wood, metal, concrete..."
+                          disabled={isSubmitting}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <FormField
                   control={form.control}
                   name="label"
@@ -126,25 +143,6 @@ export function NewTaskParameterOptionModal({
                     </FormItem>
                   )}
                 />
-
-                <FormField
-                  control={form.control}
-                  name="value"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="required-asterisk">Valor</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="Ej: wood, metal, concrete..."
-                          disabled={isSubmitting}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                </div>
               </form>
             </Form>
           </CustomModalBody>

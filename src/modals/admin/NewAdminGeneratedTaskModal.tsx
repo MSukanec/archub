@@ -17,6 +17,7 @@ import { useCreateGeneratedTask, useUpdateGeneratedTask, useTaskMaterials, useCr
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMaterials } from "@/hooks/use-materials";
 import { supabase } from "@/lib/supabase";
+import { queryClient } from "@/lib/queryClient";
 import { Loader2, Package, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -59,7 +60,7 @@ export function NewAdminGeneratedTaskModal({
   
   const { data: userData } = useCurrentUser();
   const { data: templates, isLoading: templatesLoading } = useTaskTemplates();
-  const { data: parameters, isLoading: parametersLoading } = useTaskTemplateParameters(selectedTemplateId || null);
+  const { data: parameters, isLoading: parametersLoading, refetch: refetchParameters } = useTaskTemplateParameters(selectedTemplateId || null);
   const { data: materials } = useMaterials();
   const { data: taskMaterials } = useTaskMaterials(createdTaskId || generatedTask?.id || null);
   const createGeneratedTask = useCreateGeneratedTask();
@@ -118,6 +119,12 @@ export function NewAdminGeneratedTaskModal({
   // Reset form when template changes
   useEffect(() => {
     if (selectedTemplateId) {
+      console.log('Template changed, resetting form parameters for template:', selectedTemplateId);
+      
+      // Invalidate and refetch parameters to ensure fresh data
+      queryClient.invalidateQueries({ queryKey: ['task-template-parameters', selectedTemplateId] });
+      refetchParameters();
+      
       const newParamValues: Record<string, any> = {};
       parameters?.forEach(param => {
         if (param.type === 'boolean') {
@@ -132,11 +139,12 @@ export function NewAdminGeneratedTaskModal({
         ...newParamValues
       });
     }
-  }, [selectedTemplateId, parameters, form]);
+  }, [selectedTemplateId, parameters, refetchParameters]);
 
   // Initialize form for editing
   useEffect(() => {
     if (isEditing && generatedTask && open) {
+      console.log('Editing mode - initializing with task data:', generatedTask);
       setSelectedTemplateId(generatedTask.template_id);
       setParamValues(generatedTask.param_values || {});
       setCreatedTaskId(generatedTask.id);
@@ -145,6 +153,7 @@ export function NewAdminGeneratedTaskModal({
         ...generatedTask.param_values
       });
     } else if (!isEditing && open) {
+      console.log('Create mode - resetting form');
       setSelectedTemplateId("");
       setParamValues({});
       setExistingTask(null);
@@ -154,7 +163,20 @@ export function NewAdminGeneratedTaskModal({
         template_id: ""
       });
     }
-  }, [isEditing, generatedTask, open, form]);
+  }, [isEditing, generatedTask, open]);
+
+  // Force refresh when modal opens to get latest data
+  useEffect(() => {
+    if (open) {
+      console.log('Modal opened, invalidating queries for fresh data');
+      // Invalidate all related queries to ensure fresh data
+      queryClient.invalidateQueries({ queryKey: ['task-templates'] });
+      queryClient.invalidateQueries({ queryKey: ['task-template-parameters'] });
+      if (selectedTemplateId) {
+        queryClient.invalidateQueries({ queryKey: ['task-template-parameters', selectedTemplateId] });
+      }
+    }
+  }, [open, selectedTemplateId]);
 
   // Generate description from template and parameters
   const generateDescription = (templateNameTemplate: string, paramValues: Record<string, any>) => {
