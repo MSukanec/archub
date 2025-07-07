@@ -583,7 +583,6 @@ export default function Movements() {
   );
 
   const handleClearFilters = () => {
-    setSortBy("date");
     setFilterByType("all");
     setFilterByCategory("all");
     setShowConversions(false);
