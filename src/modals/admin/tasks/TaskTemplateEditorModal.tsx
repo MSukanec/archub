@@ -50,7 +50,7 @@ export default function TaskTemplateEditorModal({
       const { data, error } = await supabase
         .from('task_templates')
         .select('*')
-        .eq('code_prefix', categoryCode)
+        .eq('code', categoryCode)
         .maybeSingle();
       
       if (error && error.code !== 'PGRST116') throw error;
@@ -80,7 +80,7 @@ export default function TaskTemplateEditorModal({
       const { data, error } = await supabase
         .from('task_templates')
         .insert({
-          code_prefix: categoryCode,
+          code: categoryCode,
           name: `Plantilla de ${categoryName}`,
           name_template: `Ejecución de ${categoryName} {{material}} {{dimension}}`,
           category_id: categoryId
