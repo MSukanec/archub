@@ -143,6 +143,29 @@ export const task_parameter_option_group_items = pgTable("task_parameter_option_
   created_at: timestamp("created_at").defaultNow(),
 });
 
+// Task Templates System
+export const task_templates = pgTable("task_templates", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  code_prefix: text("code_prefix").notNull(),
+  name_template: text("name_template").notNull(),
+  category_id: uuid("category_id").notNull(),
+  action_id: uuid("action_id"),
+  created_at: timestamp("created_at").defaultNow(),
+});
+
+export const task_template_parameters = pgTable("task_template_parameters", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  template_id: uuid("template_id").notNull(),
+  parameter_id: uuid("parameter_id").notNull(),
+  option_group_id: uuid("option_group_id"),
+  is_required: boolean("is_required").default(false),
+  position: integer("position").notNull(),
+  role: text("role"),
+  expression_template: text("expression_template"),
+  created_at: timestamp("created_at").defaultNow(),
+});
+
 export const insertTaskParameterSchema = createInsertSchema(task_parameters).omit({
   id: true,
   created_at: true,
@@ -163,6 +186,16 @@ export const insertTaskParameterOptionGroupItemSchema = createInsertSchema(task_
   created_at: true,
 });
 
+export const insertTaskTemplateSchema = createInsertSchema(task_templates).omit({
+  id: true,
+  created_at: true,
+});
+
+export const insertTaskTemplateParameterSchema = createInsertSchema(task_template_parameters).omit({
+  id: true,
+  created_at: true,
+});
+
 export type InsertUserData = z.infer<typeof insertUserDataSchema>;
 export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;
 export type DesignDocument = typeof design_documents.$inferSelect;
@@ -175,3 +208,7 @@ export type InsertTaskParameter = z.infer<typeof insertTaskParameterSchema>;
 export type InsertTaskParameterValue = z.infer<typeof insertTaskParameterValueSchema>;
 export type InsertTaskParameterOptionGroup = z.infer<typeof insertTaskParameterOptionGroupSchema>;
 export type InsertTaskParameterOptionGroupItem = z.infer<typeof insertTaskParameterOptionGroupItemSchema>;
+export type TaskTemplate = typeof task_templates.$inferSelect;
+export type TaskTemplateParameter = typeof task_template_parameters.$inferSelect;
+export type InsertTaskTemplate = z.infer<typeof insertTaskTemplateSchema>;
+export type InsertTaskTemplateParameter = z.infer<typeof insertTaskTemplateParameterSchema>;

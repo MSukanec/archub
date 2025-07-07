@@ -15,6 +15,7 @@ import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
 import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { TaskTemplate, TaskTemplateParameter, TaskParameter } from '@shared/schema';
 
 interface TaskTemplateEditorModalProps {
   open: boolean;
@@ -24,34 +25,7 @@ interface TaskTemplateEditorModalProps {
   categoryName: string;
 }
 
-interface TaskTemplate {
-  id: string;
-  code: string;
-  name: string;
-  name_template?: string;
-  category_id: string;
-  is_public?: boolean;
-  scope?: string;
-  created_at: string;
-}
-
-interface TaskParameter {
-  id: string;
-  name: string;
-  label?: string;
-  type: string;
-  unit?: string;
-}
-
-interface TaskTemplateParameter {
-  id: string;
-  template_id: string;
-  parameter_id: string;
-  option_group_id?: string;
-  is_required: boolean;
-  position: number;
-  role?: string;
-  expression_template?: string;
+interface TaskTemplateParameterWithParameter extends TaskTemplateParameter {
   parameter: TaskParameter;
 }
 
