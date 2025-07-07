@@ -53,7 +53,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   }, [data?.preferences?.theme]);
 
   return (
-    <div className="min-h-screen bg-texture">
+    <div className="min-h-screen bg-background">
       <Header {...headerProps} />
       {/* Sidebar - hidden on mobile */}
       <div className="hidden md:block">

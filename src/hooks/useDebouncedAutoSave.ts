@@ -1,67 +1,75 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 
-interface AutoSaveOptions<T> {
+interface UseDebouncedAutoSaveOptions<T> {
   data: T;
-  onSave: (data: T) => Promise<void>;
-  dependencies: any[];
+  saveFn: (data: T) => Promise<void>;
   delay?: number;
+  enabled?: boolean;
+}
+
+interface UseDebouncedAutoSaveReturn {
+  isSaving: boolean;
+  lastSavedAt: Date | null;
 }
 
 export function useDebouncedAutoSave<T>({
   data,
-  onSave,
-  dependencies,
-  delay = 750
-}: AutoSaveOptions<T>) {
+  saveFn,
+  delay = 750,
+  enabled = true,
+}: UseDebouncedAutoSaveOptions<T>): UseDebouncedAutoSaveReturn {
   const [isSaving, setIsSaving] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const isFirstRender = useRef(true);
-  const lastDataRef = useRef<T>(data);
+  const previousDataRef = useRef<T>(data);
+  const isFirstRenderRef = useRef(true);
 
-  const save = useCallback(async (dataToSave: T) => {
+  const debouncedSave = useCallback(async (dataToSave: T) => {
+    if (!enabled || !dataToSave) {
+      return;
+    }
+
+    setIsSaving(true);
     try {
-      setIsSaving(true);
-      await onSave(dataToSave);
+      await saveFn(dataToSave);
       setLastSavedAt(new Date());
-      lastDataRef.current = dataToSave;
+      console.log('Auto-save completed successfully');
     } catch (error) {
-      console.error('Auto-save failed:', error);
+      console.error('Auto-save error:', error);
     } finally {
       setIsSaving(false);
     }
-  }, [onSave]);
+  }, [saveFn, enabled]);
 
   useEffect(() => {
-    // Skip on first render
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      lastDataRef.current = data;
+    // Skip first render to avoid saving initial data
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false;
+      previousDataRef.current = data;
       return;
     }
 
-    // Deep comparison to prevent unnecessary saves
-    if (JSON.stringify(data) === JSON.stringify(lastDataRef.current)) {
+    // Deep comparison to avoid unnecessary saves
+    const hasChanged = JSON.stringify(data) !== JSON.stringify(previousDataRef.current);
+    
+    if (!hasChanged || !enabled || !data) {
       return;
     }
 
-    // Clear existing timeout
+    // Clear any existing timeout
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
-
-    // Set new timeout
+    
+    // Update previous data reference immediately
+    previousDataRef.current = data;
+    
+    // Set new timeout for debounced save with shorter delay
     timeoutRef.current = setTimeout(() => {
-      save(data);
+      debouncedSave(data);
     }, delay);
 
-    // Cleanup
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, dependencies);
+  }, [JSON.stringify(data), delay, enabled]); // Removed debouncedSave from dependencies
 
   // Cleanup on unmount
   useEffect(() => {
@@ -74,6 +82,6 @@ export function useDebouncedAutoSave<T>({
 
   return {
     isSaving,
-    lastSavedAt
+    lastSavedAt,
   };
 }

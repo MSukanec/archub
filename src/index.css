@@ -2,14 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer utilities {
-  .bg-texture {
-    background-color: var(--bg-texture-base);
-    background-image: radial-gradient(var(--bg-texture-dots) 1px, transparent 1px);
-    background-size: 4px 4px;
-  }
-}
-
 /* Gantt Timeline Scrollbar Styling */
 .gantt-timeline-scroll::-webkit-scrollbar {
   height: 12px;
@@ -76,16 +68,12 @@
 
 :root {
   /* Layout */
-  --layout-bg: hsl(0, 0%, 92%);
+  --layout-bg: hsl(0, 0%, 99%);
   --layout-text: hsl(0, 0%, 45%);
   --layout-border: hsl(0, 0%, 45%);
-  
-  /* Background Texture */
-  --bg-texture-base: hsl(0, 0%, 92%);
-  --bg-texture-dots: rgba(0, 0, 0, 0.005);
 
   /* Menus/Sidebar */
-  --menues-bg: hsl(0, 0%, 96%);
+  --menues-bg: hsl(0, 0%, 97%);
   --menues-fg: hsl(0, 0%, 45%);
   --menues-secondary-fg: hsl(0, 0%, 50%);
   --menues-border: hsl(0, 0%, 85%);
@@ -95,27 +83,16 @@
   --menues-active-fg: hsl(0, 0%, 97%);
 
   /* Cards */
-  --card-bg: hsl(0, 0%, 96%);
+  --card-bg: hsl(0, 0%, 97%);
   --card-fg: hsl(0, 0%, 35%);
   --card-text: hsl(0, 0%, 35%);
   --card-border: hsl(0, 0%, 85%);
-  --card-hover-bg: hsl(0, 0%, 96%);
+  --card-hover-bg: hsl(0, 0%, 97%);
 
   /* Secondary Cards */
-  --secondary-card-bg: hsl(0, 0%, 96%);
+  --secondary-card-bg: hsl(0, 0%, 95%);
   --secondary-card-fg: hsl(0, 0%, 35%);
-  --secondary-card-border: hsl(0, 0%, 85%);
-  --secondary-card-color-1: hsl(90, 50%, 50%);
-  --secondary-card-color-2: hsl(90, 50%, 50%);
-
-  /* Colorful Cards */
-  --colorful-card-top-bg: hsl(0, 0%, 96%);
-  --colorful-card-top-fg: hsl(0, 0%, 35%);
-  --colorful-card-bot-bg: hsl(0, 0%, 94%);
-  --colorful-card-text: hsl(0, 0%, 35%);
-  --colorful-card-border: hsl(0, 0%, 85%);
-  --colorful-card-color-1: hsl(90, 50%, 35%);
-  --colorful-card-color-2: hsl(90, 50%, 50%);
+  --secondary-card-border: hsl(0, 0%, 50%);
 
   /* Buttons - Primary */
   --button-primary-bg: hsl(90, 50%, 50%);
@@ -207,16 +184,12 @@
 
 .dark {
   /* Layout */
-  --layout-bg: hsl(0, 0%, 14%);
+  --layout-bg: hsl(0, 0%, 16%);
   --layout-text: hsl(0, 0%, 90%);
   --layout-border: hsl(240, 8%, 15%);
-  
-  /* Background Texture */
-  --bg-texture-base: hsl(0, 0%, 16%);
-  --bg-texture-dots: rgba(255, 255, 255, 0.005);
 
   /* Menus/Sidebar */
-  --menues-bg: hsl(0, 0%, 20%);
+  --menues-bg: hsl(0, 0%, 14%);
   --menues-fg: hsl(0, 0%, 70%);
   --menues-secondary-fg: hsl(0, 0%, 60%);
   --menues-border: hsl(0, 0%, 16%);
@@ -226,27 +199,16 @@
   --menues-active-fg: hsl(0, 0%, 98%);
 
   /* Cards */
-  --card-bg: hsl(0, 0%, 20%);
+  --card-bg: hsl(0, 0%, 14%);
   --card-fg: hsl(0, 0%, 90%);
   --card-text: hsl(0, 0%, 90%);
   --card-border: hsl(0, 0%, 16%);
-  --card-hover-bg: hsl(0, 0%, 20%);
+  --card-hover-bg: hsl(0, 0%, 14%);
 
   /* Secondary Cards */
-  --secondary-card-bg: hsl(0, 0%, 14%);
+  --secondary-card-bg: hsl(0, 0%, 50%);
   --secondary-card-fg: hsl(0, 0%, 85%);
-  --secondary-card-border: hsl(0, 0%, 20%);
-  --secondary-card-color-1: hsl(90, 50%, 50%);
-  --secondary-card-color-2: hsl(90, 50%, 50%);
-
-  /* Colorful Cards */
-  --colorful-card-top-bg: hsl(0, 0%, 14%);
-  --colorful-card-top-fg: hsl(0, 0%, 90%);
-  --colorful-card-bot-bg: hsl(0, 0%, 11%);
-  --colorful-card-text: hsl(0, 0%, 90%);
-  --colorful-card-border: hsl(0, 0%, 20%);
-  --colorful-card-color-1: hsl(90, 50%, 35%);
-  --colorful-card-color-2: hsl(90, 50%, 50%);
+  --secondary-card-border: hsl(250, 6%, 19%);
 
   /* Buttons - Primary */
   --button-primary-bg: hsl(90, 50%, 50%);

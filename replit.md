@@ -119,29 +119,6 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- July 6, 2025. Fixed Google OAuth redirect flow and Profile page auto-save functionality - COMPLETED
-  • Changed Google OAuth redirectTo from /organization/dashboard to / for proper onboarding flow handling
-  • Fixed Profile page auto-save by correcting hook parameters from saveFn to onSave with proper dependencies array
-  • Fixed sidebar toggle switch to use local state for immediate UI response instead of delayed database state
-  • Enhanced auto-save logging for debugging profile data persistence issues
-  • Google OAuth now properly redirects new users to onboarding flow while existing users go to dashboard
-  • Profile auto-save triggers with 750ms delay after changes to personal data, preferences, or theme settings
-  • Eliminated temporary fixUserPreferences utility after implementing proper onboarding detection logic
-- July 6, 2025. Complete ProjectBasicData page implementation with MI PERFIL layout pattern and real database fields - COMPLETED
-  • Restructured ProjectData interface to include ALL 23 fields from actual project_data database table
-  • Changed layout to match MI PERFIL pattern: title/description on left, form fields on right, separated by line dividers
-  • Organized page into 5 logical sections with proper two-column grid layout: Información General, Superficies, Ubicación, Datos del Cliente, Cronograma
-  • Información General: project name, description, project_type_id, modality_id, internal_notes, hero_image_url
-  • Superficies: surface_total, surface_covered, surface_semi (all numeric fields with m² units)
-  • Ubicación: address, city, state, country, zip_code, lat, lng (complete location data with coordinates)
-  • Datos del Cliente: client_name, email, contact_phone (client contact information)
-  • Cronograma: start_date, estimated_end (project timeline dates)
-  • Implemented comprehensive auto-save system with debounced updates and data filtering to prevent empty saves
-  • Fixed field loading from database to populate all form fields correctly on page load with real-time updates
-  • Enhanced form layout with proper responsive grids (lg:grid-cols-2 for sections, md:grid-cols-2/3 for fields)
-  • All fields now sync with real Supabase database using complete project_data table structure
-  • Auto-save system filters empty values and only saves meaningful data to avoid database conflicts
-  • Page now provides complete project configuration interface with immediate data persistence matching MI PERFIL visual structure
 - July 6, 2025. Enhanced project navigation with new sidebar structure and mobile organization selector fix - COMPLETED
   • Fixed mobile menu organization selector to automatically update project selection (like header behavior)
   • Added "Datos Básicos" button above "Diseño" in project sidebar with new "data" context navigation

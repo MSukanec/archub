@@ -76,13 +76,13 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
     member.user_id === userData?.user?.id
   );
 
-  // Helper para mostrar el nombre del miembro
+  // Helper para mostrar el nombre del miembro - CORREGIDO: users es objeto, no array
   const getMemberLabel = (id: string) => {
     if (!id) return "";
     const member = organizationMembers.find(m => m.id === id);
     if (!member) return "";
-    // Los datos ya vienen con full_name, email, etc. directamente en member
-    return member.full_name || member.email || 'Usuario';
+    const memberUser = member.users; // Es un objeto, no array
+    return memberUser?.full_name || memberUser?.email || 'Usuario';
   };
 
   const form = useForm<CreateProjectForm>({
@@ -248,7 +248,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
           />
         ),
         body: (
-          <CustomModalBody columns={1}>
+          <CustomModalBody padding="md">
             <Form {...form}>
               <div className="space-y-4">
                 {/* Fecha de creación */}
@@ -277,7 +277,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
                             </Button>
                           </FormControl>
                         </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0 z-[100000]" align="start">
+                        <PopoverContent className="w-auto p-0" align="start">
                           <CalendarComponent
                             mode="single"
                             selected={field.value}
@@ -309,10 +309,10 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
                             </SelectValue>
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="z-[100000]">
+                        <SelectContent>
                           {organizationMembers.map((member) => {
-                            // Los datos ya vienen con full_name, email, etc. directamente en member
-                            const memberName = member.full_name || member.email || 'Usuario';
+                            const memberUser = member.users; // Es un objeto, no array
+                            const memberName = memberUser?.full_name || memberUser?.email || 'Usuario';
                             const memberInitials = memberName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
                             
                             return (
@@ -361,7 +361,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
                             <SelectValue placeholder="Selecciona una tipología" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="z-[100000]">
+                        <SelectContent>
                           <SelectItem value="none">Sin tipología</SelectItem>
                           {projectTypes?.map((type) => (
                             <SelectItem key={type.id} value={type.id}>
@@ -388,7 +388,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
                             <SelectValue placeholder="Selecciona una modalidad" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="z-[100000]">
+                        <SelectContent>
                           <SelectItem value="none">Sin modalidad</SelectItem>
                           {projectModalities?.map((modality) => (
                             <SelectItem key={modality.id} value={modality.id}>
@@ -415,7 +415,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
                             <SelectValue placeholder="Selecciona un estado" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="z-[100000]">
+                        <SelectContent>
                           <SelectItem value="planning">Planificación</SelectItem>
                           <SelectItem value="active">Activo</SelectItem>
                           <SelectItem value="on-hold">En pausa</SelectItem>

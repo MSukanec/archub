@@ -10,7 +10,7 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, loading, initialized, initialize } = useAuthStore()
-  const { data: userData, isLoading: userDataLoading, error: userDataError } = useCurrentUser()
+  const { data: userData, isLoading: userDataLoading } = useCurrentUser()
   const [location, navigate] = useLocation()
   const [showAuthModal, setShowAuthModal] = useState(false)
 
@@ -24,7 +24,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   useEffect(() => {
     console.log('ProtectedRoute state:', { initialized, loading, user: !!user });
     
-    // Solo mostrar modal si ya se inicializó, no está cargando, y no hay usuario
+    // Solo mostrar modal si ya se inicializó y no hay usuario
     if (initialized && !loading && !user) {
       console.log('Showing auth modal');
       setShowAuthModal(true)
@@ -37,21 +37,21 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   // Check if user needs to complete onboarding or select a mode
   useEffect(() => {
     if (user && userData && !userDataLoading && location !== '/select-mode') {
+      const hasUserType = userData.preferences?.last_user_type;
       const onboardingCompleted = userData.preferences?.onboarding_completed;
-      const hasUserData = userData.user_data && userData.user_data.first_name && userData.user_data.last_name;
       
       console.log('Checking user type:', { 
         hasUser: !!user, 
         hasUserData: !!userData, 
         userDataLoading, 
+        hasUserType: !!hasUserType,
         onboardingCompleted,
-        hasPersonalData: !!hasUserData,
         currentLocation: location 
       });
       
-      // Solo redirigir al onboarding si NO tiene datos personales básicos Y NO ha completado onboarding
-      if (!hasUserData && !onboardingCompleted) {
-        console.log('User needs onboarding, redirecting to select-mode');
+      // Redirect to onboarding if not completed OR if no user type selected
+      if (!onboardingCompleted || !hasUserType) {
+        console.log('User needs onboarding or type selection, redirecting to select-mode');
         navigate('/select-mode');
       }
     }
