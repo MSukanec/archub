@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -71,6 +71,7 @@ export default function TaskTemplateEditorModal({
   const queryClient = useQueryClient();
   const [newParameterId, setNewParameterId] = useState<string>('');
   const [newOptionGroupId, setNewOptionGroupId] = useState<string>('');
+  const [hasTriedCreateTemplate, setHasTriedCreateTemplate] = useState(false);
 
   // Fetch existing template
   const { data: template, isLoading: templateLoading } = useQuery({
@@ -163,6 +164,7 @@ export default function TaskTemplateEditorModal({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-template', categoryCode] });
+      setHasTriedCreateTemplate(true);
       toast({
         title: 'Plantilla creada',
         description: `Plantilla ${categoryCode} creada exitosamente`
@@ -302,6 +304,24 @@ export default function TaskTemplateEditorModal({
     }
   });
 
+  // Auto-create template if it doesn't exist
+  useEffect(() => {
+    if (open && !templateLoading && !template && !hasTriedCreateTemplate && !createTemplateMutation.isPending) {
+      createTemplateMutation.mutate();
+    }
+  }, [open, templateLoading, template, hasTriedCreateTemplate, createTemplateMutation.isPending]);
+
+  // Reset state when modal opens/closes
+  useEffect(() => {
+    if (open) {
+      setHasTriedCreateTemplate(false);
+    } else {
+      setNewParameterId('');
+      setNewOptionGroupId('');
+      setHasTriedCreateTemplate(false);
+    }
+  }, [open]);
+
   const handleCreateTemplate = () => {
     createTemplateMutation.mutate();
   };
@@ -374,7 +394,7 @@ export default function TaskTemplateEditorModal({
           />
         ),
         body: (
-          <CustomModalBody columns={1}>
+          <CustomModalBody columns={1} className="overflow-visible">
             <div className="space-y-6">
               {/* Agregar Parámetro */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
