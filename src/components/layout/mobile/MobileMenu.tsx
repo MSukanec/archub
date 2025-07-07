@@ -27,6 +27,7 @@ import {
   Layout,
   Images,
   Handshake,
+  CreditCard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -302,32 +303,37 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
   const menuContent = (
     <div className="fixed inset-0 flex flex-col w-full h-full" style={{ backgroundColor: 'var(--menues-bg)', zIndex: 9999 }}>
-      {/* Header */}
-      <div className="h-14 flex items-center justify-between px-4 border-b" style={{ borderColor: 'var(--menues-border)' }}>
-        <h1 className="text-lg font-semibold" style={{ color: 'var(--menues-fg)' }}>
-          {currentSidebarContext === 'organization' && 'Organización'}
-          {currentSidebarContext === 'project' && 'Proyecto'}
-          {currentSidebarContext === 'design' && 'Diseño'}
-          {currentSidebarContext === 'construction' && 'Obra'}
-          {currentSidebarContext === 'finances' && 'Finanzas'}
-          {currentSidebarContext === 'commercialization' && 'Comercialización'}
-          {currentSidebarContext === 'data' && 'Datos Básicos'}
-          {currentSidebarContext === 'postsale' && 'Post-Venta'}
-          {currentSidebarContext === 'admin' && 'Administración'}
-        </h1>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onClose}
-          className="hover:bg-transparent"
-          style={{ color: 'var(--menues-fg)' }}
-        >
-          <X className="h-5 w-5" />
-        </Button>
-      </div>
+      {/* Spacer to leave room at the top */}
+      <div className="h-16" />
+      
+      {/* Menu Container - not full screen */}
+      <div className="flex-1 mx-4 mb-4 rounded-lg border shadow-lg overflow-hidden" style={{ backgroundColor: 'var(--menues-bg)', borderColor: 'var(--menues-border)' }}>
+        {/* Header */}
+        <div className="h-14 flex items-center justify-between px-4 border-b" style={{ borderColor: 'var(--menues-border)' }}>
+          <h1 className="text-lg font-semibold" style={{ color: 'var(--menues-fg)' }}>
+            {currentSidebarContext === 'organization' && 'Organización'}
+            {currentSidebarContext === 'project' && 'Proyecto'}
+            {currentSidebarContext === 'design' && 'Diseño'}
+            {currentSidebarContext === 'construction' && 'Obra'}
+            {currentSidebarContext === 'finances' && 'Finanzas'}
+            {currentSidebarContext === 'commercialization' && 'Comercialización'}
+            {currentSidebarContext === 'data' && 'Datos Básicos'}
+            {currentSidebarContext === 'postsale' && 'Post-Venta'}
+            {currentSidebarContext === 'admin' && 'Administración'}
+          </h1>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="hover:bg-transparent"
+            style={{ color: 'var(--menues-fg)' }}
+          >
+            <X className="h-5 w-5" />
+          </Button>
+        </div>
 
-      {/* Navigation Menu - Flex grow para ocupar el espacio disponible */}
-      <div className="flex-1 px-4 py-3 overflow-y-auto">
+        {/* Navigation Menu - Flex grow para ocupar el espacio disponible */}
+        <div className="flex-1 px-4 py-3 overflow-y-auto">
         <nav className={cn(
           "space-y-0.5 transition-all duration-300 ease-in-out",
           isAnimating && animationDirection === 'left' && "transform translate-x-full opacity-0",
@@ -354,13 +360,13 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                     <CustomRestricted reason="coming_soon">
                       <button
                         onClick={item.isAccordion ? item.onToggle : (item.onClick || (() => handleNavigation(item.href)))}
-                        className="flex w-full items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+                        className="flex w-full items-center gap-2.5 px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                         style={{
-                          color: 'var(--menues-fg)',
-                          backgroundColor: 'transparent'
+                          color: 'var(--sidebar-foreground)',
+                          backgroundColor: location === item.href ? 'var(--sidebar-accent)' : 'transparent'
                         }}
                       >
-                        <item.icon className="h-5 w-5" />
+                        <item.icon className="h-4 w-4" />
                         {item.label}
                         {item.isAccordion ? (
                           <div className="ml-auto">
@@ -376,13 +382,13 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                   ) : (
                     <button
                       onClick={item.isAccordion ? item.onToggle : (item.onClick || (() => handleNavigation(item.href)))}
-                      className="flex w-full items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+                      className="flex w-full items-center gap-2.5 px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                       style={{
-                        color: 'var(--menues-fg)',
-                        backgroundColor: 'transparent'
+                        color: 'var(--sidebar-foreground)',
+                        backgroundColor: location === item.href ? 'var(--sidebar-accent)' : 'transparent'
                       }}
                     >
-                      <item.icon className="h-5 w-5" />
+                      <item.icon className="h-4 w-4" />
                       {item.label}
                       {item.isAccordion ? (
                         <div className="ml-auto">
@@ -403,10 +409,11 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                         <button
                           key={subIndex}
                           onClick={() => handleNavigation(subItem.href)}
-                          className="flex w-full items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+                          className="flex w-full items-center gap-2 px-3 py-1.5 text-sm rounded-md transition-all duration-200 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                           style={{
-                            color: 'var(--menues-fg)',
-                            backgroundColor: 'transparent'
+                            color: 'var(--sidebar-foreground)',
+                            backgroundColor: location === subItem.href ? 'var(--sidebar-accent)' : 'transparent',
+                            opacity: 0.8
                           }}
                         >
                           <subItem.icon className="h-4 w-4" />
@@ -420,10 +427,10 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
             </div>
           ))}
         </nav>
-      </div>
+        </div>
 
-      {/* Footer - Fijo en la parte inferior */}
-      <div className="px-4 py-3 border-t relative" style={{ borderColor: 'var(--menues-border)' }}>
+        {/* Footer - Fijo en la parte inferior */}
+        <div className="px-4 py-3 border-t relative" style={{ borderColor: 'var(--menues-border)' }}>
         {/* Organization and Project Selectors */}
         <div className="space-y-3 mb-4">
           {/* Organization Selector */}
@@ -559,6 +566,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
               <span className="text-xs font-medium mt-0.5">Admin</span>
             </button>
           )}
+        </div>
         </div>
       </div>
     </div>
