@@ -119,6 +119,14 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 7, 2025. Fixed TaskParameterEditorModal structure and group assignment modal functionality - COMPLETED
+  • Corrected modal structure issue that was causing main modal to appear as horizontal line
+  • Fixed CustomModalLayout syntax with proper {{ }} structure for header/body/footer props
+  • Moved group assignment modal outside main modal structure to prevent z-index and rendering conflicts
+  • Eye button (👁️) now properly opens assignment modal for selecting which options belong to each group
+  • Edit button (✏️) correctly edits only group name as expected by user
+  • Removed debug console logs for production-ready clean code
+  • Modal hierarchy now works correctly: main parameter editor + separate overlay for group option assignment
 - July 7, 2025. Enhanced TaskParameterEditorModal with group-option assignment functionality - COMPLETED
   • Added comprehensive interface to assign task_parameter_values to task_parameter_option_groups via task_parameter_option_group_items table
   • Implemented dual-modal system: main parameter editor + group items assignment modal with checkbox interface

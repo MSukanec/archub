@@ -552,7 +552,8 @@ export function TaskParameterEditorModal({
         open={open} 
         onClose={handleClose}
         className="md:max-w-4xl"
-        content={{
+      >
+        {{
         header: (
           <CustomModalHeader
             title={parameter ? `Editar Parámetro - ${parameter.name}` : 'Nuevo Parámetro de Tarea'}
@@ -761,11 +762,8 @@ export function TaskParameterEditorModal({
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => {
-                                          console.log('Abriendo modal para grupo:', group.name);
-                                          console.log('Estado actual showGroupItemsModal:', showGroupItemsModal);
                                           setSelectedGroupForItems(group);
                                           setShowGroupItemsModal(true);
-                                          console.log('Modal debería abrirse ahora');
                                         }}
                                       >
                                         <Eye className="h-4 w-4" />
@@ -961,7 +959,7 @@ export function TaskParameterEditorModal({
           </div>
         )
         }}
-      />
+      </CustomModalLayout>
 
       {/* Group Items Assignment Modal - Outside main modal */}
       {showGroupItemsModal && selectedGroupForItems && (
