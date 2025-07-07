@@ -22,7 +22,6 @@ import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
 import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter';
 
 import { useCreateTaskParameter, useUpdateTaskParameter, TaskParameter } from '@/hooks/use-task-parameters-admin';
-import { useUnits } from '@/hooks/use-units';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -34,7 +33,6 @@ const taskParameterSchema = z.object({
   type: z.enum(['text', 'number', 'select', 'boolean'], { 
     required_error: 'El tipo es requerido' 
   }),
-  unit_id: z.string().optional(),
   required: z.boolean(),
 });
 
@@ -92,8 +90,6 @@ export function TaskParameterEditorModal({
   const createMutation = useCreateTaskParameter();
   const updateMutation = useUpdateTaskParameter();
   
-  // Load units for the selector
-  const { data: units, isLoading: unitsLoading } = useUnits();
   
   const form = useForm<TaskParameterFormData>({
     resolver: zodResolver(taskParameterSchema),
@@ -101,7 +97,6 @@ export function TaskParameterEditorModal({
       name: '',
       label: '',
       type: 'text',
-      unit_id: undefined,
       required: false,
     },
   });
@@ -325,7 +320,6 @@ export function TaskParameterEditorModal({
         name: parameter.name,
         label: parameter.label,
         type: parameter.type,
-        unit_id: parameter.unit_id || undefined,
         required: parameter.required,
       });
     } else if (!parameter && open) {
@@ -333,7 +327,6 @@ export function TaskParameterEditorModal({
         name: '',
         label: '',
         type: 'text',
-        unit_id: undefined,
         required: false,
       });
     }
@@ -345,7 +338,6 @@ export function TaskParameterEditorModal({
     try {
       const submitData = {
         ...data,
-        unit_id: data.unit_id?.trim() || undefined,
       };
 
       if (parameter) {
@@ -559,38 +551,7 @@ export function TaskParameterEditorModal({
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="unit_id"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Unidad</FormLabel>
-                            <Select 
-                              onValueChange={field.onChange} 
-                              value={field.value || ''}
-                              disabled={unitsLoading}
-                            >
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Sin unidad" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="">Sin unidad</SelectItem>
-                                {units?.map((unit) => (
-                                  <SelectItem key={unit.id} value={unit.id}>
-                                    {unit.name} ({unit.symbol})
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
+                    <FormField
                         control={form.control}
                         name="required"
                         render={({ field }) => (
@@ -610,8 +571,6 @@ export function TaskParameterEditorModal({
                           </FormItem>
                         )}
                       />
-                    </div>
-
 
                   </CardContent>
                 </Card>
