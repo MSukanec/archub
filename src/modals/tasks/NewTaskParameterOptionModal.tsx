@@ -16,8 +16,8 @@ import { useCreateTaskParameterOption, useUpdateTaskParameterOption, TaskParamet
 
 const taskParameterOptionSchema = z.object({
   parameter_id: z.string().min(1, 'Parameter ID es requerido'),
-  label: z.string().min(1, 'La etiqueta es requerida'),
-  value: z.string().min(1, 'El valor es requerido'),
+  value: z.string().min(1, 'El nombre (código) es requerido'),
+  label: z.string().min(1, 'La etiqueta (visible) es requerida'),
 });
 
 type TaskParameterOptionFormData = z.infer<typeof taskParameterOptionSchema>;
@@ -56,14 +56,14 @@ export function NewTaskParameterOptionModal({
     if (option && open) {
       form.reset({
         parameter_id: option.parameter_id,
-        label: option.label,
         value: option.value,
+        label: option.label,
       });
     } else if (!option && open) {
       form.reset({
         parameter_id: parameterId,
-        label: '',
         value: '',
+        label: '',
       });
     }
   }, [option, open, form, parameterId]);
@@ -75,10 +75,16 @@ export function NewTaskParameterOptionModal({
       if (option) {
         await updateMutation.mutateAsync({
           id: option.id,
-          ...data,
+          parameter_id: data.parameter_id,
+          name: data.value, // sending value as name to database
+          label: data.label,
         });
       } else {
-        await createMutation.mutateAsync(data);
+        await createMutation.mutateAsync({
+          parameter_id: data.parameter_id,
+          name: data.value, // sending value as name to database
+          label: data.label,
+        });
       }
       
       onClose();
@@ -113,7 +119,7 @@ export function NewTaskParameterOptionModal({
                   name="value"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="required-asterisk">Nombre</FormLabel>
+                      <FormLabel className="required-asterisk">Nombre (código)</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -131,7 +137,7 @@ export function NewTaskParameterOptionModal({
                   name="label"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="required-asterisk">Etiqueta</FormLabel>
+                      <FormLabel className="required-asterisk">Etiqueta (visible)</FormLabel>
                       <FormControl>
                         <Input
                           {...field}

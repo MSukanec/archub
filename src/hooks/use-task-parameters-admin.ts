@@ -39,12 +39,15 @@ export interface UpdateTaskParameterData {
 
 export interface CreateTaskParameterOptionData {
   parameter_id: string;
-  value: string;
+  name: string;
   label: string;
 }
 
-export interface UpdateTaskParameterOptionData extends CreateTaskParameterOptionData {
+export interface UpdateTaskParameterOptionData {
   id: string;
+  parameter_id: string;
+  name: string;
+  label: string;
 }
 
 export function useTaskParametersAdmin() {
@@ -67,8 +70,8 @@ export function useTaskParametersAdmin() {
       // Fetch options from task_parameter_values table
       const { data: options, error: optionsError } = await supabase
         .from('task_parameter_values')
-        .select('id, parameter_id, value, created_at')
-        .order('value');
+        .select('id, parameter_id, name, label, created_at')
+        .order('label');
 
       if (optionsError) {
         console.error('Error fetching options:', optionsError);
@@ -84,8 +87,8 @@ export function useTaskParametersAdmin() {
         optionsMap.get(option.parameter_id)!.push({
           id: option.id,
           parameter_id: option.parameter_id,
-          value: option.value,
-          label: option.value, // Using value as label for now
+          value: option.name, // Using name as value for backward compatibility
+          label: option.label, // Using label for display
           created_at: option.created_at
         });
       });
@@ -258,8 +261,18 @@ export function useCreateTaskParameterOption() {
     mutationFn: async (optionData: CreateTaskParameterOptionData) => {
       if (!supabase) throw new Error('Supabase client not initialized');
 
-      // Options table doesn't exist yet - throw error
-      throw new Error('Parameter options functionality not implemented yet');
+      const { data, error } = await supabase
+        .from('task_parameter_values')
+        .insert({
+          parameter_id: optionData.parameter_id,
+          name: optionData.name,
+          label: optionData.label
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin-clean'] });
@@ -286,8 +299,19 @@ export function useUpdateTaskParameterOption() {
     mutationFn: async ({ id, ...updateData }: UpdateTaskParameterOptionData) => {
       if (!supabase) throw new Error('Supabase client not initialized');
 
-      // Options table doesn't exist yet - throw error
-      throw new Error('Parameter options functionality not implemented yet');
+      const { data, error } = await supabase
+        .from('task_parameter_values')
+        .update({
+          parameter_id: updateData.parameter_id,
+          name: updateData.name,
+          label: updateData.label
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin-clean'] });
@@ -314,8 +338,12 @@ export function useDeleteTaskParameterOption() {
     mutationFn: async (optionId: string) => {
       if (!supabase) throw new Error('Supabase client not initialized');
 
-      // Options table doesn't exist yet - throw error
-      throw new Error('Parameter options functionality not implemented yet');
+      const { error } = await supabase
+        .from('task_parameter_values')
+        .delete()
+        .eq('id', optionId);
+
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin-clean'] });

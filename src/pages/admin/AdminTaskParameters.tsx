@@ -336,7 +336,7 @@ export default function AdminTaskParameters() {
                       </CollapsibleTrigger>
 
                       <CollapsibleContent>
-                        <div className="px-3 pb-3 border-t border-muted">
+                        <div className="px-3 pb-3 border-t border-border">
                           <div className="pt-3">
                             <div className="space-y-2">
                               {parameter.options && parameter.options.length > 0 ? (
