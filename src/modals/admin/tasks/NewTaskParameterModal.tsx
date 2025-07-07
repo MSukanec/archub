@@ -50,7 +50,7 @@ export function NewTaskParameterModal({
   onParameterCreated
 }: NewTaskParameterModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
+  const [isNewGroupModalOpen, setIsNewGroupModalOpen] = useState(false);
   const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<any>(null);
   
