@@ -167,9 +167,9 @@ export function TaskParameterEditorModal({
     queryFn: async () => {
       if (!parameter?.id || !selectedGroupForItems?.id) return [];
       
-      // Get all parameter options (these are the actual options we see in "Opciones Generales")
+      // Get all parameter values (these are the actual options we see in "Opciones Generales")
       const { data: allValues, error: valuesError } = await supabase
-        .from('task_parameter_options')
+        .from('task_parameter_values')
         .select('id, name, label')
         .eq('parameter_id', parameter.id)
         .order('label');
@@ -186,10 +186,10 @@ export function TaskParameterEditorModal({
       
       const selectedValueIds = new Set(selectedValues?.map(item => item.parameter_value_id) || []);
       
-      const result = (allValues || []).map(option => ({
-        id: option.id,
-        value: option.label, // Use label for display
-        selected: selectedValueIds.has(option.id)
+      const result = (allValues || []).map(value => ({
+        id: value.id,
+        value: value.label, // Use label for display
+        selected: selectedValueIds.has(value.id)
       }));
       
       console.log('Valores del parámetro:', allValues);
