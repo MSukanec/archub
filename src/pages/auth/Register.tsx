@@ -105,19 +105,14 @@ export default function Register() {
   return (
     <div className="min-h-screen dark flex items-center justify-center p-4" style={{ backgroundColor: 'var(--layout-bg)' }}>
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center space-x-2 mb-4">
-            <Building className="h-8 w-8 text-[var(--accent)]" />
-            <span className="text-2xl font-bold">Archub</span>
-          </div>
-          <h1 className="text-2xl font-bold">Crear Cuenta</h1>
-          <p className="text-muted-foreground">Únete a la plataforma de gestión más avanzada</p>
-        </div>
-
-        <Card>
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-xl text-center">Comenzar gratis</CardTitle>
-            <CardDescription className="text-center">
+        <Card style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
+          <CardHeader className="space-y-4 text-center">
+            <div className="flex items-center justify-center space-x-2">
+              <Building className="h-8 w-8 text-[var(--accent)]" />
+              <span className="text-2xl font-bold" style={{ color: 'var(--text-default)' }}>Archub</span>
+            </div>
+            <CardTitle className="text-xl" style={{ color: 'var(--text-default)' }}>Comenzar gratis</CardTitle>
+            <CardDescription style={{ color: 'var(--text-muted)' }}>
               Crea tu cuenta y empieza a gestionar proyectos hoy mismo
             </CardDescription>
           </CardHeader>
@@ -156,10 +151,10 @@ export default function Register() {
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border" />
+                <span className="w-full border-t" style={{ borderColor: 'var(--card-border)' }} />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">O continúa con</span>
+                <span className="px-2" style={{ backgroundColor: 'var(--card-bg)', color: 'var(--text-muted)' }}>O continúa con</span>
               </div>
             </div>
 

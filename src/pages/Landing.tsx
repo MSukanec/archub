@@ -280,7 +280,7 @@ export default function Landing() {
                 key={index} 
                 className="group p-8 rounded-lg transition-all duration-200 hover:scale-105"
                 style={{ 
-                  backgroundColor: 'var(--secondary-card-bg)', 
+                  backgroundColor: 'var(--card-bg)', 
                   border: '1px solid var(--card-border)' 
                 }}
               >
