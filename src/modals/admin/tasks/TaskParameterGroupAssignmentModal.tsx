@@ -24,10 +24,9 @@ export function TaskParameterGroupAssignmentModal({
 }: TaskParameterGroupAssignmentModalProps) {
   const [selectedOptions, setSelectedOptions] = useState<Set<string>>(new Set());
   
-  // Cargar todas las opciones del parámetro
-  const { data: parameterValues, isLoading: isLoadingValues } = useTaskParameterValues(group?.parameter_id || '');
+  const { data: parameterValues, isLoading } = useTaskParameterValues(group?.parameter_id || '');
   
-  const handleOptionToggle = async (optionId: string, isChecked: boolean) => {
+  const handleOptionToggle = (optionId: string, isChecked: boolean) => {
     const newSelection = new Set(selectedOptions);
     
     if (isChecked) {
@@ -41,7 +40,6 @@ export function TaskParameterGroupAssignmentModal({
 
   if (!group) return null;
 
-  const isLoading = isLoadingValues;
   const optionsCount = parameterValues?.length || 0;
   const selectedCount = selectedOptions.size;
 
@@ -53,24 +51,18 @@ export function TaskParameterGroupAssignmentModal({
         header: (
           <CustomModalHeader
             title={`Gestionar Grupo: ${group.name}`}
-            description={`Asignar opciones del parámetro "${parameterLabel}" al grupo "${group.name}"`}
+            description={`Asignar opciones del parámetro "${parameterLabel}" al grupo`}
             onClose={onClose}
           />
         ),
         body: (
           <CustomModalBody columns={1}>
             <div className="space-y-4">
-              {/* Contador de selección */}
               <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                <span className="text-sm font-medium">
-                  Opciones seleccionadas
-                </span>
-                <Badge variant="secondary">
-                  {selectedCount} de {optionsCount}
-                </Badge>
+                <span className="text-sm font-medium">Opciones seleccionadas</span>
+                <Badge variant="secondary">{selectedCount} de {optionsCount}</Badge>
               </div>
 
-              {/* Lista de opciones */}
               <div className="space-y-2 max-h-60 overflow-y-auto">
                 {isLoading ? (
                   <div className="text-center py-8 text-muted-foreground">
@@ -84,22 +76,17 @@ export function TaskParameterGroupAssignmentModal({
                         checked={selectedOptions.has(option.id)}
                         onCheckedChange={(checked) => handleOptionToggle(option.id, !!checked)}
                       />
-                      <label
-                        htmlFor={option.id}
-                        className="flex-1 text-sm font-medium cursor-pointer"
-                      >
+                      <label htmlFor={option.id} className="flex-1 text-sm font-medium cursor-pointer">
                         {option.label}
                       </label>
                       {option.name && (
-                        <span className="text-xs text-muted-foreground">
-                          ({option.name})
-                        </span>
+                        <span className="text-xs text-muted-foreground">({option.name})</span>
                       )}
                     </div>
                   ))
                 ) : (
                   <div className="text-center py-8 text-muted-foreground">
-                    No hay opciones disponibles para este parámetro
+                    No hay opciones disponibles
                   </div>
                 )}
               </div>
