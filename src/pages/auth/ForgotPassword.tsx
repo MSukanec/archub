@@ -49,13 +49,13 @@ export default function ForgotPassword() {
 
   if (emailSent) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           {/* Logo */}
           <div className="text-center mb-8">
             <Link href="/">
-              <div className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-700 transition-colors">
-                <Building className="h-8 w-8" />
+              <div className="inline-flex items-center space-x-2 text-[var(--accent)] hover:text-[var(--accent)]/80 transition-colors">
+                <Building className="h-8 w-8 text-[var(--accent)]" />
                 <span className="text-2xl font-bold">Archub</span>
               </div>
             </Link>
@@ -95,7 +95,7 @@ export default function ForgotPassword() {
               <div className="text-center text-sm text-muted-foreground">
                 ¿Recordaste tu contraseña?{" "}
                 <Link href="/login">
-                  <Button variant="link" className="p-0 h-auto font-normal text-blue-600 hover:text-blue-700">
+                  <Button variant="link" className="p-0 h-auto font-normal text-[var(--accent)] hover:text-[var(--accent)]/80">
                     Inicia sesión
                   </Button>
                 </Link>
@@ -117,13 +117,13 @@ export default function ForgotPassword() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/">
-            <div className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-700 transition-colors">
-              <Building className="h-8 w-8" />
+            <div className="inline-flex items-center space-x-2 text-[var(--accent)] hover:text-[var(--accent)]/80 transition-colors">
+              <Building className="h-8 w-8 text-[var(--accent)]" />
               <span className="text-2xl font-bold">Archub</span>
             </div>
           </Link>
@@ -153,7 +153,7 @@ export default function ForgotPassword() {
                 />
               </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button type="submit" className="w-full bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-accent-foreground" disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -168,7 +168,7 @@ export default function ForgotPassword() {
             <div className="text-center text-sm text-muted-foreground">
               ¿Recordaste tu contraseña?{" "}
               <Link href="/login">
-                <Button variant="link" className="p-0 h-auto font-normal text-blue-600 hover:text-blue-700">
+                <Button variant="link" className="p-0 h-auto font-normal text-[var(--accent)] hover:text-[var(--accent)]/80">
                   Inicia sesión
                 </Button>
               </Link>

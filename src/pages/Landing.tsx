@@ -1,188 +1,182 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building, Users, FileText, BarChart3, Shield, Zap, CheckCircle, ArrowRight } from "lucide-react";
+import { Building, Users, FileText, BarChart3, Shield, Zap, CheckCircle, ArrowRight, Star } from "lucide-react";
 
 const features = [
   {
     icon: Building,
     title: "Gestión de Proyectos",
-    description: "Administra todos tus proyectos de construcción desde un solo lugar"
+    description: "Administra todos tus proyectos de construcción desde un solo lugar con herramientas inteligentes"
   },
   {
     icon: Users,
     title: "Colaboración en Tiempo Real",
-    description: "Coordina equipos y mantén a todos sincronizados"
+    description: "Coordina equipos y mantén a todos sincronizados con actualizaciones instantáneas"
   },
   {
     icon: FileText,
     title: "Documentación Técnica",
-    description: "Organiza planos, especificaciones y documentos importantes"
+    description: "Organiza planos, especificaciones y documentos importantes de forma centralizada"
   },
   {
     icon: BarChart3,
     title: "Análisis y Reportes",
-    description: "Obtén insights valiosos sobre el progreso de tus proyectos"
+    description: "Obtén insights valiosos sobre el progreso de tus proyectos con dashboards intuitivos"
   },
   {
     icon: Shield,
     title: "Seguro y Confiable",
-    description: "Tus datos están protegidos con los más altos estándares de seguridad"
+    description: "Tus datos están protegidos con los más altos estándares de seguridad empresarial"
   },
   {
     icon: Zap,
     title: "Rápido y Eficiente",
-    description: "Interfaz optimizada para maximizar tu productividad"
+    description: "Interfaz optimizada para maximizar tu productividad y reducir tiempos de gestión"
   }
 ];
 
-const benefits = [
-  "Reduce tiempo de gestión en un 60%",
-  "Mejora la comunicación del equipo",
-  "Centraliza toda la información del proyecto",
-  "Genera reportes automáticos",
-  "Acceso desde cualquier dispositivo"
+const stats = [
+  { value: "10,000+", label: "Proyectos gestionados" },
+  { value: "500+", label: "Empresas confían en nosotros" },
+  { value: "99.9%", label: "Tiempo de actividad" },
+  { value: "24/7", label: "Soporte disponible" }
 ];
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
-      <header className="border-b bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Building className="h-8 w-8 text-blue-600" />
-            <span className="text-2xl font-bold text-slate-900 dark:text-white">Archub</span>
-          </div>
-          <div className="flex items-center space-x-4">
-            <Link href="/login">
-              <Button variant="outline">Iniciar Sesión</Button>
-            </Link>
-            <Link href="/register">
-              <Button>Registrarse</Button>
-            </Link>
+      <header className="border-b border-border/40">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <div className="flex items-center space-x-2">
+              <Building className="h-8 w-8 text-[var(--accent)]" />
+              <span className="text-xl font-bold">Archub</span>
+            </div>
+            <nav className="hidden md:flex items-center space-x-8">
+              <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Características</a>
+              <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Precios</a>
+              <a href="#contact" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Contacto</a>
+              <Link href="/login">
+                <Button variant="ghost" size="sm">Iniciar Sesión</Button>
+              </Link>
+              <Link href="/register">
+                <Button size="sm" className="bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-accent-foreground">
+                  Comenzar Gratis
+                </Button>
+              </Link>
+            </nav>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20 text-center">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-6xl font-bold text-slate-900 dark:text-white mb-6">
-            La plataforma de gestión de construcción
-            <span className="text-blue-600 block">más completa</span>
+      <section className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
+        <div className="text-center max-w-4xl mx-auto">
+          <div className="flex items-center justify-center space-x-1 mb-6">
+            <div className="flex">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} className="h-4 w-4 fill-[var(--accent)] text-[var(--accent)]" />
+              ))}
+            </div>
+            <span className="text-sm text-muted-foreground ml-2">Calificado 5/5 por más de 500 empresas</span>
+          </div>
+          
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
+            La plataforma de gestión{" "}
+            <span className="text-[var(--accent)]">más avanzada</span>{" "}
+            para construcción
           </h1>
-          <p className="text-xl text-slate-600 dark:text-slate-300 mb-8 leading-relaxed">
-            Gestiona proyectos, equipos y presupuestos de construcción de manera inteligente. 
-            Centraliza toda tu información y mejora la productividad de tu equipo.
+          
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
+            Optimiza cada etapa de tu construcción con herramientas inteligentes de planificación, 
+            presupuestos y seguimiento en tiempo real.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
             <Link href="/register">
-              <Button size="lg" className="px-8 py-4 text-lg">
+              <Button size="lg" className="bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-accent-foreground px-8 py-3">
                 Comenzar Gratis
-                <ArrowRight className="ml-2 h-5 w-5" />
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
-            <Link href="/login">
-              <Button variant="outline" size="lg" className="px-8 py-4 text-lg">
-                Ver Demo
-              </Button>
-            </Link>
+            <Button variant="outline" size="lg" className="px-8 py-3">
+              Ver Demo
+            </Button>
+          </div>
+          
+          {/* Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-12 border-t border-border/40">
+            {stats.map((stat, index) => (
+              <div key={index} className="text-center">
+                <div className="text-2xl font-bold text-[var(--accent)]">{stat.value}</div>
+                <div className="text-sm text-muted-foreground">{stat.label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Features Grid */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">
-            Todo lo que necesitas para gestionar tus proyectos
-          </h2>
-          <p className="text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
-            Archub combina todas las herramientas esenciales en una plataforma integrada
-          </p>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {features.map((feature, index) => {
-            const Icon = feature.icon;
-            return (
-              <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-shadow">
-                <CardHeader>
-                  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mb-4">
-                    <Icon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <CardTitle className="text-xl">{feature.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-base">
-                    {feature.description}
-                  </CardDescription>
-                </CardContent>
-              </Card>
-            );
-          })}
+      {/* Features Section */}
+      <section id="features" className="py-20 bg-muted/30">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+              Todo lo que necesitas para gestionar construcción
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Una suite completa de herramientas diseñadas específicamente para la industria de la construcción
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {features.map((feature, index) => (
+              <div key={index} className="group p-6 rounded-lg bg-card border border-border hover:border-[var(--accent)]/50 transition-all duration-200">
+                <div className="mb-4">
+                  <feature.icon className="h-8 w-8 text-[var(--accent)] group-hover:scale-110 transition-transform duration-200" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">{feature.description}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Benefits Section */}
-      <section className="bg-blue-600 dark:bg-blue-700 py-20">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-                Transforma la manera de gestionar tus proyectos
-              </h2>
-              <p className="text-blue-100 text-lg mb-8">
-                Miles de profesionales de la construcción ya confían en Archub para 
-                optimizar sus procesos y aumentar su rentabilidad.
-              </p>
-              <div className="space-y-4">
-                {benefits.map((benefit, index) => (
-                  <div key={index} className="flex items-center text-white">
-                    <CheckCircle className="h-5 w-5 text-green-300 mr-3 flex-shrink-0" />
-                    <span>{benefit}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="text-center">
-              <Card className="inline-block p-8 bg-white/10 border-white/20 backdrop-blur-sm">
-                <CardHeader className="text-center pb-4">
-                  <CardTitle className="text-white text-2xl mb-2">
-                    Comienza hoy mismo
-                  </CardTitle>
-                  <CardDescription className="text-blue-100">
-                    Regístrate gratis y transforma tu gestión de proyectos
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Link href="/register">
-                    <Button size="lg" className="w-full bg-white text-blue-600 hover:bg-slate-100">
-                      Crear Cuenta Gratis
-                    </Button>
-                  </Link>
-                  <p className="text-blue-100 text-sm mt-4">
-                    Sin tarjeta de crédito. Sin compromisos.
-                  </p>
-                </CardContent>
-              </Card>
+      {/* CTA Section */}
+      <section className="py-20">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+              Comienza a gestionar tus proyectos hoy mismo
+            </h2>
+            <p className="text-xl text-muted-foreground mb-8">
+              Únete a miles de empresas que ya optimizan sus procesos constructivos con Archub
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Link href="/register">
+                <Button size="lg" className="bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-accent-foreground px-8 py-3">
+                  Comenzar Gratis
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+              <span className="text-sm text-muted-foreground">Sin tarjeta de crédito requerida</span>
             </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-slate-900 dark:bg-slate-950 py-12">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between">
-            <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <Building className="h-6 w-6 text-blue-400" />
-              <span className="text-xl font-semibold text-white">Archub</span>
+      <footer className="border-t border-border/40 py-12">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Building className="h-6 w-6 text-[var(--accent)]" />
+              <span className="font-bold">Archub</span>
             </div>
-            <p className="text-slate-400">
+            <div className="text-sm text-muted-foreground">
               © 2025 Archub. Todos los derechos reservados.
-            </p>
+            </div>
           </div>
         </div>
       </footer>
