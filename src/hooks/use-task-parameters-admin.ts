@@ -420,7 +420,7 @@ export function useTaskParameterOptionGroups(parameterId: string) {
         .from('task_parameter_option_groups')
         .select('*')
         .eq('parameter_id', parameterId)
-        .order('position', { ascending: true });
+        .order('created_at', { ascending: true });
 
       console.log('Groups query result:', { data, error });
       if (error) throw error;

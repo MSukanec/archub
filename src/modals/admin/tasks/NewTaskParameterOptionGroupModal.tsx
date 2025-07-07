@@ -1,12 +1,9 @@
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
-import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 
 import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout';
 import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader';
@@ -56,7 +53,7 @@ export function NewTaskParameterOptionGroupModal({
       form.reset();
       onClose();
     } catch (error) {
-      console.error('Error creating option group:', error);
+      console.error('Error creating group:', error);
     }
   };
 
@@ -68,12 +65,13 @@ export function NewTaskParameterOptionGroupModal({
   return (
     <CustomModalLayout
       open={open}
-      onOpenChange={handleClose}
+      onClose={handleClose}
       content={{
         header: (
-          <CustomModalHeader 
-            title="Nuevo Grupo de Opciones"
-            subtitle={`Para el parámetro: ${parameterLabel}`}
+          <CustomModalHeader
+            title="Crear Grupo de Opciones"
+            description={`Crear un nuevo grupo para el parámetro "${parameterLabel}"`}
+            onClose={handleClose}
           />
         ),
         body: (
@@ -85,29 +83,23 @@ export function NewTaskParameterOptionGroupModal({
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nombre (código) *</FormLabel>
+                      <FormLabel>Nombre del Grupo</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="ej: acabados_principales"
-                          {...field}
-                        />
+                        <Input placeholder="Ej: marcas-premium" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
+                
                 <FormField
                   control={form.control}
                   name="label"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Etiqueta (mostrar) *</FormLabel>
+                      <FormLabel>Etiqueta del Grupo</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="ej: Acabados Principales"
-                          {...field}
-                        />
+                        <Input placeholder="Ej: Marcas Premium" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -118,17 +110,12 @@ export function NewTaskParameterOptionGroupModal({
           </CustomModalBody>
         ),
         footer: (
-          <CustomModalFooter>
-            <Button type="button" variant="outline" onClick={handleClose}>
-              Cancelar
-            </Button>
-            <Button 
-              onClick={form.handleSubmit(onSubmit)} 
-              disabled={createMutation.isPending}
-            >
-              {createMutation.isPending ? 'Creando...' : 'Crear Grupo'}
-            </Button>
-          </CustomModalFooter>
+          <CustomModalFooter
+            onCancel={handleClose}
+            onSubmit={form.handleSubmit(onSubmit)}
+            saveText={createMutation.isPending ? "Creando..." : "Crear Grupo"}
+            disabled={createMutation.isPending}
+          />
         ),
       }}
     />
