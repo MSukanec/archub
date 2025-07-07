@@ -347,9 +347,11 @@ export default function AdminTaskParameters() {
                                     <div className="flex items-center justify-between">
                                       <div className="flex-1">
                                         <span className="text-xs font-medium">{option.label}</span>
-                                        <span className="text-xs text-muted-foreground ml-2">
-                                          ({option.name})
-                                        </span>
+                                        {option.name && (
+                                          <span className="text-xs text-muted-foreground ml-2">
+                                            ({option.name})
+                                          </span>
+                                        )}
                                       </div>
                                       <div className="flex items-center space-x-1">
                                         <Button

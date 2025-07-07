@@ -73,7 +73,7 @@ export function useTaskParametersAdmin() {
         .select('id, parameter_id, name, label, created_at')
         .order('label');
 
-      console.log('Raw options from database:', options);
+
 
       if (optionsError) {
         console.error('Error fetching options:', optionsError);
@@ -93,12 +93,12 @@ export function useTaskParametersAdmin() {
           label: option.label,
           created_at: option.created_at,
         };
-        console.log('Mapping option:', option, '-> mapped:', mappedOption);
+
         optionsMap.get(option.parameter_id)!.push(mappedOption);
       });
 
       // Transform the data to include options
-      console.log('Final optionsMap:', optionsMap);
+
       const parametersWithOptions: TaskParameter[] = parameters.map((param: any) => ({
         id: param.id,
         template_id: '', // Not needed for standalone parameters

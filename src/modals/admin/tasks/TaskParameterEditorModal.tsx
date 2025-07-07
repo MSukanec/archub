@@ -103,20 +103,21 @@ export function TaskParameterEditorModal({
 
   const parameterType = form.watch('type');
 
-  // Load parameter values
-  const { data: parameterValues = [], isLoading: valuesLoading } = useQuery({
+  // Load parameter values (options)
+  const { data: parameterOptions = [], isLoading: valuesLoading } = useQuery({
     queryKey: ['task-parameter-values', parameter?.id],
     queryFn: async () => {
       if (!parameter?.id) return [];
       
       const { data, error } = await supabase
         .from('task_parameter_values')
-        .select('*')
+        .select('id, parameter_id, name, label, created_at')
         .eq('parameter_id', parameter.id)
-        .order('value');
+        .order('label');
       
       if (error) throw error;
-      return data as TaskParameterValue[];
+
+      return data;
     },
     enabled: !!parameter?.id,
   });
@@ -724,7 +725,7 @@ export function TaskParameterEditorModal({
                       <CardContent>
                         {valuesLoading ? (
                           <div className="text-sm text-muted-foreground">Cargando opciones...</div>
-                        ) : parameterValues.length === 0 ? (
+                        ) : parameterOptions.length === 0 ? (
                           <div className="text-center py-6 text-muted-foreground">
                             <Settings className="h-8 w-8 mx-auto mb-2 opacity-50" />
                             <p>No hay opciones disponibles</p>
@@ -732,51 +733,33 @@ export function TaskParameterEditorModal({
                           </div>
                         ) : (
                           <div className="space-y-2">
-                            {parameterValues.map((value) => (
-                              <div key={value.id} className="flex items-center justify-between p-2 border rounded-lg">
-                                {editingValue?.id === value.id ? (
-                                  <Input
-                                    value={editingValue.value}
-                                    onChange={(e) => setEditingValue({ ...editingValue, value: e.target.value })}
-                                    className="flex-1 mr-2"
-                                    onKeyDown={(e) => {
-                                      if (e.key === 'Enter') handleSaveEditValue();
-                                      if (e.key === 'Escape') setEditingValue(null);
-                                    }}
-                                    autoFocus
-                                  />
-                                ) : (
-                                  <span className="flex-1">{value.value}</span>
-                                )}
-                                <div className="flex items-center gap-2">
-                                  {editingValue?.id === value.id ? (
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={handleSaveEditValue}
-                                      disabled={updateValueMutation.isPending}
-                                    >
-                                      Guardar
-                                    </Button>
-                                  ) : (
-                                    <>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => handleEditValue(value)}
-                                      >
-                                        <Edit className="h-4 w-4" />
-                                      </Button>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => handleDeleteValue(value.id)}
-                                        className="text-destructive hover:text-destructive"
-                                      >
-                                        <Trash2 className="h-4 w-4" />
-                                      </Button>
-                                    </>
+                            {parameterOptions.map((option) => (
+                              <div key={option.id} className="flex items-center justify-between p-2 border rounded-lg">
+                                <div className="flex-1">
+                                  <span className="font-medium">{option.label}</span>
+                                  {option.name && (
+                                    <span className="text-xs text-muted-foreground ml-2">({option.name})</span>
                                   )}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => console.log('Edit option:', option)}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                      setDeleteTarget({ type: 'value', id: option.id });
+                                      setDeleteDialogOpen(true);
+                                    }}
+                                    className="text-destructive hover:text-destructive"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
                                 </div>
                               </div>
                             ))}
