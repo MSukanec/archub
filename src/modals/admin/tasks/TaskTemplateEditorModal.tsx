@@ -524,14 +524,12 @@ export default function TaskTemplateEditorModal({
           </CustomModalBody>
         ),
         footer: (
-          <CustomModalFooter onClose={onClose}>
-            <Button variant="outline" onClick={onClose}>
-              Cancelar
-            </Button>
-            <Button onClick={onClose}>
-              Guardar
-            </Button>
-          </CustomModalFooter>
+          <CustomModalFooter 
+            onCancel={onClose}
+            onSave={onClose}
+            cancelText="Cancelar"
+            saveText="Guardar"
+          />
         )
       }}
     </CustomModalLayout>
