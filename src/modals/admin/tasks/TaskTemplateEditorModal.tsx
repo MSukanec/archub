@@ -200,7 +200,7 @@ export default function TaskTemplateEditorModal({
       const { data, error } = await supabase
         .from('task_templates')
         .select('*')
-        .eq('code', categoryCode)
+        .eq('code_prefix', categoryCode)
         .maybeSingle();
       
       if (error && error.code !== 'PGRST116') throw error;
@@ -313,7 +313,7 @@ export default function TaskTemplateEditorModal({
       const { data, error } = await supabase
         .from('task_templates')
         .insert({
-          code: categoryCode,
+          code_prefix: categoryCode,
           name: `Plantilla de ${categoryName}`,
           name_template: `${categoryName}.`,
           category_id: categoryId
@@ -336,6 +336,40 @@ export default function TaskTemplateEditorModal({
         variant: 'destructive',
         title: 'Error',
         description: error.message || 'Error al crear la plantilla'
+      });
+    }
+  });
+
+  // Delete template mutation
+  const deleteTemplateMutation = useMutation({
+    mutationFn: async (templateId: string) => {
+      // First delete all template parameters
+      await supabase
+        .from('task_template_parameters')
+        .delete()
+        .eq('template_id', templateId);
+      
+      // Then delete the template
+      const { error } = await supabase
+        .from('task_templates')
+        .delete()
+        .eq('id', templateId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['task-template', categoryCode] });
+      queryClient.invalidateQueries({ queryKey: ['task-template-parameters'] });
+      toast({
+        title: 'Plantilla eliminada',
+        description: 'Plantilla y todos sus parámetros eliminados exitosamente'
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error.message || 'Error al eliminar plantilla'
       });
     }
   });
@@ -381,6 +415,34 @@ export default function TaskTemplateEditorModal({
               {templateLoading && (
                 <div className="text-center py-8">
                   <p className="text-muted-foreground">Cargando plantilla...</p>
+                </div>
+              )}
+
+              {/* Estado de la plantilla (si existe) */}
+              {template && (
+                <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-sm font-medium text-emerald-900 mb-1">
+                        ✓ Plantilla Creada: {template.code_prefix}
+                      </h3>
+                      <p className="text-xs text-emerald-700">
+                        Nombre: {template.name} | Parámetros: {templateParameters.length}
+                      </p>
+                    </div>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => {
+                        if (confirm('¿Estás seguro de eliminar esta plantilla y todos sus parámetros?')) {
+                          deleteTemplateMutation.mutate(template.id);
+                        }
+                      }}
+                      disabled={deleteTemplateMutation.isPending}
+                    >
+                      {deleteTemplateMutation.isPending ? 'Eliminando...' : 'Eliminar'}
+                    </Button>
+                  </div>
                 </div>
               )}
 
