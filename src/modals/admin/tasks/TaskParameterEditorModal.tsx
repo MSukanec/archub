@@ -162,7 +162,7 @@ export function TaskParameterEditorModal({
   });
 
   // Load group items for selection
-  const { data: groupItemsWithSelection = [], isLoading: groupItemsLoading } = useQuery({
+  const queryResult = useQuery({
     queryKey: ['task-parameter-group-items-selection', parameter?.id, selectedGroupForItems?.id],
     queryFn: async () => {
       if (!parameter?.id || !selectedGroupForItems?.id) {
@@ -215,6 +215,13 @@ export function TaskParameterEditorModal({
     enabled: !!parameter?.id && !!selectedGroupForItems?.id && showGroupItemsModal,
     refetchOnWindowFocus: false,
   });
+
+  const groupItemsWithSelection = queryResult.data || [];
+  const groupItemsLoading = queryResult.isLoading;
+  
+  console.log('useQuery result:', queryResult);
+  console.log('queryResult.data:', queryResult.data);
+  console.log('Final groupItemsWithSelection:', groupItemsWithSelection);
 
   // Mutations for parameter values
   const createValueMutation = useMutation({
