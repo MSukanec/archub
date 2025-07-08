@@ -30,25 +30,23 @@ export function generateTaskDescription(
   let description = template.name_template || '';
   
   // Sort parameters by position
-  const sortedParameters = parameters
-    .filter(param => param.task_parameters)
-    .sort((a, b) => a.position - b.position);
+  const sortedParameters = parameters.sort((a, b) => a.position - b.position);
 
   // Process each parameter
   sortedParameters.forEach(param => {
-    const paramName = param.task_parameters?.name;
+    const paramName = param.name;
     if (!paramName) return;
 
     const rawValue = paramValues[paramName];
     if (!rawValue) return;
 
     // Find the label for the selected option
-    const options = parameterOptions[param.parameter_id] || [];
+    const options = parameterOptions[param.id] || [];
     const selectedOption = options.find(opt => opt.value === rawValue);
     if (!selectedOption?.label) return;
 
     // Use expression_template and replace {value} with the option label
-    const expressionTemplate = param.task_parameters.expression_template || '{value}';
+    const expressionTemplate = param.expression_template || '{value}';
     const fragment = expressionTemplate.replace('{value}', selectedOption.label);
 
     // Replace placeholder in name_template

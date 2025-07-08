@@ -16,6 +16,7 @@ import { NewAdminGeneratedTaskModal } from '@/modals/admin/tasks/NewAdminGenerat
 import { useGeneratedTasks, useDeleteGeneratedTask } from '@/hooks/use-generated-tasks'
 import { useTaskTemplates, useTaskTemplateParameters, useTaskTemplateParameterOptions } from '@/hooks/use-task-templates'
 import { generateTaskDescription } from '@/utils/taskDescriptionGenerator'
+import { useTaskParameterValues } from '@/hooks/use-task-parameters-admin'
 
 import { Plus, Edit, Trash2, CheckSquare, Clock, Target, Zap } from 'lucide-react'
 
@@ -51,6 +52,7 @@ export default function AdminGeneratedTasks() {
 
   // Data for dynamic name generation
   const { data: templates = [] } = useTaskTemplates()
+  const { data: parameterValues = [] } = useTaskParameterValues()
 
   // Helper function to generate dynamic task name
   const generateTaskName = (task: GeneratedTask): string => {
@@ -60,11 +62,25 @@ export default function AdminGeneratedTasks() {
     // Start with the template
     let result = template.name_template
 
-    // Replace placeholders with actual values
+    // Replace placeholders with proper expression template values
     if (task.param_values) {
-      Object.entries(task.param_values).forEach(([key, value]) => {
-        const placeholder = `{{${key}}}`
-        result = result.replace(placeholder, value as string)
+      Object.entries(task.param_values).forEach(([paramName, paramValue]) => {
+        // Find the parameter in the parameter values
+        const parameterOption = parameterValues.find(pv => pv.name === paramValue)
+        
+        if (parameterOption) {
+          // Use the expression template to format the value
+          const expressionTemplate = parameterOption.expression_template || '{value}'
+          const fragment = expressionTemplate.replace('{value}', parameterOption.label)
+          
+          // Replace placeholder in name_template
+          const placeholder = `{{${paramName}}}`
+          result = result.replace(placeholder, fragment)
+        } else {
+          // Fallback to raw value if parameter option not found
+          const placeholder = `{{${paramName}}}`
+          result = result.replace(placeholder, paramValue as string)
+        }
       })
     }
 
