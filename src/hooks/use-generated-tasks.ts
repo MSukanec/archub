@@ -13,13 +13,13 @@ export interface GeneratedTask {
   organization_id: string;
   updated_at: string;
   scope: string;
-  unit_id?: string | null;
   // Related data for dynamic name generation
   task_templates?: {
     id: string;
     name_template: string;
     code: string;
     category_id: string;
+    unit_id?: string | null;
   };
 }
 
@@ -54,7 +54,8 @@ export function useGeneratedTasks() {
             id,
             name_template,
             code,
-            category_id
+            category_id,
+            unit_id
           )
         `)
         .order('created_at', { ascending: false });
@@ -74,7 +75,6 @@ export function useCreateGeneratedTask() {
       template_id: string;
       param_values: Record<string, any>;
       organization_id: string;
-      unit_id?: string | null;
       is_system?: boolean;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
@@ -85,7 +85,6 @@ export function useCreateGeneratedTask() {
           input_template_id: payload.template_id,
           input_param_values: payload.param_values,
           input_organization_id: payload.organization_id,
-          input_unit_id: payload.unit_id || null,
           input_is_system: payload.is_system || false
         });
       
@@ -279,7 +278,6 @@ export function useUpdateGeneratedTask() {
     mutationFn: async (payload: {
       task_id: string;
       input_param_values: Record<string, any>;
-      input_unit_id?: string | null;
       input_is_system?: boolean;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
@@ -289,8 +287,7 @@ export function useUpdateGeneratedTask() {
       const { data, error } = await supabase
         .from('task_generated')
         .update({
-          param_values: payload.input_param_values,
-          unit_id: payload.input_unit_id
+          param_values: payload.input_param_values
         })
         .eq('id', payload.task_id)
         .select()

@@ -44,7 +44,6 @@ interface NewAdminGeneratedTaskModalProps {
 
 const formSchema = z.object({
   template_id: z.string().min(1, "Debe seleccionar una plantilla"),
-  unit_id: z.string().optional(),
   is_system: z.boolean().default(true)
 }).catchall(z.any());
 
@@ -66,7 +65,6 @@ export function NewAdminGeneratedTaskModal({
   
   const { data: userData } = useCurrentUser();
   const { data: templates, isLoading: templatesLoading } = useTaskTemplates();
-  const { data: units, isLoading: unitsLoading } = useUnits();
   
   // Debug logging for templates
   useEffect(() => {
@@ -128,7 +126,6 @@ export function NewAdminGeneratedTaskModal({
     resolver: zodResolver(formSchema),
     defaultValues: {
       template_id: "",
-      unit_id: "",
       is_system: true,
       ...paramValues
     },
@@ -148,7 +145,7 @@ export function NewAdminGeneratedTaskModal({
       refetchParameters();
       
       const newParamValues: Record<string, any> = {};
-      parameters?.forEach(param => {
+      (parameters || []).forEach(param => {
         if (param.type === 'boolean') {
           newParamValues[param.name] = false;
         } else {
@@ -181,7 +178,6 @@ export function NewAdminGeneratedTaskModal({
       setNewMaterial({ material_id: "", amount: 1 });
       form.reset({
         template_id: "",
-        unit_id: "",
         is_system: true
       });
     }
@@ -193,7 +189,6 @@ export function NewAdminGeneratedTaskModal({
       console.log('Resetting form with param values after parameters loaded:', paramValues);
       form.reset({
         template_id: generatedTask.template_id,
-        unit_id: generatedTask.unit_id || "",
         is_system: generatedTask.is_system || false,
         ...paramValues
       });
@@ -220,7 +215,7 @@ export function NewAdminGeneratedTaskModal({
   const handleSubmit = async (data: any) => {
     if (!userData?.organization?.id) return;
     
-    const { template_id, unit_id, is_system, ...params } = data;
+    const { template_id, is_system, ...params } = data;
     
     // Find the selected template to get its category information
     
@@ -231,7 +226,6 @@ export function NewAdminGeneratedTaskModal({
         await updateGeneratedTask.mutateAsync({
           task_id: generatedTask.id,
           input_param_values: params,
-          input_unit_id: unit_id ? unit_id : null,
           input_is_system: true // Admin modal always updates as system tasks
         });
         onClose();
@@ -241,7 +235,6 @@ export function NewAdminGeneratedTaskModal({
           template_id: template_id,
           param_values: params,
           organization_id: null, // Admin modal always creates system tasks
-          unit_id: unit_id ? unit_id : null,
           is_system: true // Admin modal always creates system tasks
         });
         
@@ -523,35 +516,7 @@ export function NewAdminGeneratedTaskModal({
                           )}
                         />
 
-                        {/* Campo de Unidad */}
-                        <FormField
-                          control={form.control}
-                          name="unit_id"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Unidad</FormLabel>
-                              <Select 
-                                onValueChange={field.onChange} 
-                                value={field.value}
-                                disabled={unitsLoading}
-                              >
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Seleccionar unidad..." />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {units?.map((unit) => (
-                                    <SelectItem key={unit.id} value={unit.id}>
-                                      {unit.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+
 
                         {selectedTemplateId && parametersLoading && (
                           <div className="flex items-center justify-center py-4">
@@ -619,6 +584,19 @@ export function NewAdminGeneratedTaskModal({
                                   return selectedTemplate?.name_template || "Vista previa no disponible";
                                 })()}
                               </div>
+                              
+                              {/* Mostrar unidad del template si existe */}
+                              {(() => {
+                                const selectedTemplate = templates?.find(t => t.id === selectedTemplateId);
+                                if (selectedTemplate?.units?.name) {
+                                  return (
+                                    <div className="text-xs text-muted-foreground mt-2">
+                                      <span className="font-medium">Unidad:</span> {selectedTemplate.units.name}
+                                    </div>
+                                  );
+                                }
+                                return null;
+                              })()}
                             </div>
                           </div>
                         )}

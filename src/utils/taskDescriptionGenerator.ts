@@ -12,7 +12,7 @@ export function generatePreviewDescription(
   let result = nameTemplate;
 
   // Replace {{parameter}} placeholders
-  parameters.forEach(param => {
+  (parameters || []).forEach(param => {
     const placeholder = `{{${param.name}}}`;
     if (result.includes(placeholder)) {
       const value = paramValues[param.name];

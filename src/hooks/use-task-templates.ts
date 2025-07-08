@@ -7,6 +7,7 @@ export interface TaskTemplate {
   name_template: string;
   category_id: string;
   action_id?: string;
+  unit_id?: string | null;
   created_at: string;
 }
 
@@ -38,7 +39,7 @@ export function useTaskTemplates() {
       
       const { data, error } = await supabase
         .from('task_templates')
-        .select('*')
+        .select('*, units(name)')
         .order('code');
       
       if (error) {
