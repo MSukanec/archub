@@ -77,10 +77,9 @@ export function useCreateGeneratedTask() {
       
       // Call RPC function that handles both code generation and task creation/verification
       const { data: taskData, error: taskError } = await supabase
-        .rpc('task_generate_code', {
+        .rpc('generate_task_code', {
           input_template_id: payload.template_id,
-          input_param_values: payload.param_values,
-          input_organization_id: payload.organization_id
+          input_param_values: payload.param_values
         });
       
       if (taskError) throw taskError;
@@ -88,10 +87,21 @@ export function useCreateGeneratedTask() {
       
       // The function returns the task data directly
       const taskResult = taskData[0];
+      
+      // Update the task with organization_id if it's a new task (has generated_code field)
+      if (taskResult.generated_code) {
+        const { error: updateError } = await supabase
+          .from('task_generated')
+          .update({ organization_id: payload.organization_id })
+          .eq('id', taskResult.id);
+        
+        if (updateError) throw updateError;
+      }
+      
       return { 
         new_task: taskResult, 
-        generated_code: taskResult.code,
-        is_existing: false // Since the function handles duplicates internally
+        generated_code: taskResult.generated_code || taskResult.code,
+        is_existing: !taskResult.generated_code // If no generated_code, it's an existing task
       };
     },
     onSuccess: (data) => {
