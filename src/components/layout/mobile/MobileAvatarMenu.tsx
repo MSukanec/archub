@@ -22,6 +22,10 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
   // Function to check if a button is active based on current location
   const isButtonActive = (href: string) => {
     if (!href || href === '#') return false;
+    // Special case for organization dashboard - should be active when on /dashboard or /organization/dashboard
+    if (href === '/organization/dashboard') {
+      return location === '/organization/dashboard' || location === '/dashboard';
+    }
     return location === href || location.startsWith(href + '/');
   };
 
@@ -104,7 +108,7 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
   const menuContent = (
     <div className="fixed inset-0" style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', zIndex: 9998 }} onClick={onClose}>
       <div 
-        className="fixed bottom-0 left-0 right-0 rounded-t-xl p-2 space-y-3" 
+        className="fixed bottom-0 left-0 right-0 rounded-t-xl p-1 space-y-3" 
         style={{ backgroundColor: 'var(--menues-bg)' }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -141,7 +145,7 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
                   <button
                     key={org.id}
                     onClick={() => organizationMutation.mutate(org.id)}
-                    className="w-full px-2 py-2 text-left hover:bg-[var(--menues-hover-bg)] transition-colors rounded-lg"
+                    className="w-full px-2 py-2 text-left hover:bg-[var(--menues-hover-bg)] transition-colors rounded-xl"
                     style={{ color: 'var(--menues-fg)' }}
                   >
                     {org.name}
@@ -185,7 +189,7 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
                   <button
                     key={project.id}
                     onClick={() => projectMutation.mutate(project.id)}
-                    className="w-full px-2 py-2 text-left hover:bg-[var(--menues-hover-bg)] transition-colors rounded-lg"
+                    className="w-full px-2 py-2 text-left hover:bg-[var(--menues-hover-bg)] transition-colors rounded-xl"
                     style={{ color: 'var(--menues-fg)' }}
                   >
                     {project.name}
@@ -200,7 +204,7 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
         <div className="pt-2">
           <button
             onClick={() => handleNavigation('/profile')}
-            className="w-full flex items-center gap-3 px-2 py-2 rounded-lg transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+            className="w-full flex items-center gap-3 px-2 py-2 rounded-xl transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
             style={{ 
               color: isButtonActive('/profile') ? 'white' : 'var(--menues-fg)',
               backgroundColor: isButtonActive('/profile') ? 'var(--accent)' : 'transparent',
