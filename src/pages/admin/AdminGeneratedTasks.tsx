@@ -14,8 +14,7 @@ import { Layout } from '@/components/layout/desktop/Layout'
 import { CustomTable } from '@/components/ui-custom/misc/CustomTable'
 import { NewAdminGeneratedTaskModal } from '@/modals/admin/tasks/NewAdminGeneratedTaskModal'
 import { useGeneratedTasks, useDeleteGeneratedTask } from '@/hooks/use-generated-tasks'
-import { useTaskTemplates, useTaskTemplateParameters } from '@/hooks/use-task-templates'
-import { useTaskParameterValues } from '@/hooks/use-task-parameters-admin'
+import { useTaskTemplates, useTaskTemplateParameters, useTaskTemplateParameterOptions } from '@/hooks/use-task-templates'
 import { generateTaskDescription } from '@/utils/taskDescriptionGenerator'
 
 import { Plus, Edit, Trash2, CheckSquare, Clock, Target, Zap } from 'lucide-react'
@@ -52,41 +51,24 @@ export default function AdminGeneratedTasks() {
 
   // Data for dynamic name generation
   const { data: templates = [] } = useTaskTemplates()
-  const { data: parameterValues = [] } = useTaskParameterValues()
 
   // Helper function to generate dynamic task name
   const generateTaskName = (task: GeneratedTask): string => {
     const template = templates.find(t => t.id === task.template_id)
     if (!template) return 'Sin plantilla'
 
-    // Get parameters for this template
-    const templateParams = parameterValues.filter(pv => 
-      pv.task_template_parameters?.some(ttp => ttp.template_id === task.template_id)
-    )
+    // Start with the template
+    let result = template.name_template
 
-    // Create parameter options map
-    const parameterOptions: { [key: string]: Array<{ value: string; label: string }> } = {}
-    templateParams.forEach(param => {
-      const paramId = param.task_template_parameters?.[0]?.parameter_id
-      if (paramId) {
-        parameterOptions[paramId] = [{ value: param.name, label: param.label }]
-      }
-    })
-
-    // Get template parameters with their data
-    const parameters = parameterValues
-      .filter(pv => pv.task_template_parameters?.some(ttp => ttp.template_id === task.template_id))
-      .map(pv => {
-        const ttp = pv.task_template_parameters?.[0]
-        return {
-          id: ttp?.parameter_id || '',
-          name: pv.name,
-          position: ttp?.position || 0,
-          expression_template: pv.expression_template || '{value}'
-        }
+    // Replace placeholders with actual values
+    if (task.param_values) {
+      Object.entries(task.param_values).forEach(([key, value]) => {
+        const placeholder = `{{${key}}}`
+        result = result.replace(placeholder, value as string)
       })
+    }
 
-    return generateTaskDescription(template, parameters, task.param_values, parameterOptions)
+    return result
   }
 
   // Statistics calculations

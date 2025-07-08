@@ -196,39 +196,7 @@ export function NewAdminGeneratedTaskModal({
 
 
 
-  // Generate description using expression templates from parameters
-  const generateDescriptionWithExpressions = (paramValues: Record<string, any>) => {
-    if (!parameters) return "Seleccione los parámetros para ver la vista previa";
 
-    const currentTemplate = templates?.find(t => t.id === selectedTemplateId);
-    if (!currentTemplate) return "Seleccione una plantilla";
-
-    let description = currentTemplate.name_template;
-    let fragments: string[] = [];
-
-    parameters
-      .sort((a, b) => a.position - b.position)
-      .forEach(param => {
-        const rawValue = paramValues[param.name];
-        if (!rawValue) return;
-
-        // Buscar label de la opción seleccionada
-        const option = parameterOptions[param.id]?.find(opt => opt.value === rawValue);
-        if (!option?.label) return;
-
-        // Usar solo param.expression_template y reemplazar {value} con option.label
-        const expr = param.expression_template || '{value}';
-        const fragment = expr.replace('{value}', option.label);
-
-        // Reemplazar placeholder en name_template
-        const placeholder = `{{${param.name}}}`;
-        description = description.replace(placeholder, fragment);
-
-        fragments.push(fragment);
-      });
-
-    return description;
-  };
 
   const handleSubmit = async (data: any) => {
     if (!userData?.organization?.id) return;
