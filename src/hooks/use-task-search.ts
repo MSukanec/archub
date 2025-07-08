@@ -11,7 +11,7 @@ async function processDisplayName(displayName: string, paramValues: any): Promis
   const paramValueIds = Object.values(paramValues);
   if (paramValueIds.length === 0) return displayName;
   
-  console.log("Fetching parameter values for IDs:", paramValueIds);
+
   
   const { data: parameterValues, error } = await supabase
     .from('task_parameter_values')
@@ -28,7 +28,7 @@ async function processDisplayName(displayName: string, paramValues: any): Promis
     return displayName;
   }
   
-  console.log("Parameter values fetched:", parameterValues);
+
   
   // Reemplazar placeholders usando expression_template o label
   Object.keys(paramValues).forEach(key => {
@@ -71,18 +71,17 @@ export function useTaskSearch(searchTerm: string, organizationId: string, enable
   return useQuery({
     queryKey: ["task-search", searchTerm, organizationId],
     queryFn: async (): Promise<TaskSearchResult[]> => {
-      console.log("Task search query:", { searchTerm, organizationId, enabled });
+
       
       if (!supabase) {
         throw new Error("Supabase client not initialized");
       }
 
       if (!searchTerm || searchTerm.length < 3) {
-        console.log("Search term too short or empty:", searchTerm);
+
         return [];
       }
 
-      console.log("Executing task search query...");
       const { data, error } = await supabase
         .from("task_generated_view")
         .select("*")
@@ -94,8 +93,6 @@ export function useTaskSearch(searchTerm: string, organizationId: string, enable
         console.error("Error searching tasks:", error);
         throw error;
       }
-
-      console.log("Task search results before processing:", data);
       
       // Procesar los display_name para reemplazar placeholders
       const processedData = await Promise.all(
@@ -104,8 +101,6 @@ export function useTaskSearch(searchTerm: string, organizationId: string, enable
           display_name: await processDisplayName(task.display_name, task.param_values)
         })) || []
       );
-      
-      console.log("Task search results after processing:", processedData);
       return processedData;
     },
     enabled: enabled && !!supabase && !!organizationId && searchTerm.length >= 3

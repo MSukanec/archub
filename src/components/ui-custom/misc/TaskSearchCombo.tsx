@@ -44,7 +44,7 @@ export function TaskSearchCombo({
 }: TaskSearchComboProps) {
   const [open, setOpen] = useState(false);
 
-  console.log("TaskSearchCombo render:", { options, value, optionsLength: options.length });
+
 
   const selectedOption = options.find((option) => option.value === value);
 
@@ -70,11 +70,11 @@ export function TaskSearchCombo({
         </button>
       </PopoverTrigger>
       <PopoverContent 
-        className="p-0 z-[9999] bg-[var(--input-bg)] border-[var(--input-border)]" 
+        className="p-0 z-[9999] bg-background border" 
         align="start"
         style={{ width: 'var(--radix-popover-trigger-width)' }}
       >
-        <Command className="bg-[var(--input-bg)] rounded-md">
+        <Command className="bg-background rounded-md" shouldFilter={false}>
           <CommandInput 
             placeholder={searchPlaceholder} 
             onValueChange={onSearchChange}
