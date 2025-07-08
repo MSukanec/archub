@@ -209,6 +209,10 @@ TABLA TASK_GENERATED:
     "column_name": "unit_id",
     "data_type": "uuid"
   }
+  {
+    "column_name": "is_system",
+    "data_type": "bool"
+  }
 ]
 
 TABLA (VISTA) TASK_GENERATED_VIEW:

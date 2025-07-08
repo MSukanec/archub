@@ -26,6 +26,7 @@ interface GeneratedTask {
   template_id: string
   param_values: any
   is_public: boolean
+  is_system: boolean
   created_at: string
   organization_id: string
   updated_at: string
@@ -42,6 +43,7 @@ interface GeneratedTask {
 export default function AdminGeneratedTasks() {
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('created_at')
+  const [typeFilter, setTypeFilter] = useState<'all' | 'system' | 'user'>('all')
   const [newGeneratedTaskModalOpen, setNewGeneratedTaskModalOpen] = useState(false)
   const [editingGeneratedTask, setEditingGeneratedTask] = useState<GeneratedTask | null>(null)
   const [deletingGeneratedTask, setDeletingGeneratedTask] = useState<GeneratedTask | null>(null)
@@ -90,8 +92,8 @@ export default function AdminGeneratedTasks() {
 
   // Statistics calculations
   const totalGeneratedTasks = generatedTasks.length
-  const publicTasks = generatedTasks.filter(task => task.is_public).length
-  const privateTasks = generatedTasks.filter(task => !task.is_public).length
+  const systemTasks = generatedTasks.filter(task => task.is_system).length
+  const userTasks = generatedTasks.filter(task => !task.is_system).length
   const recentGeneratedTasks = generatedTasks.filter((task: any) => {
     const taskDate = new Date(task.created_at)
     const sevenDaysAgo = new Date()
@@ -101,10 +103,21 @@ export default function AdminGeneratedTasks() {
 
   // Filter and sort generated tasks
   const filteredGeneratedTasks = generatedTasks
-    .filter((task: any) =>
-      task.code?.toLowerCase().includes(searchValue.toLowerCase()) ||
-      task.description?.toLowerCase().includes(searchValue.toLowerCase())
-    )
+    .filter((task: any) => {
+      // Search filter
+      const matchesSearch = task.code?.toLowerCase().includes(searchValue.toLowerCase()) ||
+        task.description?.toLowerCase().includes(searchValue.toLowerCase())
+      
+      // Type filter
+      let matchesType = true
+      if (typeFilter === 'system') {
+        matchesType = task.is_system === true
+      } else if (typeFilter === 'user') {
+        matchesType = task.is_system === false
+      }
+      
+      return matchesSearch && matchesType
+    })
     .sort((a: any, b: any) => {
       if (sortBy === 'code') {
         return a.code?.localeCompare(b.code) || 0
@@ -137,6 +150,7 @@ export default function AdminGeneratedTasks() {
   const clearFilters = () => {
     setSearchValue('')
     setSortBy('created_at')
+    setTypeFilter('all')
   }
 
   // Table columns configuration
@@ -164,6 +178,16 @@ export default function AdminGeneratedTasks() {
       label: 'Tarea',
       render: (task: GeneratedTask) => (
         <span className="text-sm">{generateTaskName(task)}</span>
+      )
+    },
+    {
+      key: 'is_system',
+      label: 'Tipo',
+      width: '5%',
+      render: (task: GeneratedTask) => (
+        <Badge variant={task.is_system ? "default" : "outline"} className="text-xs">
+          {task.is_system ? 'Sistema' : 'Usuario'}
+        </Badge>
       )
     },
     {
@@ -206,6 +230,19 @@ export default function AdminGeneratedTasks() {
 
   const customFilters = (
     <div className="w-[288px] space-y-4">
+      <div className="space-y-2">
+        <Label className="text-xs font-medium">Filtrar por tipo</Label>
+        <Select value={typeFilter} onValueChange={(value: 'all' | 'system' | 'user') => setTypeFilter(value)}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas las tareas</SelectItem>
+            <SelectItem value="system">Tareas de sistema</SelectItem>
+            <SelectItem value="user">Tareas de usuario</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
       <div className="space-y-2">
         <Label className="text-xs font-medium">Ordenar por</Label>
         <Select value={sortBy} onValueChange={setSortBy}>
@@ -262,8 +299,8 @@ export default function AdminGeneratedTasks() {
           <Card className="p-3">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-muted-foreground">Tareas Públicas</p>
-                <p className="text-lg font-semibold">{publicTasks}</p>
+                <p className="text-xs text-muted-foreground">Tareas de Sistema</p>
+                <p className="text-lg font-semibold">{systemTasks}</p>
               </div>
               <CheckSquare className="h-4 w-4 text-muted-foreground" />
             </div>
@@ -272,8 +309,8 @@ export default function AdminGeneratedTasks() {
           <Card className="p-3">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-muted-foreground">Tareas Privadas</p>
-                <p className="text-lg font-semibold">{privateTasks}</p>
+                <p className="text-xs text-muted-foreground">Tareas de Usuario</p>
+                <p className="text-lg font-semibold">{userTasks}</p>
               </div>
               <Target className="h-4 w-4 text-muted-foreground" />
             </div>

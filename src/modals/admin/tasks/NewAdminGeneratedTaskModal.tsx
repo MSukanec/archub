@@ -6,7 +6,7 @@ import { CustomModalLayout } from "@/components/ui-custom/modal/CustomModalLayou
 import { CustomModalHeader } from "@/components/ui-custom/modal/CustomModalHeader";
 import { CustomModalBody } from "@/components/ui-custom/modal/CustomModalBody";
 import { CustomModalFooter } from "@/components/ui-custom/modal/CustomModalFooter";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -128,6 +128,7 @@ export function NewAdminGeneratedTaskModal({
     defaultValues: {
       template_id: "",
       unit_id: "",
+      is_system: false,
       ...paramValues
     },
     mode: "onChange"
@@ -156,6 +157,7 @@ export function NewAdminGeneratedTaskModal({
       setParamValues(newParamValues);
       form.reset({
         template_id: selectedTemplateId,
+        is_system: false,
         ...newParamValues
       });
     }
@@ -178,7 +180,8 @@ export function NewAdminGeneratedTaskModal({
       setNewMaterial({ material_id: "", amount: 1 });
       form.reset({
         template_id: "",
-        unit_id: ""
+        unit_id: "",
+        is_system: false
       });
     }
   }, [isEditing, generatedTask, open]);
@@ -190,6 +193,7 @@ export function NewAdminGeneratedTaskModal({
       form.reset({
         template_id: generatedTask.template_id,
         unit_id: generatedTask.unit_id || "",
+        is_system: generatedTask.is_system || false,
         ...paramValues
       });
     }
@@ -215,7 +219,7 @@ export function NewAdminGeneratedTaskModal({
   const handleSubmit = async (data: any) => {
     if (!userData?.organization?.id) return;
     
-    const { template_id, unit_id, ...params } = data;
+    const { template_id, unit_id, is_system, ...params } = data;
     
     // Find the selected template to get its category information
     
@@ -226,7 +230,8 @@ export function NewAdminGeneratedTaskModal({
         await updateGeneratedTask.mutateAsync({
           task_id: generatedTask.id,
           input_param_values: params,
-          input_unit_id: unit_id || null
+          input_unit_id: unit_id || null,
+          input_is_system: is_system || false
         });
         onClose();
       } else {
@@ -235,7 +240,8 @@ export function NewAdminGeneratedTaskModal({
           template_id: template_id,
           param_values: params,
           organization_id: userData.organization.id,
-          unit_id: unit_id || null
+          unit_id: unit_id || null,
+          is_system: is_system || false
         });
         
         if (result.new_task?.id) {
@@ -488,6 +494,30 @@ export function NewAdminGeneratedTaskModal({
                                 </SelectContent>
                               </Select>
                               <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* Campo de Tarea de Sistema */}
+                        <FormField
+                          control={form.control}
+                          name="is_system"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                              <div className="space-y-0.5">
+                                <FormLabel className="text-base">
+                                  Tarea de Sistema
+                                </FormLabel>
+                                <FormDescription>
+                                  Esta tarea será utilizada como plantilla base del sistema
+                                </FormDescription>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
                             </FormItem>
                           )}
                         />

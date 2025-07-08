@@ -119,6 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 8, 2025. Enhanced task generation system with is_system categorization and improved admin interface - COMPLETED
+  • Added is_system boolean column to task_generated table for categorizing system vs user tasks
+  • Updated NewAdminGeneratedTaskModal with is_system switch field above unit field for task categorization
+  • Added "Tipo" column to AdminGeneratedTasks table showing Sistema/Usuario badges with proper color coding
+  • Updated task creation/editing mutations to include is_system parameter in both create and update operations
+  • Enhanced admin statistics to show system tasks count and user tasks count instead of public/private
+  • Added comprehensive filtering by task type (all/system/user) with proper filter persistence
+  • Modified form submission to properly handle is_system field extraction and database persistence
+  • Updated clearFilters function to reset type filter to 'all' for complete filter reset functionality
 - July 8, 2025. Fixed budget filtering and task search improvements plus temporary onboarding issue resolution - COMPLETED
   • Enhanced useBudgets hook to filter by both project_id AND organization_id to prevent data leaks between organizations
   • Modified useTaskSearch hook to remove organization filter so all tasks are available when adding to budgets (as requested)
