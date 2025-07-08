@@ -152,15 +152,30 @@ export default function ConstructionBudgets() {
   // Mutación para actualizar last_budget_id en user_preferences
   const updateBudgetPreferenceMutation = useMutation({
     mutationFn: async (budgetId: string) => {
+      if (!userData?.preferences?.id) {
+        throw new Error('No user preferences ID available');
+      }
+      
       const { error } = await supabase
         .from('user_preferences')
         .update({ last_budget_id: budgetId })
-        .eq('user_id', userData?.user?.id);
+        .eq('id', userData.preferences.id);
       
       if (error) throw error;
+      return budgetId;
+    },
+    onSuccess: (budgetId) => {
+      // Invalidar el caché del usuario para reflejar el cambio
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      console.log('Budget preference updated successfully:', budgetId);
     },
     onError: (error) => {
       console.error('Error updating budget preference:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo guardar la selección del presupuesto",
+        variant: "destructive",
+      });
     }
   });
 
@@ -574,8 +589,13 @@ export default function ConstructionBudgets() {
                     {/* Budget Selector */}
                     <div className="flex-1">
                       <Select value={selectedBudgetId} onValueChange={(value) => {
+                        console.log('Budget selector changed to:', value);
+                        console.log('User data available:', !!userData?.user?.id);
+                        console.log('Preferences ID available:', !!userData?.preferences?.id);
+                        
                         setSelectedBudgetId(value);
                         if (userData?.user?.id) {
+                          console.log('Executing budget preference mutation...');
                           updateBudgetPreferenceMutation.mutate(value);
                         }
                       }}>
