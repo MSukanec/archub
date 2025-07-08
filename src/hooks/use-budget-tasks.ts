@@ -63,18 +63,15 @@ export function useBudgetTasks(budgetId: string) {
         .from("budget_tasks")
         .select(`
           *,
-          task:task_generated(
+          task:task_generated_view(
             id,
             code,
             template_id,
             param_values,
-            is_public,
             organization_id,
             unit_id,
-            units(
-              id,
-              name
-            )
+            rubro_name,
+            display_name
           )
         `)
         .eq("budget_id", budgetId)

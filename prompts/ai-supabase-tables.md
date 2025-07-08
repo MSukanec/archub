@@ -214,6 +214,7 @@ TABLA TASK_GENERATED:
 TABLA (VISTA) TASK_GENERATED_VIEW:
 
 [
+[
   {
     "column_name": "id",
     "data_type": "uuid"
@@ -235,15 +236,52 @@ TABLA (VISTA) TASK_GENERATED_VIEW:
     "data_type": "uuid"
   },
   {
+    "column_name": "unit_id",
+    "data_type": "uuid"
+  },
+  {
     "column_name": "created_at",
     "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "category_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "category_name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "category_code",
+    "data_type": "text"
+  },
+  {
+    "column_name": "subcategory_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "subcategory_name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "subcategory_code",
+    "data_type": "text"
+  },
+  {
+    "column_name": "rubro_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "rubro_name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "rubro_code",
+    "data_type": "text"
   },
   {
     "column_name": "display_name",
     "data_type": "text"
   }
-  {
-    "column_name": "unit_id",
-    "data_type": "uuid"
-  }
+]
 ]

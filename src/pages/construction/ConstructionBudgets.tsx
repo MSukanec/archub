@@ -18,6 +18,24 @@ import { useToast } from '@/hooks/use-toast'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 
+// Función para generar el nombre completo de la tarea con parámetros procesados
+function generateTaskDisplayName(task: any): string {
+  if (!task?.display_name || !task?.param_values) {
+    return task?.display_name || 'Sin nombre';
+  }
+
+  let displayName = task.display_name;
+  const paramValues = task.param_values;
+
+  // Reemplazar placeholders del tipo {{parameter-name}} con valores reales
+  Object.entries(paramValues).forEach(([paramName, paramValue]) => {
+    const placeholder = `{{${paramName}}}`;
+    displayName = displayName.replace(placeholder, paramValue as string);
+  });
+
+  return displayName;
+}
+
 interface Budget {
   id: string
   name: string
@@ -296,7 +314,7 @@ export default function ConstructionBudgets() {
                   />
                 </th>
                 <th className="p-2 text-left text-xs font-medium">Rubro</th>
-                <th className="p-2 text-left text-xs font-medium">Unidad</th>
+                <th className="p-2 text-left text-xs font-medium">Tarea</th>
                 <th className="p-2 text-left text-xs font-medium">Cantidad</th>
                 <th className="p-2 text-left text-xs font-medium">Costo de Mano de Obra</th>
                 <th className="p-2 text-left text-xs font-medium">Costo de Materiales</th>
@@ -327,10 +345,10 @@ export default function ConstructionBudgets() {
                       />
                     </td>
                     <td className="p-2">
-                      <div className="font-medium text-sm">{task.task?.code || 'Sin código'}</div>
+                      <div className="font-medium text-sm">{task.task?.rubro_name || 'Sin rubro'}</div>
                     </td>
                     <td className="p-2 text-sm">
-                      {task.task?.units?.name || 'Sin unidad'}
+                      {generateTaskDisplayName(task.task)}
                     </td>
                     <td className="p-2">
                       <input
@@ -377,7 +395,7 @@ export default function ConstructionBudgets() {
                 <td className="p-2 text-sm font-semibold">TOTAL</td>
                 <td className="p-2"></td>
                 <td className="p-2"></td>
-                <td className="p-2 text-sm font-semibold">{totalQuantity}</td>
+                <td className="p-2"></td>
                 <td className="p-2 text-sm font-semibold">$0</td>
                 <td className="p-2 text-sm font-semibold">$0</td>
                 <td className="p-2 text-sm font-semibold">$0</td>
