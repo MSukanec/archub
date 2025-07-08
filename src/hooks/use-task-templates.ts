@@ -95,7 +95,7 @@ export function useTaskTemplateParameters(templateId: string | null) {
         type: item.task_parameters?.type || 'text',
         is_required: item.is_required || false,
         position: item.position,
-        expression_template: '' // Column doesn't exist in DB
+        expression_template: '{value}' // Default, will be loaded from task_parameter_values
       })) || [];
       
       console.log('Parameters with expression_template:', parameters.map(p => ({
@@ -120,8 +120,8 @@ export function useTaskTemplateParameterOptions(parameterId: string | null) {
       console.log('Fetching real options for parameter:', parameterId);
       
       const { data, error } = await supabase
-        .from('task_template_parameter_options')
-        .select('*')
+        .from('task_parameter_values')
+        .select('id, name, label, expression_template')
         .eq('parameter_id', parameterId);
       
       if (error) {
@@ -129,8 +129,13 @@ export function useTaskTemplateParameterOptions(parameterId: string | null) {
         throw error;
       }
       
-      console.log('Real parameter options from DB:', data);
-      return data as TaskTemplateParameterOption[];
+      console.log('Real parameter options from task_parameter_values:', data);
+      return data?.map(item => ({
+        id: item.id,
+        value: item.id, // Use ID as value
+        label: item.label || item.name,
+        expression_template: item.expression_template || '{value}'
+      })) as TaskTemplateParameterOption[];
     },
     enabled: !!parameterId && !!supabase
   });

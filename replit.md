@@ -119,6 +119,12 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 8, 2025. Fixed task preview generation to use expression_template from task_parameter_values - COMPLETED
+  • Updated useTaskTemplateParameterOptions hook to query task_parameter_values table instead of non-existent task_template_parameter_options
+  • Corrected preview generation logic to use expression_template column from task_parameter_values (e.g., "con mortero de {value}")
+  • Fixed both preview display and actual task creation to properly use expression templates from selected parameter values
+  • Task descriptions now generate correctly: "Muros Simples {{mortar_type}}" + "con mortero de {value}" = "Muros Simples con mortero de Cal y Cemento"
+  • System now properly formats task names using semantic expressions instead of raw parameter labels
 - July 8, 2025. Updated task_tasks column reference from "description" to "name" throughout system - COMPLETED
   • Fixed all database queries, interfaces, and references to use "name" column instead of "description" in task_tasks table
   • Updated BudgetTask interfaces in use-budget-tasks.ts and ConstructionBudgets.tsx to use name field

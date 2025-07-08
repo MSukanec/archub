@@ -220,7 +220,7 @@ export function NewAdminGeneratedTaskModal({
     const currentTemplate = templates?.find(t => t.id === selectedTemplateId);
     if (!currentTemplate) return "Seleccione una plantilla para ver la vista previa";
     
-    // Start with the name_template from the task template (e.g., "Muros Simples {{brick-type}} {{mortar_type}}")
+    // Start with the name_template from the task template (e.g., "Muros Simples {{mortar_type}}")
     let description = currentTemplate.name_template || '';
     
     // Replace each {{parameter-name}} placeholder with the processed expression_template
@@ -229,25 +229,22 @@ export function NewAdminGeneratedTaskModal({
       const placeholder = `{{${param.name}}}`;
       
       if (value && description.includes(placeholder)) {
-        // Map specific parameter IDs to their expression templates from the database
-        let expressionTemplate = '{value}'; // default
-        
-        // Use the specific IDs from the database logs we can see
-        if (param.id === 'd0e0cc8c-e44d-4d43-bb99-0f41ef0383c2') { // mortar_type
-          expressionTemplate = '{value}';
-        }
-        
+        let expressionTemplate = '{value}'; // default fallback
         let displayValue = value.toString();
         
-        // For select parameters, find the label instead of using raw value
+        // For select parameters, get expression_template from selected option
         if (param.type === 'select') {
           const option = parameterOptions[param.id]?.find(opt => opt.value === value || opt.id === value);
           if (option) {
             displayValue = option.label;
+            // Get the expression_template from the task_parameter_values
+            if (option.expression_template) {
+              expressionTemplate = option.expression_template;
+            }
           }
         }
         
-        // Replace {value} in expression template with actual selected value
+        // Replace {value} in expression template with actual selected value/label
         const processedExpression = expressionTemplate.replace(/{value}/g, displayValue);
         
         // Replace the {{parameter-name}} placeholder with the processed expression
@@ -279,7 +276,7 @@ export function NewAdminGeneratedTaskModal({
         // Crear nueva tarea
         const selectedTemplate = templates?.find(t => t.id === template_id);
         
-        // Generate task description using the correct function name
+        // Generate task description using expression templates
         const generatedDescription = (() => {
           const currentTemplate = templates?.find(t => t.id === template_id);
           if (!currentTemplate) return "Seleccione una plantilla para ver la vista previa";
@@ -293,25 +290,22 @@ export function NewAdminGeneratedTaskModal({
             const placeholder = `{{${param.name}}}`;
             
             if (value && description.includes(placeholder)) {
-              // Map specific parameter IDs to their expression templates from the database
-              let expressionTemplate = '{value}'; // default
-              
-              // Use the specific IDs from the database logs we can see
-              if (param.id === 'd0e0cc8c-e44d-4d43-bb99-0f41ef0383c2') { // mortar_type
-                expressionTemplate = '{value}';
-              }
-              
+              let expressionTemplate = '{value}'; // default fallback
               let displayValue = value.toString();
               
-              // For select parameters, find the label instead of using raw value
+              // For select parameters, get expression_template from selected option
               if (param.type === 'select') {
                 const option = parameterOptions[param.id]?.find(opt => opt.value === value || opt.id === value);
                 if (option) {
                   displayValue = option.label;
+                  // Get the expression_template from the task_parameter_values
+                  if (option.expression_template) {
+                    expressionTemplate = option.expression_template;
+                  }
                 }
               }
               
-              // Replace {value} in expression template with actual selected value
+              // Replace {value} in expression template with actual selected value/label
               const processedExpression = expressionTemplate.replace(/{value}/g, displayValue);
               
               // Replace the {{parameter-name}} placeholder with the processed expression
