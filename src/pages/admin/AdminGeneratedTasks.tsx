@@ -52,39 +52,29 @@ export default function AdminGeneratedTasks() {
 
   // Data for dynamic name generation
   const { data: templates = [] } = useTaskTemplates()
-  const { data: parameterValues = [] } = useTaskParameterValues()
+  const { data: templateParameters = [] } = useTaskTemplateParameters()
+  const { data: templateParameterOptions = [] } = useTaskTemplateParameterOptions()
 
   // Helper function to generate dynamic task name
   const generateTaskName = (task: GeneratedTask): string => {
     const template = templates.find(t => t.id === task.template_id)
     if (!template) return 'Sin plantilla'
 
-    // Start with the template
-    let result = template.name_template
+    // Get parameters for this template
+    const parameters = templateParameters.filter(param => param.template_id === task.template_id)
+    
+    // Create parameter options map
+    const parameterOptions: { [key: string]: Array<{ value: string; label: string }> } = {}
+    parameters.forEach(param => {
+      const options = templateParameterOptions.filter(option => option.parameter_id === param.id)
+      parameterOptions[param.id] = options.map(option => ({
+        value: option.value,
+        label: option.label
+      }))
+    })
 
-    // Replace placeholders with proper expression template values
-    if (task.param_values) {
-      Object.entries(task.param_values).forEach(([paramName, paramValue]) => {
-        // Find the parameter in the parameter values
-        const parameterOption = parameterValues.find(pv => pv.name === paramValue)
-        
-        if (parameterOption) {
-          // Use the expression template to format the value
-          const expressionTemplate = parameterOption.expression_template || '{value}'
-          const fragment = expressionTemplate.replace('{value}', parameterOption.label)
-          
-          // Replace placeholder in name_template
-          const placeholder = `{{${paramName}}}`
-          result = result.replace(placeholder, fragment)
-        } else {
-          // Fallback to raw value if parameter option not found
-          const placeholder = `{{${paramName}}}`
-          result = result.replace(placeholder, paramValue as string)
-        }
-      })
-    }
-
-    return result
+    // Use the utility function to generate the description
+    return generateTaskDescription(template, parameters, task.param_values, parameterOptions)
   }
 
   // Statistics calculations
