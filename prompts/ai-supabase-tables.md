@@ -205,8 +205,4 @@ TABLA TASK_GENERATED:
     "column_name": "updated_at",
     "data_type": "timestamp with time zone"
   },
-  {
-    "column_name": "scope",
-    "data_type": "text"
-  }
 ]
