@@ -66,7 +66,6 @@ export function useTaskTemplateParameters(templateId: string | null) {
           option_group_id,
           is_required,
           position,
-          expression_template,
           created_at,
           updated_at,
           task_parameters (
@@ -96,7 +95,7 @@ export function useTaskTemplateParameters(templateId: string | null) {
         type: item.task_parameters?.type || 'text',
         is_required: item.is_required || false,
         position: item.position,
-        expression_template: item.expression_template || ''
+        expression_template: '' // Column doesn't exist in DB
       })) || [];
       
       console.log('Parameters with expression_template:', parameters.map(p => ({
