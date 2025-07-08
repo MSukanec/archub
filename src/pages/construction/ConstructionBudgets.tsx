@@ -149,21 +149,25 @@ export default function ConstructionBudgets() {
 
   // Inicializar selectedBudgetId con last_budget_id de preferences
   useEffect(() => {
-    if (userData?.preferences?.last_budget_id && budgets.length > 0) {
+    if (userData?.preferences?.last_budget_id && budgets.length > 0 && !selectedBudgetId) {
       const lastBudgetExists = budgets.some(budget => budget.id === userData.preferences.last_budget_id);
       if (lastBudgetExists) {
         setSelectedBudgetId(userData.preferences.last_budget_id);
       } else if (budgets.length > 0) {
         // Si el último presupuesto no existe, seleccionar el primero
         setSelectedBudgetId(budgets[0].id);
-        updateBudgetPreferenceMutation.mutate(budgets[0].id);
+        if (userData?.user?.id) {
+          updateBudgetPreferenceMutation.mutate(budgets[0].id);
+        }
       }
-    } else if (budgets.length > 0 && !selectedBudgetId) {
+    } else if (budgets.length > 0 && !selectedBudgetId && !userData?.preferences?.last_budget_id) {
       // Si no hay last_budget_id, seleccionar el primero
       setSelectedBudgetId(budgets[0].id);
-      updateBudgetPreferenceMutation.mutate(budgets[0].id);
+      if (userData?.user?.id) {
+        updateBudgetPreferenceMutation.mutate(budgets[0].id);
+      }
     }
-  }, [userData?.preferences?.last_budget_id, budgets, selectedBudgetId, updateBudgetPreferenceMutation]);
+  }, [userData?.preferences?.last_budget_id, budgets, selectedBudgetId, userData?.user?.id]);
 
   // Filter and sort budgets
   const filteredBudgets = budgets
@@ -543,15 +547,17 @@ export default function ConstructionBudgets() {
             <Card className="border rounded-lg overflow-hidden">
               <div className="flex items-center justify-between w-full p-4 border-b">
                 <div className="flex items-center gap-3 flex-1">
-                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Building2 className="h-4 w-4 text-primary" />
-                  </div>
+                  <span className="text-sm font-medium text-muted-foreground">
+                    Presupuesto:
+                  </span>
                   
                   {/* Budget Selector */}
                   <div className="flex-1">
                     <Select value={selectedBudgetId} onValueChange={(value) => {
                       setSelectedBudgetId(value);
-                      updateBudgetPreferenceMutation.mutate(value);
+                      if (userData?.user?.id) {
+                        updateBudgetPreferenceMutation.mutate(value);
+                      }
                     }}>
                       <SelectTrigger className="w-full max-w-sm">
                         <SelectValue placeholder="Selecciona un presupuesto" />
