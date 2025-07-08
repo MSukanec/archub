@@ -213,297 +213,256 @@ export function NewTaskParameterModal({
             <CustomModalBody columns={1}>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id="parameter-form">
-                  <Accordion type="single" collapsible defaultValue="basic-data" className="w-full">
-                    {/* Acordeón Datos Básicos */}
-                    <AccordionItem value="basic-data">
-                      <AccordionTrigger className="text-sm font-medium px-3 py-2 border rounded-lg mb-2">
-                        <div className="flex items-center gap-2">
-                          <Settings className="w-4 h-4" />
-                          <span>Configuración del Parámetro</span>
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent className="px-0 pt-2">
-                        <div className="space-y-4">
-                          <FormField
-                            control={form.control}
-                            name="label"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="required-asterisk">Etiqueta (Visible)</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    {...field}
-                                    placeholder="Ej: Ladrillos y Bloques"
-                                    disabled={isSubmitting}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                  <div className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="label"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="required-asterisk">Etiqueta (Visible)</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Ej: Ladrillos y Bloques"
+                              disabled={isSubmitting}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                          <FormField
-                            control={form.control}
-                            name="name"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="required-asterisk">Nombre (Clave)</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    {...field}
-                                    placeholder="Ej: brick-type"
-                                    disabled={isSubmitting}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="required-asterisk">Nombre (Clave)</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Ej: brick-type"
+                              disabled={isSubmitting}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                          <FormField
-                            control={form.control}
-                            name="type"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="required-asterisk">Tipo</FormLabel>
-                                <Select
-                                  onValueChange={field.onChange}
-                                  value={field.value}
-                                  disabled={isSubmitting}
-                                >
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Seleccionar tipo" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent className="z-[9999]">
-                                    <SelectItem value="text">Texto</SelectItem>
-                                    <SelectItem value="number">Número</SelectItem>
-                                    <SelectItem value="select">Selección</SelectItem>
-                                    <SelectItem value="boolean">Booleano</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                    <FormField
+                      control={form.control}
+                      name="type"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="required-asterisk">Tipo</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                            disabled={isSubmitting}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Seleccionar tipo" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="z-[9999]">
+                              <SelectItem value="text">Texto</SelectItem>
+                              <SelectItem value="number">Número</SelectItem>
+                              <SelectItem value="select">Selección</SelectItem>
+                              <SelectItem value="boolean">Booleano</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="expression_template"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Plantilla de frase</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="de {value}"
+                              disabled={isSubmitting}
+                            />
+                          </FormControl>
+                          {field.value && !field.value.includes('{value}') && (
+                            <div className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded p-2">
+                              ⚠️ La plantilla debería incluir {'{value}'} como placeholder
+                            </div>
+                          )}
+                          {field.value && field.value.includes('{value}') && (
+                            <div className="text-xs text-muted-foreground">
+                              <span className="font-medium">Frase resultante:</span> {field.value.replace('{value}', 'Ladrillo hueco')}
+                            </div>
+                          )}
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
 
-
-                          <FormField
-                            control={form.control}
-                            name="expression_template"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Plantilla de frase</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    {...field}
-                                    placeholder="de {value}"
-                                    disabled={isSubmitting}
-                                  />
-                                </FormControl>
-                                {field.value && !field.value.includes('{value}') && (
-                                  <div className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded p-2">
-                                    ⚠️ La plantilla debería incluir {'{value}'} como placeholder
-                                  </div>
-                                )}
-                                {field.value && field.value.includes('{value}') && (
-                                  <div className="text-xs text-muted-foreground">
-                                    <span className="font-medium">Frase resultante:</span> {field.value.replace('{value}', 'Ladrillo hueco')}
-                                  </div>
-                                )}
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={form.control}
-                            name="is_required"
-                            render={({ field }) => (
-                              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                                <div className="space-y-0.5">
-                                  <FormLabel>Campo Obligatorio</FormLabel>
-                                  <div className="text-xs text-muted-foreground">
-                                    Este parámetro será requerido en las tareas
-                                  </div>
-                                </div>
-                                <FormControl>
-                                  <Switch
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                    disabled={isSubmitting}
-                                  />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-
-                    {/* Acordeón Grupos de Opciones */}
+                    {/* Grupos de Opciones - Siempre visible si es tipo select */}
                     {form.watch('type') === 'select' && (
-                      <AccordionItem value="option-groups">
-                        <AccordionTrigger className="text-sm font-medium px-3 py-2 border rounded-lg mb-2">
-                          <div className="flex items-center gap-2">
-                            <Package className="w-4 h-4" />
-                            <span>Grupos de Opciones</span>
-                          </div>
-                        </AccordionTrigger>
-                        <AccordionContent className="px-0 pt-2">
-                          <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                              <h4 className="text-sm font-medium">Grupos existentes</h4>
-                            </div>
+                      <div className="space-y-4 pt-4 border-t">
+                        <div className="flex items-center gap-2 mb-4">
+                          <Package className="w-4 h-4" />
+                          <span className="text-sm font-medium">Grupos de Opciones</span>
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-sm font-medium">Grupos existentes</h4>
+                        </div>
                             
-                            {/* Inline group creation */}
-                            {parameter && (
-                              <div className="flex gap-2">
-                                <Select value={selectedSubcategoryId} onValueChange={setSelectedSubcategoryId}>
-                                  <SelectTrigger className="flex-1">
-                                    <SelectValue placeholder="Seleccionar subcategoría..." />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {subcategoriesLoading ? (
-                                      <SelectItem value="loading" disabled>Cargando...</SelectItem>
-                                    ) : subcategories.length > 0 ? (
-                                      subcategories.map((subcategory) => (
-                                        <SelectItem key={subcategory.id} value={subcategory.id}>
-                                          {subcategory.code || subcategory.name} {subcategory.name && subcategory.code ? '- ' + subcategory.name : ''}
-                                        </SelectItem>
-                                      ))
-                                    ) : (
-                                      <SelectItem value="empty" disabled>No hay subcategorías disponibles</SelectItem>
-                                    )}
-                                  </SelectContent>
-                                </Select>
-                                <Button
-                                  type="button"
-                                  size="sm"
-                                  onClick={handleCreateGroup}
-                                  disabled={!selectedSubcategoryId || isCreatingGroup}
-                                  className="h-10"
-                                >
-                                  {isCreatingGroup ? (
-                                    'Creando...'
-                                  ) : (
-                                    <>
-                                      <Plus className="h-4 w-4 mr-1" />
-                                      Crear
-                                    </>
-                                  )}
-                                </Button>
-                              </div>
-                            )}
-                            
-                            <div className="space-y-2">
-                              {/* Grupos reales desde la base de datos */}
-                              {isLoadingGroups ? (
-                                <div className="text-sm text-muted-foreground text-center py-4">
-                                  Cargando grupos...
-                                </div>
-                              ) : optionGroups && optionGroups.length > 0 ? (
-                                optionGroups.map((group) => (
-                                  <div key={group.id} className="flex items-center justify-between p-3 border rounded-lg">
-                                    <div className="flex-1">
-                                      {editingGroupId === group.id ? (
-                                        <div className="flex gap-2">
-                                          <Select value={editingGroupName} onValueChange={setEditingGroupName}>
-                                            <SelectTrigger className="text-sm flex-1">
-                                              <SelectValue placeholder="Seleccionar subcategoría..." />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                              {subcategories.map((subcategory) => (
-                                                <SelectItem key={subcategory.id} value={subcategory.id}>
-                                                  {subcategory.name} - {subcategory.label || subcategory.description}
-                                                </SelectItem>
-                                              ))}
-                                            </SelectContent>
-                                          </Select>
-                                          <Button
-                                            type="button"
-                                            size="sm"
-                                            onClick={handleSaveGroupEdit}
-                                            disabled={!editingGroupName}
-                                          >
-                                            ✓
-                                          </Button>
-                                          <Button
-                                            type="button"
-                                            size="sm"
-                                            variant="ghost"
-                                            onClick={handleCancelGroupEdit}
-                                          >
-                                            ✕
-                                          </Button>
-                                        </div>
-                                      ) : (
-                                        <div>
-                                          <p className="text-sm font-medium">{group.name}</p>
-                                          <p className="text-xs text-muted-foreground">
-                                            {group.category_id ? 
-                                              subcategories.find(cat => cat.id === group.category_id)?.label || 
-                                              subcategories.find(cat => cat.id === group.category_id)?.description || 
-                                              'Categoría no encontrada' 
-                                              : 'Sin categoría asignada'
-                                            }
-                                          </p>
-                                        </div>
-                                      )}
-                                    </div>
-                                    {editingGroupId !== group.id && (
-                                      <div className="flex items-center gap-2">
-                                        <Button
-                                          type="button"
-                                          size="sm"
-                                          variant="ghost"
-                                          onClick={() => handleEditGroup(group)}
-                                          className="h-7 w-7 p-0"
-                                        >
-                                          <Pencil className="w-3 h-3" />
-                                        </Button>
-                                        <Button
-                                          type="button"
-                                          size="sm"
-                                          variant="ghost"
-                                          onClick={() => handleDeleteGroup(group.id)}
-                                          className="h-7 w-7 p-0"
-                                        >
-                                          <Trash2 className="w-3 h-3" />
-                                        </Button>
-                                        <Button
-                                          type="button"
-                                          size="sm"
-                                          variant="ghost"
-                                          onClick={() => {
-                                            setSelectedGroup(group);
-                                            setIsAssignmentModalOpen(true);
-                                          }}
-                                          className="h-7 w-7 p-0"
-                                        >
-                                          <CheckSquare className="w-3 h-3" />
-                                        </Button>
-                                      </div>
-                                    )}
-                                  </div>
-                                ))
-                              ) : parameter ? (
-                                <div className="text-sm text-muted-foreground text-center py-4">
-                                  No hay grupos de opciones configurados para este parámetro.
-                                </div>
+                        {/* Inline group creation */}
+                        {parameter && (
+                          <div className="flex gap-2">
+                            <Select value={selectedSubcategoryId} onValueChange={setSelectedSubcategoryId}>
+                              <SelectTrigger className="flex-1">
+                                <SelectValue placeholder="Seleccionar subcategoría..." />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {subcategoriesLoading ? (
+                                  <SelectItem value="loading" disabled>Cargando...</SelectItem>
+                                ) : subcategories.length > 0 ? (
+                                  subcategories.map((subcategory) => (
+                                    <SelectItem key={subcategory.id} value={subcategory.id}>
+                                      {subcategory.code || subcategory.name} {subcategory.name && subcategory.code ? '- ' + subcategory.name : ''}
+                                    </SelectItem>
+                                  ))
+                                ) : (
+                                  <SelectItem value="empty" disabled>No hay subcategorías disponibles</SelectItem>
+                                )}
+                              </SelectContent>
+                            </Select>
+                            <Button
+                              type="button"
+                              size="sm"
+                              onClick={handleCreateGroup}
+                              disabled={!selectedSubcategoryId || isCreatingGroup}
+                              className="h-10"
+                            >
+                              {isCreatingGroup ? (
+                                'Creando...'
                               ) : (
-                                <div className="text-sm text-muted-foreground text-center py-4">
-                                  Los grupos se mostrarán después de crear el parámetro.
-                                </div>
+                                <>
+                                  <Plus className="h-4 w-4 mr-1" />
+                                  Crear
+                                </>
                               )}
-                            </div>
+                            </Button>
                           </div>
-                        </AccordionContent>
-                      </AccordionItem>
+                        )}
+                            
+                        <div className="space-y-2">
+                          {/* Grupos reales desde la base de datos */}
+                          {isLoadingGroups ? (
+                            <div className="text-sm text-muted-foreground text-center py-4">
+                              Cargando grupos...
+                            </div>
+                          ) : optionGroups && optionGroups.length > 0 ? (
+                            optionGroups.map((group) => (
+                              <div key={group.id} className="flex items-center justify-between p-3 border rounded-lg">
+                                <div className="flex-1">
+                                  {editingGroupId === group.id ? (
+                                    <div className="flex gap-2">
+                                      <Select value={editingGroupName} onValueChange={setEditingGroupName}>
+                                        <SelectTrigger className="text-sm flex-1">
+                                          <SelectValue placeholder="Seleccionar subcategoría..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          {subcategories.map((subcategory) => (
+                                            <SelectItem key={subcategory.id} value={subcategory.id}>
+                                              {subcategory.name} - {subcategory.label || subcategory.description}
+                                            </SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        onClick={handleSaveGroupEdit}
+                                        disabled={!editingGroupName}
+                                      >
+                                        ✓
+                                      </Button>
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={handleCancelGroupEdit}
+                                      >
+                                        ✕
+                                      </Button>
+                                    </div>
+                                  ) : (
+                                    <div>
+                                      <p className="text-sm font-medium">{group.name}</p>
+                                      <p className="text-xs text-muted-foreground">
+                                        {group.category_id ? 
+                                          subcategories.find(cat => cat.id === group.category_id)?.label || 
+                                          subcategories.find(cat => cat.id === group.category_id)?.description || 
+                                          'Categoría no encontrada' 
+                                          : 'Sin categoría asignada'
+                                        }
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                                {editingGroupId !== group.id && (
+                                  <div className="flex items-center gap-2">
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => handleEditGroup(group)}
+                                      className="h-7 w-7 p-0"
+                                    >
+                                      <Pencil className="w-3 h-3" />
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => handleDeleteGroup(group.id)}
+                                      className="h-7 w-7 p-0"
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => {
+                                        setSelectedGroup(group);
+                                        setIsAssignmentModalOpen(true);
+                                      }}
+                                      className="h-7 w-7 p-0"
+                                    >
+                                      <CheckSquare className="w-3 h-3" />
+                                    </Button>
+                                  </div>
+                                )}
+                              </div>
+                            ))
+                          ) : parameter ? (
+                            <div className="text-sm text-muted-foreground text-center py-4">
+                              No hay grupos de opciones configurados para este parámetro.
+                            </div>
+                          ) : (
+                            <div className="text-sm text-muted-foreground text-center py-4">
+                              Los grupos se mostrarán después de crear el parámetro.
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     )}
-                  </Accordion>
+                  </div>
                 </form>
               </Form>
             </CustomModalBody>

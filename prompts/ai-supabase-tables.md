@@ -96,3 +96,32 @@ TABLA TASK_TEMPLATE_PARAMETERS:
     "data_type": "uuid"
   }
 ]
+
+TABLA TASK_PARAMETER_VALUES:
+
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "parameter_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "label",
+    "data_type": "text"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  }
+]
