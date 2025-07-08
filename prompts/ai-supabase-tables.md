@@ -63,3 +63,36 @@ TABLA TASK_PARAMETERS:
     "data_type": "timestamp with time zone"
   }
 ]
+
+TABLA TASK_TEMPLATE_PARAMETERS:
+
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "template_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "parameter_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "position",
+    "data_type": "integer"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "option_group_id",
+    "data_type": "uuid"
+  }
+]

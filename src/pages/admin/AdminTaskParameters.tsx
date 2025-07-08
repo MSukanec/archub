@@ -48,9 +48,9 @@ export default function AdminTaskParameters() {
     const totalParameters = parameters.length;
     const selectParameters = parameters.filter(p => p.type === 'select').length;
     const totalOptions = parameters.reduce((sum, param) => sum + (param.options?.length || 0), 0);
-    const requiredParameters = parameters.filter(p => p.is_required).length;
 
-    return { totalParameters, selectParameters, totalOptions, requiredParameters };
+
+    return { totalParameters, selectParameters, totalOptions, requiredParameters: 0 };
   };
 
   const stats = calculateStats(parameters);
@@ -359,7 +359,7 @@ export default function AdminTaskParameters() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-muted-foreground">Obligatorios</p>
-                      <p className="text-2xl font-semibold">{stats.requiredParameters}</p>
+                      <p className="text-2xl font-semibold">0</p>
                     </div>
                     <Plus className="h-8 w-8 text-muted-foreground" />
                   </div>

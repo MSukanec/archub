@@ -53,7 +53,6 @@ export function NewTaskTemplateModal({
     label: param.label,
     type: param.type,
     unit: undefined, // Unit will be resolved from unit_id if needed
-    is_required: param.is_required,
     position: 0 // Default position since it's not in the database
   }));
 

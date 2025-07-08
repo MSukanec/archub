@@ -306,7 +306,7 @@ export default function TaskTemplateEditorModal({
           template_id: template.id,
           parameter_id: parameterId,
           option_group_id: optionGroupId || null,
-          is_required: false,
+
           position: templateParameters.length,
         })
         .select()

@@ -29,7 +29,6 @@ const taskParameterSchema = z.object({
     required_error: 'El tipo es requerido' 
   }),
   expression_template: z.string().optional(),
-  is_required: z.boolean().optional(),
 });
 
 type TaskParameterFormData = z.infer<typeof taskParameterSchema>;
@@ -78,10 +77,7 @@ export function NewTaskParameterModal({
       name: '',
       label: '',
       type: 'text',
-      semantic_role: '',
       expression_template: '',
-      unit_id: undefined,
-      is_required: false,
     },
   });
 
@@ -292,31 +288,7 @@ export function NewTaskParameterModal({
                             )}
                           />
 
-                          <FormField
-                            control={form.control}
-                            name="role"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Rol Semántico</FormLabel>
-                                <Select onValueChange={field.onChange} value={field.value || ''} disabled={isSubmitting}>
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Seleccionar rol" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent className="z-[9999]">
-                                    <SelectItem value="">Sin rol específico</SelectItem>
-                                    <SelectItem value="material">Material</SelectItem>
-                                    <SelectItem value="dimension">Dimensión</SelectItem>
-                                    <SelectItem value="quantity">Cantidad</SelectItem>
-                                    <SelectItem value="quality">Calidad</SelectItem>
-                                    <SelectItem value="specification">Especificación</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+
 
                           <FormField
                             control={form.control}
