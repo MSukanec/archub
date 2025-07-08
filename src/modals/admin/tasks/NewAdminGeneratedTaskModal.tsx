@@ -164,10 +164,7 @@ export function NewAdminGeneratedTaskModal({
       setSelectedTemplateId(generatedTask.template_id);
       setParamValues(generatedTask.param_values || {});
       setCreatedTaskId(generatedTask.id);
-      form.reset({
-        template_id: generatedTask.template_id,
-        ...generatedTask.param_values
-      });
+      // Don't reset form here - let parameters load first
     } else if (!isEditing && open) {
       console.log('Create mode - resetting form');
       setSelectedTemplateId("");
@@ -180,6 +177,17 @@ export function NewAdminGeneratedTaskModal({
       });
     }
   }, [isEditing, generatedTask, open]);
+
+  // Reset form after parameters load in edit mode
+  useEffect(() => {
+    if (isEditing && generatedTask && parameters && paramValues && Object.keys(paramValues).length > 0) {
+      console.log('Resetting form with param values after parameters loaded:', paramValues);
+      form.reset({
+        template_id: generatedTask.template_id,
+        ...paramValues
+      });
+    }
+  }, [isEditing, generatedTask, parameters, paramValues, form]);
 
   // Force refresh when modal opens to get latest data
   useEffect(() => {
