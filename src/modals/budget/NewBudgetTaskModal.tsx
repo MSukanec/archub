@@ -66,6 +66,8 @@ export default function NewBudgetTaskModal({
     value: task.id,
     label: task.display_name || task.code || 'Sin nombre'
   }));
+  
+  console.log("TaskOptions prepared:", taskOptions);
 
   // Precargar datos en modo edición
   useEffect(() => {
