@@ -195,14 +195,6 @@ export default function TaskTemplateEditorModal({
         title: 'Parámetro eliminado',
         description: 'Parámetro eliminado exitosamente de la plantilla'
       });
-      
-      // Auto-update name_template after parameter is deleted
-      setTimeout(() => {
-        const newNameTemplate = generatePreview();
-        if (template?.id) {
-          updateTemplateNameMutation.mutate(newNameTemplate);
-        }
-      }, 500);
     },
     onError: (error: any) => {
       toast({
@@ -333,14 +325,6 @@ export default function TaskTemplateEditorModal({
         title: 'Parámetro agregado',
         description: 'Parámetro agregado exitosamente a la plantilla'
       });
-      
-      // Auto-update name_template after parameter is added
-      setTimeout(() => {
-        const newNameTemplate = generatePreview();
-        if (template?.id) {
-          updateTemplateNameMutation.mutate(newNameTemplate);
-        }
-      }, 500);
     },
     onError: (error: any) => {
       toast({
@@ -604,24 +588,9 @@ export default function TaskTemplateEditorModal({
 
                   {/* Preview de la plantilla */}
                   <div className="bg-muted/30 rounded-lg border p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <Label className="text-sm font-medium">
-                        Vista previa de la plantilla:
-                      </Label>
-                      {template && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            const newNameTemplate = generatePreview();
-                            updateTemplateNameMutation.mutate(newNameTemplate);
-                          }}
-                          disabled={updateTemplateNameMutation.isPending}
-                        >
-                          {updateTemplateNameMutation.isPending ? 'Guardando...' : 'Guardar Vista Previa'}
-                        </Button>
-                      )}
-                    </div>
+                    <Label className="text-sm font-medium mb-2 block">
+                      Vista previa de la plantilla:
+                    </Label>
                     <div className="text-sm bg-background p-3 rounded border">
                       <span className="font-medium">
                         {generatePreview()}
@@ -630,7 +599,7 @@ export default function TaskTemplateEditorModal({
                     <div className="mt-2 text-xs text-muted-foreground">
                       <p>• Estructura: {categoryName} + parámetros + punto final</p>
                       <p>• Los parámetros se insertan automáticamente entre el nombre y el punto</p>
-                      <p>• Se guarda automáticamente al agregar/eliminar parámetros</p>
+                      <p>• Se guardará al presionar "Guardar" en el modal</p>
                     </div>
                   </div>
                 </div>
@@ -641,9 +610,32 @@ export default function TaskTemplateEditorModal({
         footer: (
           <CustomModalFooter 
             onCancel={onClose}
-            onSave={onClose}
+            onSave={() => {
+              // Save the name_template with the current preview
+              if (template?.id) {
+                const newNameTemplate = generatePreview();
+                updateTemplateNameMutation.mutate(newNameTemplate, {
+                  onSuccess: () => {
+                    toast({
+                      title: 'Plantilla guardada',
+                      description: 'La plantilla se ha guardado exitosamente'
+                    });
+                    onClose();
+                  },
+                  onError: (error: any) => {
+                    toast({
+                      variant: 'destructive',
+                      title: 'Error al guardar',
+                      description: error.message || 'Error al guardar la plantilla'
+                    });
+                  }
+                });
+              } else {
+                onClose();
+              }
+            }}
             cancelText="Cancelar"
-            saveText="Cerrar"
+            saveText="Guardar"
           />
         )
       }}
