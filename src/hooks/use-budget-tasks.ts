@@ -83,7 +83,55 @@ export function useBudgetTasks(budgetId: string) {
       }
 
       console.log("Budget tasks data received:", data);
-      return data || [];
+      
+      // Procesar los nombres de las tareas usando la misma lógica del modal
+      const processedTasks = await Promise.all(
+        (data || []).map(async (task: any) => {
+          if (task.task?.display_name && task.task?.param_values) {
+            // Obtener valores de parámetros
+            const paramValueIds = Object.values(task.task.param_values);
+            if (paramValueIds.length > 0) {
+              const { data: parameterValues, error: paramError } = await supabase
+                .from('task_parameter_values')
+                .select(`
+                  name, 
+                  label,
+                  parameter_id,
+                  task_parameters!inner(expression_template)
+                `)
+                .in('name', paramValueIds);
+              
+              if (!paramError && parameterValues) {
+                let processed = task.task.display_name;
+                
+                // Reemplazar placeholders usando expression_template
+                Object.keys(task.task.param_values).forEach(key => {
+                  const placeholder = `{{${key}}}`;
+                  const paramValueId = task.task.param_values[key];
+                  
+                  const paramValue = parameterValues.find(pv => pv.name === paramValueId);
+                  
+                  if (paramValue) {
+                    let replacement = paramValue.task_parameters?.expression_template || paramValue.label;
+                    
+                    if (replacement.includes('{value}')) {
+                      replacement = replacement.replace(/{value}/g, paramValue.label);
+                    }
+                    
+                    processed = processed.replace(new RegExp(placeholder, 'g'), replacement);
+                  }
+                });
+                
+                // Actualizar display_name procesado
+                task.task.display_name = processed;
+              }
+            }
+          }
+          return task;
+        })
+      );
+      
+      return processedTasks;
     },
     enabled: !!budgetId && !!supabase
   });

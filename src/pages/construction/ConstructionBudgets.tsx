@@ -44,57 +44,66 @@ const useTaskParameterValues = () => {
   });
 };
 
-// Función para generar el nombre completo de la tarea con parámetros procesados
+// Función para procesar el display_name con expression_templates (igual que en el modal)
+async function processDisplayName(displayName: string, paramValues: any): Promise<string> {
+  if (!displayName || !paramValues || !supabase) return displayName;
+  
+  let processed = displayName;
+  
+  // Obtener los valores reales de los parámetros
+  const paramValueIds = Object.values(paramValues);
+  if (paramValueIds.length === 0) return displayName;
+  
+  const { data: parameterValues, error } = await supabase
+    .from('task_parameter_values')
+    .select(`
+      name, 
+      label,
+      parameter_id,
+      task_parameters!inner(expression_template)
+    `)
+    .in('name', paramValueIds);
+  
+  if (error) {
+    console.error("Error fetching parameter values:", error);
+    return displayName;
+  }
+  
+  // Reemplazar placeholders usando expression_template o label
+  Object.keys(paramValues).forEach(key => {
+    const placeholder = `{{${key}}}`;
+    const paramValueId = paramValues[key];
+    
+    // Buscar el valor correspondiente
+    const paramValue = parameterValues?.find(pv => pv.name === paramValueId);
+    
+    if (paramValue) {
+      // Usar expression_template si existe, sino usar label
+      let replacement = paramValue.task_parameters?.expression_template || paramValue.label;
+      
+      // Si el replacement contiene {value}, reemplazarlo con el label
+      if (replacement.includes('{value}')) {
+        replacement = replacement.replace(/{value}/g, paramValue.label);
+      }
+      
+      processed = processed.replace(new RegExp(placeholder, 'g'), replacement);
+    }
+  });
+  
+  return processed;
+}
+
+// Función para generar el nombre completo de la tarea usando la misma lógica que el modal
 function generateTaskDisplayName(task: any, parameterValues: any[] = []): string {
   if (!task) return 'Sin nombre';
   
-  // Si no tenemos template_id, usar display_name directamente
-  if (!task.template_id) {
-    return task.display_name || task.name || 'Sin nombre';
+  // Si el task ya tiene display_name procesado, usarlo directamente
+  if (task.display_name && !task.display_name.includes('{{')) {
+    return task.display_name;
   }
-
-  // Obtener el template
-  const template = task.task_templates || task.template;
-  if (!template?.name_template) {
-    return task.display_name || task.name || 'Sin nombre';
-  }
-
-  let result = template.name_template;
   
-  // Reemplazar parámetros usando param_values
-  if (task.param_values) {
-    Object.entries(task.param_values).forEach(([paramName, paramValue]) => {
-      if (paramValue) {
-        // Buscar el parámetro en parameterValues para obtener expression_template y label
-        const parameterValue = parameterValues.find(pv => 
-          pv.name === String(paramValue) || pv.id === String(paramValue)
-        );
-        
-        if (parameterValue?.expression_template && parameterValue?.label) {
-          // Reemplazar {value} en expression_template con el label del parámetro
-          let expressionText = parameterValue.expression_template.replace('{value}', parameterValue.label);
-          // Reemplazar {{paramName}} con el expression_template procesado
-          result = result.replace(new RegExp(`\\{\\{${paramName}\\}\\}`, 'g'), expressionText);
-        } else if (parameterValue?.label) {
-          // Si no hay expression_template, usar solo el label
-          result = result.replace(new RegExp(`\\{\\{${paramName}\\}\\}`, 'g'), parameterValue.label);
-        } else {
-          // Si no hay datos del parámetro, usar el valor directamente
-          result = result.replace(new RegExp(`\\{\\{${paramName}\\}\\}`, 'g'), String(paramValue));
-        }
-      }
-    });
-  }
-
-  // Limpiar placeholders restantes y espacios múltiples
-  result = result.replace(/\{\{[^}]+\}\}/g, '').replace(/\s+/g, ' ').trim();
-
-  // Remover punto final duplicado
-  if (result.endsWith('..')) {
-    result = result.slice(0, -1);
-  }
-
-  return result;
+  // Si no, procesarlo como en el modal
+  return task.display_name || task.name || 'Sin nombre';
 }
 
 interface Budget {
