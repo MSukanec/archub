@@ -72,57 +72,45 @@ export function useCreateGeneratedTask() {
       template_id: string;
       param_values: Record<string, any>;
       organization_id: string;
-      code: string;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
       
-      // Check if a task with the same code already exists
-      const { data: existingTask } = await supabase
-        .from('task_generated')
-        .select('id, code, name')
-        .eq('code', payload.code)
-        .eq('organization_id', payload.organization_id)
-        .single();
+      // Step 1: Generate task code using RPC function
+      const { data: codeData, error: codeError } = await supabase
+        .rpc('archub_generate_task_code', {
+          template_id: payload.template_id
+        });
       
-      if (existingTask) {
-        return { existing_task: existingTask, new_task: null };
-      }
+      if (codeError) throw codeError;
+      if (!codeData) throw new Error('No se pudo generar el código de la tarea');
       
-      // Create new task directly in task_generated table
+      const generatedCode = codeData;
+      
+      // Step 2: Insert task with generated code
       const { data, error } = await supabase
         .from('task_generated')
         .insert({
-          code: payload.code,
+          code: generatedCode,
           template_id: payload.template_id,
           param_values: payload.param_values,
           is_public: false,
-          organization_id: payload.organization_id,
-          scope: 'organization'
+          organization_id: payload.organization_id
         })
         .select()
         .single();
       
       if (error) throw error;
-      return { existing_task: null, new_task: data };
+      return { new_task: data, generated_code: generatedCode };
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['task-generated'] });
       
-      if (data.existing_task) {
-        toast({
-          title: "Tarea Existente",
-          description: `Ya existe una tarea con estos parámetros: ${data.existing_task.code}`,
-          variant: "default"
-        });
-        return data.existing_task;
-      } else {
-        toast({
-          title: "Tarea Generada",
-          description: "La tarea generada se ha creado exitosamente",
-          variant: "default"
-        });
-        return data.new_task;
-      }
+      toast({
+        title: "Tarea Generada",
+        description: `Tarea creada exitosamente con código ${data.generated_code}`,
+        variant: "default"
+      });
+      return data.new_task;
     },
     onError: (error: any) => {
       toast({

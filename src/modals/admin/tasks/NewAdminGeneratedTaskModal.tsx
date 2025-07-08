@@ -223,22 +223,14 @@ export function NewAdminGeneratedTaskModal({
         });
         onClose();
       } else {
-        // Crear nueva tarea usando función utilitaria
-        const selectedTemplate = templates?.find(t => t.id === template_id);
-        
-        // Generate a simple task code
-        const taskCode = `${selectedTemplate?.code_prefix || 'TSK'}-${Date.now().toString().slice(-6)}`;
-        
+        // Crear nueva tarea usando función utilitaria - el código se genera automáticamente
         const result = await createGeneratedTask.mutateAsync({
           template_id: template_id,
           param_values: params,
-          organization_id: userData.organization.id,
-          code: taskCode
+          organization_id: userData.organization.id
         });
         
-        if (result.existing_task) {
-          setExistingTask(result.existing_task);
-        } else if (result.new_task?.id) {
+        if (result.new_task?.id) {
           // Capturar el ID de la tarea creada para habilitar la gestión de materiales
           setCreatedTaskId(result.new_task.id);
         } else {
