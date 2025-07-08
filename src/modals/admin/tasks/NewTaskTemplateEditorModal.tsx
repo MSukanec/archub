@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Trash2, GripVertical } from 'lucide-react';
+import { useUnits } from '@/hooks/use-units';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
@@ -107,6 +108,9 @@ export default function TaskTemplateEditorModal({
   const [newParameterId, setNewParameterId] = useState('');
   const [newOptionGroupId, setNewOptionGroupId] = useState('');
   const queryClient = useQueryClient();
+  
+  // Load units
+  const { data: units = [] } = useUnits();
 
   // Drag & drop sensors
   const sensors = useSensors(
@@ -172,6 +176,29 @@ export default function TaskTemplateEditorModal({
       toast({
         title: "Plantilla actualizada",
         description: "La vista previa se ha guardado correctamente",
+        variant: "default"
+      });
+    }
+  });
+
+  // Update template unit_id mutation
+  const updateTemplateUnitMutation = useMutation({
+    mutationFn: async (unitId: string | null) => {
+      if (!template?.id) throw new Error('No template selected');
+      
+      const { error } = await supabase
+        .from('task_templates')
+        .update({ unit_id: unitId })
+        .eq('id', template.id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['task-template', categoryCode] });
+      queryClient.invalidateQueries({ queryKey: ['admin-task-templates'] });
+      toast({
+        title: "Unidad actualizada",
+        description: "La unidad se ha guardado correctamente",
         variant: "default"
       });
     }
@@ -482,11 +509,39 @@ export default function TaskTemplateEditorModal({
                 </div>
               )}
 
-              {/* Paso 2: Gestión de Parámetros (solo si la plantilla existe) */}
+              {/* Paso 2: Unidad (solo si la plantilla existe) */}
+              {template && (
+                <div className="bg-card border border-border rounded-lg p-4">
+                  <h3 className="text-sm font-medium mb-3">Paso 2: Unidad</h3>
+                  <div className="space-y-2">
+                    <Label>Unidad</Label>
+                    <Select 
+                      value={template.unit_id || ""} 
+                      onValueChange={(value) => {
+                        updateTemplateUnitMutation.mutate(value || null);
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar unidad..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Sin unidad</SelectItem>
+                        {units?.map((unit) => (
+                          <SelectItem key={unit.id} value={unit.id}>
+                            {unit.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
+
+              {/* Paso 3: Gestión de Parámetros (solo si la plantilla existe) */}
               {template && (
                 <div className="space-y-4">
                   <div className="bg-card border border-border rounded-lg p-4">
-                    <h3 className="text-sm font-medium mb-3">Paso 2: Agregar Parámetros</h3>
+                    <h3 className="text-sm font-medium mb-3">Paso 3: Agregar Parámetros</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-2">
                         <Label>Parámetro</Label>
