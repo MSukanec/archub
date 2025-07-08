@@ -243,6 +243,8 @@ export default function ConstructionBudgets() {
     const { budgetTasks, isLoading } = useBudgetTasks(budgetId);
     const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
 
+    console.log("Budget tasks received in component:", budgetTasks);
+
     // Calculate totals for percentage calculations (simplified for task_tasks)
     const totalBudgetAmount = budgetTasks?.length || 0;
 
@@ -327,10 +329,7 @@ export default function ConstructionBudgets() {
                       />
                     </td>
                     <td className="p-2">
-                      <div className="font-medium text-sm">
-                        {task.task?.task_templates?.task_categories?.name || 'Sin categoría'}
-                      </div>
-                      <div className="text-xs text-muted-foreground">{task.task?.code || 'Sin código'}</div>
+                      <div className="font-medium text-sm">{task.task?.code || 'Sin código'}</div>
                     </td>
                     <td className="p-2 text-sm">
                       Unidad
