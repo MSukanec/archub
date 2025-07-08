@@ -464,12 +464,7 @@ export default function ConstructionBudgets() {
                       <SelectContent>
                         {filteredBudgets.map((budget: Budget) => (
                           <SelectItem key={budget.id} value={budget.id}>
-                            <div>
-                              <div className="font-medium text-sm">{budget.name}</div>
-                              {budget.description && (
-                                <div className="text-xs text-muted-foreground">{budget.description}</div>
-                              )}
-                            </div>
+                            <span className="text-left">{budget.name}</span>
                           </SelectItem>
                         ))}
                       </SelectContent>

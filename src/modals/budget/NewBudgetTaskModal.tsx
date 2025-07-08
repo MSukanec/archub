@@ -10,7 +10,7 @@ import { CustomModalFooter } from "@/components/ui-custom/modal/CustomModalFoote
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CustomComboBox } from "@/components/ui-custom/misc/CustomComboBox";
+import { TaskSearchCombo } from "@/components/ui-custom/misc/TaskSearchCombo";
 import { Label } from "@/components/ui/label";
 import { useGeneratedTasks } from "@/hooks/use-generated-tasks";
 import { useBudgetTasks } from "@/hooks/use-budget-tasks";
@@ -161,7 +161,7 @@ export default function NewBudgetTaskModal({
                       <Label htmlFor="task_id" className="text-xs required-asterisk">
                         Tarea
                       </Label>
-                      <CustomComboBox
+                      <TaskSearchCombo
                         options={taskOptions}
                         value={watch("task_id")}
                         onValueChange={(value) => setValue("task_id", value)}

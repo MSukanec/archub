@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 import {
   Command,
   CommandEmpty,
@@ -20,7 +19,7 @@ interface Option {
   label: string;
 }
 
-interface CustomComboBoxProps {
+interface TaskSearchComboProps {
   options: Option[];
   value?: string;
   onValueChange: (value: string) => void;
@@ -32,7 +31,7 @@ interface CustomComboBoxProps {
   onSearchChange?: (search: string) => void;
 }
 
-export function CustomComboBox({
+export function TaskSearchCombo({
   options,
   value,
   onValueChange,
@@ -42,7 +41,7 @@ export function CustomComboBox({
   disabled = false,
   className,
   onSearchChange
-}: CustomComboBoxProps) {
+}: TaskSearchComboProps) {
   const [open, setOpen] = useState(false);
 
   const selectedOption = options.find((option) => option.value === value);
@@ -50,20 +49,27 @@ export function CustomComboBox({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant="outline"
+        <button
           role="combobox"
           aria-expanded={open}
           className={cn(
-            "w-full justify-between text-sm h-10",
+            // Styled exactly like an Input component
+            "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background",
+            "file:border-0 file:bg-transparent file:text-sm file:font-medium",
+            "placeholder:text-muted-foreground",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+            "disabled:cursor-not-allowed disabled:opacity-50",
+            "justify-between items-center",
             !selectedOption && "text-muted-foreground",
             className
           )}
           disabled={disabled}
         >
-          {selectedOption ? selectedOption.label : placeholder}
+          <span className="truncate text-left">
+            {selectedOption ? selectedOption.label : placeholder}
+          </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
+        </button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0" align="start">
         <Command>
