@@ -177,7 +177,8 @@ export function NewAdminGeneratedTaskModal({
       setCreatedTaskId(null);
       setNewMaterial({ material_id: "", amount: 1 });
       form.reset({
-        template_id: ""
+        template_id: "",
+        unit_id: ""
       });
     }
   }, [isEditing, generatedTask, open]);
@@ -188,6 +189,7 @@ export function NewAdminGeneratedTaskModal({
       console.log('Resetting form with param values after parameters loaded:', paramValues);
       form.reset({
         template_id: generatedTask.template_id,
+        unit_id: generatedTask.unit_id || "",
         ...paramValues
       });
     }
@@ -213,7 +215,7 @@ export function NewAdminGeneratedTaskModal({
   const handleSubmit = async (data: any) => {
     if (!userData?.organization?.id) return;
     
-    const { template_id, ...params } = data;
+    const { template_id, unit_id, ...params } = data;
     
     // Find the selected template to get its category information
     
@@ -223,7 +225,8 @@ export function NewAdminGeneratedTaskModal({
 
         await updateGeneratedTask.mutateAsync({
           task_id: generatedTask.id,
-          input_param_values: params
+          input_param_values: params,
+          input_unit_id: unit_id || null
         });
         onClose();
       } else {
@@ -231,7 +234,8 @@ export function NewAdminGeneratedTaskModal({
         const result = await createGeneratedTask.mutateAsync({
           template_id: template_id,
           param_values: params,
-          organization_id: userData.organization.id
+          organization_id: userData.organization.id,
+          unit_id: unit_id || null
         });
         
         if (result.new_task?.id) {
