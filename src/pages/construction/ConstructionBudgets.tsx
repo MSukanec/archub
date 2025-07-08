@@ -93,16 +93,11 @@ async function processDisplayName(displayName: string, paramValues: any): Promis
   return processed;
 }
 
-// Función para generar el nombre completo de la tarea usando la misma lógica que el modal
+// Función para generar el nombre completo de la tarea usando los datos ya procesados
 function generateTaskDisplayName(task: any, parameterValues: any[] = []): string {
   if (!task) return 'Sin nombre';
   
-  // Si el task ya tiene display_name procesado, usarlo directamente
-  if (task.display_name && !task.display_name.includes('{{')) {
-    return task.display_name;
-  }
-  
-  // Si no, procesarlo como en el modal
+  // Usar display_name que ya fue procesado por el hook useBudgetTasks
   return task.display_name || task.name || 'Sin nombre';
 }
 
