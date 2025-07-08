@@ -53,18 +53,44 @@ export function useCreateGeneratedTask() {
 
   return useMutation({
     mutationFn: async (payload: {
-      input_template_id: string;
-      input_param_values: Record<string, any>;
-      input_organization_id: string;
-      input_description?: string;
+      template_id: string;
+      param_values: Record<string, any>;
+      organization_id: string;
+      description: string;
+      code: string;
+      created_by: string;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
       
+      // Check if a task with the same code already exists
+      const { data: existingTask } = await supabase
+        .from('task_tasks')
+        .select('id, code, description')
+        .eq('code', payload.code)
+        .eq('organization_id', payload.organization_id)
+        .single();
+      
+      if (existingTask) {
+        return { existing_task: existingTask, new_task: null };
+      }
+      
+      // Create new task directly in task_tasks table
       const { data, error } = await supabase
-        .rpc('create_generated_task', payload);
+        .from('task_tasks')
+        .insert({
+          template_id: payload.template_id,
+          param_values: payload.param_values,
+          description: payload.description,
+          code: payload.code,
+          created_by: payload.created_by,
+          organization_id: payload.organization_id,
+          is_public: false
+        })
+        .select()
+        .single();
       
       if (error) throw error;
-      return data;
+      return { existing_task: null, new_task: data };
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['task-tasks'] });

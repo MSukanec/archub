@@ -267,8 +267,6 @@ export function NewAdminGeneratedTaskModal({
     const { template_id, ...params } = data;
     
     // Find the selected template to get its category information
-    const selectedTemplate = templates?.find(t => t.id === template_id);
-    const generatedDescription = generateDescriptionWithExpressions(params);
     
     try {
       if (isEditing && generatedTask?.id) {
@@ -281,11 +279,19 @@ export function NewAdminGeneratedTaskModal({
         onClose();
       } else {
         // Crear nueva tarea
+        const selectedTemplate = templates?.find(t => t.id === template_id);
+        const generatedDescription = generateTaskDescription();
+        
+        // Generate a simple task code
+        const taskCode = `${selectedTemplate?.code_prefix || 'TSK'}-${Date.now().toString().slice(-6)}`;
+        
         const result = await createGeneratedTask.mutateAsync({
-          input_template_id: template_id,
-          input_param_values: params,
-          input_organization_id: userData.organization.id,
-          input_description: generatedDescription
+          template_id: template_id,
+          param_values: params,
+          organization_id: userData.organization.id,
+          description: generatedDescription,
+          code: taskCode,
+          created_by: userData.user.id
         });
         
         if (result.existing_task) {
