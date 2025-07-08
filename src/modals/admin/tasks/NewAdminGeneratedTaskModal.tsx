@@ -231,7 +231,7 @@ export function NewAdminGeneratedTaskModal({
         await updateGeneratedTask.mutateAsync({
           task_id: generatedTask.id,
           input_param_values: params,
-          input_unit_id: unit_id || null,
+          input_unit_id: unit_id ? unit_id : null,
           input_is_system: is_system || false
         });
         onClose();
@@ -241,7 +241,7 @@ export function NewAdminGeneratedTaskModal({
           template_id: template_id,
           param_values: params,
           organization_id: userData.organization.id,
-          unit_id: unit_id || null,
+          unit_id: unit_id ? unit_id : null,
           is_system: is_system || false
         });
         
