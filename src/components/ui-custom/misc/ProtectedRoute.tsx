@@ -37,13 +37,6 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   // Check if user needs to complete onboarding or select a mode
   useEffect(() => {
     if (user && userData && !userDataLoading && location !== '/select-mode') {
-      // Si preferences es null, significa que hay un problema con los datos del usuario
-      // En lugar de redirigir al onboarding, vamos a permitir el acceso temporalmente
-      if (!userData.preferences) {
-        console.log('User preferences are null - possible database issue, allowing access');
-        return;
-      }
-      
       const hasUserType = userData.preferences?.last_user_type;
       const onboardingCompleted = userData.preferences?.onboarding_completed;
       const hasPersonalData = userData.user_data?.first_name && userData.user_data?.last_name;

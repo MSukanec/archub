@@ -119,6 +119,13 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 8, 2025. Fixed budget filtering and task search improvements plus temporary onboarding issue resolution - COMPLETED
+  • Enhanced useBudgets hook to filter by both project_id AND organization_id to prevent data leaks between organizations
+  • Modified useTaskSearch hook to remove organization filter so all tasks are available when adding to budgets (as requested)
+  • Fixed temporary ProtectedRoute issue where null preferences caused infinite onboarding redirects
+  • User manually recreated user_preferences database record to resolve missing preferences data
+  • System now properly filters budgets by organization while allowing full task catalog access during budget creation
+  • Improved data security by ensuring budgets only show within correct organizational boundaries
 - July 8, 2025. Complete task description generation system and cache invalidation implementation - COMPLETED
   • Fixed useAllTaskParameterValues hook to properly JOIN with task_parameters table to access expression_template column
   • Task table now correctly displays full descriptions like "Muros Simples de ladrillo cerámico hueco de 12x18x33 con mortero de asiento de cemento de albañilería" 
