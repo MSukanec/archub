@@ -94,7 +94,6 @@ export function CreateGeneratedTaskUserModal({
     resolver: zodResolver(formSchema),
     defaultValues: {
       template_id: "",
-      unit_id: "",
       ...paramValues
     },
     mode: "onChange"
@@ -121,7 +120,6 @@ export function CreateGeneratedTaskUserModal({
       setParamValues(newParamValues);
       form.reset({
         template_id: selectedTemplateId,
-        unit_id: "",
         ...newParamValues
       });
     }
@@ -133,8 +131,7 @@ export function CreateGeneratedTaskUserModal({
       setSelectedTemplateId("");
       setParamValues({});
       form.reset({
-        template_id: "",
-        unit_id: ""
+        template_id: ""
       });
       // Invalidate queries for fresh data
       queryClient.invalidateQueries({ queryKey: ['task-templates'] });
@@ -153,7 +150,7 @@ export function CreateGeneratedTaskUserModal({
     }
     
     setIsSubmitting(true);
-    const { template_id, unit_id, ...params } = data;
+    const { template_id, ...params } = data;
     
     try {
       // Crear nueva tarea como usuario (no del sistema)
@@ -161,7 +158,6 @@ export function CreateGeneratedTaskUserModal({
         template_id: template_id,
         param_values: params,
         organization_id: userData.organization.id,
-        unit_id: unit_id ? unit_id : null,
         is_system: false // Usuarios crean tareas de organización
       });
       
@@ -378,35 +374,24 @@ export function CreateGeneratedTaskUserModal({
                     )}
                   />
 
-                  {/* Campo de Unidad */}
-                  <FormField
-                    control={form.control}
-                    name="unit_id"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Unidad</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          value={field.value}
-                          disabled={unitsLoading}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Seleccionar unidad..." />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {units?.map((unit) => (
-                              <SelectItem key={unit.id} value={unit.id}>
-                                {unit.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {/* Mostrar unidad del template seleccionado */}
+                  {selectedTemplateId && templates && (
+                    (() => {
+                      const selectedTemplate = templates.find(t => t.id === selectedTemplateId);
+                      if (selectedTemplate?.unit_id) {
+                        const unit = units?.find(u => u.id === selectedTemplate.unit_id);
+                        return (
+                          <div className="p-3 bg-muted/50 rounded-lg border">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-muted-foreground">Unidad definida por la plantilla:</span>
+                              <span className="text-sm font-medium">{unit?.name || 'Cargando...'}</span>
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    })()
+                  )}
 
                   {/* Parámetros de la Plantilla */}
                   {selectedTemplateId && parameters && parameters.length > 0 && (

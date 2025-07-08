@@ -375,7 +375,7 @@ export default function ConstructionBudgets() {
 
   // Budget Task Table Component
   function BudgetTaskTable({ budgetId }: { budgetId: string }) {
-    const { budgetTasks, isLoading } = useBudgetTasks(budgetId);
+    const { budgetTasks, isLoading, updateBudgetTask } = useBudgetTasks(budgetId);
     const { data: parameterValues = [] } = useTaskParameterValues();
     const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
     
@@ -406,6 +406,39 @@ export default function ConstructionBudgets() {
       if (!unitId) return '-';
       const unit = units.find(u => u.id === unitId);
       return unit?.name || '-';
+    };
+
+    // Función para actualizar la cantidad de una tarea
+    const handleUpdateQuantity = async (taskId: string, newQuantity: number) => {
+      try {
+        const task = budgetTasks?.find(t => t.id === taskId);
+        if (!task) return;
+
+        await updateBudgetTask.mutateAsync({
+          id: taskId,
+          budget_id: budgetId,
+          task_id: task.task_id,
+          quantity: newQuantity,
+          start_date: task.start_date,
+          end_date: task.end_date,
+          planned_days: task.planned_days,
+          priority: task.priority,
+          dependencies: task.dependencies,
+          organization_id: task.organization_id
+        });
+
+        toast({
+          title: "Cantidad actualizada",
+          description: `Cantidad cambiada a ${newQuantity}`,
+        });
+      } catch (error) {
+        console.error('Error updating quantity:', error);
+        toast({
+          title: "Error",
+          description: "No se pudo actualizar la cantidad",
+          variant: "destructive",
+        });
+      }
     };
 
     // Calculate totals for percentage calculations (simplified for task_tasks)
@@ -507,7 +540,14 @@ export default function ConstructionBudgets() {
                         type="number"
                         value={task.quantity || 0}
                         onChange={(e) => {
-                          console.log('Editing quantity:', e.target.value);
+                          const newQuantity = parseFloat(e.target.value) || 0;
+                          handleUpdateQuantity(task.id, newQuantity);
+                        }}
+                        onBlur={(e) => {
+                          const newQuantity = parseFloat(e.target.value) || 0;
+                          if (newQuantity !== task.quantity) {
+                            handleUpdateQuantity(task.id, newQuantity);
+                          }
                         }}
                         className="w-20 px-2 py-1 text-sm border rounded"
                         min="0"
