@@ -20,6 +20,7 @@ export interface TaskTemplateParameter {
   unit?: string;
   is_required: boolean;
   position: number;
+  expression_template?: string;
 }
 
 export interface TaskTemplateParameterOption {
@@ -84,8 +85,9 @@ export function useTaskTemplateParameters(templateId: string | null) {
         name: item.task_parameters?.name || '',
         label: item.task_parameters?.label || '',
         type: item.task_parameters?.type || 'text',
-        is_required: true, // Default since we don't have this field in current DB
-        position: item.position
+        is_required: item.is_required || false,
+        position: item.position,
+        expression_template: item.expression_template || ''
       })) || [];
       
       console.log('Transformed real parameters:', parameters);

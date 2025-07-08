@@ -212,16 +212,57 @@ export function NewAdminGeneratedTaskModal({
     return description;
   };
 
+  // Generate description using expression templates from parameters
+  const generateDescriptionWithExpressions = (paramValues: Record<string, any>) => {
+    if (!parameters) return "Seleccione los parámetros para ver la vista previa";
+    
+    // Find the selected template
+    const currentTemplate = templates?.find(t => t.id === selectedTemplateId);
+    if (!currentTemplate) return "Seleccione una plantilla para ver la vista previa";
+    
+    // Get category name (subcategory)
+    const categoryName = categories?.find(cat => cat.id === currentTemplate.category_id)?.name || '';
+    
+    // Sort parameters by position
+    const sortedParameters = [...parameters].sort((a, b) => a.position - b.position);
+    
+    // Generate expression parts for each parameter
+    const expressionParts: string[] = [];
+    
+    sortedParameters.forEach(param => {
+      const value = paramValues[param.name];
+      const expressionTemplate = param.expression_template;
+      
+      if (value && expressionTemplate) {
+        let displayValue = value.toString();
+        
+        // For select parameters, find the label instead of using raw value
+        if (param.type === 'select') {
+          const option = parameterOptions[param.id]?.find(opt => opt.value === value || opt.id === value);
+          if (option) {
+            displayValue = option.label;
+          }
+        }
+        
+        // Replace {value} in expression template with actual value
+        const expressionPart = expressionTemplate.replace(/{value}/g, displayValue);
+        expressionParts.push(expressionPart);
+      }
+    });
+    
+    // Combine: Category Name + Expression Parts + "."
+    const fullDescription = `${categoryName} ${expressionParts.join(' ')}.`;
+    return fullDescription;
+  };
+
   const handleSubmit = async (data: any) => {
     if (!userData?.organization?.id) return;
     
     const { template_id, ...params } = data;
     
-    // Find the selected template to get its name_template
+    // Find the selected template to get its category information
     const selectedTemplate = templates?.find(t => t.id === template_id);
-    const generatedDescription = selectedTemplate?.name_template 
-      ? generateDescription(selectedTemplate.name_template, params)
-      : "Tarea generada";
+    const generatedDescription = generateDescriptionWithExpressions(params);
     
     try {
       if (isEditing && generatedTask?.id) {
@@ -530,9 +571,7 @@ export function NewAdminGeneratedTaskModal({
                                     }
                                   });
                                   
-                                  return selectedTemplate?.name_template 
-                                    ? generateDescription(selectedTemplate.name_template, displayParams)
-                                    : "Seleccione los parámetros para ver la vista previa";
+                                  return generateDescriptionWithExpressions(displayParams);
                                 })()}
                               </div>
                             </div>
