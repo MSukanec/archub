@@ -104,14 +104,17 @@ export default function AdminGeneratedTasks() {
     },
     {
       key: 'code',
-      label: 'Tarea Generada',
+      label: 'Código',
+      width: '10%',
       render: (task: GeneratedTask) => (
-        <div>
-          <span className="text-sm font-medium">{task.code}</span>
-          {task.description && (
-            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{task.description}</p>
-          )}
-        </div>
+        <span className="text-sm font-medium">{task.code}</span>
+      )
+    },
+    {
+      key: 'description',
+      label: 'Tarea',
+      render: (task: GeneratedTask) => (
+        <span className="text-sm">{task.description || 'Sin descripción'}</span>
       )
     },
     {
@@ -124,16 +127,7 @@ export default function AdminGeneratedTasks() {
         </Badge>
       )
     },
-    {
-      key: 'template_id',
-      label: 'Plantilla',
-      width: '5%',
-      render: (task: GeneratedTask) => (
-        <span className="text-xs">
-          {task.template_id || 'N/A'}
-        </span>
-      )
-    },
+
     {
       key: 'actions',
       label: 'Acciones',

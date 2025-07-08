@@ -11,7 +11,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { useTasks } from "@/hooks/use-tasks";
+import { useGeneratedTasks } from "@/hooks/use-generated-tasks";
 import { useBudgetTasks } from "@/hooks/use-budget-tasks";
 
 const budgetTaskSchema = z.object({
@@ -39,7 +39,7 @@ export default function NewBudgetTaskModal({
   editingTask
 }: NewBudgetTaskModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { data: tasks = [], isLoading: tasksLoading } = useTasks();
+  const { data: tasks = [], isLoading: tasksLoading } = useGeneratedTasks();
   const budgetTasksHook = useBudgetTasks(budgetId);
   const { createBudgetTask, updateBudgetTask } = budgetTasksHook;
 
@@ -134,7 +134,7 @@ export default function NewBudgetTaskModal({
         ),
         body: (
           <form onSubmit={handleSubmit(onSubmit)} id="budget-task-form">
-            <CustomModalBody>
+            <CustomModalBody columns={1}>
               <Accordion type="single" collapsible defaultValue="datos-tarea" className="w-full">
                 <AccordionItem value="datos-tarea">
                   <AccordionTrigger className="text-sm font-medium">
@@ -161,7 +161,7 @@ export default function NewBudgetTaskModal({
                           ) : (
                             tasks.map((task) => (
                               <SelectItem key={task.id} value={task.id}>
-                                {task.name}
+                                {task.description || `${task.code} - Sin descripción`}
                               </SelectItem>
                             ))
                           )}
