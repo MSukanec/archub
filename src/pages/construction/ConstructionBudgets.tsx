@@ -18,6 +18,7 @@ import { useBudgetTasks } from '@/hooks/use-budget-tasks'
 import { useToast } from '@/hooks/use-toast'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import { BudgetTaskCard } from '@/components/cards/BudgetTaskCard'
 
 // Hook para obtener valores de parámetros con expression_template
 const useTaskParameterValues = () => {
@@ -415,7 +416,8 @@ export default function ConstructionBudgets() {
 
     return (
       <div className="space-y-4">
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b bg-muted/50">
@@ -523,6 +525,38 @@ export default function ConstructionBudgets() {
               </tr>
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Cards View */}
+        <div className="md:hidden space-y-3">
+          {budgetTasks?.map((task: any) => {
+            const processedName = generateTaskDisplayName(task.task, parameterValues);
+            return (
+              <BudgetTaskCard
+                key={task.id}
+                task={task}
+                processedName={processedName}
+                onEdit={(task) => {
+                  console.log('Edit task mobile:', task);
+                  // TODO: Implement edit functionality
+                }}
+                onDelete={handleDeleteTask}
+              />
+            );
+          })}
+          
+          {/* Mobile Total Card */}
+          <Card className="border-2 border-accent bg-accent/5">
+            <div className="p-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold">TOTAL</span>
+                <div className="flex items-center gap-4">
+                  <span className="text-sm font-semibold">$0</span>
+                  <span className="text-xs text-muted-foreground">100.0%</span>
+                </div>
+              </div>
+            </div>
+          </Card>
         </div>
       </div>
     );
