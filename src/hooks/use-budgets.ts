@@ -18,19 +18,18 @@ export function useBudgets(projectId?: string) {
   const { data: userData } = useCurrentUser()
 
   return useQuery({
-    queryKey: ['budgets', projectId, userData?.preferences?.last_organization_id],
+    queryKey: ['budgets', projectId],
     queryFn: async () => {
-      if (!supabase || !projectId || !userData?.preferences?.last_organization_id) {
+      if (!supabase || !projectId) {
         return []
       }
 
-      console.log('Fetching budgets for project:', projectId, 'and organization:', userData.preferences.last_organization_id)
+      console.log('Fetching budgets for project:', projectId)
       
       const { data, error } = await supabase
         .from('budgets')
         .select('*')
         .eq('project_id', projectId)
-        .eq('organization_id', userData.preferences.last_organization_id)
         .order('created_at', { ascending: false })
 
       if (error) {
@@ -41,7 +40,7 @@ export function useBudgets(projectId?: string) {
       console.log('Budgets data received:', data)
       return data as Budget[]
     },
-    enabled: !!supabase && !!projectId && !!userData?.preferences?.last_organization_id
+    enabled: !!supabase && !!projectId
   })
 }
 

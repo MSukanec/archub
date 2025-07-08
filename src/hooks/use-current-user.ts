@@ -99,68 +99,26 @@ export function useCurrentUser() {
         throw new Error('User not authenticated')
       }
 
-      // Usar consultas directas en lugar de RPC ya que archub_get_user no está disponible
-      const [userResult, userDataResult, preferencesResult, organizationResult] = await Promise.all([
-        supabase.from('users').select('*').eq('auth_id', authUser.id).single(),
-        supabase.from('user_data').select('*').eq('user_id', authUser.id).maybeSingle(),
-        supabase.from('user_preferences').select('*').eq('user_id', authUser.id).maybeSingle(),
-        // Organización actual basada en last_organization_id
-        supabase.from('user_preferences')
-          .select('last_organization_id, organizations(*)')
-          .eq('user_id', authUser.id)
-          .maybeSingle()
-      ])
-
-      if (userResult.error) throw userResult.error
-      if (userDataResult.error) throw userDataResult.error
-      if (preferencesResult.error) throw preferencesResult.error
-
-      const user = userResult.data
-      const userData = userDataResult.data
-      const preferences = preferencesResult.data
+      const { data, error } = await supabase.rpc('archub_get_user')
       
-      // Si no hay preferencias, crear registro por defecto
-      let finalPreferences = preferences
-      if (!preferences && user) {
-        const { data: newPreferences, error: createError } = await supabase
-          .from('user_preferences')
-          .insert({
-            user_id: user.id,
-            theme: 'light',
-            sidebar_docked: false,
-            onboarding_completed: true
-          })
-          .select()
-          .single()
-
-        if (createError) {
-          console.error('Error creating user preferences:', createError)
-        } else {
-          finalPreferences = newPreferences
-        }
+      if (error) {
+        console.error('Supabase RPC Error:', error)
+        console.error('Error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        })
+        throw error
+      }
+      
+      if (!data) {
+        console.error('No user data returned from RPC function')
+        throw new Error('No user data returned')
       }
 
-      // Obtener organización actual si existe
-      let organization = null
-      if (finalPreferences?.last_organization_id) {
-        const { data: orgData } = await supabase
-          .from('organizations')
-          .select('*')
-          .eq('id', finalPreferences.last_organization_id)
-          .single()
-        organization = orgData
-      }
-
-      const result = {
-        user,
-        user_data: userData,
-        preferences: finalPreferences,
-        organization,
-        organization_preferences: null // Por ahora null, se puede agregar después
-      }
-
-      console.log('User data received:', result)
-      return result as UserData
+      console.log('User data received:', data)
+      return data as UserData
     },
     enabled: !!authUser && !!supabase,
     retry: 3,

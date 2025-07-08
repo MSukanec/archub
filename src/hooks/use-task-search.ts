@@ -82,10 +82,11 @@ export function useTaskSearch(searchTerm: string, organizationId: string, enable
         return [];
       }
 
-      // Obtener todas las tareas (SIN filtrar por organización para mostrar todas las tareas disponibles)
+      // Primero obtener todas las tareas de la organización (sin filtrar por término)
       const { data: allTasks, error } = await supabase
         .from("task_generated_view")
         .select("*")
+        .eq("organization_id", organizationId)
         .limit(100);
 
       if (error) {
