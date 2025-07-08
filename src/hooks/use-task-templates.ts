@@ -76,24 +76,20 @@ export function useTaskTemplateParameters(templateId: string | null) {
         throw error;
       }
       
-      console.log('Raw parameter data from DB:', data);
-      
       // Transform the data to match our interface - only real data
-      const parameters = data?.map(item => ({
-        id: item.parameter_id,
-        template_id: item.template_id,
-        name: item.task_parameters?.name || '',
-        label: item.task_parameters?.label || '',
-        type: item.task_parameters?.type || 'text',
-        is_required: item.is_required || false,
-        position: item.position,
-        expression_template: item.expression_template || ''
-      })) || [];
-      
-      console.log('Parameters with expression_template:', parameters.map(p => ({
-        name: p.name,
-        expression_template: p.expression_template
-      })));
+      const parameters = data?.map(item => {
+        console.log('Individual item raw:', item);
+        return {
+          id: item.parameter_id,
+          template_id: item.template_id,
+          name: item.task_parameters?.name || '',
+          label: item.task_parameters?.label || '',
+          type: item.task_parameters?.type || 'text',
+          is_required: item.is_required || false,
+          position: item.position,
+          expression_template: item.expression_template || ''
+        };
+      }) || [];
       
       console.log('Transformed real parameters:', parameters);
       return parameters as TaskTemplateParameter[];
