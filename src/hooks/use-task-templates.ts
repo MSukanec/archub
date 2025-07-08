@@ -77,6 +77,7 @@ export function useTaskTemplateParameters(templateId: string | null) {
       }
       
       console.log('Raw parameter data from DB:', data);
+      console.log('Individual item raw:', data?.[0]);
       
       // Transform the data to match our interface - only real data
       const parameters = data?.map(item => ({
