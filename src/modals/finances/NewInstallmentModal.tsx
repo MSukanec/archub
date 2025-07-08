@@ -159,6 +159,8 @@ export function NewInstallmentModal({
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase client not initialized')
       
+      console.log('Fetching contacts for organization:', organizationId)
+      
       const { data, error } = await supabase
         .from('contacts')
         .select(`
@@ -167,11 +169,17 @@ export function NewInstallmentModal({
           last_name,
           company_name,
           email,
-          avatar_url
+          avatar_url,
+          full_name
         `)
         .eq('organization_id', organizationId)
 
-      if (error) throw error
+      if (error) {
+        console.error('Error fetching contacts:', error)
+        throw error
+      }
+      
+      console.log('Contacts loaded:', data)
       return data || []
     },
     enabled: !!organizationId && !!supabase
@@ -417,6 +425,10 @@ export function NewInstallmentModal({
 
             <div className="space-y-2">
               <Label>Contacto *</Label>
+              {/* Debug info */}
+              {organizationContacts && organizationContacts.length === 0 && (
+                <p className="text-xs text-muted-foreground">No hay contactos en esta organización</p>
+              )}
               <Select 
                 value={form.watch('contact_id')} 
                 onValueChange={(value) => form.setValue('contact_id', value)}
@@ -426,13 +438,17 @@ export function NewInstallmentModal({
                 </SelectTrigger>
                 <SelectContent>
                   {organizationContacts?.map((contact, index) => {
-                    const displayName = contact.company_name || 
-                      `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 'Contacto sin nombre'
-                    const initials = contact.company_name 
-                      ? contact.company_name.split(' ').map(n => n[0]).join('').toUpperCase()
-                      : contact.first_name && contact.last_name
-                        ? `${contact.first_name[0]}${contact.last_name[0]}`.toUpperCase()
-                        : contact.first_name?.[0]?.toUpperCase() || 'C'
+                    const displayName = contact.full_name || 
+                      contact.company_name || 
+                      `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 
+                      'Contacto sin nombre'
+                    const initials = contact.full_name
+                      ? contact.full_name.split(' ').map(n => n[0]).join('').toUpperCase()
+                      : contact.company_name 
+                        ? contact.company_name.split(' ').map(n => n[0]).join('').toUpperCase()
+                        : contact.first_name && contact.last_name
+                          ? `${contact.first_name[0]}${contact.last_name[0]}`.toUpperCase()
+                          : contact.first_name?.[0]?.toUpperCase() || 'C'
                     
                     return (
                       <SelectItem key={`contact-${contact.id || index}`} value={contact.id || ''}>
