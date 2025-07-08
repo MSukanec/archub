@@ -182,7 +182,7 @@ export default function ConstructionBudgets() {
 
   // Inicializar selectedBudgetId con last_budget_id de preferences
   useEffect(() => {
-    if (budgets.length > 0 && userData?.preferences) {
+    if (budgets.length > 0 && userData?.preferences && !selectedBudgetId) {
       if (userData.preferences.last_budget_id) {
         const lastBudgetExists = budgets.some(budget => budget.id === userData.preferences.last_budget_id);
         if (lastBudgetExists) {
@@ -213,14 +213,12 @@ export default function ConstructionBudgets() {
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     })
 
-  // Auto-select first budget when budgets load or project changes (only if no budget is selected)
+  // Reset budget selection when project changes
   useEffect(() => {
-    if (filteredBudgets.length > 0 && !selectedBudgetId) {
-      setSelectedBudgetId(filteredBudgets[0].id);
-    } else if (filteredBudgets.length === 0) {
+    if (filteredBudgets.length === 0) {
       setSelectedBudgetId('');
     }
-  }, [userData?.preferences?.last_project_id, filteredBudgets.length, selectedBudgetId]);
+  }, [userData?.preferences?.last_project_id, filteredBudgets.length]);
 
   // Get selected budget
   const selectedBudget = filteredBudgets.find(budget => budget.id === selectedBudgetId);
