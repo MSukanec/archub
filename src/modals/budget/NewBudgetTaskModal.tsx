@@ -160,7 +160,7 @@ export default function NewBudgetTaskModal({
                     emptyText={searchQuery.length < 3 ? "Escriba al menos 3 caracteres" : "No se encontraron tareas"}
                     disabled={tasksLoading}
                   />
-                  {searchQuery.length >= 3 && filteredTasks.length === 0 && (
+                  {searchQuery.length >= 3 && tasks.length === 0 && !tasksLoading && (
                     <p className="text-xs text-muted-foreground">
                       No se encontraron tareas que coincidan con "{searchQuery}"
                     </p>
