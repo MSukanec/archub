@@ -193,31 +193,7 @@ export function NewAdminGeneratedTaskModal({
     }
   }, [open, selectedTemplateId]);
 
-  // Generate description from template and parameters
-  const generateDescription = (templateNameTemplate: string, paramValues: Record<string, any>) => {
-    let description = templateNameTemplate;
-    
-    // Replace parameter placeholders with actual values
-    parameters?.forEach(param => {
-      const value = paramValues[param.name];
-      if (value !== undefined && value !== '') {
-        const placeholder = `{{${param.name}}}`;
-        let displayValue = value.toString();
-        
-        // For select parameters, find the label instead of using raw value
-        if (param.type === 'select') {
-          const option = parameterOptions[param.id]?.find(opt => opt.value === value);
-          if (option) {
-            displayValue = option.label;
-          }
-        }
-        
-        description = description.replace(new RegExp(placeholder, 'g'), displayValue);
-      }
-    });
-    
-    return description;
-  };
+
 
   // Generate description using expression templates from parameters
   const generateDescriptionWithExpressions = (paramValues: Record<string, any>) => {
@@ -234,14 +210,13 @@ export function NewAdminGeneratedTaskModal({
         const rawValue = paramValues[param.name];
         if (!rawValue) return;
 
-        // Buscar label para select
-        let label = rawValue.toString();
+        // Buscar label de la opción seleccionada
         const option = parameterOptions[param.id]?.find(opt => opt.value === rawValue);
-        if (option?.label) label = option.label;
+        if (!option?.label) return;
 
-        // Aplicar plantilla del parámetro
-        const expr = option?.expression_template || param.expression_template || '{value}';
-        const fragment = expr.replace('{value}', label);
+        // Usar solo param.expression_template y reemplazar {value} con option.label
+        const expr = param.expression_template || '{value}';
+        const fragment = expr.replace('{value}', option.label);
 
         fragments.push(fragment);
       });

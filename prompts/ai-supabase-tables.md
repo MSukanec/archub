@@ -1,3 +1,5 @@
+# Tablas de Supabase relacionadas a TAREAS (Tasks):
+
 TABLA TASK_TEMPLATES:
 
 [
