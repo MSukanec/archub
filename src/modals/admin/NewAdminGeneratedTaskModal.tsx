@@ -220,8 +220,8 @@ export function NewAdminGeneratedTaskModal({
     const currentTemplate = templates?.find(t => t.id === selectedTemplateId);
     if (!currentTemplate) return "Seleccione una plantilla para ver la vista previa";
     
-    // For now, use the template name directly since we don't have categories loaded
-    const categoryName = currentTemplate.name || '';
+    // Use the template name_template as the base name
+    const categoryName = currentTemplate.name_template || '';
     
     // Sort parameters by position
     const sortedParameters = [...parameters].sort((a, b) => a.position - b.position);
