@@ -220,28 +220,25 @@ export function NewAdminGeneratedTaskModal({
     const currentTemplate = templates?.find(t => t.id === selectedTemplateId);
     if (!currentTemplate) return "Seleccione una plantilla para ver la vista previa";
     
-    // Use the template name_template as the base name
-    const categoryName = currentTemplate.name_template || '';
+    // Start with the name_template from the task template (e.g., "Muros Simples {{brick-type}} {{mortar_type}}")
+    let description = currentTemplate.name_template || '';
     
-    // Sort parameters by position
-    const sortedParameters = [...parameters].sort((a, b) => a.position - b.position);
-    
-    // Generate expression parts for each parameter
-    const expressionParts: string[] = [];
-    
-    sortedParameters.forEach(param => {
+    // Replace each {{parameter-name}} placeholder with the processed expression_template
+    parameters.forEach(param => {
       const value = paramValues[param.name];
-      // Map specific parameter IDs to their expression templates
-      let expressionTemplate = '{value}'; // default
+      const placeholder = `{{${param.name}}}`;
       
-      // Use the specific IDs from the database we can see in the logs
-      if (param.id === 'd497ca6f-cf39-4498-a7d7-7028386ffc30') { // brick-type
-        expressionTemplate = 'de {value}';
-      } else if (param.id === '617e8f74-b291-420f-b2b8-4cab537672f7') { // mortar_type  
-        expressionTemplate = '{value}';
-      }
-      
-      if (value && expressionTemplate) {
+      if (value && description.includes(placeholder)) {
+        // Map specific parameter IDs to their expression templates from the database
+        let expressionTemplate = '{value}'; // default
+        
+        // Use the specific IDs from the database 
+        if (param.id === 'd497ca6f-cf39-4498-a7d7-7028386ffc30') { // brick-type
+          expressionTemplate = 'de {value}';
+        } else if (param.id === '617e8f74-b291-420f-b2b8-4cab537672f7') { // mortar_type  
+          expressionTemplate = '{value}';
+        }
+        
         let displayValue = value.toString();
         
         // For select parameters, find the label instead of using raw value
@@ -252,15 +249,16 @@ export function NewAdminGeneratedTaskModal({
           }
         }
         
-        // Replace {value} in expression template with actual value
-        const expressionPart = expressionTemplate.replace(/{value}/g, displayValue);
-        expressionParts.push(expressionPart);
+        // Replace {value} in expression template with actual selected value
+        const processedExpression = expressionTemplate.replace(/{value}/g, displayValue);
+        
+        // Replace the {{parameter-name}} placeholder with the processed expression
+        description = description.replace(placeholder, processedExpression);
       }
     });
     
-    // Combine: Category Name + Expression Parts + "."
-    const fullDescription = `${categoryName} ${expressionParts.join(' ')}.`;
-    return fullDescription;
+    // Add final period
+    return description + '.';
   };
 
   const handleSubmit = async (data: any) => {
