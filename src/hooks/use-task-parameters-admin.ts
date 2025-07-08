@@ -2,15 +2,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 
-// Hook para obtener subcategorías de tareas (las de 3 letras)
+// Hook para obtener todas las categorías de tareas disponibles
 export function useTaskSubcategories() {
   return useQuery({
     queryKey: ['task-subcategories'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('task_categories')
-        .select('*')
-        .eq('length(name)', 3) // Solo las de 3 letras (subcategorías)
+        .select('id, name, code, parent_id')
         .order('name');
 
       if (error) throw error;

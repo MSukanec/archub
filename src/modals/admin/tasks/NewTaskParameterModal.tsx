@@ -400,7 +400,7 @@ export function NewTaskParameterModal({
                                     ) : subcategories.length > 0 ? (
                                       subcategories.map((subcategory) => (
                                         <SelectItem key={subcategory.id} value={subcategory.id}>
-                                          {subcategory.name} - {subcategory.label || subcategory.description}
+                                          {subcategory.code || subcategory.name} {subcategory.name && subcategory.code ? '- ' + subcategory.name : ''}
                                         </SelectItem>
                                       ))
                                     ) : (
