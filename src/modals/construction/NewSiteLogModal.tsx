@@ -215,7 +215,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
   useEffect(() => {
     if (editingSiteLog) {
       // Find the organization member that corresponds to the creator user
-      const creatorMember = members?.find((member: any) => member.users.id === editingSiteLog.created_by);
+      const creatorMember = members?.find((member: any) => member.user_id === editingSiteLog.created_by);
       
       form.reset({
         log_date: new Date(editingSiteLog.log_date),
@@ -238,7 +238,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
       setExistingFiles([])
       
       // Seleccionar usuario actual por defecto en modo creación
-      const currentUserMember = members?.find((member: any) => member.users?.id === userData?.user?.id);
+      const currentUserMember = members?.find((member: any) => member.user_id === userData?.user?.id);
       if (currentUserMember?.id) {
         form.setValue('created_by', currentUserMember.id)
       }
@@ -685,15 +685,14 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                                 </FormControl>
                                 <SelectContent>
                                   {members?.map((member: any) => {
-                                    const user = member.users;
-                                    const displayName = user?.full_name || user?.email || 'Usuario sin nombre';
-                                    const avatarFallback = user?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U';
+                                    const displayName = member.full_name || member.email || 'Usuario sin nombre';
+                                    const avatarFallback = member.full_name?.charAt(0) || member.email?.charAt(0) || 'U';
                                     
                                     return (
                                       <SelectItem key={member.id} value={member.id}>
                                         <div className="flex items-center gap-2">
                                           <Avatar className="h-6 w-6">
-                                            <AvatarImage src={user?.avatar_url} />
+                                            <AvatarImage src={member.avatar_url} />
                                             <AvatarFallback>
                                               {avatarFallback}
                                             </AvatarFallback>
