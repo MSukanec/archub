@@ -161,7 +161,7 @@ export default function NewBudgetTaskModal({
                           ) : (
                             tasks.map((task) => (
                               <SelectItem key={task.id} value={task.id}>
-                                {task.description || `${task.code} - Sin descripción`}
+                                {task.name || `${task.code} - Sin nombre`}
                               </SelectItem>
                             ))
                           )}

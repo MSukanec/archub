@@ -119,6 +119,14 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 8, 2025. Updated task_tasks column reference from "description" to "name" throughout system - COMPLETED
+  • Fixed all database queries, interfaces, and references to use "name" column instead of "description" in task_tasks table
+  • Updated BudgetTask interfaces in use-budget-tasks.ts and ConstructionBudgets.tsx to use name field
+  • Corrected NewBudgetTaskModal to display task names properly using name field instead of description
+  • Fixed AdminGeneratedTasks page to show task names correctly in table columns
+  • Updated GeneratedTask interface and all CRUD operations in use-generated-tasks.ts to use name field
+  • Modified NewAdminGeneratedTaskModal to create and update tasks using name field for consistency
+  • System now properly displays task names throughout the application using consistent field naming
 - July 8, 2025. Fixed task generation system with direct task_tasks table integration - COMPLETED
   • Eliminated all references to deleted RPC function and corrected code to work directly with task_tasks table
   • Fixed name_template processing to properly replace {{parameter-name}} placeholders with expression_template values

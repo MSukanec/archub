@@ -7,7 +7,7 @@ export interface GeneratedTask {
   code: string;
   template_id: string;
   param_values: Record<string, any>;
-  description: string;
+  name: string;
   created_by: string;
   is_public: boolean;
   created_at: string;
@@ -56,7 +56,7 @@ export function useCreateGeneratedTask() {
       template_id: string;
       param_values: Record<string, any>;
       organization_id: string;
-      description: string;
+      name: string;
       code: string;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
@@ -64,7 +64,7 @@ export function useCreateGeneratedTask() {
       // Check if a task with the same code already exists
       const { data: existingTask } = await supabase
         .from('task_tasks')
-        .select('id, code, description')
+        .select('id, code, name')
         .eq('code', payload.code)
         .eq('organization_id', payload.organization_id)
         .single();
@@ -80,7 +80,7 @@ export function useCreateGeneratedTask() {
           code: payload.code,
           template_id: payload.template_id,
           param_values: payload.param_values,
-          description: payload.description,
+          name: payload.name,
           is_public: false,
           organization_id: payload.organization_id
         })
@@ -266,7 +266,7 @@ export function useUpdateGeneratedTask() {
     mutationFn: async (payload: {
       task_id: string;
       input_param_values: Record<string, any>;
-      input_description: string;
+      input_name: string;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
       
@@ -276,7 +276,7 @@ export function useUpdateGeneratedTask() {
         .from('task_tasks')
         .update({
           param_values: payload.input_param_values,
-          description: payload.input_description
+          name: payload.input_name
         })
         .eq('id', payload.task_id)
         .select()

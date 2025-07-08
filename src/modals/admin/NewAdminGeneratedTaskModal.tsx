@@ -26,7 +26,7 @@ interface GeneratedTask {
   code: string
   template_id: string
   param_values: any
-  description: string
+  name: string
   created_by: string
   is_public: boolean
   created_at: string
@@ -272,7 +272,7 @@ export function NewAdminGeneratedTaskModal({
         await updateGeneratedTask.mutateAsync({
           task_id: generatedTask.id,
           input_param_values: params,
-          input_description: generatedDescription
+          input_name: generatedDescription
         });
         onClose();
       } else {
@@ -330,7 +330,7 @@ export function NewAdminGeneratedTaskModal({
           template_id: template_id,
           param_values: params,
           organization_id: userData.organization.id,
-          description: generatedDescription,
+          name: generatedDescription,
           code: taskCode
         });
         

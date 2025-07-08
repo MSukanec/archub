@@ -19,7 +19,7 @@ export interface BudgetTask {
   task: {
     id: string;
     code: string;
-    description: string;
+    name: string;
     template_id: string | null;
     param_values: any;
     is_public: boolean;
@@ -67,7 +67,7 @@ export function useBudgetTasks(budgetId: string) {
           task:task_tasks(
             id,
             code,
-            description,
+            name,
             template_id,
             param_values,
             is_public,

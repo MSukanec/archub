@@ -22,7 +22,7 @@ interface GeneratedTask {
   code: string
   template_id: string
   param_values: any
-  description: string
+  name: string
   created_by: string
   is_public: boolean
   created_at: string
@@ -111,10 +111,10 @@ export default function AdminGeneratedTasks() {
       )
     },
     {
-      key: 'description',
+      key: 'name',
       label: 'Tarea',
       render: (task: GeneratedTask) => (
-        <span className="text-sm">{task.description || 'Sin descripción'}</span>
+        <span className="text-sm">{task.name || 'Sin nombre'}</span>
       )
     },
     {
