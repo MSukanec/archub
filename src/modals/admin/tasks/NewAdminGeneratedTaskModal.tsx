@@ -27,9 +27,11 @@ interface GeneratedTask {
   template_id: string
   param_values: any
   name: string
-  created_by: string
   is_public: boolean
   created_at: string
+  organization_id: string
+  updated_at: string
+  scope: string
 }
 
 interface NewAdminGeneratedTaskModalProps {

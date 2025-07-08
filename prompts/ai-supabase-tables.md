@@ -168,3 +168,47 @@ TABLA TASK_PARAMETERS_OPTION_GROUP_ITEMS
   }
 ]
 
+TABLA TASK_GENERATED:
+
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "code",
+    "data_type": "text"
+  },
+  {
+    "column_name": "template_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "param_values",
+    "data_type": "jsonb"
+  },
+  {
+    "column_name": "name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "is_public",
+    "data_type": "boolean"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "organization_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "scope",
+    "data_type": "text"
+  }
+]
