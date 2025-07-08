@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { useState, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { Calculator, Plus, Trash2, Building2 } from 'lucide-react'
-import { CustomTable } from '@/components/ui-custom/misc/CustomTable'
+// Removed CustomTable import as we now use BudgetTable
 import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState'
 import { BudgetTable } from '@/components/ui-custom/misc/BudgetTable'
 import { NewBudgetModal } from '@/modals/budget/NewBudgetModal'
@@ -26,10 +26,20 @@ const useTaskParameterValues = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('task_parameter_values')
-        .select('name, label, expression_template');
+        .select(`
+          name, 
+          label,
+          task_parameters!inner(expression_template)
+        `);
       
       if (error) throw error;
-      return data;
+      
+      // Flatten the data structure to include expression_template directly
+      return data?.map(item => ({
+        name: item.name,
+        label: item.label,
+        expression_template: item.task_parameters?.expression_template || null
+      })) || [];
     }
   });
 };
@@ -54,11 +64,17 @@ function generateTaskDisplayName(task: any, parameterValues: any[] = []): string
       // Reemplazar {value} en expression_template con el valor actual
       const processedValue = parameterValue.expression_template.replace('{value}', parameterValue.label || paramValue as string);
       displayName = displayName.replace(placeholder, processedValue);
+    } else if (parameterValue?.label) {
+      // Fallback al label si no hay expression_template
+      displayName = displayName.replace(placeholder, parameterValue.label);
     } else {
-      // Fallback al valor directo si no hay expression_template
+      // Fallback al valor directo si no hay ningún dato
       displayName = displayName.replace(placeholder, paramValue as string);
     }
   });
+
+  // Limpiar cualquier placeholder que no se haya procesado y espacios extras
+  displayName = displayName.replace(/\{\{[^}]+\}\}/g, '').replace(/\s+/g, ' ').trim();
 
   return displayName;
 }
@@ -425,11 +441,6 @@ export default function ConstructionBudgets() {
                 <td className="p-2"></td>
                 <td className="p-2"></td>
                 <td className="p-2"></td>
-                <td className="p-2 text-sm font-semibold">$0</td>
-                <td className="p-2 text-sm font-semibold">100.0%</td>
-                <td className="p-2"></td>
-                <td className="p-2 text-sm font-semibold">$0</td>
-                <td className="p-2 text-sm font-semibold">$0</td>
                 <td className="p-2 text-sm font-semibold">$0</td>
                 <td className="p-2 text-sm font-semibold">100.0%</td>
                 <td className="p-2"></td>
