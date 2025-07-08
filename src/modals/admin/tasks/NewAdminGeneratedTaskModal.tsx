@@ -44,7 +44,8 @@ interface NewAdminGeneratedTaskModalProps {
 
 const formSchema = z.object({
   template_id: z.string().min(1, "Debe seleccionar una plantilla"),
-  unit_id: z.string().optional()
+  unit_id: z.string().optional(),
+  is_system: z.boolean().default(true)
 }).catchall(z.any());
 
 export function NewAdminGeneratedTaskModal({ 
@@ -128,7 +129,7 @@ export function NewAdminGeneratedTaskModal({
     defaultValues: {
       template_id: "",
       unit_id: "",
-      is_system: false,
+      is_system: true,
       ...paramValues
     },
     mode: "onChange"
@@ -157,7 +158,7 @@ export function NewAdminGeneratedTaskModal({
       setParamValues(newParamValues);
       form.reset({
         template_id: selectedTemplateId,
-        is_system: false,
+        is_system: true,
         ...newParamValues
       });
     }
@@ -181,7 +182,7 @@ export function NewAdminGeneratedTaskModal({
       form.reset({
         template_id: "",
         unit_id: "",
-        is_system: false
+        is_system: true
       });
     }
   }, [isEditing, generatedTask, open]);
@@ -503,13 +504,13 @@ export function NewAdminGeneratedTaskModal({
                           control={form.control}
                           name="is_system"
                           render={({ field }) => (
-                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
                               <div className="space-y-0.5">
-                                <FormLabel className="text-base">
+                                <FormLabel className="text-sm font-medium">
                                   Tarea de Sistema
                                 </FormLabel>
-                                <FormDescription>
-                                  Esta tarea será utilizada como plantilla base del sistema
+                                <FormDescription className="text-xs text-muted-foreground">
+                                  Las tareas de sistema son disponibles para todas las organizaciones
                                 </FormDescription>
                               </div>
                               <FormControl>
