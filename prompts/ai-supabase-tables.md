@@ -31,6 +31,10 @@ TABLA TASK_TEMPLATES:
     "column_name": "updated_at",
     "data_type": "timestamp with time zone"
   }
+  {
+    "column_name": "unit_id",
+    "data_type": "uuid"
+  }
 ]
 
 TABLA TASK_PARAMETERS:
@@ -205,10 +209,6 @@ TABLA TASK_GENERATED:
     "column_name": "updated_at",
     "data_type": "timestamp with time zone"
   },
-  {
-    "column_name": "unit_id",
-    "data_type": "uuid"
-  }
   {
     "column_name": "is_system",
     "data_type": "bool"
