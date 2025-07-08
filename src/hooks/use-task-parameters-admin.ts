@@ -136,6 +136,7 @@ export function useTaskParametersAdmin() {
         name: param.name,
         label: param.label,
         type: param.type,
+        expression_template: param.expression_template,
         required: false,
         created_at: param.created_at,
         options: optionsMap.get(param.id) || []
