@@ -83,15 +83,15 @@ export default function ConstructionGallery() {
 
   // Gallery files query
   const { data: galleryFiles = [], isLoading, error } = useQuery({
-    queryKey: ['galleryFiles', projectId],
+    queryKey: ['galleryFiles', projectId, userData?.preferences?.last_organization_id],
     queryFn: async () => {
       console.log('Fetching gallery files for project:', projectId);
       
-      if (!supabase) {
-        throw new Error('Supabase client not initialized');
+      if (!supabase || !projectId || !userData?.preferences?.last_organization_id) {
+        throw new Error('Missing required data');
       }
 
-      // Get all files from site_log_files table
+      // Get files from site_log_files table joined with site_logs to filter by project
       const { data, error } = await supabase
         .from('site_log_files')
         .select(`
@@ -101,8 +101,18 @@ export default function ConstructionGallery() {
           file_name,
           created_at,
           site_log_id,
-          description
+          description,
+          site_logs!inner (
+            id,
+            project_id,
+            organization_id,
+            entry_type,
+            log_date,
+            created_by
+          )
         `)
+        .eq('site_logs.project_id', projectId)
+        .eq('site_logs.organization_id', userData.preferences.last_organization_id)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -110,28 +120,38 @@ export default function ConstructionGallery() {
         throw error;
       }
 
-      return data?.map((file: any) => ({
-        id: file.id,
-        file_url: file.file_url,
-        file_type: file.file_type,
-        original_name: file.file_name || 'Sin nombre',
-        title: file.file_name || 'Sin título',
-        description: '',
-        entry_type: 'registro_general',
-        created_at: file.created_at,
-        site_log: file.site_log_id ? {
-          id: file.site_log_id,
-          log_date: file.created_at,
-          entry_type: 'registro_general',
-          creator: {
-            id: userData?.user?.id || '',
-            full_name: userData?.user?.full_name || 'Usuario',
-            avatar_url: userData?.user?.avatar_url || ''
-          }
-        } : undefined
-      })) || [];
+      return data?.map((file: any) => {
+        // Generate proper public URL from Supabase Storage
+        const publicUrl = file.file_url?.startsWith('http') 
+          ? file.file_url 
+          : file.file_url 
+            ? supabase.storage.from('site-log-files').getPublicUrl(file.file_url).data.publicUrl
+            : '';
+
+        return {
+          id: file.id,
+          file_url: publicUrl,
+          file_type: file.file_type,
+          file_name: file.file_name || 'Sin nombre',
+          original_name: file.file_name || 'Sin nombre',
+          title: file.file_name || 'Sin título',
+          description: file.description || '',
+          entry_type: file.site_logs?.entry_type || 'registro_general',
+          created_at: file.created_at,
+          site_log: file.site_log_id ? {
+            id: file.site_log_id,
+            log_date: file.site_logs?.log_date || file.created_at,
+            entry_type: file.site_logs?.entry_type || 'registro_general',
+            creator: {
+              id: file.site_logs?.created_by || '',
+              full_name: userData?.user?.full_name || 'Usuario',
+              avatar_url: userData?.user?.avatar_url || ''
+            }
+          } : undefined
+        };
+      }) || [];
     },
-    enabled: !!projectId
+    enabled: !!projectId && !!userData?.preferences?.last_organization_id
   });
 
   // Delete mutation
