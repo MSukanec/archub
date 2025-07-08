@@ -184,17 +184,19 @@ export default function NewBudgetTaskModal({
                     onValueChange={(value) => setValue("task_id", value)}
                     onSearchChange={setSearchQuery}
                     placeholder={searchQuery.length < 3 ? "Escriba al menos 3 caracteres para buscar..." : "Seleccionar tarea"}
-                    searchPlaceholder="Buscar tarea por nombre..."
-                    emptyText={searchQuery.length < 3 ? "Escriba al menos 3 caracteres" : "No se encontraron tareas"}
+                    searchPlaceholder="🔍 Buscar tarea por nombre..."
+                    emptyText={searchQuery.length < 3 ? "Escriba al menos 3 caracteres para buscar" : "No se encontraron tareas"}
                     disabled={tasksLoading}
                     showCreateButton={!userData?.user_data?.user_type || userData.user_data.user_type !== 'admin'}
                     onCreateTask={handleCreateTask}
                     searchQuery={searchQuery}
                   />
-                  {searchQuery.length >= 3 && tasks.length === 0 && !tasksLoading && (
-                    <p className="text-xs text-muted-foreground">
-                      No se encontraron tareas que coincidan con "{searchQuery}"
-                    </p>
+                  {searchQuery.length >= 3 && tasks.length === 0 && !tasksLoading && !(!userData?.user_data?.user_type || userData.user_data.user_type !== 'admin') && (
+                    <div className="text-center py-2">
+                      <p className="text-xs text-muted-foreground">
+                        No se encontraron tareas que coincidan con "{searchQuery}"
+                      </p>
+                    </div>
                   )}
                   {errors.task_id && (
                     <p className="text-xs text-destructive">{errors.task_id.message}</p>

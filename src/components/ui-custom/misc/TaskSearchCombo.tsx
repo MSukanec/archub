@@ -86,28 +86,38 @@ export function TaskSearchCombo({
             onValueChange={onSearchChange}
             className="text-xs leading-tight py-2 px-3 border-0 bg-transparent placeholder:text-[var(--input-placeholder)] text-foreground"
           />
-          <CommandEmpty className="text-xs py-2 px-3 text-[var(--input-placeholder)]">
-            <div className="space-y-3">
-              <p>{emptyText}</p>
-              {showCreateButton && searchQuery.length >= 3 && onCreateTask && (
-                <div className="space-y-2">
-                  <p className="text-xs text-muted-foreground">
-                    ❗ No se encontraron tareas. Puede crear una nueva tarea personalizada.
+          <CommandEmpty className="text-xs py-4 px-3 text-center">
+            {showCreateButton && searchQuery.length >= 3 && onCreateTask ? (
+              <div className="space-y-3">
+                <div className="text-muted-foreground">
+                  <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-muted flex items-center justify-center">
+                    <Plus className="w-6 h-6 text-muted-foreground" />
+                  </div>
+                  <p className="text-sm font-medium">No hay tareas con "{searchQuery}"</p>
+                  <p className="text-xs mt-1 text-muted-foreground">
+                    Puede crear una nueva tarea personalizada para su organización
                   </p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setOpen(false);
-                      onCreateTask();
-                    }}
-                    className="flex items-center gap-2 w-full px-3 py-2 text-xs bg-accent text-accent-foreground rounded-md hover:bg-accent/80 transition-colors"
-                  >
-                    <Plus className="w-3 h-3" />
-                    Crear Tarea Personalizada
-                  </button>
                 </div>
-              )}
-            </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpen(false);
+                    onCreateTask();
+                  }}
+                  className="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-xs bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium"
+                >
+                  <Plus className="w-4 h-4" />
+                  Crear Tarea Personalizada
+                </button>
+              </div>
+            ) : (
+              <div className="text-muted-foreground">
+                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-muted flex items-center justify-center">
+                  <Plus className="w-6 h-6 text-muted-foreground" />
+                </div>
+                <p className="text-sm">{emptyText}</p>
+              </div>
+            )}
           </CommandEmpty>
           <CommandGroup className="max-h-64 overflow-auto">
             {options.map((option) => (
