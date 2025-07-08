@@ -202,6 +202,7 @@ export function NewAdminGeneratedTaskModal({
     const currentTemplate = templates?.find(t => t.id === selectedTemplateId);
     if (!currentTemplate) return "Seleccione una plantilla";
 
+    let description = currentTemplate.name_template;
     let fragments: string[] = [];
 
     parameters
@@ -218,10 +219,14 @@ export function NewAdminGeneratedTaskModal({
         const expr = param.expression_template || '{value}';
         const fragment = expr.replace('{value}', option.label);
 
+        // Reemplazar placeholder en name_template
+        const placeholder = `{{${param.name}}}`;
+        description = description.replace(placeholder, fragment);
+
         fragments.push(fragment);
       });
 
-    return `${currentTemplate.name_template.replace(/\./g, '')} ${fragments.join(' ')}.`.trim();
+    return description;
   };
 
   const handleSubmit = async (data: any) => {
