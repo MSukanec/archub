@@ -119,6 +119,13 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 8, 2025. Mobile menu height optimization and task creation unit field fixes - COMPLETED
+  • Modified mobile menu to use full screen height (h-screen) instead of 80vh with 20vh top margin
+  • Removed "Unidad" field from CreateGeneratedTaskUserModal as unit is now template-defined
+  • Added visual indicator showing template unit in create task modal (e.g., "Unidad definida por la plantilla: M2")
+  • Fixed editable quantity field in budget table with real-time save functionality via handleUpdateQuantity
+  • Users can now edit task quantities directly in budget table with automatic persistence
+  • Prepared project for deployment with optimized mobile UX
 - July 8, 2025. Fixed unit_id architecture and corrected task preview generation system - COMPLETED
   • Successfully moved unit_id from task_generated table to task_templates table as requested by user
   • Added "Paso 2: Unidad" section to TaskTemplateEditorModal with unit selector and save functionality  
