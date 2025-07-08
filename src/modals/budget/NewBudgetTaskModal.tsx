@@ -14,6 +14,7 @@ import { TaskSearchCombo } from "@/components/ui-custom/misc/TaskSearchCombo";
 import { Label } from "@/components/ui/label";
 import { useTaskSearch } from "@/hooks/use-task-search";
 import { useBudgetTasks } from "@/hooks/use-budget-tasks";
+import { useDebugTasks } from "@/hooks/use-debug-tasks";
 
 const budgetTaskSchema = z.object({
   task_id: z.string().min(1, "Debe seleccionar una tarea"),
@@ -44,6 +45,9 @@ export default function NewBudgetTaskModal({
   const { data: tasks = [], isLoading: tasksLoading } = useTaskSearch(searchQuery, organizationId, open);
   const budgetTasksHook = useBudgetTasks(budgetId);
   const { createBudgetTask, updateBudgetTask } = budgetTasksHook;
+  
+  // Hook de debug temporal
+  const { data: debugData } = useDebugTasks(organizationId);
 
   const form = useForm<BudgetTaskFormData>({
     resolver: zodResolver(budgetTaskSchema),

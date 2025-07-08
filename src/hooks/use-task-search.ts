@@ -15,14 +15,18 @@ export function useTaskSearch(searchTerm: string, organizationId: string, enable
   return useQuery({
     queryKey: ["task-search", searchTerm, organizationId],
     queryFn: async (): Promise<TaskSearchResult[]> => {
+      console.log("Task search query:", { searchTerm, organizationId, enabled });
+      
       if (!supabase) {
         throw new Error("Supabase client not initialized");
       }
 
       if (!searchTerm || searchTerm.length < 3) {
+        console.log("Search term too short or empty:", searchTerm);
         return [];
       }
 
+      console.log("Executing task search query...");
       const { data, error } = await supabase
         .from("task_generated_view")
         .select("*")
@@ -35,6 +39,7 @@ export function useTaskSearch(searchTerm: string, organizationId: string, enable
         throw error;
       }
 
+      console.log("Task search results:", data);
       return data || [];
     },
     enabled: enabled && !!supabase && !!organizationId && searchTerm.length >= 3
