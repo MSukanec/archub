@@ -75,32 +75,24 @@ export function useCreateGeneratedTask() {
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
       
-      // Step 1: Generate task code using RPC function
-      const { data: codeData, error: codeError } = await supabase
-        .rpc('archub_generate_task_code', {
-          template_id: payload.template_id
+      // Call RPC function that handles both code generation and task creation/verification
+      const { data: taskData, error: taskError } = await supabase
+        .rpc('task_generate_code', {
+          input_template_id: payload.template_id,
+          input_param_values: payload.param_values,
+          input_organization_id: payload.organization_id
         });
       
-      if (codeError) throw codeError;
-      if (!codeData) throw new Error('No se pudo generar el código de la tarea');
+      if (taskError) throw taskError;
+      if (!taskData || taskData.length === 0) throw new Error('No se pudo crear la tarea');
       
-      const generatedCode = codeData;
-      
-      // Step 2: Insert task with generated code
-      const { data, error } = await supabase
-        .from('task_generated')
-        .insert({
-          code: generatedCode,
-          template_id: payload.template_id,
-          param_values: payload.param_values,
-          is_public: false,
-          organization_id: payload.organization_id
-        })
-        .select()
-        .single();
-      
-      if (error) throw error;
-      return { new_task: data, generated_code: generatedCode };
+      // The function returns the task data directly
+      const taskResult = taskData[0];
+      return { 
+        new_task: taskResult, 
+        generated_code: taskResult.code,
+        is_existing: false // Since the function handles duplicates internally
+      };
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['task-generated'] });
