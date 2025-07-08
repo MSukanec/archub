@@ -171,25 +171,27 @@ export default function ConstructionBudgets() {
 
   // Inicializar selectedBudgetId con last_budget_id de preferences
   useEffect(() => {
-    if (userData?.preferences?.last_budget_id && budgets.length > 0 && !selectedBudgetId) {
-      const lastBudgetExists = budgets.some(budget => budget.id === userData.preferences.last_budget_id);
-      if (lastBudgetExists) {
-        setSelectedBudgetId(userData.preferences.last_budget_id);
-      } else if (budgets.length > 0) {
-        // Si el último presupuesto no existe, seleccionar el primero
+    if (budgets.length > 0 && !selectedBudgetId) {
+      if (userData?.preferences?.last_budget_id) {
+        const lastBudgetExists = budgets.some(budget => budget.id === userData.preferences.last_budget_id);
+        if (lastBudgetExists) {
+          setSelectedBudgetId(userData.preferences.last_budget_id);
+        } else {
+          // Si el último presupuesto no existe, seleccionar el primero
+          setSelectedBudgetId(budgets[0].id);
+          if (userData?.user?.id) {
+            updateBudgetPreferenceMutation.mutate(budgets[0].id);
+          }
+        }
+      } else {
+        // Si no hay last_budget_id, seleccionar el primero
         setSelectedBudgetId(budgets[0].id);
         if (userData?.user?.id) {
           updateBudgetPreferenceMutation.mutate(budgets[0].id);
         }
       }
-    } else if (budgets.length > 0 && !selectedBudgetId && !userData?.preferences?.last_budget_id) {
-      // Si no hay last_budget_id, seleccionar el primero
-      setSelectedBudgetId(budgets[0].id);
-      if (userData?.user?.id) {
-        updateBudgetPreferenceMutation.mutate(budgets[0].id);
-      }
     }
-  }, [userData?.preferences?.last_budget_id, budgets, selectedBudgetId, userData?.user?.id]);
+  }, [budgets, selectedBudgetId, userData?.preferences?.last_budget_id, userData?.user?.id]);
 
   // Filter and sort budgets
   const filteredBudgets = budgets

@@ -88,6 +88,8 @@ export function useBudgetTasks(budgetId: string) {
       const processedTasks = await Promise.all(
         (data || []).map(async (task: any) => {
           if (task.task?.display_name && task.task?.param_values) {
+            console.log('Processing task:', task.task.display_name, 'with params:', task.task.param_values);
+            
             // Obtener valores de parámetros
             const paramValueIds = Object.values(task.task.param_values);
             if (paramValueIds.length > 0) {
@@ -101,6 +103,8 @@ export function useBudgetTasks(budgetId: string) {
                 `)
                 .in('name', paramValueIds);
               
+              console.log('Parameter values fetched:', parameterValues);
+              
               if (!paramError && parameterValues) {
                 let processed = task.task.display_name;
                 
@@ -111,17 +115,21 @@ export function useBudgetTasks(budgetId: string) {
                   
                   const paramValue = parameterValues.find(pv => pv.name === paramValueId);
                   
+                  console.log(`Processing ${key}:`, paramValueId, 'found:', paramValue);
+                  
                   if (paramValue) {
                     let replacement = paramValue.task_parameters?.expression_template || paramValue.label;
                     
-                    if (replacement.includes('{value}')) {
+                    if (replacement && replacement.includes('{value}')) {
                       replacement = replacement.replace(/{value}/g, paramValue.label);
                     }
                     
+                    console.log(`Replacing ${placeholder} with:`, replacement);
                     processed = processed.replace(new RegExp(placeholder, 'g'), replacement);
                   }
                 });
                 
+                console.log('Final processed name:', processed);
                 // Actualizar display_name procesado
                 task.task.display_name = processed;
               }
