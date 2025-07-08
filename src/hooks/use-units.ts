@@ -11,9 +11,21 @@ export function useUnits() {
   return useQuery({
     queryKey: ['units'],
     queryFn: async () => {
-      // Return empty array since units table doesn't exist or has different structure
-      // This prevents the error and allows the modal to work
-      return [] as Unit[];
+      if (!supabase) {
+        throw new Error("Supabase client not initialized");
+      }
+
+      const { data, error } = await supabase
+        .from("units")
+        .select("*")
+        .order("name", { ascending: true });
+
+      if (error) {
+        console.error("Error fetching units:", error);
+        throw error;
+      }
+
+      return data || [];
     },
   });
 }

@@ -69,7 +69,12 @@ export function useBudgetTasks(budgetId: string) {
             template_id,
             param_values,
             is_public,
-            organization_id
+            organization_id,
+            unit_id,
+            units(
+              id,
+              name
+            )
           )
         `)
         .eq("budget_id", budgetId)

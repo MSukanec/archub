@@ -242,4 +242,8 @@ TABLA (VISTA) TASK_GENERATED_VIEW:
     "column_name": "display_name",
     "data_type": "text"
   }
+  {
+    "column_name": "unit_id",
+    "data_type": "uuid"
+  }
 ]

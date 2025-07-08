@@ -17,6 +17,7 @@ import { useTaskTemplates, useTaskTemplateParameters } from "@/hooks/use-task-te
 import { useCreateGeneratedTask, useUpdateGeneratedTask, useTaskMaterials, useCreateTaskMaterial, useDeleteTaskMaterial } from "@/hooks/use-generated-tasks";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMaterials } from "@/hooks/use-materials";
+import { useUnits } from "@/hooks/use-units";
 import { supabase } from "@/lib/supabase";
 import { generateTaskDescription, generatePreviewDescription } from "@/utils/taskDescriptionGenerator";
 import { queryClient } from "@/lib/queryClient";
@@ -42,7 +43,8 @@ interface NewAdminGeneratedTaskModalProps {
 }
 
 const formSchema = z.object({
-  template_id: z.string().min(1, "Debe seleccionar una plantilla")
+  template_id: z.string().min(1, "Debe seleccionar una plantilla"),
+  unit_id: z.string().optional()
 }).catchall(z.any());
 
 export function NewAdminGeneratedTaskModal({ 
@@ -63,6 +65,7 @@ export function NewAdminGeneratedTaskModal({
   
   const { data: userData } = useCurrentUser();
   const { data: templates, isLoading: templatesLoading } = useTaskTemplates();
+  const { data: units, isLoading: unitsLoading } = useUnits();
   
   // Debug logging for templates
   useEffect(() => {
@@ -124,6 +127,7 @@ export function NewAdminGeneratedTaskModal({
     resolver: zodResolver(formSchema),
     defaultValues: {
       template_id: "",
+      unit_id: "",
       ...paramValues
     },
     mode: "onChange"
@@ -475,6 +479,36 @@ export function NewAdminGeneratedTaskModal({
                                   {templates?.map((template) => (
                                     <SelectItem key={template.id} value={template.id}>
                                       {template.name_template || template.code}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* Campo de Unidad */}
+                        <FormField
+                          control={form.control}
+                          name="unit_id"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Unidad</FormLabel>
+                              <Select 
+                                onValueChange={field.onChange} 
+                                value={field.value}
+                                disabled={unitsLoading}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Seleccionar unidad..." />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {units?.map((unit) => (
+                                    <SelectItem key={unit.id} value={unit.id}>
+                                      {unit.name}
                                     </SelectItem>
                                   ))}
                                 </SelectContent>
