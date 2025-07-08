@@ -3,7 +3,6 @@ import { supabase } from "@/lib/supabase";
 
 export interface TaskTemplate {
   id: string;
-  name: string;
   code: string;
   name_template: string;
   category_id: string;
@@ -40,7 +39,7 @@ export function useTaskTemplates() {
       const { data, error } = await supabase
         .from('task_templates')
         .select('*')
-        .order('name');
+        .order('code');
       
       if (error) throw error;
       

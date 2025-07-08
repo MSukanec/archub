@@ -239,7 +239,7 @@ export function NewAdminGeneratedTaskModal({
         fragments.push(fragment);
       });
 
-    return `${currentTemplate.name} ${fragments.join(' ')}.`.trim();
+    return `${currentTemplate.name_template.replace(/\./g, '')} ${fragments.join(' ')}.`.trim();
   };
 
   const handleSubmit = async (data: any) => {
@@ -588,7 +588,7 @@ export function NewAdminGeneratedTaskModal({
                               <div className="p-3 bg-muted/20 rounded border text-sm">
                                 {(() => {
                                   const selectedTemplate = templates?.find(t => t.id === selectedTemplateId);
-                                  return selectedTemplate?.name_template || selectedTemplate?.name || "Vista previa no disponible";
+                                  return selectedTemplate?.name_template || "Vista previa no disponible";
                                 })()}
                               </div>
                             </div>

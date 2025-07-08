@@ -342,7 +342,6 @@ export default function TaskTemplateEditorModal({
         .from('task_templates')
         .insert({
           code: categoryCode,
-          name: `Plantilla de ${categoryName}`,
           name_template: `${categoryName}.`,
           category_id: categoryId
         })
@@ -457,7 +456,7 @@ export default function TaskTemplateEditorModal({
                         ✓ Plantilla Creada: {template.code}
                       </h3>
                       <p className="text-xs text-muted-foreground">
-                        Nombre: {template.name} | Parámetros: {templateParameters.length}
+                        Categoría: {categoryName} | Parámetros: {templateParameters.length}
                       </p>
                     </div>
                     <Button

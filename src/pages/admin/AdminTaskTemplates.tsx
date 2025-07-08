@@ -30,14 +30,14 @@ export default function AdminTaskTemplates() {
   // Filter and sort templates
   const filteredAndSortedTemplates = templates
     .filter(template => 
-      template.name.toLowerCase().includes(searchValue.toLowerCase()) ||
       template.code.toLowerCase().includes(searchValue.toLowerCase()) ||
+      template.name_template.toLowerCase().includes(searchValue.toLowerCase()) ||
       template.task_categories?.name.toLowerCase().includes(searchValue.toLowerCase())
     )
     .sort((a, b) => {
       switch (sortBy) {
-        case 'name':
-          return a.name.localeCompare(b.name)
+        case 'name_template':
+          return a.name_template.localeCompare(b.name_template)
         case 'code':
           return a.code.localeCompare(b.code)
         case 'category':
@@ -120,13 +120,13 @@ export default function AdminTaskTemplates() {
       )
     },
     {
-      key: 'name',
-      label: 'Nombre',
+      key: 'name_template',
+      label: 'Plantilla',
       width: '25%',
       render: (template: TaskTemplate) => (
         <div className="flex items-center gap-2">
           <FileCode className="w-4 h-4 text-muted-foreground" />
-          <span className="font-medium">{template.name}</span>
+          <span className="font-medium">{template.name_template}</span>
         </div>
       )
     },
@@ -141,14 +141,14 @@ export default function AdminTaskTemplates() {
       )
     },
     {
-      key: 'name_template',
-      label: 'Plantilla',
-      width: '20%',
+      key: 'code_prefix',
+      label: 'Prefijo',
+      width: '15%',
       render: (template: TaskTemplate) => (
         <div className="flex items-center gap-2">
           <Code className="w-4 h-4 text-muted-foreground" />
-          <span className="text-xs font-mono bg-muted px-2 py-1 rounded truncate max-w-[200px]">
-            {template.name_template}
+          <span className="text-xs font-mono bg-muted px-2 py-1 rounded">
+            {template.code_prefix || template.code}
           </span>
         </div>
       )
@@ -200,7 +200,7 @@ export default function AdminTaskTemplates() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="created_at">Fecha de creación</SelectItem>
-            <SelectItem value="name">Nombre</SelectItem>
+            <SelectItem value="name_template">Plantilla</SelectItem>
             <SelectItem value="code">Código</SelectItem>
             <SelectItem value="category">Categoría</SelectItem>
           </SelectContent>
