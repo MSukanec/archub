@@ -285,11 +285,12 @@ export default function TaskTemplateEditorModal({
           position,
           created_at,
           updated_at,
-          task_parameters!parameter_id (
+          task_parameters!inner (
             id,
             name,
             label,
-            type
+            type,
+            expression_template
           )
         `)
         .eq('template_id', template.id)
