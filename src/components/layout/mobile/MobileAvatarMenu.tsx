@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { X, ChevronDown, UserCircle } from "lucide-react";
+import { X, ChevronDown, UserCircle, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -98,7 +98,7 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
 
   const menuContent = (
     <div className="fixed inset-0" style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', zIndex: 9998 }}>
-      <div className="flex flex-col w-full h-screen" style={{ backgroundColor: 'var(--menues-bg)' }}>
+      <div className="flex flex-col w-full mt-16 rounded-t-lg" style={{ backgroundColor: 'var(--menues-bg)', maxHeight: 'calc(100vh - 4rem)' }}>
         {/* Header */}
         <div className="h-14 flex items-center justify-between px-4 border-b" style={{ borderColor: 'var(--menues-border)' }}>
           <h1 className="text-lg font-semibold" style={{ color: 'var(--menues-fg)' }}>
@@ -113,7 +113,7 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="p-4 space-y-4">
           {/* Organization Selector */}
           <div className="space-y-2">
             <label className="text-sm font-medium" style={{ color: 'var(--menues-fg)' }}>
@@ -202,18 +202,32 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
             </div>
           </div>
 
-          {/* Profile Button */}
+          {/* User Profile Button - Full width */}
           <div className="pt-4">
             <button
               onClick={() => handleNavigation('/profile')}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-[var(--menues-hover-bg)]"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
               style={{ 
                 color: 'var(--menues-fg)',
-                backgroundColor: 'transparent'
+                backgroundColor: 'transparent',
+                border: '1px solid var(--menues-border)'
               }}
             >
-              <UserCircle className="h-5 w-5" />
-              <span className="text-sm font-medium">Mi Perfil</span>
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={userData?.user?.avatar_url || ''} />
+                <AvatarFallback style={{ backgroundColor: 'var(--accent)', color: 'var(--accent-foreground)' }}>
+                  {userData?.user?.full_name?.charAt(0) || userData?.user?.email?.charAt(0) || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 text-left">
+                <div className="font-medium" style={{ color: 'var(--menues-fg)' }}>
+                  {userData?.user?.full_name || 'Usuario'}
+                </div>
+                <div className="text-xs opacity-70" style={{ color: 'var(--menues-fg)' }}>
+                  Mi Perfil
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 opacity-50" />
             </button>
           </div>
         </div>
