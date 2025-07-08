@@ -332,9 +332,6 @@ export default function ConstructionBudgets() {
                     </td>
                     <td className="p-2">
                       <div className="font-medium text-sm">{task.task?.code || 'Sin código'}</div>
-                      {task.task?.name && (
-                        <div className="text-xs text-muted-foreground">{task.task.name}</div>
-                      )}
                     </td>
                     <td className="p-2 text-sm">
                       Unidad

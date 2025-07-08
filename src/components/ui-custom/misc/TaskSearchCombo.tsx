@@ -67,13 +67,18 @@ export function TaskSearchCombo({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0 z-[9999]" align="start">
-        <Command>
+      <PopoverContent 
+        className="p-0 z-[9999]" 
+        align="start"
+        style={{ width: 'var(--radix-popover-trigger-width)' }}
+      >
+        <Command className="border border-[var(--input-border)] bg-[var(--input-bg)] rounded-md">
           <CommandInput 
             placeholder={searchPlaceholder} 
             onValueChange={onSearchChange}
+            className="text-xs leading-tight py-2 px-3 border-0 bg-transparent placeholder:text-[var(--input-placeholder)]"
           />
-          <CommandEmpty>{emptyText}</CommandEmpty>
+          <CommandEmpty className="text-xs py-2 px-3 text-[var(--input-placeholder)]">{emptyText}</CommandEmpty>
           <CommandGroup className="max-h-64 overflow-auto">
             {options.map((option) => (
               <CommandItem
@@ -83,6 +88,7 @@ export function TaskSearchCombo({
                   onValueChange(currentValue === value ? "" : currentValue);
                   setOpen(false);
                 }}
+                className="text-xs py-2 px-3 cursor-pointer hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]"
               >
                 <Check
                   className={cn(

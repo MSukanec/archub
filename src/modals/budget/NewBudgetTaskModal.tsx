@@ -60,14 +60,14 @@ export default function NewBudgetTaskModal({
   // Filtrar tareas basado en búsqueda (mínimo 3 caracteres)
   const filteredTasks = searchQuery.length >= 3 
     ? tasks.filter(task => 
-        task.name?.toLowerCase().includes(searchQuery.toLowerCase())
+        task.code?.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : [];
 
   // Preparar opciones para CustomComboBox
   const taskOptions = filteredTasks.map(task => ({
     value: task.id,
-    label: task.name || 'Sin nombre'
+    label: task.code || 'Sin código'
   }));
 
   // Precargar datos en modo edición
