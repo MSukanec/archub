@@ -15,12 +15,13 @@ export interface BudgetTask {
   organization_id: string;
   created_at: string;
   updated_at: string;
-  // Datos de la tarea relacionada (task_generated)
-  task: {
+  // Datos de la tarea relacionada (task_tasks)
+  task_tasks: {
     id: string;
     code: string;
     template_id: string | null;
     param_values: any;
+    name: string;
     is_public: boolean;
     organization_id: string;
   };
@@ -63,15 +64,14 @@ export function useBudgetTasks(budgetId: string) {
         .from("budget_tasks")
         .select(`
           *,
-          task:task_generated_view(
+          task_tasks(
             id,
             code,
             template_id,
             param_values,
-            organization_id,
-            unit_id,
-            rubro_name,
-            display_name
+            name,
+            is_public,
+            organization_id
           )
         `)
         .eq("budget_id", budgetId)
