@@ -119,6 +119,14 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 8, 2025. Complete task description generation system and cache invalidation implementation - COMPLETED
+  • Fixed useAllTaskParameterValues hook to properly JOIN with task_parameters table to access expression_template column
+  • Task table now correctly displays full descriptions like "Muros Simples de ladrillo cerámico hueco de 12x18x33 con mortero de asiento de cemento de albañilería" 
+  • Eliminated F5 refresh requirement by adding proper cache invalidation for 'all-task-parameter-values' query key
+  • Updated all parameter CRUD operations (create, update, delete) to invalidate both parameter admin cache and task generation cache
+  • Parameter option modifications now automatically refresh task generation display without page reload
+  • Modal and table generation now use identical logic ensuring consistent task name generation throughout system
+  • Removed all debugging logs for production-ready clean code quality
 - July 8, 2025. Task parameter modal cleanup: eliminated Campo Obligatorio field and consolidated all parameter fields into single view - COMPLETED
   • Removed "Campo Obligatorio" field from parameter editing modal as requested by user
   • Consolidated all form fields into single view without accordion separation for cleaner interface

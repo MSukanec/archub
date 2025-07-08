@@ -177,15 +177,18 @@ export function useCreateTaskParameter() {
       return parameter;
     },
     onSuccess: () => {
-      // Invalidate all related queries
+      // Invalidate all related queries including the new useAllTaskParameterValues hook
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin-clean'] });
       queryClient.removeQueries({ queryKey: ['task-parameters-admin-clean'] });
       queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
       queryClient.removeQueries({ queryKey: ['task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
+      queryClient.removeQueries({ queryKey: ['all-task-parameter-values'] });
       
       // Force refetch immediately
       setTimeout(() => {
         queryClient.refetchQueries({ queryKey: ['task-parameters-admin-clean'] });
+        queryClient.refetchQueries({ queryKey: ['all-task-parameter-values'] });
       }, 100);
       
       toast({
@@ -228,15 +231,18 @@ export function useUpdateTaskParameter() {
       return parameter;
     },
     onSuccess: () => {
-      // Invalidate all related queries
+      // Invalidate all related queries including the new useAllTaskParameterValues hook
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin-clean'] });
       queryClient.removeQueries({ queryKey: ['task-parameters-admin-clean'] });
       queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
       queryClient.removeQueries({ queryKey: ['task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
+      queryClient.removeQueries({ queryKey: ['all-task-parameter-values'] });
       
       // Force refetch immediately
       setTimeout(() => {
         queryClient.refetchQueries({ queryKey: ['task-parameters-admin-clean'] });
+        queryClient.refetchQueries({ queryKey: ['all-task-parameter-values'] });
       }, 100);
       
       toast({
@@ -274,6 +280,7 @@ export function useDeleteTaskParameter() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin-clean'] });
+      queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
       toast({
         title: 'Parámetro eliminado',
         description: 'El parámetro y sus opciones se han eliminado correctamente.',
@@ -312,6 +319,7 @@ export function useCreateTaskParameterOption() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin-clean'] });
+      queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
       toast({
         title: 'Opción creada',
         description: 'La opción se ha creado correctamente.',
@@ -351,6 +359,7 @@ export function useUpdateTaskParameterOption() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin-clean'] });
+      queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
       toast({
         title: 'Opción actualizada',
         description: 'La opción se ha actualizado correctamente.',
@@ -383,6 +392,7 @@ export function useDeleteTaskParameterOption() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin-clean'] });
+      queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
       toast({
         title: 'Opción eliminada',
         description: 'La opción se ha eliminado correctamente.',
@@ -436,15 +446,11 @@ export function useAllTaskParameterValues() {
 
       if (error) throw error;
       
-      console.log('useAllTaskParameterValues - Raw data from query:', data);
-      
       // Flatten the data structure to include expression_template at the top level
       const flattenedData = data?.map(item => ({
         ...item,
         expression_template: item.task_parameters?.expression_template || '{value}'
       })) || [];
-      
-      console.log('useAllTaskParameterValues - Flattened data:', flattenedData);
       
       return flattenedData;
     },
