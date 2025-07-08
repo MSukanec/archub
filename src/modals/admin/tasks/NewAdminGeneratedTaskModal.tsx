@@ -233,6 +233,8 @@ export function NewAdminGeneratedTaskModal({
         if (result.new_task?.id) {
           // Capturar el ID de la tarea creada para habilitar la gestión de materiales
           setCreatedTaskId(result.new_task.id);
+          // Cerrar el modal después de una creación exitosa
+          onClose();
         } else {
           onClose();
         }

@@ -121,13 +121,6 @@ export function useCreateGeneratedTask() {
           variant: "destructive"
         });
       }
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Error al crear la tarea generada",
-        variant: "destructive"
-      });
     }
   });
 }
