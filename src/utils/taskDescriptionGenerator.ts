@@ -1,5 +1,6 @@
 /**
  * Utility function to generate task descriptions for preview
+ * Uses expression_template from parameters to format the replacement text
  */
 export function generatePreviewDescription(
   nameTemplate: string,
@@ -11,7 +12,7 @@ export function generatePreviewDescription(
 
   let result = nameTemplate;
 
-  // Replace {{parameter}} placeholders
+  // Replace {{parameter}} placeholders with expression_template formatted values
   (parameters || []).forEach(param => {
     const placeholder = `{{${param.name}}}`;
     if (result.includes(placeholder)) {
@@ -21,10 +22,17 @@ export function generatePreviewDescription(
         let replacementText = '';
         
         if (param.type === 'select') {
-          // Find the option and use its label
+          // Find the option and use its label with expression_template
           const options = parameterOptions[param.id] || [];
           const selectedOption = options.find(opt => opt.value === value);
-          replacementText = selectedOption?.label || value;
+          const optionLabel = selectedOption?.label || value;
+          
+          // Use expression_template if available (e.g., "de {value}" or "con mortero de asiento de {value}")
+          if (param.expression_template) {
+            replacementText = param.expression_template.replace('{value}', optionLabel);
+          } else {
+            replacementText = optionLabel;
+          }
         } else if (param.type === 'boolean') {
           replacementText = value ? 'Sí' : 'No';
         } else {
