@@ -159,8 +159,6 @@ export function NewInstallmentModal({
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase client not initialized')
       
-      console.log('Fetching contacts for organization:', organizationId)
-      
       const { data, error } = await supabase
         .from('contacts')
         .select(`
@@ -169,17 +167,11 @@ export function NewInstallmentModal({
           last_name,
           company_name,
           email,
-          avatar_url,
           full_name
         `)
         .eq('organization_id', organizationId)
 
-      if (error) {
-        console.error('Error fetching contacts:', error)
-        throw error
-      }
-      
-      console.log('Contacts loaded:', data)
+      if (error) throw error
       return data || []
     },
     enabled: !!organizationId && !!supabase
@@ -425,10 +417,7 @@ export function NewInstallmentModal({
 
             <div className="space-y-2">
               <Label>Contacto *</Label>
-              {/* Debug info */}
-              {organizationContacts && organizationContacts.length === 0 && (
-                <p className="text-xs text-muted-foreground">No hay contactos en esta organización</p>
-              )}
+
               <Select 
                 value={form.watch('contact_id')} 
                 onValueChange={(value) => form.setValue('contact_id', value)}
@@ -454,7 +443,6 @@ export function NewInstallmentModal({
                       <SelectItem key={`contact-${contact.id || index}`} value={contact.id || ''}>
                         <div className="flex items-center gap-2">
                           <Avatar className="h-6 w-6">
-                            <AvatarImage src={contact.avatar_url || ''} />
                             <AvatarFallback className="text-xs">{initials}</AvatarFallback>
                           </Avatar>
                           <span>{displayName}</span>
