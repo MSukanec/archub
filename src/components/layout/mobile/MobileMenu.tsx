@@ -131,21 +131,23 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
   const handleNavigationWithAnimation = (href: string, newContext?: string, direction?: 'left' | 'right') => {
     if (newContext && direction) {
+      console.log('Starting animation for context:', newContext);
       // Trigger slide-down animation
       setIsContentAnimating(true);
       
       setTimeout(() => {
+        console.log('Changing context to:', newContext);
         setSidebarContext(newContext as any);
+        navigate(href);
         // Trigger slide-up animation
         setTimeout(() => {
+          console.log('Ending animation');
           setIsContentAnimating(false);
-        }, 30);
-      }, 150);
+        }, 50);
+      }, 180);
       
-      // Solo navegar, NO cerrar el menú para cambios de contexto
-      navigate(href);
       // Scroll to top on mobile navigation
-      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 200);
+      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 250);
     } else {
       // Para navegación normal (sin cambio de contexto), cerrar menú
       if (newContext) {
@@ -343,7 +345,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
           "space-y-0 transition-all duration-300 ease-out",
           isAnimating && animationDirection === 'left' && "transform translate-x-full opacity-0",
           isAnimating && animationDirection === 'right' && "transform -translate-x-full opacity-0",
-          isContentAnimating && "transform translate-y-6 opacity-0 scale-95",
+          isContentAnimating && "transform translate-y-12 opacity-0 scale-90",
           !isAnimating && !isContentAnimating && "transform translate-x-0 translate-y-0 opacity-100 scale-100"
         )}>
           {/* Context Title */}
