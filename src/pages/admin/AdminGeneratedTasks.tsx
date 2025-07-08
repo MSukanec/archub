@@ -56,11 +56,15 @@ export default function AdminGeneratedTasks() {
 
   // Helper function to generate dynamic task name
   const generateTaskName = (task: GeneratedTask): string => {
+    console.log('Table generateTaskName - Called with task:', task)
+    console.log('Table generateTaskName - Available parameterValues:', parameterValues)
+    
     const template = templates.find(t => t.id === task.template_id)
     if (!template) return 'Sin plantilla'
 
     // Start with the template
     let result = template.name_template
+    console.log('Table generateTaskName - Template name_template:', result)
 
     // Replace placeholders with proper expression template values
     if (task.param_values) {
@@ -68,10 +72,16 @@ export default function AdminGeneratedTasks() {
         // Find the parameter value option by name (value stored in param_values)
         const parameterOption = parameterValues.find(pv => pv.name === paramValue)
         
+        console.log('Table generateTaskName - Looking for param:', paramName, 'value:', paramValue)
+        console.log('Table generateTaskName - Found option:', parameterOption)
+        
         if (parameterOption) {
           // Use the expression template to format the value
           const expressionTemplate = parameterOption.expression_template || '{value}'
           const fragment = expressionTemplate.replace('{value}', parameterOption.label)
+          
+          console.log('Table generateTaskName - Using expression_template:', expressionTemplate)
+          console.log('Table generateTaskName - Generated fragment:', fragment)
           
           // Replace placeholder in name_template
           const placeholder = `{{${paramName}}}`
