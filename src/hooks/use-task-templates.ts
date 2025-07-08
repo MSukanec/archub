@@ -90,6 +90,11 @@ export function useTaskTemplateParameters(templateId: string | null) {
         expression_template: item.expression_template || ''
       })) || [];
       
+      console.log('Parameters with expression_template:', parameters.map(p => ({
+        name: p.name,
+        expression_template: p.expression_template
+      })));
+      
       console.log('Transformed real parameters:', parameters);
       return parameters as TaskTemplateParameter[];
     },
