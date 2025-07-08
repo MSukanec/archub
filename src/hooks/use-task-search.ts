@@ -15,7 +15,12 @@ async function processDisplayName(displayName: string, paramValues: any): Promis
   
   const { data: parameterValues, error } = await supabase
     .from('task_parameter_values')
-    .select('name, label, expression_template')
+    .select(`
+      name, 
+      label,
+      parameter_id,
+      task_parameters!inner(expression_template)
+    `)
     .in('name', paramValueIds);
   
   if (error) {
@@ -35,7 +40,7 @@ async function processDisplayName(displayName: string, paramValues: any): Promis
     
     if (paramValue) {
       // Usar expression_template si existe, sino usar label
-      const replacement = paramValue.expression_template || paramValue.label;
+      const replacement = paramValue.task_parameters?.expression_template || paramValue.label;
       processed = processed.replace(new RegExp(placeholder, 'g'), replacement);
     }
   });

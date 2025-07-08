@@ -210,3 +210,36 @@ TABLA TASK_GENERATED:
     "data_type": "text"
   }
 ]
+
+TABLA (VISTA) TASK_GENERATED_VIEW:
+
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "code",
+    "data_type": "text"
+  },
+  {
+    "column_name": "template_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "param_values",
+    "data_type": "jsonb"
+  },
+  {
+    "column_name": "organization_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "display_name",
+    "data_type": "text"
+  }
+]
