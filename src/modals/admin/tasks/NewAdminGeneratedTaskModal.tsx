@@ -62,6 +62,11 @@ export function NewAdminGeneratedTaskModal({
   
   const { data: userData } = useCurrentUser();
   const { data: templates, isLoading: templatesLoading } = useTaskTemplates();
+  
+  // Debug logging for templates
+  useEffect(() => {
+    console.log('Templates state changed:', { templates, templatesLoading });
+  }, [templates, templatesLoading]);
   const { data: parameters, isLoading: parametersLoading, refetch: refetchParameters } = useTaskTemplateParameters(selectedTemplateId || null);
   const { data: materials } = useMaterials();
   const { data: taskMaterials } = useTaskMaterials(createdTaskId || generatedTask?.id || null);
@@ -522,7 +527,7 @@ export function NewAdminGeneratedTaskModal({
                                 <SelectContent>
                                   {templates?.map((template) => (
                                     <SelectItem key={template.id} value={template.id}>
-                                      {template.name}
+                                      {template.name_template || template.code}
                                     </SelectItem>
                                   ))}
                                 </SelectContent>

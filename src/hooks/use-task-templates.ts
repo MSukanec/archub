@@ -41,8 +41,12 @@ export function useTaskTemplates() {
         .select('*')
         .order('code');
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching templates:', error);
+        throw error;
+      }
       
+      console.log('Templates fetched from DB:', data);
       return data as TaskTemplate[];
     }
   });
