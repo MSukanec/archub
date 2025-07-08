@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ChevronDown, Plus, Filter, X, Search, Building, Folder, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +22,8 @@ import { NewOrganizationModal } from "@/modals/organization/NewOrganizationModal
 import { NewProjectModal } from "@/modals/project/NewProjectModal";
 import { MobileMenu } from "../mobile/MobileMenu";
 import { useMobileMenuStore } from "../mobile/useMobileMenuStore";
+import { MobileAvatarMenu } from "../mobile/MobileAvatarMenu";
+import { useMobileAvatarMenuStore } from "../mobile/useMobileAvatarMenuStore";
 import { useMobile } from "@/hooks/use-mobile";
 
 interface HeaderProps {
@@ -53,6 +56,7 @@ export function Header({
   const [showNewProjectModal, setShowNewProjectModal] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { isOpen: isMobileMenuOpen, openMenu, closeMenu } = useMobileMenuStore();
+  const { isOpen: isMobileAvatarMenuOpen, openMenu: openAvatarMenu, closeMenu: closeAvatarMenu } = useMobileAvatarMenuStore();
 
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
@@ -148,8 +152,25 @@ export function Header({
           <span className="text-base font-bold leading-none text-[var(--menues-fg)]">A</span>
         </div>
 
-        {/* Mobile Title - visible only on mobile, positioned left */}
+        {/* Mobile Avatar Button - visible only on mobile, positioned left */}
         <div className="md:hidden pl-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={openAvatarMenu}
+            className="h-8 w-8 p-0 hover:bg-transparent"
+          >
+            <Avatar className="h-7 w-7">
+              <AvatarImage src={userData?.user?.avatar_url || ""} />
+              <AvatarFallback className="text-xs bg-[var(--accent)] text-[var(--accent-foreground)]">
+                {userData?.user_data?.first_name?.charAt(0) || userData?.user?.full_name?.charAt(0) || 'U'}
+              </AvatarFallback>
+            </Avatar>
+          </Button>
+        </div>
+
+        {/* Mobile Title - visible only on mobile, positioned center */}
+        <div className="md:hidden absolute left-1/2 transform -translate-x-1/2">
           <h1 className="text-lg font-semibold text-[var(--menues-fg)]">
             {title || 'Archub'}
           </h1>
@@ -499,6 +520,9 @@ export function Header({
 
     {/* Mobile Menu */}
     {isMobileMenuOpen && <MobileMenu onClose={closeMenu} isOpen={isMobileMenuOpen} />}
+    
+    {/* Mobile Avatar Menu */}
+    {isMobileAvatarMenuOpen && <MobileAvatarMenu onClose={closeAvatarMenu} isOpen={isMobileAvatarMenuOpen} />}
     </>
   );
 }
