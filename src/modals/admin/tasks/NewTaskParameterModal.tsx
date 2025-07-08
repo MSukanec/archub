@@ -18,7 +18,7 @@ import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeade
 import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
 import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter';
 
-import { useCreateTaskParameter, useUpdateTaskParameter, TaskParameter, useTaskParameterOptionGroups, useCreateTaskParameterOptionGroup, useDeleteTaskParameterOptionGroup, useUpdateTaskParameterOptionGroup } from '@/hooks/use-task-parameters-admin';
+import { useCreateTaskParameter, useUpdateTaskParameter, TaskParameter, useTaskParameterOptionGroups, useCreateTaskParameterOptionGroup, useDeleteTaskParameterOptionGroup, useUpdateTaskParameterOptionGroup, useTaskSubcategories } from '@/hooks/use-task-parameters-admin';
 import { TaskParameterGroupAssignmentModal } from './TaskParameterGroupAssignmentModal';
 import { useUnits } from '@/hooks/use-units';
 
@@ -51,7 +51,7 @@ export function NewTaskParameterModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<any>(null);
-  const [newGroupName, setNewGroupName] = useState('');
+  const [selectedSubcategoryId, setSelectedSubcategoryId] = useState('');
   const [isCreatingGroup, setIsCreatingGroup] = useState(false);
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [editingGroupName, setEditingGroupName] = useState('');
@@ -70,6 +70,9 @@ export function NewTaskParameterModal({
   console.log('Loading groups for parameter:', { parameter, parameterId });
   const { data: optionGroups, isLoading: isLoadingGroups } = useTaskParameterOptionGroups(parameterId);
   
+  // Load subcategories for group creation
+  const { data: subcategories = [], isLoading: subcategoriesLoading } = useTaskSubcategories();
+  
   const form = useForm<TaskParameterFormData>({
     resolver: zodResolver(taskParameterSchema),
     defaultValues: {
@@ -85,16 +88,19 @@ export function NewTaskParameterModal({
 
   // Functions for inline group creation
   const handleCreateGroup = async () => {
-    if (!newGroupName.trim() || !parameter?.parameter_id) return;
+    if (!selectedSubcategoryId || !parameter?.parameter_id) return;
+    
+    const selectedSubcategory = subcategories.find(cat => cat.id === selectedSubcategoryId);
+    if (!selectedSubcategory) return;
     
     setIsCreatingGroup(true);
     try {
       await createGroupMutation.mutateAsync({
         parameter_id: parameter.parameter_id,
-        name: newGroupName.toLowerCase().replace(/\s+/g, '-'),
-        label: newGroupName,
+        name: selectedSubcategory.name,
+        category_id: selectedSubcategory.id,
       });
-      setNewGroupName('');
+      setSelectedSubcategoryId('');
     } catch (error) {
       console.error('Error creating group:', error);
     } finally {
@@ -112,17 +118,20 @@ export function NewTaskParameterModal({
 
   const handleEditGroup = (group: any) => {
     setEditingGroupId(group.id);
-    setEditingGroupName(group.name || group.label);
+    setEditingGroupName(group.category_id || '');
   };
 
   const handleSaveGroupEdit = async () => {
-    if (!editingGroupId || !editingGroupName.trim()) return;
+    if (!editingGroupId || !editingGroupName) return;
+    
+    const selectedSubcategory = subcategories.find(cat => cat.id === editingGroupName);
+    if (!selectedSubcategory) return;
     
     try {
       await updateGroupMutation.mutateAsync({
         id: editingGroupId,
-        name: editingGroupName.toLowerCase().replace(/\s+/g, '-'),
-        label: editingGroupName,
+        name: selectedSubcategory.name,
+        category_id: selectedSubcategory.id,
       });
       setEditingGroupId(null);
       setEditingGroupName('');
@@ -381,23 +390,29 @@ export function NewTaskParameterModal({
                             {/* Inline group creation */}
                             {parameter && (
                               <div className="flex gap-2">
-                                <Input
-                                  placeholder="Nombre del nuevo grupo..."
-                                  value={newGroupName}
-                                  onChange={(e) => setNewGroupName(e.target.value)}
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                      e.preventDefault();
-                                      handleCreateGroup();
-                                    }
-                                  }}
-                                  className="flex-1"
-                                />
+                                <Select value={selectedSubcategoryId} onValueChange={setSelectedSubcategoryId}>
+                                  <SelectTrigger className="flex-1">
+                                    <SelectValue placeholder="Seleccionar subcategoría..." />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {subcategoriesLoading ? (
+                                      <SelectItem value="loading" disabled>Cargando...</SelectItem>
+                                    ) : subcategories.length > 0 ? (
+                                      subcategories.map((subcategory) => (
+                                        <SelectItem key={subcategory.id} value={subcategory.id}>
+                                          {subcategory.name} - {subcategory.label || subcategory.description}
+                                        </SelectItem>
+                                      ))
+                                    ) : (
+                                      <SelectItem value="empty" disabled>No hay subcategorías disponibles</SelectItem>
+                                    )}
+                                  </SelectContent>
+                                </Select>
                                 <Button
                                   type="button"
                                   size="sm"
                                   onClick={handleCreateGroup}
-                                  disabled={!newGroupName.trim() || isCreatingGroup}
+                                  disabled={!selectedSubcategoryId || isCreatingGroup}
                                   className="h-10"
                                 >
                                   {isCreatingGroup ? (
@@ -424,25 +439,23 @@ export function NewTaskParameterModal({
                                     <div className="flex-1">
                                       {editingGroupId === group.id ? (
                                         <div className="flex gap-2">
-                                          <Input
-                                            value={editingGroupName}
-                                            onChange={(e) => setEditingGroupName(e.target.value)}
-                                            onKeyDown={(e) => {
-                                              if (e.key === 'Enter') {
-                                                e.preventDefault();
-                                                handleSaveGroupEdit();
-                                              } else if (e.key === 'Escape') {
-                                                handleCancelGroupEdit();
-                                              }
-                                            }}
-                                            className="text-sm"
-                                            autoFocus
-                                          />
+                                          <Select value={editingGroupName} onValueChange={setEditingGroupName}>
+                                            <SelectTrigger className="text-sm flex-1">
+                                              <SelectValue placeholder="Seleccionar subcategoría..." />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                              {subcategories.map((subcategory) => (
+                                                <SelectItem key={subcategory.id} value={subcategory.id}>
+                                                  {subcategory.name} - {subcategory.label || subcategory.description}
+                                                </SelectItem>
+                                              ))}
+                                            </SelectContent>
+                                          </Select>
                                           <Button
                                             type="button"
                                             size="sm"
                                             onClick={handleSaveGroupEdit}
-                                            disabled={!editingGroupName.trim()}
+                                            disabled={!editingGroupName}
                                           >
                                             ✓
                                           </Button>
@@ -457,8 +470,15 @@ export function NewTaskParameterModal({
                                         </div>
                                       ) : (
                                         <div>
-                                          <p className="text-sm font-medium">{group.label || group.name}</p>
-                                          <p className="text-xs text-muted-foreground">{group.name}</p>
+                                          <p className="text-sm font-medium">{group.name}</p>
+                                          <p className="text-xs text-muted-foreground">
+                                            {group.category_id ? 
+                                              subcategories.find(cat => cat.id === group.category_id)?.label || 
+                                              subcategories.find(cat => cat.id === group.category_id)?.description || 
+                                              'Categoría no encontrada' 
+                                              : 'Sin categoría asignada'
+                                            }
+                                          </p>
                                         </div>
                                       )}
                                     </div>

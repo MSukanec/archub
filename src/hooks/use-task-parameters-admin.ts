@@ -2,6 +2,23 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 
+// Hook para obtener subcategorías de tareas (las de 3 letras)
+export function useTaskSubcategories() {
+  return useQuery({
+    queryKey: ['task-subcategories'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('task_categories')
+        .select('*')
+        .eq('length(name)', 3) // Solo las de 3 letras (subcategorías)
+        .order('name');
+
+      if (error) throw error;
+      return data || [];
+    },
+  });
+}
+
 export interface TaskParameter {
   id: string;
   template_id: string;
@@ -461,7 +478,7 @@ export function useCreateTaskParameterOptionGroup() {
     mutationFn: async (data: {
       parameter_id: string;
       name: string;
-      label: string;
+      category_id?: string;
       position?: number;
     }) => {
       const { data: result, error } = await supabase
@@ -537,13 +554,13 @@ export function useUpdateTaskParameterOptionGroup() {
     mutationFn: async (data: {
       id: string;
       name: string;
-      label: string;
+      category_id?: string;
     }) => {
       const { data: result, error } = await supabase
         .from('task_parameter_option_groups')
         .update({
           name: data.name,
-          label: data.label,
+          category_id: data.category_id,
         })
         .eq('id', data.id)
         .select()
