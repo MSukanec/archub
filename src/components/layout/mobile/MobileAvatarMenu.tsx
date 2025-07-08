@@ -98,13 +98,13 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
   const menuContent = (
     <div className="fixed inset-0" style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', zIndex: 9998 }} onClick={onClose}>
       <div 
-        className="fixed bottom-0 left-0 right-0 rounded-t-lg p-4 space-y-4" 
+        className="fixed bottom-0 left-0 right-0 rounded-t-lg p-3 space-y-3" 
         style={{ backgroundColor: 'var(--menues-bg)' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Organization Selector */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium" style={{ color: 'var(--menues-fg)' }}>
+        <div className="space-y-1">
+          <label className="text-xs font-medium" style={{ color: 'var(--menues-fg)' }}>
             Organización
           </label>
           <div className="relative">
@@ -147,8 +147,8 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
         </div>
 
         {/* Project Selector */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium" style={{ color: 'var(--menues-fg)' }}>
+        <div className="space-y-1">
+          <label className="text-xs font-medium" style={{ color: 'var(--menues-fg)' }}>
             Proyecto
           </label>
           <div className="relative">
@@ -191,24 +191,24 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
         </div>
 
         {/* User Profile Button - Full width */}
-        <div className="pt-4">
+        <div className="pt-2">
           <button
             onClick={() => handleNavigation('/profile')}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
             style={{ 
               color: 'var(--menues-fg)',
               backgroundColor: 'transparent',
               border: '1px solid var(--menues-border)'
             }}
           >
-            <Avatar className="h-10 w-10">
+            <Avatar className="h-8 w-8">
               <AvatarImage src={userData?.user?.avatar_url || ''} />
               <AvatarFallback style={{ backgroundColor: 'var(--accent)', color: 'var(--accent-foreground)' }}>
                 {userData?.user?.full_name?.charAt(0) || userData?.user?.email?.charAt(0) || 'U'}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 text-left">
-              <div className="font-medium" style={{ color: 'var(--menues-fg)' }}>
+              <div className="font-medium text-sm" style={{ color: 'var(--menues-fg)' }}>
                 {userData?.user?.full_name || 'Usuario'}
               </div>
               <div className="text-xs opacity-70" style={{ color: 'var(--menues-fg)' }}>

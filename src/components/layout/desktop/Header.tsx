@@ -170,8 +170,8 @@ export function Header({
         </div>
 
         {/* Mobile Title - visible only on mobile, positioned center */}
-        <div className="md:hidden absolute left-1/2 transform -translate-x-1/2">
-          <h1 className="text-lg font-semibold text-[var(--menues-fg)]">
+        <div className="md:hidden absolute left-1/2 transform -translate-x-1/2 max-w-[200px]">
+          <h1 className="text-base font-semibold text-[var(--menues-fg)] truncate">
             {title || 'Archub'}
           </h1>
         </div>
