@@ -7,12 +7,18 @@ export interface GeneratedTask {
   code: string;
   template_id: string;
   param_values: Record<string, any>;
-  name: string;
   is_public: boolean;
   created_at: string;
   organization_id: string;
   updated_at: string;
   scope: string;
+  // Related data for dynamic name generation
+  task_templates?: {
+    id: string;
+    name_template: string;
+    code: string;
+    category_id: string;
+  };
 }
 
 // Interface for task materials
@@ -40,7 +46,15 @@ export function useGeneratedTasks() {
       
       const { data, error } = await supabase
         .from('task_generated')
-        .select('*')
+        .select(`
+          *,
+          task_templates (
+            id,
+            name_template,
+            code,
+            category_id
+          )
+        `)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -58,7 +72,6 @@ export function useCreateGeneratedTask() {
       template_id: string;
       param_values: Record<string, any>;
       organization_id: string;
-      name: string;
       code: string;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
@@ -82,7 +95,6 @@ export function useCreateGeneratedTask() {
           code: payload.code,
           template_id: payload.template_id,
           param_values: payload.param_values,
-          name: payload.name,
           is_public: false,
           organization_id: payload.organization_id,
           scope: 'organization'
@@ -269,7 +281,6 @@ export function useUpdateGeneratedTask() {
     mutationFn: async (payload: {
       task_id: string;
       input_param_values: Record<string, any>;
-      input_name: string;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
       
@@ -278,8 +289,7 @@ export function useUpdateGeneratedTask() {
       const { data, error } = await supabase
         .from('task_generated')
         .update({
-          param_values: payload.input_param_values,
-          name: payload.input_name
+          param_values: payload.input_param_values
         })
         .eq('id', payload.task_id)
         .select()

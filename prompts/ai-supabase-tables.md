@@ -190,10 +190,6 @@ TABLA TASK_GENERATED:
     "data_type": "jsonb"
   },
   {
-    "column_name": "name",
-    "data_type": "text"
-  },
-  {
     "column_name": "is_public",
     "data_type": "boolean"
   },

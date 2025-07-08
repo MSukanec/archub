@@ -18,6 +18,7 @@ import { useCreateGeneratedTask, useUpdateGeneratedTask, useTaskMaterials, useCr
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMaterials } from "@/hooks/use-materials";
 import { supabase } from "@/lib/supabase";
+import { generateTaskDescription, generatePreviewDescription } from "@/utils/taskDescriptionGenerator";
 import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 
@@ -238,62 +239,16 @@ export function NewAdminGeneratedTaskModal({
     
     try {
       if (isEditing && generatedTask?.id) {
-        // Actualizar tarea existente - generar descripción igual que al crear
-        const selectedTemplate = templates?.find(t => t.id === template_id);
-        let description = selectedTemplate?.name_template || '';
-        
-        parameters
-          ?.sort((a, b) => a.position - b.position)
-          .forEach(param => {
-            const rawValue = params[param.name];
-            if (!rawValue) return;
-
-            // Buscar label de la opción seleccionada
-            const option = parameterOptions[param.id]?.find(opt => opt.value === rawValue);
-            if (!option?.label) return;
-
-            // Usar param.expression_template y reemplazar {value} con option.label
-            const expr = param.expression_template || '{value}';
-            const fragment = expr.replace('{value}', option.label);
-
-            // Reemplazar placeholder en name_template
-            const placeholder = `{{${param.name}}}`;
-            description = description.replace(placeholder, fragment);
-          });
+        // Actualizar tarea existente usando función utilitaria
 
         await updateGeneratedTask.mutateAsync({
           task_id: generatedTask.id,
-          input_param_values: params,
-          input_name: description
+          input_param_values: params
         });
         onClose();
       } else {
-        // Crear nueva tarea
+        // Crear nueva tarea usando función utilitaria
         const selectedTemplate = templates?.find(t => t.id === template_id);
-        
-        // Generate task description using the same logic as preview
-        let description = selectedTemplate.name_template;
-        
-        parameters
-          ?.sort((a, b) => a.position - b.position)
-          .forEach(param => {
-            const rawValue = params[param.name];
-            if (!rawValue) return;
-
-            // Buscar label de la opción seleccionada
-            const option = parameterOptions[param.id]?.find(opt => opt.value === rawValue);
-            if (!option?.label) return;
-
-            // Usar param.expression_template y reemplazar {value} con option.label
-            const expr = param.expression_template || '{value}';
-            const fragment = expr.replace('{value}', option.label);
-
-            // Reemplazar placeholder en name_template
-            const placeholder = `{{${param.name}}}`;
-            description = description.replace(placeholder, fragment);
-          });
-
-        const generatedDescription = description;
         
         // Generate a simple task code
         const taskCode = `${selectedTemplate?.code_prefix || 'TSK'}-${Date.now().toString().slice(-6)}`;
@@ -302,7 +257,6 @@ export function NewAdminGeneratedTaskModal({
           template_id: template_id,
           param_values: params,
           organization_id: userData.organization.id,
-          name: generatedDescription,
           code: taskCode
         });
         
@@ -595,7 +549,12 @@ export function NewAdminGeneratedTaskModal({
                                     }
                                   });
                                   
-                                  return generateDescriptionWithExpressions(displayParams);
+                                  return generatePreviewDescription(
+                                    selectedTemplate,
+                                    parameters,
+                                    displayParams,
+                                    parameterOptions
+                                  );
                                 })()}
                               </div>
                             </div>
