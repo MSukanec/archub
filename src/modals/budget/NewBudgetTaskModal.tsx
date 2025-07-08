@@ -78,6 +78,8 @@ export default function NewBudgetTaskModal({
         start_date: editingTask.start_date || "",
         end_date: editingTask.end_date || ""
       });
+      // Forzar actualización del campo task_id
+      setValue("task_id", editingTask.task_id || "");
     } else if (!editingTask && open) {
       reset({
         task_id: "",
@@ -86,7 +88,7 @@ export default function NewBudgetTaskModal({
         end_date: ""
       });
     }
-  }, [editingTask, open, reset]);
+  }, [editingTask, open, reset, setValue]);
 
   const handleClose = () => {
     reset();

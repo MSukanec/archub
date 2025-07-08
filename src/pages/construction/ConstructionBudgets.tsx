@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label'
 import { useState, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { Calculator, Plus, Trash2, Building2 } from 'lucide-react'
+import { Calculator, Plus, Trash2, Building2, Edit } from 'lucide-react'
 // Removed CustomTable import as we now use BudgetTable
 import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState'
 import { BudgetTable } from '@/components/ui-custom/misc/BudgetTable'
@@ -76,6 +76,11 @@ function generateTaskDisplayName(task: any, parameterValues: any[] = []): string
   // Limpiar cualquier placeholder que no se haya procesado y espacios extras
   displayName = displayName.replace(/\{\{[^}]+\}\}/g, '').replace(/\s+/g, ' ').trim();
 
+  // Remover el punto final si existe (para evitar doble punto)
+  if (displayName.endsWith('.')) {
+    displayName = displayName.slice(0, -1);
+  }
+
   return displayName;
 }
 
@@ -126,6 +131,39 @@ export default function ConstructionBudgets() {
   const { data: budgets = [], isLoading: budgetsLoading } = useBudgets(userData?.preferences?.last_project_id)
   const { toast } = useToast()
   const queryClient = useQueryClient()
+
+  // Mutación para actualizar last_budget_id en user_preferences
+  const updateBudgetPreferenceMutation = useMutation({
+    mutationFn: async (budgetId: string) => {
+      const { error } = await supabase
+        .from('user_preferences')
+        .update({ last_budget_id: budgetId })
+        .eq('user_id', userData?.user?.id);
+      
+      if (error) throw error;
+    },
+    onError: (error) => {
+      console.error('Error updating budget preference:', error);
+    }
+  });
+
+  // Inicializar selectedBudgetId con last_budget_id de preferences
+  useEffect(() => {
+    if (userData?.preferences?.last_budget_id && budgets.length > 0) {
+      const lastBudgetExists = budgets.some(budget => budget.id === userData.preferences.last_budget_id);
+      if (lastBudgetExists) {
+        setSelectedBudgetId(userData.preferences.last_budget_id);
+      } else if (budgets.length > 0) {
+        // Si el último presupuesto no existe, seleccionar el primero
+        setSelectedBudgetId(budgets[0].id);
+        updateBudgetPreferenceMutation.mutate(budgets[0].id);
+      }
+    } else if (budgets.length > 0 && !selectedBudgetId) {
+      // Si no hay last_budget_id, seleccionar el primero
+      setSelectedBudgetId(budgets[0].id);
+      updateBudgetPreferenceMutation.mutate(budgets[0].id);
+    }
+  }, [userData?.preferences?.last_budget_id, budgets, selectedBudgetId, updateBudgetPreferenceMutation]);
 
   // Filter and sort budgets
   const filteredBudgets = budgets
@@ -418,7 +456,7 @@ export default function ConstructionBudgets() {
                           onClick={() => handleEditTask(budgetId, task)}
                           className="h-7 w-7 p-0"
                         >
-                          <Building2 className="h-3 w-3" />
+                          <Edit className="h-3 w-3" />
                         </Button>
                         <Button
                           variant="ghost"
@@ -511,7 +549,10 @@ export default function ConstructionBudgets() {
                   
                   {/* Budget Selector */}
                   <div className="flex-1">
-                    <Select value={selectedBudgetId} onValueChange={setSelectedBudgetId}>
+                    <Select value={selectedBudgetId} onValueChange={(value) => {
+                      setSelectedBudgetId(value);
+                      updateBudgetPreferenceMutation.mutate(value);
+                    }}>
                       <SelectTrigger className="w-full max-w-sm">
                         <SelectValue placeholder="Selecciona un presupuesto" />
                       </SelectTrigger>
@@ -549,7 +590,7 @@ export default function ConstructionBudgets() {
                     }}
                     disabled={!selectedBudget}
                   >
-                    <Building2 className="w-3 h-3" />
+                    <Edit className="w-3 h-3" />
                   </Button>
                   
                   <Button
