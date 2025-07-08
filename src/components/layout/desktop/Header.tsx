@@ -153,7 +153,7 @@ export function Header({
         </div>
 
         {/* Mobile Avatar Button - visible only on mobile, positioned left */}
-        <div className="md:hidden pl-4">
+        <div className="md:hidden pl-2">
           <Button
             variant="ghost"
             size="icon"
@@ -171,7 +171,7 @@ export function Header({
 
         {/* Mobile Title - visible only on mobile, positioned center */}
         <div className="md:hidden absolute left-1/2 transform -translate-x-1/2 max-w-[200px]">
-          <h1 className="text-base font-semibold text-[var(--menues-fg)] truncate">
+          <h1 className="text-sm font-medium text-[var(--menues-fg)] truncate">
             {title || 'Archub'}
           </h1>
         </div>
@@ -394,7 +394,7 @@ export function Header({
       </div>
 
       {/* Right side - Search, Filters, Actions */}
-      <div className="flex items-center gap-2 ml-auto pr-4">
+      <div className="flex items-center gap-2 ml-auto pr-2">
         {/* Mobile Menu Button - visible on mobile only, positioned on the right */}
         <Button
           variant="ghost"

@@ -131,17 +131,14 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
   const handleNavigationWithAnimation = (href: string, newContext?: string, direction?: 'left' | 'right') => {
     if (newContext && direction) {
-      console.log('Starting animation for context:', newContext);
       // Trigger slide-down animation
       setIsContentAnimating(true);
       
       setTimeout(() => {
-        console.log('Changing context to:', newContext);
         setSidebarContext(newContext as any);
         navigate(href);
         // Trigger slide-up animation
         setTimeout(() => {
-          console.log('Ending animation');
           setIsContentAnimating(false);
         }, 100);
       }, 220);
