@@ -119,15 +119,6 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- July 8, 2025. Simplified task parameter modal with single-section layout and removed obsolete fields - COMPLETED
-  • Eliminated all references to IS_REQUIRED column from task_template_parameters table following user's database schema changes
-  • Removed ROLE/ROL SEMÁNTICO field completely from parameter management as column doesn't exist in database
-  • Restructured NewTaskParameterModal to use single layout instead of multiple accordions for better UX
-  • Applied proper CustomModal template structure following ai-modal-template.md standards
-  • Enhanced "Grupos de Opciones" section with bordered container for visual separation without confusing accordion nesting
-  • Fixed modal footer button styling to match system standards with proper CustomModalFooter component
-  • Cleaned up all parameter interfaces and database queries to work without deleted columns
-  • System now fully functional without errors related to non-existent database columns
 - July 8, 2025. Fixed task preview generation to use expression_template from task_parameter_values - COMPLETED
   • Updated useTaskTemplateParameterOptions hook to query task_parameter_values table instead of non-existent task_template_parameter_options
   • Corrected preview generation logic to use expression_template column from task_parameter_values (e.g., "con mortero de {value}")
