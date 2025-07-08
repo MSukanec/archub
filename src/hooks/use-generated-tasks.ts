@@ -105,6 +105,24 @@ export function useCreateGeneratedTask() {
       return data.new_task;
     },
     onError: (error: any) => {
+      console.error('Error handling task:', error);
+      
+      // Handle duplicate task error specifically
+      if (error.code === '23505' && error.message?.includes('unique_generated_task_per_template_and_params')) {
+        toast({
+          title: "Tarea Duplicada",
+          description: "Ya existe una tarea con estos parámetros exactos. Revisa la lista de tareas existentes.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: error.message || "Ocurrió un error al crear la tarea",
+          variant: "destructive"
+        });
+      }
+    },
+    onError: (error: any) => {
       toast({
         title: "Error",
         description: error.message || "Error al crear la tarea generada",
