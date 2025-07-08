@@ -29,6 +29,7 @@ const taskParameterSchema = z.object({
     required_error: 'El tipo es requerido' 
   }),
   role: z.string().optional(),
+  expression_template: z.string().optional(),
   is_required: z.boolean().optional(),
 });
 
@@ -78,7 +79,9 @@ export function NewTaskParameterModal({
       name: '',
       label: '',
       type: 'text',
-      role: '',
+      semantic_role: '',
+      expression_template: '',
+      unit_id: undefined,
       is_required: false,
     },
   });
@@ -150,6 +153,7 @@ export function NewTaskParameterModal({
         label: parameter.label,
         type: parameter.type,
         role: parameter.role || '',
+        expression_template: parameter.expression_template || '',
         is_required: parameter.is_required,
       });
     } else if (!parameter && open) {
@@ -158,6 +162,7 @@ export function NewTaskParameterModal({
         label: '',
         type: 'text',
         role: '',
+        expression_template: '',
         is_required: false,
       });
     }
@@ -314,7 +319,33 @@ export function NewTaskParameterModal({
                             )}
                           />
 
-
+                          <FormField
+                            control={form.control}
+                            name="expression_template"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Plantilla de frase</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    {...field}
+                                    placeholder="de {value}"
+                                    disabled={isSubmitting}
+                                  />
+                                </FormControl>
+                                {field.value && !field.value.includes('{value}') && (
+                                  <div className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded p-2">
+                                    ⚠️ La plantilla debería incluir {'{value}'} como placeholder
+                                  </div>
+                                )}
+                                {field.value && field.value.includes('{value}') && (
+                                  <div className="text-xs text-muted-foreground">
+                                    <span className="font-medium">Frase resultante:</span> {field.value.replace('{value}', 'Ladrillo hueco')}
+                                  </div>
+                                )}
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
 
                           <FormField
                             control={form.control}
