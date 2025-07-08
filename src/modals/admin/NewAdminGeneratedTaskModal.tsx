@@ -12,13 +12,13 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { FileText, Settings, Package, Loader2, Plus, Trash2 } from "lucide-react";
 import { useTaskTemplates, useTaskTemplateParameters, useTaskTemplateParameterOptions } from "@/hooks/use-task-templates";
 import { useCreateGeneratedTask, useUpdateGeneratedTask, useTaskMaterials, useCreateTaskMaterial, useDeleteTaskMaterial } from "@/hooks/use-generated-tasks";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMaterials } from "@/hooks/use-materials";
 import { supabase } from "@/lib/supabase";
 import { queryClient } from "@/lib/queryClient";
-import { Loader2, Package, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface GeneratedTask {
@@ -82,12 +82,20 @@ export function NewAdminGeneratedTaskModal({
             try {
               if (supabase) {
                 const { data: options, error } = await supabase
-                  .from('task_template_parameter_options')
-                  .select('*')
-                  .eq('parameter_id', param.id);
+                  .from('task_parameter_values')
+                  .select('name, label')
+                  .eq('parameter_id', param.id)
+                  .order('name');
                 
-                if (!error) {
-                  optionsMap[param.id] = options || [];
+                if (error) {
+                  console.error('Error fetching parameter options:', error);
+                  optionsMap[param.id] = [];
+                } else {
+                  // Transform data to expected format
+                  optionsMap[param.id] = (options || []).map(opt => ({
+                    value: opt.name,
+                    label: opt.label || opt.name
+                  }));
                 }
               }
             } catch (error) {
@@ -447,7 +455,12 @@ export function NewAdminGeneratedTaskModal({
                   <Accordion type="single" collapsible defaultValue="task-info" className="w-full">
                     {/* Primer acordeón: Información de la Tarea */}
                     <AccordionItem value="task-info">
-                      <AccordionTrigger>Información de la Tarea</AccordionTrigger>
+                      <AccordionTrigger>
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4" />
+                          Información de la Tarea
+                        </div>
+                      </AccordionTrigger>
                       <AccordionContent className="space-y-4">
                         <FormField
                           control={form.control}
