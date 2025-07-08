@@ -554,9 +554,9 @@ export function NewAdminGeneratedTaskModal({
                                   });
                                   
                                   return generatePreviewDescription(
-                                    selectedTemplate,
-                                    parameters,
+                                    selectedTemplate?.name_template || '',
                                     displayParams,
+                                    parameters || [],
                                     parameterOptions
                                   );
                                 })()}

@@ -70,6 +70,8 @@ export function useBudgetTasks(budgetId: string) {
             param_values,
             organization_id,
             unit_id,
+            category_name,
+            subcategory_name,
             rubro_name,
             display_name
           )
