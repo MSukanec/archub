@@ -54,6 +54,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
   const [animationDirection, setAnimationDirection] = useState<'left' | 'right' | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isContentAnimating, setIsContentAnimating] = useState(false);
 
   // Bloquear scroll del body cuando el menú está abierto
   useEffect(() => {
@@ -130,13 +131,15 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
   const handleNavigationWithAnimation = (href: string, newContext?: string, direction?: 'left' | 'right') => {
     if (newContext && direction) {
-      setAnimationDirection(direction);
-      setIsAnimating(true);
+      // Trigger slide-down animation
+      setIsContentAnimating(true);
       
       setTimeout(() => {
         setSidebarContext(newContext as any);
-        setIsAnimating(false);
-        setAnimationDirection(null);
+        // Trigger slide-up animation
+        setTimeout(() => {
+          setIsContentAnimating(false);
+        }, 30);
       }, 150);
       
       // Solo navegar, NO cerrar el menú para cambios de contexto
@@ -337,10 +340,11 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       {/* Navigation Menu - Flex grow para ocupar el espacio disponible */}
       <div className="flex-1 px-1.5 py-2 overflow-y-auto">
         <nav className={cn(
-          "space-y-0 transition-all duration-300 ease-in-out",
+          "space-y-0 transition-all duration-300 ease-out",
           isAnimating && animationDirection === 'left' && "transform translate-x-full opacity-0",
           isAnimating && animationDirection === 'right' && "transform -translate-x-full opacity-0",
-          !isAnimating && "transform translate-x-0 opacity-100"
+          isContentAnimating && "transform translate-y-6 opacity-0 scale-95",
+          !isAnimating && !isContentAnimating && "transform translate-x-0 translate-y-0 opacity-100 scale-100"
         )}>
           {/* Context Title */}
           {sidebarContextTitles[currentSidebarContext] && (
