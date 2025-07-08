@@ -295,8 +295,7 @@ export default function ConstructionBudgets() {
                     className="rounded"
                   />
                 </th>
-                <th className="p-2 text-left text-xs font-medium">Rubro (Categoría)</th>
-                <th className="p-2 text-left text-xs font-medium">Tarea</th>
+                <th className="p-2 text-left text-xs font-medium">Rubro</th>
                 <th className="p-2 text-left text-xs font-medium">Unidad</th>
                 <th className="p-2 text-left text-xs font-medium">Cantidad</th>
                 <th className="p-2 text-left text-xs font-medium">Costo de Mano de Obra</th>
@@ -327,11 +326,11 @@ export default function ConstructionBudgets() {
                         className="rounded"
                       />
                     </td>
-                    <td className="p-2 text-sm text-muted-foreground">
-                      Sin categoría
-                    </td>
                     <td className="p-2">
-                      <div className="font-medium text-sm">{task.task?.code || 'Sin código'}</div>
+                      <div className="font-medium text-sm">
+                        {task.task?.task_templates?.task_categories?.name || 'Sin categoría'}
+                      </div>
+                      <div className="text-xs text-muted-foreground">{task.task?.code || 'Sin código'}</div>
                     </td>
                     <td className="p-2 text-sm">
                       Unidad

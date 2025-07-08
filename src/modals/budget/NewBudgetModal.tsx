@@ -165,7 +165,7 @@ export function NewBudgetModal({ open, onClose, editingBudget, onSuccess }: NewB
       />
     ),
     body: (
-      <CustomModalBody padding="md">
+      <CustomModalBody columns={1}>
         <Form {...form}>
           <form id="budget-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             {/* Fecha de creación */}

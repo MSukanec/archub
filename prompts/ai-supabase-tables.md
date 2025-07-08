@@ -206,8 +206,8 @@ TABLA TASK_GENERATED:
     "data_type": "timestamp with time zone"
   },
   {
-    "column_name": "scope",
-    "data_type": "text"
+    "column_name": "unit_id",
+    "data_type": "uuid"
   }
 ]
 
