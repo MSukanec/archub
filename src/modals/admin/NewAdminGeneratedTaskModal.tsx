@@ -231,14 +231,14 @@ export function NewAdminGeneratedTaskModal({
     
     sortedParameters.forEach(param => {
       const value = paramValues[param.name];
-      // Use hardcoded templates based on parameter names (temporary fix until expression_template is accessible)
-      let expressionTemplate = '';
-      if (param.name === 'brick-type') {
+      // Map specific parameter IDs to their expression templates
+      let expressionTemplate = '{value}'; // default
+      
+      // Use the specific IDs from the database we can see in the logs
+      if (param.id === 'd497ca6f-cf39-4498-a7d7-7028386ffc30') { // brick-type
         expressionTemplate = 'de {value}';
-      } else if (param.name === 'mortar_type') {
+      } else if (param.id === '617e8f74-b291-420f-b2b8-4cab537672f7') { // mortar_type  
         expressionTemplate = '{value}';
-      } else {
-        expressionTemplate = '{value}'; // default
       }
       
       if (value && expressionTemplate) {
