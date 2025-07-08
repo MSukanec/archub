@@ -8,6 +8,7 @@ export interface GeneratedTask {
   template_id: string;
   param_values: Record<string, any>;
   is_public: boolean;
+  is_system: boolean;
   created_at: string;
   organization_id: string;
   updated_at: string;
@@ -74,6 +75,7 @@ export function useCreateGeneratedTask() {
       param_values: Record<string, any>;
       organization_id: string;
       unit_id?: string | null;
+      is_system?: boolean;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
       
@@ -82,7 +84,9 @@ export function useCreateGeneratedTask() {
         .rpc('task_generate_code', {
           input_template_id: payload.template_id,
           input_param_values: payload.param_values,
-          input_organization_id: payload.organization_id
+          input_organization_id: payload.organization_id,
+          input_unit_id: payload.unit_id || null,
+          input_is_system: payload.is_system || false
         });
       
       if (taskError) throw taskError;
@@ -276,6 +280,7 @@ export function useUpdateGeneratedTask() {
       task_id: string;
       input_param_values: Record<string, any>;
       input_unit_id?: string | null;
+      input_is_system?: boolean;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
       
