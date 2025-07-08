@@ -10,6 +10,7 @@ import { CustomModalFooter } from "@/components/ui-custom/modal/CustomModalFoote
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CustomComboBox } from "@/components/ui-custom/misc/CustomComboBox";
 import { Label } from "@/components/ui/label";
 import { useGeneratedTasks } from "@/hooks/use-generated-tasks";
 import { useBudgetTasks } from "@/hooks/use-budget-tasks";
@@ -39,6 +40,7 @@ export default function NewBudgetTaskModal({
   editingTask
 }: NewBudgetTaskModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const { data: tasks = [], isLoading: tasksLoading } = useGeneratedTasks();
   const budgetTasksHook = useBudgetTasks(budgetId);
   const { createBudgetTask, updateBudgetTask } = budgetTasksHook;
@@ -54,6 +56,19 @@ export default function NewBudgetTaskModal({
   });
 
   const { register, handleSubmit, formState: { errors }, reset, setValue, watch } = form;
+
+  // Filtrar tareas basado en búsqueda (mínimo 3 caracteres)
+  const filteredTasks = searchQuery.length >= 3 
+    ? tasks.filter(task => 
+        task.name?.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : [];
+
+  // Preparar opciones para CustomComboBox
+  const taskOptions = filteredTasks.map(task => ({
+    value: task.id,
+    label: task.name || 'Sin nombre'
+  }));
 
   // Precargar datos en modo edición
   useEffect(() => {
@@ -146,27 +161,21 @@ export default function NewBudgetTaskModal({
                       <Label htmlFor="task_id" className="text-xs required-asterisk">
                         Tarea
                       </Label>
-                      <Select
+                      <CustomComboBox
+                        options={taskOptions}
                         value={watch("task_id")}
                         onValueChange={(value) => setValue("task_id", value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar tarea" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {tasksLoading ? (
-                            <SelectItem value="loading">Cargando tareas...</SelectItem>
-                          ) : tasks.length === 0 ? (
-                            <SelectItem value="empty">No hay tareas disponibles</SelectItem>
-                          ) : (
-                            tasks.map((task) => (
-                              <SelectItem key={task.id} value={task.id}>
-                                {task.name || `${task.code} - Sin nombre`}
-                              </SelectItem>
-                            ))
-                          )}
-                        </SelectContent>
-                      </Select>
+                        onSearchChange={setSearchQuery}
+                        placeholder={searchQuery.length < 3 ? "Escriba al menos 3 caracteres para buscar..." : "Seleccionar tarea"}
+                        searchPlaceholder="Buscar tarea por nombre..."
+                        emptyText={searchQuery.length < 3 ? "Escriba al menos 3 caracteres" : "No se encontraron tareas"}
+                        disabled={tasksLoading}
+                      />
+                      {searchQuery.length >= 3 && filteredTasks.length === 0 && (
+                        <p className="text-xs text-muted-foreground">
+                          No se encontraron tareas que coincidan con "{searchQuery}"
+                        </p>
+                      )}
                       {errors.task_id && (
                         <p className="text-xs text-destructive">{errors.task_id.message}</p>
                       )}

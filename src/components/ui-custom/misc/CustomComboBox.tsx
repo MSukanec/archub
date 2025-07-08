@@ -29,6 +29,7 @@ interface CustomComboBoxProps {
   emptyText?: string;
   disabled?: boolean;
   className?: string;
+  onSearchChange?: (search: string) => void;
 }
 
 export function CustomComboBox({
@@ -39,7 +40,8 @@ export function CustomComboBox({
   searchPlaceholder = "Buscar...",
   emptyText = "No se encontraron opciones.",
   disabled = false,
-  className
+  className,
+  onSearchChange
 }: CustomComboBoxProps) {
   const [open, setOpen] = useState(false);
 
@@ -65,7 +67,10 @@ export function CustomComboBox({
       </PopoverTrigger>
       <PopoverContent className="w-full p-0" align="start">
         <Command>
-          <CommandInput placeholder={searchPlaceholder} />
+          <CommandInput 
+            placeholder={searchPlaceholder} 
+            onValueChange={onSearchChange}
+          />
           <CommandEmpty>{emptyText}</CommandEmpty>
           <CommandGroup className="max-h-64 overflow-auto">
             {options.map((option) => (

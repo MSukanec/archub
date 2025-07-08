@@ -113,11 +113,11 @@ export function Header({
       '/finance/dashboard': 'Finanzas',
       '/movimientos': 'Finanzas',
       
-      // Obra accordion - NO mostrar "Obra" para dashboard ya que está en el contexto
-      '/construction/logs': 'Obra',
-      '/construction/budgets': 'Obra',
-      '/construction/materials': 'Obra',
-      '/construction/personnel': 'Obra',
+      // Obra accordion - NO mostrar "Obra" para páginas principales ya que está en el contexto de etapa
+      '/construction/logs': null,
+      '/construction/budgets': null,
+      '/construction/materials': null,
+      '/construction/personnel': null,
       // Galería NO debe tener accordion parent - el breadcrumb se forma con ORGANIZACIÓN / PROYECTO / ETAPA (Obra) / Galería
       // '/construction/gallery': removed - no accordion parent
       
