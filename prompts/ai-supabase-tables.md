@@ -125,3 +125,28 @@ TABLA TASK_PARAMETER_VALUES:
     "data_type": "timestamp with time zone"
   }
 ]
+
+TABLA TASK_PARAMETER_OPTION_GROUPS:
+
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "parameter_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "category_id",
+    "data_type": "uuid"
+  }
+]

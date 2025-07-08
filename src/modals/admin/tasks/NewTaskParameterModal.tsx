@@ -17,6 +17,7 @@ import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayou
 import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader';
 import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
 import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter';
+import { useToast } from '@/hooks/use-toast';
 
 import { useCreateTaskParameter, useUpdateTaskParameter, TaskParameter, useTaskParameterOptionGroups, useCreateTaskParameterOptionGroup, useDeleteTaskParameterOptionGroup, useUpdateTaskParameterOptionGroup, useTaskSubcategories } from '@/hooks/use-task-parameters-admin';
 import { TaskParameterGroupAssignmentModal } from './NewTaskParameterGroupAssignmentModal';
@@ -54,6 +55,8 @@ export function NewTaskParameterModal({
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [editingGroupName, setEditingGroupName] = useState('');
   
+  const { toast } = useToast();
+  
   const createMutation = useCreateTaskParameter();
   const updateMutation = useUpdateTaskParameter();
   const createGroupMutation = useCreateTaskParameterOptionGroup();
@@ -88,6 +91,17 @@ export function NewTaskParameterModal({
     const selectedSubcategory = subcategories.find(cat => cat.id === selectedSubcategoryId);
     if (!selectedSubcategory) return;
     
+    // Check if group already exists for this category
+    const existingGroup = optionGroups?.find(group => group.category_id === selectedSubcategoryId);
+    if (existingGroup) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Ya existe un grupo para esta categoría'
+      });
+      return;
+    }
+    
     setIsCreatingGroup(true);
     try {
       await createGroupMutation.mutateAsync({
@@ -96,8 +110,17 @@ export function NewTaskParameterModal({
         category_id: selectedSubcategory.id,
       });
       setSelectedSubcategoryId('');
-    } catch (error) {
+      toast({
+        title: 'Éxito',
+        description: 'Grupo creado correctamente'
+      });
+    } catch (error: any) {
       console.error('Error creating group:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error.message || 'Error al crear el grupo'
+      });
     } finally {
       setIsCreatingGroup(false);
     }
@@ -330,13 +353,18 @@ export function NewTaskParameterModal({
                                 {subcategoriesLoading ? (
                                   <SelectItem value="loading" disabled>Cargando...</SelectItem>
                                 ) : subcategories.length > 0 ? (
-                                  subcategories.map((subcategory) => (
-                                    <SelectItem key={subcategory.id} value={subcategory.id}>
-                                      {subcategory.code || subcategory.name} {subcategory.name && subcategory.code ? '- ' + subcategory.name : ''}
-                                    </SelectItem>
-                                  ))
+                                  subcategories
+                                    .filter(subcategory => !optionGroups?.some(group => group.category_id === subcategory.id))
+                                    .map((subcategory) => (
+                                      <SelectItem key={subcategory.id} value={subcategory.id}>
+                                        {subcategory.code || subcategory.name} {subcategory.name && subcategory.code ? '- ' + subcategory.name : ''}
+                                      </SelectItem>
+                                    ))
                                 ) : (
                                   <SelectItem value="empty" disabled>No hay subcategorías disponibles</SelectItem>
+                                )}
+                                {subcategories.length > 0 && subcategories.filter(subcategory => !optionGroups?.some(group => group.category_id === subcategory.id)).length === 0 && (
+                                  <SelectItem value="no-available" disabled>Todas las subcategorías ya tienen grupos</SelectItem>
                                 )}
                               </SelectContent>
                             </Select>
