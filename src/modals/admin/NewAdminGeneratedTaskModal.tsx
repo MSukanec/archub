@@ -232,10 +232,8 @@ export function NewAdminGeneratedTaskModal({
         // Map specific parameter IDs to their expression templates from the database
         let expressionTemplate = '{value}'; // default
         
-        // Use the specific IDs from the database 
-        if (param.id === 'd497ca6f-cf39-4498-a7d7-7028386ffc30') { // brick-type
-          expressionTemplate = 'de {value}';
-        } else if (param.id === '617e8f74-b291-420f-b2b8-4cab537672f7') { // mortar_type  
+        // Use the specific IDs from the database logs we can see
+        if (param.id === 'd0e0cc8c-e44d-4d43-bb99-0f41ef0383c2') { // mortar_type
           expressionTemplate = '{value}';
         }
         
@@ -290,8 +288,7 @@ export function NewAdminGeneratedTaskModal({
           param_values: params,
           organization_id: userData.organization.id,
           description: generatedDescription,
-          code: taskCode,
-          created_by: userData.user.id
+          code: taskCode
         });
         
         if (result.existing_task) {

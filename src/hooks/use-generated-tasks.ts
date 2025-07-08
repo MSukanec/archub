@@ -58,7 +58,6 @@ export function useCreateGeneratedTask() {
       organization_id: string;
       description: string;
       code: string;
-      created_by: string;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
       
@@ -75,21 +74,34 @@ export function useCreateGeneratedTask() {
       }
       
       // Create new task directly in task_tasks table
+      console.log('Creating task with payload:', {
+        code: payload.code,
+        template_id: payload.template_id,
+        param_values: payload.param_values,
+        description: payload.description,
+        organization_id: payload.organization_id
+      });
+      
       const { data, error } = await supabase
         .from('task_tasks')
         .insert({
+          code: payload.code,
           template_id: payload.template_id,
           param_values: payload.param_values,
           description: payload.description,
-          code: payload.code,
-          created_by: payload.created_by,
+          is_public: false,
           organization_id: payload.organization_id,
-          is_public: false
+          task: payload.description // Seems like 'task' field is also needed based on DB structure
         })
         .select()
         .single();
       
-      if (error) throw error;
+      console.log('Task creation result:', { data, error });
+      
+      if (error) {
+        console.error('Task creation error details:', error);
+        throw error;
+      }
       return { existing_task: null, new_task: data };
     },
     onSuccess: (data) => {
