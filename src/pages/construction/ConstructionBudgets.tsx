@@ -34,18 +34,17 @@ interface BudgetTask {
   budget_id: string
   task_id: string
   quantity: number
-  unit_labor_price: number
-  unit_material_price: number
-  total_labor_cost: number
-  total_material_cost: number
-  total_cost: number
+  start_date: string | null
+  end_date: string | null
+  organization_id: string
   task: {
-    name: string
-    description?: string
-    unit: {
-      name: string
-      abbreviation: string
-    }
+    id: string
+    code: string
+    description: string
+    template_id: string | null
+    param_values: any
+    is_public: boolean
+    organization_id: string
   }
 }
 
@@ -244,13 +243,8 @@ export default function ConstructionBudgets() {
     const { budgetTasks, isLoading } = useBudgetTasks(budgetId);
     const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
 
-    // Calculate totals for percentage calculations
-    const totalBudgetAmount = budgetTasks?.reduce((total, task) => {
-      const laborPrice = task.task?.unit_labor_price || 0;
-      const materialPrice = task.task?.unit_material_price || 0;
-      const subtotal = (laborPrice + materialPrice) * (task.quantity || 0);
-      return total + subtotal;
-    }, 0) || 0;
+    // Calculate totals for percentage calculations (simplified for task_tasks)
+    const totalBudgetAmount = budgetTasks?.length || 0;
 
     if (isLoading) {
       return <div className="p-4 text-center text-sm text-muted-foreground">Cargando tareas...</div>;
@@ -276,15 +270,9 @@ export default function ConstructionBudgets() {
       );
     }
 
-    // Calculate totals for TOTAL row
-    const totalLaborCost = budgetTasks?.reduce((total, task) => {
-      const laborPrice = task.task?.unit_labor_price || 0;
-      return total + (laborPrice * (task.quantity || 0));
-    }, 0) || 0;
-
-    const totalMaterialCost = budgetTasks?.reduce((total, task) => {
-      const materialPrice = task.task?.unit_material_price || 0;
-      return total + (materialPrice * (task.quantity || 0));
+    // Calculate totals for TOTAL row (simplified since task_tasks doesn't have price fields)
+    const totalQuantity = budgetTasks?.reduce((total, task) => {
+      return total + (task.quantity || 0);
     }, 0) || 0;
 
     return (
@@ -320,12 +308,8 @@ export default function ConstructionBudgets() {
             </thead>
             <tbody>
               {budgetTasks?.map((task: any) => {
-                const laborPrice = task.task?.unit_labor_price || 0;
-                const materialPrice = task.task?.unit_material_price || 0;
-                const laborCost = laborPrice * (task.quantity || 0);
-                const materialCost = materialPrice * (task.quantity || 0);
-                const subtotal = laborCost + materialCost;
-                const percentage = totalBudgetAmount > 0 ? (subtotal / totalBudgetAmount) * 100 : 0;
+                // Simplified calculations since task_tasks doesn't have price fields
+                const percentage = totalBudgetAmount > 0 ? (1 / totalBudgetAmount) * 100 : 0;
 
                 return (
                   <tr key={task.id} className="border-b hover:bg-muted/20">
@@ -344,16 +328,16 @@ export default function ConstructionBudgets() {
                       />
                     </td>
                     <td className="p-2 text-sm text-muted-foreground">
-                      {task.task?.task_categories?.name || 'Sin categoría'}
+                      Sin categoría
                     </td>
                     <td className="p-2">
-                      <div className="font-medium text-sm">{task.task?.name || 'Sin nombre'}</div>
+                      <div className="font-medium text-sm">{task.task?.code || 'Sin código'}</div>
                       {task.task?.description && (
                         <div className="text-xs text-muted-foreground">{task.task.description}</div>
                       )}
                     </td>
                     <td className="p-2 text-sm">
-                      {task.task?.units?.name || 'Sin unidad'}
+                      Unidad
                     </td>
                     <td className="p-2">
                       <input
@@ -367,9 +351,9 @@ export default function ConstructionBudgets() {
                         step="0.01"
                       />
                     </td>
-                    <td className="p-2 text-sm">${laborCost.toLocaleString()}</td>
-                    <td className="p-2 text-sm">${materialCost.toLocaleString()}</td>
-                    <td className="p-2 text-sm font-medium">${subtotal.toLocaleString()}</td>
+                    <td className="p-2 text-sm">$0</td>
+                    <td className="p-2 text-sm">$0</td>
+                    <td className="p-2 text-sm font-medium">$0</td>
                     <td className="p-2 text-sm text-muted-foreground">{percentage.toFixed(1)}%</td>
                     <td className="p-2">
                       <div className="flex gap-1">
@@ -400,10 +384,10 @@ export default function ConstructionBudgets() {
                 <td className="p-2 text-sm font-semibold">TOTAL</td>
                 <td className="p-2"></td>
                 <td className="p-2"></td>
-                <td className="p-2"></td>
-                <td className="p-2 text-sm font-semibold">${totalLaborCost.toLocaleString()}</td>
-                <td className="p-2 text-sm font-semibold">${totalMaterialCost.toLocaleString()}</td>
-                <td className="p-2 text-sm font-semibold">${totalBudgetAmount.toLocaleString()}</td>
+                <td className="p-2 text-sm font-semibold">{totalQuantity}</td>
+                <td className="p-2 text-sm font-semibold">$0</td>
+                <td className="p-2 text-sm font-semibold">$0</td>
+                <td className="p-2 text-sm font-semibold">$0</td>
                 <td className="p-2 text-sm font-semibold">100.0%</td>
                 <td className="p-2"></td>
               </tr>

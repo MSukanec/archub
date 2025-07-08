@@ -15,23 +15,15 @@ export interface BudgetTask {
   organization_id: string;
   created_at: string;
   updated_at: string;
-  // Datos de la tarea relacionada con categoría y unidad
+  // Datos de la tarea relacionada (task_tasks)
   task: {
     id: string;
-    name: string;
+    code: string;
     description: string;
-    unit_labor_price: number;
-    unit_material_price: number;
-    category_id: string | null;
-    unit_id: string | null;
-    task_categories: {
-      id: string;
-      name: string;
-    } | null;
-    units: {
-      id: string;
-      name: string;
-    } | null;
+    template_id: string | null;
+    param_values: any;
+    is_public: boolean;
+    organization_id: string;
   };
 }
 
@@ -72,22 +64,14 @@ export function useBudgetTasks(budgetId: string) {
         .from("budget_tasks")
         .select(`
           *,
-          task:tasks(
+          task:task_tasks(
             id,
-            name,
+            code,
             description,
-            unit_labor_price,
-            unit_material_price,
-            category_id,
-            unit_id,
-            task_categories!tasks_category_id_fkey(
-              id,
-              name
-            ),
-            units(
-              id,
-              name
-            )
+            template_id,
+            param_values,
+            is_public,
+            organization_id
           )
         `)
         .eq("budget_id", budgetId)
