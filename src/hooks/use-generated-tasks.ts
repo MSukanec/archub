@@ -74,14 +74,6 @@ export function useCreateGeneratedTask() {
       }
       
       // Create new task directly in task_tasks table
-      console.log('Creating task with payload:', {
-        code: payload.code,
-        template_id: payload.template_id,
-        param_values: payload.param_values,
-        description: payload.description,
-        organization_id: payload.organization_id
-      });
-      
       const { data, error } = await supabase
         .from('task_tasks')
         .insert({
@@ -90,18 +82,12 @@ export function useCreateGeneratedTask() {
           param_values: payload.param_values,
           description: payload.description,
           is_public: false,
-          organization_id: payload.organization_id,
-          task: payload.description // Seems like 'task' field is also needed based on DB structure
+          organization_id: payload.organization_id
         })
         .select()
         .single();
       
-      console.log('Task creation result:', { data, error });
-      
-      if (error) {
-        console.error('Task creation error details:', error);
-        throw error;
-      }
+      if (error) throw error;
       return { existing_task: null, new_task: data };
     },
     onSuccess: (data) => {

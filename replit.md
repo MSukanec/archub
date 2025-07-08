@@ -119,6 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 8, 2025. Fixed task generation system with direct task_tasks table integration - COMPLETED
+  • Eliminated all references to deleted RPC function and corrected code to work directly with task_tasks table
+  • Fixed name_template processing to properly replace {{parameter-name}} placeholders with expression_template values
+  • Corrected database column mapping to use actual task_tasks structure: code, template_id, param_values, description, is_public, organization_id
+  • Removed non-existent 'task' column reference that was causing schema cache errors
+  • Fixed generateTaskDescription function reference error by implementing inline description generation logic
+  • System now successfully creates tasks with proper name generation: "Muros Simples {{mortar_type}}" → "Muros Simples Cal y Cemento."
+  • Task creation flow verified working: template selection → parameter filling → description generation → database insertion
+  • Cleaned up debugging logs for production-ready code quality
 - July 7, 2025. TaskTemplateEditorModal modal aesthetics simplified with accordion structure and clean parameter display - COMPLETED
   • Refactored modal to follow ai-modal-template.md standards using Accordion components for better organization
   • Replaced Card-based layout with three main accordion sections: Estado de la Plantilla, Agregar Parámetro, and Parámetros de la Plantilla

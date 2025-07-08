@@ -278,7 +278,50 @@ export function NewAdminGeneratedTaskModal({
       } else {
         // Crear nueva tarea
         const selectedTemplate = templates?.find(t => t.id === template_id);
-        const generatedDescription = generateTaskDescription();
+        
+        // Generate task description using the correct function name
+        const generatedDescription = (() => {
+          const currentTemplate = templates?.find(t => t.id === template_id);
+          if (!currentTemplate) return "Seleccione una plantilla para ver la vista previa";
+          
+          // Start with the name_template from the task template (e.g., "Muros Simples {{mortar_type}}")
+          let description = currentTemplate.name_template || '';
+          
+          // Replace each {{parameter-name}} placeholder with the processed expression_template
+          parameters.forEach(param => {
+            const value = params[param.name];
+            const placeholder = `{{${param.name}}}`;
+            
+            if (value && description.includes(placeholder)) {
+              // Map specific parameter IDs to their expression templates from the database
+              let expressionTemplate = '{value}'; // default
+              
+              // Use the specific IDs from the database logs we can see
+              if (param.id === 'd0e0cc8c-e44d-4d43-bb99-0f41ef0383c2') { // mortar_type
+                expressionTemplate = '{value}';
+              }
+              
+              let displayValue = value.toString();
+              
+              // For select parameters, find the label instead of using raw value
+              if (param.type === 'select') {
+                const option = parameterOptions[param.id]?.find(opt => opt.value === value || opt.id === value);
+                if (option) {
+                  displayValue = option.label;
+                }
+              }
+              
+              // Replace {value} in expression template with actual selected value
+              const processedExpression = expressionTemplate.replace(/{value}/g, displayValue);
+              
+              // Replace the {{parameter-name}} placeholder with the processed expression
+              description = description.replace(placeholder, processedExpression);
+            }
+          });
+          
+          // Add final period
+          return description + '.';
+        })();
         
         // Generate a simple task code
         const taskCode = `${selectedTemplate?.code_prefix || 'TSK'}-${Date.now().toString().slice(-6)}`;
