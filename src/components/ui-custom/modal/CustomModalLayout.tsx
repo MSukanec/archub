@@ -70,17 +70,17 @@ export function CustomModalLayout({
         )}
       >
         {/* Layout vertical con header/footer fijos */}
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full md:h-auto">
           {children?.header && (
             <div className="shrink-0">{children.header}</div>
           )}
           {children?.body && (
-            <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+            <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 md:max-h-[60vh]">
               {children.body}
             </div>
           )}
           {children?.footer && (
-            <div className="shrink-0">{children.footer}</div>
+            <div className="shrink-0 mt-auto">{children.footer}</div>
           )}
         </div>
       </div>
