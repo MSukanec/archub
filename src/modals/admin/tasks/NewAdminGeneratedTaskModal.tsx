@@ -238,11 +238,33 @@ export function NewAdminGeneratedTaskModal({
     
     try {
       if (isEditing && generatedTask?.id) {
-        // Actualizar tarea existente
+        // Actualizar tarea existente - generar descripción igual que al crear
+        const selectedTemplate = templates?.find(t => t.id === template_id);
+        let description = selectedTemplate?.name_template || '';
+        
+        parameters
+          ?.sort((a, b) => a.position - b.position)
+          .forEach(param => {
+            const rawValue = params[param.name];
+            if (!rawValue) return;
+
+            // Buscar label de la opción seleccionada
+            const option = parameterOptions[param.id]?.find(opt => opt.value === rawValue);
+            if (!option?.label) return;
+
+            // Usar param.expression_template y reemplazar {value} con option.label
+            const expr = param.expression_template || '{value}';
+            const fragment = expr.replace('{value}', option.label);
+
+            // Reemplazar placeholder en name_template
+            const placeholder = `{{${param.name}}}`;
+            description = description.replace(placeholder, fragment);
+          });
+
         await updateGeneratedTask.mutateAsync({
           task_id: generatedTask.id,
           input_param_values: params,
-          input_name: generatedDescription
+          input_name: description
         });
         onClose();
       } else {
@@ -250,7 +272,28 @@ export function NewAdminGeneratedTaskModal({
         const selectedTemplate = templates?.find(t => t.id === template_id);
         
         // Generate task description using the same logic as preview
-        const generatedDescription = generateDescriptionWithExpressions(params);
+        let description = selectedTemplate.name_template;
+        
+        parameters
+          ?.sort((a, b) => a.position - b.position)
+          .forEach(param => {
+            const rawValue = params[param.name];
+            if (!rawValue) return;
+
+            // Buscar label de la opción seleccionada
+            const option = parameterOptions[param.id]?.find(opt => opt.value === rawValue);
+            if (!option?.label) return;
+
+            // Usar param.expression_template y reemplazar {value} con option.label
+            const expr = param.expression_template || '{value}';
+            const fragment = expr.replace('{value}', option.label);
+
+            // Reemplazar placeholder en name_template
+            const placeholder = `{{${param.name}}}`;
+            description = description.replace(placeholder, fragment);
+          });
+
+        const generatedDescription = description;
         
         // Generate a simple task code
         const taskCode = `${selectedTemplate?.code_prefix || 'TSK'}-${Date.now().toString().slice(-6)}`;
@@ -265,9 +308,9 @@ export function NewAdminGeneratedTaskModal({
         
         if (result.existing_task) {
           setExistingTask(result.existing_task);
-        } else if (result.task_id) {
+        } else if (result.new_task?.id) {
           // Capturar el ID de la tarea creada para habilitar la gestión de materiales
-          setCreatedTaskId(result.task_id);
+          setCreatedTaskId(result.new_task.id);
         } else {
           onClose();
         }
