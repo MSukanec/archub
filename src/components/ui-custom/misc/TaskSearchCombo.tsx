@@ -72,13 +72,13 @@ export function TaskSearchCombo({
         align="start"
         style={{ width: 'var(--radix-popover-trigger-width)' }}
       >
-        <Command className="border border-[var(--input-border)] bg-[var(--input-bg)] rounded-md">
+        <Command className="bg-background border rounded-md">
           <CommandInput 
             placeholder={searchPlaceholder} 
             onValueChange={onSearchChange}
-            className="text-xs leading-tight py-2 px-3 border-0 bg-transparent placeholder:text-[var(--input-placeholder)]"
+            className="h-9 text-sm border-0 bg-transparent placeholder:text-muted-foreground"
           />
-          <CommandEmpty className="text-xs py-2 px-3 text-[var(--input-placeholder)]">{emptyText}</CommandEmpty>
+          <CommandEmpty className="text-sm py-2 px-3 text-muted-foreground">{emptyText}</CommandEmpty>
           <CommandGroup className="max-h-64 overflow-auto">
             {options.map((option) => (
               <CommandItem
@@ -88,7 +88,7 @@ export function TaskSearchCombo({
                   onValueChange(currentValue === value ? "" : currentValue);
                   setOpen(false);
                 }}
-                className="text-xs py-2 px-3 cursor-pointer hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]"
+                className="text-sm py-2 px-3 cursor-pointer hover:bg-accent hover:text-accent-foreground"
               >
                 <Check
                   className={cn(

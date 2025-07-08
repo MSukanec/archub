@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TaskSearchCombo } from "@/components/ui-custom/misc/TaskSearchCombo";
 import { Label } from "@/components/ui/label";
-import { useGeneratedTasks } from "@/hooks/use-generated-tasks";
+import { useTaskSearch } from "@/hooks/use-task-search";
 import { useBudgetTasks } from "@/hooks/use-budget-tasks";
 
 const budgetTaskSchema = z.object({
@@ -41,7 +41,7 @@ export default function NewBudgetTaskModal({
 }: NewBudgetTaskModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const { data: tasks = [], isLoading: tasksLoading } = useGeneratedTasks();
+  const { data: tasks = [], isLoading: tasksLoading } = useTaskSearch(searchQuery, organizationId, open);
   const budgetTasksHook = useBudgetTasks(budgetId);
   const { createBudgetTask, updateBudgetTask } = budgetTasksHook;
 
@@ -57,17 +57,10 @@ export default function NewBudgetTaskModal({
 
   const { register, handleSubmit, formState: { errors }, reset, setValue, watch } = form;
 
-  // Filtrar tareas basado en búsqueda (mínimo 3 caracteres)
-  const filteredTasks = searchQuery.length >= 3 
-    ? tasks.filter(task => 
-        task.code?.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : [];
-
-  // Preparar opciones para CustomComboBox
-  const taskOptions = filteredTasks.map(task => ({
+  // Preparar opciones para TaskSearchCombo usando display_name
+  const taskOptions = tasks.map(task => ({
     value: task.id,
-    label: task.code || 'Sin código'
+    label: task.display_name || task.code || 'Sin nombre'
   }));
 
   // Precargar datos en modo edición
@@ -91,6 +84,7 @@ export default function NewBudgetTaskModal({
 
   const handleClose = () => {
     reset();
+    setSearchQuery('');
     onClose();
   };
 
