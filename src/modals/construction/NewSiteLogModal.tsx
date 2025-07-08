@@ -455,7 +455,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
       return siteLogResult.data
     },
     onSuccess: () => {
-      // Invalidación inmediata y forzada del cache
+      // Invalidación inmediata y forzada del cache para site-logs
       queryClient.invalidateQueries({ queryKey: ['site-logs'] })
       queryClient.removeQueries({ queryKey: ['site-logs'] })
       queryClient.refetchQueries({ queryKey: ['site-logs'] })
@@ -465,10 +465,16 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
       queryClient.removeQueries({ queryKey: ['personnel-attendance'] })
       queryClient.refetchQueries({ queryKey: ['personnel-attendance'] })
       
+      // CRÍTICO: Invalidar también el cache de la galería para mostrar archivos nuevos
+      queryClient.invalidateQueries({ queryKey: ['galleryFiles'] })
+      queryClient.removeQueries({ queryKey: ['galleryFiles'] })
+      queryClient.refetchQueries({ queryKey: ['galleryFiles'] })
+      
       // Actualizar el estado local inmediatamente
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ['site-logs'] })
         queryClient.invalidateQueries({ queryKey: ['personnel-attendance'] })
+        queryClient.invalidateQueries({ queryKey: ['galleryFiles'] })
       }, 100)
       
       toast({

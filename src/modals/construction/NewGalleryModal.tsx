@@ -114,7 +114,12 @@ export function NewGalleryModal({ open, onClose, editingFile }: NewGalleryModalP
         title: 'Éxito',
         description: data.message,
       });
+      
+      // Invalidar caché con todas las claves posibles
       queryClient.invalidateQueries({ queryKey: ['galleryFiles'] });
+      queryClient.removeQueries({ queryKey: ['galleryFiles'] });
+      queryClient.refetchQueries({ queryKey: ['galleryFiles'] });
+      
       handleClose();
     },
     onError: (error) => {

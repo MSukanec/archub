@@ -179,7 +179,11 @@ export default function OrganizationContacts() {
         title: "Contacto eliminado",
         description: "El contacto ha sido eliminado correctamente"
       })
+      
+      // Invalidar ambas claves de caché para contactos
       queryClient.invalidateQueries({ queryKey: ['contacts'] })
+      queryClient.invalidateQueries({ queryKey: ['organization-contacts'] })
+      
       setShowDeleteDialog(false)
       setContactToDelete(null)
     },
@@ -346,6 +350,7 @@ export default function OrganizationContacts() {
             onClose={() => setShowCreateModal(false)}
             onSuccess={() => {
               queryClient.invalidateQueries({ queryKey: ['contacts'] })
+              queryClient.invalidateQueries({ queryKey: ['organization-contacts'] })
               setShowCreateModal(false)
             }}
           />

@@ -242,7 +242,11 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
           ? "Contacto actualizado correctamente"
           : "Contacto creado correctamente"
       });
+      
+      // Invalidar ambas claves de caché para contactos
       queryClient.invalidateQueries({ queryKey: ['contacts'] });
+      queryClient.invalidateQueries({ queryKey: ['organization-contacts', organizationId] });
+      
       if (onSuccess) onSuccess();
       onClose();
       form.reset();

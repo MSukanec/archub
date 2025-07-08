@@ -190,7 +190,12 @@ export default function ConstructionGallery() {
         title: 'Éxito',
         description: 'Archivo eliminado correctamente',
       });
+      
+      // Invalidar caché con todas las claves posibles
       queryClient.invalidateQueries({ queryKey: ['galleryFiles'] });
+      queryClient.removeQueries({ queryKey: ['galleryFiles'] });
+      queryClient.refetchQueries({ queryKey: ['galleryFiles'] });
+      
       setSelectedFile(null);
     },
     onError: (error) => {
