@@ -143,8 +143,8 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         setTimeout(() => {
           console.log('Ending animation');
           setIsContentAnimating(false);
-        }, 50);
-      }, 180);
+        }, 100);
+      }, 220);
       
       // Scroll to top on mobile navigation
       setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 250);
@@ -329,7 +329,11 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const menuContent = (
     <div className="fixed inset-0" style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', zIndex: 9999 }} onClick={onClose}>
       <div 
-        className="fixed bottom-0 left-0 right-0 rounded-t-xl" 
+        className={cn(
+          "fixed bottom-0 left-0 right-0 rounded-t-xl transition-all duration-300 ease-out",
+          isContentAnimating && "transform translate-y-full opacity-0",
+          !isContentAnimating && "transform translate-y-0 opacity-100"
+        )}
         style={{ 
           backgroundColor: 'var(--menues-bg)', 
           height: '80vh',
@@ -342,11 +346,10 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       {/* Navigation Menu - Flex grow para ocupar el espacio disponible */}
       <div className="flex-1 px-1.5 py-2 overflow-y-auto">
         <nav className={cn(
-          "space-y-0 transition-all duration-300 ease-out",
+          "space-y-0 transition-all duration-200 ease-out",
           isAnimating && animationDirection === 'left' && "transform translate-x-full opacity-0",
           isAnimating && animationDirection === 'right' && "transform -translate-x-full opacity-0",
-          isContentAnimating && "transform translate-y-12 opacity-0 scale-90",
-          !isAnimating && !isContentAnimating && "transform translate-x-0 translate-y-0 opacity-100 scale-100"
+          !isAnimating && "transform translate-x-0 opacity-100"
         )}>
           {/* Context Title */}
           {sidebarContextTitles[currentSidebarContext] && (
