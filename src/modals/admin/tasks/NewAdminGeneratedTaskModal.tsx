@@ -232,7 +232,7 @@ export function NewAdminGeneratedTaskModal({
           task_id: generatedTask.id,
           input_param_values: params,
           input_unit_id: unit_id ? unit_id : null,
-          input_is_system: is_system || false
+          input_is_system: true // Admin modal always updates as system tasks
         });
         onClose();
       } else {
@@ -240,9 +240,9 @@ export function NewAdminGeneratedTaskModal({
         const result = await createGeneratedTask.mutateAsync({
           template_id: template_id,
           param_values: params,
-          organization_id: userData.organization.id,
+          organization_id: null, // Admin modal always creates system tasks
           unit_id: unit_id ? unit_id : null,
-          is_system: is_system || false
+          is_system: true // Admin modal always creates system tasks
         });
         
         if (result.new_task?.id) {
