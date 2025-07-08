@@ -116,7 +116,7 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
           <div className="relative">
             <button
               onClick={() => setExpandedOrgSelector(!expandedOrgSelector)}
-              className="w-full h-10 px-3 rounded-lg border flex items-center justify-between transition-colors hover:bg-[var(--menues-hover-bg)]"
+              className="w-full h-10 px-2 rounded-lg border flex items-center justify-between transition-colors hover:bg-[var(--menues-hover-bg)]"
               style={{ 
                 borderColor: 'var(--menues-border)',
                 backgroundColor: 'var(--menues-bg)',
@@ -141,7 +141,7 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
                   <button
                     key={org.id}
                     onClick={() => organizationMutation.mutate(org.id)}
-                    className="w-full px-3 py-2 text-left hover:bg-[var(--menues-hover-bg)] transition-colors"
+                    className="w-full px-2 py-2 text-left hover:bg-[var(--menues-hover-bg)] transition-colors rounded-lg"
                     style={{ color: 'var(--menues-fg)' }}
                   >
                     {org.name}
@@ -160,7 +160,7 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
           <div className="relative">
             <button
               onClick={() => setExpandedProjectSelector(!expandedProjectSelector)}
-              className="w-full h-10 px-3 rounded-lg border flex items-center justify-between transition-colors hover:bg-[var(--menues-hover-bg)]"
+              className="w-full h-10 px-2 rounded-lg border flex items-center justify-between transition-colors hover:bg-[var(--menues-hover-bg)]"
               style={{ 
                 borderColor: 'var(--menues-border)',
                 backgroundColor: 'var(--menues-bg)',
@@ -185,7 +185,7 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
                   <button
                     key={project.id}
                     onClick={() => projectMutation.mutate(project.id)}
-                    className="w-full px-3 py-2 text-left hover:bg-[var(--menues-hover-bg)] transition-colors"
+                    className="w-full px-2 py-2 text-left hover:bg-[var(--menues-hover-bg)] transition-colors rounded-lg"
                     style={{ color: 'var(--menues-fg)' }}
                   >
                     {project.name}
@@ -200,9 +200,9 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
         <div className="pt-2">
           <button
             onClick={() => handleNavigation('/profile')}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+            className="w-full flex items-center gap-3 px-2 py-2 rounded-lg transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
             style={{ 
-              color: isButtonActive('/profile') ? 'var(--accent-foreground)' : 'var(--menues-fg)',
+              color: isButtonActive('/profile') ? 'white' : 'var(--menues-fg)',
               backgroundColor: isButtonActive('/profile') ? 'var(--accent)' : 'transparent',
               border: '1px solid var(--menues-border)'
             }}
