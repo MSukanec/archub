@@ -104,7 +104,7 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
   const menuContent = (
     <div className="fixed inset-0" style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', zIndex: 9998 }} onClick={onClose}>
       <div 
-        className="fixed bottom-0 left-0 right-0 rounded-t-lg p-3 space-y-3" 
+        className="fixed bottom-0 left-0 right-0 rounded-t-xl p-2 space-y-3" 
         style={{ backgroundColor: 'var(--menues-bg)' }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -131,7 +131,7 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
 
             {expandedOrgSelector && (
               <div 
-                className="absolute top-full left-0 right-0 mt-1 border rounded-lg shadow-lg max-h-48 overflow-y-auto z-50"
+                className="absolute top-full left-0 right-0 mt-1 border rounded-xl shadow-lg max-h-48 overflow-y-auto z-50 p-1"
                 style={{ 
                   backgroundColor: 'var(--menues-bg)',
                   borderColor: 'var(--menues-border)'
@@ -175,7 +175,7 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
 
             {expandedProjectSelector && (
               <div 
-                className="absolute top-full left-0 right-0 mt-1 border rounded-lg shadow-lg max-h-48 overflow-y-auto z-50"
+                className="absolute top-full left-0 right-0 mt-1 border rounded-xl shadow-lg max-h-48 overflow-y-auto z-50 p-1"
                 style={{ 
                   backgroundColor: 'var(--menues-bg)',
                   borderColor: 'var(--menues-border)'

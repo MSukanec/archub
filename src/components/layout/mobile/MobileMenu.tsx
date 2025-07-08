@@ -320,7 +320,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const menuContent = (
     <div className="fixed inset-0" style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', zIndex: 9999 }} onClick={onClose}>
       <div 
-        className="fixed bottom-0 left-0 right-0 rounded-t-lg" 
+        className="fixed bottom-0 left-0 right-0 rounded-t-xl" 
         style={{ 
           backgroundColor: 'var(--menues-bg)', 
           height: '80vh',
@@ -331,7 +331,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
 
       {/* Navigation Menu - Flex grow para ocupar el espacio disponible */}
-      <div className="flex-1 px-4 py-2 overflow-y-auto">
+      <div className="flex-1 px-3 py-2 overflow-y-auto">
         <nav className={cn(
           "space-y-0 transition-all duration-300 ease-in-out",
           isAnimating && animationDirection === 'left' && "transform translate-x-full opacity-0",
