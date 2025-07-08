@@ -75,79 +75,23 @@ export function useCreateGeneratedTask() {
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
       
-      // Primero obtener el template para generar el código
-      const { data: templateData, error: templateError } = await supabase
-        .from('task_templates')
-        .select('code')
-        .eq('id', payload.template_id)
-        .single();
+      // Call RPC function that handles both code generation and task creation/verification
+      const { data: taskData, error: taskError } = await supabase
+        .rpc('task_generate_code', {
+          input_template_id: payload.template_id,
+          input_param_values: payload.param_values,
+          input_organization_id: payload.organization_id
+        });
       
-      if (templateError) throw templateError;
-      if (!templateData) throw new Error('Template no encontrado');
+      if (taskError) throw taskError;
+      if (!taskData || taskData.length === 0) throw new Error('No se pudo crear la tarea');
       
-      // Generar código único
-      const prefix = templateData.code;
-      
-      // Obtener el siguiente número para este prefijo
-      const { data: existingTasks, error: existingError } = await supabase
-        .from('task_generated')
-        .select('code')
-        .like('code', `${prefix}-%`)
-        .order('code', { ascending: false })
-        .limit(1);
-      
-      if (existingError) throw existingError;
-      
-      let nextNumber = 1;
-      if (existingTasks && existingTasks.length > 0) {
-        const lastCode = existingTasks[0].code;
-        const numberMatch = lastCode.match(/(\d+)$/);
-        if (numberMatch) {
-          nextNumber = parseInt(numberMatch[1]) + 1;
-        }
-      }
-      
-      const newCode = `${prefix}-${nextNumber.toString().padStart(6, '0')}`;
-      
-      // Verificar si ya existe una tarea con estos parámetros
-      const { data: existingTask, error: duplicateError } = await supabase
-        .from('task_generated')
-        .select('*')
-        .eq('template_id', payload.template_id)
-        .eq('param_values', JSON.stringify(payload.param_values))
-        .single();
-      
-      if (duplicateError && duplicateError.code !== 'PGRST116') {
-        throw duplicateError;
-      }
-      
-      if (existingTask) {
-        return { 
-          existing_task: existingTask,
-          generated_code: existingTask.code,
-          is_existing: true
-        };
-      }
-      
-      // Crear nueva tarea
-      const { data: newTask, error: createError } = await supabase
-        .from('task_generated')
-        .insert({
-          code: newCode,
-          template_id: payload.template_id,
-          param_values: payload.param_values,
-          is_public: false,
-          organization_id: payload.organization_id
-        })
-        .select()
-        .single();
-      
-      if (createError) throw createError;
-      
+      // The function returns the task data directly
+      const taskResult = taskData[0];
       return { 
-        new_task: newTask, 
-        generated_code: newCode,
-        is_existing: false
+        new_task: taskResult, 
+        generated_code: taskResult.code,
+        is_existing: false // Since the function handles duplicates internally
       };
     },
     onSuccess: (data) => {

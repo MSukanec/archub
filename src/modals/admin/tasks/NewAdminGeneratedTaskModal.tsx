@@ -230,10 +230,7 @@ export function NewAdminGeneratedTaskModal({
           organization_id: userData.organization.id
         });
         
-        if (result.existing_task) {
-          // Mostrar aviso de tarea existente
-          setExistingTask(result.existing_task);
-        } else if (result.new_task?.id) {
+        if (result.new_task?.id) {
           // Capturar el ID de la tarea creada para habilitar la gestión de materiales
           setCreatedTaskId(result.new_task.id);
         } else {
