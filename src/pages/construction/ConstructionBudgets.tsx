@@ -182,27 +182,24 @@ export default function ConstructionBudgets() {
 
   // Inicializar selectedBudgetId con last_budget_id de preferences
   useEffect(() => {
-    if (budgets.length > 0 && !selectedBudgetId) {
-      if (userData?.preferences?.last_budget_id) {
+    if (budgets.length > 0 && userData?.preferences) {
+      if (userData.preferences.last_budget_id) {
         const lastBudgetExists = budgets.some(budget => budget.id === userData.preferences.last_budget_id);
         if (lastBudgetExists) {
           setSelectedBudgetId(userData.preferences.last_budget_id);
+          console.log('Budget selector initialized with last_budget_id:', userData.preferences.last_budget_id);
         } else {
           // Si el último presupuesto no existe, seleccionar el primero
           setSelectedBudgetId(budgets[0].id);
-          if (userData?.user?.id) {
-            updateBudgetPreferenceMutation.mutate(budgets[0].id);
-          }
+          updateBudgetPreferenceMutation.mutate(budgets[0].id);
         }
       } else {
         // Si no hay last_budget_id, seleccionar el primero
         setSelectedBudgetId(budgets[0].id);
-        if (userData?.user?.id) {
-          updateBudgetPreferenceMutation.mutate(budgets[0].id);
-        }
+        updateBudgetPreferenceMutation.mutate(budgets[0].id);
       }
     }
-  }, [budgets, selectedBudgetId, userData?.preferences?.last_budget_id, userData?.user?.id]);
+  }, [budgets, userData?.preferences?.last_budget_id, userData?.preferences?.id]);
 
   // Filter and sort budgets
   const filteredBudgets = budgets
@@ -216,14 +213,14 @@ export default function ConstructionBudgets() {
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     })
 
-  // Auto-select first budget when budgets load or project changes
+  // Auto-select first budget when budgets load or project changes (only if no budget is selected)
   useEffect(() => {
-    if (filteredBudgets.length > 0) {
+    if (filteredBudgets.length > 0 && !selectedBudgetId) {
       setSelectedBudgetId(filteredBudgets[0].id);
-    } else {
+    } else if (filteredBudgets.length === 0) {
       setSelectedBudgetId('');
     }
-  }, [userData?.preferences?.last_project_id, filteredBudgets.length]);
+  }, [userData?.preferences?.last_project_id, filteredBudgets.length, selectedBudgetId]);
 
   // Get selected budget
   const selectedBudget = filteredBudgets.find(budget => budget.id === selectedBudgetId);

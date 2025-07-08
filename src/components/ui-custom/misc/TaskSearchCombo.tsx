@@ -104,7 +104,7 @@ export function TaskSearchCombo({
                     setOpen(false);
                     onCreateTask();
                   }}
-                  className="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-xs bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium"
+                  className="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-xs bg-accent text-accent-foreground rounded-md hover:bg-accent/80 transition-colors font-medium"
                 >
                   <Plus className="w-4 h-4" />
                   Crear Tarea Personalizada
