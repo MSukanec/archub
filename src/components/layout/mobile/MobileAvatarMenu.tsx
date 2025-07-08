@@ -19,6 +19,12 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
   const [expandedOrgSelector, setExpandedOrgSelector] = useState(false);
   const [expandedProjectSelector, setExpandedProjectSelector] = useState(false);
 
+  // Function to check if a button is active based on current location
+  const isButtonActive = (href: string) => {
+    if (!href || href === '#') return false;
+    return location === href || location.startsWith(href + '/');
+  };
+
   // Bloquear scroll del body cuando el menú está abierto
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -196,8 +202,8 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
             onClick={() => handleNavigation('/profile')}
             className="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
             style={{ 
-              color: 'var(--menues-fg)',
-              backgroundColor: 'transparent',
+              color: isButtonActive('/profile') ? 'var(--accent-foreground)' : 'var(--menues-fg)',
+              backgroundColor: isButtonActive('/profile') ? 'var(--accent)' : 'transparent',
               border: '1px solid var(--menues-border)'
             }}
           >
