@@ -63,7 +63,6 @@ export function useTaskTemplateParameters(templateId: string | null) {
           template_id,
           parameter_id,
           option_group_id,
-          is_required,
           position,
           created_at,
           updated_at,
@@ -92,7 +91,7 @@ export function useTaskTemplateParameters(templateId: string | null) {
         name: item.task_parameters?.name || '',
         label: item.task_parameters?.label || '',
         type: item.task_parameters?.type || 'text',
-        is_required: item.is_required || false,
+        is_required: false,
         position: item.position,
         expression_template: '{value}' // Default, will be loaded from task_parameter_values
       })) || [];

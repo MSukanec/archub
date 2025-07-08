@@ -150,3 +150,21 @@ TABLA TASK_PARAMETER_OPTION_GROUPS:
     "data_type": "uuid"
   }
 ]
+
+TABLA TASK_PARAMETERS_OPTION_GROUP_ITEMS
+
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "group_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "parameter_value_id",
+    "data_type": "uuid"
+  }
+]
+

@@ -278,7 +278,13 @@ export default function TaskTemplateEditorModal({
       const { data, error } = await supabase
         .from('task_template_parameters')
         .select(`
-          *,
+          id,
+          template_id,
+          parameter_id,
+          option_group_id,
+          position,
+          created_at,
+          updated_at,
           task_parameters:parameter_id (
             id,
             name,
