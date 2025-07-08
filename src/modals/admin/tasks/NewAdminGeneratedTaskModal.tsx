@@ -193,23 +193,7 @@ export function NewAdminGeneratedTaskModal({
     }
   }, [open, selectedTemplateId]);
 
-  // Función temporal para actualizar expression_template del parámetro mortar_type
-  const updateMortarTypeExpression = async () => {
-    try {
-      const { error } = await supabase
-        .from('task_parameters')
-        .update({ expression_template: 'con mortero de {value}' })
-        .eq('name', 'mortar_type');
-      
-      if (error) throw error;
-      
-      // Invalidar queries para recargar datos
-      queryClient.invalidateQueries({ queryKey: ['task-template-parameters'] });
-      console.log('Expression template actualizado para mortar_type');
-    } catch (error) {
-      console.error('Error actualizando expression_template:', error);
-    }
-  };
+
 
   // Generate description using expression templates from parameters
   const generateDescriptionWithExpressions = (paramValues: Record<string, any>) => {
@@ -553,18 +537,7 @@ export function NewAdminGeneratedTaskModal({
                             
                             {/* Preview of generated description */}
                             <div className="border-t pt-4">
-                              <div className="flex items-center justify-between mb-2">
-                                <h3 className="text-sm font-medium">Vista previa de la descripción</h3>
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={updateMortarTypeExpression}
-                                  className="text-xs"
-                                >
-                                  🔧 Arreglar Expression
-                                </Button>
-                              </div>
+                              <h3 className="text-sm font-medium mb-2">Vista previa de la descripción</h3>
                               <div className="p-3 bg-muted/20 rounded border text-sm">
                                 {(() => {
                                   const selectedTemplate = templates?.find(t => t.id === selectedTemplateId);
