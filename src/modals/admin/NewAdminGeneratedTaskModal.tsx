@@ -231,7 +231,15 @@ export function NewAdminGeneratedTaskModal({
     
     sortedParameters.forEach(param => {
       const value = paramValues[param.name];
-      const expressionTemplate = param.expression_template;
+      // Use hardcoded templates based on parameter names (temporary fix until expression_template is accessible)
+      let expressionTemplate = '';
+      if (param.name === 'brick-type') {
+        expressionTemplate = 'de {value}';
+      } else if (param.name === 'mortar_type') {
+        expressionTemplate = '{value}';
+      } else {
+        expressionTemplate = '{value}'; // default
+      }
       
       if (value && expressionTemplate) {
         let displayValue = value.toString();

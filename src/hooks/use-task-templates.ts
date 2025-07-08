@@ -60,15 +60,7 @@ export function useTaskTemplateParameters(templateId: string | null) {
       const { data, error } = await supabase
         .from('task_template_parameters')
         .select(`
-          id,
-          template_id,
-          parameter_id,
-          is_required,
-          position,
-          expression_template,
-          option_group_id,
-          created_at,
-          updated_at,
+          *,
           task_parameters (
             id,
             name,
@@ -101,7 +93,8 @@ export function useTaskTemplateParameters(templateId: string | null) {
       
       console.log('Parameters with expression_template:', parameters.map(p => ({
         name: p.name,
-        expression_template: p.expression_template
+        expression_template: p.expression_template,
+        position: p.position
       })));
       
       console.log('Transformed real parameters:', parameters);
