@@ -140,11 +140,11 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         // Trigger slide-up animation
         setTimeout(() => {
           setIsContentAnimating(false);
-        }, 100);
-      }, 220);
+        }, 30);
+      }, 80);
       
       // Scroll to top on mobile navigation
-      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 250);
+      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 120);
     } else {
       // Para navegación normal (sin cambio de contexto), cerrar menú
       if (newContext) {
@@ -327,7 +327,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     <div className="fixed inset-0" style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', zIndex: 9999 }} onClick={onClose}>
       <div 
         className={cn(
-          "fixed bottom-0 left-0 right-0 rounded-t-xl transition-all duration-300 ease-out",
+          "fixed bottom-0 left-0 right-0 rounded-t-xl transition-all duration-100 ease-out",
           isContentAnimating && "transform translate-y-full opacity-0",
           !isContentAnimating && "transform translate-y-0 opacity-100"
         )}
