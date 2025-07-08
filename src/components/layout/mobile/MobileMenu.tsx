@@ -52,10 +52,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const { currentSidebarContext, setSidebarContext } = useNavigationStore();
   const [expandedAccordion, setExpandedAccordion] = useState<string | null>(null);
 
-  const [animationDirection, setAnimationDirection] = useState<'left' | 'right' | null>(null);
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [isContentAnimating, setIsContentAnimating] = useState(false);
-
   // Bloquear scroll del body cuando el menú está abierto
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -131,20 +127,11 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
   const handleNavigationWithAnimation = (href: string, newContext?: string, direction?: 'left' | 'right') => {
     if (newContext && direction) {
-      // Trigger slide-down animation
-      setIsContentAnimating(true);
-      
-      setTimeout(() => {
-        setSidebarContext(newContext as any);
-        navigate(href);
-        // Trigger slide-up animation
-        setTimeout(() => {
-          setIsContentAnimating(false);
-        }, 30);
-      }, 80);
-      
+      // Cambio inmediato sin animación
+      setSidebarContext(newContext as any);
+      navigate(href);
       // Scroll to top on mobile navigation
-      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 120);
+      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
     } else {
       // Para navegación normal (sin cambio de contexto), cerrar menú
       if (newContext) {
@@ -326,15 +313,11 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const menuContent = (
     <div className="fixed inset-0" style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', zIndex: 9999 }} onClick={onClose}>
       <div 
-        className={cn(
-          "fixed bottom-0 left-0 right-0 rounded-t-xl transition-all duration-100 ease-out",
-          isContentAnimating && "transform translate-y-full opacity-0",
-          !isContentAnimating && "transform translate-y-0 opacity-100"
-        )}
+        className="fixed bottom-0 left-0 right-0 rounded-t-xl"
         style={{ 
           backgroundColor: 'var(--menues-bg)', 
-          height: '80vh',
-          marginTop: '20vh'
+          height: '70vh',
+          marginTop: '30vh'
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -342,12 +325,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
       {/* Navigation Menu - Flex grow para ocupar el espacio disponible */}
       <div className="flex-1 px-1.5 py-2 overflow-y-auto">
-        <nav className={cn(
-          "space-y-0 transition-all duration-200 ease-out",
-          isAnimating && animationDirection === 'left' && "transform translate-x-full opacity-0",
-          isAnimating && animationDirection === 'right' && "transform -translate-x-full opacity-0",
-          !isAnimating && "transform translate-x-0 opacity-100"
-        )}>
+        <nav className="space-y-0">
           {/* Context Title */}
           {sidebarContextTitles[currentSidebarContext] && (
             <div className="px-3 py-2 mb-2">
