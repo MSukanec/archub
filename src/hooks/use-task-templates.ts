@@ -74,7 +74,8 @@ export function useTaskTemplateParameters(templateId: string | null) {
             id,
             name,
             label,
-            type
+            type,
+            expression_template
           )
         `)
         .eq('template_id', templateId)
@@ -97,7 +98,7 @@ export function useTaskTemplateParameters(templateId: string | null) {
         type: item.task_parameters?.type || 'text',
         is_required: false,
         position: item.position,
-        expression_template: '{value}' // Default, will be loaded from task_parameter_values
+        expression_template: item.task_parameters?.expression_template || '{value}'
       })) || [];
       
       console.log('Parameters with expression_template:', parameters.map(p => ({
