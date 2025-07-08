@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { FileText, Settings, Package, Loader2, Plus, Trash2 } from "lucide-react";
-import { useTaskTemplates, useTaskTemplateParameters, useTaskTemplateParameterOptions } from "@/hooks/use-task-templates";
+import { useTaskTemplates, useTaskTemplateParameters } from "@/hooks/use-task-templates";
 import { useCreateGeneratedTask, useUpdateGeneratedTask, useTaskMaterials, useCreateTaskMaterial, useDeleteTaskMaterial } from "@/hooks/use-generated-tasks";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMaterials } from "@/hooks/use-materials";
@@ -308,7 +308,8 @@ export function NewAdminGeneratedTaskModal({
   };
 
   const ParameterField = ({ param }: { param: any }) => {
-    const { data: options } = useTaskTemplateParameterOptions(param.type === 'select' ? param.id : null);
+    // Use the cached options from parameterOptions state
+    const options = parameterOptions[param.id] || [];
 
     switch (param.type) {
       case 'text':
@@ -582,10 +583,10 @@ export function NewAdminGeneratedTaskModal({
                               >
                                 <div className="flex-1">
                                   <div className="font-medium text-sm">
-                                    {taskMaterial.material?.name}
+                                    {taskMaterial.materials?.name}
                                   </div>
                                   <div className="text-xs text-muted-foreground">
-                                    Cantidad: {taskMaterial.amount} {taskMaterial.material?.unit?.name}
+                                    Cantidad: {taskMaterial.amount} {taskMaterial.materials?.units?.name}
                                   </div>
                                 </div>
                                 <Button

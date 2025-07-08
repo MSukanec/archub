@@ -21,10 +21,10 @@ export interface TaskMaterial {
   amount: number
   organization_id: string
   created_at: string
-  material?: {
+  materials?: {
     id: string
     name: string
-    unit: {
+    units: {
       name: string
     }
   }
@@ -32,12 +32,12 @@ export interface TaskMaterial {
 
 export function useGeneratedTasks() {
   return useQuery({
-    queryKey: ['generated-tasks'],
+    queryKey: ['task-tasks'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not initialized');
       
       const { data, error } = await supabase
-        .from('generated_tasks')
+        .from('task_tasks')
         .select('*')
         .order('created_at', { ascending: false });
       
@@ -67,7 +67,7 @@ export function useCreateGeneratedTask() {
       return data;
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['generated-tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['task-tasks'] });
       
       if (data.existing_task) {
         toast({
@@ -104,14 +104,14 @@ export function useDeleteGeneratedTask() {
       if (!supabase) throw new Error('Supabase not initialized');
       
       const { error } = await supabase
-        .from('generated_tasks')
+        .from('task_tasks')
         .delete()
         .eq('id', taskId);
       
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['generated-tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['task-tasks'] });
       toast({
         title: "Tarea Eliminada",
         description: "La tarea generada se ha eliminado exitosamente",
@@ -139,10 +139,10 @@ export function useTaskMaterials(taskId: string | null) {
         .from('task_materials')
         .select(`
           *,
-          material:materials (
+          materials (
             id,
             name,
-            unit:units(name)
+            units(name)
           )
         `)
         .eq('task_id', taskId);
@@ -249,7 +249,7 @@ export function useUpdateGeneratedTask() {
       console.log('Updating generated task with data:', payload);
       
       const { data, error } = await supabase
-        .from('generated_tasks')
+        .from('task_tasks')
         .update({
           param_values: payload.input_param_values,
           description: payload.input_description
@@ -267,7 +267,7 @@ export function useUpdateGeneratedTask() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['generated-tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['task-tasks'] });
       toast({
         title: "Tarea Actualizada",
         description: "La tarea se ha actualizada exitosamente"
