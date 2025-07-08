@@ -1,6 +1,48 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 
+// Función para procesar el display_name y reemplazar placeholders
+async function processDisplayName(displayName: string, paramValues: any): Promise<string> {
+  if (!displayName || !paramValues || !supabase) return displayName;
+  
+  let processed = displayName;
+  
+  // Obtener los valores reales de los parámetros
+  const paramValueIds = Object.values(paramValues);
+  if (paramValueIds.length === 0) return displayName;
+  
+  console.log("Fetching parameter values for IDs:", paramValueIds);
+  
+  const { data: parameterValues, error } = await supabase
+    .from('task_parameter_values')
+    .select('name, label, expression_template')
+    .in('name', paramValueIds);
+  
+  if (error) {
+    console.error("Error fetching parameter values:", error);
+    return displayName;
+  }
+  
+  console.log("Parameter values fetched:", parameterValues);
+  
+  // Reemplazar placeholders usando expression_template o label
+  Object.keys(paramValues).forEach(key => {
+    const placeholder = `{{${key}}}`;
+    const paramValueId = paramValues[key];
+    
+    // Buscar el valor correspondiente
+    const paramValue = parameterValues?.find(pv => pv.name === paramValueId);
+    
+    if (paramValue) {
+      // Usar expression_template si existe, sino usar label
+      const replacement = paramValue.expression_template || paramValue.label;
+      processed = processed.replace(new RegExp(placeholder, 'g'), replacement);
+    }
+  });
+  
+  return processed;
+}
+
 export interface TaskSearchResult {
   id: string;
   code: string;
@@ -39,8 +81,18 @@ export function useTaskSearch(searchTerm: string, organizationId: string, enable
         throw error;
       }
 
-      console.log("Task search results:", data);
-      return data || [];
+      console.log("Task search results before processing:", data);
+      
+      // Procesar los display_name para reemplazar placeholders
+      const processedData = await Promise.all(
+        data?.map(async task => ({
+          ...task,
+          display_name: await processDisplayName(task.display_name, task.param_values)
+        })) || []
+      );
+      
+      console.log("Task search results after processing:", processedData);
+      return processedData;
     },
     enabled: enabled && !!supabase && !!organizationId && searchTerm.length >= 3
   });
