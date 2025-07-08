@@ -129,6 +129,24 @@ export function useBudgetTasks(budgetId: string) {
                   }
                 });
                 
+                // También reemplazar valores de parámetros directos (como ladrillo-ceramico-081833)
+                Object.keys(task.task.param_values).forEach(key => {
+                  const paramValueId = task.task.param_values[key];
+                  const paramValue = parameterValues.find(pv => pv.name === paramValueId);
+                  
+                  if (paramValue) {
+                    // Reemplazar el valor directo con su expression_template procesado
+                    let replacement = paramValue.task_parameters?.expression_template || paramValue.label;
+                    
+                    if (replacement && replacement.includes('{value}')) {
+                      replacement = replacement.replace(/{value}/g, paramValue.label);
+                    }
+                    
+                    console.log(`Replacing direct value ${paramValueId} with:`, replacement);
+                    processed = processed.replace(new RegExp(paramValueId, 'g'), replacement);
+                  }
+                });
+                
                 console.log('Final processed name:', processed);
                 // Actualizar display_name procesado
                 task.task.display_name = processed;
