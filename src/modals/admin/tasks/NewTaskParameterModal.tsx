@@ -18,8 +18,7 @@ import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeade
 import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
 import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter';
 
-import { useCreateTaskParameter, useUpdateTaskParameter, TaskParameter, useTaskParameterOptionGroups } from '@/hooks/use-task-parameters-admin';
-import { NewTaskParameterOptionGroupModal } from './NewTaskParameterOptionGroupModal';
+import { useCreateTaskParameter, useUpdateTaskParameter, TaskParameter, useTaskParameterOptionGroups, useCreateTaskParameterOptionGroup, useDeleteTaskParameterOptionGroup, useUpdateTaskParameterOptionGroup } from '@/hooks/use-task-parameters-admin';
 import { TaskParameterGroupAssignmentModal } from './TaskParameterGroupAssignmentModal';
 import { useUnits } from '@/hooks/use-units';
 
@@ -50,12 +49,18 @@ export function NewTaskParameterModal({
   onParameterCreated
 }: NewTaskParameterModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isNewGroupModalOpen, setIsNewGroupModalOpen] = useState(false);
   const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<any>(null);
+  const [newGroupName, setNewGroupName] = useState('');
+  const [isCreatingGroup, setIsCreatingGroup] = useState(false);
+  const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
+  const [editingGroupName, setEditingGroupName] = useState('');
   
   const createMutation = useCreateTaskParameter();
   const updateMutation = useUpdateTaskParameter();
+  const createGroupMutation = useCreateTaskParameterOptionGroup();
+  const deleteGroupMutation = useDeleteTaskParameterOptionGroup();
+  const updateGroupMutation = useUpdateTaskParameterOptionGroup();
   
   // Load units for the selector
   const { data: units, isLoading: unitsLoading } = useUnits();
@@ -77,6 +82,59 @@ export function NewTaskParameterModal({
       is_required: false,
     },
   });
+
+  // Functions for inline group creation
+  const handleCreateGroup = async () => {
+    if (!newGroupName.trim() || !parameter?.parameter_id) return;
+    
+    setIsCreatingGroup(true);
+    try {
+      await createGroupMutation.mutateAsync({
+        parameter_id: parameter.parameter_id,
+        name: newGroupName.toLowerCase().replace(/\s+/g, '-'),
+        label: newGroupName,
+      });
+      setNewGroupName('');
+    } catch (error) {
+      console.error('Error creating group:', error);
+    } finally {
+      setIsCreatingGroup(false);
+    }
+  };
+
+  const handleDeleteGroup = async (groupId: string) => {
+    try {
+      await deleteGroupMutation.mutateAsync(groupId);
+    } catch (error) {
+      console.error('Error deleting group:', error);
+    }
+  };
+
+  const handleEditGroup = (group: any) => {
+    setEditingGroupId(group.id);
+    setEditingGroupName(group.name || group.label);
+  };
+
+  const handleSaveGroupEdit = async () => {
+    if (!editingGroupId || !editingGroupName.trim()) return;
+    
+    try {
+      await updateGroupMutation.mutateAsync({
+        id: editingGroupId,
+        name: editingGroupName.toLowerCase().replace(/\s+/g, '-'),
+        label: editingGroupName,
+      });
+      setEditingGroupId(null);
+      setEditingGroupName('');
+    } catch (error) {
+      console.error('Error updating group:', error);
+    }
+  };
+
+  const handleCancelGroupEdit = () => {
+    setEditingGroupId(null);
+    setEditingGroupName('');
+  };
 
   // Reset form when modal opens/closes or parameter changes
   useEffect(() => {
@@ -316,18 +374,43 @@ export function NewTaskParameterModal({
                         </AccordionTrigger>
                         <AccordionContent className="px-0 pt-2">
                           <div className="space-y-4">
-                            <div className="flex justify-between items-center">
+                            <div className="flex items-center justify-between">
                               <h4 className="text-sm font-medium">Grupos existentes</h4>
-                              <Button
-                                type="button"
-                                size="sm"
-                                onClick={() => setIsNewGroupModalOpen(true)}
-                                className="h-8"
-                              >
-                                <Plus className="h-4 w-4 mr-1" />
-                                Crear Grupo de Opción
-                              </Button>
                             </div>
+                            
+                            {/* Inline group creation */}
+                            {parameter && (
+                              <div className="flex gap-2">
+                                <Input
+                                  placeholder="Nombre del nuevo grupo..."
+                                  value={newGroupName}
+                                  onChange={(e) => setNewGroupName(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      e.preventDefault();
+                                      handleCreateGroup();
+                                    }
+                                  }}
+                                  className="flex-1"
+                                />
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  onClick={handleCreateGroup}
+                                  disabled={!newGroupName.trim() || isCreatingGroup}
+                                  className="h-10"
+                                >
+                                  {isCreatingGroup ? (
+                                    'Creando...'
+                                  ) : (
+                                    <>
+                                      <Plus className="h-4 w-4 mr-1" />
+                                      Crear
+                                    </>
+                                  )}
+                                </Button>
+                              </div>
+                            )}
                             
                             <div className="space-y-2">
                               {/* Grupos reales desde la base de datos */}
@@ -338,35 +421,81 @@ export function NewTaskParameterModal({
                               ) : optionGroups && optionGroups.length > 0 ? (
                                 optionGroups.map((group) => (
                                   <div key={group.id} className="flex items-center justify-between p-3 border rounded-lg">
-                                    <div>
-                                      <p className="text-sm font-medium">{group.label}</p>
-                                      <p className="text-xs text-muted-foreground">{group.name}</p>
+                                    <div className="flex-1">
+                                      {editingGroupId === group.id ? (
+                                        <div className="flex gap-2">
+                                          <Input
+                                            value={editingGroupName}
+                                            onChange={(e) => setEditingGroupName(e.target.value)}
+                                            onKeyDown={(e) => {
+                                              if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                handleSaveGroupEdit();
+                                              } else if (e.key === 'Escape') {
+                                                handleCancelGroupEdit();
+                                              }
+                                            }}
+                                            className="text-sm"
+                                            autoFocus
+                                          />
+                                          <Button
+                                            type="button"
+                                            size="sm"
+                                            onClick={handleSaveGroupEdit}
+                                            disabled={!editingGroupName.trim()}
+                                          >
+                                            ✓
+                                          </Button>
+                                          <Button
+                                            type="button"
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={handleCancelGroupEdit}
+                                          >
+                                            ✕
+                                          </Button>
+                                        </div>
+                                      ) : (
+                                        <div>
+                                          <p className="text-sm font-medium">{group.label || group.name}</p>
+                                          <p className="text-xs text-muted-foreground">{group.name}</p>
+                                        </div>
+                                      )}
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                      <Button
-                                        type="button"
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() => {
-                                          // TODO: Implementar eliminación de grupo
-                                        }}
-                                        className="h-7 w-7 p-0"
-                                      >
-                                        <Trash2 className="w-3 h-3" />
-                                      </Button>
-                                      <Button
-                                        type="button"
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() => {
-                                          setSelectedGroup(group);
-                                          setIsAssignmentModalOpen(true);
-                                        }}
-                                        className="h-7 w-7 p-0"
-                                      >
-                                        <CheckSquare className="w-3 h-3" />
-                                      </Button>
-                                    </div>
+                                    {editingGroupId !== group.id && (
+                                      <div className="flex items-center gap-2">
+                                        <Button
+                                          type="button"
+                                          size="sm"
+                                          variant="ghost"
+                                          onClick={() => handleEditGroup(group)}
+                                          className="h-7 w-7 p-0"
+                                        >
+                                          <Pencil className="w-3 h-3" />
+                                        </Button>
+                                        <Button
+                                          type="button"
+                                          size="sm"
+                                          variant="ghost"
+                                          onClick={() => handleDeleteGroup(group.id)}
+                                          className="h-7 w-7 p-0"
+                                        >
+                                          <Trash2 className="w-3 h-3" />
+                                        </Button>
+                                        <Button
+                                          type="button"
+                                          size="sm"
+                                          variant="ghost"
+                                          onClick={() => {
+                                            setSelectedGroup(group);
+                                            setIsAssignmentModalOpen(true);
+                                          }}
+                                          className="h-7 w-7 p-0"
+                                        >
+                                          <CheckSquare className="w-3 h-3" />
+                                        </Button>
+                                      </div>
+                                    )}
                                   </div>
                                 ))
                               ) : parameter ? (
@@ -413,15 +542,7 @@ export function NewTaskParameterModal({
         }}
       </CustomModalLayout>
 
-      {/* Modal para crear grupos de opciones */}
-      {parameter && (
-        <NewTaskParameterOptionGroupModal
-          open={isNewGroupModalOpen}
-          onClose={() => setIsNewGroupModalOpen(false)}
-          parameterId={parameter.parameter_id}
-          parameterLabel={parameter.label}
-        />
-      )}
+
 
       {/* Modal de asignación de opciones a grupos */}
       {selectedGroup && (

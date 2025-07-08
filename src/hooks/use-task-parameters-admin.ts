@@ -491,6 +491,85 @@ export function useCreateTaskParameterOptionGroup() {
   });
 }
 
+// Hook para eliminar grupo de opciones
+export function useDeleteTaskParameterOptionGroup() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (groupId: string) => {
+      // First delete all group items
+      await supabase
+        .from('task_parameter_option_group_items')
+        .delete()
+        .eq('group_id', groupId);
+
+      // Then delete the group
+      const { error } = await supabase
+        .from('task_parameter_option_groups')
+        .delete()
+        .eq('id', groupId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-option-groups'] });
+      toast({
+        title: 'Grupo eliminado',
+        description: 'El grupo de opciones se ha eliminado correctamente.',
+      });
+    },
+    onError: (error) => {
+      console.error('Error deleting option group:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo eliminar el grupo de opciones.',
+        variant: 'destructive',
+      });
+    },
+  });
+}
+
+// Hook para actualizar grupo de opciones
+export function useUpdateTaskParameterOptionGroup() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: {
+      id: string;
+      name: string;
+      label: string;
+    }) => {
+      const { data: result, error } = await supabase
+        .from('task_parameter_option_groups')
+        .update({
+          name: data.name,
+          label: data.label,
+        })
+        .eq('id', data.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-option-groups'] });
+      toast({
+        title: 'Grupo actualizado',
+        description: 'El grupo de opciones se ha actualizado correctamente.',
+      });
+    },
+    onError: (error) => {
+      console.error('Error updating option group:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo actualizar el grupo de opciones.',
+        variant: 'destructive',
+      });
+    },
+  });
+}
+
 // Hook para agregar/quitar opciones de un grupo
 export function useToggleTaskParameterOptionInGroup() {
   const queryClient = useQueryClient();
