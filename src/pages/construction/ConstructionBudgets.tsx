@@ -15,11 +15,26 @@ import NewBudgetTaskModal from '@/modals/budget/NewBudgetTaskModal'
 import { useBudgets } from '@/hooks/use-budgets'
 import { useBudgetTasks } from '@/hooks/use-budget-tasks'
 import { useToast } from '@/hooks/use-toast'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 
+// Hook para obtener valores de parámetros con expression_template
+const useTaskParameterValues = () => {
+  return useQuery({
+    queryKey: ['task-parameter-values'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('task_parameter_values')
+        .select('name, label, expression_template');
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+};
+
 // Función para generar el nombre completo de la tarea con parámetros procesados
-function generateTaskDisplayName(task: any): string {
+function generateTaskDisplayName(task: any, parameterValues: any[] = []): string {
   if (!task?.display_name || !task?.param_values) {
     return task?.display_name || 'Sin nombre';
   }
@@ -27,10 +42,21 @@ function generateTaskDisplayName(task: any): string {
   let displayName = task.display_name;
   const paramValues = task.param_values;
 
-  // Reemplazar placeholders del tipo {{parameter-name}} con valores reales
+  // Reemplazar placeholders del tipo {{parameter-name}} con expression_template
   Object.entries(paramValues).forEach(([paramName, paramValue]) => {
     const placeholder = `{{${paramName}}}`;
-    displayName = displayName.replace(placeholder, paramValue as string);
+    
+    // Buscar el parameter value correspondiente para obtener su expression_template
+    const parameterValue = parameterValues.find(pv => pv.name === paramValue);
+    
+    if (parameterValue?.expression_template) {
+      // Reemplazar {value} en expression_template con el valor actual
+      const processedValue = parameterValue.expression_template.replace('{value}', parameterValue.label || paramValue as string);
+      displayName = displayName.replace(placeholder, processedValue);
+    } else {
+      // Fallback al valor directo si no hay expression_template
+      displayName = displayName.replace(placeholder, paramValue as string);
+    }
   });
 
   return displayName;
@@ -259,6 +285,7 @@ export default function ConstructionBudgets() {
   // Budget Task Table Component
   function BudgetTaskTable({ budgetId }: { budgetId: string }) {
     const { budgetTasks, isLoading } = useBudgetTasks(budgetId);
+    const { data: parameterValues = [] } = useTaskParameterValues();
     const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
 
     // Calculate totals for percentage calculations (simplified for task_tasks)
@@ -348,7 +375,7 @@ export default function ConstructionBudgets() {
                       <div className="font-medium text-sm">{task.task?.rubro_name || 'Sin rubro'}</div>
                     </td>
                     <td className="p-2 text-sm">
-                      {generateTaskDisplayName(task.task)}
+                      {generateTaskDisplayName(task.task, parameterValues)}
                     </td>
                     <td className="p-2">
                       <input
@@ -395,6 +422,10 @@ export default function ConstructionBudgets() {
                 <td className="p-2 text-sm font-semibold">TOTAL</td>
                 <td className="p-2"></td>
                 <td className="p-2"></td>
+                <td className="p-2"></td>
+                <td className="p-2"></td>
+                <td className="p-2 text-sm font-semibold">$0</td>
+                <td className="p-2 text-sm font-semibold">100.0%</td>
                 <td className="p-2"></td>
                 <td className="p-2 text-sm font-semibold">$0</td>
                 <td className="p-2 text-sm font-semibold">$0</td>
