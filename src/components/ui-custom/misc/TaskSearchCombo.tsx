@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Check, ChevronsUpDown } from 'lucide-react';
+import { Check, ChevronsUpDown, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Command,
@@ -29,6 +29,9 @@ interface TaskSearchComboProps {
   disabled?: boolean;
   className?: string;
   onSearchChange?: (search: string) => void;
+  showCreateButton?: boolean;
+  onCreateTask?: () => void;
+  searchQuery?: string;
 }
 
 export function TaskSearchCombo({
@@ -40,7 +43,10 @@ export function TaskSearchCombo({
   emptyText = "No se encontraron opciones.",
   disabled = false,
   className,
-  onSearchChange
+  onSearchChange,
+  showCreateButton = false,
+  onCreateTask,
+  searchQuery = ""
 }: TaskSearchComboProps) {
   const [open, setOpen] = useState(false);
 
@@ -80,7 +86,29 @@ export function TaskSearchCombo({
             onValueChange={onSearchChange}
             className="text-xs leading-tight py-2 px-3 border-0 bg-transparent placeholder:text-[var(--input-placeholder)] text-foreground"
           />
-          <CommandEmpty className="text-xs py-2 px-3 text-[var(--input-placeholder)]">{emptyText}</CommandEmpty>
+          <CommandEmpty className="text-xs py-2 px-3 text-[var(--input-placeholder)]">
+            <div className="space-y-3">
+              <p>{emptyText}</p>
+              {showCreateButton && searchQuery.length >= 3 && onCreateTask && (
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground">
+                    ❗ No se encontraron tareas. Puede crear una nueva tarea personalizada.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOpen(false);
+                      onCreateTask();
+                    }}
+                    className="flex items-center gap-2 w-full px-3 py-2 text-xs bg-accent text-accent-foreground rounded-md hover:bg-accent/80 transition-colors"
+                  >
+                    <Plus className="w-3 h-3" />
+                    Crear Tarea Personalizada
+                  </button>
+                </div>
+              )}
+            </div>
+          </CommandEmpty>
           <CommandGroup className="max-h-64 overflow-auto">
             {options.map((option) => (
               <CommandItem

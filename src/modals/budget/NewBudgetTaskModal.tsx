@@ -15,6 +15,8 @@ import { Label } from "@/components/ui/label";
 import { useTaskSearch } from "@/hooks/use-task-search";
 import { useBudgetTasks } from "@/hooks/use-budget-tasks";
 import { useDebugTasks } from "@/hooks/use-debug-tasks";
+import { CreateGeneratedTaskUserModal } from "@/modals/user/CreateGeneratedTaskUserModal";
+import { useCurrentUser } from "@/hooks/use-current-user";
 
 const budgetTaskSchema = z.object({
   task_id: z.string().min(1, "Debe seleccionar una tarea"),
@@ -42,9 +44,11 @@ export default function NewBudgetTaskModal({
 }: NewBudgetTaskModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const { data: tasks = [], isLoading: tasksLoading } = useTaskSearch(searchQuery, organizationId, open);
+  const [createTaskModalOpen, setCreateTaskModalOpen] = useState(false);
+  const { data: tasks = [], isLoading: tasksLoading, refetch: refetchTasks } = useTaskSearch(searchQuery, organizationId, open);
   const budgetTasksHook = useBudgetTasks(budgetId);
   const { createBudgetTask, updateBudgetTask } = budgetTasksHook;
+  const { data: userData } = useCurrentUser();
   
   // Hook de debug temporal
   const { data: debugData } = useDebugTasks(organizationId);
@@ -96,6 +100,21 @@ export default function NewBudgetTaskModal({
     onClose();
   };
 
+  // Handle task creation from modal
+  const handleTaskCreated = (newTask: any) => {
+    // Set the newly created task in the form
+    setValue("task_id", newTask.id);
+    // Close the create task modal
+    setCreateTaskModalOpen(false);
+    // Refetch tasks to include the new one
+    refetchTasks();
+  };
+
+  // Handle create task button click
+  const handleCreateTask = () => {
+    setCreateTaskModalOpen(true);
+  };
+
   const onSubmit = async (data: BudgetTaskFormData) => {
     setIsSubmitting(true);
     try {
@@ -141,7 +160,8 @@ export default function NewBudgetTaskModal({
 
 
   return (
-    <CustomModalLayout open={open} onClose={handleClose}>
+    <>
+      <CustomModalLayout open={open} onClose={handleClose}>
       {{
         header: (
           <CustomModalHeader
@@ -167,6 +187,9 @@ export default function NewBudgetTaskModal({
                     searchPlaceholder="Buscar tarea por nombre..."
                     emptyText={searchQuery.length < 3 ? "Escriba al menos 3 caracteres" : "No se encontraron tareas"}
                     disabled={tasksLoading}
+                    showCreateButton={!userData?.user_data?.user_type || userData.user_data.user_type !== 'admin'}
+                    onCreateTask={handleCreateTask}
+                    searchQuery={searchQuery}
                   />
                   {searchQuery.length >= 3 && tasks.length === 0 && !tasksLoading && (
                     <p className="text-xs text-muted-foreground">
@@ -209,6 +232,13 @@ export default function NewBudgetTaskModal({
           />
         )
       }}
-    </CustomModalLayout>
+      </CustomModalLayout>
+      
+      <CreateGeneratedTaskUserModal
+        open={createTaskModalOpen}
+        onClose={() => setCreateTaskModalOpen(false)}
+        onTaskCreated={handleTaskCreated}
+      />
+    </>
   );
 }
