@@ -2,16 +2,14 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, Edit, Trash2, Eye, Settings, Package, Pencil, CheckSquare } from 'lucide-react';
-
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
+import { Plus, Trash2, Eye, Edit3 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout';
 import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader';
@@ -60,9 +58,6 @@ export function NewTaskParameterModal({
   const deleteGroupMutation = useDeleteTaskParameterOptionGroup();
   const updateGroupMutation = useUpdateTaskParameterOptionGroup();
   
-  // Load units for the selector
-  const { data: units, isLoading: unitsLoading } = useUnits();
-  
   // Load option groups for this parameter
   const parameterId = parameter?.parameter_id || '';
   console.log('Loading groups for parameter:', { parameter, parameterId });
@@ -81,6 +76,8 @@ export function NewTaskParameterModal({
     },
   });
 
+  const { toast } = useToast();
+
   // Functions for inline group creation
   const handleCreateGroup = async () => {
     if (!selectedSubcategoryId || !parameter?.parameter_id) return;
@@ -93,11 +90,20 @@ export function NewTaskParameterModal({
       await createGroupMutation.mutateAsync({
         parameter_id: parameter.parameter_id,
         name: selectedSubcategory.name,
-        category_id: selectedSubcategory.id,
+        category_id: selectedSubcategoryId
       });
       setSelectedSubcategoryId('');
+      toast({
+        title: "Éxito",
+        description: "Grupo creado correctamente"
+      });
     } catch (error) {
       console.error('Error creating group:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Error al crear el grupo"
+      });
     } finally {
       setIsCreatingGroup(false);
     }
@@ -106,96 +112,104 @@ export function NewTaskParameterModal({
   const handleDeleteGroup = async (groupId: string) => {
     try {
       await deleteGroupMutation.mutateAsync(groupId);
+      toast({
+        title: "Éxito",
+        description: "Grupo eliminado correctamente"
+      });
     } catch (error) {
       console.error('Error deleting group:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Error al eliminar el grupo"
+      });
     }
   };
 
-  const handleEditGroup = (group: any) => {
-    setEditingGroupId(group.id);
-    setEditingGroupName(group.category_id || '');
-  };
-
-  const handleSaveGroupEdit = async () => {
-    if (!editingGroupId || !editingGroupName) return;
-    
-    const selectedSubcategory = subcategories.find(cat => cat.id === editingGroupName);
-    if (!selectedSubcategory) return;
-    
+  const handleUpdateGroup = async (groupId: string, newName: string) => {
     try {
       await updateGroupMutation.mutateAsync({
-        id: editingGroupId,
-        name: selectedSubcategory.name,
-        category_id: selectedSubcategory.id,
+        id: groupId,
+        name: newName
       });
       setEditingGroupId(null);
       setEditingGroupName('');
+      toast({
+        title: "Éxito",
+        description: "Grupo actualizado correctamente"
+      });
     } catch (error) {
       console.error('Error updating group:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Error al actualizar el grupo"
+      });
     }
   };
 
-  const handleCancelGroupEdit = () => {
+  const handleClose = () => {
+    form.reset();
+    setSelectedSubcategoryId('');
     setEditingGroupId(null);
     setEditingGroupName('');
+    onClose();
   };
 
-  // Reset form when modal opens/closes or parameter changes
+  // Load parameter data for editing
   useEffect(() => {
     if (parameter && open) {
       form.reset({
         name: parameter.name,
         label: parameter.label,
         type: parameter.type,
-        role: parameter.role || '',
         expression_template: parameter.expression_template || '',
-        is_required: parameter.is_required,
       });
     } else if (!parameter && open) {
       form.reset({
         name: '',
         label: '',
         type: 'text',
-        role: '',
         expression_template: '',
-        is_required: false,
       });
     }
   }, [parameter, open, form]);
 
   const onSubmit = async (data: TaskParameterFormData) => {
+    console.log('Creating parameter with data:', data);
     setIsSubmitting(true);
-    
     try {
-      const submitData = {
-        ...data,
-        role: data.role?.trim() || undefined,
-        expression_template: data.expression_template?.trim() || undefined,
-      };
-
       if (parameter) {
         await updateMutation.mutateAsync({
           id: parameter.id,
-          ...submitData,
+          ...data,
+        });
+        toast({
+          title: "Éxito",
+          description: "Parámetro actualizado correctamente"
         });
       } else {
-        const newParameter = await createMutation.mutateAsync(submitData);
-        if (onParameterCreated && newParameter?.id) {
-          onParameterCreated(newParameter.id);
+        const result = await createMutation.mutateAsync(data);
+        console.log('Parameter created with ID:', result.id);
+        if (onParameterCreated) {
+          onParameterCreated(result.id);
         }
+        toast({
+          title: "Éxito",
+          description: "Parámetro creado correctamente"
+        });
       }
-      
-      onClose();
+      handleClose();
     } catch (error) {
-      console.error('Error submitting parameter:', error);
+      console.error('Error saving parameter:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Error al guardar el parámetro"
+      });
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const handleClose = () => {
-    form.reset();
-    onClose();
   };
 
   return (
@@ -204,336 +218,228 @@ export function NewTaskParameterModal({
         {{
           header: (
             <CustomModalHeader
-              title={parameter ? 'Editar Parámetro' : 'Nuevo Parámetro'}
-              description={parameter ? 'Modifica los datos del parámetro' : 'Crea un nuevo parámetro de plantilla'}
+              title={parameter ? "Editar Parámetro" : "Nuevo Parámetro"}
+              subtitle={parameter ? "Modifica los datos del parámetro" : "Crea un nuevo parámetro de tarea"}
               onClose={handleClose}
             />
           ),
           body: (
-            <CustomModalBody columns={1}>
+            <CustomModalBody>
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id="parameter-form">
-                  <Accordion type="single" collapsible defaultValue="basic-data" className="w-full">
-                    {/* Acordeón Datos Básicos */}
-                    <AccordionItem value="basic-data">
-                      <AccordionTrigger className="text-sm font-medium px-3 py-2 border rounded-lg mb-2">
-                        <div className="flex items-center gap-2">
-                          <Settings className="w-4 h-4" />
-                          <span>Configuración del Parámetro</span>
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent className="px-0 pt-2">
-                        <div className="space-y-4">
-                          <FormField
-                            control={form.control}
-                            name="label"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="required-asterisk">Etiqueta (Visible)</FormLabel>
-                                <FormControl>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  <div className="space-y-6">
+                {/* Configuración Básica */}
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="label"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="required-asterisk">Etiqueta (Visible)</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Ej: Morteros"
+                              disabled={isSubmitting}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="required-asterisk">Nombre (Clave)</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Ej: mortar_type"
+                              disabled={isSubmitting}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="type"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="required-asterisk">Tipo</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value} disabled={isSubmitting}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Seleccionar tipo" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="z-[9999]">
+                              <SelectItem value="text">Texto</SelectItem>
+                              <SelectItem value="number">Número</SelectItem>
+                              <SelectItem value="select">Selección</SelectItem>
+                              <SelectItem value="boolean">Verdadero/Falso</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="expression_template"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Plantilla de frase</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="de {value}"
+                              disabled={isSubmitting}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+
+                {/* Grupos de Opciones - Solo visible si es tipo select */}
+                {form.watch('type') === 'select' && (
+                  <div className="border rounded-lg p-4 bg-muted/20">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 mb-4">
+                        <h3 className="text-sm font-medium">Grupos de Opciones</h3>
+                        <Badge variant="outline" className="text-xs">
+                          {optionGroups?.length || 0} grupos
+                        </Badge>
+                      </div>
+
+                      {/* Crear nuevo grupo */}
+                      <div className="flex gap-2">
+                        <Select value={selectedSubcategoryId} onValueChange={setSelectedSubcategoryId}>
+                          <SelectTrigger className="flex-1">
+                            <SelectValue placeholder="Seleccionar subcategoría" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {subcategories.map((subcategory) => (
+                              <SelectItem key={subcategory.id} value={subcategory.id}>
+                                {subcategory.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={handleCreateGroup}
+                          disabled={!selectedSubcategoryId || isCreatingGroup || !parameter}
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
+
+                      {/* Lista de grupos existentes */}
+                      {optionGroups && optionGroups.length > 0 && (
+                        <div className="space-y-2">
+                          {optionGroups.map((group) => (
+                            <div key={group.id} className="flex items-center justify-between p-2 border rounded bg-background">
+                              <div className="flex items-center gap-2">
+                                {editingGroupId === group.id ? (
                                   <Input
-                                    {...field}
-                                    placeholder="Ej: Ladrillos y Bloques"
-                                    disabled={isSubmitting}
+                                    value={editingGroupName}
+                                    onChange={(e) => setEditingGroupName(e.target.value)}
+                                    className="h-8 w-32"
+                                    onBlur={() => {
+                                      if (editingGroupName.trim()) {
+                                        handleUpdateGroup(group.id, editingGroupName.trim());
+                                      } else {
+                                        setEditingGroupId(null);
+                                        setEditingGroupName('');
+                                      }
+                                    }}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') {
+                                        if (editingGroupName.trim()) {
+                                          handleUpdateGroup(group.id, editingGroupName.trim());
+                                        }
+                                      } else if (e.key === 'Escape') {
+                                        setEditingGroupId(null);
+                                        setEditingGroupName('');
+                                      }
+                                    }}
+                                    autoFocus
                                   />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={form.control}
-                            name="name"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="required-asterisk">Nombre (Clave)</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    {...field}
-                                    placeholder="Ej: brick-type"
-                                    disabled={isSubmitting}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={form.control}
-                            name="type"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="required-asterisk">Tipo</FormLabel>
-                                <Select
-                                  onValueChange={field.onChange}
-                                  value={field.value}
-                                  disabled={isSubmitting}
-                                >
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Seleccionar tipo" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent className="z-[9999]">
-                                    <SelectItem value="text">Texto</SelectItem>
-                                    <SelectItem value="number">Número</SelectItem>
-                                    <SelectItem value="select">Selección</SelectItem>
-                                    <SelectItem value="boolean">Booleano</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-
-
-                          <FormField
-                            control={form.control}
-                            name="expression_template"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Plantilla de frase</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    {...field}
-                                    placeholder="de {value}"
-                                    disabled={isSubmitting}
-                                  />
-                                </FormControl>
-                                {field.value && !field.value.includes('{value}') && (
-                                  <div className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded p-2">
-                                    ⚠️ La plantilla debería incluir {'{value}'} como placeholder
-                                  </div>
+                                ) : (
+                                  <span className="text-sm font-medium">{group.name}</span>
                                 )}
-                                {field.value && field.value.includes('{value}') && (
-                                  <div className="text-xs text-muted-foreground">
-                                    <span className="font-medium">Frase resultante:</span> {field.value.replace('{value}', 'Ladrillo hueco')}
-                                  </div>
-                                )}
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={form.control}
-                            name="is_required"
-                            render={({ field }) => (
-                              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                                <div className="space-y-0.5">
-                                  <FormLabel>Campo Obligatorio</FormLabel>
-                                  <div className="text-xs text-muted-foreground">
-                                    Este parámetro será requerido en las tareas
-                                  </div>
-                                </div>
-                                <FormControl>
-                                  <Switch
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                    disabled={isSubmitting}
-                                  />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-
-                    {/* Acordeón Grupos de Opciones */}
-                    {form.watch('type') === 'select' && (
-                      <AccordionItem value="option-groups">
-                        <AccordionTrigger className="text-sm font-medium px-3 py-2 border rounded-lg mb-2">
-                          <div className="flex items-center gap-2">
-                            <Package className="w-4 h-4" />
-                            <span>Grupos de Opciones</span>
-                          </div>
-                        </AccordionTrigger>
-                        <AccordionContent className="px-0 pt-2">
-                          <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                              <h4 className="text-sm font-medium">Grupos existentes</h4>
-                            </div>
-                            
-                            {/* Inline group creation */}
-                            {parameter && (
-                              <div className="flex gap-2">
-                                <Select value={selectedSubcategoryId} onValueChange={setSelectedSubcategoryId}>
-                                  <SelectTrigger className="flex-1">
-                                    <SelectValue placeholder="Seleccionar subcategoría..." />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {subcategoriesLoading ? (
-                                      <SelectItem value="loading" disabled>Cargando...</SelectItem>
-                                    ) : subcategories.length > 0 ? (
-                                      subcategories.map((subcategory) => (
-                                        <SelectItem key={subcategory.id} value={subcategory.id}>
-                                          {subcategory.code || subcategory.name} {subcategory.name && subcategory.code ? '- ' + subcategory.name : ''}
-                                        </SelectItem>
-                                      ))
-                                    ) : (
-                                      <SelectItem value="empty" disabled>No hay subcategorías disponibles</SelectItem>
-                                    )}
-                                  </SelectContent>
-                                </Select>
+                              </div>
+                              <div className="flex items-center gap-1">
                                 <Button
                                   type="button"
+                                  variant="ghost"
                                   size="sm"
-                                  onClick={handleCreateGroup}
-                                  disabled={!selectedSubcategoryId || isCreatingGroup}
-                                  className="h-10"
+                                  onClick={() => {
+                                    setSelectedGroup(group);
+                                    setIsAssignmentModalOpen(true);
+                                  }}
+                                  className="h-8 w-8 p-0"
                                 >
-                                  {isCreatingGroup ? (
-                                    'Creando...'
-                                  ) : (
-                                    <>
-                                      <Plus className="h-4 w-4 mr-1" />
-                                      Crear
-                                    </>
-                                  )}
+                                  <Eye className="h-3 w-3" />
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setEditingGroupId(group.id);
+                                    setEditingGroupName(group.name);
+                                  }}
+                                  className="h-8 w-8 p-0"
+                                >
+                                  <Edit3 className="h-3 w-3" />
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteGroup(group.id)}
+                                  className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                                >
+                                  <Trash2 className="h-3 w-3" />
                                 </Button>
                               </div>
-                            )}
-                            
-                            <div className="space-y-2">
-                              {/* Grupos reales desde la base de datos */}
-                              {isLoadingGroups ? (
-                                <div className="text-sm text-muted-foreground text-center py-4">
-                                  Cargando grupos...
-                                </div>
-                              ) : optionGroups && optionGroups.length > 0 ? (
-                                optionGroups.map((group) => (
-                                  <div key={group.id} className="flex items-center justify-between p-3 border rounded-lg">
-                                    <div className="flex-1">
-                                      {editingGroupId === group.id ? (
-                                        <div className="flex gap-2">
-                                          <Select value={editingGroupName} onValueChange={setEditingGroupName}>
-                                            <SelectTrigger className="text-sm flex-1">
-                                              <SelectValue placeholder="Seleccionar subcategoría..." />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                              {subcategories.map((subcategory) => (
-                                                <SelectItem key={subcategory.id} value={subcategory.id}>
-                                                  {subcategory.name} - {subcategory.label || subcategory.description}
-                                                </SelectItem>
-                                              ))}
-                                            </SelectContent>
-                                          </Select>
-                                          <Button
-                                            type="button"
-                                            size="sm"
-                                            onClick={handleSaveGroupEdit}
-                                            disabled={!editingGroupName}
-                                          >
-                                            ✓
-                                          </Button>
-                                          <Button
-                                            type="button"
-                                            size="sm"
-                                            variant="ghost"
-                                            onClick={handleCancelGroupEdit}
-                                          >
-                                            ✕
-                                          </Button>
-                                        </div>
-                                      ) : (
-                                        <div>
-                                          <p className="text-sm font-medium">{group.name}</p>
-                                          <p className="text-xs text-muted-foreground">
-                                            {group.category_id ? 
-                                              subcategories.find(cat => cat.id === group.category_id)?.label || 
-                                              subcategories.find(cat => cat.id === group.category_id)?.description || 
-                                              'Categoría no encontrada' 
-                                              : 'Sin categoría asignada'
-                                            }
-                                          </p>
-                                        </div>
-                                      )}
-                                    </div>
-                                    {editingGroupId !== group.id && (
-                                      <div className="flex items-center gap-2">
-                                        <Button
-                                          type="button"
-                                          size="sm"
-                                          variant="ghost"
-                                          onClick={() => handleEditGroup(group)}
-                                          className="h-7 w-7 p-0"
-                                        >
-                                          <Pencil className="w-3 h-3" />
-                                        </Button>
-                                        <Button
-                                          type="button"
-                                          size="sm"
-                                          variant="ghost"
-                                          onClick={() => handleDeleteGroup(group.id)}
-                                          className="h-7 w-7 p-0"
-                                        >
-                                          <Trash2 className="w-3 h-3" />
-                                        </Button>
-                                        <Button
-                                          type="button"
-                                          size="sm"
-                                          variant="ghost"
-                                          onClick={() => {
-                                            setSelectedGroup(group);
-                                            setIsAssignmentModalOpen(true);
-                                          }}
-                                          className="h-7 w-7 p-0"
-                                        >
-                                          <CheckSquare className="w-3 h-3" />
-                                        </Button>
-                                      </div>
-                                    )}
-                                  </div>
-                                ))
-                              ) : parameter ? (
-                                <div className="text-sm text-muted-foreground text-center py-4">
-                                  No hay grupos de opciones configurados para este parámetro.
-                                </div>
-                              ) : (
-                                <div className="text-sm text-muted-foreground text-center py-4">
-                                  Los grupos se mostrarán después de crear el parámetro.
-                                </div>
-                              )}
                             </div>
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
-                    )}
-                  </Accordion>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+                  </div>
                 </form>
               </Form>
             </CustomModalBody>
           ),
           footer: (
-            <div className="p-2 border-t border-[var(--card-border)] mt-auto">
-              <div className="flex gap-2 w-full">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={handleClose}
-                  className="w-1/4"
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  type="submit"
-                  form="parameter-form"
-                  className="w-3/4"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? 'Guardando...' : (parameter ? "Actualizar" : "Guardar")}
-                </Button>
-              </div>
-            </div>
+            <CustomModalFooter
+              onClose={handleClose}
+              isSubmitting={isSubmitting}
+              submitText={parameter ? "Actualizar" : "Guardar"}
+            />
           ),
         }}
       </CustomModalLayout>
-
-
 
       {/* Modal de asignación de opciones a grupos */}
       {selectedGroup && (
