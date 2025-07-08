@@ -419,18 +419,34 @@ export function useTaskParameterValues(parameterId: string) {
   });
 }
 
-// Hook para obtener TODOS los valores de parámetros (sin filtro)
+// Hook para obtener TODOS los valores de parámetros (sin filtro) con expression_template
 export function useAllTaskParameterValues() {
   return useQuery({
     queryKey: ['all-task-parameter-values'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('task_parameter_values')
-        .select('*')
+        .select(`
+          *,
+          task_parameters(
+            expression_template
+          )
+        `)
         .order('name', { ascending: true });
 
       if (error) throw error;
-      return data || [];
+      
+      console.log('useAllTaskParameterValues - Raw data from query:', data);
+      
+      // Flatten the data structure to include expression_template at the top level
+      const flattenedData = data?.map(item => ({
+        ...item,
+        expression_template: item.task_parameters?.expression_template || '{value}'
+      })) || [];
+      
+      console.log('useAllTaskParameterValues - Flattened data:', flattenedData);
+      
+      return flattenedData;
     },
   });
 }

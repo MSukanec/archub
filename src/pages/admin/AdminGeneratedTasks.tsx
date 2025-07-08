@@ -58,6 +58,7 @@ export default function AdminGeneratedTasks() {
   const generateTaskName = (task: GeneratedTask): string => {
     console.log('Table generateTaskName - Called with task:', task)
     console.log('Table generateTaskName - Available parameterValues:', parameterValues)
+    console.log('Table generateTaskName - First parameterValue structure:', parameterValues[0])
     
     const template = templates.find(t => t.id === task.template_id)
     if (!template) return 'Sin plantilla'
@@ -74,6 +75,7 @@ export default function AdminGeneratedTasks() {
         
         console.log('Table generateTaskName - Looking for param:', paramName, 'value:', paramValue)
         console.log('Table generateTaskName - Found option:', parameterOption)
+        console.log('Table generateTaskName - Found option has expression_template:', parameterOption?.expression_template)
         
         if (parameterOption) {
           // Use the expression template to format the value
