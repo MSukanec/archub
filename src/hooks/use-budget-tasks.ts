@@ -23,6 +23,7 @@ export interface BudgetTask {
     param_values: any;
     is_public: boolean;
     organization_id: string;
+    unit_id: string | null;
   };
 }
 

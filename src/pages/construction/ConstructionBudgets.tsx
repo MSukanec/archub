@@ -19,6 +19,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { BudgetTaskCard } from '@/components/cards/BudgetTaskCard'
+import { useUnits } from '@/hooks/use-units'
 
 // Hook para obtener valores de parámetros con expression_template
 const useTaskParameterValues = () => {
@@ -129,6 +130,7 @@ interface BudgetTask {
     param_values: any
     is_public: boolean
     organization_id: string
+    unit_id: string | null
   }
 }
 
@@ -376,6 +378,35 @@ export default function ConstructionBudgets() {
     const { budgetTasks, isLoading } = useBudgetTasks(budgetId);
     const { data: parameterValues = [] } = useTaskParameterValues();
     const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
+    
+    // Hook para obtener unidades
+    const { data: units = [] } = useQuery({
+      queryKey: ['units'],
+      queryFn: async () => {
+        if (!supabase) {
+          throw new Error("Supabase client not initialized");
+        }
+
+        const { data, error } = await supabase
+          .from("units")
+          .select("*")
+          .order("name", { ascending: true });
+
+        if (error) {
+          console.error("Error fetching units:", error);
+          throw error;
+        }
+
+        return data || [];
+      },
+    });
+
+    // Función para obtener el nombre de la unidad por ID
+    const getUnitName = (unitId: string | null) => {
+      if (!unitId) return '-';
+      const unit = units.find(u => u.id === unitId);
+      return unit?.name || '-';
+    };
 
     // Calculate totals for percentage calculations (simplified for task_tasks)
     const totalBudgetAmount = budgetTasks?.length || 0;
@@ -432,6 +463,7 @@ export default function ConstructionBudgets() {
                 </th>
                 <th className="p-2 text-left text-xs font-medium">Rubro</th>
                 <th className="p-2 text-left text-xs font-medium">Tarea</th>
+                <th className="p-2 text-left text-xs font-medium">Unidad</th>
                 <th className="p-2 text-left text-xs font-medium">Cantidad</th>
                 <th className="p-2 text-left text-xs font-medium">Costo de Mano de Obra</th>
                 <th className="p-2 text-left text-xs font-medium">Costo de Materiales</th>
@@ -466,6 +498,9 @@ export default function ConstructionBudgets() {
                     </td>
                     <td className="p-2 text-sm">
                       {generateTaskDisplayName(task.task, parameterValues)}
+                    </td>
+                    <td className="p-2 text-sm">
+                      {getUnitName(task.task?.unit_id)}
                     </td>
                     <td className="p-2">
                       <input
@@ -514,6 +549,7 @@ export default function ConstructionBudgets() {
                 <td className="p-2"></td>
                 <td className="p-2"></td>
                 <td className="p-2"></td>
+                <td className="p-2"></td>
                 <td className="p-2 text-sm font-semibold">$0</td>
                 <td className="p-2 text-sm font-semibold">100.0%</td>
                 <td className="p-2"></td>
@@ -526,11 +562,13 @@ export default function ConstructionBudgets() {
         <div className="md:hidden space-y-3">
           {budgetTasks?.map((task: any) => {
             const processedName = generateTaskDisplayName(task.task, parameterValues);
+            const unitName = getUnitName(task.task?.unit_id);
             return (
               <BudgetTaskCard
                 key={task.id}
                 task={task}
                 processedName={processedName}
+                unitName={unitName}
                 onEdit={(task) => {
                   console.log('Edit task mobile:', task);
                   // TODO: Implement edit functionality

@@ -20,17 +20,19 @@ interface BudgetTask {
     param_values: any
     is_public: boolean
     organization_id: string
+    unit_id: string | null
   }
 }
 
 interface BudgetTaskCardProps {
   task: BudgetTask
   processedName: string
+  unitName?: string
   onEdit?: (task: BudgetTask) => void
   onDelete?: (taskId: string) => void
 }
 
-export function BudgetTaskCard({ task, processedName, onEdit, onDelete }: BudgetTaskCardProps) {
+export function BudgetTaskCard({ task, processedName, unitName, onEdit, onDelete }: BudgetTaskCardProps) {
   const handleEdit = () => {
     onEdit?.(task)
   }
@@ -61,6 +63,12 @@ export function BudgetTaskCard({ task, processedName, onEdit, onDelete }: Budget
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">Cant:</span>
               <span className="text-sm font-medium">{task.quantity}</span>
+              {unitName && (
+                <>
+                  <span className="text-sm text-muted-foreground">•</span>
+                  <span className="text-sm font-medium">{unitName}</span>
+                </>
+              )}
             </div>
           </div>
 
