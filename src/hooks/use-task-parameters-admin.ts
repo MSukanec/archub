@@ -25,7 +25,6 @@ export interface TaskParameter {
   name: string;
   label: string;
   type: 'text' | 'number' | 'select' | 'boolean';
-  role?: string;
   expression_template?: string;
   is_required: boolean;
   created_at: string;
@@ -44,7 +43,6 @@ export interface CreateTaskParameterData {
   name: string;
   label: string;
   type: 'text' | 'number' | 'select' | 'boolean';
-  role?: string;
   expression_template?: string;
   is_required: boolean;
 }
@@ -54,7 +52,6 @@ export interface UpdateTaskParameterData {
   name: string;
   label: string;
   type: 'text' | 'number' | 'select' | 'boolean';
-  role?: string;
   expression_template?: string;
   is_required: boolean;
 }
@@ -97,7 +94,7 @@ export function useTaskParametersAdmin() {
       // Fetch parameters directly from task_parameters table
       const { data: parameters, error: parametersError } = await supabase
         .from('task_parameters')
-        .select('id, name, label, type, role, expression_template, required, created_at')
+        .select('id, name, label, type, expression_template, created_at')
         .order('created_at');
 
       if (parametersError) {

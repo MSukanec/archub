@@ -14,7 +14,6 @@ import { TemplateNameBuilder, type TaskTemplateParameter } from "@/components/ui
 import { type TaskCategoryAdmin, useTaskCategoriesAdmin } from "@/hooks/use-task-categories-admin";
 
 const formSchema = z.object({
-  name: z.string().min(1, "El nombre es requerido"),
   code: z.string().min(1, "El código es requerido"),
   name_template: z.string().min(1, "La plantilla de nombre es requerida"),
   action_id: z.string().optional().nullable(),
@@ -61,7 +60,6 @@ export function NewTaskTemplateModal({
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
       code: "",
       name_template: "",
       action_id: null,
@@ -78,14 +76,12 @@ export function NewTaskTemplateModal({
       // Reset form with template data if editing, empty if creating
       if (template) {
         form.reset({
-          name: template.name || "",
           code: template.code || "",
           name_template: template.name_template || "",
           action_id: template.action_id || null,
         });
       } else {
         form.reset({
-          name: templateCategory?.name || "",
           code: templateCategory?.code || "",
           name_template: "",
           action_id: null,
@@ -134,20 +130,7 @@ export function NewTaskTemplateModal({
           <CustomModalBody padding="md" columns={1}>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="required-asterisk">Nombre</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Nombre de la plantilla" 
-                          {...field} 
-                          disabled={true}
-                          className="bg-muted cursor-not-allowed"
-                        />
-                      </FormControl>
+
                       <FormMessage />
                     </FormItem>
                   )}
@@ -184,7 +167,7 @@ export function NewTaskTemplateModal({
                           value={field.value}
                           onChange={field.onChange}
                           parameters={templateParameters}
-                          categoryName={template ? template.name : templateCategory?.name}
+                          categoryName={template ? template.name_template : templateCategory?.name}
                           placeholder="Construye la plantilla de nombre usando parámetros..."
                           onActionChange={(actionId) => {
                             form.setValue('action_id', actionId);

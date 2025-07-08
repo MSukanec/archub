@@ -4,7 +4,6 @@ import { useToast } from "@/hooks/use-toast";
 
 export interface TaskTemplate {
   id: string;
-  name: string;
   code: string;
   name_template: string;
   category_id: string;
@@ -17,7 +16,6 @@ export interface TaskTemplate {
 }
 
 export interface CreateTaskTemplateData {
-  name: string;
   code: string;
   name_template: string;
   category_id: string;

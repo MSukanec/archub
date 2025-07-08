@@ -12,7 +12,6 @@ export interface TaskCategoryAdmin {
   children?: TaskCategoryAdmin[];
   template?: {
     id: string;
-    name: string;
     code: string;
     name_template: string;
   } | null;
@@ -70,7 +69,7 @@ export function useTaskCategoriesAdmin() {
       // Fetch templates to map to categories
       const { data: templates, error: templatesError } = await supabase
         .from('task_templates')
-        .select('id, name, code, name_template, category_id');
+        .select('id, code, name_template, category_id');
 
       if (templatesError) {
         console.error('Error fetching templates:', templatesError);

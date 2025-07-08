@@ -28,7 +28,6 @@ const taskParameterSchema = z.object({
   type: z.enum(['text', 'number', 'select', 'boolean'], { 
     required_error: 'El tipo es requerido' 
   }),
-  role: z.string().optional(),
   expression_template: z.string().optional(),
   is_required: z.boolean().optional(),
 });
