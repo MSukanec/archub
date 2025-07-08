@@ -132,9 +132,9 @@ export function NewAdminGeneratedTaskModal({
   // Watch all form values for real-time preview
   const watchedValues = useWatch({ control: form.control });
 
-  // Reset form when template changes
+  // Reset form when template changes (but not during editing)
   useEffect(() => {
-    if (selectedTemplateId) {
+    if (selectedTemplateId && !isEditing) {
       console.log('Template changed, resetting form parameters for template:', selectedTemplateId);
       
       // Invalidate and refetch parameters to ensure fresh data
@@ -155,7 +155,7 @@ export function NewAdminGeneratedTaskModal({
         ...newParamValues
       });
     }
-  }, [selectedTemplateId, parameters, refetchParameters]);
+  }, [selectedTemplateId, parameters, refetchParameters, isEditing]);
 
   // Initialize form for editing
   useEffect(() => {

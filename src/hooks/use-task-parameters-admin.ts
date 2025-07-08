@@ -419,6 +419,22 @@ export function useTaskParameterValues(parameterId: string) {
   });
 }
 
+// Hook para obtener TODOS los valores de parámetros (sin filtro)
+export function useAllTaskParameterValues() {
+  return useQuery({
+    queryKey: ['all-task-parameter-values'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('task_parameter_values')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+      return data || [];
+    },
+  });
+}
+
 // Hook para obtener grupos de opciones de un parámetro
 export function useTaskParameterOptionGroups(parameterId: string) {
   return useQuery({

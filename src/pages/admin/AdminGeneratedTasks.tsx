@@ -16,7 +16,7 @@ import { NewAdminGeneratedTaskModal } from '@/modals/admin/tasks/NewAdminGenerat
 import { useGeneratedTasks, useDeleteGeneratedTask } from '@/hooks/use-generated-tasks'
 import { useTaskTemplates, useTaskTemplateParameters, useTaskTemplateParameterOptions } from '@/hooks/use-task-templates'
 import { generateTaskDescription } from '@/utils/taskDescriptionGenerator'
-import { useTaskParameterValues } from '@/hooks/use-task-parameters-admin'
+import { useAllTaskParameterValues } from '@/hooks/use-task-parameters-admin'
 
 import { Plus, Edit, Trash2, CheckSquare, Clock, Target, Zap } from 'lucide-react'
 
@@ -52,7 +52,7 @@ export default function AdminGeneratedTasks() {
 
   // Data for dynamic name generation
   const { data: templates = [] } = useTaskTemplates()
-  const { data: parameterValues = [] } = useTaskParameterValues()
+  const { data: parameterValues = [] } = useAllTaskParameterValues()
 
   // Helper function to generate dynamic task name
   const generateTaskName = (task: GeneratedTask): string => {
