@@ -285,7 +285,7 @@ export default function TaskTemplateEditorModal({
           position,
           created_at,
           updated_at,
-          task_parameters:parameter_id (
+          task_parameters!parameter_id (
             id,
             name,
             label,
