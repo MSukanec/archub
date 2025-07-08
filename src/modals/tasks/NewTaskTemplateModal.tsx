@@ -8,8 +8,12 @@ import { CustomModalBody } from "@/components/ui-custom/modal/CustomModalBody";
 import { CustomModalFooter } from "@/components/ui-custom/modal/CustomModalFooter";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { FileText, Package2, Settings } from "lucide-react";
 import { useCreateTaskTemplate, useUpdateTaskTemplate, type TaskTemplate } from "@/hooks/use-task-templates-admin";
 import { useTaskParametersAdmin } from "@/hooks/use-task-parameters-admin";
+import { useUnits } from "@/hooks/use-units";
 import { TemplateNameBuilder, type TaskTemplateParameter } from "@/components/ui-custom/misc/TemplateNameBuilder";
 import { type TaskCategoryAdmin, useTaskCategoriesAdmin } from "@/hooks/use-task-categories-admin";
 
@@ -17,6 +21,7 @@ const formSchema = z.object({
   code: z.string().min(1, "El código es requerido"),
   name_template: z.string().min(1, "La plantilla de nombre es requerida"),
   action_id: z.string().optional().nullable(),
+  unit_id: z.string().optional().nullable(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -38,6 +43,7 @@ export function NewTaskTemplateModal({
   
   const { data: parameters = [] } = useTaskParametersAdmin();
   const { data: categories = [] } = useTaskCategoriesAdmin();
+  const { data: units = [] } = useUnits();
   const createTaskTemplate = useCreateTaskTemplate();
   const updateTaskTemplate = useUpdateTaskTemplate();
 
@@ -62,6 +68,7 @@ export function NewTaskTemplateModal({
       code: "",
       name_template: "",
       action_id: null,
+      unit_id: null,
     },
   });
 
@@ -78,12 +85,14 @@ export function NewTaskTemplateModal({
           code: template.code || "",
           name_template: template.name_template || "",
           action_id: template.action_id || null,
+          unit_id: template.unit_id || null,
         });
       } else {
         form.reset({
           code: templateCategory?.code || "",
           name_template: "",
           action_id: null,
+          unit_id: null,
         });
       }
     }
@@ -97,12 +106,14 @@ export function NewTaskTemplateModal({
           id: template.id,
           category_id: template.category_id, // Keep existing category
           action_id: data.action_id,
+          unit_id: data.unit_id,
         });
       } else {
         await createTaskTemplate.mutateAsync({
           ...data,
           category_id: category?.id || "4ec7eacb-37b0-4b00-8420-36dca30cc291", // Use category prop or default
           action_id: data.action_id,
+          unit_id: data.unit_id,
         });
       }
       onClose();
@@ -126,57 +137,122 @@ export function NewTaskTemplateModal({
           />
         ),
         body: (
-          <CustomModalBody padding="md" columns={1}>
+          <CustomModalBody columns={1}>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <Accordion type="single" collapsible defaultValue="step-1" className="w-full">
+                  
+                  {/* Paso 1: Información Básica */}
+                  <AccordionItem value="step-1">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4" />
+                        Paso 1: Información Básica
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="code"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="required-asterisk">Código</FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="Ej: EXC, COL, INS" 
+                                maxLength={4} 
+                                {...field} 
+                                disabled={true}
+                                className="bg-muted cursor-not-allowed"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                      <FormField
+                        control={form.control}
+                        name="name_template"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="required-asterisk">Plantilla de Nombre</FormLabel>
+                            <FormControl>
+                              <TemplateNameBuilder
+                                value={field.value}
+                                onChange={field.onChange}
+                                parameters={templateParameters}
+                                categoryName={template ? template.name_template : templateCategory?.name}
+                                placeholder="Construye la plantilla de nombre usando parámetros..."
+                                onActionChange={(actionId) => {
+                                  form.setValue('action_id', actionId);
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
 
-                <FormField
-                  control={form.control}
-                  name="code"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="required-asterisk">Código</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Ej: EXC, COL, INS" 
-                          maxLength={4} 
-                          {...field} 
-                          disabled={true}
-                          className="bg-muted cursor-not-allowed"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  {/* Paso 2: Unidad */}
+                  <AccordionItem value="step-2">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <Package2 className="h-4 w-4" />
+                        Paso 2: Unidad
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="unit_id"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Unidad</FormLabel>
+                            <Select 
+                              onValueChange={field.onChange} 
+                              value={field.value || ""}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Seleccionar unidad..." />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="">Sin unidad</SelectItem>
+                                {units?.map((unit) => (
+                                  <SelectItem key={unit.id} value={unit.id}>
+                                    {unit.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
 
-                <FormField
-                  control={form.control}
-                  name="name_template"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="required-asterisk">Plantilla de Nombre</FormLabel>
-                      <FormControl>
-                        <TemplateNameBuilder
-                          value={field.value}
-                          onChange={field.onChange}
-                          parameters={templateParameters}
-                          categoryName={template ? template.name_template : templateCategory?.name}
-                          placeholder="Construye la plantilla de nombre usando parámetros..."
-                          onActionChange={(actionId) => {
-                            form.setValue('action_id', actionId);
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  {/* Paso 3: Agregar Parámetros */}
+                  <AccordionItem value="step-3">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <Settings className="h-4 w-4" />
+                        Paso 3: Agregar Parámetros
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="space-y-4">
+                      <div className="text-sm text-muted-foreground">
+                        Los parámetros se configuran después de crear la plantilla.
+                        Podrás agregarlos desde el editor de plantillas.
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                </Accordion>
               </form>
             </Form>
           </CustomModalBody>
