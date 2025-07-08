@@ -19,7 +19,7 @@ import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
 import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter';
 
 import { useCreateTaskParameter, useUpdateTaskParameter, TaskParameter, useTaskParameterOptionGroups, useCreateTaskParameterOptionGroup, useDeleteTaskParameterOptionGroup, useUpdateTaskParameterOptionGroup, useTaskSubcategories } from '@/hooks/use-task-parameters-admin';
-import { TaskParameterGroupAssignmentModal } from './TaskParameterGroupAssignmentModal';
+import { TaskParameterGroupAssignmentModal } from './NewTaskParameterGroupAssignmentModal';
 import { useUnits } from '@/hooks/use-units';
 
 const taskParameterSchema = z.object({

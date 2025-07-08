@@ -215,45 +215,31 @@ export function NewAdminGeneratedTaskModal({
   // Generate description using expression templates from parameters
   const generateDescriptionWithExpressions = (paramValues: Record<string, any>) => {
     if (!parameters) return "Seleccione los parámetros para ver la vista previa";
-    
-    // Find the selected template
+
     const currentTemplate = templates?.find(t => t.id === selectedTemplateId);
-    if (!currentTemplate) return "Seleccione una plantilla para ver la vista previa";
-    
-    // Start with the name_template from the task template (e.g., "Muros Simples {{mortar_type}}")
-    let description = currentTemplate.name_template || '';
-    
-    // Replace each {{parameter-name}} placeholder with the processed expression_template
-    parameters.forEach(param => {
-      const value = paramValues[param.name];
-      const placeholder = `{{${param.name}}}`;
-      
-      if (value && description.includes(placeholder)) {
-        let expressionTemplate = '{value}'; // default fallback
-        let displayValue = value.toString();
-        
-        // For select parameters, get expression_template from selected option
-        if (param.type === 'select') {
-          const option = parameterOptions[param.id]?.find(opt => opt.value === value || opt.id === value);
-          if (option) {
-            displayValue = option.label;
-            // Get the expression_template from the task_parameter_values
-            if (option.expression_template) {
-              expressionTemplate = option.expression_template;
-            }
-          }
-        }
-        
-        // Replace {value} in expression template with actual selected value/label
-        const processedExpression = expressionTemplate.replace(/{value}/g, displayValue);
-        
-        // Replace the {{parameter-name}} placeholder with the processed expression
-        description = description.replace(placeholder, processedExpression);
-      }
-    });
-    
-    // Add final period
-    return description + '.';
+    if (!currentTemplate) return "Seleccione una plantilla";
+
+    let fragments: string[] = [];
+
+    parameters
+      .sort((a, b) => a.position - b.position)
+      .forEach(param => {
+        const rawValue = paramValues[param.name];
+        if (!rawValue) return;
+
+        // Buscar label para select
+        let label = rawValue.toString();
+        const option = parameterOptions[param.id]?.find(opt => opt.value === rawValue);
+        if (option?.label) label = option.label;
+
+        // Aplicar plantilla del parámetro
+        const expr = option?.expression_template || param.expression_template || '{value}';
+        const fragment = expr.replace('{value}', label);
+
+        fragments.push(fragment);
+      });
+
+    return `${currentTemplate.name} ${fragments.join(' ')}.`.trim();
   };
 
   const handleSubmit = async (data: any) => {
@@ -276,46 +262,8 @@ export function NewAdminGeneratedTaskModal({
         // Crear nueva tarea
         const selectedTemplate = templates?.find(t => t.id === template_id);
         
-        // Generate task description using expression templates
-        const generatedDescription = (() => {
-          const currentTemplate = templates?.find(t => t.id === template_id);
-          if (!currentTemplate) return "Seleccione una plantilla para ver la vista previa";
-          
-          // Start with the name_template from the task template (e.g., "Muros Simples {{mortar_type}}")
-          let description = currentTemplate.name_template || '';
-          
-          // Replace each {{parameter-name}} placeholder with the processed expression_template
-          parameters.forEach(param => {
-            const value = params[param.name];
-            const placeholder = `{{${param.name}}}`;
-            
-            if (value && description.includes(placeholder)) {
-              let expressionTemplate = '{value}'; // default fallback
-              let displayValue = value.toString();
-              
-              // For select parameters, get expression_template from selected option
-              if (param.type === 'select') {
-                const option = parameterOptions[param.id]?.find(opt => opt.value === value || opt.id === value);
-                if (option) {
-                  displayValue = option.label;
-                  // Get the expression_template from the task_parameter_values
-                  if (option.expression_template) {
-                    expressionTemplate = option.expression_template;
-                  }
-                }
-              }
-              
-              // Replace {value} in expression template with actual selected value/label
-              const processedExpression = expressionTemplate.replace(/{value}/g, displayValue);
-              
-              // Replace the {{parameter-name}} placeholder with the processed expression
-              description = description.replace(placeholder, processedExpression);
-            }
-          });
-          
-          // Add final period
-          return description + '.';
-        })();
+        // Generate task description using the same logic as preview
+        const generatedDescription = generateDescriptionWithExpressions(params);
         
         // Generate a simple task code
         const taskCode = `${selectedTemplate?.code_prefix || 'TSK'}-${Date.now().toString().slice(-6)}`;

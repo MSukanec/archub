@@ -11,7 +11,7 @@ import { HierarchicalCategoryTree } from '@/components/ui-custom/misc/Hierarchic
 
 import { useTaskCategoriesAdmin, useAllTaskCategories, useDeleteTaskCategory, TaskCategoryAdmin } from '@/hooks/use-task-categories-admin';
 import { NewAdminTaskCategoryModal } from '@/modals/admin/NewAdminTaskCategoryModal';
-import TaskTemplateEditorModal from '@/modals/admin/tasks/TaskTemplateEditorModal';
+import TaskTemplateEditorModal from '@/modals/admin/tasks/NewTaskTemplateEditorModal';
 
 export default function AdminCategories() {
   const [searchTerm, setSearchTerm] = useState('');
