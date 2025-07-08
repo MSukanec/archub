@@ -82,8 +82,7 @@ export function useCreateGeneratedTask() {
         .rpc('task_generate_code', {
           input_template_id: payload.template_id,
           input_param_values: payload.param_values,
-          input_organization_id: payload.organization_id,
-          input_unit_id: payload.unit_id || null
+          input_organization_id: payload.organization_id
         });
       
       if (taskError) throw taskError;
