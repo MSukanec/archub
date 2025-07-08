@@ -82,12 +82,12 @@ export function useTaskSearch(searchTerm: string, organizationId: string, enable
         return [];
       }
 
-      const { data, error } = await supabase
+      // Primero obtener todas las tareas de la organización (sin filtrar por término)
+      const { data: allTasks, error } = await supabase
         .from("task_generated_view")
         .select("*")
         .eq("organization_id", organizationId)
-        .ilike("display_name", `%${searchTerm}%`)
-        .limit(20);
+        .limit(100);
 
       if (error) {
         console.error("Error searching tasks:", error);
@@ -96,12 +96,19 @@ export function useTaskSearch(searchTerm: string, organizationId: string, enable
       
       // Procesar los display_name para reemplazar placeholders
       const processedData = await Promise.all(
-        data?.map(async task => ({
+        allTasks?.map(async task => ({
           ...task,
           display_name: await processDisplayName(task.display_name, task.param_values)
         })) || []
       );
-      return processedData;
+
+      // Ahora filtrar por término de búsqueda en el display_name procesado
+      const filteredData = processedData.filter(task => 
+        task.display_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        task.code.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      
+      return filteredData;
     },
     enabled: enabled && !!supabase && !!organizationId && searchTerm.length >= 3
   });
