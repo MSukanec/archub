@@ -46,42 +46,55 @@ const useTaskParameterValues = () => {
 
 // Función para generar el nombre completo de la tarea con parámetros procesados
 function generateTaskDisplayName(task: any, parameterValues: any[] = []): string {
-  if (!task?.display_name || !task?.param_values) {
-    return task?.display_name || 'Sin nombre';
+  if (!task) return 'Sin nombre';
+  
+  // Si no tenemos template_id, usar display_name directamente
+  if (!task.template_id) {
+    return task.display_name || task.name || 'Sin nombre';
   }
 
-  let displayName = task.display_name;
-  const paramValues = task.param_values;
-
-  // Reemplazar placeholders del tipo {{parameter-name}} con expression_template
-  Object.entries(paramValues).forEach(([paramName, paramValue]) => {
-    const placeholder = `{{${paramName}}}`;
-    
-    // Buscar el parameter value correspondiente para obtener su expression_template
-    const parameterValue = parameterValues.find(pv => pv.name === paramValue);
-    
-    if (parameterValue?.expression_template) {
-      // Reemplazar {value} en expression_template con el valor actual
-      const processedValue = parameterValue.expression_template.replace('{value}', parameterValue.label || paramValue as string);
-      displayName = displayName.replace(placeholder, processedValue);
-    } else if (parameterValue?.label) {
-      // Fallback al label si no hay expression_template
-      displayName = displayName.replace(placeholder, parameterValue.label);
-    } else {
-      // Fallback al valor directo si no hay ningún dato
-      displayName = displayName.replace(placeholder, paramValue as string);
-    }
-  });
-
-  // Limpiar cualquier placeholder que no se haya procesado y espacios extras
-  displayName = displayName.replace(/\{\{[^}]+\}\}/g, '').replace(/\s+/g, ' ').trim();
-
-  // Remover el punto final si existe (para evitar doble punto)
-  if (displayName.endsWith('.')) {
-    displayName = displayName.slice(0, -1);
+  // Obtener el template
+  const template = task.task_templates || task.template;
+  if (!template?.name_template) {
+    return task.display_name || task.name || 'Sin nombre';
   }
 
-  return displayName;
+  let result = template.name_template;
+  
+  // Reemplazar parámetros usando param_values
+  if (task.param_values) {
+    Object.entries(task.param_values).forEach(([paramName, paramValue]) => {
+      if (paramValue) {
+        // Buscar el parámetro en parameterValues para obtener expression_template y label
+        const parameterValue = parameterValues.find(pv => 
+          pv.name === String(paramValue) || pv.id === String(paramValue)
+        );
+        
+        if (parameterValue?.expression_template && parameterValue?.label) {
+          // Reemplazar {value} en expression_template con el label del parámetro
+          let expressionText = parameterValue.expression_template.replace('{value}', parameterValue.label);
+          // Reemplazar {{paramName}} con el expression_template procesado
+          result = result.replace(new RegExp(`\\{\\{${paramName}\\}\\}`, 'g'), expressionText);
+        } else if (parameterValue?.label) {
+          // Si no hay expression_template, usar solo el label
+          result = result.replace(new RegExp(`\\{\\{${paramName}\\}\\}`, 'g'), parameterValue.label);
+        } else {
+          // Si no hay datos del parámetro, usar el valor directamente
+          result = result.replace(new RegExp(`\\{\\{${paramName}\\}\\}`, 'g'), String(paramValue));
+        }
+      }
+    });
+  }
+
+  // Limpiar placeholders restantes y espacios múltiples
+  result = result.replace(/\{\{[^}]+\}\}/g, '').replace(/\s+/g, ' ').trim();
+
+  // Remover punto final duplicado
+  if (result.endsWith('..')) {
+    result = result.slice(0, -1);
+  }
+
+  return result;
 }
 
 interface Budget {
@@ -545,70 +558,79 @@ export default function ConstructionBudgets() {
 
             {/* Single Budget Card with Selector */}
             <Card className="border rounded-lg overflow-hidden">
-              <div className="flex items-center justify-between w-full p-4 border-b">
-                <div className="flex items-center gap-3 flex-1">
-                  <span className="text-sm font-medium text-muted-foreground">
-                    Presupuesto:
-                  </span>
+              <div className="p-4 border-b">
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center gap-3 flex-1">
+                    <span className="text-sm font-medium text-muted-foreground">
+                      Presupuesto:
+                    </span>
+                    
+                    {/* Budget Selector */}
+                    <div className="flex-1">
+                      <Select value={selectedBudgetId} onValueChange={(value) => {
+                        setSelectedBudgetId(value);
+                        if (userData?.user?.id) {
+                          updateBudgetPreferenceMutation.mutate(value);
+                        }
+                      }}>
+                        <SelectTrigger className="w-full max-w-sm">
+                          <SelectValue placeholder="Selecciona un presupuesto" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {filteredBudgets.map((budget: Budget) => (
+                            <SelectItem key={budget.id} value={budget.id}>
+                              <span className="text-left">{budget.name}</span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
                   
-                  {/* Budget Selector */}
-                  <div className="flex-1">
-                    <Select value={selectedBudgetId} onValueChange={(value) => {
-                      setSelectedBudgetId(value);
-                      if (userData?.user?.id) {
-                        updateBudgetPreferenceMutation.mutate(value);
-                      }
-                    }}>
-                      <SelectTrigger className="w-full max-w-sm">
-                        <SelectValue placeholder="Selecciona un presupuesto" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {filteredBudgets.map((budget: Budget) => (
-                          <SelectItem key={budget.id} value={budget.id}>
-                            <span className="text-left">{budget.name}</span>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 w-7 p-0"
+                      onClick={() => {
+                        if (selectedBudget) {
+                          setEditingBudget(selectedBudget)
+                          setNewBudgetModalOpen(true)
+                        }
+                      }}
+                      disabled={!selectedBudget}
+                    >
+                      <Edit className="w-3 h-3" />
+                    </Button>
+                    
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                      onClick={() => selectedBudget && handleDeleteBudget(selectedBudget)}
+                      disabled={!selectedBudget}
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                    
+                    <Button
+                      size="sm"
+                      className="h-7 px-2 text-xs"
+                      onClick={() => selectedBudget && handleAddTask(selectedBudget.id)}
+                      disabled={!selectedBudget}
+                    >
+                      <Plus className="w-3 h-3 mr-1" />
+                      Agregar Tarea
+                    </Button>
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-2">
-                  <Button
-                    size="sm"
-                    className="h-7 px-2 text-xs"
-                    onClick={() => selectedBudget && handleAddTask(selectedBudget.id)}
-                    disabled={!selectedBudget}
-                  >
-                    <Plus className="w-3 h-3 mr-1" />
-                    Agregar Tarea
-                  </Button>
-                  
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 w-7 p-0"
-                    onClick={() => {
-                      if (selectedBudget) {
-                        setEditingBudget(selectedBudget)
-                        setNewBudgetModalOpen(true)
-                      }
-                    }}
-                    disabled={!selectedBudget}
-                  >
-                    <Edit className="w-3 h-3" />
-                  </Button>
-                  
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 w-7 p-0 text-destructive hover:text-destructive"
-                    onClick={() => selectedBudget && handleDeleteBudget(selectedBudget)}
-                    disabled={!selectedBudget}
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </Button>
-                </div>
+                {/* Budget Description */}
+                {selectedBudget?.description && (
+                  <div className="mt-2 text-sm text-muted-foreground">
+                    {selectedBudget.description}
+                  </div>
+                )}
               </div>
               
               {/* Budget Tasks Table */}
