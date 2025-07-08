@@ -66,7 +66,6 @@ export function useTaskTemplateParameters(templateId: string | null) {
           option_group_id,
           is_required,
           position,
-          role,
           expression_template,
           created_at,
           updated_at,
