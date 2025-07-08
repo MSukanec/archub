@@ -7,7 +7,7 @@ import { CustomModalLayout } from "@/components/ui-custom/modal/CustomModalLayou
 import { CustomModalHeader } from "@/components/ui-custom/modal/CustomModalHeader";
 import { CustomModalBody } from "@/components/ui-custom/modal/CustomModalBody";
 import { CustomModalFooter } from "@/components/ui-custom/modal/CustomModalFooter";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TaskSearchCombo } from "@/components/ui-custom/misc/TaskSearchCombo";
@@ -150,96 +150,50 @@ export default function NewBudgetTaskModal({
         body: (
           <form onSubmit={handleSubmit(onSubmit)} id="budget-task-form">
             <CustomModalBody columns={1}>
-              <Accordion type="single" collapsible defaultValue="datos-tarea" className="w-full">
-                <AccordionItem value="datos-tarea">
-                  <AccordionTrigger className="text-sm font-medium">
-                    Datos de Tarea
-                  </AccordionTrigger>
-                  <AccordionContent className="space-y-3 pt-3 pb-4">
-                    {/* Tarea */}
-                    <div className="space-y-1">
-                      <Label htmlFor="task_id" className="text-xs required-asterisk">
-                        Tarea
-                      </Label>
-                      <TaskSearchCombo
-                        options={taskOptions}
-                        value={watch("task_id")}
-                        onValueChange={(value) => setValue("task_id", value)}
-                        onSearchChange={setSearchQuery}
-                        placeholder={searchQuery.length < 3 ? "Escriba al menos 3 caracteres para buscar..." : "Seleccionar tarea"}
-                        searchPlaceholder="Buscar tarea por nombre..."
-                        emptyText={searchQuery.length < 3 ? "Escriba al menos 3 caracteres" : "No se encontraron tareas"}
-                        disabled={tasksLoading}
-                      />
-                      {searchQuery.length >= 3 && filteredTasks.length === 0 && (
-                        <p className="text-xs text-muted-foreground">
-                          No se encontraron tareas que coincidan con "{searchQuery}"
-                        </p>
-                      )}
-                      {errors.task_id && (
-                        <p className="text-xs text-destructive">{errors.task_id.message}</p>
-                      )}
-                    </div>
+              <div className="space-y-4">
+                {/* Tarea */}
+                <div className="space-y-1">
+                  <Label htmlFor="task_id" className="text-xs required-asterisk">
+                    Tarea
+                  </Label>
+                  <TaskSearchCombo
+                    options={taskOptions}
+                    value={watch("task_id")}
+                    onValueChange={(value) => setValue("task_id", value)}
+                    onSearchChange={setSearchQuery}
+                    placeholder={searchQuery.length < 3 ? "Escriba al menos 3 caracteres para buscar..." : "Seleccionar tarea"}
+                    searchPlaceholder="Buscar tarea por nombre..."
+                    emptyText={searchQuery.length < 3 ? "Escriba al menos 3 caracteres" : "No se encontraron tareas"}
+                    disabled={tasksLoading}
+                  />
+                  {searchQuery.length >= 3 && filteredTasks.length === 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      No se encontraron tareas que coincidan con "{searchQuery}"
+                    </p>
+                  )}
+                  {errors.task_id && (
+                    <p className="text-xs text-destructive">{errors.task_id.message}</p>
+                  )}
+                </div>
 
-                    {/* Cantidad */}
-                    <div className="space-y-1">
-                      <Label htmlFor="quantity" className="text-xs required-asterisk">
-                        Cantidad
-                      </Label>
-                      <Input
-                        id="quantity"
-                        type="number"
-                        step="0.01"
-                        min="0.01"
-                        {...register("quantity", { valueAsNumber: true })}
-                        placeholder="Ej: 1"
-                      />
-                      {errors.quantity && (
-                        <p className="text-xs text-destructive">{errors.quantity.message}</p>
-                      )}
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="ejecucion">
-                  <AccordionTrigger className="text-sm font-medium">
-                    Ejecución
-                  </AccordionTrigger>
-                  <AccordionContent className="space-y-3 pt-3 pb-4">
-                    {/* Fecha de Inicio */}
-                    <div className="space-y-1">
-                      <Label htmlFor="start_date" className="text-xs">
-                        Fecha de Inicio
-                      </Label>
-                      <Input
-                        id="start_date"
-                        type="date"
-                        {...register("start_date")}
-                      />
-                      {errors.start_date && (
-                        <p className="text-xs text-destructive">{errors.start_date.message}</p>
-                      )}
-                    </div>
-
-                    {/* Fecha de Finalización */}
-                    <div className="space-y-1">
-                      <Label htmlFor="end_date" className="text-xs">
-                        Fecha de Finalización
-                      </Label>
-                      <Input
-                        id="end_date"
-                        type="date"
-                        {...register("end_date")}
-                      />
-                      {errors.end_date && (
-                        <p className="text-xs text-destructive">{errors.end_date.message}</p>
-                      )}
-                    </div>
-
-
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
+                {/* Cantidad */}
+                <div className="space-y-1">
+                  <Label htmlFor="quantity" className="text-xs required-asterisk">
+                    Cantidad
+                  </Label>
+                  <Input
+                    id="quantity"
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    {...register("quantity", { valueAsNumber: true })}
+                    placeholder="Ej: 1"
+                  />
+                  {errors.quantity && (
+                    <p className="text-xs text-destructive">{errors.quantity.message}</p>
+                  )}
+                </div>
+              </div>
             </CustomModalBody>
           </form>
         ),

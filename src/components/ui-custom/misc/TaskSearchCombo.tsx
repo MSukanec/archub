@@ -53,14 +53,10 @@ export function TaskSearchCombo({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            // Styled exactly like an Input component
-            "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background",
-            "file:border-0 file:bg-transparent file:text-sm file:font-medium",
-            "placeholder:text-muted-foreground",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-            "disabled:cursor-not-allowed disabled:opacity-50",
-            "justify-between items-center",
-            !selectedOption && "text-muted-foreground",
+            // Styled EXACTLY like Input component from ui/input.tsx
+            "flex w-full text-xs leading-tight py-2 px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 placeholder:text-[var(--input-placeholder)] file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent disabled:opacity-60 disabled:cursor-not-allowed",
+            "justify-between items-center cursor-pointer",
+            !selectedOption && "text-[var(--input-placeholder)]",
             className
           )}
           disabled={disabled}
@@ -71,7 +67,7 @@ export function TaskSearchCombo({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0" align="start">
+      <PopoverContent className="w-full p-0 z-[9999]" align="start">
         <Command>
           <CommandInput 
             placeholder={searchPlaceholder} 
