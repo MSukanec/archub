@@ -119,6 +119,14 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 9, 2025. Critical sidebar tooltip fix and reusable UserSelector component implementation - COMPLETED
+  • Completely removed tooltip functionality from SidebarButton component to eliminate z-index and display issues within sidebars
+  • Created new reusable UserSelector component in src/components/ui-custom/misc/UserSelector.tsx for consistent avatar+name display
+  • UserSelector features: avatar display, full name fallback to first_name+last_name, proper select dropdown with avatar+name in options
+  • Replaced hardcoded creator field in NewProjectModal with UserSelector component for consistent styling with bitácora modal
+  • Enhanced project modal to show avatar left of creator name matching existing bitácora modal design pattern
+  • Fixed ACTIVO badge display to only show for selected project using is_active property and --accent CSS variable
+  • UserSelector component ready for reuse across all modals requiring user selection with avatar display
 - July 9, 2025. ModernProjectCard implementation and NewProjectModal restructure - COMPLETED
   • Successfully replaced all ProjectCard references with new ModernProjectCard component based on user-provided design images
   • Implemented modern card layout with improved visual hierarchy: project name/status header, type/date info row, creator attribution footer

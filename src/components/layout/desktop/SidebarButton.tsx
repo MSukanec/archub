@@ -128,20 +128,7 @@ export default function SidebarButton({
       )}
       </button>
       
-      {/* Tooltip for main sidebar buttons when collapsed */}
-      {variant === 'main' && !isExpanded && (
-        <div 
-          className="fixed bg-black text-white text-sm px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap"
-          style={{
-            left: tooltipPosition.left,
-            top: tooltipPosition.top,
-            transform: 'translateY(-50%)',
-            zIndex: 9999999
-          }}
-        >
-          {label}
-        </div>
-      )}
+
     </div>
   );
 }

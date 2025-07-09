@@ -26,6 +26,7 @@ import { useProjectModalities } from "@/hooks/use-project-modalities";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
+import UserSelector from "@/components/ui-custom/misc/UserSelector";
 
 const createProjectSchema = z.object({
   name: z.string().min(1, "El nombre es requerido"),
@@ -256,27 +257,21 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
                   name="created_by"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Creador *</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar creador">
-                              {field.value && getMemberLabel(field.value)}
-                            </SelectValue>
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {organizationMembers?.length > 0 ? organizationMembers.map((member) => {
-                            return (
-                              <SelectItem key={member.id} value={member.id}>
-                                {member.full_name || member.email || 'Usuario sin nombre'}
-                              </SelectItem>
-                            );
-                          }) : (
-                            <SelectItem value="" disabled>Cargando miembros...</SelectItem>
-                          )}
-                        </SelectContent>
-                      </Select>
+                      <UserSelector
+                        users={organizationMembers?.map(member => ({
+                          id: member.id,
+                          full_name: member.full_name,
+                          email: member.email || '',
+                          avatar_url: member.avatar_url,
+                          first_name: member.first_name,
+                          last_name: member.last_name
+                        })) || []}
+                        value={field.value}
+                        onChange={field.onChange}
+                        label="Creador"
+                        placeholder="Seleccionar creador"
+                        required
+                      />
                       <FormMessage />
                     </FormItem>
                   )}
