@@ -6,6 +6,7 @@ import { useSidebarStore, useSecondarySidebarStore } from "@/stores/sidebarStore
 import { cn } from "@/lib/utils";
 import SidebarButton from "./SidebarButton";
 import { CustomRestricted } from "@/components/ui-custom/misc/CustomRestricted";
+import { Plan } from "@/components/ui-custom/misc/Plan";
 import { 
   Home,
   Users,
@@ -262,6 +263,13 @@ export function SidebarSubmenu() {
             })
           ) : null}
         </div>
+
+        {/* Plan Section - Only visible for organization section when expanded */}
+        {currentSection === 'organizacion' && isSecondarySidebarExpanded && (
+          <div className="mt-auto p-1 pb-2">
+            <Plan isExpanded={true} />
+          </div>
+        )}
       </div>
     </div>
   );

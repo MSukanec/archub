@@ -173,7 +173,7 @@ export function Header({
         </div>
 
         {/* Breadcrumb - hidden on mobile */}
-        <div className="hidden md:flex items-center gap-2">
+        <div className="hidden md:flex items-center gap-2 px-3">
           {/* Organization Button - ALWAYS visible */}
           <div className="flex items-center">
             <Button

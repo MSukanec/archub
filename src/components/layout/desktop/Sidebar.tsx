@@ -313,11 +313,6 @@ export function Sidebar() {
         </div>
       </div>
 
-      {/* Plan Section - Above Divider */}
-      <div className="p-1">
-        <Plan isExpanded={isExpanded} />
-      </div>
-
       {/* Bottom Section - Fixed Buttons */}
       <div className="p-1">
         <div className="flex flex-col gap-[2px]">
