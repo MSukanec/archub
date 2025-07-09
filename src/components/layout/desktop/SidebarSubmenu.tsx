@@ -167,27 +167,7 @@ export function SidebarSubmenu() {
         isMainSidebarExpanded ? "left-[240px]" : "left-[40px]"
       )}
     >
-      {/* Header con título de la sección */}
-      <div className="h-16 flex items-center justify-between px-4 border-b border-[var(--menues-border)]">
-        <h3 className="font-semibold text-sm uppercase tracking-wide text-[var(--menues-fg)] opacity-60">
-          {activeSidebarSection === 'organizacion' && 'Organización'}
-          {activeSidebarSection === 'datos-basicos' && 'Datos Básicos'}
-          {activeSidebarSection === 'diseno' && 'Diseño'}
-          {activeSidebarSection === 'obra' && 'Obra'}
-          {activeSidebarSection === 'finanzas' && 'Finanzas'}
-          {activeSidebarSection === 'comercializacion' && 'Comercialización'}
-          {activeSidebarSection === 'post-venta' && 'Post-Venta'}
-          {activeSidebarSection === 'administracion' && 'Administración'}
-        </h3>
-        <button
-          onClick={() => setActiveSidebarSection(null)}
-          className="p-1.5 rounded-md hover:bg-[var(--menues-hover-bg)] transition-colors text-[var(--menues-fg)]"
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </button>
-      </div>
-
-      {/* Contenido del submenú */}
+      {/* Contenido del submenú - sin header */}
       <div className="flex-1 overflow-y-auto p-2">
         <div className="space-y-1">
           {currentSubmenu.map((item, index) => {
