@@ -260,7 +260,7 @@ export function Sidebar() {
   return (
     <aside 
       className={cn(
-        "fixed top-0 left-0 h-screen border-r bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)] transition-all duration-300 z-10 flex flex-col",
+        "fixed top-0 left-0 h-screen border-r bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)] transition-all duration-300 z-1 flex flex-col",
         "w-[40px]"
       )}
     >

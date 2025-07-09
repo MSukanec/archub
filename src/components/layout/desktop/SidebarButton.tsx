@@ -60,7 +60,13 @@ export default function SidebarButton({
           isExpanded && 'w-full'
         )}
         onClick={handleClick}
-        onMouseEnter={handleMouseEnter}
+        onMouseEnter={(e) => {
+          handleMouseEnter();
+          if (!isActive) {
+            e.currentTarget.style.backgroundColor = `var(--${variant}-sidebar-button-hover-bg)`;
+            e.currentTarget.style.color = `var(--${variant}-sidebar-button-hover-fg)`;
+          }
+        }}
         style={{ 
         borderRadius: variant === 'main' && isActive ? '4px 0 0 4px' : '4px', // Remove right border radius for active main buttons
         backgroundColor: isActive 
@@ -79,12 +85,6 @@ export default function SidebarButton({
           borderRight: `1px solid var(--${variant}-sidebar-button-active-bg)`
         })
       } as React.CSSProperties}
-      onMouseEnter={(e) => {
-        if (!isActive) {
-          e.currentTarget.style.backgroundColor = `var(--${variant}-sidebar-button-hover-bg)`;
-          e.currentTarget.style.color = `var(--${variant}-sidebar-button-hover-fg)`;
-        }
-      }}
       onMouseLeave={(e) => {
         if (!isActive) {
           e.currentTarget.style.backgroundColor = `var(--${variant}-sidebar-button-bg)`;
@@ -136,7 +136,7 @@ export default function SidebarButton({
             left: tooltipPosition.left,
             top: tooltipPosition.top,
             transform: 'translateY(-50%)',
-            zIndex: 999999
+            zIndex: 50
           }}
         >
           {label}
