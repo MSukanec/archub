@@ -163,11 +163,14 @@ export function SidebarSubmenu() {
     <div 
       className={cn(
         "fixed top-9 h-[calc(100vh-36px)] bg-[var(--secondary-sidebar-bg)] border-r border-[var(--secondary-sidebar-border)] z-30 flex flex-col transition-all duration-300",
-        "left-[40px]",
+        "left-[39px]", // Move 1px left to overlap the main sidebar border
         isSecondarySidebarExpanded ? "w-64" : "w-10"
       )}
       onMouseEnter={() => setSecondaryHovered(true)}
       onMouseLeave={() => setSecondaryHovered(false)}
+      style={{
+        marginLeft: '-1px' // Overlap the main sidebar border
+      }}
     >
       {/* Contenido del submenú - sin header */}
       <div className="flex-1 overflow-y-auto p-1">

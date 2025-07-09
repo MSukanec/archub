@@ -65,10 +65,10 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       </div>
       <main
         className={`transition-all duration-300 ease-in-out flex-1 overflow-auto p-3 mt-1 ${
-          // Calculate margin based on fixed main sidebar (40px) and variable secondary sidebar
+          // Calculate margin based on fixed main sidebar (40px) and variable secondary sidebar (overlapped by 1px)
           isSecondaryExpanded 
-            ? "md:ml-[304px]" // 40px main + 264px secondary
-            : "md:ml-[90px]"  // 40px main + 50px secondary
+            ? "md:ml-[303px]" // 40px main + 264px secondary - 1px overlap
+            : "md:ml-[49px]"  // 40px main + 10px secondary - 1px overlap
         } ml-0 ${isMobile && showActionBar ? "pb-20" : ""}`}
       >
         <div className={wide ? "" : "max-w-[1440px] mx-auto"}>{children}</div>
