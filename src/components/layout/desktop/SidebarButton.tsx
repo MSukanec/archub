@@ -68,7 +68,7 @@ export default function SidebarButton({
           }
         }}
         style={{ 
-        borderRadius: variant === 'main' && isActive ? '4px 0 0 4px' : '4px', // Remove right border radius for active main buttons
+        borderRadius: '4px', // All buttons have 4px rounded corners
         backgroundColor: isActive 
           ? `var(--${variant}-sidebar-button-active-bg)` 
           : `var(--${variant}-sidebar-button-bg)`,
@@ -136,7 +136,7 @@ export default function SidebarButton({
             left: tooltipPosition.left,
             top: tooltipPosition.top,
             transform: 'translateY(-50%)',
-            zIndex: 50
+            zIndex: 9999
           }}
         >
           {label}
