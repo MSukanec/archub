@@ -42,14 +42,33 @@ export default function SidebarButton({
         // Botón SIEMPRE 32x32px (w-8 h-8), centrado cuando colapsado
         'w-8 h-8',
         // Cuando expandido, el botón se extiende pero el icono queda fijo
-        isExpanded && 'w-full',
-        isActive 
-          ? `bg-[var(--${variant}-sidebar-button-active-bg)] text-[var(--${variant}-sidebar-button-active-fg)]` 
-          : `bg-[var(--${variant}-sidebar-button-bg)] text-[var(--${variant}-sidebar-button-fg)] hover:bg-[var(--${variant}-sidebar-button-hover-bg)] hover:text-[var(--${variant}-sidebar-button-hover-fg)]`
+        isExpanded && 'w-full'
       )}
       onClick={handleClick}
       title={!isExpanded ? label : undefined}
-      style={{ borderRadius: '4px' }}
+      style={{ 
+        borderRadius: '4px',
+        backgroundColor: isActive 
+          ? `var(--${variant}-sidebar-button-active-bg)` 
+          : `var(--${variant}-sidebar-button-bg)`,
+        color: isActive 
+          ? `var(--${variant}-sidebar-button-active-fg)` 
+          : `var(--${variant}-sidebar-button-fg)`,
+        '--hover-bg': `var(--${variant}-sidebar-button-hover-bg)`,
+        '--hover-fg': `var(--${variant}-sidebar-button-hover-fg)`
+      } as React.CSSProperties}
+      onMouseEnter={(e) => {
+        if (!isActive) {
+          e.currentTarget.style.backgroundColor = `var(--${variant}-sidebar-button-hover-bg)`;
+          e.currentTarget.style.color = `var(--${variant}-sidebar-button-hover-fg)`;
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!isActive) {
+          e.currentTarget.style.backgroundColor = `var(--${variant}-sidebar-button-bg)`;
+          e.currentTarget.style.color = `var(--${variant}-sidebar-button-fg)`;
+        }
+      }}
     >
       {/* Contenedor del icono - SIEMPRE centrado en 32x32px, no mostrar para hijos */}
       {!isChild && (
