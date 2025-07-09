@@ -136,7 +136,7 @@ export default function SidebarButton({
             left: tooltipPosition.left,
             top: tooltipPosition.top,
             transform: 'translateY(-50%)',
-            zIndex: 9999
+            zIndex: 99999
           }}
         >
           {label}
