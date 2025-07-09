@@ -212,7 +212,7 @@ export function Sidebar() {
       id: 'proyecto', 
       icon: FolderOpen, 
       label: 'Proyecto', 
-      defaultRoute: '/project/basic-data',
+      defaultRoute: '/project/dashboard',
       isActive: activeSidebarSection === 'proyecto' || location.startsWith('/project')
     },
     { 
@@ -252,14 +252,7 @@ export function Sidebar() {
       isActive: activeSidebarSection === 'post-venta' || location.startsWith('/postsale'),
       restricted: true
     },
-    // Solo mostrar administración si es admin
-    ...(isAdmin ? [{
-      id: 'administracion', 
-      icon: Crown, 
-      label: 'Administración', 
-      defaultRoute: '/admin/dashboard',
-      isActive: activeSidebarSection === 'administracion' || location.startsWith('/admin')
-    }] : [])
+    // Administración movida al footer
   ];
 
 
@@ -316,13 +309,25 @@ export function Sidebar() {
       {/* Bottom Section - Fixed Buttons */}
       <div className="p-1">
         <div className="flex flex-col gap-[2px]">
+          {/* Admin button (above Profile) */}
+          {isAdmin && (
+            <SidebarButton
+              icon={<Crown className="w-[18px] h-[18px]" />}
+              label="Administración"
+              isActive={activeSidebarSection === 'administracion' || location.startsWith('/admin')}
+              isExpanded={isExpanded}
+              onClick={() => handleMainSectionClick('administracion', '/admin/dashboard')}
+              variant="main"
+            />
+          )}
+          
           {/* Profile */}
           <SidebarButton
             icon={<UserCircle className="w-[18px] h-[18px]" />}
             label="Mi Perfil"
-            isActive={location === '/profile'}
+            isActive={activeSidebarSection === 'perfil' || location === '/profile'}
             isExpanded={isExpanded}
-            onClick={() => navigate('/profile')}
+            onClick={() => handleMainSectionClick('perfil', '/profile')}
             avatarUrl={userData?.user?.avatar_url}
             variant="main"
           />
