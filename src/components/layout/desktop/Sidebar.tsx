@@ -267,12 +267,9 @@ export function Sidebar() {
   return (
     <aside 
       className={cn(
-        "fixed top-9 left-0 h-[calc(100vh-36px)] bg-[var(--main-sidebar-bg)] transition-all duration-300 z-40 flex flex-col",
+        "fixed top-9 left-0 h-[calc(100vh-36px)] border-r bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)] transition-all duration-300 z-40 flex flex-col",
         "w-[40px]"
       )}
-      style={{
-        borderRight: `1px solid var(--main-sidebar-border)`
-      }}
     >
       {/* Navigation Items */}
       <div className="flex-1 p-1">
