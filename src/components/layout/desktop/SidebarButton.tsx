@@ -49,7 +49,7 @@ export default function SidebarButton({
     }
   };
   return (
-    <div className="relative group" style={{ zIndex: 99999 }}>
+    <div className="relative group">
       <button
         ref={buttonRef}
         className={cn(
@@ -136,7 +136,7 @@ export default function SidebarButton({
             left: tooltipPosition.left,
             top: tooltipPosition.top,
             transform: 'translateY(-50%)',
-            zIndex: 99999
+            zIndex: 999999
           }}
         >
           {label}

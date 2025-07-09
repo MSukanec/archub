@@ -119,6 +119,16 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 9, 2025. ModernProjectCard implementation and NewProjectModal restructure - COMPLETED
+  • Successfully replaced all ProjectCard references with new ModernProjectCard component based on user-provided design images
+  • Implemented modern card layout with improved visual hierarchy: project name/status header, type/date info row, creator attribution footer
+  • Applied proper responsive grid layout in mobile view with consistent gap-4 spacing between cards
+  • Completely rebuilt NewProjectModal to follow ai-modal-template.md standards using CustomModalBody columns={2} prop
+  • Fixed all duplicate and syntax errors in modal structure for stable functionality
+  • Modal now properly displays all form fields in two-column layout: Creator/Date (row 1), Project Name (full width), Type/Modality (row 2), Status (full width)
+  • Enhanced creator field to show all organization members with current user pre-selected by default
+  • Added required field indicators (*) for mandatory fields and proper form validation
+  • Mobile and desktop views now use identical modern card design for consistent user experience
 - July 9, 2025. Two-column sidebar navigation implementation - COMPLETED
   • Created new two-column sidebar system similar to Linear/Notion with main categories and sub-menus
   • Updated navigationStore to include activeSidebarSection state for controlling right column (defaults to 'organization')

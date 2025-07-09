@@ -21,7 +21,7 @@ import { useNavigationStore } from '@/stores/navigationStore'
 import { useLocation } from 'wouter'
 import { NewProjectModal } from '@/modals/project/NewProjectModal'
 import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState'
-import ProjectCard from '@/components/cards/ProjectCard'
+import ModernProjectCard from '@/components/cards/ModernProjectCard'
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
 
 export default function OrganizationProjects() {
@@ -243,7 +243,7 @@ export default function OrganizationProjects() {
 
   const headerProps = {
     icon: Folder,
-    title: "Gestión de Proyectos",
+    title: "Proyectos",
     showSearch: true,
     searchValue,
     onSearchChange: setSearchValue,
@@ -318,9 +318,9 @@ export default function OrganizationProjects() {
           <>
             {/* Vista móvil */}
             {isMobile ? (
-              <div className="space-y-3 px-4">
+              <div className="grid grid-cols-1 gap-4 px-4">
                 {filteredProjects.map((project) => (
-                  <ProjectCard
+                  <ModernProjectCard
                     key={project.id}
                     project={project}
                     onEdit={handleEdit}
