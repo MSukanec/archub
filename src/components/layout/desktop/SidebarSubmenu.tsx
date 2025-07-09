@@ -88,7 +88,7 @@ export function SidebarSubmenu() {
   // Contenido de submenús para cada sección principal
   const submenuContent = {
     'perfil': [
-      { icon: UserCircle, label: 'Mi Perfil', href: '/profile' },
+      { icon: UserCircle, label: 'Datos Básicos', href: '/profile' },
     ],
     
     'organizacion': [

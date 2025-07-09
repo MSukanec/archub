@@ -17,7 +17,7 @@ import { supabase } from '@/lib/supabase'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
-import { useSidebarStore } from '@/stores/sidebarStore'
+import { useSidebarStore, useSecondarySidebarStore } from '@/stores/sidebarStore'
 import { useThemeStore } from '@/stores/themeStore'
 
 interface Country {
@@ -29,7 +29,7 @@ interface Country {
 export default function Profile() {
   const { data: userData, isLoading } = useCurrentUser()
   const { toast } = useToast()
-  const { setDocked } = useSidebarStore()
+  const { setDocked: setSecondarySidebarDocked } = useSecondarySidebarStore()
   const { isDark, setTheme } = useThemeStore()
   const [, navigate] = useLocation()
   
@@ -135,7 +135,7 @@ export default function Profile() {
 
   const handleSidebarDockedChange = (value: boolean) => {
     setSidebarDocked(value)
-    setDocked(value)
+    setSecondarySidebarDocked(value)
   }
 
   const handleThemeChange = (value: boolean) => {

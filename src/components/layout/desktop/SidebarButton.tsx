@@ -115,7 +115,7 @@ export default function SidebarButton({
       
       {/* Tooltip for main sidebar buttons when collapsed */}
       {variant === 'main' && !isExpanded && (
-        <div className="absolute left-10 top-1/2 transform -translate-y-1/2 bg-black text-white text-sm px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-[9999]">
+        <div className="fixed left-10 top-1/2 transform -translate-y-1/2 bg-black text-white text-sm px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-[99999]">
           {label}
         </div>
       )}
