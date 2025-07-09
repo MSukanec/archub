@@ -45,7 +45,10 @@ import {
   Layout,
   CreditCard,
   Handshake,
-  Brush
+  Brush,
+  HardHat,
+  NotebookPen,
+  FileImage
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -221,7 +224,7 @@ export function Sidebar() {
     },
     { 
       id: 'obra', 
-      icon: Shield, 
+      icon: HardHat, 
       label: 'Obra', 
       defaultRoute: '/construction/dashboard',
       isActive: activeSidebarSection === 'obra' || location.startsWith('/construction')

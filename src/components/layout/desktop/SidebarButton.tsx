@@ -47,7 +47,7 @@ export default function SidebarButton({
         )}
         onClick={handleClick}
         style={{ 
-        borderRadius: '4px',
+        borderRadius: variant === 'main' && isActive ? '4px 0 0 4px' : '4px', // Remove right border radius for active main buttons
         backgroundColor: isActive 
           ? `var(--${variant}-sidebar-button-active-bg)` 
           : `var(--${variant}-sidebar-button-bg)`,
@@ -55,7 +55,14 @@ export default function SidebarButton({
           ? `var(--${variant}-sidebar-button-active-fg)` 
           : `var(--${variant}-sidebar-button-fg)`,
         '--hover-bg': `var(--${variant}-sidebar-button-hover-bg)`,
-        '--hover-fg': `var(--${variant}-sidebar-button-hover-fg)`
+        '--hover-fg': `var(--${variant}-sidebar-button-hover-fg)`,
+        // Extend active main buttons to overlap the border
+        ...(variant === 'main' && isActive && {
+          width: 'calc(100% + 1px)',
+          marginRight: '-1px',
+          zIndex: 10,
+          borderRight: `1px solid var(--${variant}-sidebar-button-active-bg)`
+        })
       } as React.CSSProperties}
       onMouseEnter={(e) => {
         if (!isActive) {

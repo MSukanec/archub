@@ -37,7 +37,10 @@ import {
   Database,
   Layout,
   CreditCard,
-  Handshake
+  Handshake,
+  NotebookPen,
+  FileImage,
+  HardHat
 } from "lucide-react";
 
 export function SidebarSubmenu() {
@@ -91,13 +94,13 @@ export function SidebarSubmenu() {
     
     'proyecto': [
       { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },
-      { icon: Database, label: 'Datos Básicos', href: '/project/basic-data' },
+      { icon: NotebookPen, label: 'Datos Básicos', href: '/project/basic-data' },
     ],
 
     'diseno': [
       { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' },
-      { icon: Database, label: 'Documentación', href: '/design/documentation' },
-      { icon: Calendar, label: 'Cronograma', href: '/design/timeline' },
+      { icon: FileImage, label: 'Documentación', href: '/design/documentation' },
+      { icon: Calendar, label: 'Cronograma', href: '/design/timeline', restricted: true },
       { icon: Layout, label: 'Tablero', href: '/design/board', restricted: true },
       { icon: Calculator, label: 'Cómputo', href: '/design/compute', restricted: true },
       { icon: FileCode, label: 'Datos', href: '/design/data', restricted: true },
@@ -174,9 +177,6 @@ export function SidebarSubmenu() {
               if (item.type === 'accordion') {
                 return (
                   <div key={index} className="mb-[1px]">
-                    <div className="px-3 py-2 text-xs font-semibold text-[var(--secondary-sidebar-fg)] opacity-60 uppercase tracking-wide">
-                      {item.label}
-                    </div>
                     <div className="flex flex-col gap-[1px]">
                       {item.items?.map((subItem, subIndex) => (
                         <div key={subIndex} className="mb-[1px]">
