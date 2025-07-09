@@ -7,13 +7,41 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { HelpPopover } from '@/components/ui-custom/HelpPopover';
+import ProjectHeroImage from '@/components/project/ProjectHeroImage';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useNavigationStore } from '@/stores/navigationStore';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase';
 
 export default function ProjectBasicData() {
   const { data: userData } = useCurrentUser();
   const { setSidebarContext } = useNavigationStore();
+  
+  const organizationId = userData?.preferences?.last_organization_id;
+  const projectId = userData?.preferences?.last_project_id;
+
+  // Get project data including image URL
+  const { data: projectData } = useQuery({
+    queryKey: ['project-data', projectId],
+    queryFn: async () => {
+      if (!projectId || !supabase) return null;
+      
+      const { data, error } = await supabase
+        .from('project_data')
+        .select('*')
+        .eq('project_id', projectId)
+        .single();
+        
+      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows found
+        console.error('Error fetching project data:', error);
+        throw error;
+      }
+      
+      return data;
+    },
+    enabled: !!projectId && !!supabase
+  });
 
   // Form states (mock data for now)
   const [projectName, setProjectName] = useState('');
@@ -22,21 +50,27 @@ export default function ProjectBasicData() {
   const [projectStatus, setProjectStatus] = useState('');
   const [projectLocation, setProjectLocation] = useState('');
   const [projectClient, setProjectClient] = useState('');
+  const [projectImageUrl, setProjectImageUrl] = useState<string | null>(null);
 
   // Set sidebar context on component mount
   useEffect(() => {
     setSidebarContext('data');
   }, [setSidebarContext]);
 
-  // Initialize with mock data
+  // Initialize with project data
   useEffect(() => {
+    if (projectData) {
+      setProjectImageUrl(projectData.project_image_url || null);
+    }
+    
+    // Initialize with mock data for other fields
     setProjectName('Casa Familiar Moderna');
     setProjectDescription('Proyecto de vivienda unifamiliar de 150m² con diseño contemporáneo, incluye 3 dormitorios, 2 baños, living-comedor integrado y cocina moderna.');
     setProjectType('residential');
     setProjectStatus('design');
     setProjectLocation('Buenos Aires, Argentina');
     setProjectClient('Familia Rodríguez');
-  }, []);
+  }, [projectData]);
 
   const projectTypes = [
     { id: 'residential', name: 'Residencial' },
@@ -65,7 +99,19 @@ export default function ProjectBasicData() {
         ]
       }}
     >
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-5xl mx-auto space-y-8">
+        {/* Hero Image Section */}
+        {projectId && organizationId && (
+          <div className="w-full">
+            <ProjectHeroImage
+              projectId={projectId}
+              organizationId={organizationId}
+              currentImageUrl={projectImageUrl}
+              onImageUpdate={setProjectImageUrl}
+            />
+          </div>
+        )}
+
         {/* Header */}
         <div className="space-y-2">
           <h1 className="text-2xl font-semibold">Datos Básicos</h1>
