@@ -178,7 +178,7 @@ export function SidebarSubmenu() {
   return (
     <div 
       className={cn(
-        "fixed top-0 h-screen bg-[var(--secondary-sidebar-bg)] border-r border-[var(--secondary-sidebar-border)] z-30 flex flex-col transition-all duration-300",
+        "fixed top-0 h-screen bg-[var(--secondary-sidebar-bg)] border-r border-[var(--secondary-sidebar-border)] z-30 flex flex-col transition-all duration-300 overflow-hidden",
         "left-[40px]",
         isSecondarySidebarExpanded ? "w-64" : "w-[40px]"
       )}
@@ -186,7 +186,7 @@ export function SidebarSubmenu() {
       onMouseLeave={() => setSecondaryHovered(false)}
     >
       {/* Section Title Header */}
-      <div className="h-9 flex items-center px-3 border-b border-[var(--secondary-sidebar-border)] bg-[var(--secondary-sidebar-bg)]">
+      <div className="h-9 flex items-center px-3 bg-[var(--secondary-sidebar-bg)]">
         {isSecondarySidebarExpanded && (
           <div className="flex items-center gap-2">
             {(() => {
@@ -201,7 +201,7 @@ export function SidebarSubmenu() {
       </div>
 
       {/* Contenido del submenú */}
-      <div className="flex-1 overflow-y-auto p-1">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden p-1 pt-3">
         <div className="flex flex-col gap-[1px]">
           {currentSubmenu.length > 0 ? (
             currentSubmenu.map((item, index) => {

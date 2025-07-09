@@ -272,12 +272,12 @@ export function Sidebar() {
       )}
     >
       {/* Logo Section */}
-      <div className="h-9 flex items-center justify-center border-b border-[var(--main-sidebar-border)] bg-[var(--main-sidebar-bg)]">
+      <div className="h-9 flex items-center justify-center bg-[var(--main-sidebar-bg)]">
         <div className="text-lg font-bold text-[var(--main-sidebar-fg)]">A</div>
       </div>
 
       {/* Navigation Items */}
-      <div className="flex-1 p-1">
+      <div className="flex-1 p-1 pt-3">
         <div className="flex flex-col gap-[2px] h-full">
           <div className={`flex-1 transition-opacity duration-150 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
             {/* Context Title - Removed since sidebar doesn't expand */}
@@ -319,7 +319,7 @@ export function Sidebar() {
       </div>
 
       {/* Bottom Section - Fixed Buttons */}
-      <div className="border-t border-[var(--menues-border)] p-1">
+      <div className="p-1">
         <div className="flex flex-col gap-[2px]">
           {/* Profile */}
           <SidebarButton
