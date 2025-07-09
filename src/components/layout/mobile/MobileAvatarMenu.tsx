@@ -120,14 +120,14 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
           <div className="relative">
             <button
               onClick={() => setExpandedOrgSelector(!expandedOrgSelector)}
-              className="w-full h-10 px-2 rounded-lg border flex items-center justify-between transition-colors hover:bg-[var(--menues-hover-bg)]"
+              className="w-full h-15 px-2 rounded-lg border flex items-center justify-between transition-colors hover:bg-[var(--menues-hover-bg)]"
               style={{ 
                 borderColor: 'var(--menues-border)',
                 backgroundColor: 'var(--menues-bg)',
                 color: 'var(--menues-fg)'
               }}
             >
-              <span className="truncate text-left">
+              <span className="truncate text-left text-base">
                 {currentOrganization?.name || 'Seleccionar organización'}
               </span>
               <ChevronDown className={`h-4 w-4 transition-transform ${expandedOrgSelector ? 'rotate-180' : ''}`} />
@@ -145,7 +145,7 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
                   <button
                     key={org.id}
                     onClick={() => organizationMutation.mutate(org.id)}
-                    className="w-full px-2 py-2 text-left hover:bg-[var(--menues-hover-bg)] transition-colors rounded-xl"
+                    className="w-full px-2 py-3 text-left text-base hover:bg-[var(--menues-hover-bg)] transition-colors rounded-xl"
                     style={{ color: 'var(--menues-fg)' }}
                   >
                     {org.name}
@@ -164,14 +164,14 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
           <div className="relative">
             <button
               onClick={() => setExpandedProjectSelector(!expandedProjectSelector)}
-              className="w-full h-10 px-2 rounded-lg border flex items-center justify-between transition-colors hover:bg-[var(--menues-hover-bg)]"
+              className="w-full h-15 px-2 rounded-lg border flex items-center justify-between transition-colors hover:bg-[var(--menues-hover-bg)]"
               style={{ 
                 borderColor: 'var(--menues-border)',
                 backgroundColor: 'var(--menues-bg)',
                 color: 'var(--menues-fg)'
               }}
             >
-              <span className="truncate text-left">
+              <span className="truncate text-left text-base">
                 {projectsData?.find((p: any) => p.id === effectiveCurrentProject)?.name || 'Seleccionar proyecto'}
               </span>
               <ChevronDown className={`h-4 w-4 transition-transform ${expandedProjectSelector ? 'rotate-180' : ''}`} />
@@ -189,7 +189,7 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
                   <button
                     key={project.id}
                     onClick={() => projectMutation.mutate(project.id)}
-                    className="w-full px-2 py-2 text-left hover:bg-[var(--menues-hover-bg)] transition-colors rounded-xl"
+                    className="w-full px-2 py-3 text-left text-base hover:bg-[var(--menues-hover-bg)] transition-colors rounded-xl"
                     style={{ color: 'var(--menues-fg)' }}
                   >
                     {project.name}
@@ -204,7 +204,7 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
         <div className="pt-2">
           <button
             onClick={() => handleNavigation('/profile')}
-            className="w-full flex items-center gap-3 px-2 py-2 rounded-xl transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+            className="w-full flex items-center gap-3 px-2 py-3 rounded-xl transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
             style={{ 
               color: isButtonActive('/profile') ? 'white' : 'var(--menues-fg)',
               backgroundColor: isButtonActive('/profile') ? 'var(--accent)' : 'transparent',
@@ -218,10 +218,10 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 text-left">
-              <div className="font-medium text-sm" style={{ color: 'var(--menues-fg)' }}>
+              <div className="font-medium text-base" style={{ color: 'var(--menues-fg)' }}>
                 {userData?.user?.full_name || 'Usuario'}
               </div>
-              <div className="text-xs opacity-70" style={{ color: 'var(--menues-fg)' }}>
+              <div className="text-sm opacity-70" style={{ color: 'var(--menues-fg)' }}>
                 Mi Perfil
               </div>
             </div>

@@ -346,7 +346,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                     <CustomRestricted reason="coming_soon">
                       <button
                         onClick={item.isAccordion ? item.onToggle : (item.onClick || (() => handleNavigation(item.href)))}
-                        className="flex w-full items-center gap-3 px-2 py-2 text-sm font-medium rounded-xl transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+                        className="flex w-full items-center gap-3 px-2 py-3 text-base font-medium rounded-xl transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
                         style={{
                           color: isButtonActive(item.href) ? 'white' : 'var(--menues-fg)',
                           backgroundColor: isButtonActive(item.href) ? 'var(--accent)' : 'transparent'
@@ -368,7 +368,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                   ) : (
                     <button
                       onClick={item.isAccordion ? item.onToggle : (item.onClick || (() => handleNavigation(item.href)))}
-                      className="flex w-full items-center gap-3 px-2 py-2 text-sm font-medium rounded-xl transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+                      className="flex w-full items-center gap-3 px-2 py-3 text-base font-medium rounded-xl transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
                       style={{
                         color: isButtonActive(item.href) ? 'white' : 'var(--menues-fg)',
                         backgroundColor: isButtonActive(item.href) ? 'var(--accent)' : 'transparent'
@@ -395,7 +395,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                         <button
                           key={subIndex}
                           onClick={() => handleNavigation(subItem.href)}
-                          className="flex w-full items-center gap-2 px-2 py-2 text-sm rounded-xl transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
+                          className="flex w-full items-center gap-2 px-2 py-3 text-base rounded-xl transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
                           style={{
                             color: isButtonActive(subItem.href) ? 'white' : 'var(--menues-fg)',
                             backgroundColor: isButtonActive(subItem.href) ? 'var(--accent)' : 'transparent'
