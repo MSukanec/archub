@@ -6,7 +6,7 @@ import { useSidebarStore, useSecondarySidebarStore } from "@/stores/sidebarStore
 import { cn } from "@/lib/utils";
 import SidebarButton from "./SidebarButton";
 import { CustomRestricted } from "@/components/ui-custom/misc/CustomRestricted";
-import Plan from "@/components/ui-custom/misc/Plan";
+
 import { 
   Home,
   Users,
@@ -186,7 +186,7 @@ export function SidebarSubmenu() {
   return (
     <div 
       className={cn(
-        "fixed top-0 h-screen bg-[var(--secondary-sidebar-bg)] border-r border-[var(--secondary-sidebar-border)] z-30 flex flex-col transition-all duration-300 overflow-hidden",
+        "fixed top-0 h-screen bg-[var(--secondary-sidebar-bg)] border-r border-[var(--secondary-sidebar-border)] z-50 flex flex-col transition-all duration-300 overflow-hidden rounded-r-lg",
         "left-[40px]",
         isSecondarySidebarExpanded ? "w-64" : "w-[40px]"
       )}
@@ -271,12 +271,7 @@ export function SidebarSubmenu() {
           ) : null}
         </div>
 
-        {/* Plan Section - Only visible for organization section when expanded */}
-        {currentSection === 'organizacion' && isSecondarySidebarExpanded && (
-          <div className="mt-auto p-1 pb-2">
-            <Plan isExpanded={true} />
-          </div>
-        )}
+
       </div>
     </div>
   );
