@@ -1,11 +1,13 @@
 import { cn } from "@/lib/utils";
+import { useLocation } from "wouter";
 
 interface SidebarButtonProps {
   icon: React.ReactNode;
   label: string;
   isActive: boolean;
   isExpanded: boolean;
-  onClick: () => void;
+  onClick?: () => void;
+  href?: string;
   avatarUrl?: string;
   rightIcon?: React.ReactNode;
   isChild?: boolean;
@@ -18,11 +20,21 @@ export default function SidebarButton({
   isActive, 
   isExpanded, 
   onClick,
+  href,
   avatarUrl,
   rightIcon,
   isChild = false,
   variant = 'main'
 }: SidebarButtonProps) {
+  const [, navigate] = useLocation();
+
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    } else if (href) {
+      navigate(href);
+    }
+  };
   return (
     <button
       className={cn(
@@ -35,7 +47,7 @@ export default function SidebarButton({
           ? `bg-[var(--${variant}-sidebar-button-active-bg)] text-[var(--${variant}-sidebar-button-active-fg)]` 
           : `bg-[var(--${variant}-sidebar-button-bg)] text-[var(--${variant}-sidebar-button-fg)] hover:bg-[var(--${variant}-sidebar-button-hover-bg)] hover:text-[var(--${variant}-sidebar-button-hover-fg)]`
       )}
-      onClick={onClick}
+      onClick={handleClick}
       title={!isExpanded ? label : undefined}
       style={{ borderRadius: '4px' }}
     >
