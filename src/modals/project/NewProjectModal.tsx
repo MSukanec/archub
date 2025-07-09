@@ -29,7 +29,7 @@ import { queryClient } from "@/lib/queryClient";
 
 const createProjectSchema = z.object({
   name: z.string().min(1, "El nombre es requerido"),
-  created_at: z.date(),
+  created_at: z.string(),
   created_by: z.string().min(1, "El creador es requerido"),
   project_type_id: z.string(),
   modality_id: z.string(),
@@ -89,7 +89,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
     resolver: zodResolver(createProjectSchema),
     defaultValues: {
       name: editingProject?.name || "",
-      created_at: editingProject ? new Date(editingProject.created_at) : new Date(),
+      created_at: editingProject ? editingProject.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
       created_by: editingProject?.created_by || currentUserMember?.id || "",
       project_type_id: editingProject?.project_data?.project_type_id || "none",
       modality_id: editingProject?.project_data?.modality_id || "none",
@@ -152,7 +152,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
             status: formData.status,
             created_by: formData.created_by,
             organization_id: organizationId,
-            created_at: formData.created_at.toISOString(),
+            created_at: new Date(formData.created_at).toISOString(),
             is_active: true,
           })
           .select()
@@ -250,22 +250,18 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {organizationMembers.map((member) => {
+                          {organizationMembers?.length > 0 ? organizationMembers.map((member) => {
                             const memberUser = member.users;
-                            const memberName = memberUser?.full_name || memberUser?.email || 'Usuario';
-                            const memberInitials = memberName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
+                            const memberName = memberUser?.full_name || memberUser?.email || 'Usuario sin nombre';
                             
                             return (
                               <SelectItem key={member.id} value={member.id}>
-                                <div className="flex items-center gap-2">
-                                  <div className="h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center text-xs">
-                                    {memberInitials}
-                                  </div>
-                                  {memberName}
-                                </div>
+                                {memberName}
                               </SelectItem>
                             );
-                          })}
+                          }) : (
+                            <SelectItem value="" disabled>Cargando miembros...</SelectItem>
+                          )}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -278,39 +274,14 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
                   control={form.control}
                   name="created_at"
                   render={({ field }) => (
-                    <FormItem className="flex flex-col">
+                    <FormItem>
                       <FormLabel className="text-sm font-medium">Fecha de creación</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant="outline"
-                              className={cn(
-                                "w-full pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "PPP", { locale: es })
-                              ) : (
-                                <span>Selecciona una fecha</span>
-                              )}
-                              <Calendar className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <CalendarComponent
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            disabled={(date) =>
-                              date > new Date() || date < new Date("1900-01-01")
-                            }
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
+                      <FormControl>
+                        <Input 
+                          type="date"
+                          {...field}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -321,7 +292,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
                   control={form.control}
                   name="name"
                   render={({ field }) => (
-                    <FormItem className="col-span-2">
+                    <FormItem>
                       <FormLabel className="text-sm font-medium">Nombre del proyecto *</FormLabel>
                       <FormControl>
                         <Input placeholder="Ej: Construcción edificio residencial" {...field} />
@@ -390,7 +361,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
                   control={form.control}
                   name="status"
                   render={({ field }) => (
-                    <FormItem className="col-span-2">
+                    <FormItem>
                       <FormLabel className="text-sm font-medium">Estado del proyecto *</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
