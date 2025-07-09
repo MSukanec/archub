@@ -223,11 +223,9 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
       onClose={handleClose}
       children={{
         header: (
-          <CustomModalHeader>
-            <h2 className="text-lg font-semibold">
-              {editingProject ? 'Editar Proyecto' : 'Nuevo Proyecto'}
-            </h2>
-          </CustomModalHeader>
+          <CustomModalHeader
+            title={editingProject ? "Editar Proyecto" : "Nuevo Proyecto"}
+          />
         ),
         body: (
           <Form {...form}>

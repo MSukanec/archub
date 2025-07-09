@@ -78,12 +78,35 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect 
             </div>
           </div>
           
-          {/* Active Badge */}
-          {project.status === 'active' && (
-            <span className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
-              ACTIVO
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            {/* Active Badge */}
+            {project.status === 'active' && (
+              <span className="bg-[var(--accent)] text-white text-xs font-medium px-2 py-1 rounded-full">
+                ACTIVO
+              </span>
+            )}
+            
+            {/* More Options - Desktop */}
+            <div className="md:block hidden">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center">
+                    <MoreHorizontal className="w-4 h-4 text-gray-600" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => onEdit(project)}>
+                    <Edit className="w-4 h-4 mr-2" />
+                    Editar
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onDelete(project)} className="text-red-600">
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Eliminar
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
         </div>
 
         {/* Project Image/Thumbnail */}
