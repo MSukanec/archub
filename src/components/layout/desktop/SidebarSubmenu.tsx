@@ -186,15 +186,13 @@ export function SidebarSubmenu() {
   return (
     <div 
       className={cn(
-        "fixed top-0 h-screen z-30 flex flex-col transition-all duration-300 overflow-hidden",
+        "fixed top-0 h-screen bg-[var(--secondary-sidebar-bg)] border-r border-[var(--secondary-sidebar-border)] z-30 flex flex-col transition-all duration-300 overflow-hidden",
         "left-[40px]",
         isSecondarySidebarExpanded ? "w-64" : "w-[40px]"
       )}
       onMouseEnter={() => setSecondaryHovered(true)}
       onMouseLeave={() => setSecondaryHovered(false)}
     >
-      <div className="h-full bg-[var(--secondary-sidebar-bg)] border border-[var(--secondary-sidebar-border)] rounded-r-lg mt-2 mr-2 mb-2 flex flex-col overflow-hidden">
-        {/* Content moved inside this div */}
       {/* Section Title Header */}
       <div className="h-9 flex items-center px-3 bg-[var(--secondary-sidebar-bg)]">
         {isSecondarySidebarExpanded && (
@@ -279,7 +277,6 @@ export function SidebarSubmenu() {
             <Plan isExpanded={true} />
           </div>
         )}
-      </div>
       </div>
     </div>
   );
