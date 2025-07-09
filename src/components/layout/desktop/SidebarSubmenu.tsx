@@ -186,10 +186,15 @@ export function SidebarSubmenu() {
   return (
     <div 
       className={cn(
-        "fixed top-0 h-screen bg-[var(--secondary-sidebar-bg)] border-r border-[var(--secondary-sidebar-border)] z-50 flex flex-col transition-all duration-300 overflow-hidden rounded-r-lg",
+        "fixed top-0 h-screen bg-[var(--secondary-sidebar-bg)] border-r border-[var(--secondary-sidebar-border)] z-50 flex flex-col transition-all duration-300",
         "left-[40px]",
         isSecondarySidebarExpanded ? "w-64" : "w-[40px]"
       )}
+      style={{
+        borderTopRightRadius: '12px',
+        borderBottomRightRadius: '12px',
+        overflow: 'hidden'
+      }}
       onMouseEnter={() => setSecondaryHovered(true)}
       onMouseLeave={() => setSecondaryHovered(false)}
     >
