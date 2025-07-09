@@ -70,8 +70,6 @@ export function SidebarSubmenu() {
   const submenuContent = {
     'organizacion': [
       { icon: Home, label: 'Resumen de la Organización', href: '/organization/dashboard' },
-      { icon: ArrowRight, label: 'Ir al Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
-      { type: 'divider' },
       { icon: FolderOpen, label: 'Proyectos', href: '/organization/projects' },
       { icon: Activity, label: 'Actividad', href: '/organization/activity' },
       { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
@@ -81,15 +79,11 @@ export function SidebarSubmenu() {
     
     'datos-basicos': [
       { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },
-      { icon: ArrowLeft, label: 'Volver a Organización', href: '#', onClick: () => { setSidebarContext('organization'); navigate('/organization/dashboard'); } },
-      { type: 'divider' },
       { icon: Database, label: 'Datos Básicos', href: '/project/basic-data' },
     ],
 
     'diseno': [
       { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' },
-      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
-      { type: 'divider' },
       { icon: Database, label: 'Documentación', href: '/design/documentation' },
       { icon: Calendar, label: 'Cronograma', href: '/design/timeline' },
       { icon: Layout, label: 'Tablero', href: '/design/board', restricted: true },
@@ -100,8 +94,6 @@ export function SidebarSubmenu() {
 
     'obra': [
       { icon: Home, label: 'Resumen de Obra', href: '/construction/dashboard' },
-      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
-      { type: 'divider' },
       { icon: DollarSign, label: 'Presupuestos', href: '/construction/budgets' },
       { icon: Package, label: 'Materiales', href: '/construction/materials' },
       { icon: FileText, label: 'Bitácora', href: '/construction/logs' },
@@ -111,8 +103,6 @@ export function SidebarSubmenu() {
 
     'finanzas': [
       { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
-      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
-      { type: 'divider' },
       { icon: Activity, label: 'Movimientos', href: '/finances/movements' },
       { icon: CreditCard, label: 'Aportes', href: '/finances/installments' },
       { icon: FolderOpen, label: 'Preferencias de Finanzas', href: '/finances/preferences' },
@@ -120,8 +110,6 @@ export function SidebarSubmenu() {
 
     'comercializacion': [
       { icon: Home, label: 'Resumen de Comercialización', href: '/commercialization/dashboard', restricted: true },
-      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
-      { type: 'divider' },
       { icon: Handshake, label: 'Unidades', href: '/commercialization/units', restricted: true },
       { icon: Users, label: 'Clientes', href: '/commercialization/clients', restricted: true },
       { icon: DollarSign, label: 'Ventas', href: '/commercialization/sales', restricted: true },
@@ -130,8 +118,6 @@ export function SidebarSubmenu() {
 
     'post-venta': [
       { icon: Home, label: 'Resumen de Post-Venta', href: '/postsale/dashboard', restricted: true },
-      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
-      { type: 'divider' },
       { icon: Contact, label: 'Servicios', href: '/postsale/services', restricted: true },
       { icon: Activity, label: 'Soporte', href: '/postsale/support', restricted: true },
       { icon: FolderOpen, label: 'Preferencias de Post-Venta', href: '/postsale/preferences', restricted: true },
@@ -139,7 +125,6 @@ export function SidebarSubmenu() {
 
     'administracion': [
       { icon: Home, label: 'Resumen de Administración', href: '/admin/dashboard' },
-      { type: 'divider' },
       { type: 'accordion', label: 'Comunidad', items: [
         { icon: History, label: 'Changelog', href: '/admin/changelogs' },
       ]},
@@ -168,30 +153,28 @@ export function SidebarSubmenu() {
       )}
     >
       {/* Contenido del submenú - sin header */}
-      <div className="flex-1 overflow-y-auto p-2">
-        <div className="space-y-1">
+      <div className="flex-1 overflow-y-auto p-1">
+        <div className="flex flex-col gap-[2px]">
           {currentSubmenu.map((item, index) => {
-            if (item.type === 'divider') {
-              return <hr key={index} className="my-2 border-border" />;
-            }
 
             if (item.type === 'accordion') {
               return (
-                <div key={index} className="mb-2">
+                <div key={index} className="mb-[2px]">
                   <div className="px-3 py-2 text-xs font-semibold text-[var(--menues-fg)] opacity-60 uppercase tracking-wide">
                     {item.label}
                   </div>
-                  <div className="space-y-1">
+                  <div className="flex flex-col gap-[2px]">
                     {item.items?.map((subItem, subIndex) => (
-                      <SidebarButton
-                        key={subIndex}
-                        icon={<subItem.icon className="w-[18px] h-[18px]" />}
-                        href={subItem.href}
-                        isActive={location === subItem.href}
-                        onClick={subItem.onClick}
-                        label={subItem.label}
-                        isExpanded={true}
-                      />
+                      <div key={subIndex} className="mb-[2px]">
+                        <SidebarButton
+                          icon={<subItem.icon className="w-[18px] h-[18px]" />}
+                          href={subItem.href}
+                          isActive={location === subItem.href}
+                          onClick={subItem.onClick}
+                          label={subItem.label}
+                          isExpanded={true}
+                        />
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -201,29 +184,32 @@ export function SidebarSubmenu() {
             // Botón normal con posible restricción
             if (item.restricted && !isAdmin) {
               return (
-                <CustomRestricted key={index} reason="coming_soon">
-                  <SidebarButton
-                    icon={<item.icon className="w-[18px] h-[18px]" />}
-                    href="#"
-                    isActive={false}
-                    onClick={() => {}}
-                    label={item.label}
-                    isExpanded={true}
-                  />
-                </CustomRestricted>
+                <div key={index} className="mb-[2px]">
+                  <CustomRestricted reason="coming_soon">
+                    <SidebarButton
+                      icon={<item.icon className="w-[18px] h-[18px]" />}
+                      href="#"
+                      isActive={false}
+                      onClick={() => {}}
+                      label={item.label}
+                      isExpanded={true}
+                    />
+                  </CustomRestricted>
+                </div>
               );
             }
 
             return (
-              <SidebarButton
-                key={index}
-                icon={<item.icon className="w-[18px] h-[18px]" />}
-                href={item.href}
-                isActive={location === item.href}
-                onClick={item.onClick}
-                label={item.label}
-                isExpanded={true}
-              />
+              <div key={index} className="mb-[2px]">
+                <SidebarButton
+                  icon={<item.icon className="w-[18px] h-[18px]" />}
+                  href={item.href}
+                  isActive={location === item.href}
+                  onClick={item.onClick}
+                  label={item.label}
+                  isExpanded={true}
+                />
+              </div>
             );
           })}
         </div>
