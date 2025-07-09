@@ -31,13 +31,11 @@ interface LayoutProps {
 export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   const { isDark, setTheme } = useThemeStore();
   const { data } = useCurrentUser();
-  const { isDocked: isMainDocked, isHovered: isMainHovered } = useSidebarStore();
   const { isDocked: isSecondaryDocked, isHovered: isSecondaryHovered } = useSecondarySidebarStore();
   const { activeSidebarSection } = useNavigationStore();
   const { showActionBar } = useMobileActionBar();
   const isMobile = useMobile();
 
-  const isMainExpanded = isMainDocked || isMainHovered;
   const isSecondaryExpanded = isSecondaryDocked || isSecondaryHovered;
 
   useEffect(() => {
@@ -67,13 +65,9 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       </div>
       <main
         className={`transition-all duration-300 ease-in-out flex-1 overflow-auto p-3 mt-1 ${
-          // Calculate margin based on both sidebars
-          isMainExpanded && isSecondaryExpanded 
-            ? "md:ml-[504px]" // 240px main + 264px secondary
-            : isMainExpanded && !isSecondaryExpanded
-            ? "md:ml-[290px]" // 240px main + 50px secondary
-            : !isMainExpanded && isSecondaryExpanded
-            ? "md:ml-[304px]" // 40px main + 264px secondary  
+          // Calculate margin based on fixed main sidebar (40px) and variable secondary sidebar
+          isSecondaryExpanded 
+            ? "md:ml-[304px]" // 40px main + 264px secondary
             : "md:ml-[90px]"  // 40px main + 50px secondary
         } ml-0 ${isMobile && showActionBar ? "pb-20" : ""}`}
       >

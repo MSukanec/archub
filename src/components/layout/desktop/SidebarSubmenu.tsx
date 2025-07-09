@@ -51,10 +51,8 @@ export function SidebarSubmenu() {
   const isMainSidebarExpanded = isMainDocked || isMainHovered;
   const isSecondarySidebarExpanded = isSecondaryDocked || isSecondaryHovered;
 
-  // Si no hay sección activa, no mostrar nada
-  if (!activeSidebarSection) {
-    return null;
-  }
+  // Definir sección por defecto si no hay ninguna activa
+  const currentSection = activeSidebarSection || 'organizacion';
 
   // Función para navegación con transición hacia adelante
   const navigateForward = (newContext: string, href: string) => {
@@ -143,7 +141,7 @@ export function SidebarSubmenu() {
     ],
   };
 
-  const currentSubmenu = submenuContent[activeSidebarSection as keyof typeof submenuContent] || [];
+  const currentSubmenu = submenuContent[currentSection as keyof typeof submenuContent] || [];
 
   // Always show the secondary sidebar
   return (
