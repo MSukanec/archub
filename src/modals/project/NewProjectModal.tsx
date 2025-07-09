@@ -415,10 +415,11 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
         ),
         footer: (
           <CustomModalFooter
-            onClose={handleClose}
-            isSubmitting={mutation.isPending}
-            submitButtonText={editingProject ? 'Actualizar Proyecto' : 'Crear Proyecto'}
-            formId="project-form"
+            onCancel={handleClose}
+            cancelText="Cancelar"
+            submitText={editingProject ? 'Actualizar Proyecto' : 'Crear Proyecto'}
+            isLoading={mutation.isPending}
+            form="project-form"
           />
         )
       }}

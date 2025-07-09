@@ -267,6 +267,7 @@ export default function OrganizationProjects() {
   const selectedProject = projects?.find(p => p.id === userData?.preferences?.last_project_id);
 
   return (
+    <>
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
         {/* Card de información del proyecto seleccionado */}
@@ -438,18 +439,18 @@ export default function OrganizationProjects() {
           </AlertDialogContent>
         </AlertDialog>
 
-        {/* New Project Modal */}
-        {showNewProjectModal && (
-          <NewProjectModal
-            open={showNewProjectModal}
-            onClose={() => {
-              setShowNewProjectModal(false)
-              setEditingProject(null)
-            }}
-            editingProject={editingProject}
-          />
-        )}
       </div>
     </Layout>
+
+    {/* New Project Modal - Outside Layout to render as overlay */}
+    <NewProjectModal
+      open={showNewProjectModal}
+      onClose={() => {
+        setShowNewProjectModal(false)
+        setEditingProject(null)
+      }}
+      editingProject={editingProject}
+    />
+  </>
   )
 }
