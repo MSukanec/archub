@@ -86,9 +86,9 @@
   /* Secondary Sidebar */
   --secondary-sidebar-bg: hsl(0, 0%, 100%);
   --secondary-sidebar-fg: hsl(0, 0%, 35%);
-  --secondary-sidebar-border: hsl(0, 0%, 35%);
+  --secondary-sidebar-border: hsl(0, 0%, 70%);
   --secondary-sidebar-button-bg: transparent;
-  --secondary-sidebar-button-fg: hsl(0, 0%, 35%);
+  --secondary-sidebar-button-fg: hsl(0, 0%, 50%);
   --secondary-sidebar-button-active-bg: hsl(90, 50%, 50%);
   --secondary-sidebar-button-active-fg: hsl(0, 0%, 97%);
   --secondary-sidebar-button-hover-bg: hsl(90, 50%, 50%);
