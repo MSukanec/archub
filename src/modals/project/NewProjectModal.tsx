@@ -138,6 +138,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
           .update({
             name: formData.name,
             status: formData.status,
+            created_by: formData.created_by,
           })
           .eq('id', editingProject.id);
 

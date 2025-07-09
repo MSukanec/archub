@@ -132,8 +132,13 @@ export default function OrganizationProjects() {
     }
   })
 
-  // Poner el proyecto activo primero
+  // Mark active project and put it first
   const activeProjectId = userData?.preferences?.last_project_id
+  filteredProjects = filteredProjects.map(project => ({
+    ...project,
+    is_active: project.id === activeProjectId
+  }))
+  
   if (activeProjectId) {
     filteredProjects = [
       ...filteredProjects.filter(project => project.id === activeProjectId),

@@ -34,14 +34,7 @@ interface ModernProjectCardProps {
 export default function ModernProjectCard({ project, onEdit, onDelete, onSelect }: ModernProjectCardProps) {
   const statusConfig = projectStatuses[project.status as keyof typeof projectStatuses] || projectStatuses.planning;
   
-  // Debug log to see project data
-  console.log('Project data in card:', {
-    id: project.id,
-    name: project.name,
-    status: project.status,
-    creator: project.creator,
-    project_data: project.project_data
-  });
+
 
   return (
     <SwipeableCard
@@ -88,10 +81,12 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect 
           </div>
           
           <div className="flex items-center gap-2">
-            {/* Status Badge - Always show for debugging */}
-            <span className="bg-blue-600 text-white text-xs font-medium px-2 py-1 rounded-full">
-              {project.status === 'active' ? 'ACTIVO' : statusConfig.label}
-            </span>
+            {/* Active Project Badge - Only show for selected project */}
+            {project.is_active && (
+              <span className="text-xs font-medium px-2 py-1 rounded-full text-white" style={{backgroundColor: 'var(--accent)'}}>
+                ACTIVO
+              </span>
+            )}
             
             {/* More Options - Desktop */}
             <div className="md:block hidden">
