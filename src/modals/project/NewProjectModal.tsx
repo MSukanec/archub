@@ -96,10 +96,28 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
     },
   });
 
-  // Reset form when currentUserMember changes
+  // Reset form when currentUserMember changes or when editing project changes
   React.useEffect(() => {
-    if (currentUserMember && !editingProject) {
-      form.setValue('created_by', currentUserMember.id);
+    if (editingProject) {
+      // Load editing project data
+      form.reset({
+        name: editingProject.name,
+        created_at: editingProject.created_at.split('T')[0],
+        created_by: editingProject.created_by,
+        project_type_id: editingProject.project_data?.project_type_id || "none",
+        modality_id: editingProject.project_data?.modality_id || "none",
+        status: editingProject.status,
+      });
+    } else if (currentUserMember) {
+      // Set default values for new project
+      form.reset({
+        name: "",
+        created_at: new Date().toISOString().split('T')[0],
+        created_by: currentUserMember.id,
+        project_type_id: "none",
+        modality_id: "none",
+        status: "planning",
+      });
     }
   }, [currentUserMember, editingProject, form]);
 

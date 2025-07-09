@@ -33,6 +33,15 @@ interface ModernProjectCardProps {
 
 export default function ModernProjectCard({ project, onEdit, onDelete, onSelect }: ModernProjectCardProps) {
   const statusConfig = projectStatuses[project.status as keyof typeof projectStatuses] || projectStatuses.planning;
+  
+  // Debug log to see project data
+  console.log('Project data in card:', {
+    id: project.id,
+    name: project.name,
+    status: project.status,
+    creator: project.creator,
+    project_data: project.project_data
+  });
 
   return (
     <SwipeableCard
@@ -65,13 +74,13 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect 
         <div className="flex items-center justify-between p-4 pb-2">
           <div className="flex items-center gap-3">
             <Avatar className="w-8 h-8">
-              <AvatarImage src={project.creator_avatar || ''} />
+              <AvatarImage src={project.creator?.avatar_url || ''} />
               <AvatarFallback className="text-xs bg-gray-100">
-                {project.creator_name?.split(' ').map(n => n[0]).join('') || 'U'}
+                {project.creator?.full_name?.split(' ').map(n => n[0]).join('') || 'U'}
               </AvatarFallback>
             </Avatar>
             <div>
-              <p className="text-sm font-medium text-gray-900">{project.creator_name || 'Usuario'}</p>
+              <p className="text-sm font-medium text-gray-900">{project.creator?.full_name || project.creator?.first_name || 'Usuario'}</p>
               <p className="text-xs text-gray-500">
                 {project.created_at ? format(new Date(project.created_at), 'dd MMM, yyyy', { locale: es }) : ''}
               </p>
@@ -79,12 +88,10 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect 
           </div>
           
           <div className="flex items-center gap-2">
-            {/* Active Badge */}
-            {project.status === 'active' && (
-              <span className="bg-[var(--accent)] text-white text-xs font-medium px-2 py-1 rounded-full">
-                ACTIVO
-              </span>
-            )}
+            {/* Status Badge - Always show for debugging */}
+            <span className="bg-blue-600 text-white text-xs font-medium px-2 py-1 rounded-full">
+              {project.status === 'active' ? 'ACTIVO' : statusConfig.label}
+            </span>
             
             {/* More Options - Desktop */}
             <div className="md:block hidden">
@@ -132,10 +139,10 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect 
           
           <div className="space-y-1">
             <p className="text-sm text-gray-600">
-              <span className="font-medium">Tipología:</span> {project.typology || 'Sin especificar'}
+              <span className="font-medium">Tipología:</span> {project.project_data?.project_type?.name || 'Sin especificar'}
             </p>
             <p className="text-sm text-gray-600">
-              <span className="font-medium">Modalidad:</span> {project.modality || 'Sin especificar'}
+              <span className="font-medium">Modalidad:</span> {project.project_data?.modality?.name || 'Sin especificar'}
             </p>
             <p className="text-sm text-gray-600">
               <span className="font-medium">Estado:</span> {statusConfig.label}

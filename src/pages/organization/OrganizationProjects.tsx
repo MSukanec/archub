@@ -178,6 +178,7 @@ export default function OrganizationProjects() {
   const handleEdit = (project: any) => {
     setEditingProject(project)
     setShowNewProjectModal(true)
+    // Don't call handleSelectProject here
   }
 
   const handleDeleteClick = (project: any) => {
