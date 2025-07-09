@@ -65,7 +65,7 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
         onClick={() => onSelect(project)}
       >
         {/* Creator Info - Top */}
-        <div className="flex items-center justify-between p-4 pb-2">
+        <div className="flex items-center justify-between p-6 pb-3">
           <div className="flex items-center gap-3">
             <Avatar className="w-8 h-8">
               <AvatarImage src={project.creator?.avatar_url || ''} />
@@ -117,7 +117,7 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
         </div>
 
         {/* Project Image/Thumbnail */}
-        <div className="relative h-40 bg-gradient-to-br from-blue-50 to-indigo-100 overflow-hidden mx-4 rounded-lg">
+        <div className="relative h-40 bg-gradient-to-br from-blue-50 to-indigo-100 overflow-hidden mx-6 rounded-lg">
           {project.project_data?.project_image_url ? (
             <img 
               src={project.project_data.project_image_url} 
@@ -132,7 +132,7 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
         </div>
 
         {/* Project Info - Bottom */}
-        <div className="p-4 pt-3 space-y-2">
+        <div className="p-6 pt-3 space-y-2">
           <h3 className="font-semibold text-gray-900 text-lg leading-tight">
             {project.name}
           </h3>

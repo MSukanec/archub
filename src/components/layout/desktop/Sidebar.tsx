@@ -329,6 +329,7 @@ export function Sidebar() {
             isExpanded={isExpanded}
             onClick={() => handleMainSectionClick('perfil', '/profile')}
             avatarUrl={userData?.user?.avatar_url}
+            userFullName={userData?.user?.full_name}
             variant="main"
           />
         </div>

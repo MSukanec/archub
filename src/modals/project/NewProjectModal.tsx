@@ -388,6 +388,16 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
                 {/* Image Upload Field */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Imagen Principal del Proyecto</label>
+                  {editingProject?.project_data?.project_image_url && (
+                    <div className="mb-2">
+                      <img 
+                        src={editingProject.project_data.project_image_url} 
+                        alt="Imagen actual" 
+                        className="w-20 h-20 object-cover rounded border border-input"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">Imagen actual</p>
+                    </div>
+                  )}
                   <input
                     type="file"
                     accept="image/*"

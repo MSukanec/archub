@@ -10,6 +10,7 @@ interface SidebarButtonProps {
   onClick?: () => void;
   href?: string;
   avatarUrl?: string;
+  userFullName?: string | null;
   rightIcon?: React.ReactNode;
   isChild?: boolean;
   variant?: 'main' | 'secondary';
@@ -23,6 +24,7 @@ export default function SidebarButton({
   onClick,
   href,
   avatarUrl,
+  userFullName,
   rightIcon,
   isChild = false,
   variant = 'main'
@@ -99,8 +101,12 @@ export default function SidebarButton({
             <img 
               src={avatarUrl} 
               alt="Avatar"
-              className="w-[18px] h-[18px] rounded-full"
+              className="w-[28px] h-[28px] rounded-full"
             />
+          ) : userFullName ? (
+            <div className="w-[28px] h-[28px] rounded-full bg-accent text-accent-foreground flex items-center justify-center text-xs font-medium">
+              {userFullName.split(' ').map(name => name[0]).join('').substring(0, 2).toUpperCase()}
+            </div>
           ) : (
             icon
           )}
