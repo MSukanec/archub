@@ -72,7 +72,27 @@
   --layout-text: hsl(0, 0%, 45%);
   --layout-border: hsl(0, 0%, 45%);
 
-  /* Menus/Sidebar */
+  /* Main Sidebar */
+  --main-sidebar-bg: hsl(0, 0%, 97%);
+  --main-sidebar-fg: hsl(0, 0%, 45%);
+  --main-sidebar-secondary-fg: hsl(0, 0%, 50%);
+  --main-sidebar-border: hsl(0, 0%, 85%);
+  --main-sidebar-hover-bg: hsl(90, 50%, 50%);
+  --main-sidebar-hover-fg: hsl(0, 0%, 97%);
+  --main-sidebar-active-bg: hsl(90, 50%, 50%);
+  --main-sidebar-active-fg: hsl(0, 0%, 97%);
+
+  /* Secondary Sidebar */
+  --secondary-sidebar-bg: hsl(0, 0%, 97%);
+  --secondary-sidebar-fg: hsl(0, 0%, 45%);
+  --secondary-sidebar-secondary-fg: hsl(0, 0%, 50%);
+  --secondary-sidebar-border: hsl(0, 0%, 85%);
+  --secondary-sidebar-hover-bg: hsl(90, 50%, 50%);
+  --secondary-sidebar-hover-fg: hsl(0, 0%, 97%);
+  --secondary-sidebar-active-bg: hsl(90, 50%, 50%);
+  --secondary-sidebar-active-fg: hsl(0, 0%, 97%);
+  
+  /* Legacy support (will be removed) */
   --menues-bg: hsl(0, 0%, 97%);
   --menues-fg: hsl(0, 0%, 45%);
   --menues-secondary-fg: hsl(0, 0%, 50%);

@@ -267,7 +267,7 @@ export function Sidebar() {
   return (
     <aside 
       className={cn(
-        "fixed top-9 left-0 h-[calc(100vh-36px)] border-r bg-[var(--menues-bg)] border-[var(--menues-border)] transition-all duration-300 z-40 flex flex-col",
+        "fixed top-9 left-0 h-[calc(100vh-36px)] border-r bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)] transition-all duration-300 z-40 flex flex-col",
         isExpanded ? "w-[240px]" : "w-[40px]"
       )}
       onMouseEnter={() => setHovered(true)}
@@ -280,7 +280,7 @@ export function Sidebar() {
             {/* Context Title */}
             {sidebarContextTitles[currentSidebarContext] && isExpanded && (
               <div className="px-3 py-1 mb-1">
-                <span className="text-sm text-[var(--menues-fg)] opacity-60">
+                <span className="text-sm text-[var(--main-sidebar-fg)] opacity-60">
                   {sidebarContextTitles[currentSidebarContext]}
                 </span>
               </div>

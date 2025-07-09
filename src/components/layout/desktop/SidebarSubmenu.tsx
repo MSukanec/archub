@@ -143,75 +143,82 @@ export function SidebarSubmenu() {
 
   const currentSubmenu = submenuContent[activeSidebarSection as keyof typeof submenuContent] || [];
 
-  if (!activeSidebarSection) return null;
-
+  // Always show the secondary sidebar
   return (
     <div 
       className={cn(
-        "fixed top-9 h-[calc(100vh-36px)] w-64 bg-[var(--menues-bg)] border-r border-[var(--menues-border)] z-30 flex flex-col transition-all duration-300",
+        "fixed top-9 h-[calc(100vh-36px)] w-64 bg-[var(--secondary-sidebar-bg)] border-r border-[var(--secondary-sidebar-border)] z-30 flex flex-col transition-all duration-300",
         isMainSidebarExpanded ? "left-[240px]" : "left-[40px]"
       )}
     >
       {/* Contenido del submenú - sin header */}
       <div className="flex-1 overflow-y-auto p-1">
         <div className="flex flex-col gap-[2px]">
-          {currentSubmenu.map((item, index) => {
+          {currentSubmenu.length > 0 ? (
+            currentSubmenu.map((item, index) => {
+              if (item.type === 'accordion') {
+                return (
+                  <div key={index} className="mb-[2px]">
+                    <div className="px-3 py-2 text-xs font-semibold text-[var(--secondary-sidebar-fg)] opacity-60 uppercase tracking-wide">
+                      {item.label}
+                    </div>
+                    <div className="flex flex-col gap-[2px]">
+                      {item.items?.map((subItem, subIndex) => (
+                        <div key={subIndex} className="mb-[2px]">
+                          <SidebarButton
+                            icon={<subItem.icon className="w-[18px] h-[18px]" />}
+                            href={subItem.href}
+                            isActive={location === subItem.href}
+                            onClick={subItem.onClick}
+                            label={subItem.label}
+                            isExpanded={true}
+                            variant="secondary"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              }
 
-            if (item.type === 'accordion') {
+              // Botón normal con posible restricción
+              if (item.restricted && !isAdmin) {
+                return (
+                  <div key={index} className="mb-[2px]">
+                    <CustomRestricted reason="coming_soon">
+                      <SidebarButton
+                        icon={<item.icon className="w-[18px] h-[18px]" />}
+                        href="#"
+                        isActive={false}
+                        onClick={() => {}}
+                        label={item.label}
+                        isExpanded={true}
+                        variant="secondary"
+                      />
+                    </CustomRestricted>
+                  </div>
+                );
+              }
+
               return (
                 <div key={index} className="mb-[2px]">
-                  <div className="px-3 py-2 text-xs font-semibold text-[var(--menues-fg)] opacity-60 uppercase tracking-wide">
-                    {item.label}
-                  </div>
-                  <div className="flex flex-col gap-[2px]">
-                    {item.items?.map((subItem, subIndex) => (
-                      <div key={subIndex} className="mb-[2px]">
-                        <SidebarButton
-                          icon={<subItem.icon className="w-[18px] h-[18px]" />}
-                          href={subItem.href}
-                          isActive={location === subItem.href}
-                          onClick={subItem.onClick}
-                          label={subItem.label}
-                          isExpanded={true}
-                        />
-                      </div>
-                    ))}
-                  </div>
+                  <SidebarButton
+                    icon={<item.icon className="w-[18px] h-[18px]" />}
+                    href={item.href}
+                    isActive={location === item.href}
+                    onClick={item.onClick}
+                    label={item.label}
+                    isExpanded={true}
+                    variant="secondary"
+                  />
                 </div>
               );
-            }
-
-            // Botón normal con posible restricción
-            if (item.restricted && !isAdmin) {
-              return (
-                <div key={index} className="mb-[2px]">
-                  <CustomRestricted reason="coming_soon">
-                    <SidebarButton
-                      icon={<item.icon className="w-[18px] h-[18px]" />}
-                      href="#"
-                      isActive={false}
-                      onClick={() => {}}
-                      label={item.label}
-                      isExpanded={true}
-                    />
-                  </CustomRestricted>
-                </div>
-              );
-            }
-
-            return (
-              <div key={index} className="mb-[2px]">
-                <SidebarButton
-                  icon={<item.icon className="w-[18px] h-[18px]" />}
-                  href={item.href}
-                  isActive={location === item.href}
-                  onClick={item.onClick}
-                  label={item.label}
-                  isExpanded={true}
-                />
-              </div>
-            );
-          })}
+            })
+          ) : (
+            <div className="p-4 text-center text-sm text-[var(--secondary-sidebar-fg)] opacity-60">
+              Selecciona una sección para ver opciones
+            </div>
+          )}
         </div>
       </div>
     </div>

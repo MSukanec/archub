@@ -9,6 +9,7 @@ interface SidebarButtonProps {
   avatarUrl?: string;
   rightIcon?: React.ReactNode;
   isChild?: boolean;
+  variant?: 'main' | 'secondary';
 }
 
 export default function SidebarButton({ 
@@ -19,7 +20,8 @@ export default function SidebarButton({
   onClick,
   avatarUrl,
   rightIcon,
-  isChild = false
+  isChild = false,
+  variant = 'main'
 }: SidebarButtonProps) {
   return (
     <button
@@ -30,8 +32,8 @@ export default function SidebarButton({
         // Cuando expandido, el botón se extiende pero el icono queda fijo
         isExpanded && 'w-full',
         isActive 
-          ? 'bg-[var(--menues-active-bg)] text-[var(--menues-active-fg)]' 
-          : 'text-[var(--menues-fg)] hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]'
+          ? `bg-[var(--${variant}-sidebar-active-bg)] text-[var(--${variant}-sidebar-active-fg)]` 
+          : `text-[var(--${variant}-sidebar-fg)] hover:bg-[var(--${variant}-sidebar-hover-bg)] hover:text-[var(--${variant}-sidebar-hover-fg)]`
       )}
       onClick={onClick}
       title={!isExpanded ? label : undefined}
