@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Database } from 'lucide-react';
+import { Database, ImageIcon } from 'lucide-react';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { Label } from '@/components/ui/label';
@@ -43,13 +43,35 @@ export default function ProjectBasicData() {
     enabled: !!projectId && !!supabase
   });
 
-  // Form states (mock data for now)
+  // Get actual project info
+  const { data: projectInfo } = useQuery({
+    queryKey: ['project-info', projectId],
+    queryFn: async () => {
+      if (!projectId || !supabase) return null;
+      
+      const { data, error } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('id', projectId)
+        .single();
+        
+      if (error) {
+        console.error('Error fetching project info:', error);
+        throw error;
+      }
+      
+      return data;
+    },
+    enabled: !!projectId && !!supabase
+  });
+
+  // Form states - using real data
   const [projectName, setProjectName] = useState('');
   const [projectDescription, setProjectDescription] = useState('');
-  const [projectType, setProjectType] = useState('');
-  const [projectStatus, setProjectStatus] = useState('');
   const [projectLocation, setProjectLocation] = useState('');
   const [projectClient, setProjectClient] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [projectImageUrl, setProjectImageUrl] = useState<string | null>(null);
 
   // Set sidebar context on component mount
@@ -57,35 +79,23 @@ export default function ProjectBasicData() {
     setSidebarContext('data');
   }, [setSidebarContext]);
 
-  // Initialize with project data
+  // Initialize with real project data
   useEffect(() => {
     if (projectData) {
       setProjectImageUrl(projectData.project_image_url || null);
+      setProjectLocation(projectData.address || '');
+      setProjectClient(projectData.client_name || '');
+      setStartDate(projectData.start_date || '');
+      setEndDate(projectData.estimated_end || '');
+      setProjectDescription(projectData.description || '');
     }
     
-    // Initialize with mock data for other fields
-    setProjectName('Casa Familiar Moderna');
-    setProjectDescription('Proyecto de vivienda unifamiliar de 150m² con diseño contemporáneo, incluye 3 dormitorios, 2 baños, living-comedor integrado y cocina moderna.');
-    setProjectType('residential');
-    setProjectStatus('design');
-    setProjectLocation('Buenos Aires, Argentina');
-    setProjectClient('Familia Rodríguez');
-  }, [projectData]);
+    if (projectInfo) {
+      setProjectName(projectInfo.name || '');
+    }
+  }, [projectData, projectInfo]);
 
-  const projectTypes = [
-    { id: 'residential', name: 'Residencial' },
-    { id: 'commercial', name: 'Comercial' },
-    { id: 'industrial', name: 'Industrial' },
-    { id: 'infrastructure', name: 'Infraestructura' }
-  ];
 
-  const projectStatuses = [
-    { id: 'planning', name: 'Planificación' },
-    { id: 'design', name: 'Diseño' },
-    { id: 'construction', name: 'Construcción' },
-    { id: 'finishing', name: 'Terminaciones' },
-    { id: 'completed', name: 'Completado' }
-  ];
 
   return (
     <Layout 
@@ -101,23 +111,31 @@ export default function ProjectBasicData() {
     >
       <div className="max-w-5xl mx-auto space-y-8">
         {/* Hero Image Section */}
-        {projectId && organizationId && (
-          <div className="w-full">
+        <div className="space-y-6">
+          {/* Section Header */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <ImageIcon className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">🖼️ Imagen Principal</h2>
+              <HelpPopover 
+                title="Imagen Principal del Proyecto"
+                description="Sube una imagen representativa de tu proyecto que se mostrará como imagen principal. Esta imagen aparecerá en las tarjetas del proyecto y en la página de información básica. Formatos aceptados: JPG, PNG, WebP con un tamaño máximo de 10MB."
+              />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Define la imagen representativa de tu proyecto que se mostrará en tarjetas y reportes
+            </p>
+          </div>
+
+          {/* Hero Image Component */}
+          {projectId && organizationId && (
             <ProjectHeroImage
               projectId={projectId}
               organizationId={organizationId}
               currentImageUrl={projectImageUrl}
               onImageUpdate={setProjectImageUrl}
             />
-          </div>
-        )}
-
-        {/* Header */}
-        <div className="space-y-2">
-          <h1 className="text-2xl font-semibold">Datos Básicos</h1>
-          <p className="text-sm text-muted-foreground">
-            Configura la información básica de tu proyecto, incluyendo descripción, tipo y estado actual.
-          </p>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -165,38 +183,6 @@ export default function ProjectBasicData() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="project-type">Tipo de Proyecto</Label>
-                <Select value={projectType} onValueChange={setProjectType}>
-                  <SelectTrigger id="project-type">
-                    <SelectValue placeholder="Selecciona el tipo de proyecto" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {projectTypes.map((type) => (
-                      <SelectItem key={type.id} value={type.id}>
-                        {type.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="project-status">Estado Actual</Label>
-                <Select value={projectStatus} onValueChange={setProjectStatus}>
-                  <SelectTrigger id="project-status">
-                    <SelectValue placeholder="Selecciona el estado actual" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {projectStatuses.map((status) => (
-                      <SelectItem key={status.id} value={status.id}>
-                        {status.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
                 <Label htmlFor="project-location">Ubicación</Label>
                 <Input
                   id="project-location"
@@ -213,6 +199,26 @@ export default function ProjectBasicData() {
                   value={projectClient}
                   onChange={(e) => setProjectClient(e.target.value)}
                   placeholder="Nombre del cliente o contratante"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="start-date">Fecha de Inicio</Label>
+                <Input
+                  id="start-date"
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="end-date">Fecha Estimada de Finalización</Label>
+                <Input
+                  id="end-date"
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
                 />
               </div>
             </div>

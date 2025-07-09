@@ -181,17 +181,16 @@ export default function ProjectHeroImage({
           </>
         ) : (
           <>
-            {/* No Image Placeholder */}
+            {/* No Image Placeholder - styled like CustomEmptyState */}
             <div 
-              className="w-full h-full flex flex-col items-center justify-center cursor-pointer border-2 border-dashed border-muted-foreground/25 hover:border-primary/50 transition-colors"
+              className="w-full h-full flex flex-col items-center justify-center cursor-pointer border-2 border-dashed border-muted-foreground/25 hover:border-[var(--accent)]/50 transition-colors bg-card rounded-lg"
               onClick={() => document.getElementById('hero-image-input')?.click()}
             >
-              <div className="text-center space-y-4">
-                <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center">
+              <div className="text-center space-y-4 p-8">
+                <div className="w-16 h-16 mx-auto bg-muted/50 rounded-full flex items-center justify-center border border-muted-foreground/20">
                   <ImageIcon className="h-8 w-8 text-muted-foreground" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-lg font-medium">🖼️ Imagen Principal</h3>
                   <p className="text-sm text-muted-foreground max-w-sm">
                     Arrastra una imagen aquí o haz clic para seleccionar la imagen principal de tu proyecto
                   </p>
@@ -199,7 +198,7 @@ export default function ProjectHeroImage({
                     Formatos: JPG, PNG, WebP • Tamaño máximo: 10MB
                   </p>
                 </div>
-                <Button disabled={isUploading} className="gap-2">
+                <Button disabled={isUploading} variant="outline" className="gap-2 border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]">
                   <Upload className="h-4 w-4" />
                   {isUploading ? 'Subiendo...' : 'Seleccionar Imagen'}
                 </Button>
