@@ -188,7 +188,7 @@ export default function ProjectHeroImage({
             >
               <div className="text-center space-y-4 p-8">
                 <div className="w-16 h-16 mx-auto bg-muted/50 rounded-full flex items-center justify-center border border-muted-foreground/20">
-                  <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                  <Upload className="h-8 w-8 text-muted-foreground" />
                 </div>
                 <div className="space-y-2">
                   <p className="text-sm text-muted-foreground max-w-sm">

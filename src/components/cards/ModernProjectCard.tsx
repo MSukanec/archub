@@ -29,9 +29,10 @@ interface ModernProjectCardProps {
   onEdit: (project: any) => void;
   onDelete: (project: any) => void;
   onSelect: (project: any) => void;
+  onNavigateToBasicData: (project: any) => void;
 }
 
-export default function ModernProjectCard({ project, onEdit, onDelete, onSelect }: ModernProjectCardProps) {
+export default function ModernProjectCard({ project, onEdit, onDelete, onSelect, onNavigateToBasicData }: ModernProjectCardProps) {
   const statusConfig = projectStatuses[project.status as keyof typeof projectStatuses] || projectStatuses.planning;
   
 
@@ -97,11 +98,15 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect 
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => onEdit(project)}>
+                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit(project); }}>
                     <Edit className="w-4 h-4 mr-2" />
-                    Editar
+                    Edición rápida
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => onDelete(project)} className="text-red-600">
+                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onNavigateToBasicData(project); }}>
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edición completa
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onDelete(project); }} className="text-red-600">
                     <Trash2 className="w-4 h-4 mr-2" />
                     Eliminar
                   </DropdownMenuItem>
@@ -113,9 +118,9 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect 
 
         {/* Project Image/Thumbnail */}
         <div className="relative h-40 bg-gradient-to-br from-blue-50 to-indigo-100 overflow-hidden mx-4 rounded-lg">
-          {project.thumbnail_url ? (
+          {project.project_data?.project_image_url ? (
             <img 
-              src={project.thumbnail_url} 
+              src={project.project_data.project_image_url} 
               alt={project.name}
               className="w-full h-full object-cover rounded-lg"
             />

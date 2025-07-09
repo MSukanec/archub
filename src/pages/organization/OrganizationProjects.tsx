@@ -178,17 +178,26 @@ export default function OrganizationProjects() {
 
   const handleSelectProject = (projectId: string) => {
     selectProjectMutation.mutate(projectId)
+    // Navigate to project dashboard after selection
+    navigate('/project/dashboard')
   }
 
   const handleEdit = (project: any) => {
     setEditingProject(project)
     setShowNewProjectModal(true)
-    // Don't call handleSelectProject here
+    // Don't call handleSelectProject here to prevent unwanted navigation
   }
 
   const handleDeleteClick = (project: any) => {
     setProjectToDelete(project)
     setDeleteDialogOpen(true)
+  }
+
+  // Function to navigate to basic data after setting project as active
+  const handleNavigateToBasicData = (project: any) => {
+    selectProjectMutation.mutate(project.id)
+    // Navigate to basic data page
+    navigate('/project/basic-data')
   }
 
   const clearFilters = () => {
@@ -331,6 +340,7 @@ export default function OrganizationProjects() {
                     onEdit={handleEdit}
                     onDelete={handleDeleteClick}
                     onSelect={(project) => handleSelectProject(project.id)}
+                    onNavigateToBasicData={handleNavigateToBasicData}
                   />
                 ))}
               </div>
@@ -344,6 +354,7 @@ export default function OrganizationProjects() {
                     onEdit={handleEdit}
                     onDelete={handleDeleteClick}
                     onSelect={(project) => handleSelectProject(project.id)}
+                    onNavigateToBasicData={handleNavigateToBasicData}
                   />
                 ))}
               </div>
