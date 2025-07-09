@@ -71,7 +71,7 @@ export function SidebarSubmenu() {
     return 'organizacion'; // default fallback
   };
   
-  const currentSection = activeSidebarSection || getDefaultSection();
+  const currentSection = getDefaultSection();
 
   // Función para navegación con transición hacia adelante
   const navigateForward = (newContext: string, href: string) => {

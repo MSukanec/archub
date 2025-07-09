@@ -58,113 +58,67 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect 
       ]}
     >
       <Card 
-        className="w-full cursor-pointer hover:shadow-lg transition-all duration-200 bg-white border border-gray-200 overflow-hidden group"
+        className="w-full cursor-pointer hover:shadow-lg transition-all duration-200 bg-white border border-gray-200 overflow-hidden"
         onClick={() => onSelect(project)}
       >
+        {/* Creator Info - Top */}
+        <div className="flex items-center justify-between p-4 pb-2">
+          <div className="flex items-center gap-3">
+            <Avatar className="w-8 h-8">
+              <AvatarImage src={project.creator_avatar || ''} />
+              <AvatarFallback className="text-xs bg-gray-100">
+                {project.creator_name?.split(' ').map(n => n[0]).join('') || 'U'}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="text-sm font-medium text-gray-900">{project.creator_name || 'Usuario'}</p>
+              <p className="text-xs text-gray-500">
+                {project.created_at ? format(new Date(project.created_at), 'dd MMM, yyyy', { locale: es }) : ''}
+              </p>
+            </div>
+          </div>
+          
+          {/* Active Badge */}
+          {project.status === 'active' && (
+            <span className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
+              ACTIVO
+            </span>
+          )}
+        </div>
+
         {/* Project Image/Thumbnail */}
-        <div className="relative h-48 bg-gradient-to-br from-blue-50 to-indigo-100 overflow-hidden">
+        <div className="relative h-40 bg-gradient-to-br from-blue-50 to-indigo-100 overflow-hidden mx-4 rounded-lg">
           {project.thumbnail_url ? (
             <img 
               src={project.thumbnail_url} 
               alt={project.name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover rounded-lg"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-6xl font-bold text-blue-200/50">
+            <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-blue-200/50 rounded-lg">
               {project.name?.charAt(0)?.toUpperCase() || 'P'}
             </div>
           )}
-          
-          {/* Status Badge - Top Right */}
-          <div className="absolute top-3 right-3">
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusConfig.color}`}>
-              {statusConfig.label}
-            </span>
-          </div>
-
-          {/* More Options - Top Left for Desktop */}
-          <div className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity md:block hidden">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="w-8 h-8 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow-sm">
-                  <MoreHorizontal className="w-4 h-4" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
-                <DropdownMenuItem onClick={() => onEdit(project)}>
-                  <Edit className="w-4 h-4 mr-2" />
-                  Editar
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onDelete(project)} className="text-red-600">
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Eliminar
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
         </div>
 
-        <CardContent className="p-4">
-          {/* Project Title */}
-          <h3 className="font-semibold text-lg text-gray-900 mb-2 line-clamp-2">
+        {/* Project Info - Bottom */}
+        <div className="p-4 pt-3 space-y-2">
+          <h3 className="font-semibold text-gray-900 text-lg leading-tight">
             {project.name}
           </h3>
-
-          {/* Project Type Tags */}
-          <div className="flex gap-2 mb-3 flex-wrap">
-            {project.project_data?.project_type?.name && (
-              <Badge variant="outline" className="text-xs">
-                {project.project_data.project_type.name}
-              </Badge>
-            )}
-            {project.project_data?.modality?.name && (
-              <Badge variant="outline" className="text-xs">
-                {project.project_data.modality.name}
-              </Badge>
-            )}
+          
+          <div className="space-y-1">
+            <p className="text-sm text-gray-600">
+              <span className="font-medium">Tipología:</span> {project.typology || 'Sin especificar'}
+            </p>
+            <p className="text-sm text-gray-600">
+              <span className="font-medium">Modalidad:</span> {project.modality || 'Sin especificar'}
+            </p>
+            <p className="text-sm text-gray-600">
+              <span className="font-medium">Estado:</span> {statusConfig.label}
+            </p>
           </div>
-
-          {/* Project Stats */}
-          <div className="flex items-center justify-between text-sm text-gray-600 mb-3">
-            <div className="flex items-center gap-1">
-              <DollarSign className="w-4 h-4" />
-              <span className="font-medium">
-                ${project.estimated_budget ? 
-                  new Intl.NumberFormat('es-AR').format(project.estimated_budget) : 
-                  '0'
-                }
-              </span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Calendar className="w-4 h-4" />
-              <span>
-                {project.start_date ? 
-                  format(new Date(project.start_date), 'dd MMM yyyy', { locale: es }) : 
-                  'Sin fecha'
-                }
-              </span>
-            </div>
-          </div>
-
-          {/* Creator Info */}
-          <div className="flex items-center gap-2">
-            <Avatar className="w-6 h-6">
-              <AvatarImage src={project.creator?.avatar_url} />
-              <AvatarFallback className="text-xs">
-                {project.creator?.full_name?.charAt(0) || 'U'}
-              </AvatarFallback>
-            </Avatar>
-            <span className="text-sm text-gray-600">
-              {project.creator?.full_name || 'Usuario'}
-            </span>
-            <div className="ml-auto text-xs text-gray-400">
-              {project.updated_at ? 
-                `Actualizado ${format(new Date(project.updated_at), 'dd MMM', { locale: es })}` :
-                format(new Date(project.created_at), 'dd MMM', { locale: es })
-              }
-            </div>
-          </div>
-        </CardContent>
+        </div>
       </Card>
     </SwipeableCard>
   );

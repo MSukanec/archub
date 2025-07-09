@@ -157,8 +157,6 @@ export default function OrganizationProjects() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['current-user'] })
-      setSidebarContext('project')
-      navigate('/project/dashboard')
       toast({
         title: "Proyecto seleccionado",
         description: "El proyecto se ha seleccionado correctamente"
