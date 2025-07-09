@@ -32,8 +32,8 @@ export default function SidebarButton({
         // Cuando expandido, el botón se extiende pero el icono queda fijo
         isExpanded && 'w-full',
         isActive 
-          ? `bg-[var(--${variant}-sidebar-active-bg)] text-[var(--${variant}-sidebar-active-fg)]` 
-          : `text-[var(--${variant}-sidebar-fg)] hover:bg-[var(--${variant}-sidebar-hover-bg)] hover:text-[var(--${variant}-sidebar-hover-fg)]`
+          ? `bg-[var(--${variant}-sidebar-button-active-bg)] text-[var(--${variant}-sidebar-button-active-fg)]` 
+          : `bg-[var(--${variant}-sidebar-button-bg)] text-[var(--${variant}-sidebar-button-fg)] hover:bg-[var(--${variant}-sidebar-button-hover-bg)] hover:text-[var(--${variant}-sidebar-button-hover-fg)]`
       )}
       onClick={onClick}
       title={!isExpanded ? label : undefined}

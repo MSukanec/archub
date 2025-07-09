@@ -5,7 +5,7 @@ import { Header } from "./Header";
 import { useAuthStore } from "@/stores/authStore";
 import { useThemeStore } from "@/stores/themeStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useSidebarStore } from "@/stores/sidebarStore";
+import { useSidebarStore, useSecondarySidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { MobileActionBar } from "@/components/ui-custom/mobile/MobileActionBar";
 import { useMobileActionBar } from "@/components/layout/mobile/MobileActionBarContext";
@@ -31,12 +31,14 @@ interface LayoutProps {
 export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   const { isDark, setTheme } = useThemeStore();
   const { data } = useCurrentUser();
-  const { isDocked, isHovered } = useSidebarStore();
+  const { isDocked: isMainDocked, isHovered: isMainHovered } = useSidebarStore();
+  const { isDocked: isSecondaryDocked, isHovered: isSecondaryHovered } = useSecondarySidebarStore();
   const { activeSidebarSection } = useNavigationStore();
   const { showActionBar } = useMobileActionBar();
   const isMobile = useMobile();
 
-  const isExpanded = isDocked || isHovered;
+  const isMainExpanded = isMainDocked || isMainHovered;
+  const isSecondaryExpanded = isSecondaryDocked || isSecondaryHovered;
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDark);
@@ -65,9 +67,14 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       </div>
       <main
         className={`transition-all duration-300 ease-in-out flex-1 overflow-auto p-3 mt-1 ${
-          isExpanded 
-            ? "md:ml-[504px]" // 240px main sidebar + 264px secondary sidebar (always visible)
-            : "md:ml-[304px]"  // 40px main sidebar + 264px secondary sidebar (always visible)
+          // Calculate margin based on both sidebars
+          isMainExpanded && isSecondaryExpanded 
+            ? "md:ml-[504px]" // 240px main + 264px secondary
+            : isMainExpanded && !isSecondaryExpanded
+            ? "md:ml-[290px]" // 240px main + 50px secondary
+            : !isMainExpanded && isSecondaryExpanded
+            ? "md:ml-[304px]" // 40px main + 264px secondary  
+            : "md:ml-[90px]"  // 40px main + 50px secondary
         } ml-0 ${isMobile && showActionBar ? "pb-20" : ""}`}
       >
         <div className={wide ? "" : "max-w-[1440px] mx-auto"}>{children}</div>

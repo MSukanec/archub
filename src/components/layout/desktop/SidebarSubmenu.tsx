@@ -2,7 +2,7 @@ import { useLocation } from "wouter";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
-import { useSidebarStore } from "@/stores/sidebarStore";
+import { useSidebarStore, useSecondarySidebarStore } from "@/stores/sidebarStore";
 import { cn } from "@/lib/utils";
 import SidebarButton from "./SidebarButton";
 import { CustomRestricted } from "@/components/ui-custom/misc/CustomRestricted";
@@ -44,10 +44,12 @@ export function SidebarSubmenu() {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const isAdmin = useIsAdmin();
-  const { isDocked, isHovered } = useSidebarStore();
+  const { isDocked: isMainDocked, isHovered: isMainHovered } = useSidebarStore();
+  const { isDocked: isSecondaryDocked, isHovered: isSecondaryHovered, setDocked: setSecondaryDocked, setHovered: setSecondaryHovered } = useSecondarySidebarStore();
   const { activeSidebarSection, setActiveSidebarSection, setSidebarContext } = useNavigationStore();
 
-  const isMainSidebarExpanded = isDocked || isHovered;
+  const isMainSidebarExpanded = isMainDocked || isMainHovered;
+  const isSecondarySidebarExpanded = isSecondaryDocked || isSecondaryHovered;
 
   // Si no hay sección activa, no mostrar nada
   if (!activeSidebarSection) {
@@ -147,9 +149,12 @@ export function SidebarSubmenu() {
   return (
     <div 
       className={cn(
-        "fixed top-9 h-[calc(100vh-36px)] w-64 bg-[var(--secondary-sidebar-bg)] border-r border-[var(--secondary-sidebar-border)] z-30 flex flex-col transition-all duration-300",
-        isMainSidebarExpanded ? "left-[240px]" : "left-[40px]"
+        "fixed top-9 h-[calc(100vh-36px)] bg-[var(--secondary-sidebar-bg)] border-r border-[var(--secondary-sidebar-border)] z-30 flex flex-col transition-all duration-300",
+        isMainSidebarExpanded ? "left-[240px]" : "left-[40px]",
+        isSecondarySidebarExpanded ? "w-64" : "w-10"
       )}
+      onMouseEnter={() => setSecondaryHovered(true)}
+      onMouseLeave={() => setSecondaryHovered(false)}
     >
       {/* Contenido del submenú - sin header */}
       <div className="flex-1 overflow-y-auto p-1">
@@ -171,7 +176,7 @@ export function SidebarSubmenu() {
                             isActive={location === subItem.href}
                             onClick={subItem.onClick}
                             label={subItem.label}
-                            isExpanded={true}
+                            isExpanded={isSecondarySidebarExpanded}
                             variant="secondary"
                           />
                         </div>
@@ -192,7 +197,7 @@ export function SidebarSubmenu() {
                         isActive={false}
                         onClick={() => {}}
                         label={item.label}
-                        isExpanded={true}
+                        isExpanded={isSecondarySidebarExpanded}
                         variant="secondary"
                       />
                     </CustomRestricted>
@@ -208,7 +213,7 @@ export function SidebarSubmenu() {
                     isActive={location === item.href}
                     onClick={item.onClick}
                     label={item.label}
-                    isExpanded={true}
+                    isExpanded={isSecondarySidebarExpanded}
                     variant="secondary"
                   />
                 </div>

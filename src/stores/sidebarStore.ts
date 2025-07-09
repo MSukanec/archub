@@ -22,3 +22,26 @@ export const useSidebarStore = create<SidebarState>()(
     }
   )
 )
+
+// Secondary Sidebar Store
+interface SecondarySidebarState {
+  isDocked: boolean
+  isHovered: boolean
+  setDocked: (docked: boolean) => void
+  setHovered: (hovered: boolean) => void
+}
+
+export const useSecondarySidebarStore = create<SecondarySidebarState>()(
+  persist(
+    (set) => ({
+      isDocked: false,
+      isHovered: false,
+      setDocked: (docked: boolean) => set({ isDocked: docked }),
+      setHovered: (hovered: boolean) => set({ isHovered: hovered }),
+    }),
+    {
+      name: 'secondary-sidebar-store',
+      partialize: (state) => ({ isDocked: state.isDocked }),
+    }
+  )
+)
