@@ -51,8 +51,20 @@ export function SidebarSubmenu() {
   const isMainSidebarExpanded = false; // Always collapsed
   const isSecondarySidebarExpanded = isSecondaryDocked || isSecondaryHovered;
 
-  // Definir sección por defecto si no hay ninguna activa
-  const currentSection = activeSidebarSection || 'organizacion';
+  // Definir sección por defecto basada en la ruta actual
+  const getDefaultSection = () => {
+    if (location.startsWith('/organization')) return 'organizacion';
+    if (location.startsWith('/project')) return 'proyecto';
+    if (location.startsWith('/design')) return 'diseno';
+    if (location.startsWith('/construction')) return 'obra';
+    if (location.startsWith('/finances')) return 'finanzas';
+    if (location.startsWith('/commercialization')) return 'comercializacion';
+    if (location.startsWith('/postsale')) return 'post-venta';
+    if (location.startsWith('/admin')) return 'administracion';
+    return 'organizacion'; // default fallback
+  };
+  
+  const currentSection = activeSidebarSection || getDefaultSection();
 
   // Función para navegación con transición hacia adelante
   const navigateForward = (newContext: string, href: string) => {
@@ -77,7 +89,7 @@ export function SidebarSubmenu() {
       { icon: CheckSquare, label: 'Tareas', href: '/tasks' },
     ],
     
-    'datos-basicos': [
+    'proyecto': [
       { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },
       { icon: Database, label: 'Datos Básicos', href: '/project/basic-data' },
     ],
@@ -217,11 +229,7 @@ export function SidebarSubmenu() {
                 </div>
               );
             })
-          ) : (
-            <div className="p-4 text-center text-sm text-[var(--secondary-sidebar-fg)] opacity-60">
-              Selecciona una sección para ver opciones
-            </div>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

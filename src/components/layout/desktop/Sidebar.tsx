@@ -44,7 +44,8 @@ import {
   Database,
   Layout,
   CreditCard,
-  Handshake
+  Handshake,
+  Brush
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -188,15 +189,10 @@ export function Sidebar() {
 
   // Función para manejar clicks en botones principales
   const handleMainSectionClick = (sectionId: string, defaultRoute: string) => {
-    // Si ya está activa la sección, cerrar
-    if (activeSidebarSection === sectionId) {
-      setActiveSidebarSection(null);
-    } else {
-      // Abrir nueva sección y navegar si es necesario
-      setActiveSidebarSection(sectionId);
-      if (location !== defaultRoute) {
-        navigate(defaultRoute);
-      }
+    // Siempre establecer la sección activa y navegar
+    setActiveSidebarSection(sectionId);
+    if (location !== defaultRoute) {
+      navigate(defaultRoute);
     }
   };
 
@@ -204,28 +200,28 @@ export function Sidebar() {
   const mainSidebarItems = [
     { 
       id: 'organizacion', 
-      icon: Users, 
+      icon: Building, 
       label: 'Organización', 
       defaultRoute: '/organization/dashboard',
       isActive: activeSidebarSection === 'organizacion' || location.startsWith('/organization')
     },
     { 
-      id: 'datos-basicos', 
-      icon: Database, 
-      label: 'Datos Básicos', 
+      id: 'proyecto', 
+      icon: FolderOpen, 
+      label: 'Proyecto', 
       defaultRoute: '/project/basic-data',
-      isActive: activeSidebarSection === 'datos-basicos' || location.startsWith('/project/basic-data')
+      isActive: activeSidebarSection === 'proyecto' || location.startsWith('/project')
     },
     { 
       id: 'diseno', 
-      icon: FolderOpen, 
+      icon: Brush, 
       label: 'Diseño', 
       defaultRoute: '/design/dashboard',
       isActive: activeSidebarSection === 'diseno' || location.startsWith('/design')
     },
     { 
       id: 'obra', 
-      icon: Building, 
+      icon: Shield, 
       label: 'Obra', 
       defaultRoute: '/construction/dashboard',
       isActive: activeSidebarSection === 'obra' || location.startsWith('/construction')

@@ -13,7 +13,7 @@ interface NavigationState {
 export const useNavigationStore = create<NavigationState>((set) => ({
   currentSidebarContext: 'organization',
   setSidebarContext: (context: SidebarContext) => set({ currentSidebarContext: context }),
-  // Estado para la columna lateral derecha - default to organization
-  activeSidebarSection: 'organization',
+  // Estado para la columna lateral derecha - default to organizacion
+  activeSidebarSection: 'organizacion',
   setActiveSidebarSection: (section: string | null) => set({ activeSidebarSection: section }),
 }))
