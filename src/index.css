@@ -68,7 +68,7 @@
 
 :root {
   /* Layout */
-  --layout-bg: hsl(0, 0%, 99%);
+  --layout-bg: hsl(0, 0%, 95%);
   --layout-text: hsl(0, 0%, 45%);
   --layout-border: hsl(0, 0%, 45%);
 

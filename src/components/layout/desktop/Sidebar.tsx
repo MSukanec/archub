@@ -297,6 +297,7 @@ export function Sidebar() {
                       isExpanded={isExpanded}
                       onClick={() => handleMainSectionClick(item.id, item.defaultRoute)}
                       rightIcon={isExpanded && <ChevronRight className="w-4 h-4" />}
+                      variant="main"
                     />
                   </CustomRestricted>
                 ) : (
@@ -307,6 +308,7 @@ export function Sidebar() {
                     isExpanded={isExpanded}
                     onClick={() => handleMainSectionClick(item.id, item.defaultRoute)}
                     rightIcon={isExpanded && <ChevronRight className="w-4 h-4" />}
+                    variant="main"
                   />
                 )}
               </div>
@@ -400,6 +402,7 @@ export function Sidebar() {
             isActive={location === '/changelog'}
             isExpanded={isExpanded}
             onClick={() => navigate('/changelog')}
+            variant="main"
           />
 
           {/* Profile */}
@@ -410,6 +413,7 @@ export function Sidebar() {
             isExpanded={isExpanded}
             onClick={() => navigate('/profile')}
             avatarUrl={userData?.user?.avatar_url}
+            variant="main"
           />
         </div>
       </div>
