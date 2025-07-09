@@ -267,10 +267,12 @@ export function Sidebar() {
   return (
     <aside 
       className={cn(
-        "fixed top-0 left-0 h-screen border-r bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)] transition-all duration-300 z-40 flex flex-col",
+        "fixed top-0 left-0 h-screen transition-all duration-300 z-40 flex flex-col",
         "w-[40px]"
       )}
     >
+      <div className="h-full bg-[var(--main-sidebar-bg)] border border-[var(--main-sidebar-border)] rounded-lg m-2 flex flex-col">
+        {/* Content moved inside this div */}
       {/* Logo Section */}
       <div className="h-9 flex items-center justify-center bg-[var(--main-sidebar-bg)]">
         <div className="text-lg font-bold text-[var(--main-sidebar-fg)]">A</div>
@@ -327,6 +329,7 @@ export function Sidebar() {
             variant="main"
           />
         </div>
+      </div>
       </div>
     </aside>
   );

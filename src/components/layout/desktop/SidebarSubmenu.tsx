@@ -186,13 +186,15 @@ export function SidebarSubmenu() {
   return (
     <div 
       className={cn(
-        "fixed top-0 h-screen bg-[var(--secondary-sidebar-bg)] border-r border-[var(--secondary-sidebar-border)] z-30 flex flex-col transition-all duration-300 overflow-hidden rounded-r-2xl",
+        "fixed top-0 h-screen z-30 flex flex-col transition-all duration-300 overflow-hidden",
         "left-[40px]",
-        isSecondarySidebarExpanded ? "w-64" : "w-[60px]"
+        isSecondarySidebarExpanded ? "w-64" : "w-[40px]"
       )}
       onMouseEnter={() => setSecondaryHovered(true)}
       onMouseLeave={() => setSecondaryHovered(false)}
     >
+      <div className="h-full bg-[var(--secondary-sidebar-bg)] border border-[var(--secondary-sidebar-border)] rounded-r-lg mt-2 mr-2 mb-2 flex flex-col overflow-hidden">
+        {/* Content moved inside this div */}
       {/* Section Title Header */}
       <div className="h-9 flex items-center px-3 bg-[var(--secondary-sidebar-bg)]">
         {isSecondarySidebarExpanded && (
@@ -209,14 +211,8 @@ export function SidebarSubmenu() {
       </div>
 
       {/* Contenido del submenú */}
-      <div className={cn(
-        "flex-1 overflow-y-auto overflow-x-hidden pt-3",
-        isSecondarySidebarExpanded ? "p-1" : "px-0"
-      )}>
-        <div className={cn(
-          "flex flex-col gap-[1px]",
-          !isSecondarySidebarExpanded && "items-center"
-        )}>
+      <div className="flex-1 overflow-y-auto overflow-x-hidden p-1 pt-3">
+        <div className="flex flex-col gap-[1px]">
           {currentSubmenu.length > 0 ? (
             currentSubmenu.map((item, index) => {
               if (item.type === 'accordion') {
@@ -224,10 +220,7 @@ export function SidebarSubmenu() {
                   <div key={index} className="mb-[1px]">
                     <div className="flex flex-col gap-[1px]">
                       {item.items?.map((subItem, subIndex) => (
-                        <div key={subIndex} className={cn(
-                          "mb-[1px]",
-                          !isSecondarySidebarExpanded && "w-8 flex justify-center"
-                        )}>
+                        <div key={subIndex} className="mb-[1px]">
                           <SidebarButton
                             icon={<subItem.icon className="w-[18px] h-[18px]" />}
                             href={subItem.href}
@@ -247,10 +240,7 @@ export function SidebarSubmenu() {
               // Botón normal con posible restricción
               if (item.restricted && !isAdmin) {
                 return (
-                  <div key={index} className={cn(
-                    "mb-[1px]",
-                    !isSecondarySidebarExpanded && "w-8 flex justify-center"
-                  )}>
+                  <div key={index} className="mb-[1px]">
                     <CustomRestricted reason="coming_soon">
                       <SidebarButton
                         icon={<item.icon className="w-[18px] h-[18px]" />}
@@ -267,10 +257,7 @@ export function SidebarSubmenu() {
               }
 
               return (
-                <div key={index} className={cn(
-                  "mb-[1px]",
-                  !isSecondarySidebarExpanded && "w-8 flex justify-center"
-                )}>
+                <div key={index} className="mb-[1px]">
                   <SidebarButton
                     icon={<item.icon className="w-[18px] h-[18px]" />}
                     href={item.href}
@@ -292,6 +279,7 @@ export function SidebarSubmenu() {
             <Plan isExpanded={true} />
           </div>
         )}
+      </div>
       </div>
     </div>
   );

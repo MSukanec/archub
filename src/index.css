@@ -73,22 +73,22 @@
   --layout-border: hsl(0, 0%, 45%);
 
   /* Main Sidebar */
-  --main-sidebar-bg: hsl(0, 0%, 20%);
-  --main-sidebar-fg: hsl(0, 0%, 100%);
+  --main-sidebar-bg: hsl(0, 0%, 93%);
+  --main-sidebar-fg: hsl(0, 0%, 15%);
   --main-sidebar-border: hsl(0, 0%, 85%);
   --main-sidebar-button-bg: transparent;
-  --main-sidebar-button-fg: hsl(0, 0%, 80%);
+  --main-sidebar-button-fg: hsl(0, 0%, 35%);
   --main-sidebar-button-active-bg: hsl(0, 0%, 20%);
   --main-sidebar-button-active-fg: hsl(0, 0%, 100%);
   --main-sidebar-button-hover-bg: hsl(0, 0%, 100%);
   --main-sidebar-button-hover-fg: hsl(90, 50%, 50%);
 
   /* Secondary Sidebar */
-  --secondary-sidebar-bg: hsl(0, 0%, 100%);
-  --secondary-sidebar-fg: hsl(0, 0%, 35%);
-  --secondary-sidebar-border: hsl(0, 0%, 70%);
+  --secondary-sidebar-bg: hsl(0, 0%, 20%);
+  --secondary-sidebar-fg: hsl(0, 0%, 60%);
+  --secondary-sidebar-border: hsl(0, 0%, 85%);
   --secondary-sidebar-button-bg: transparent;
-  --secondary-sidebar-button-fg: hsl(0, 0%, 50%);
+  --secondary-sidebar-button-fg: hsl(0, 0%, 70%);
   --secondary-sidebar-button-active-bg: hsl(90, 50%, 50%);
   --secondary-sidebar-button-active-fg: hsl(0, 0%, 97%);
   --secondary-sidebar-button-hover-bg: hsl(90, 50%, 50%);

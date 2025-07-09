@@ -39,9 +39,11 @@ export default function SidebarButton({
     <div className="relative group">
       <button
         className={cn(
-          'relative flex items-center transition-all duration-300 h-8',
-          // When collapsed: 32px width, when expanded: full width
-          isExpanded ? 'w-full' : 'w-8'
+          'relative flex items-center transition-all duration-300',
+          // Botón SIEMPRE 32x32px (w-8 h-8), centrado cuando colapsado
+          'w-8 h-8',
+          // Cuando expandido, el botón se extiende al full width SIN PADDING
+          isExpanded && 'w-full'
         )}
         onClick={handleClick}
         style={{ 
@@ -75,9 +77,9 @@ export default function SidebarButton({
         }
       }}
     >
-      {/* Contenedor del icono - SIEMPRE en posición fija, no se mueve */}
+      {/* Contenedor del icono - SIEMPRE centrado en 32x32px, no mostrar para hijos */}
       {!isChild && (
-        <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
+        <div className="absolute left-0 top-0 w-8 h-8 flex items-center justify-center flex-shrink-0">
           {avatarUrl ? (
             <img 
               src={avatarUrl} 
@@ -90,11 +92,11 @@ export default function SidebarButton({
         </div>
       )}
       
-      {/* Texto - aparece después del icono cuando expandido */}
+      {/* Texto - solo cuando expandido */}
       {isExpanded && (
         <div className={cn(
-          "flex items-center justify-between flex-1 ml-0",
-          isChild && "ml-2" // Solo margen para elementos hijos
+          "flex items-center justify-between w-full",
+          isChild ? "ml-2" : "ml-8" // Menos margen para elementos hijos
         )}>
           <span className={cn(
             "text-sm whitespace-nowrap text-left transition-opacity duration-300 delay-100",
