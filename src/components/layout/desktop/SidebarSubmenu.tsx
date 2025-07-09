@@ -186,7 +186,7 @@ export function SidebarSubmenu() {
   return (
     <div 
       className={cn(
-        "fixed top-0 h-screen bg-[var(--secondary-sidebar-bg)] z-30 flex flex-col transition-all duration-300 overflow-hidden rounded-r-2xl",
+        "fixed top-0 h-screen bg-[var(--secondary-sidebar-bg)] border-r border-[var(--secondary-sidebar-border)] z-30 flex flex-col transition-all duration-300 overflow-hidden rounded-r-2xl",
         "left-[40px]",
         isSecondarySidebarExpanded ? "w-64" : "w-[60px]"
       )}
@@ -209,8 +209,14 @@ export function SidebarSubmenu() {
       </div>
 
       {/* Contenido del submenú */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden p-1 pt-3">
-        <div className="flex flex-col gap-[1px]">
+      <div className={cn(
+        "flex-1 overflow-y-auto overflow-x-hidden pt-3",
+        isSecondarySidebarExpanded ? "p-1" : "px-0"
+      )}>
+        <div className={cn(
+          "flex flex-col gap-[1px]",
+          !isSecondarySidebarExpanded && "items-center"
+        )}>
           {currentSubmenu.length > 0 ? (
             currentSubmenu.map((item, index) => {
               if (item.type === 'accordion') {
@@ -218,7 +224,10 @@ export function SidebarSubmenu() {
                   <div key={index} className="mb-[1px]">
                     <div className="flex flex-col gap-[1px]">
                       {item.items?.map((subItem, subIndex) => (
-                        <div key={subIndex} className="mb-[1px]">
+                        <div key={subIndex} className={cn(
+                          "mb-[1px]",
+                          !isSecondarySidebarExpanded && "w-8 flex justify-center"
+                        )}>
                           <SidebarButton
                             icon={<subItem.icon className="w-[18px] h-[18px]" />}
                             href={subItem.href}
@@ -238,7 +247,10 @@ export function SidebarSubmenu() {
               // Botón normal con posible restricción
               if (item.restricted && !isAdmin) {
                 return (
-                  <div key={index} className="mb-[1px]">
+                  <div key={index} className={cn(
+                    "mb-[1px]",
+                    !isSecondarySidebarExpanded && "w-8 flex justify-center"
+                  )}>
                     <CustomRestricted reason="coming_soon">
                       <SidebarButton
                         icon={<item.icon className="w-[18px] h-[18px]" />}
@@ -255,7 +267,10 @@ export function SidebarSubmenu() {
               }
 
               return (
-                <div key={index} className="mb-[1px]">
+                <div key={index} className={cn(
+                  "mb-[1px]",
+                  !isSecondarySidebarExpanded && "w-8 flex justify-center"
+                )}>
                   <SidebarButton
                     icon={<item.icon className="w-[18px] h-[18px]" />}
                     href={item.href}
