@@ -201,11 +201,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
           }
         }
 
-        // Update user preferences to set this as the last project
-        await supabase
-          .from('user_preferences')
-          .update({ last_project_id: projectData.id })
-          .eq('user_id', userData?.user?.id);
+        // Don't automatically set new projects as last project
       }
     },
     onSuccess: () => {
@@ -216,7 +212,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
           : "Proyecto creado correctamente"
       });
       queryClient.invalidateQueries({ queryKey: ['projects', organizationId] });
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      // Don't invalidate current-user to avoid project selection changes
       handleClose();
     },
     onError: (error: any) => {
@@ -388,6 +384,45 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
                     </FormItem>
                   )}
                 />
+
+                {/* Image Upload Field */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Imagen Principal del Proyecto</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (file && editingProject && organizationId) {
+                        try {
+                          const { uploadProjectImage, updateProjectImageUrl } = await import('@/lib/storage/uploadProjectImage');
+                          const uploadResult = await uploadProjectImage(file, editingProject.id, organizationId);
+                          await updateProjectImageUrl(editingProject.id, uploadResult.file_url);
+                          queryClient.invalidateQueries({ queryKey: ['projects', organizationId] });
+                          toast({
+                            title: "Éxito",
+                            description: "Imagen principal actualizada correctamente"
+                          });
+                        } catch (error: any) {
+                          toast({
+                            title: "Error",
+                            description: error.message || "No se pudo subir la imagen",
+                            variant: "destructive"
+                          });
+                        }
+                      } else if (file && !editingProject) {
+                        toast({
+                          title: "Información",
+                          description: "La imagen se agregará después de crear el proyecto",
+                        });
+                      }
+                    }}
+                    className="w-full p-2 border border-input rounded-md bg-background text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Formatos: JPG, PNG, WebP • Tamaño máximo: 10MB
+                  </p>
+                </div>
               </CustomModalBody>
             </form>
           </Form>

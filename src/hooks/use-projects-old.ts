@@ -47,7 +47,6 @@ export function useProjects(organizationId: string | undefined) {
           project_data (
             project_type_id,
             modality_id,
-            project_image_url,
             project_types!project_type_id (
               id,
               name
@@ -138,7 +137,6 @@ export function useProject(projectId: string | undefined) {
           project_data (
             project_type_id,
             modality_id,
-            project_image_url,
             project_types!project_type_id (
               id,
               name
@@ -178,7 +176,6 @@ export function useProject(projectId: string | undefined) {
           projectData = {
             project_type_id: pd.project_type_id,
             modality_id: pd.modality_id,
-            project_image_url: pd.project_image_url,
             project_type: pd.project_types,
             modality: pd.project_modalities
           }
@@ -204,3 +201,4 @@ export function useProject(projectId: string | undefined) {
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
 }
+
