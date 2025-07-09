@@ -144,7 +144,7 @@ export function Header({
 
   return (
     <>
-    <header className="sticky top-0 z-50 h-14 md:h-9 border-b border-[var(--menues-border)] bg-[var(--menues-bg)] flex items-center justify-between gap-2">
+    <header className="sticky top-0 z-50 h-14 md:h-9 bg-[var(--layout-bg)] flex items-center justify-between gap-2">
       {/* Left side - Breadcrumb only */}
       <div className="flex items-center gap-2">
 

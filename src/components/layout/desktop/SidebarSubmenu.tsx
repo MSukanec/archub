@@ -186,7 +186,7 @@ export function SidebarSubmenu() {
   return (
     <div 
       className={cn(
-        "fixed top-0 h-screen bg-[var(--secondary-sidebar-bg)] border-r border-[var(--secondary-sidebar-border)] z-30 flex flex-col transition-all duration-300 overflow-hidden",
+        "fixed top-0 h-screen bg-[var(--secondary-sidebar-bg)] border-r border-[var(--secondary-sidebar-border)] z-30 flex flex-col transition-all duration-300 overflow-hidden rounded-r-lg",
         "left-[40px]",
         isSecondarySidebarExpanded ? "w-64" : "w-[40px]"
       )}
