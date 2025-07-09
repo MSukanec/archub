@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useLocation } from "wouter";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -46,11 +45,9 @@ export function SidebarSubmenu() {
   const { data: userData } = useCurrentUser();
   const isAdmin = useIsAdmin();
   const { isDocked, isHovered } = useSidebarStore();
-  const { activeSidebarSection, setActiveSidebarSection, setSidebarContext, currentSidebarContext } = useNavigationStore();
+  const { activeSidebarSection, setActiveSidebarSection, setSidebarContext } = useNavigationStore();
 
-  const [isSubmenuHovered, setIsSubmenuHovered] = useState(false);
   const isMainSidebarExpanded = isDocked || isHovered;
-  const isSubmenuExpanded = isDocked || isSubmenuHovered;
 
   // Si no hay sección activa, no mostrar nada
   if (!activeSidebarSection) {
@@ -161,70 +158,64 @@ export function SidebarSubmenu() {
 
   const currentSubmenu = submenuContent[activeSidebarSection as keyof typeof submenuContent] || [];
 
-  // Mapeo simple de contextos a items del submenu (solo botones principales)
-  const getSubmenuItemsForContext = () => {
-    if (!currentSidebarContext) return [];
-    
-    const contextItems = submenuContent[currentSidebarContext as keyof typeof submenuContent] || [];
-    
-    // Filtrar solo items principales (no accordion items, no dividers)
-    return contextItems.filter(item => 
-      item.type !== 'divider' && 
-      item.type !== 'accordion' && 
-      !item.href?.includes('#')
-    );
-  };
-
-  const currentSubmenuItems = getSubmenuItemsForContext();
+  if (!activeSidebarSection) return null;
 
   return (
     <div 
       className={cn(
-        "fixed top-9 z-30 bg-[var(--menues-bg)] border-r border-[var(--menues-border)] transition-all duration-300",
-        isMainSidebarExpanded ? "left-[240px]" : "left-[40px]",
-        isSubmenuExpanded ? "w-[240px]" : "w-[40px]"
+        "fixed top-9 h-[calc(100vh-36px)] w-64 bg-[var(--menues-bg)] border-r border-[var(--menues-border)] z-30 flex flex-col transition-all duration-300",
+        isMainSidebarExpanded ? "left-[240px]" : "left-[40px]"
       )}
-      style={{ height: 'calc(100vh - 36px)' }}
-      onMouseEnter={() => setIsSubmenuHovered(true)}
-      onMouseLeave={() => setIsSubmenuHovered(false)}
     >
-      {/* Header del contexto actual */}
-      <div className="h-16 flex items-center justify-center px-4">
-        <div className="flex items-center">
-          <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
-            {currentSidebarContext === 'organization' && <Building2 className="w-4 h-4 text-accent-foreground" />}
-            {currentSidebarContext === 'project' && <FolderOpen className="w-4 h-4 text-accent-foreground" />}
-            {currentSidebarContext === 'design' && <Palette className="w-4 h-4 text-accent-foreground" />}
-            {currentSidebarContext === 'construction' && <HardHat className="w-4 h-4 text-accent-foreground" />}
-            {currentSidebarContext === 'finances' && <DollarSign className="w-4 h-4 text-accent-foreground" />}
-            {currentSidebarContext === 'commercialization' && <Handshake className="w-4 h-4 text-accent-foreground" />}
-            {currentSidebarContext === 'postsale' && <Contact className="w-4 h-4 text-accent-foreground" />}
-            {currentSidebarContext === 'admin' && <Crown className="w-4 h-4 text-accent-foreground" />}
-            {!currentSidebarContext && <Home className="w-4 h-4 text-accent-foreground" />}
-          </div>
-          {isSubmenuExpanded && (
-            <span className="ml-3 font-semibold text-[var(--menues-fg)]">
-              {currentSidebarContext === 'organization' && 'Organización'}
-              {currentSidebarContext === 'project' && 'Proyecto'}
-              {currentSidebarContext === 'design' && 'Diseño'}
-              {currentSidebarContext === 'construction' && 'Obra'}
-              {currentSidebarContext === 'finances' && 'Finanzas'}
-              {currentSidebarContext === 'commercialization' && 'Comercial'}
-              {currentSidebarContext === 'postsale' && 'Post-Venta'}
-              {currentSidebarContext === 'admin' && 'Admin'}
-              {!currentSidebarContext && 'General'}
-            </span>
-          )}
-        </div>
+      {/* Header con título de la sección */}
+      <div className="h-16 flex items-center justify-between px-4 border-b border-[var(--menues-border)]">
+        <h3 className="font-semibold text-sm uppercase tracking-wide text-[var(--menues-fg)] opacity-60">
+          {activeSidebarSection === 'organizacion' && 'Organización'}
+          {activeSidebarSection === 'datos-basicos' && 'Datos Básicos'}
+          {activeSidebarSection === 'diseno' && 'Diseño'}
+          {activeSidebarSection === 'obra' && 'Obra'}
+          {activeSidebarSection === 'finanzas' && 'Finanzas'}
+          {activeSidebarSection === 'comercializacion' && 'Comercialización'}
+          {activeSidebarSection === 'post-venta' && 'Post-Venta'}
+          {activeSidebarSection === 'administracion' && 'Administración'}
+        </h3>
+        <button
+          onClick={() => setActiveSidebarSection(null)}
+          className="p-1.5 rounded-md hover:bg-[var(--menues-hover-bg)] transition-colors text-[var(--menues-fg)]"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </button>
       </div>
 
-      {/* Navegación - sin divisores, headers ni botones de cerrar */}
-      <div className="flex-1 overflow-y-auto px-2 pb-4">
-        <div className="space-y-[2px]">
-          {currentSubmenuItems.map((item, index) => {
-            // Skip dividers y accordions - solo botones simples
-            if (item.type === 'divider' || item.type === 'accordion') {
-              return null;
+      {/* Contenido del submenú */}
+      <div className="flex-1 overflow-y-auto p-2">
+        <div className="space-y-1">
+          {currentSubmenu.map((item, index) => {
+            if (item.type === 'divider') {
+              return <hr key={index} className="my-2 border-border" />;
+            }
+
+            if (item.type === 'accordion') {
+              return (
+                <div key={index} className="mb-2">
+                  <div className="px-3 py-2 text-xs font-semibold text-[var(--menues-fg)] opacity-60 uppercase tracking-wide">
+                    {item.label}
+                  </div>
+                  <div className="space-y-1">
+                    {item.items?.map((subItem, subIndex) => (
+                      <SidebarButton
+                        key={subIndex}
+                        icon={<subItem.icon className="w-[18px] h-[18px]" />}
+                        href={subItem.href}
+                        isActive={location === subItem.href}
+                        onClick={subItem.onClick}
+                        label={subItem.label}
+                        isExpanded={true}
+                      />
+                    ))}
+                  </div>
+                </div>
+              );
             }
 
             // Botón normal con posible restricción
@@ -237,7 +228,7 @@ export function SidebarSubmenu() {
                     isActive={false}
                     onClick={() => {}}
                     label={item.label}
-                    isExpanded={isSubmenuExpanded}
+                    isExpanded={true}
                   />
                 </CustomRestricted>
               );
@@ -251,7 +242,7 @@ export function SidebarSubmenu() {
                 isActive={location === item.href}
                 onClick={item.onClick}
                 label={item.label}
-                isExpanded={isSubmenuExpanded}
+                isExpanded={true}
               />
             );
           })}
