@@ -40,7 +40,8 @@ import {
   Handshake,
   NotebookPen,
   FileImage,
-  HardHat
+  HardHat,
+  Brush
 } from "lucide-react";
 
 export function SidebarSubmenu() {
@@ -158,19 +159,19 @@ export function SidebarSubmenu() {
 
   const currentSubmenu = submenuContent[currentSection as keyof typeof submenuContent] || [];
 
-  // Get section title
-  const getSectionTitle = () => {
-    const sectionTitles = {
-      'organizacion': 'Organización',
-      'proyecto': 'Proyecto',
-      'diseno': 'Diseño',
-      'obra': 'Obra',
-      'finanzas': 'Finanzas',
-      'comercializacion': 'Comercialización',
-      'post-venta': 'Post-Venta',
-      'administracion': 'Administración'
+  // Get section title and icon
+  const getSectionInfo = () => {
+    const sectionInfo = {
+      'organizacion': { title: 'Organización', icon: Building },
+      'proyecto': { title: 'Proyecto', icon: FolderOpen },
+      'diseno': { title: 'Diseño', icon: Brush },
+      'obra': { title: 'Obra', icon: HardHat },
+      'finanzas': { title: 'Finanzas', icon: DollarSign },
+      'comercializacion': { title: 'Comercialización', icon: Handshake },
+      'post-venta': { title: 'Post-Venta', icon: CreditCard },
+      'administracion': { title: 'Administración', icon: Crown }
     };
-    return sectionTitles[currentSection as keyof typeof sectionTitles] || 'Organización';
+    return sectionInfo[currentSection as keyof typeof sectionInfo] || { title: 'Organización', icon: Building };
   };
 
   // Always show the secondary sidebar
@@ -178,8 +179,8 @@ export function SidebarSubmenu() {
     <div 
       className={cn(
         "fixed top-0 h-screen bg-[var(--secondary-sidebar-bg)] border-r border-[var(--secondary-sidebar-border)] z-30 flex flex-col transition-all duration-300",
-        "left-[50px]",
-        isSecondarySidebarExpanded ? "w-64" : "w-[50px]"
+        "left-[40px]",
+        isSecondarySidebarExpanded ? "w-64" : "w-[40px]"
       )}
       onMouseEnter={() => setSecondaryHovered(true)}
       onMouseLeave={() => setSecondaryHovered(false)}
@@ -187,9 +188,15 @@ export function SidebarSubmenu() {
       {/* Section Title Header */}
       <div className="h-9 flex items-center px-3 border-b border-[var(--secondary-sidebar-border)] bg-[var(--secondary-sidebar-bg)]">
         {isSecondarySidebarExpanded && (
-          <h2 className="text-sm font-semibold text-[var(--secondary-sidebar-fg)] uppercase tracking-wide">
-            {getSectionTitle()}
-          </h2>
+          <div className="flex items-center gap-2">
+            {(() => {
+              const IconComponent = getSectionInfo().icon;
+              return <IconComponent className="w-4 h-4 text-[var(--secondary-sidebar-fg)]" />;
+            })()}
+            <span className="text-sm font-medium text-[var(--secondary-sidebar-fg)]">
+              {getSectionInfo().title}
+            </span>
+          </div>
         )}
       </div>
 
