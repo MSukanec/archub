@@ -148,6 +148,8 @@ export function SidebarSubmenu() {
 
     'administracion': [
       { icon: Home, label: 'Resumen de Administración', href: '/admin/dashboard' },
+      { icon: Building, label: 'Gestión de Organizaciones', href: '/admin/organizations' },
+      { icon: Users, label: 'Gestión de Usuarios', href: '/admin/users' },
       { type: 'accordion', label: 'Comunidad', items: [
         { icon: History, label: 'Changelog', href: '/admin/changelogs' },
       ]},
@@ -186,7 +188,7 @@ export function SidebarSubmenu() {
   return (
     <div 
       className={cn(
-        "fixed top-0 h-screen bg-[var(--secondary-sidebar-bg)] border-r border-[var(--secondary-sidebar-border)] z-50 flex flex-col transition-all duration-300",
+        "fixed top-0 h-screen bg-[var(--secondary-sidebar-bg)] border-r border-[var(--secondary-sidebar-border)] z-40 flex flex-col transition-all duration-300",
         "left-[40px]",
         isSecondarySidebarExpanded ? "w-64" : "w-[40px]"
       )}

@@ -139,8 +139,8 @@ export function CustomRestricted({
             onMouseEnter={() => setIsPopoverOpen(true)}
             onMouseLeave={() => setIsPopoverOpen(false)}
           >
-            <div className="bg-white rounded-full p-1.5 shadow-sm border border-black group-hover:shadow-md transition-shadow">
-              <Lock className="h-3 w-3 text-black" />
+            <div className="bg-black rounded-full p-1.5 shadow-sm border border-black group-hover:shadow-md transition-shadow">
+              <Lock className="h-3 w-3 text-white" />
             </div>
           </div>
         </PopoverTrigger>
