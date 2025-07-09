@@ -119,15 +119,18 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- July 9, 2025. Two-column sidebar navigation implementation - IN PROGRESS
+- July 9, 2025. Two-column sidebar navigation implementation - COMPLETED
   • Created new two-column sidebar system similar to Linear/Notion with main categories and sub-menus
-  • Updated navigationStore to include activeSidebarSection state for controlling right column
+  • Updated navigationStore to include activeSidebarSection state for controlling right column (defaults to 'organization')
   • Created SidebarSubmenu component for displaying category-specific navigation options in right column 
   • Modified Sidebar.tsx to show only main category buttons (Organización, Datos Básicos, Diseño, Obra, Finanzas, etc.)
-  • Enhanced Layout.tsx to integrate both sidebars with proper spacing calculations (240px + 64px when both expanded)
-  • Implemented click-to-toggle behavior: clicking main category opens/closes right submenu
+  • Enhanced Layout.tsx to integrate both sidebars with proper spacing calculations (40px main + variable submenu)
+  • Main sidebar now permanently collapsed at 40px width showing only icons (no expansion capability)
+  • Secondary sidebar submenu is always visible instead of conditional on active button
+  • Added tooltips to main sidebar buttons showing labels on hover when collapsed
+  • Removed all horizontal padding from main sidebar buttons to seamlessly connect with submenu
+  • Fixed default active states: organization button and organization summary active on login
   • Maintained exact same design aesthetic while reorganizing navigation structure
-  → Currently fixing icon rendering issue in SidebarSubmenu component
 Changelog:
 - July 8, 2025. Mobile menu height optimization and task creation unit field fixes - COMPLETED
   • Modified mobile menu to use full screen height (h-screen) instead of 80vh with 20vh top margin

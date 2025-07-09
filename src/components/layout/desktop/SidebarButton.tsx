@@ -36,18 +36,17 @@ export default function SidebarButton({
     }
   };
   return (
-    <button
-      className={cn(
-        'relative flex items-center transition-all duration-300',
-        // Botón SIEMPRE 32x32px (w-8 h-8), centrado cuando colapsado
-        'w-8 h-8',
-        // Cuando expandido, el botón se extiende pero el icono queda fijo
-        // SIN PADDING en los laterales para que se "una" con el submenu
-        isExpanded && 'w-full px-0'
-      )}
-      onClick={handleClick}
-      title={!isExpanded ? label : undefined}
-      style={{ 
+    <div className="relative group">
+      <button
+        className={cn(
+          'relative flex items-center transition-all duration-300',
+          // Botón SIEMPRE 32x32px (w-8 h-8), centrado cuando colapsado
+          'w-8 h-8',
+          // Cuando expandido, el botón se extiende al full width SIN PADDING
+          isExpanded && 'w-full'
+        )}
+        onClick={handleClick}
+        style={{ 
         borderRadius: '4px',
         backgroundColor: isActive 
           ? `var(--${variant}-sidebar-button-active-bg)` 
@@ -102,6 +101,14 @@ export default function SidebarButton({
           )}
         </div>
       )}
-    </button>
+      </button>
+      
+      {/* Tooltip for main sidebar buttons when collapsed */}
+      {variant === 'main' && !isExpanded && (
+        <div className="absolute left-10 top-1/2 transform -translate-y-1/2 bg-black text-white text-sm px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+          {label}
+        </div>
+      )}
+    </div>
   );
 }

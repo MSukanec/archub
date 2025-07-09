@@ -48,7 +48,7 @@ export function SidebarSubmenu() {
   const { isDocked: isSecondaryDocked, isHovered: isSecondaryHovered, setDocked: setSecondaryDocked, setHovered: setSecondaryHovered } = useSecondarySidebarStore();
   const { activeSidebarSection, setActiveSidebarSection, setSidebarContext } = useNavigationStore();
 
-  const isMainSidebarExpanded = isMainDocked || isMainHovered;
+  const isMainSidebarExpanded = false; // Always collapsed
   const isSecondarySidebarExpanded = isSecondaryDocked || isSecondaryHovered;
 
   // Definir sección por defecto si no hay ninguna activa
@@ -148,7 +148,7 @@ export function SidebarSubmenu() {
     <div 
       className={cn(
         "fixed top-9 h-[calc(100vh-36px)] bg-[var(--secondary-sidebar-bg)] border-r border-[var(--secondary-sidebar-border)] z-30 flex flex-col transition-all duration-300",
-        isMainSidebarExpanded ? "left-[240px]" : "left-[40px]",
+        "left-[40px]",
         isSecondarySidebarExpanded ? "w-64" : "w-10"
       )}
       onMouseEnter={() => setSecondaryHovered(true)}
