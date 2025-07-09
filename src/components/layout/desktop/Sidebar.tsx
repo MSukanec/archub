@@ -65,7 +65,7 @@ export function Sidebar() {
       setDocked(userData.preferences.sidebar_docked);
     }
   }, [userData?.preferences?.sidebar_docked, setDocked]);
-  const { currentSidebarContext, setSidebarContext } = useNavigationStore();
+  const { currentSidebarContext, setSidebarContext, activeSidebarSection, setActiveSidebarSection } = useNavigationStore();
   const queryClient = useQueryClient();
   
   // Estado para acordeones - solo uno abierto a la vez
@@ -185,129 +185,82 @@ export function Sidebar() {
     admin: null // Admin title removed as requested
   };
 
-  // Different navigation items based on context
-  const sidebarContexts = {
-    organization: [
-      { icon: Home, label: 'Resumen de la Organización', href: '/organization/dashboard' },
-      { icon: ArrowRight, label: 'Ir al Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
-      { type: 'divider' },
-      { icon: FolderOpen, label: 'Proyectos', href: '/organization/projects' },
-      { icon: Activity, label: 'Actividad', href: '/organization/activity' },
-      { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
-      { icon: Users, label: 'Miembros', href: '/organization/members' },
-      { icon: CheckSquare, label: 'Tareas', href: '/tasks' },
-    ],
-    project: [
-      { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },
-      { icon: ArrowLeft, label: 'Volver a Organización', href: '#', onClick: () => { setSidebarContext('organization'); navigate('/organization/dashboard'); } },
-      { type: 'divider' },
-      { icon: Database, label: 'Datos Básicos', href: '#', onClick: () => { setSidebarContext('data'); navigate('/project/basic-data'); }, rightIcon: ChevronRight },
-      { icon: FolderOpen, label: 'Diseño', href: '#', onClick: () => { setSidebarContext('design'); navigate('/design/dashboard'); }, rightIcon: ChevronRight },
-      { icon: Building, label: 'Obra', href: '#', onClick: () => { setSidebarContext('construction'); navigate('/construction/dashboard'); }, rightIcon: ChevronRight },
-      { icon: DollarSign, label: 'Finanzas', href: '#', onClick: () => { setSidebarContext('finances'); navigate('/finances/dashboard'); }, rightIcon: ChevronRight },
-      { icon: Users, label: 'Comercialización', href: '#', onClick: () => { setSidebarContext('commercialization'); navigate('/commercialization/dashboard'); }, rightIcon: ChevronRight, restricted: true },
-      { icon: Handshake, label: 'Post-Venta', href: '#', onClick: () => { setSidebarContext('postsale'); navigate('/postsale/dashboard'); }, rightIcon: ChevronRight, restricted: true },
-    ],
-    design: [
-      { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' },
-      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
-      { type: 'divider' },
-      { icon: FileText, label: 'Documentación', href: '/design/documentation' },
-      { icon: Database, label: 'Datos', href: '/design/data', restricted: true },
-      { icon: Calendar, label: 'Cronograma', href: '/design/timeline', restricted: true },
-      { icon: Layout, label: 'Tablero', href: '/design/board', restricted: true },
-      { icon: Calculator, label: 'Cómputo', href: '/design/compute', restricted: true },
-      { icon: Settings, label: 'Preferencias de Diseño', href: '/design/preferences', restricted: true },
-    ],
-    construction: [
-      { icon: Home, label: 'Resumen de Obra', href: '/construction/dashboard' },
-      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
-      { type: 'divider' },
-      { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
-      { icon: Package, label: 'Materiales', href: '/construction/materials' },
-      { icon: FileText, label: 'Bitácora', href: '/construction/logs' },
-      { icon: Users, label: 'Personal', href: '/construction/personnel' },
-      { icon: Images, label: 'Galería', href: '/construction/gallery' },
-    ],
-    finances: [
-      { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
-      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
-      { type: 'divider' },
-      { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
-      { icon: CreditCard, label: 'Aportes', href: '/finances/installments' },
-      { icon: Settings, label: 'Preferencias de Finanzas', href: '/finances/preferences' },
-    ],
-    commercialization: [
-      { icon: Home, label: 'Resumen de Comercialización', href: '/commercialization/dashboard' },
-      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
-      { type: 'divider' },
-      { icon: Building, label: 'Listado de unidades', href: '/commercialization/unidades' },
-      { icon: Users, label: 'Clientes interesados', href: '/commercialization/clientes' },
-      { icon: FileText, label: 'Estadísticas de venta', href: '/commercialization/estadisticas' },
-    ],
-    data: [
-      { icon: Database, label: 'Resumen de Datos', href: '/project/basic-data' },
-      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
-      { type: 'divider' },
-      { icon: Database, label: 'Datos Básicos', href: '/project/basic-data' },
-    ],
-    postsale: [
-      { icon: Handshake, label: 'Resumen de Post-Venta', href: '/postsale/dashboard' },
-      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => { setSidebarContext('project'); navigate('/project/dashboard'); } },
-      { type: 'divider' },
-    ],
-    admin: [
-      { icon: Home, label: 'Resumen de Administración', href: '/admin/dashboard' },
-      { type: 'divider' },
-      { 
-        icon: Users, 
-        label: 'Comunidad', 
-        isAccordion: true, 
-        expanded: expandedAccordion === 'admin-comunidad',
-        onToggle: () => toggleAccordion('admin-comunidad'),
-        children: [
-          { icon: Building, label: 'Organizaciones', href: '/admin/organizations' },
-          { icon: Users, label: 'Usuarios', href: '/admin/users' },
-          { icon: FileText, label: 'Changelog', href: '/admin/changelogs' }
-        ]
-      },
-      { 
-        icon: CheckSquare, 
-        label: 'Tareas', 
-        isAccordion: true, 
-        expanded: expandedAccordion === 'admin-tareas',
-        onToggle: () => toggleAccordion('admin-tareas'),
-        children: [
-          { icon: Zap, label: 'Tareas Generadas', href: '/admin/generated-tasks' },
-          { icon: Settings, label: 'Parámetros', href: '/admin/task-parameters' },
-          { icon: Package2, label: 'Categorías', href: '/admin/categories' }
-        ]
-      },
-      { 
-        icon: Package, 
-        label: 'Materiales', 
-        isAccordion: true, 
-        expanded: expandedAccordion === 'admin-materiales',
-        onToggle: () => toggleAccordion('admin-materiales'),
-        children: [
-          { icon: Package, label: 'Materiales', href: '/admin/materials' },
-          { icon: Tag, label: 'Categorías de Materiales', href: '/admin/material-categories' }
-        ]
-      },
-      { 
-        icon: DollarSign, 
-        label: 'Finanzas', 
-        isAccordion: true, 
-        expanded: expandedAccordion === 'admin-finanzas',
-        onToggle: () => toggleAccordion('admin-finanzas'),
-        children: [
-          { icon: DollarSign, label: 'Conceptos', href: '/admin/movement-concepts' }
-        ]
+  // Función para manejar clicks en botones principales
+  const handleMainSectionClick = (sectionId: string, defaultRoute: string) => {
+    // Si ya está activa la sección, cerrar
+    if (activeSidebarSection === sectionId) {
+      setActiveSidebarSection(null);
+    } else {
+      // Abrir nueva sección y navegar si es necesario
+      setActiveSidebarSection(sectionId);
+      if (location !== defaultRoute) {
+        navigate(defaultRoute);
       }
-    ]
+    }
   };
 
-  const navigationItems = sidebarContexts[currentSidebarContext] || sidebarContexts.organization;
+  // Botones principales del sidebar - solo estos se muestran
+  const mainSidebarItems = [
+    { 
+      id: 'organizacion', 
+      icon: Users, 
+      label: 'Organización', 
+      defaultRoute: '/organization/dashboard',
+      isActive: activeSidebarSection === 'organizacion' || location.startsWith('/organization')
+    },
+    { 
+      id: 'datos-basicos', 
+      icon: Database, 
+      label: 'Datos Básicos', 
+      defaultRoute: '/project/basic-data',
+      isActive: activeSidebarSection === 'datos-basicos' || location.startsWith('/project/basic-data')
+    },
+    { 
+      id: 'diseno', 
+      icon: FolderOpen, 
+      label: 'Diseño', 
+      defaultRoute: '/design/dashboard',
+      isActive: activeSidebarSection === 'diseno' || location.startsWith('/design')
+    },
+    { 
+      id: 'obra', 
+      icon: Building, 
+      label: 'Obra', 
+      defaultRoute: '/construction/dashboard',
+      isActive: activeSidebarSection === 'obra' || location.startsWith('/construction')
+    },
+    { 
+      id: 'finanzas', 
+      icon: DollarSign, 
+      label: 'Finanzas', 
+      defaultRoute: '/finances/dashboard',
+      isActive: activeSidebarSection === 'finanzas' || location.startsWith('/finances')
+    },
+    { 
+      id: 'comercializacion', 
+      icon: Handshake, 
+      label: 'Comercialización', 
+      defaultRoute: '/commercialization/dashboard',
+      isActive: activeSidebarSection === 'comercializacion' || location.startsWith('/commercialization'),
+      restricted: true
+    },
+    { 
+      id: 'post-venta', 
+      icon: CreditCard, 
+      label: 'Post-Venta', 
+      defaultRoute: '/postsale/dashboard',
+      isActive: activeSidebarSection === 'post-venta' || location.startsWith('/postsale'),
+      restricted: true
+    },
+    // Solo mostrar administración si es admin
+    ...(isAdmin ? [{
+      id: 'administracion', 
+      icon: Crown, 
+      label: 'Administración', 
+      defaultRoute: '/admin/dashboard',
+      isActive: activeSidebarSection === 'administracion' || location.startsWith('/admin')
+    }] : [])
+  ];
 
 
 
@@ -332,61 +285,27 @@ export function Sidebar() {
                 </span>
               </div>
             )}
-            {navigationItems.map((item: any, index: number) => (
-              <div key={`${item.label || 'divider'}-${index}`} className="mb-[2px]">
-                {/* Divider */}
-                {item.type === 'divider' ? (
-                  <div className="mx-2 my-1 border-t border-[var(--menues-border)]" />
+            {mainSidebarItems.map((item, index) => (
+              <div key={`${item.label}-${index}`} className="mb-[2px]">
+                {/* Main Button with potential restriction */}
+                {item.restricted ? (
+                  <CustomRestricted reason="coming_soon">
+                    <SidebarButton
+                      icon={<item.icon className="w-[18px] h-[18px]" />}
+                      label={item.label}
+                      isActive={item.isActive}
+                      isExpanded={isExpanded}
+                      onClick={() => handleMainSectionClick(item.id, item.defaultRoute)}
+                    />
+                  </CustomRestricted>
                 ) : (
-                  <div>
-                    {/* Main Button with potential restriction */}
-                    {item.restricted ? (
-                      <CustomRestricted reason="coming_soon">
-                        <SidebarButton
-                          icon={<item.icon className="w-[18px] h-[18px]" />}
-                          label={item.label}
-                          isActive={location === item.href}
-                          isExpanded={isExpanded}
-                          onClick={item.isAccordion ? item.onToggle : (item.onClick || (() => navigate(item.href)))}
-                          rightIcon={item.isAccordion && isExpanded ? (
-                            item.expanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />
-                          ) : item.rightIcon && isExpanded ? (
-                            <item.rightIcon className="w-4 h-4" />
-                          ) : undefined}
-                        />
-                      </CustomRestricted>
-                    ) : (
-                      <SidebarButton
-                        icon={<item.icon className="w-[18px] h-[18px]" />}
-                        label={item.label}
-                        isActive={location === item.href}
-                        isExpanded={isExpanded}
-                        onClick={item.isAccordion ? item.onToggle : (item.onClick || (() => navigate(item.href)))}
-                        rightIcon={item.isAccordion && isExpanded ? (
-                          item.expanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />
-                        ) : item.rightIcon && isExpanded ? (
-                          <item.rightIcon className="w-4 h-4" />
-                        ) : undefined}
-                      />
-                    )}
-                
-                    {/* Accordion Children */}
-                    {item.isAccordion && item.expanded && isExpanded && (
-                      <div className="ml-6 mt-1 flex flex-col gap-[2px]">
-                        {item.children?.map((child: any, childIndex: number) => (
-                          <SidebarButton
-                            key={`${child.label}-${childIndex}`}
-                            icon={<child.icon className="w-[18px] h-[18px]" />}
-                            label={child.label}
-                            isActive={location === child.href}
-                            isExpanded={isExpanded}
-                            onClick={() => navigate(child.href)}
-                            isChild={true}
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  <SidebarButton
+                    icon={<item.icon className="w-[18px] h-[18px]" />}
+                    label={item.label}
+                    isActive={item.isActive}
+                    isExpanded={isExpanded}
+                    onClick={() => handleMainSectionClick(item.id, item.defaultRoute)}
+                  />
                 )}
               </div>
             ))}
@@ -472,22 +391,6 @@ export function Sidebar() {
       {/* Bottom Section - Fixed Buttons */}
       <div className="border-t border-[var(--menues-border)] p-1">
         <div className="flex flex-col gap-[2px]">
-          {/* Administration - Only for Admin Users */}
-          {isAdmin && (
-            <SidebarButton
-              icon={<Shield className="w-[18px] h-[18px]" />}
-              label="Administración"
-              isActive={currentSidebarContext === 'admin'}
-              isExpanded={isExpanded}
-              onClick={() => {
-                setSidebarContext('admin');
-                navigate('/admin/dashboard');
-              }}
-            />
-          )}
-
-
-
           {/* Changelog */}
           <SidebarButton
             icon={<History className="w-[18px] h-[18px]" />}

@@ -1,10 +1,12 @@
 import { useEffect } from "react";
 import { Sidebar } from "./Sidebar";
+import { SidebarSubmenu } from "./SidebarSubmenu";
 import { Header } from "./Header";
 import { useAuthStore } from "@/stores/authStore";
 import { useThemeStore } from "@/stores/themeStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useSidebarStore } from "@/stores/sidebarStore";
+import { useNavigationStore } from "@/stores/navigationStore";
 import { MobileActionBar } from "@/components/ui-custom/mobile/MobileActionBar";
 import { useMobileActionBar } from "@/components/layout/mobile/MobileActionBarContext";
 import { useMobile } from "@/hooks/use-mobile";
@@ -30,6 +32,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   const { isDark, setTheme } = useThemeStore();
   const { data } = useCurrentUser();
   const { isDocked, isHovered } = useSidebarStore();
+  const { activeSidebarSection } = useNavigationStore();
   const { showActionBar } = useMobileActionBar();
   const isMobile = useMobile();
 
@@ -58,10 +61,17 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       {/* Sidebar - hidden on mobile */}
       <div className="hidden md:block">
         <Sidebar />
+        <SidebarSubmenu />
       </div>
       <main
         className={`transition-all duration-300 ease-in-out flex-1 overflow-auto p-3 mt-1 ${
-          isExpanded ? "md:ml-[240px]" : "md:ml-[40px]"
+          isExpanded 
+            ? activeSidebarSection 
+              ? "md:ml-[304px]" // 240px sidebar + 64px submenu
+              : "md:ml-[240px]" 
+            : activeSidebarSection 
+              ? "md:ml-[104px]" // 40px sidebar + 64px submenu
+              : "md:ml-[40px]"
         } ml-0 ${isMobile && showActionBar ? "pb-20" : ""}`}
       >
         <div className={wide ? "" : "max-w-[1440px] mx-auto"}>{children}</div>

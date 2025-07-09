@@ -5,9 +5,15 @@ type SidebarContext = 'organization' | 'project' | 'design' | 'construction' | '
 interface NavigationState {
   currentSidebarContext: SidebarContext
   setSidebarContext: (context: SidebarContext) => void
+  // Nueva funcionalidad para columna lateral
+  activeSidebarSection: string | null
+  setActiveSidebarSection: (section: string | null) => void
 }
 
 export const useNavigationStore = create<NavigationState>((set) => ({
   currentSidebarContext: 'organization',
   setSidebarContext: (context: SidebarContext) => set({ currentSidebarContext: context }),
+  // Estado para la columna lateral derecha
+  activeSidebarSection: null,
+  setActiveSidebarSection: (section: string | null) => set({ activeSidebarSection: section }),
 }))
