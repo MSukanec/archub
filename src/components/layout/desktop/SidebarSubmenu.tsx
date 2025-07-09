@@ -42,7 +42,8 @@ import {
   NotebookPen,
   FileImage,
   HardHat,
-  Brush
+  Brush,
+  UserCircle
 } from "lucide-react";
 
 export function SidebarSubmenu() {
