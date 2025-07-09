@@ -330,138 +330,18 @@ export default function OrganizationProjects() {
                 ))}
               </div>
             ) : (
-              <>
-                {/* Headers de columnas - Desktop */}
-                <div className="grid grid-cols-12 gap-4 px-4 py-2 text-xs font-medium text-muted-foreground border-b">
-                  <div className="col-span-2">Fecha</div>
-                  <div className="col-span-2">Creador</div>
-                  <div className="col-span-2">Proyecto</div>
-                  <div className="col-span-2">Tipología</div>
-                  <div className="col-span-2">Modalidad</div>
-                  <div className="col-span-1">Estado</div>
-                  <div className="col-span-1">Acciones</div>
-                </div>
-
-                {/* Lista de proyectos - Desktop */}
-                <div className="space-y-2">
-                  {filteredProjects.map((project) => {
-                    const isSelected = userData?.preferences?.last_project_id === project.id
-                    
-                    return (
-                      <Card 
-                        key={project.id} 
-                        className={`w-full cursor-pointer transition-all hover:shadow-sm border ${
-                          isSelected ? 'border-[var(--accent)] bg-[var(--accent-bg)]' : ''
-                        }`}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleSelectProject(project.id)
-                        }}
-                      >
-                    <CardContent className="p-4">
-                      <div className="grid grid-cols-12 gap-4 items-center">
-                        {/* Fecha */}
-                        <div className="col-span-2 text-xs text-muted-foreground">
-                          {format(new Date(project.created_at), 'dd/MM/yyyy', { locale: es })}
-                        </div>
-
-                        {/* Creador */}
-                        <div className="col-span-2 flex items-center gap-2">
-                          <Avatar className="w-6 h-6">
-                            <AvatarFallback className="text-xs">
-                              {project.creator?.full_name?.substring(0, 2).toUpperCase() || 
-                               project.creator?.email?.substring(0, 2).toUpperCase() || 'XX'}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="text-xs text-muted-foreground truncate">
-                            {project.creator?.full_name || project.creator?.email || 'Sin asignar'}
-                          </span>
-                        </div>
-
-                        {/* Proyecto */}
-                        <div className="col-span-2 flex items-center gap-2">
-                          <Folder className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                          <div>
-                            <div className="font-medium flex items-center gap-2">
-                              {project.name}
-                              {isSelected && (
-                                <Badge variant="secondary" className="text-xs">
-                                  Activo
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Tipología */}
-                        <div className="col-span-2 text-xs text-muted-foreground">
-                          {project.project_data?.project_type?.name || 'Sin especificar'}
-                        </div>
-
-                        {/* Modalidad */}
-                        <div className="col-span-2 text-xs text-muted-foreground">
-                          {project.project_data?.modality?.name || 'Sin especificar'}
-                        </div>
-
-                        {/* Estado */}
-                        <div className="col-span-1">
-                          <Badge 
-                            variant={
-                              project.status === 'active' ? 'default' :
-                              project.status === 'planning' ? 'secondary' :
-                              project.status === 'completed' ? 'outline' : 'destructive'
-                            }
-                            className="text-xs"
-                          >
-                            {project.status === 'planning' ? 'Planificación' :
-                             project.status === 'active' ? 'Activo' :
-                             project.status === 'on-hold' ? 'En pausa' : 'Completado'}
-                          </Badge>
-                        </div>
-
-                        {/* Acciones */}
-                        <div className="col-span-1 flex justify-start">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-8 w-8 p-0"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="start">
-                              <DropdownMenuItem 
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleEdit(project)
-                                }}
-                              >
-                                <Edit className="mr-2 h-4 w-4" />
-                                Editar
-                              </DropdownMenuItem>
-                              <DropdownMenuItem 
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleDeleteClick(project)
-                                }}
-                                className="text-destructive"
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Eliminar
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )
-              })}
-            </div>
-              </>
+              /* Desktop Grid */
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredProjects.map((project) => (
+                  <ModernProjectCard
+                    key={project.id}
+                    project={project}
+                    onEdit={handleEdit}
+                    onDelete={handleDeleteClick}
+                    onSelect={(project) => handleSelectProject(project.id)}
+                  />
+                ))}
+              </div>
             )}
           </>
         ) : (

@@ -219,199 +219,209 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
   };
 
   return (
-    <CustomModalLayout open={open} onClose={handleClose}>
-      <CustomModalHeader>
-        <h2 className="text-lg font-semibold">
-          {editingProject ? 'Editar Proyecto' : 'Nuevo Proyecto'}
-        </h2>
-      </CustomModalHeader>
+    <CustomModalLayout 
+      open={open} 
+      onClose={handleClose}
+      children={{
+        header: (
+          <CustomModalHeader>
+            <h2 className="text-lg font-semibold">
+              {editingProject ? 'Editar Proyecto' : 'Nuevo Proyecto'}
+            </h2>
+          </CustomModalHeader>
+        ),
+        body: (
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} id="project-form">
+              <CustomModalBody columns={2}>
+                {/* Creador */}
+                <FormField
+                  control={form.control}
+                  name="created_by"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">Creador *</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar creador">
+                              {field.value && getMemberLabel(field.value)}
+                            </SelectValue>
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {organizationMembers.map((member) => {
+                            const memberUser = member.users;
+                            const memberName = memberUser?.full_name || memberUser?.email || 'Usuario';
+                            const memberInitials = memberName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
+                            
+                            return (
+                              <SelectItem key={member.id} value={member.id}>
+                                <div className="flex items-center gap-2">
+                                  <div className="h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center text-xs">
+                                    {memberInitials}
+                                  </div>
+                                  {memberName}
+                                </div>
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)}>
-          <CustomModalBody columns={2}>
-            {/* Creador */}
-            <FormField
-              control={form.control}
-              name="created_by"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium">Creador *</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar creador">
-                          {field.value && getMemberLabel(field.value)}
-                        </SelectValue>
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {organizationMembers.map((member) => {
-                        const memberUser = member.users;
-                        const memberName = memberUser?.full_name || memberUser?.email || 'Usuario';
-                        const memberInitials = memberName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
-                        
-                        return (
-                          <SelectItem key={member.id} value={member.id}>
-                            <div className="flex items-center gap-2">
-                              <div className="h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center text-xs">
-                                {memberInitials}
-                              </div>
-                              {memberName}
-                            </div>
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                {/* Fecha de creación */}
+                <FormField
+                  control={form.control}
+                  name="created_at"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel className="text-sm font-medium">Fecha de creación</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP", { locale: es })
+                              ) : (
+                                <span>Selecciona una fecha</span>
+                              )}
+                              <Calendar className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <CalendarComponent
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) =>
+                              date > new Date() || date < new Date("1900-01-01")
+                            }
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            {/* Fecha de creación */}
-            <FormField
-              control={form.control}
-              name="created_at"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel className="text-sm font-medium">Fecha de creación</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
+                {/* Nombre del proyecto */}
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem className="col-span-2">
+                      <FormLabel className="text-sm font-medium">Nombre del proyecto *</FormLabel>
                       <FormControl>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "PPP", { locale: es })
-                          ) : (
-                            <span>Selecciona una fecha</span>
-                          )}
-                          <Calendar className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
+                        <Input placeholder="Ej: Construcción edificio residencial" {...field} />
                       </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <CalendarComponent
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) =>
-                          date > new Date() || date < new Date("1900-01-01")
-                        }
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            {/* Nombre del proyecto */}
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem className="col-span-2">
-                  <FormLabel className="text-sm font-medium">Nombre del proyecto *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Ej: Construcción edificio residencial" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                {/* Tipología */}
+                <FormField
+                  control={form.control}
+                  name="project_type_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">Tipología</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecciona una tipología" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="none">Sin tipología</SelectItem>
+                          {projectTypes?.map((type) => (
+                            <SelectItem key={type.id} value={type.id}>
+                              {type.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            {/* Tipología */}
-            <FormField
-              control={form.control}
-              name="project_type_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium">Tipología</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecciona una tipología" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="none">Sin tipología</SelectItem>
-                      {projectTypes?.map((type) => (
-                        <SelectItem key={type.id} value={type.id}>
-                          {type.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                {/* Modalidad */}
+                <FormField
+                  control={form.control}
+                  name="modality_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">Modalidad</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecciona una modalidad" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="none">Sin modalidad</SelectItem>
+                          {projectModalities?.map((modality) => (
+                            <SelectItem key={modality.id} value={modality.id}>
+                              {modality.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            {/* Modalidad */}
-            <FormField
-              control={form.control}
-              name="modality_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium">Modalidad</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecciona una modalidad" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="none">Sin modalidad</SelectItem>
-                      {projectModalities?.map((modality) => (
-                        <SelectItem key={modality.id} value={modality.id}>
-                          {modality.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Estado */}
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem className="col-span-2">
-                  <FormLabel className="text-sm font-medium">Estado del proyecto *</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecciona un estado" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="planning">Planificación</SelectItem>
-                      <SelectItem value="active">Activo</SelectItem>
-                      <SelectItem value="on-hold">En pausa</SelectItem>
-                      <SelectItem value="completed">Completado</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CustomModalBody>
-
+                {/* Estado */}
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem className="col-span-2">
+                      <FormLabel className="text-sm font-medium">Estado del proyecto *</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecciona un estado" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="planning">Planificación</SelectItem>
+                          <SelectItem value="active">Activo</SelectItem>
+                          <SelectItem value="on-hold">En pausa</SelectItem>
+                          <SelectItem value="completed">Completado</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CustomModalBody>
+            </form>
+          </Form>
+        ),
+        footer: (
           <CustomModalFooter
             onClose={handleClose}
             isSubmitting={mutation.isPending}
+            submitButtonText={editingProject ? 'Actualizar Proyecto' : 'Crear Proyecto'}
+            formId="project-form"
           />
-        </form>
-      </Form>
-    </CustomModalLayout>
+        )
+      }}
+    />
   );
 }
