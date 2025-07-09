@@ -81,8 +81,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
     if (!id) return "";
     const member = organizationMembers.find(m => m.id === id);
     if (!member) return "";
-    const memberUser = member.users; // Es un objeto, no array
-    return memberUser?.full_name || memberUser?.email || 'Usuario';
+    return member.full_name || member.email || 'Usuario';
   };
 
   const form = useForm<CreateProjectForm>({
@@ -233,7 +232,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
         body: (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} id="project-form">
-              <CustomModalBody columns={2}>
+              <CustomModalBody columns={1}>
                 {/* Creador */}
                 <FormField
                   control={form.control}
@@ -251,12 +250,9 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
                         </FormControl>
                         <SelectContent>
                           {organizationMembers?.length > 0 ? organizationMembers.map((member) => {
-                            const memberUser = member.users;
-                            const memberName = memberUser?.full_name || memberUser?.email || 'Usuario sin nombre';
-                            
                             return (
                               <SelectItem key={member.id} value={member.id}>
-                                {memberName}
+                                {member.full_name || member.email || 'Usuario sin nombre'}
                               </SelectItem>
                             );
                           }) : (
