@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { useLocation } from "wouter";
+import { useState, useRef } from "react";
 
 interface SidebarButtonProps {
   icon: React.ReactNode;
@@ -27,6 +28,8 @@ export default function SidebarButton({
   variant = 'main'
 }: SidebarButtonProps) {
   const [, navigate] = useLocation();
+  const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   const handleClick = () => {
     if (onClick) {
@@ -35,9 +38,20 @@ export default function SidebarButton({
       navigate(href);
     }
   };
+
+  const handleMouseEnter = () => {
+    if (buttonRef.current && variant === 'main' && !isExpanded) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setTooltipPosition({
+        top: rect.top + rect.height / 2,
+        left: rect.right + 8
+      });
+    }
+  };
   return (
-    <div className="relative group">
+    <div className="relative group" style={{ zIndex: 99999 }}>
       <button
+        ref={buttonRef}
         className={cn(
           'relative flex items-center transition-all duration-300',
           // Botón SIEMPRE 32x32px (w-8 h-8), centrado cuando colapsado
@@ -46,6 +60,7 @@ export default function SidebarButton({
           isExpanded && 'w-full'
         )}
         onClick={handleClick}
+        onMouseEnter={handleMouseEnter}
         style={{ 
         borderRadius: variant === 'main' && isActive ? '4px 0 0 4px' : '4px', // Remove right border radius for active main buttons
         backgroundColor: isActive 
@@ -115,7 +130,15 @@ export default function SidebarButton({
       
       {/* Tooltip for main sidebar buttons when collapsed */}
       {variant === 'main' && !isExpanded && (
-        <div className="fixed left-10 top-1/2 transform -translate-y-1/2 bg-black text-white text-sm px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-[99999]">
+        <div 
+          className="fixed bg-black text-white text-sm px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap"
+          style={{
+            left: tooltipPosition.left,
+            top: tooltipPosition.top,
+            transform: 'translateY(-50%)',
+            zIndex: 999999
+          }}
+        >
           {label}
         </div>
       )}
