@@ -98,7 +98,10 @@ export default function SidebarButton({
           "flex items-center justify-between w-full",
           isChild ? "ml-2" : "ml-8" // Menos margen para elementos hijos
         )}>
-          <span className="text-sm font-medium whitespace-nowrap text-left transition-opacity duration-300 delay-100">
+          <span className={cn(
+            "text-sm whitespace-nowrap text-left transition-opacity duration-300 delay-100",
+            variant === 'main' ? "font-medium" : "font-normal"
+          )}>
             {label}
           </span>
           {rightIcon && (

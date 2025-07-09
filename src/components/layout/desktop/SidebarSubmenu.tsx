@@ -6,7 +6,7 @@ import { useSidebarStore, useSecondarySidebarStore } from "@/stores/sidebarStore
 import { cn } from "@/lib/utils";
 import SidebarButton from "./SidebarButton";
 import { CustomRestricted } from "@/components/ui-custom/misc/CustomRestricted";
-import { Plan } from "@/components/ui-custom/misc/Plan";
+import Plan from "@/components/ui-custom/misc/Plan";
 import { 
   Home,
   Users,
@@ -58,6 +58,7 @@ export function SidebarSubmenu() {
 
   // Definir sección por defecto basada en la ruta actual
   const getDefaultSection = () => {
+    if (location.startsWith('/profile')) return 'perfil';
     if (location.startsWith('/organization')) return 'organizacion';
     if (location.startsWith('/project')) return 'proyecto';
     if (location.startsWith('/design')) return 'diseno';
@@ -85,6 +86,10 @@ export function SidebarSubmenu() {
 
   // Contenido de submenús para cada sección principal
   const submenuContent = {
+    'perfil': [
+      { icon: UserCircle, label: 'Mi Perfil', href: '/profile' },
+    ],
+    
     'organizacion': [
       { icon: Home, label: 'Resumen de la Organización', href: '/organization/dashboard' },
       { icon: FolderOpen, label: 'Proyectos', href: '/organization/projects' },
@@ -163,6 +168,7 @@ export function SidebarSubmenu() {
   // Get section title and icon
   const getSectionInfo = () => {
     const sectionInfo = {
+      'perfil': { title: 'Mi Perfil', icon: UserCircle },
       'organizacion': { title: 'Organización', icon: Building },
       'proyecto': { title: 'Proyecto', icon: FolderOpen },
       'diseno': { title: 'Diseño', icon: Brush },
@@ -192,9 +198,9 @@ export function SidebarSubmenu() {
           <div className="flex items-center gap-2">
             {(() => {
               const IconComponent = getSectionInfo().icon;
-              return <IconComponent className="w-4 h-4 text-[var(--secondary-sidebar-fg)]" />;
+              return <IconComponent className="w-[18px] h-[18px] text-[var(--secondary-sidebar-fg)]" />;
             })()}
-            <span className="text-sm font-medium text-[var(--secondary-sidebar-fg)]">
+            <span className="text-sm font-normal text-[var(--secondary-sidebar-fg)]">
               {getSectionInfo().title}
             </span>
           </div>
