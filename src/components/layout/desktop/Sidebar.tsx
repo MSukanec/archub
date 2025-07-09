@@ -296,6 +296,7 @@ export function Sidebar() {
                       isActive={item.isActive}
                       isExpanded={isExpanded}
                       onClick={() => handleMainSectionClick(item.id, item.defaultRoute)}
+                      rightIcon={isExpanded && <ChevronRight className="w-4 h-4" />}
                     />
                   </CustomRestricted>
                 ) : (
@@ -305,6 +306,7 @@ export function Sidebar() {
                     isActive={item.isActive}
                     isExpanded={isExpanded}
                     onClick={() => handleMainSectionClick(item.id, item.defaultRoute)}
+                    rightIcon={isExpanded && <ChevronRight className="w-4 h-4" />}
                   />
                 )}
               </div>

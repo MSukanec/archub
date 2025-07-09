@@ -65,12 +65,12 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       </div>
       <main
         className={`transition-all duration-300 ease-in-out flex-1 overflow-auto p-3 mt-1 ${
-          isExpanded 
-            ? activeSidebarSection 
-              ? "md:ml-[304px]" // 240px sidebar + 64px submenu
-              : "md:ml-[240px]" 
-            : activeSidebarSection 
-              ? "md:ml-[104px]" // 40px sidebar + 64px submenu
+          activeSidebarSection 
+            ? isExpanded 
+              ? "md:ml-[504px]" // 240px sidebar + 264px submenu
+              : "md:ml-[304px]" // 40px sidebar + 264px submenu
+            : isExpanded 
+              ? "md:ml-[240px]" 
               : "md:ml-[40px]"
         } ml-0 ${isMobile && showActionBar ? "pb-20" : ""}`}
       >

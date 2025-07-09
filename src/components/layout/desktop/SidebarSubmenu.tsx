@@ -2,6 +2,7 @@ import { useLocation } from "wouter";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
+import { useSidebarStore } from "@/stores/sidebarStore";
 import { cn } from "@/lib/utils";
 import SidebarButton from "./SidebarButton";
 import { CustomRestricted } from "@/components/ui-custom/misc/CustomRestricted";
@@ -43,7 +44,10 @@ export function SidebarSubmenu() {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const isAdmin = useIsAdmin();
+  const { isDocked, isHovered } = useSidebarStore();
   const { activeSidebarSection, setActiveSidebarSection, setSidebarContext } = useNavigationStore();
+
+  const isMainSidebarExpanded = isDocked || isHovered;
 
   // Si no hay sección activa, no mostrar nada
   if (!activeSidebarSection) {
@@ -154,11 +158,18 @@ export function SidebarSubmenu() {
 
   const currentSubmenu = submenuContent[activeSidebarSection as keyof typeof submenuContent] || [];
 
+  if (!activeSidebarSection) return null;
+
   return (
-    <div className="fixed left-16 top-0 h-full w-64 bg-background border-r border-border z-40 flex flex-col">
+    <div 
+      className={cn(
+        "fixed top-9 h-[calc(100vh-36px)] w-64 bg-[var(--menues-bg)] border-r border-[var(--menues-border)] z-30 flex flex-col transition-all duration-300",
+        isMainSidebarExpanded ? "left-[240px]" : "left-[40px]"
+      )}
+    >
       {/* Header con título de la sección */}
-      <div className="h-16 flex items-center justify-between px-4 border-b border-border">
-        <h3 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
+      <div className="h-16 flex items-center justify-between px-4 border-b border-[var(--menues-border)]">
+        <h3 className="font-semibold text-sm uppercase tracking-wide text-[var(--menues-fg)] opacity-60">
           {activeSidebarSection === 'organizacion' && 'Organización'}
           {activeSidebarSection === 'datos-basicos' && 'Datos Básicos'}
           {activeSidebarSection === 'diseno' && 'Diseño'}
@@ -170,7 +181,7 @@ export function SidebarSubmenu() {
         </h3>
         <button
           onClick={() => setActiveSidebarSection(null)}
-          className="p-1.5 rounded-md hover:bg-accent/50 transition-colors"
+          className="p-1.5 rounded-md hover:bg-[var(--menues-hover-bg)] transition-colors text-[var(--menues-fg)]"
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
@@ -187,7 +198,7 @@ export function SidebarSubmenu() {
             if (item.type === 'accordion') {
               return (
                 <div key={index} className="mb-2">
-                  <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                  <div className="px-3 py-2 text-xs font-semibold text-[var(--menues-fg)] opacity-60 uppercase tracking-wide">
                     {item.label}
                   </div>
                   <div className="space-y-1">
