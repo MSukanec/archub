@@ -145,12 +145,8 @@ export function Header({
   return (
     <>
     <header className="sticky top-0 z-50 h-14 md:h-9 border-b border-[var(--menues-border)] bg-[var(--menues-bg)] flex items-center justify-between gap-2">
-      {/* Left side - Logo + Breadcrumb */}
+      {/* Left side - Breadcrumb only */}
       <div className="flex items-center gap-2">
-        {/* Logo Section - Desktop only */}
-        <div className="hidden md:flex w-[40px] h-9 items-center justify-center border-r border-[var(--menues-border)]">
-          <span className="text-base font-bold leading-none text-[var(--menues-fg)]">A</span>
-        </div>
 
         {/* Mobile Avatar Button - visible only on mobile, positioned left */}
         <div className="md:hidden pl-2">

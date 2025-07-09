@@ -40,8 +40,8 @@ export default function SidebarButton({
       <button
         className={cn(
           'relative flex items-center transition-all duration-300',
-          // Botón SIEMPRE 32x32px (w-8 h-8), centrado cuando colapsado
-          'w-8 h-8',
+          // Botón SIEMPRE 42x32px (w-[42px] h-8), centrado cuando colapsado
+          'w-[42px] h-8',
           // Cuando expandido, el botón se extiende al full width SIN PADDING
           isExpanded && 'w-full'
         )}
@@ -77,9 +77,9 @@ export default function SidebarButton({
         }
       }}
     >
-      {/* Contenedor del icono - SIEMPRE centrado en 32x32px, no mostrar para hijos */}
+      {/* Contenedor del icono - SIEMPRE centrado en 42x32px, no mostrar para hijos */}
       {!isChild && (
-        <div className="absolute left-0 top-0 w-8 h-8 flex items-center justify-center flex-shrink-0">
+        <div className="absolute left-0 top-0 w-[42px] h-8 flex items-center justify-center flex-shrink-0">
           {avatarUrl ? (
             <img 
               src={avatarUrl} 
@@ -96,7 +96,7 @@ export default function SidebarButton({
       {isExpanded && (
         <div className={cn(
           "flex items-center justify-between w-full",
-          isChild ? "ml-2" : "ml-8" // Menos margen para elementos hijos
+          isChild ? "ml-2" : "ml-[42px]" // Menos margen para elementos hijos
         )}>
           <span className="text-sm font-medium whitespace-nowrap text-left transition-opacity duration-300 delay-100">
             {label}

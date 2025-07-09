@@ -158,18 +158,42 @@ export function SidebarSubmenu() {
 
   const currentSubmenu = submenuContent[currentSection as keyof typeof submenuContent] || [];
 
+  // Get section title
+  const getSectionTitle = () => {
+    const sectionTitles = {
+      'organizacion': 'Organización',
+      'proyecto': 'Proyecto',
+      'diseno': 'Diseño',
+      'obra': 'Obra',
+      'finanzas': 'Finanzas',
+      'comercializacion': 'Comercialización',
+      'post-venta': 'Post-Venta',
+      'administracion': 'Administración'
+    };
+    return sectionTitles[currentSection as keyof typeof sectionTitles] || 'Organización';
+  };
+
   // Always show the secondary sidebar
   return (
     <div 
       className={cn(
-        "fixed top-9 h-[calc(100vh-36px)] bg-[var(--secondary-sidebar-bg)] border-r border-[var(--secondary-sidebar-border)] z-30 flex flex-col transition-all duration-300",
-        "left-[40px]",
-        isSecondarySidebarExpanded ? "w-64" : "w-10"
+        "fixed top-0 h-screen bg-[var(--secondary-sidebar-bg)] border-r border-[var(--secondary-sidebar-border)] z-30 flex flex-col transition-all duration-300",
+        "left-[50px]",
+        isSecondarySidebarExpanded ? "w-64" : "w-[50px]"
       )}
       onMouseEnter={() => setSecondaryHovered(true)}
       onMouseLeave={() => setSecondaryHovered(false)}
     >
-      {/* Contenido del submenú - sin header */}
+      {/* Section Title Header */}
+      <div className="h-9 flex items-center px-3 border-b border-[var(--secondary-sidebar-border)] bg-[var(--secondary-sidebar-bg)]">
+        {isSecondarySidebarExpanded && (
+          <h2 className="text-sm font-semibold text-[var(--secondary-sidebar-fg)] uppercase tracking-wide">
+            {getSectionTitle()}
+          </h2>
+        )}
+      </div>
+
+      {/* Contenido del submenú */}
       <div className="flex-1 overflow-y-auto p-1">
         <div className="flex flex-col gap-[1px]">
           {currentSubmenu.length > 0 ? (

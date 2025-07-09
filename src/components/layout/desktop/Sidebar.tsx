@@ -267,10 +267,15 @@ export function Sidebar() {
   return (
     <aside 
       className={cn(
-        "fixed top-9 left-0 h-[calc(100vh-36px)] border-r bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)] transition-all duration-300 z-40 flex flex-col",
-        "w-[40px]"
+        "fixed top-0 left-0 h-screen border-r bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)] transition-all duration-300 z-40 flex flex-col",
+        "w-[50px]"
       )}
     >
+      {/* Logo Section */}
+      <div className="h-9 flex items-center justify-center border-b border-[var(--main-sidebar-border)] bg-[var(--main-sidebar-bg)]">
+        <div className="text-lg font-bold text-[var(--main-sidebar-fg)]">A</div>
+      </div>
+
       {/* Navigation Items */}
       <div className="flex-1 p-1">
         <div className="flex flex-col gap-[2px] h-full">

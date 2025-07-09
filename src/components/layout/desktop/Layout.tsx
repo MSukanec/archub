@@ -57,18 +57,29 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header {...headerProps} />
       {/* Sidebar - hidden on mobile */}
       <div className="hidden md:block">
         <Sidebar />
         <SidebarSubmenu />
       </div>
+      
+      {/* Header starts after sidebars */}
+      <div 
+        className={`transition-all duration-300 ease-in-out ${
+          isSecondaryExpanded 
+            ? "md:ml-[314px]" // 50px main + 264px secondary
+            : "md:ml-[100px]"  // 50px main + 50px secondary
+        } ml-0`}
+      >
+        <Header {...headerProps} />
+      </div>
+
       <main
         className={`transition-all duration-300 ease-in-out flex-1 overflow-auto p-3 mt-1 ${
-          // Calculate margin based on fixed main sidebar (40px) and variable secondary sidebar
+          // Calculate margin based on fixed main sidebar (50px) and variable secondary sidebar
           isSecondaryExpanded 
-            ? "md:ml-[304px]" // 40px main + 264px secondary
-            : "md:ml-[90px]"  // 40px main + 50px secondary
+            ? "md:ml-[314px]" // 50px main + 264px secondary
+            : "md:ml-[100px]"  // 50px main + 50px secondary
         } ml-0 ${isMobile && showActionBar ? "pb-20" : ""}`}
       >
         <div className={wide ? "" : "max-w-[1440px] mx-auto"}>{children}</div>
