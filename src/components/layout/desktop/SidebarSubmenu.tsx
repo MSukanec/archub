@@ -158,18 +158,18 @@ export function SidebarSubmenu() {
     >
       {/* Contenido del submenú - sin header */}
       <div className="flex-1 overflow-y-auto p-1">
-        <div className="flex flex-col gap-[2px]">
+        <div className="flex flex-col gap-[1px]">
           {currentSubmenu.length > 0 ? (
             currentSubmenu.map((item, index) => {
               if (item.type === 'accordion') {
                 return (
-                  <div key={index} className="mb-[2px]">
+                  <div key={index} className="mb-[1px]">
                     <div className="px-3 py-2 text-xs font-semibold text-[var(--secondary-sidebar-fg)] opacity-60 uppercase tracking-wide">
                       {item.label}
                     </div>
-                    <div className="flex flex-col gap-[2px]">
+                    <div className="flex flex-col gap-[1px]">
                       {item.items?.map((subItem, subIndex) => (
-                        <div key={subIndex} className="mb-[2px]">
+                        <div key={subIndex} className="mb-[1px]">
                           <SidebarButton
                             icon={<subItem.icon className="w-[18px] h-[18px]" />}
                             href={subItem.href}
@@ -189,7 +189,7 @@ export function SidebarSubmenu() {
               // Botón normal con posible restricción
               if (item.restricted && !isAdmin) {
                 return (
-                  <div key={index} className="mb-[2px]">
+                  <div key={index} className="mb-[1px]">
                     <CustomRestricted reason="coming_soon">
                       <SidebarButton
                         icon={<item.icon className="w-[18px] h-[18px]" />}
@@ -206,7 +206,7 @@ export function SidebarSubmenu() {
               }
 
               return (
-                <div key={index} className="mb-[2px]">
+                <div key={index} className="mb-[1px]">
                   <SidebarButton
                     icon={<item.icon className="w-[18px] h-[18px]" />}
                     href={item.href}

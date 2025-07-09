@@ -42,7 +42,8 @@ export default function SidebarButton({
         // Botón SIEMPRE 32x32px (w-8 h-8), centrado cuando colapsado
         'w-8 h-8',
         // Cuando expandido, el botón se extiende pero el icono queda fijo
-        isExpanded && 'w-full'
+        // SIN PADDING en los laterales para que se "una" con el submenu
+        isExpanded && 'w-full px-0'
       )}
       onClick={handleClick}
       title={!isExpanded ? label : undefined}
