@@ -40,8 +40,16 @@ export function OrganizationRecentProjects() {
         .order('updated_at', { ascending: false })
         .limit(6)
       
+      // Sort to put active project first, then by updated_at
+      const sortedData = data?.sort((a, b) => {
+        const userActiveProjectId = userData?.preferences?.last_project_id
+        if (a.id === userActiveProjectId) return -1
+        if (b.id === userActiveProjectId) return 1
+        return new Date(b.updated_at || b.created_at).getTime() - new Date(a.updated_at || a.created_at).getTime()
+      })
+      
       if (error) throw error
-      return data || []
+      return sortedData || []
     },
     enabled: !!currentOrganization?.id
   })
@@ -75,8 +83,12 @@ export function OrganizationRecentProjects() {
   })
 
   const handleSetActiveProject = (projectId: string) => {
-    selectProjectMutation.mutate(projectId)
-    // Don't navigate or change context, just set as active
+    selectProjectMutation.mutate(projectId, {
+      onSuccess: () => {
+        // Invalidate the projects query to refresh the list order
+        queryClient.invalidateQueries({ queryKey: ['recent-projects-by-activity'] })
+      }
+    })
   }
 
   const getProjectInitials = (name: string) => {

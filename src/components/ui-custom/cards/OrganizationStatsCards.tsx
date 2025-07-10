@@ -22,8 +22,14 @@ const formatCurrency = (amount: number) => {
 
 // Generate realistic trend data for mini charts based on actual values
 const generateTrendData = (currentValue: number) => {
+  // If value is 0, show flat line
+  if (currentValue === 0) {
+    return Array.from({ length: 7 }, (_, i) => ({ day: i, value: 0 }))
+  }
+  
+  // For non-zero values, create realistic progression
   const data = []
-  let startValue = Math.max(0, currentValue - 15)
+  let startValue = Math.max(0, currentValue - Math.min(15, currentValue * 0.5))
   
   for (let i = 0; i < 7; i++) {
     if (i === 6) {
@@ -32,7 +38,7 @@ const generateTrendData = (currentValue: number) => {
     } else {
       // Generate progression towards current value
       const progress = i / 6
-      const variance = (Math.random() - 0.5) * 8
+      const variance = (Math.random() - 0.5) * Math.min(8, currentValue * 0.2)
       const progressValue = startValue + (currentValue - startValue) * progress + variance
       data.push({ day: i, value: Math.max(0, Math.round(progressValue)) })
     }

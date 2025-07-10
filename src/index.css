@@ -27,6 +27,7 @@
     opacity: 0;
     transform: translateY(5px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -34,33 +35,44 @@
 }
 
 @keyframes float-horizontal {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateX(0px);
   }
+
   50% {
     transform: translateX(20px);
   }
 }
 
 @keyframes float-vertical {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px);
   }
+
   50% {
     transform: translateY(-15px);
   }
 }
 
 @keyframes float-diagonal {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translate(0px, 0px);
   }
+
   25% {
     transform: translate(10px, -8px);
   }
+
   50% {
     transform: translate(-5px, -12px);
   }
+
   75% {
     transform: translate(-10px, 5px);
   }
@@ -93,7 +105,7 @@
   --secondary-sidebar-button-active-fg: hsl(0, 0%, 97%);
   --secondary-sidebar-button-hover-bg: hsl(0, 0%, 50%);
   --secondary-sidebar-button-hover-fg: hsl(0, 0%, 97%);
-  
+
   /* Legacy support (will be removed) */
   --menues-bg: hsl(0, 0%, 97%);
   --menues-fg: hsl(0, 0%, 45%);
@@ -204,7 +216,7 @@
   --card-foreground: hsl(0, 0%, 35%);
   --background: hsl(0, 0%, 99%);
   --foreground: hsl(0, 0%, 45%);
-  
+
   /* Shadcn accent definitions */
   --accent: 90 50% 50%;
   --accent-foreground: 0 0% 100%;
@@ -244,10 +256,10 @@
   --secondary-card-border: hsl(250, 6%, 19%);
 
   /* Buttons - Primary */
-  --button-primary-bg: hsl(90, 50%, 50%);
+  --button-primary-bg: hsl(76, 100%, 40%);
   --button-primary-text: hsl(0, 0%, 100%);
   --button-primary-border: transparent;
-  --button-primary-hover-bg: hsl(90, 50%, 50%);
+  --button-primary-hover-bg: hsl(76, 100%, 40%);
   --button-primary-hover-text: hsl(0, 0%, 100%);
   --button-primary-hover-border: transparent;
   --button-primary-disabled-bg: hsl(240, 5%, 25%);
@@ -283,11 +295,11 @@
   --accent-bg: hsl(90, 30%, 20%);
 
   /* Accent / State */
-  --accent: hsl(90, 50%, 50%);
+  --accent: hsl(76, 100%, 40%);
   --accent-text: hsl(0, 0%, 100%);
   --destructive: hsl(0, 84%, 65%);
   --destructive-text: hsl(0, 0%, 100%);
-  --success: hsl(120, 40%, 55%);
+  --success: hsl(76, 100%, 40%);
   --success-text: hsl(0, 0%, 100%);
   --warning: hsl(45, 90%, 55%);
   --warning-text: hsl(240, 10%, 4%);
@@ -330,9 +342,9 @@
   --card-foreground: hsl(0, 0%, 70%);
   --background: hsl(0, 0%, 16%);
   --foreground: hsl(0, 0%, 90%);
-  
+
   /* Shadcn accent definitions */
-  --accent: 90 50% 50%;
+  --accent: hsl(76, 100%, 40%);
   --accent-foreground: 0 0% 100%;
   --ring-default: hsl(0, 50%, 50%);
 
@@ -392,7 +404,7 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-  
+
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
