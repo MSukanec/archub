@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Plus, Package2, Settings, CheckCircle, XCircle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -48,6 +48,42 @@ export default function AdminCategories() {
     categoriesLength: categories.length,
     hasData: !!categories
   });
+
+  // Auto-expand categories that have task groups
+  React.useEffect(() => {
+    if (categories.length > 0) {
+      const categoriesToExpand = new Set<string>();
+      
+      const checkForTaskGroups = (cats: TaskCategoryAdmin[]) => {
+        cats.forEach(cat => {
+          // If category has task groups, expand it
+          if (cat.taskGroups && cat.taskGroups.length > 0) {
+            categoriesToExpand.add(cat.id);
+            console.log(`🔍 Auto-expanding category "${cat.name}" because it has ${cat.taskGroups.length} task groups:`, cat.taskGroups.map(tg => tg.name));
+          }
+          
+          // Also expand parent categories if they have children with task groups
+          if (cat.children && cat.children.length > 0) {
+            const hasChildrenWithTaskGroups = cat.children.some(child => 
+              child.taskGroups && child.taskGroups.length > 0
+            );
+            if (hasChildrenWithTaskGroups) {
+              categoriesToExpand.add(cat.id);
+              console.log(`🔍 Auto-expanding parent category "${cat.name}" because children have task groups`);
+            }
+            checkForTaskGroups(cat.children);
+          }
+        });
+      };
+      
+      checkForTaskGroups(categories);
+      
+      if (categoriesToExpand.size > 0) {
+        console.log('🎯 Categories to auto-expand:', Array.from(categoriesToExpand));
+        setExpandedCategories(categoriesToExpand);
+      }
+    }
+  }, [categories]);
   const deleteCategoryMutation = useDeleteTaskCategory();
   const deleteTaskGroupMutation = useDeleteTaskGroup();
 

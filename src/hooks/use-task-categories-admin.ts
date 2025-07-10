@@ -100,12 +100,12 @@ export function useTaskCategoriesAdmin() {
 
       console.log('Task groups fetched successfully:', taskGroups?.length || 0, taskGroups);
       
-      // Let's specifically look for the "Muertos" task group
-      const muertosGroup = taskGroups?.find(tg => tg.name.includes('Muertos') || tg.name.includes('Muertos'));
-      if (muertosGroup) {
-        console.log('🎯 Found Muertos task group:', muertosGroup);
+      // Let's specifically look for the "MURETES" task group
+      const muretesGroup = taskGroups?.find(tg => tg.name.includes('MURETES') || tg.name.includes('JORGE'));
+      if (muretesGroup) {
+        console.log('🎯 Found MURETES/JORGE task group:', muretesGroup);
       } else {
-        console.log('❌ Muertos task group not found');
+        console.log('❌ MURETES/JORGE task group not found');
         console.log('🔍 All task group names:', taskGroups?.map(tg => tg.name));
       }
 
