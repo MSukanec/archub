@@ -17,8 +17,7 @@ export interface GeneratedTask {
   task_templates?: {
     id: string;
     name_template: string;
-    code: string;
-    category_id: string;
+    task_group_id: string;
     unit_id?: string | null;
   };
 }
@@ -53,8 +52,7 @@ export function useGeneratedTasks() {
           task_templates (
             id,
             name_template,
-            code,
-            category_id,
+            task_group_id,
             unit_id
           )
         `)
@@ -79,10 +77,21 @@ export function useCreateGeneratedTask() {
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
       
+      // First, get the task_group_id from the template
+      const { data: templateData, error: templateError } = await supabase
+        .from('task_templates')
+        .select('task_group_id')
+        .eq('id', payload.template_id)
+        .single();
+      
+      if (templateError || !templateData?.task_group_id) {
+        throw new Error('Template not found or missing task_group_id');
+      }
+      
       // Call RPC function that handles both code generation and task creation/verification
       const { data: taskData, error: taskError } = await supabase
         .rpc('task_generate_code', {
-          input_template_id: payload.template_id,
+          input_group_id: templateData.task_group_id,
           input_param_values: payload.param_values,
           input_organization_id: payload.organization_id,
           input_is_system: payload.is_system || false
