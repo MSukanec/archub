@@ -331,7 +331,7 @@ export function CreateGeneratedTaskUserModal({
       {{
         header: (
           <CustomModalHeader
-            title="✨ Crear Tarea Personalizada"
+            title="Crear Tarea Personalizada"
             description="Configure una nueva tarea específica para su organización"
             onClose={handleClose}
           />
@@ -347,7 +347,7 @@ export function CreateGeneratedTaskUserModal({
                     name="template_id"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="required-asterisk">Plantilla de Tarea</FormLabel>
+                        <FormLabel className="required-asterisk">Tipo de Tarea</FormLabel>
                         <Select 
                           onValueChange={(value) => {
                             field.onChange(value);
@@ -358,7 +358,7 @@ export function CreateGeneratedTaskUserModal({
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Seleccionar plantilla..." />
+                              <SelectValue placeholder="Seleccionar tipo de tarea..." />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -383,7 +383,7 @@ export function CreateGeneratedTaskUserModal({
                         return (
                           <div className="p-3 bg-muted/50 rounded-lg border">
                             <div className="flex items-center gap-2">
-                              <span className="text-sm text-muted-foreground">Unidad definida por la plantilla:</span>
+                              <span className="text-sm text-muted-foreground">Unidad definida por el tipo de tarea:</span>
                               <span className="text-sm font-medium">{unit?.name || 'Cargando...'}</span>
                             </div>
                           </div>
@@ -397,12 +397,7 @@ export function CreateGeneratedTaskUserModal({
                   {selectedTemplateId && parameters && parameters.length > 0 && (
                     <div className="space-y-4">
                       <div className="border-t pt-4">
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center">
-                            <span className="text-blue-600 text-xs">⚙️</span>
-                          </div>
-                          <h3 className="text-sm font-medium">Configurar Parámetros</h3>
-                        </div>
+                        <h3 className="text-sm font-medium mb-3">Configurar Parámetros</h3>
                         <div className="space-y-3">
                           {parameters
                             .sort((a, b) => (a.position || 0) - (b.position || 0))
@@ -417,14 +412,9 @@ export function CreateGeneratedTaskUserModal({
                   {/* Preview */}
                   {selectedTemplateId && (
                     <div className="border-t pt-4">
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
-                          <span className="text-green-600 text-xs">👁️</span>
-                        </div>
-                        <h3 className="text-sm font-medium">Vista Previa</h3>
-                      </div>
-                      <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
-                        <p className="text-sm font-medium text-blue-900">
+                      <h3 className="text-sm font-medium mb-3">Vista Previa</h3>
+                      <div className="p-4 bg-muted/50 rounded-lg border">
+                        <p className="text-sm font-medium">
                           {generatePreview() || "Complete los parámetros para ver la vista previa"}
                         </p>
                       </div>
@@ -439,7 +429,7 @@ export function CreateGeneratedTaskUserModal({
           <CustomModalFooter
             onClose={handleClose}
             isSubmitting={isSubmitting}
-            submitText={isSubmitting ? "Creando..." : "✨ Crear Tarea"}
+            submitText={isSubmitting ? "Creando..." : "Crear Tarea"}
             form="create-task-form"
           />
         )
