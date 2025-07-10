@@ -211,11 +211,11 @@
   --ring-default: hsl(76, 100%, 40%);
 
   /* Tailwind variables */
-  --border: 240 6% 90%;
-  --card: 0 0% 97%;
-  --card-foreground: 0 0% 35%;
-  --background: 0 0% 99%;
-  --foreground: 0 0% 45%;
+  --border: hsl(240, 6%, 90%);
+  --card: hsl(0, 0%, 97%);
+  --card-foreground: hsl(0, 0%, 35%);
+  --background: hsl(0, 0%, 99%);
+  --foreground: hsl(0, 0%, 45%);
 
   /* Shadcn accent definitions */
   --accent: 90 50% 50%;
@@ -359,14 +359,14 @@
   --border-strong: hsl(0, 50%, 50%);
 
   /* Tailwind variables */
-  --border: 0 0% 22%;
-  --card: 0 0% 14%;
-  --card-foreground: 0 0% 70%;
-  --background: 0 0% 16%;
-  --foreground: 0 0% 90%;
+  --border: hsl(0, 0%, 22%);
+  --card: hsl(0, 0%, 14%);
+  --card-foreground: hsl(0, 0%, 70%);
+  --background: hsl(0, 0%, 16%);
+  --foreground: hsl(0, 0%, 90%);
 
   /* Shadcn accent definitions */
-  --accent: 76 100% 40%;
+  --accent: hsl(76, 100%, 40%);
   --accent-foreground: 0 0% 100%;
   --ring-default: hsl(0, 50%, 50%);
 
