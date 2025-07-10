@@ -593,55 +593,6 @@ export default function ConstructionBudgets() {
 
     return (
       <div className="space-y-4">
-        {/* Quick Add Task Section */}
-        <Card className="border-dashed border-2 border-muted-foreground/30">
-          <div className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="flex-1">
-                <TaskSearchCombo
-                  value={quickTaskId}
-                  onValueChange={setQuickTaskId}
-                  searchQuery={quickSearchQuery}
-                  onSearchChange={setQuickSearchQuery}
-                  options={quickTaskOptions}
-                  placeholder="Buscar tipo de tarea..."
-                  isLoading={quickTasksLoading}
-                  filters={taskFilters}
-                  onFiltersChange={setTaskFilters}
-                  filterOptions={filterOptions}
-                />
-              </div>
-              <div className="w-32">
-                <div className="flex items-center gap-1">
-                  <Input
-                    type="number"
-                    value={quickQuantity}
-                    onChange={(e) => setQuickQuantity(Number(e.target.value) || 1)}
-                    placeholder="Cant."
-                    min="1"
-                    step="0.01"
-                    className="text-center w-20"
-                  />
-                  <span className="text-xs text-muted-foreground min-w-0">
-                    {quickTaskId ? (
-                      getUnitName(quickTasks.find(t => t.id === quickTaskId)?.unit_id) || '-'
-                    ) : '-'}
-                  </span>
-                </div>
-              </div>
-              <Button
-                onClick={handleQuickAddTask}
-                disabled={!quickTaskId || isAddingQuickTask}
-                className="px-4"
-              >
-                {isAddingQuickTask ? "Agregando..." : "Agregar"}
-              </Button>
-            </div>
-            <div className="mt-2 text-xs text-muted-foreground">
-              Busca y agrega tareas rápidamente sin abrir el modal
-            </div>
-          </div>
-        </Card>
 
         {/* Desktop Table View */}
         <div className="hidden md:block overflow-x-auto">
@@ -909,6 +860,58 @@ export default function ConstructionBudgets() {
                 </CardContent>
               </Card>
             </div>
+
+            {/* Quick Add Task Section - Isolated */}
+            {selectedBudget && (
+              <Card className="border-dashed border-2 border-muted-foreground/30">
+                <div className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1">
+                      <TaskSearchCombo
+                        value={quickTaskId}
+                        onValueChange={setQuickTaskId}
+                        searchQuery={quickSearchQuery}
+                        onSearchChange={setQuickSearchQuery}
+                        options={quickTaskOptions}
+                        placeholder="Buscar tipo de tarea..."
+                        isLoading={quickTasksLoading}
+                        filters={taskFilters}
+                        onFiltersChange={setTaskFilters}
+                        filterOptions={filterOptions}
+                      />
+                    </div>
+                    <div className="w-32">
+                      <div className="flex items-center gap-1">
+                        <Input
+                          type="number"
+                          value={quickQuantity}
+                          onChange={(e) => setQuickQuantity(Number(e.target.value) || 1)}
+                          placeholder="Cant."
+                          min="1"
+                          step="0.01"
+                          className="text-center w-20"
+                        />
+                        <span className="text-xs text-muted-foreground min-w-0">
+                          {quickTaskId ? (
+                            getUnitName(quickTasks.find(t => t.id === quickTaskId)?.unit_id) || '-'
+                          ) : '-'}
+                        </span>
+                      </div>
+                    </div>
+                    <Button
+                      onClick={handleQuickAddTask}
+                      disabled={!quickTaskId || isAddingQuickTask}
+                      className="px-4"
+                    >
+                      {isAddingQuickTask ? "Agregando..." : "Agregar"}
+                    </Button>
+                  </div>
+                  <div className="mt-2 text-xs text-muted-foreground">
+                    Busca y agrega tareas rápidamente sin abrir el modal
+                  </div>
+                </div>
+              </Card>
+            )}
 
             {/* Single Budget Card with Selector */}
             <Card className="border rounded-lg overflow-hidden">
