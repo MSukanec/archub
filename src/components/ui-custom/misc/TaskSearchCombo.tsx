@@ -76,7 +76,7 @@ export function TaskSearchCombo({
         </button>
       </PopoverTrigger>
       <PopoverContent 
-        className="p-0 z-[9999] bg-background border" 
+        className="p-0 z-[9999] bg-background border w-full" 
         align="start"
         style={{ width: 'var(--radix-popover-trigger-width)' }}
       >
@@ -84,62 +84,64 @@ export function TaskSearchCombo({
           <CommandInput 
             placeholder={searchPlaceholder} 
             onValueChange={onSearchChange}
-            className="text-xs leading-tight py-2 px-3 border-0 bg-transparent placeholder:text-[var(--input-placeholder)] text-foreground"
+            className="text-xs h-8 border-0 bg-transparent placeholder:text-[var(--input-placeholder)] text-foreground"
           />
-          <CommandEmpty className="text-xs py-4 px-3 text-center">
-            {showCreateButton && searchQuery.length >= 3 && onCreateTask ? (
-              <div className="space-y-3">
-                <div className="text-muted-foreground">
-                  <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-muted flex items-center justify-center">
-                    <Plus className="w-6 h-6 text-muted-foreground" />
-                  </div>
-                  <p className="text-sm font-medium">No hay tareas con "{searchQuery}"</p>
-                  <p className="text-xs mt-1 text-muted-foreground">
-                    Puede crear una nueva tarea personalizada para su organización
-                  </p>
+          
+          {/* Solo mostrar CommandEmpty si no hay opciones Y hay una búsqueda activa */}
+          {options.length === 0 && searchQuery.length >= 3 && (
+            <CommandEmpty className="text-xs py-3 px-3 text-center">
+              {showCreateButton && onCreateTask ? (
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">No hay tareas con "{searchQuery}"</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOpen(false);
+                      onCreateTask();
+                    }}
+                    className="flex items-center justify-center gap-2 w-full px-3 py-2 text-xs bg-accent text-accent-foreground rounded-md hover:bg-accent/80 transition-colors font-medium"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Crear Tarea Personalizada
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
+              ) : (
+                <p className="text-sm text-muted-foreground">{emptyText}</p>
+              )}
+            </CommandEmpty>
+          )}
+
+          {/* Solo mostrar CommandGroup si hay opciones */}
+          {options.length > 0 && (
+            <CommandGroup className="max-h-48 overflow-auto">
+              {options.map((option) => (
+                <CommandItem
+                  key={option.value}
+                  value={option.value}
+                  onSelect={(currentValue) => {
+                    onValueChange(currentValue === value ? "" : currentValue);
                     setOpen(false);
-                    onCreateTask();
                   }}
-                  className="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-xs bg-accent text-accent-foreground rounded-md hover:bg-accent/80 transition-colors font-medium"
+                  className="text-xs py-2 px-3 cursor-pointer hover:bg-accent hover:text-accent-foreground text-foreground"
                 >
-                  <Plus className="w-4 h-4" />
-                  Crear Tarea Personalizada
-                </button>
-              </div>
-            ) : (
-              <div className="text-muted-foreground">
-                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-muted flex items-center justify-center">
-                  <Plus className="w-6 h-6 text-muted-foreground" />
-                </div>
-                <p className="text-sm">{emptyText}</p>
-              </div>
-            )}
-          </CommandEmpty>
-          <CommandGroup className="max-h-64 overflow-auto">
-            {options.map((option) => (
-              <CommandItem
-                key={option.value}
-                value={option.value}
-                onSelect={(currentValue) => {
-                  onValueChange(currentValue === value ? "" : currentValue);
-                  setOpen(false);
-                }}
-                className="text-xs py-2 px-3 cursor-pointer hover:bg-accent hover:text-accent-foreground text-foreground"
-              >
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    value === option.value ? "opacity-100" : "opacity-0"
-                  )}
-                />
-                {option.label}
-              </CommandItem>
-            ))}
-          </CommandGroup>
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      value === option.value ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  <span className="truncate">{option.label}</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
+
+          {/* Estado vacío cuando no hay búsqueda activa */}
+          {options.length === 0 && searchQuery.length < 3 && (
+            <div className="py-2 px-3 text-xs text-muted-foreground text-center">
+              Escribe al menos 3 caracteres para buscar
+            </div>
+          )}
         </Command>
       </PopoverContent>
     </Popover>
