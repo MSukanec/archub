@@ -452,10 +452,13 @@ export default function TaskTemplateEditorModal({
       }
     },
     onSuccess: (data) => {
+      // Invalidate all relevant queries to update UI immediately
       queryClient.invalidateQueries({ queryKey: ['task-template', taskGroupId || categoryCode] });
       queryClient.invalidateQueries({ queryKey: ['task-template-parameters'] });
-      queryClient.invalidateQueries({ queryKey: ['admin-task-categories'] }); // Refresh categories to show template status
-      queryClient.invalidateQueries({ queryKey: ['task-groups'] }); // Refresh task groups
+      queryClient.invalidateQueries({ queryKey: ['task-templates'] }); // CRITICAL: For AdminGeneratedTasks modal
+      queryClient.invalidateQueries({ queryKey: ['task-categories-admin'] }); // CRITICAL: For categories tree
+      queryClient.invalidateQueries({ queryKey: ['admin-task-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['task-groups'] });
       toast({
         title: 'Plantilla creada',
         description: `Plantilla creada exitosamente para ${taskGroupName || categoryName}`
@@ -500,8 +503,11 @@ export default function TaskTemplateEditorModal({
       if (error) throw error;
     },
     onSuccess: () => {
+      // Invalidate all relevant queries to update UI immediately
       queryClient.invalidateQueries({ queryKey: ['task-template', taskGroupId || categoryCode] });
       queryClient.invalidateQueries({ queryKey: ['task-template-parameters'] });
+      queryClient.invalidateQueries({ queryKey: ['task-templates'] }); // CRITICAL: For AdminGeneratedTasks modal
+      queryClient.invalidateQueries({ queryKey: ['task-categories-admin'] }); // CRITICAL: For categories tree
       queryClient.invalidateQueries({ queryKey: ['admin-task-templates'] });
       queryClient.invalidateQueries({ queryKey: ['admin-task-categories'] });
       queryClient.invalidateQueries({ queryKey: ['task-groups'] });

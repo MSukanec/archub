@@ -41,7 +41,7 @@ export function useTaskTemplates() {
         .select(`
           *,
           units(name),
-          task_groups(
+          task_groups!task_templates_task_group_id_fkey(
             name,
             category_id,
             task_categories(name, code)
@@ -54,7 +54,6 @@ export function useTaskTemplates() {
         throw error;
       }
       
-      console.log('Templates fetched from DB:', data);
       return data as TaskTemplate[];
     }
   });
