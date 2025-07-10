@@ -20,48 +20,48 @@ export function OrganizationQuickActions() {
       title: "Crear Proyecto",
       description: "Nuevo proyecto de construcción",
       icon: Building,
-      color: "text-[hsl(var(--accent))]",
-      bgColor: "bg-[hsl(var(--accent))] bg-opacity-10",
+      color: "text-white",
+      bgColor: "bg-[hsl(var(--accent))]",
       onClick: () => navigate('/organization/projects')
     },
     {
       title: "Agregar Contacto",
       description: "Nuevo cliente o proveedor",
       icon: Users,
-      color: "text-[hsl(var(--accent))]",
-      bgColor: "bg-[hsl(var(--accent))] bg-opacity-10",
+      color: "text-white",
+      bgColor: "bg-[hsl(var(--accent))]",
       onClick: () => navigate('/organization/contacts')
     },
     {
       title: "Subir Documento",
       description: "Documentos de diseño",
       icon: FileText,
-      color: "text-[hsl(var(--accent))]",
-      bgColor: "bg-[hsl(var(--accent))] bg-opacity-10",
+      color: "text-white",
+      bgColor: "bg-[hsl(var(--accent))]",
       onClick: () => navigate('/design/documentation')
     },
     {
       title: "Nuevo Movimiento",
       description: "Registrar ingreso o gasto",
       icon: DollarSign,
-      color: "text-[hsl(var(--accent))]",
-      bgColor: "bg-[hsl(var(--accent))] bg-opacity-10",
+      color: "text-white",
+      bgColor: "bg-[hsl(var(--accent))]",
       onClick: () => navigate('/finances/movements')
     },
     {
       title: "Bitácora de Obra",
       description: "Registrar actividad diaria",
       icon: Construction,
-      color: "text-[hsl(var(--accent))]",
-      bgColor: "bg-[hsl(var(--accent))] bg-opacity-10",
+      color: "text-white",
+      bgColor: "bg-[hsl(var(--accent))]",
       onClick: () => navigate('/construction/logs')
     },
     {
       title: "Invitar Miembro",
       description: "Nuevo miembro del equipo",
       icon: Users,
-      color: "text-[hsl(var(--accent))]",
-      bgColor: "bg-[hsl(var(--accent))] bg-opacity-10",
+      color: "text-white",
+      bgColor: "bg-[hsl(var(--accent))]",
       onClick: () => navigate('/organization/members')
     }
   ]

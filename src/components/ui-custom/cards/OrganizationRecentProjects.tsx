@@ -156,14 +156,9 @@ export function OrganizationRecentProjects() {
                 transition={{ delay: index * 0.05, duration: 0.2 }}
                 className={`p-4 border rounded-lg hover:shadow-md transition-all duration-200 cursor-pointer ${
                   userData?.preferences?.last_project_id === project.id 
-                    ? 'ring-2 ring-offset-2' 
+                    ? 'ring-2 ring-offset-2 ring-[hsl(var(--accent))]' 
                     : ''
                 }`}
-                style={{
-                  ringColor: userData?.preferences?.last_project_id === project.id 
-                    ? 'hsl(90, 50%, 50%)' 
-                    : 'transparent'
-                }}
                 onClick={() => handleProjectSelect(project.id)}
               >
                 <div className="flex items-center gap-3">
