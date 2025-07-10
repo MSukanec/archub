@@ -149,6 +149,7 @@ export default function ConstructionBudgets() {
   const [deletingBudget, setDeletingBudget] = useState<Budget | null>(null)
   const [selectedBudgetId, setSelectedBudgetId] = useState<string>('')
   const [budgetTaskModalOpen, setBudgetTaskModalOpen] = useState(false)
+  const [newTaskModalOpen, setNewTaskModalOpen] = useState(false)
   const [currentBudgetId, setCurrentBudgetId] = useState<string>('')
   
   // Quick Add Task states
@@ -930,7 +931,12 @@ export default function ConstructionBudgets() {
 
             {/* Budget Controls Section - Isolated */}
             {selectedBudget && (
-              <div className="border-dashed border-2 border-muted-foreground/30 rounded-lg p-4 bg-transparent">
+              <Card style={{ 
+                backgroundColor: 'var(--secondary-card-bg)',
+                borderColor: 'var(--secondary-card-border)',
+                color: 'var(--secondary-card-fg)'
+              }} className="mb-4">
+                <CardContent className="p-4">
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-center gap-4 flex-1">
                     {/* Budget Selector */}
@@ -1027,12 +1033,14 @@ export default function ConstructionBudgets() {
                     {selectedBudget.description}
                   </div>
                 )}
-              </div>
+                </CardContent>
+              </Card>
             )}
 
             {/* Quick Add Task Section - Isolated */}
             {selectedBudget && (
-              <div className="border-dashed border-2 border-muted-foreground/30 rounded-lg p-4 bg-transparent">
+              <Card className="mb-4">
+                <CardContent className="p-4">
                 <div className="flex items-center gap-3">
                   <div className="flex-1">
                     <TaskSearchCombo
@@ -1046,20 +1054,22 @@ export default function ConstructionBudgets() {
                       filters={taskFilters}
                       onFiltersChange={setTaskFilters}
                       filterOptions={filterOptions}
+                      showCreateButton={true}
+                      onCreateTask={() => setNewTaskModalOpen(true)}
                     />
                   </div>
                   <div className="w-32">
-                    <div className="flex items-center gap-1">
+                    <div className="relative">
                       <Input
                         type="number"
                         value={quickQuantity}
                         onChange={(e) => setQuickQuantity(Number(e.target.value) || 1)}
-                        placeholder="Cant."
+                        placeholder="Cantidad"
                         min="1"
                         step="0.01"
-                        className="text-center w-20"
+                        className="text-center pr-8"
                       />
-                      <span className="text-xs text-muted-foreground min-w-0">
+                      <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
                         {quickTaskId ? (
                           getUnitName(quickTasks.find(t => t.id === quickTaskId)?.unit_id) || '-'
                         ) : '-'}
@@ -1074,10 +1084,8 @@ export default function ConstructionBudgets() {
                     {isAddingQuickTask ? "Agregando..." : "Agregar"}
                   </Button>
                 </div>
-                <div className="mt-2 text-xs text-muted-foreground">
-                  Busca y agrega tareas rápidamente sin abrir el modal
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             )}
 
             {/* Budget Table Card - Clean without extra controls */}
