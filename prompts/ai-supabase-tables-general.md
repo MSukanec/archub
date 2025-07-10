@@ -96,3 +96,40 @@ TABLA PROJECT_DATA
     "data_type": "uuid"
   }
 ]
+
+TABLA ORGANIZATIONS:
+
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "created_by",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "is_active",
+    "data_type": "boolean"
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "plan_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "is_system",
+    "data_type": "boolean"
+  }
+]

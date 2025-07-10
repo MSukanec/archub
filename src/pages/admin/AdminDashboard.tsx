@@ -5,10 +5,12 @@ import { Badge } from '@/components/ui/badge';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Building, Users, Crown, Activity } from 'lucide-react';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext';
 import { useMobile } from '@/hooks/use-mobile';
-import { OrganizationGrowthChart } from '@/components/graphics/OrganizationGrowthChart';
+import { UserGrowthChart } from '@/components/graphics/UserGrowthChart';
 
 // Hook para obtener estadísticas del sistema
 function useSystemStats() {
@@ -64,7 +66,9 @@ function useRecentOrganizations() {
           created_at,
           is_active,
           is_system,
-          plan:plans(name)
+          created_by,
+          plan:plans(name),
+          creator:users!created_by(id, full_name, email)
         `)
         .order('created_at', { ascending: false })
         .limit(5);
@@ -143,8 +147,8 @@ export default function AdminDashboard() {
           </Card>
         </div>
 
-        {/* Gráfico de crecimiento de organizaciones */}
-        <OrganizationGrowthChart />
+        {/* Gráfico de crecimiento de usuarios */}
+        <UserGrowthChart />
 
         {/* Organizaciones recientes */}
         <Card>
@@ -170,7 +174,7 @@ export default function AdminDashboard() {
                       <div>
                         <div className="font-medium">{org.name}</div>
                         <div className="text-sm text-muted-foreground">
-                          Plan: {org.plan?.[0]?.name || 'Sin plan'}
+                          Plan: {org.plan?.name || 'Sin plan'} • Creado por: {org.creator?.full_name || 'Usuario desconocido'}
                         </div>
                       </div>
                     </div>
@@ -180,9 +184,9 @@ export default function AdminDashboard() {
                           Sistema
                         </Badge>
                       )}
-                      <Badge variant={org.is_active ? 'default' : 'secondary'}>
-                        {org.is_active ? 'Activa' : 'Inactiva'}
-                      </Badge>
+                      <div className="text-sm text-muted-foreground">
+                        {org.created_at ? format(new Date(org.created_at), 'dd MMM, yyyy', { locale: es }) : 'Fecha no disponible'}
+                      </div>
                     </div>
                   </div>
                 ))}
