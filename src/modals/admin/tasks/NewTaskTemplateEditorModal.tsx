@@ -414,13 +414,11 @@ export default function TaskTemplateEditorModal({
         if (error) throw error;
         return data;
       } else {
-        // LEGACY: Crear plantilla para categoría
+        // LEGACY: Crear plantilla para categoría - Solo campos que existen en la tabla
         const { data, error } = await supabase
           .from('task_templates')
           .insert({
-            code: categoryCode,
-            name_template: `${categoryName}.`,
-            category_id: categoryId
+            name_template: `${categoryName}.`
           })
           .select()
           .single();
@@ -535,7 +533,7 @@ export default function TaskTemplateEditorModal({
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-sm font-medium mb-1">
-                        ✓ Plantilla Creada: {template.code}
+                        ✓ Plantilla Creada: {taskGroupName || categoryName}
                       </h3>
                       <p className="text-xs text-muted-foreground">
                         Categoría: {categoryName} | Parámetros: {templateParameters.length}

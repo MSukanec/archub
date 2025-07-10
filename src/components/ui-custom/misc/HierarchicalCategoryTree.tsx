@@ -212,7 +212,20 @@ export function HierarchicalCategoryTree({
                       variant="ghost"
                       size="sm"
                       onClick={() => onTaskGroupTemplate(taskGroup, category)}
-                      className="h-6 w-6 p-0 hover:bg-blue-200 text-blue-600 hover:text-blue-800 dark:hover:bg-blue-800/50 dark:text-blue-400 dark:hover:text-blue-200"
+                      className="h-6 w-6 p-0 text-blue-600 dark:text-blue-400"
+                      style={{
+                        backgroundColor: 'var(--button-primary-bg)',
+                        color: 'var(--button-primary-text)',
+                        border: '1px solid var(--button-primary-border)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = 'var(--button-primary-hover-bg)';
+                        e.currentTarget.style.color = 'var(--button-primary-hover-text)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'var(--button-primary-bg)';
+                        e.currentTarget.style.color = 'var(--button-primary-text)';
+                      }}
                       title="Plantilla"
                     >
                       <FileText className="h-3 w-3" />
@@ -224,7 +237,20 @@ export function HierarchicalCategoryTree({
                       variant="ghost"
                       size="sm"
                       onClick={() => onEditTaskGroup(taskGroup, category)}
-                      className="h-6 w-6 p-0 hover:bg-blue-200 text-blue-600 hover:text-blue-800 dark:hover:bg-blue-800/50 dark:text-blue-400 dark:hover:text-blue-200"
+                      className="h-6 w-6 p-0"
+                      style={{
+                        backgroundColor: 'var(--button-secondary-bg)',
+                        color: 'var(--button-secondary-text)',
+                        border: '1px solid var(--button-secondary-border)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = 'var(--button-secondary-hover-bg)';
+                        e.currentTarget.style.color = 'var(--button-secondary-hover-text)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'var(--button-secondary-bg)';
+                        e.currentTarget.style.color = 'var(--button-secondary-text)';
+                      }}
                       title="Editar Grupo"
                     >
                       <Edit className="h-3 w-3" />
@@ -236,7 +262,20 @@ export function HierarchicalCategoryTree({
                       variant="ghost"
                       size="sm"
                       onClick={() => onDeleteTaskGroup(taskGroup.id)}
-                      className="h-6 w-6 p-0 hover:bg-destructive/10 text-blue-600 hover:text-destructive dark:text-blue-400"
+                      className="h-6 w-6 p-0"
+                      style={{
+                        backgroundColor: 'transparent',
+                        color: 'var(--destructive)',
+                        border: '1px solid transparent'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = 'var(--destructive)';
+                        e.currentTarget.style.color = 'var(--destructive-text)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                        e.currentTarget.style.color = 'var(--destructive)';
+                      }}
                       title="Eliminar Grupo"
                     >
                       <Trash2 className="h-3 w-3" />
