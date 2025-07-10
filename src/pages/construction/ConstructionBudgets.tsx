@@ -150,11 +150,129 @@ export default function ConstructionBudgets() {
   const [selectedBudgetId, setSelectedBudgetId] = useState<string>('')
   const [budgetTaskModalOpen, setBudgetTaskModalOpen] = useState(false)
   const [currentBudgetId, setCurrentBudgetId] = useState<string>('')
+  
+  // Quick Add Task states
+  const [quickTaskId, setQuickTaskId] = useState<string>('')
+  const [quickQuantity, setQuickQuantity] = useState<number>(1)
+  const [quickSearchQuery, setQuickSearchQuery] = useState('')
+  const [taskFilters, setTaskFilters] = useState<any>({})
+  const [isAddingQuickTask, setIsAddingQuickTask] = useState(false)
 
   const { data: userData, isLoading } = useCurrentUser()
   const { data: budgets = [], isLoading: budgetsLoading } = useBudgets(userData?.preferences?.last_project_id)
   const { toast } = useToast()
   const queryClient = useQueryClient()
+
+  // Quick task search hook con filtros
+  const { data: quickTasks = [], isLoading: quickTasksLoading } = useTaskSearch(
+    quickSearchQuery, 
+    userData?.organization?.id || '', 
+    taskFilters,
+    true
+  );
+  
+  // Hook para opciones de filtros
+  const { data: filterOptions, isLoading: filterOptionsLoading } = useTaskSearchFilterOptions(
+    userData?.organization?.id || ''
+  );
+  
+  // Hook para obtener unidades
+  const { data: units = [] } = useQuery({
+    queryKey: ['units'],
+    queryFn: async () => {
+      if (!supabase) {
+        throw new Error("Supabase client not initialized");
+      }
+
+      const { data, error } = await supabase
+        .from("units")
+        .select("*")
+        .order("name", { ascending: true });
+
+      if (error) {
+        console.error("Error fetching units:", error);
+        throw error;
+      }
+
+      return data || [];
+    },
+  });
+
+  // Función para obtener el nombre de la unidad por ID
+  const getUnitName = (unitId: string | null) => {
+    if (!unitId) return '-';
+    const unit = units.find(u => u.id === unitId);
+    return unit?.name || '-';
+  };
+
+  // Generar opciones para el TaskSearchCombo
+  const quickTaskOptions = quickTasks.map(task => ({
+    value: task.id,
+    label: task.display_name || task.name || 'Sin nombre',
+    description: `${task.category_name || ''} • ${task.subcategory_name || ''}`.trim()
+  }));
+
+  // Hook para crear tareas en presupuesto (debe estar aquí para usar en handleQuickAddTask)
+  const createBudgetTaskMutation = useMutation({
+    mutationFn: async (taskData: any) => {
+      if (!supabase) {
+        throw new Error("Supabase client not initialized");
+      }
+
+      const { data, error } = await supabase
+        .from("budget_tasks")
+        .insert(taskData)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error creating budget task:", error);
+        throw error;
+      }
+
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["budget-tasks", selectedBudgetId] });
+      queryClient.invalidateQueries({ queryKey: ["budgets"] });
+    }
+  });
+
+  // Quick add task function
+  const handleQuickAddTask = async () => {
+    if (!quickTaskId || !selectedBudgetId || !userData?.organization?.id) return;
+    
+    setIsAddingQuickTask(true);
+    try {
+      await createBudgetTaskMutation.mutateAsync({
+        budget_id: selectedBudgetId,
+        task_id: quickTaskId,
+        quantity: quickQuantity,
+        organization_id: userData.organization.id
+      });
+      
+      // Reset form
+      setQuickTaskId('');
+      setQuickQuantity(1);
+      setQuickSearchQuery('');
+      
+      toast({
+        title: "Tarea agregada",
+        description: "La tarea se agregó al presupuesto correctamente"
+      });
+    } catch (error) {
+      console.error('Error adding quick task:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo agregar la tarea al presupuesto",
+        variant: "destructive"
+      });
+    } finally {
+      setIsAddingQuickTask(false);
+    }
+  };
+
+
 
   // Mutación para actualizar last_budget_id en user_preferences
   const updateBudgetPreferenceMutation = useMutation({
@@ -416,57 +534,6 @@ export default function ConstructionBudgets() {
           return groups;
         }, {}) || {}
       : { 'Todas las Tareas': budgetTasks || [] };
-    
-    // Quick add task states
-    const [quickTaskId, setQuickTaskId] = useState('');
-    const [quickQuantity, setQuickQuantity] = useState(1);
-    const [quickSearchQuery, setQuickSearchQuery] = useState('');
-    const [isAddingQuickTask, setIsAddingQuickTask] = useState(false);
-    
-    // Estados para filtros de búsqueda de tareas
-    const [taskFilters, setTaskFilters] = useState<TaskSearchFilters>({ origin: 'all' });
-    
-    // Quick task search hook con filtros
-    const { data: quickTasks = [], isLoading: quickTasksLoading } = useTaskSearch(
-      quickSearchQuery, 
-      userData?.organization?.id || '', 
-      taskFilters,
-      true
-    );
-    
-    // Hook para opciones de filtros
-    const { data: filterOptions, isLoading: filterOptionsLoading } = useTaskSearchFilterOptions(
-      userData?.organization?.id || ''
-    );
-    
-    // Hook para obtener unidades
-    const { data: units = [] } = useQuery({
-      queryKey: ['units'],
-      queryFn: async () => {
-        if (!supabase) {
-          throw new Error("Supabase client not initialized");
-        }
-
-        const { data, error } = await supabase
-          .from("units")
-          .select("*")
-          .order("name", { ascending: true });
-
-        if (error) {
-          console.error("Error fetching units:", error);
-          throw error;
-        }
-
-        return data || [];
-      },
-    });
-
-    // Función para obtener el nombre de la unidad por ID
-    const getUnitName = (unitId: string | null) => {
-      if (!unitId) return '-';
-      const unit = units.find(u => u.id === unitId);
-      return unit?.name || '-';
-    };
 
     // Función para actualizar la cantidad de una tarea
     const handleUpdateQuantity = async (taskId: string, newQuantity: number) => {
