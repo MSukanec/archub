@@ -12,10 +12,6 @@ export interface OrganizationStats {
 
 export interface ActivityData {
   date: string
-  movimientos: number
-  tareas: number
-  contactos: number
-  documentos: number
   total: number
 }
 
@@ -141,10 +137,6 @@ export function useOrganizationActivity() {
         
         activityData.push({
           date: `${dayName} ${formattedDate}`,
-          movimientos,
-          tareas,
-          contactos,
-          documentos,
           total
         })
       }

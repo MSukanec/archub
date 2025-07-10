@@ -16,6 +16,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { OrganizationStatsCards } from '@/components/ui-custom/cards/OrganizationStatsCards';
 import { OrganizationActivityChart } from '@/components/ui-custom/charts/OrganizationActivityChart';
+import { OrganizationQuickActions } from '@/components/ui-custom/cards/OrganizationQuickActions';
+import { OrganizationRecentProjects } from '@/components/ui-custom/cards/OrganizationRecentProjects';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useOrganizationStats, useOrganizationActivity } from '@/hooks/use-organization-stats';
@@ -32,7 +34,7 @@ const getTimeBasedGreeting = () => {
   } else if (hour >= 12 && hour < 20) {
     return "Buena tarde"
   } else {
-    return "Buena noche"
+    return "Buenas noches"
   }
 }
 
@@ -66,7 +68,8 @@ export default function OrganizationDashboard() {
   }, [setSidebarContext, setShowActionBar, isMobile]);
 
   const greeting = getTimeBasedGreeting()
-  const firstName = userData?.user_data?.first_name || userData?.user?.full_name || 'Usuario'
+  const fullFirstName = userData?.user_data?.first_name || userData?.user?.full_name || 'Usuario'
+  const firstName = fullFirstName.split(' ')[0] // Extract only first name
 
   const headerProps = {
     title: "Resumen de la Organización",
@@ -104,7 +107,7 @@ export default function OrganizationDashboard() {
                 <div className="flex-shrink-0">
                   <Avatar className="h-16 w-16 border-2 border-gray-200">
                     <AvatarImage src={currentOrganization.logo_url} alt={currentOrganization.name} />
-                    <AvatarFallback className="text-lg font-bold bg-gradient-to-br from-blue-500 to-purple-600 text-white">
+                    <AvatarFallback className="text-lg font-bold text-white" style={{ backgroundColor: 'hsl(var(--accent))' }}>
                       {getOrganizationInitials(currentOrganization.name)}
                     </AvatarFallback>
                   </Avatar>
@@ -160,6 +163,12 @@ export default function OrganizationDashboard() {
           data={activityData || []}
           isLoading={activityLoading}
         />
+
+        {/* Quick Actions & Recent Projects */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <OrganizationQuickActions />
+          <OrganizationRecentProjects />
+        </div>
       </div>
     </Layout>
   )
