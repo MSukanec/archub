@@ -18,6 +18,7 @@ import { useBudgetTasks } from "@/hooks/use-budget-tasks";
 import { useDebugTasks } from "@/hooks/use-debug-tasks";
 import { CreateGeneratedTaskUserModal } from "@/modals/user/CreateGeneratedTaskUserModal";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { generatePreviewDescription } from "@/utils/taskDescriptionGenerator";
 
 // Interface para tareas pendientes de agregar
 interface PendingTask {
@@ -105,11 +106,17 @@ export default function NewBudgetTaskModal({
 
   // Handle task creation from modal
   const handleTaskCreated = (newTask: any) => {
+    console.log('New task created data:', newTask);
+    
+    // Simply use the task code as the name since we don't have all the infrastructure for dynamic names
+    // The display name will be properly computed by the task search system when it re-fetches
+    const taskName = newTask.code || 'Nueva tarea';
+    
     // Agregar la nueva tarea directamente a la lista de pendientes
     const newPendingTask: PendingTask = {
       id: `temp-${Date.now()}`,
       task_id: newTask.id,
-      task_name: newTask.display_name || newTask.name || 'Nueva tarea',
+      task_name: taskName,
       quantity: 1,
       unit_name: newTask.unit_name
     };
@@ -118,7 +125,7 @@ export default function NewBudgetTaskModal({
     
     // Close the create task modal
     setCreateTaskModalOpen(false);
-    // Refetch tasks to include the new one
+    // Refetch tasks to include the new one - this will update the search with proper display names
     refetchTasks();
     
     toast({

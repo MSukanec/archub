@@ -103,8 +103,33 @@ export function useCreateGeneratedTask() {
       // The function returns the task data directly
       const taskResult = taskData[0];
       
+      // Now fetch the complete task data with template information
+      const { data: completeTask, error: fetchError } = await supabase
+        .from('task_generated')
+        .select(`
+          *,
+          task_templates (
+            id,
+            name_template,
+            task_group_id,
+            unit_id
+          )
+        `)
+        .eq('id', taskResult.id)
+        .single();
+      
+      if (fetchError) {
+        console.error('Error fetching complete task data:', fetchError);
+        // Fallback to basic task data
+        return { 
+          new_task: taskResult, 
+          generated_code: taskResult.code,
+          is_existing: false
+        };
+      }
+      
       return { 
-        new_task: taskResult, 
+        new_task: completeTask, 
         generated_code: taskResult.code,
         is_existing: false // Function handles duplicates internally
       };
@@ -312,9 +337,12 @@ export function useUpdateGeneratedTask() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-generated'] });
+      queryClient.invalidateQueries({ queryKey: ['task-search'] });
+      queryClient.invalidateQueries({ queryKey: ['budget-tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['task-generated-view'] });
       toast({
         title: "Tarea Actualizada",
-        description: "La tarea se ha actualizada exitosamente"
+        description: "La tarea se ha actualizado exitosamente"
       });
     },
     onError: (error: any) => {
