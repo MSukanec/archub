@@ -58,36 +58,31 @@ export default function AdminGeneratedTasks() {
 
   // Helper function to generate dynamic task name
   const generateTaskName = (task: GeneratedTask): string => {
-    
     const template = templates.find(t => t.id === task.template_id)
     if (!template) return 'Sin plantilla'
 
-    // Start with the template
-    let result = template.name_template
+    let result = template.name_template || '';
 
-    // Replace placeholders with proper expression template values
+    // Simple replacement for now - will be enhanced when we have parameter info
     if (task.param_values) {
       Object.entries(task.param_values).forEach(([paramName, paramValue]) => {
-        // Find the parameter value option by name (value stored in param_values)
-        const parameterOption = parameterValues.find(pv => pv.name === paramValue)
+        const placeholder = `{{${paramName}}}`;
         
-        if (parameterOption) {
-          // Use the expression template to format the value
-          const expressionTemplate = parameterOption.expression_template || '{value}'
-          const fragment = expressionTemplate.replace('{value}', parameterOption.label)
-          
-          // Replace placeholder in name_template
-          const placeholder = `{{${paramName}}}`
-          result = result.replace(placeholder, fragment)
+        // For select parameters, try to find in parameterValues
+        const parameterOption = parameterValues.find(pv => pv.name === paramValue);
+        
+        if (parameterOption && parameterOption.expression_template) {
+          // Use expression template to format the value
+          const fragment = parameterOption.expression_template.replace('{value}', parameterOption.label);
+          result = result.replace(placeholder, fragment);
         } else {
-          // Fallback to raw value if parameter option not found
-          const placeholder = `{{${paramName}}}`
-          result = result.replace(placeholder, paramValue as string)
+          // Fallback to raw value
+          result = result.replace(placeholder, String(paramValue));
         }
-      })
+      });
     }
 
-    return result
+    return result;
   }
 
   // Statistics calculations
