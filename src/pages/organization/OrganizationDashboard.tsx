@@ -105,7 +105,7 @@ export default function OrganizationDashboard() {
               <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6">
                 {/* Organization Avatar */}
                 <div className="flex-shrink-0">
-                  <Avatar className="h-12 w-12 md:h-16 md:w-16 border-2 border-gray-200">
+                  <Avatar className="h-12 w-12 md:h-16 md:w-16 border-2 border-border">
                     <AvatarImage src={currentOrganization.logo_url} alt={currentOrganization.name} />
                     <AvatarFallback className="text-sm md:text-lg font-bold text-white bg-[hsl(var(--accent))]">
                       {getOrganizationInitials(currentOrganization.name)}
@@ -116,18 +116,18 @@ export default function OrganizationDashboard() {
                 {/* Greeting and Organization Info */}
                 <div className="flex-1">
                   <motion.h1 
-                    className="text-2xl md:text-4xl font-black text-gray-900 mb-1"
+                    className="text-2xl md:text-4xl font-black text-foreground mb-1"
                     initial={{ scale: 0.8 }}
                     animate={{ scale: 1 }}
                     transition={{ delay: 0.2, duration: 0.3 }}
                   >
                     {greeting}, {firstName}
                   </motion.h1>
-                  <p className="text-base md:text-lg text-gray-600 mb-2 md:mb-3">
-                    Estás en <span className="font-semibold">{currentOrganization.name}</span>
+                  <p className="text-base md:text-lg text-muted-foreground mb-2 md:mb-3">
+                    Estás en <span className="font-semibold text-foreground">{currentOrganization.name}</span>
                   </p>
                   
-                  <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 text-sm text-gray-500">
+                  <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Calendar className="h-4 w-4" />
                       <span>Creado el {format(new Date(currentOrganization.created_at), 'dd/MM/yyyy', { locale: es })}</span>

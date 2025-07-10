@@ -229,12 +229,12 @@
 
 .dark {
   /* Layout */
-  --layout-bg: hsl(0, 0%, 16%);
+  --layout-bg: hsl(0, 0%, 20%);
   --layout-text: hsl(0, 0%, 90%);
   --layout-border: hsl(240, 8%, 15%);
 
   /* Menus/Sidebar */
-  --menues-bg: hsl(0, 0%, 14%);
+  --menues-bg: hsl(0, 0%, 20%);
   --menues-fg: hsl(0, 0%, 70%);
   --menues-secondary-fg: hsl(0, 0%, 60%);
   --menues-border: hsl(0, 0%, 16%);
@@ -243,8 +243,30 @@
   --menues-active-bg: hsl(76, 100%, 40%);
   --menues-active-fg: hsl(0, 0%, 98%);
 
+  /* Main Sidebar */
+  --main-sidebar-bg: hsl(0, 0%, 12%);
+  --main-sidebar-fg: hsl(0, 0%, 50%);
+  --main-sidebar-border: transparent;
+  --main-sidebar-button-bg: transparent;
+  --main-sidebar-button-fg: hsl(0, 0%, 40%);
+  --main-sidebar-button-active-bg: hsl(0, 0%, 25%);
+  --main-sidebar-button-active-fg: hsl(0, 0%, 100%);
+  --main-sidebar-button-hover-bg: hsl(0, 0%, 25%);
+  --main-sidebar-button-hover-fg: hsl(0, 0%, 100%);
+
+  /* Secondary Sidebar */
+  --secondary-sidebar-bg: hsl(0, 0%, 15%);
+  --secondary-sidebar-fg: hsl(0, 0%, 70%);
+  --secondary-sidebar-border: hsl(0, 0%, 15%);
+  --secondary-sidebar-button-bg: transparent;
+  --secondary-sidebar-button-fg: hsl(0, 0%, 70%);
+  --secondary-sidebar-button-active-bg: hsl(0, 0%, 50%);
+  --secondary-sidebar-button-active-fg: hsl(0, 0%, 97%);
+  --secondary-sidebar-button-hover-bg: hsl(0, 0%, 50%);
+  --secondary-sidebar-button-hover-fg: hsl(0, 0%, 97%);
+
   /* Cards */
-  --card-bg: hsl(0, 0%, 14%);
+  --card-bg: hsl(0, 0%, 12%);
   --card-fg: hsl(0, 0%, 90%);
   --card-text: hsl(0, 0%, 90%);
   --card-border: hsl(0, 0%, 16%);

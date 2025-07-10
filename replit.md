@@ -119,6 +119,11 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 10, 2025. Fixed layout background and dark mode compatibility for Organization Summary page - COMPLETED
+  • Changed Layout background from bg-background to --layout-bg CSS variable for proper theme consistency
+  • Updated Organization Summary welcome card to use semantic CSS variables: text-foreground, text-muted-foreground, border-border
+  • Fixed dark mode rendering issues in welcome card by replacing hardcoded gray colors with proper theme variables
+  • Enhanced theme compatibility across all text elements, borders, and backgrounds in the main greeting card
 - July 10, 2025. Complete Organization Summary page refactor with dynamic greeting and analytics dashboard - COMPLETED
   • Completely rebuilt OrganizationDashboard.tsx with modern time-based greeting system ("Buen día/tarde/noche, first_name")
   • Created dynamic greeting card with 4xl font-black styling, organization avatar with gradient fallback showing initials
