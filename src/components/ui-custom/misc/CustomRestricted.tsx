@@ -146,7 +146,7 @@ export function CustomRestricted({
         </PopoverTrigger>
 
         <PopoverContent
-          className="w-64 p-3 bg-black border-none shadow-lg rounded-lg"
+          className="w-64 p-3 bg-[var(--popover)] border border-[var(--popover-border)] shadow-lg rounded-lg"
           side="top"
         >
           <div className="flex items-start gap-2">
@@ -154,8 +154,8 @@ export function CustomRestricted({
               <Lock className="h-3 w-3 text-[var(--accent)]" />
             </div>
             <div className="flex-1">
-              <h4 className="font-medium text-sm text-white">Función Bloqueada</h4>
-              <p className="text-xs text-gray-300 mt-1">
+              <h4 className="font-medium text-sm text-[var(--popover-foreground)]">Función Bloqueada</h4>
+              <p className="text-xs text-[var(--muted-foreground)] mt-1">
                 {restriction.message}
               </p>
               {restriction.actionLabel && restriction.actionUrl && (
