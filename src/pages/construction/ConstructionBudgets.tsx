@@ -655,7 +655,9 @@ export default function ConstructionBudgets() {
                     className="rounded"
                   />
                 </th>
-                <th className="p-2 text-left text-xs font-medium">Rubro</th>
+                {!groupTasksByRubro && (
+                  <th className="p-2 text-left text-xs font-medium">Rubro</th>
+                )}
                 <th className="p-2 text-left text-xs font-medium">Tarea</th>
                 <th className="p-2 text-left text-xs font-medium">Unidad</th>
                 <th className="p-2 text-left text-xs font-medium">Cantidad</th>
@@ -667,93 +669,109 @@ export default function ConstructionBudgets() {
               </tr>
             </thead>
             <tbody>
-              {Object.entries(groupedTasks).map(([rubroName, tasks]) => (
-                <Fragment key={rubroName}>
-                  {/* Rubro Header Row (only show if grouping is enabled and not showing all tasks) */}
-                  {groupTasksByRubro && (
-                    <tr className="bg-accent/20 border-b border-accent">
-                      <td colSpan={10} className="p-3">
-                        <div className="font-semibold text-sm text-accent-foreground uppercase tracking-wide">
-                          {rubroName}
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                  
-                  {/* Task Rows */}
-                  {tasks.map((task: any) => {
-                    const percentage = totalBudgetAmount > 0 ? (1 / totalBudgetAmount) * 100 : 0;
-
-                    return (
-                      <tr key={task.id} className="border-b hover:bg-muted/20">
-                        <td className="p-2">
-                          <input
-                            type="checkbox"
-                            checked={selectedTasks.includes(task.id)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setSelectedTasks(prev => [...prev, task.id]);
-                              } else {
-                                setSelectedTasks(prev => prev.filter(id => id !== task.id));
-                              }
-                            }}
-                            className="rounded"
-                          />
-                        </td>
-                        <td className="p-2">
-                          <div className="font-medium text-sm">{task.task?.rubro_name || 'Sin rubro'}</div>
-                        </td>
-                        <td className="p-2 text-sm">
-                          {generateTaskDisplayName(task.task, parameterValues)}
-                        </td>
-                        <td className="p-2 text-sm">
-                          {getUnitName(task.task?.unit_id)}
-                        </td>
-                        <td className="p-2">
-                          <input
-                            type="number"
-                            value={task.quantity || 0}
-                            onChange={(e) => {
-                              const newQuantity = parseFloat(e.target.value) || 0;
-                              handleUpdateQuantity(task.id, newQuantity);
-                            }}
-                            onBlur={(e) => {
-                              const newQuantity = parseFloat(e.target.value) || 0;
-                              if (newQuantity !== task.quantity) {
-                                handleUpdateQuantity(task.id, newQuantity);
-                              }
-                            }}
-                            className="w-20 px-2 py-1 text-sm border rounded"
-                            min="0"
-                            step="0.01"
-                          />
-                        </td>
-                        <td className="p-2 text-sm">$0</td>
-                        <td className="p-2 text-sm">$0</td>
-                        <td className="p-2 text-sm font-medium">$0</td>
-                        <td className="p-2 text-sm text-muted-foreground">{percentage.toFixed(1)}%</td>
-                        <td className="p-2">
-                          <div className="flex gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDeleteTask(task.id)}
-                              className="h-7 w-7 p-0 text-destructive hover:text-destructive"
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
+              {Object.entries(groupedTasks).map(([rubroName, tasks]) => {
+                // Calculate rubro subtotal (all tasks in this rubro have subtotal $0 for now)
+                const rubroSubtotal = tasks.reduce((sum, task) => sum + 0, 0); // Will be $0 until real pricing is implemented
+                const rubroPercentage = totalBudgetAmount > 0 ? (rubroSubtotal / totalBudgetAmount) * 100 : 0;
+                
+                return (
+                  <Fragment key={rubroName}>
+                    {/* Rubro Header Row (only show if grouping is enabled) */}
+                    {groupTasksByRubro && (
+                      <tr className="bg-gray-600 border-b border-gray-700">
+                        <td className="p-3"></td>
+                        <td className="p-3">
+                          <div className="font-semibold text-sm text-white capitalize">
+                            {rubroName.toLowerCase()}
                           </div>
                         </td>
+                        <td className="p-3"></td>
+                        <td className="p-3"></td>
+                        <td className="p-3"></td>
+                        <td className="p-3"></td>
+                        <td className="p-3 text-sm font-semibold text-white">${rubroSubtotal.toLocaleString()}</td>
+                        <td className="p-3 text-sm font-semibold text-white">{rubroPercentage.toFixed(1)}%</td>
+                        <td className="p-3"></td>
                       </tr>
-                    );
-                  })}
-                </Fragment>
-              ))}
+                    )}
+                    
+                    {/* Task Rows */}
+                    {tasks.map((task: any) => {
+                      const percentage = totalBudgetAmount > 0 ? (1 / totalBudgetAmount) * 100 : 0;
+
+                      return (
+                        <tr key={task.id} className="border-b hover:bg-muted/20">
+                          <td className="p-2">
+                            <input
+                              type="checkbox"
+                              checked={selectedTasks.includes(task.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedTasks(prev => [...prev, task.id]);
+                                } else {
+                                  setSelectedTasks(prev => prev.filter(id => id !== task.id));
+                                }
+                              }}
+                              className="rounded"
+                            />
+                          </td>
+                          {!groupTasksByRubro && (
+                            <td className="p-2">
+                              <div className="font-medium text-sm">{task.task?.rubro_name || 'Sin rubro'}</div>
+                            </td>
+                          )}
+                          <td className="p-2 text-sm">
+                            {generateTaskDisplayName(task.task, parameterValues)}
+                          </td>
+                          <td className="p-2 text-sm">
+                            {getUnitName(task.task?.unit_id)}
+                          </td>
+                          <td className="p-2">
+                            <input
+                              type="number"
+                              value={task.quantity || 0}
+                              onChange={(e) => {
+                                const newQuantity = parseFloat(e.target.value) || 0;
+                                handleUpdateQuantity(task.id, newQuantity);
+                              }}
+                              onBlur={(e) => {
+                                const newQuantity = parseFloat(e.target.value) || 0;
+                                if (newQuantity !== task.quantity) {
+                                  handleUpdateQuantity(task.id, newQuantity);
+                                }
+                              }}
+                              className="w-20 px-2 py-1 text-sm border rounded"
+                              min="0"
+                              step="0.01"
+                            />
+                          </td>
+                          <td className="p-2 text-sm">$0</td>
+                          <td className="p-2 text-sm">$0</td>
+                          <td className="p-2 text-sm font-medium">$0</td>
+                          <td className="p-2 text-sm text-muted-foreground">{percentage.toFixed(1)}%</td>
+                          <td className="p-2">
+                            <div className="flex gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteTask(task.id)}
+                                className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </Fragment>
+                );
+              })}
               {/* TOTAL Row */}
               <tr className="border-b-2 bg-accent/10 font-medium">
                 <td className="p-2"></td>
+                {!groupTasksByRubro && <td className="p-2"></td>}
                 <td className="p-2 text-sm font-semibold">TOTAL</td>
-                <td className="p-2"></td>
                 <td className="p-2"></td>
                 <td className="p-2"></td>
                 <td className="p-2"></td>
