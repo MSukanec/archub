@@ -206,7 +206,7 @@ export function Sidebar() {
       icon: Building, 
       label: 'Organización', 
       defaultRoute: '/organization/dashboard',
-      isActive: activeSidebarSection === 'organizacion' || location.startsWith('/organization')
+      isActive: activeSidebarSection === 'organizacion' || location.startsWith('/organization') || location === '/dashboard'
     },
     { 
       id: 'proyecto', 

@@ -98,38 +98,52 @@ export default function ProjectBasicData() {
           .from('projects')
           .update({ name: dataToSave.name })
           .eq('id', projectId);
-        
+
         if (projectError) throw projectError;
       }
 
-      // Prepare project_data payload
-      const projectDataPayload = { ...dataToSave };
-      delete projectDataPayload.name; // Remove name as it goes to projects table
+      // Update project data in project_data table
+      const projectDataFields = {
+        description: dataToSave.description,
+        internal_notes: dataToSave.internal_notes,
+        client_name: dataToSave.client_name,
+        contact_phone: dataToSave.contact_phone,
+        email: dataToSave.email,
+        address: dataToSave.address,
+        city: dataToSave.city,
+        state: dataToSave.state,
+        country: dataToSave.country,
+        zip_code: dataToSave.zip_code,
+        start_date: dataToSave.start_date,
+        estimated_end: dataToSave.estimated_end,
+        surface_total: dataToSave.surface_total ? parseFloat(dataToSave.surface_total) : null,
+        surface_covered: dataToSave.surface_covered ? parseFloat(dataToSave.surface_covered) : null,
+        surface_semi: dataToSave.surface_semi ? parseFloat(dataToSave.surface_semi) : null,
+      };
 
-      // Convert empty strings to null for numeric fields
-      ['surface_total', 'surface_covered', 'surface_semi'].forEach(field => {
-        if (projectDataPayload[field] === '') {
-          projectDataPayload[field] = null;
-        } else if (projectDataPayload[field] !== undefined) {
-          projectDataPayload[field] = parseFloat(projectDataPayload[field]) || null;
-        }
-      });
+      // Remove undefined values
+      const cleanData = Object.fromEntries(
+        Object.entries(projectDataFields).filter(([_, value]) => value !== undefined)
+      );
 
-      // Update or insert project_data
-      const { error: dataError } = await supabase
-        .from('project_data')
-        .upsert({
-          project_id: projectId,
-          ...projectDataPayload,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'project_id' });
-      
-      if (dataError) throw dataError;
+      if (Object.keys(cleanData).length > 0) {
+        const { error } = await supabase
+          .from('project_data')
+          .upsert({
+            project_id: projectId,
+            organization_id: organizationId,
+            ...cleanData
+          });
+
+        if (error) throw error;
+      }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['project-data', projectId] });
-      queryClient.invalidateQueries({ queryKey: ['project-info', projectId] });
-      queryClient.invalidateQueries({ queryKey: ['projects', organizationId] });
+    onError: (error) => {
+      toast({
+        title: "Error al guardar",
+        description: "No se pudieron guardar los cambios automáticamente",
+        variant: "destructive"
+      });
     }
   });
 
@@ -198,35 +212,48 @@ export default function ProjectBasicData() {
         ]
       }}
     >
-      <div className="max-w-4xl mx-auto space-y-8">
-        {/* Hero Image Section */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <ImageIcon className="h-5 w-5 text-accent" />
-            <h2 className="text-lg font-semibold">Imagen Principal</h2>
-            <HelpPopover content="Sube una imagen representativa de tu proyecto que se mostrará como imagen principal." />
+      <div className="max-w-6xl mx-auto space-y-8">
+        
+        {/* Imagen Principal Section */}
+        <div className="flex gap-8 items-start">
+          <div className="w-1/3 space-y-2">
+            <div className="flex items-center gap-2">
+              <ImageIcon className="h-5 w-5 text-accent" />
+              <h3 className="text-lg font-semibold">Imagen Principal</h3>
+              <HelpPopover content="Sube una imagen representativa de tu proyecto que se mostrará como imagen principal." />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Imagen que representa tu proyecto en tarjetas y vistas principales.
+            </p>
           </div>
-          
-          {projectId && organizationId && (
-            <ProjectHeroImage
-              projectId={projectId}
-              organizationId={organizationId}
-              currentImageUrl={projectImageUrl}
-              onImageUpdate={setProjectImageUrl}
-            />
-          )}
+          <div className="flex-1">
+            {projectId && organizationId && (
+              <ProjectHeroImage
+                projectId={projectId}
+                organizationId={organizationId}
+                currentImageUrl={projectImageUrl}
+                onImageUpdate={setProjectImageUrl}
+              />
+            )}
+          </div>
         </div>
 
-        {/* Project Configuration Section */}
-        <div className="space-y-6">
-          <div className="flex items-center gap-2">
-            <Database className="h-5 w-5 text-accent" />
-            <h2 className="text-lg font-semibold">Información Básica del Proyecto</h2>
-            <HelpPopover content="Configura todos los datos básicos de tu proyecto. Los cambios se guardan automáticamente." />
-            {isSaving && <span className="text-xs text-muted-foreground">Guardando...</span>}
-          </div>
+        <hr className="border-border" />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Información Básica Section */}
+        <div className="flex gap-8 items-start">
+          <div className="w-1/3 space-y-2">
+            <div className="flex items-center gap-2">
+              <Database className="h-5 w-5 text-accent" />
+              <h3 className="text-lg font-semibold">Información Básica</h3>
+              <HelpPopover content="Datos fundamentales del proyecto que se usarán en todo el sistema." />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Configura los datos básicos que identifican tu proyecto.
+              {isSaving && <span className="block text-accent">Guardando...</span>}
+            </p>
+          </div>
+          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="project-name">Nombre del Proyecto</Label>
               <Input 
@@ -237,8 +264,47 @@ export default function ProjectBasicData() {
               />
             </div>
 
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="description">Descripción</Label>
+              <Textarea 
+                id="description"
+                placeholder="Descripción general del proyecto..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="internal-notes">Notas Internas</Label>
+              <Textarea 
+                id="internal-notes"
+                placeholder="Notas internas para el equipo..."
+                value={internalNotes}
+                onChange={(e) => setInternalNotes(e.target.value)}
+                rows={2}
+              />
+            </div>
+          </div>
+        </div>
+
+        <hr className="border-border" />
+
+        {/* Información del Cliente Section */}
+        <div className="flex gap-8 items-start">
+          <div className="w-1/3 space-y-2">
+            <div className="flex items-center gap-2">
+              <Database className="h-5 w-5 text-accent" />
+              <h3 className="text-lg font-semibold">Información del Cliente</h3>
+              <HelpPopover content="Datos de contacto del cliente para este proyecto." />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Información de contacto del cliente responsable del proyecto.
+            </p>
+          </div>
+          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="client-name">Cliente</Label>
+              <Label htmlFor="client-name">Nombre del Cliente</Label>
               <Input 
                 id="client-name"
                 placeholder="Ej: Familia López"
@@ -257,7 +323,7 @@ export default function ProjectBasicData() {
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 md:col-span-2">
               <Label htmlFor="email">Email de Contacto</Label>
               <Input 
                 id="email"
@@ -267,8 +333,25 @@ export default function ProjectBasicData() {
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
+          </div>
+        </div>
 
-            <div className="space-y-2">
+        <hr className="border-border" />
+
+        {/* Ubicación Section */}
+        <div className="flex gap-8 items-start">
+          <div className="w-1/3 space-y-2">
+            <div className="flex items-center gap-2">
+              <Database className="h-5 w-5 text-accent" />
+              <h3 className="text-lg font-semibold">Ubicación del Proyecto</h3>
+              <HelpPopover content="Dirección completa donde se ejecutará el proyecto." />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Ubicación física donde se desarrollará la obra.
+            </p>
+          </div>
+          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2 md:col-span-2">
               <Label htmlFor="address">Dirección</Label>
               <Input 
                 id="address"
@@ -317,7 +400,24 @@ export default function ProjectBasicData() {
                 onChange={(e) => setZipCode(e.target.value)}
               />
             </div>
+          </div>
+        </div>
 
+        <hr className="border-border" />
+
+        {/* Cronograma Section */}
+        <div className="flex gap-8 items-start">
+          <div className="w-1/3 space-y-2">
+            <div className="flex items-center gap-2">
+              <Database className="h-5 w-5 text-accent" />
+              <h3 className="text-lg font-semibold">Cronograma del Proyecto</h3>
+              <HelpPopover content="Fechas importantes para la planificación del proyecto." />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Fechas de inicio y finalización estimada del proyecto.
+            </p>
+          </div>
+          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="start-date">Fecha de Inicio</Label>
               <Input 
@@ -337,7 +437,24 @@ export default function ProjectBasicData() {
                 onChange={(e) => setEstimatedEnd(e.target.value)}
               />
             </div>
+          </div>
+        </div>
 
+        <hr className="border-border" />
+
+        {/* Superficies Section */}
+        <div className="flex gap-8 items-start">
+          <div className="w-1/3 space-y-2">
+            <div className="flex items-center gap-2">
+              <Database className="h-5 w-5 text-accent" />
+              <h3 className="text-lg font-semibold">Superficies del Proyecto</h3>
+              <HelpPopover content="Medidas de las diferentes áreas del proyecto." />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Especifica las superficies totales, cubiertas y semicubiertas en metros cuadrados.
+            </p>
+          </div>
+          <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="surface-total">Superficie Total (m²)</Label>
               <Input 
@@ -354,7 +471,7 @@ export default function ProjectBasicData() {
               <Input 
                 id="surface-covered"
                 type="number"
-                placeholder="Ej: 200"
+                placeholder="Ej: 180"
                 value={surfaceCovered}
                 onChange={(e) => setSurfaceCovered(e.target.value)}
               />
@@ -365,31 +482,9 @@ export default function ProjectBasicData() {
               <Input 
                 id="surface-semi"
                 type="number"
-                placeholder="Ej: 50"
+                placeholder="Ej: 70"
                 value={surfaceSemi}
                 onChange={(e) => setSurfaceSemi(e.target.value)}
-              />
-            </div>
-
-            <div className="md:col-span-2 space-y-2">
-              <Label htmlFor="description">Descripción del Proyecto</Label>
-              <Textarea 
-                id="description"
-                placeholder="Describe brevemente el proyecto..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={4}
-              />
-            </div>
-
-            <div className="md:col-span-2 space-y-2">
-              <Label htmlFor="internal-notes">Notas Internas</Label>
-              <Textarea 
-                id="internal-notes"
-                placeholder="Notas internas para el equipo de trabajo..."
-                value={internalNotes}
-                onChange={(e) => setInternalNotes(e.target.value)}
-                rows={3}
               />
             </div>
           </div>
