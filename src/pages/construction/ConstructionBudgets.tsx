@@ -15,11 +15,14 @@ import { NewBudgetModal } from '@/modals/budget/NewBudgetModal'
 import NewBudgetTaskModal from '@/modals/budget/NewBudgetTaskModal'
 import { useBudgets } from '@/hooks/use-budgets'
 import { useBudgetTasks } from '@/hooks/use-budget-tasks'
+import { useTaskSearch } from '@/hooks/use-task-search'
 import { useToast } from '@/hooks/use-toast'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { BudgetTaskCard } from '@/components/cards/BudgetTaskCard'
 import { useUnits } from '@/hooks/use-units'
+import { TaskSearchCombo } from '@/components/ui-custom/misc/TaskSearchCombo'
+import { Input } from '@/components/ui/input'
 
 // Hook para obtener valores de parámetros con expression_template
 const useTaskParameterValues = () => {
@@ -365,9 +368,22 @@ export default function ConstructionBudgets() {
 
   // Budget Task Table Component
   function BudgetTaskTable({ budgetId }: { budgetId: string }) {
-    const { budgetTasks, isLoading, updateBudgetTask } = useBudgetTasks(budgetId);
+    const { budgetTasks, isLoading, updateBudgetTask, createBudgetTask } = useBudgetTasks(budgetId);
     const { data: parameterValues = [] } = useTaskParameterValues();
     const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
+    
+    // Quick add task states
+    const [quickTaskId, setQuickTaskId] = useState('');
+    const [quickQuantity, setQuickQuantity] = useState(1);
+    const [quickSearchQuery, setQuickSearchQuery] = useState('');
+    const [isAddingQuickTask, setIsAddingQuickTask] = useState(false);
+    
+    // Quick task search hook
+    const { data: quickTasks = [], isLoading: quickTasksLoading } = useTaskSearch(
+      quickSearchQuery, 
+      userData?.organization?.id || '', 
+      true
+    );
     
     // Hook para obtener unidades
     const { data: units = [] } = useQuery({
@@ -431,6 +447,64 @@ export default function ConstructionBudgets() {
       }
     };
 
+    // Función para agregar tarea rápidamente
+    const handleQuickAddTask = async () => {
+      if (!quickTaskId) {
+        toast({
+          title: "Error",
+          description: "Selecciona una tarea para agregar",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Verificar si la tarea ya está en el presupuesto
+      if (budgetTasks?.some(t => t.task_id === quickTaskId)) {
+        toast({
+          title: "Tarea ya agregada",
+          description: "Esta tarea ya está en el presupuesto",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setIsAddingQuickTask(true);
+
+      try {
+        await createBudgetTask.mutateAsync({
+          budget_id: budgetId,
+          task_id: quickTaskId,
+          quantity: quickQuantity,
+          organization_id: userData?.organization?.id || ''
+        });
+
+        // Reset form
+        setQuickTaskId('');
+        setQuickQuantity(1);
+        setQuickSearchQuery('');
+
+        toast({
+          title: "Tarea agregada",
+          description: "La tarea se agregó al presupuesto correctamente",
+        });
+      } catch (error) {
+        console.error('Error adding task:', error);
+        toast({
+          title: "Error",
+          description: "No se pudo agregar la tarea",
+          variant: "destructive",
+        });
+      } finally {
+        setIsAddingQuickTask(false);
+      }
+    };
+
+    // Preparar opciones para TaskSearchCombo
+    const quickTaskOptions = quickTasks.map(task => ({
+      value: task.id,
+      label: task.display_name || task.code || 'Sin nombre'
+    }));
+
     // Calculate totals for percentage calculations (simplified for task_tasks)
     const totalBudgetAmount = budgetTasks?.length || 0;
 
@@ -465,6 +539,46 @@ export default function ConstructionBudgets() {
 
     return (
       <div className="space-y-4">
+        {/* Quick Add Task Section */}
+        <Card className="border-dashed border-2 border-muted-foreground/30">
+          <div className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="flex-1">
+                <TaskSearchCombo
+                  value={quickTaskId}
+                  onValueChange={setQuickTaskId}
+                  searchQuery={quickSearchQuery}
+                  onSearchChange={setQuickSearchQuery}
+                  options={quickTaskOptions}
+                  placeholder="Buscar tipo de tarea..."
+                  isLoading={quickTasksLoading}
+                />
+              </div>
+              <div className="w-24">
+                <Input
+                  type="number"
+                  value={quickQuantity}
+                  onChange={(e) => setQuickQuantity(Number(e.target.value) || 1)}
+                  placeholder="Cant."
+                  min="1"
+                  step="0.01"
+                  className="text-center"
+                />
+              </div>
+              <Button
+                onClick={handleQuickAddTask}
+                disabled={!quickTaskId || isAddingQuickTask}
+                className="px-4"
+              >
+                {isAddingQuickTask ? "Agregando..." : "Agregar"}
+              </Button>
+            </div>
+            <div className="mt-2 text-xs text-muted-foreground">
+              Busca y agrega tareas rápidamente sin abrir el modal
+            </div>
+          </div>
+        </Card>
+
         {/* Desktop Table View */}
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full">
