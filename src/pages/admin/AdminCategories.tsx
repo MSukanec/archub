@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Package2, Settings, CheckCircle, XCircle, Edit, Trash2 } from 'lucide-react';
+import { Plus, Package2, Settings, CheckCircle, XCircle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,8 +7,11 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from '@/components/ui/badge';
 
 import { Layout } from '@/components/layout/desktop/Layout';
-import { CustomTable } from '@/components/ui-custom/misc/CustomTable';
-import { TaskGroup } from '@/shared/schema';
+import { HierarchicalCategoryTree } from '@/components/ui-custom/misc/HierarchicalCategoryTree';
+
+import { useTaskCategoriesAdmin, useAllTaskCategories, useDeleteTaskCategory, TaskCategoryAdmin } from '@/hooks/use-task-categories-admin';
+import { NewAdminTaskCategoryModal } from '@/modals/admin/NewAdminTaskCategoryModal';
+import TaskTemplateEditorModal from '@/modals/admin/tasks/NewTaskTemplateEditorModal';
 
 export default function AdminCategories() {
   const [searchTerm, setSearchTerm] = useState('');

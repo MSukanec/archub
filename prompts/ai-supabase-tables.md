@@ -8,6 +8,18 @@ TABLA TASK_TEMPLATES:
     "data_type": "uuid"
   },
   {
+    "column_name": "category_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "code",
+    "data_type": "text"
+  },
+  {
+    "column_name": "name",
+    "data_type": "text"
+  },
+  {
     "column_name": "name_template",
     "data_type": "text"
   },
@@ -18,9 +30,9 @@ TABLA TASK_TEMPLATES:
   {
     "column_name": "updated_at",
     "data_type": "timestamp with time zone"
-  },
+  }
   {
-    "column_name": "task_group_id",
+    "column_name": "unit_id",
     "data_type": "uuid"
   }
 ]
