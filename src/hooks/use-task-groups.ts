@@ -6,6 +6,7 @@ export interface TaskGroup {
   id: string;
   name: string;
   category_id: string;
+  template_id?: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -22,6 +22,7 @@ export interface TaskGroupAdmin {
   id: string;
   name: string;
   category_id: string;
+  template_id?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -119,6 +120,7 @@ export function useTaskCategoriesAdmin() {
           id: tg.id,
           name: tg.name,
           category_id: tg.category_id,
+          template_id: tg.template_id,
           created_at: tg.created_at,
           updated_at: tg.updated_at,
         }));
