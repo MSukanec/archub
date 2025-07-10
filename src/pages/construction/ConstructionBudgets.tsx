@@ -658,6 +658,7 @@ export default function ConstructionBudgets() {
                 {!groupTasksByRubro && (
                   <th className="p-2 text-left text-xs font-medium">Rubro</th>
                 )}
+                <th className="w-16 p-2 text-left text-xs font-medium">ID</th>
                 <th className="p-2 text-left text-xs font-medium">Tarea</th>
                 <th className="p-2 text-left text-xs font-medium">Unidad</th>
                 <th className="p-2 text-left text-xs font-medium">Cantidad</th>
@@ -669,10 +670,11 @@ export default function ConstructionBudgets() {
               </tr>
             </thead>
             <tbody>
-              {Object.entries(groupedTasks).map(([rubroName, tasks]) => {
+              {Object.entries(groupedTasks).map(([rubroName, tasks], rubroIndex) => {
                 // Calculate rubro subtotal (all tasks in this rubro have subtotal $0 for now)
                 const rubroSubtotal = tasks.reduce((sum, task) => sum + 0, 0); // Will be $0 until real pricing is implemented
                 const rubroPercentage = totalBudgetAmount > 0 ? (rubroSubtotal / totalBudgetAmount) * 100 : 0;
+                const rubroNumber = rubroIndex + 1;
                 
                 return (
                   <Fragment key={rubroName}>
@@ -680,6 +682,11 @@ export default function ConstructionBudgets() {
                     {groupTasksByRubro && (
                       <tr className="bg-gray-600 border-b border-gray-700">
                         <td className="p-3"></td>
+                        <td className="p-3">
+                          <div className="font-semibold text-sm text-white">
+                            {rubroNumber}
+                          </div>
+                        </td>
                         <td className="p-3">
                           <div className="font-semibold text-sm text-white capitalize">
                             {rubroName.toLowerCase()}
@@ -696,8 +703,25 @@ export default function ConstructionBudgets() {
                     )}
                     
                     {/* Task Rows */}
-                    {tasks.map((task: any) => {
+                    {tasks.map((task: any, taskIndex) => {
                       const percentage = totalBudgetAmount > 0 ? (1 / totalBudgetAmount) * 100 : 0;
+                      
+                      // Generate ID based on grouping mode
+                      let taskId: string;
+                      if (groupTasksByRubro) {
+                        // Hierarchical: 1.1, 1.2, 2.1, 2.2, etc.
+                        taskId = `${rubroNumber}.${taskIndex + 1}`;
+                      } else {
+                        // Sequential: calculate global task index
+                        let globalIndex = 0;
+                        const rubroEntries = Object.entries(groupedTasks);
+                        for (let i = 0; i < rubroIndex; i++) {
+                          globalIndex += rubroEntries[i][1].length;
+                        }
+                        globalIndex += taskIndex + 1;
+                        // Format as 001, 002, 003, etc.
+                        taskId = globalIndex.toString().padStart(3, '0');
+                      }
 
                       return (
                         <tr key={task.id} className="border-b hover:bg-muted/20">
@@ -720,6 +744,9 @@ export default function ConstructionBudgets() {
                               <div className="font-medium text-sm">{task.task?.rubro_name || 'Sin rubro'}</div>
                             </td>
                           )}
+                          <td className="p-2 text-sm font-medium">
+                            {taskId}
+                          </td>
                           <td className="p-2 text-sm">
                             {generateTaskDisplayName(task.task, parameterValues)}
                           </td>
@@ -771,6 +798,7 @@ export default function ConstructionBudgets() {
               <tr className="border-b-2 bg-accent/10 font-medium">
                 <td className="p-2"></td>
                 {!groupTasksByRubro && <td className="p-2"></td>}
+                <td className="p-2"></td>
                 <td className="p-2 text-sm font-semibold">TOTAL</td>
                 <td className="p-2"></td>
                 <td className="p-2"></td>
