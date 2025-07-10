@@ -101,50 +101,60 @@ export function NewTaskGroupModal({
   };
 
   return (
-    <CustomModalLayout open={open} onClose={handleClose}>
-      <CustomModalHeader 
-        title={taskGroup ? "Editar Grupo de Tareas" : "Nuevo Grupo de Tareas"}
-        onClose={handleClose}
-      />
-      
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <CustomModalBody columns={1}>
-            <div className="space-y-4">
-              {/* Category context */}
-              <div className="p-3 bg-muted rounded-md">
-                <p className="text-sm text-muted-foreground">
-                  Categoría: <span className="font-medium text-foreground">{categoryName}</span>
-                </p>
-              </div>
-
-              {/* Task Group Name */}
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nombre del Grupo <span className="text-red-500">*</span></FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="Ej: Muros de Mampostería, Estructuras de Hormigón..." 
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </CustomModalBody>
-
-          <CustomModalFooter
+    <CustomModalLayout 
+      open={open} 
+      onClose={handleClose}
+      children={{
+        header: (
+          <CustomModalHeader 
+            title={taskGroup ? "Editar Grupo de Tareas" : "Nuevo Grupo de Tareas"}
             onClose={handleClose}
-            isSubmitting={isSubmitting}
-            submitLabel={taskGroup ? "Actualizar Grupo" : "Crear Grupo"}
           />
-        </form>
-      </Form>
-    </CustomModalLayout>
+        ),
+        body: (
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <CustomModalBody columns={1}>
+                <div className="space-y-4">
+                  {/* Category context */}
+                  <div className="p-3 bg-muted rounded-md">
+                    <p className="text-sm text-muted-foreground">
+                      Categoría: <span className="font-medium text-foreground">{categoryName}</span>
+                    </p>
+                  </div>
+
+                  {/* Task Group Name */}
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nombre del Grupo <span className="text-red-500">*</span></FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Ej: Muros de Mampostería, Estructuras de Hormigón..." 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CustomModalBody>
+            </form>
+          </Form>
+        ),
+        footer: (
+          <CustomModalFooter
+            onCancel={handleClose}
+            onSubmit={form.handleSubmit(onSubmit)}
+            cancelText="Cancelar"
+            submitText={taskGroup ? "Actualizar Grupo" : "Crear Grupo"}
+            isLoading={isSubmitting}
+          />
+        )
+      }}
+    />
   );
 }
