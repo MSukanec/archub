@@ -62,8 +62,17 @@ export function useAllTaskCategories() {
 export function useTaskCategoriesAdmin() {
   return useQuery({
     queryKey: ['task-categories-admin'],
+    retry: false,
+    refetchOnWindowFocus: false,
     queryFn: async () => {
-      if (!supabase) throw new Error('Supabase client not initialized');
+      console.log('🔍 Starting task categories admin query...');
+      
+      if (!supabase) {
+        console.error('❌ Supabase client not initialized');
+        throw new Error('Supabase client not initialized');
+      }
+
+      console.log('✅ Supabase client OK, fetching categories...');
 
       // Fetch categories with their templates
       const { data: categories, error: categoriesError } = await supabase
@@ -72,11 +81,11 @@ export function useTaskCategoriesAdmin() {
         .order('name');
 
       if (categoriesError) {
-        console.error('Error fetching categories:', categoriesError);
+        console.error('❌ Error fetching categories:', categoriesError);
         throw categoriesError;
       }
 
-      console.log('Categories fetched successfully:', categories?.length || 0);
+      console.log('✅ Categories fetched successfully:', categories?.length || 0);
 
       // Fetch task groups first without templates to avoid relationship conflicts
       console.log('Fetching task groups...');
@@ -90,6 +99,15 @@ export function useTaskCategoriesAdmin() {
       }
 
       console.log('Task groups fetched successfully:', taskGroups?.length || 0, taskGroups);
+      
+      // Let's specifically look for the "Muertos" task group
+      const muertosGroup = taskGroups?.find(tg => tg.name.includes('Muertos') || tg.name.includes('Muertos'));
+      if (muertosGroup) {
+        console.log('🎯 Found Muertos task group:', muertosGroup);
+      } else {
+        console.log('❌ Muertos task group not found');
+        console.log('🔍 All task group names:', taskGroups?.map(tg => tg.name));
+      }
 
       // Fetch templates separately if needed
       console.log('Fetching templates...');

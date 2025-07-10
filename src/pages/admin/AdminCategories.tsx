@@ -37,8 +37,17 @@ export default function AdminCategories() {
   const [deleteCategoryId, setDeleteCategoryId] = useState<string | null>(null);
   const [deleteTaskGroupId, setDeleteTaskGroupId] = useState<string | null>(null);
 
-  const { data: categories = [], isLoading } = useTaskCategoriesAdmin();
+  const { data: categories = [], isLoading, error, isError, refetch } = useTaskCategoriesAdmin();
   const { data: allCategories = [] } = useAllTaskCategories();
+
+  // Debug query state
+  console.log('🎯 AdminCategories render - Query state:', {
+    isLoading,
+    isError,
+    error,
+    categoriesLength: categories.length,
+    hasData: !!categories
+  });
   const deleteCategoryMutation = useDeleteTaskCategory();
   const deleteTaskGroupMutation = useDeleteTaskGroup();
 
@@ -213,13 +222,22 @@ export default function AdminCategories() {
     ],
     onClearFilters: clearFilters,
     actions: (
-      <Button 
-        onClick={() => setIsCategoryModalOpen(true)}
-        className="h-8 px-3 text-sm font-medium"
-      >
-        <Plus className="mr-2 h-4 w-4" />
-        CREAR CATEGORÍAS
-      </Button>
+      <div className="flex gap-2">
+        <Button 
+          onClick={() => refetch()}
+          variant="outline"
+          className="h-8 px-3 text-sm font-medium"
+        >
+          🔄 REFETCH
+        </Button>
+        <Button 
+          onClick={() => setIsCategoryModalOpen(true)}
+          className="h-8 px-3 text-sm font-medium"
+        >
+          <Plus className="mr-2 h-4 w-4" />
+          CREAR CATEGORÍAS
+        </Button>
+      </div>
     )
   };
 
