@@ -63,6 +63,10 @@ TABLA TASK_PARAMETERS:
   {
     "column_name": "updated_at",
     "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "task_group_id",
+    "data_type": "uuid"
   }
 ]
 
