@@ -18,7 +18,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     return (
       <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
         <p className="font-medium mb-2">{label}</p>
-        <p className="text-sm font-medium" style={{ color: 'hsl(var(--accent))' }}>
+        <p className="text-sm font-medium text-[hsl(var(--accent))]">
           Actividad total: {payload[0]?.value || 0}
         </p>
       </div>

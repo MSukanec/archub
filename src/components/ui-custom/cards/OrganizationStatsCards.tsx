@@ -40,42 +40,42 @@ export function OrganizationStatsCards({
       title: "Proyectos Activos",
       value: activeProjects,
       icon: Building2,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
+      color: "text-[hsl(var(--accent))]",
+      bgColor: "bg-[hsl(var(--accent))]",
       description: "proyectos en curso",
       trendData: generateTrendData(activeProjects),
-      lineColor: "#2563eb"
+      lineColor: "hsl(var(--accent))"
     },
     {
       title: "Documentos (30 días)",
       value: documentsLast30Days,
       icon: FileText,
-      color: "text-green-600",
-      bgColor: "bg-green-50",
+      color: "text-[hsl(var(--accent))]",
+      bgColor: "bg-[hsl(var(--accent))]",
       description: "documentos subidos",
       trendData: generateTrendData(documentsLast30Days),
-      lineColor: "#16a34a"
+      lineColor: "hsl(var(--accent))"
     },
     {
       title: "Tareas Generadas",
       value: generatedTasks,
       icon: Wrench,
-      color: "text-orange-600",
-      bgColor: "bg-orange-50",
+      color: "text-[hsl(var(--accent))]",
+      bgColor: "bg-[hsl(var(--accent))]",
       description: "tareas creadas",
       trendData: generateTrendData(generatedTasks),
-      lineColor: "#ea580c"
+      lineColor: "hsl(var(--accent))"
     },
     {
       title: "Movimientos (30 días)",
       value: financialMovementsLast30Days,
       icon: DollarSign,
-      color: "text-purple-600",
-      bgColor: "bg-purple-50",
+      color: "text-[hsl(var(--accent))]",
+      bgColor: "bg-[hsl(var(--accent))]",
       description: "total movido",
       isAmount: true,
       trendData: generateTrendData(financialMovementsLast30Days / 1000),
-      lineColor: "#9333ea"
+      lineColor: "hsl(var(--accent))"
     }
   ]
 
@@ -88,16 +88,10 @@ export function OrganizationStatsCards({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.1, duration: 0.3 }}
         >
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <div className="flex flex-col space-y-1">
-                <CardTitle className="text-xs lg:text-sm font-medium truncate">{stat.title}</CardTitle>
-                <div className={`h-6 w-6 lg:h-8 lg:w-8 rounded-full ${stat.bgColor} flex items-center justify-center`}>
-                  <stat.icon className={`h-3 w-3 lg:h-4 lg:w-4 ${stat.color}`} />
-                </div>
-              </div>
-              {/* Mini Chart */}
-              <div className="h-8 w-16 lg:h-10 lg:w-20">
+          <Card className="relative overflow-hidden">
+            <CardContent className="p-4">
+              {/* Large Chart Taking Most Space */}
+              <div className="h-20 lg:h-24 mb-3">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={stat.trendData}>
                     <Line 
@@ -111,10 +105,20 @@ export function OrganizationStatsCards({
                   </LineChart>
                 </ResponsiveContainer>
               </div>
-            </CardHeader>
-            <CardContent className="pb-3">
+              
+              {/* Small Icon and Title */}
+              <div className="flex items-center gap-2 mb-1">
+                <div className={`h-4 w-4 lg:h-5 lg:w-5 rounded-full bg-opacity-20 ${stat.bgColor} flex items-center justify-center`}>
+                  <stat.icon className={`h-2 w-2 lg:h-3 lg:w-3 ${stat.color}`} />
+                </div>
+                <CardTitle className="text-xs lg:text-sm font-medium text-muted-foreground truncate">
+                  {stat.title}
+                </CardTitle>
+              </div>
+              
+              {/* Small Number at Bottom */}
               <motion.div 
-                className="text-lg lg:text-2xl font-bold mb-1"
+                className="text-sm lg:text-base font-bold text-foreground"
                 initial={{ scale: 0.8 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: index * 0.1 + 0.2, duration: 0.3 }}
@@ -123,9 +127,6 @@ export function OrganizationStatsCards({
                   stat.isAmount ? formatCurrency(stat.value) : stat.value.toLocaleString()
                 )}
               </motion.div>
-              <p className="text-xs text-muted-foreground">
-                {stat.description}
-              </p>
             </CardContent>
           </Card>
         </motion.div>

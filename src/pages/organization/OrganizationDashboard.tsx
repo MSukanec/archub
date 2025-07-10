@@ -107,7 +107,7 @@ export default function OrganizationDashboard() {
                 <div className="flex-shrink-0">
                   <Avatar className="h-16 w-16 border-2 border-gray-200">
                     <AvatarImage src={currentOrganization.logo_url} alt={currentOrganization.name} />
-                    <AvatarFallback className="text-lg font-bold text-white" style={{ backgroundColor: 'hsl(var(--accent))' }}>
+                    <AvatarFallback className="text-lg font-bold text-white bg-[hsl(var(--accent))]">
                       {getOrganizationInitials(currentOrganization.name)}
                     </AvatarFallback>
                   </Avatar>

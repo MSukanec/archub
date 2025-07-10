@@ -161,7 +161,7 @@ export function OrganizationRecentProjects() {
                 }`}
                 style={{
                   ringColor: userData?.preferences?.last_project_id === project.id 
-                    ? 'hsl(var(--accent))' 
+                    ? 'hsl(90, 50%, 50%)' 
                     : 'transparent'
                 }}
                 onClick={() => handleProjectSelect(project.id)}
@@ -169,7 +169,7 @@ export function OrganizationRecentProjects() {
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10">
                     <AvatarImage src={project.hero_image_url} alt={project.name} />
-                    <AvatarFallback className="text-sm font-bold text-white" style={{ backgroundColor: 'hsl(var(--accent))' }}>
+                    <AvatarFallback className="text-sm font-bold text-white bg-[hsl(var(--accent))]">
                       {getProjectInitials(project.name)}
                     </AvatarFallback>
                   </Avatar>
@@ -178,7 +178,7 @@ export function OrganizationRecentProjects() {
                     <div className="flex items-center gap-2 mb-1">
                       <h4 className="font-medium text-sm truncate">{project.name}</h4>
                       {userData?.preferences?.last_project_id === project.id && (
-                        <Badge variant="outline" className="text-xs px-1 py-0" style={{ borderColor: 'hsl(var(--accent))', color: 'hsl(var(--accent))' }}>
+                        <Badge variant="outline" className="text-xs px-1 py-0 border-[hsl(var(--accent))] text-[hsl(var(--accent))]">
                           ACTIVO
                         </Badge>
                       )}

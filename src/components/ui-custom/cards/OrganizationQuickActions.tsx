@@ -20,48 +20,48 @@ export function OrganizationQuickActions() {
       title: "Crear Proyecto",
       description: "Nuevo proyecto de construcción",
       icon: Building,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
+      color: "text-[hsl(var(--accent))]",
+      bgColor: "bg-[hsl(var(--accent))] bg-opacity-10",
       onClick: () => navigate('/organization/projects')
     },
     {
       title: "Agregar Contacto",
       description: "Nuevo cliente o proveedor",
       icon: Users,
-      color: "text-green-600",
-      bgColor: "bg-green-50",
+      color: "text-[hsl(var(--accent))]",
+      bgColor: "bg-[hsl(var(--accent))] bg-opacity-10",
       onClick: () => navigate('/organization/contacts')
     },
     {
       title: "Subir Documento",
       description: "Documentos de diseño",
       icon: FileText,
-      color: "text-purple-600",
-      bgColor: "bg-purple-50",
+      color: "text-[hsl(var(--accent))]",
+      bgColor: "bg-[hsl(var(--accent))] bg-opacity-10",
       onClick: () => navigate('/design/documentation')
     },
     {
       title: "Nuevo Movimiento",
       description: "Registrar ingreso o gasto",
       icon: DollarSign,
-      color: "text-orange-600",
-      bgColor: "bg-orange-50",
+      color: "text-[hsl(var(--accent))]",
+      bgColor: "bg-[hsl(var(--accent))] bg-opacity-10",
       onClick: () => navigate('/finances/movements')
     },
     {
       title: "Bitácora de Obra",
       description: "Registrar actividad diaria",
       icon: Construction,
-      color: "text-indigo-600",
-      bgColor: "bg-indigo-50",
+      color: "text-[hsl(var(--accent))]",
+      bgColor: "bg-[hsl(var(--accent))] bg-opacity-10",
       onClick: () => navigate('/construction/logs')
     },
     {
       title: "Invitar Miembro",
       description: "Nuevo miembro del equipo",
       icon: Users,
-      color: "text-pink-600",
-      bgColor: "bg-pink-50",
+      color: "text-[hsl(var(--accent))]",
+      bgColor: "bg-[hsl(var(--accent))] bg-opacity-10",
       onClick: () => navigate('/organization/members')
     }
   ]

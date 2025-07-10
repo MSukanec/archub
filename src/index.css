@@ -204,6 +204,10 @@
   --card-foreground: hsl(0, 0%, 35%);
   --background: hsl(0, 0%, 99%);
   --foreground: hsl(0, 0%, 45%);
+  
+  /* Shadcn accent definitions */
+  --accent: 90 50% 50%;
+  --accent-foreground: 0 0% 100%;
 
   /* Radius */
   --radius-sm: 6px;
@@ -326,6 +330,10 @@
   --card-foreground: hsl(0, 0%, 70%);
   --background: hsl(0, 0%, 16%);
   --foreground: hsl(0, 0%, 90%);
+  
+  /* Shadcn accent definitions */
+  --accent: 90 50% 50%;
+  --accent-foreground: 0 0% 100%;
   --ring-default: hsl(0, 50%, 50%);
 
   /* Radius */
