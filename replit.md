@@ -119,6 +119,13 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 10, 2025. Enhanced template editor to support global parameters without option groups - COMPLETED
+  • Modified TaskTemplateEditorModal to allow adding parameters without requiring option groups
+  • Removed mandatory option group requirement from "Agregar" button - now only requires parameter selection
+  • Added informative messages: "✓ Este parámetro es global (no requiere grupo de opciones)" for parameters without groups
+  • Enhanced user experience with message "ℹ️ Puedes agregar sin grupo (parámetro global) o con un grupo específico"
+  • Global parameters like "espesor" or "dimensión" can now be added directly to templates without group configuration
+  • System supports both grouped parameters (with specific option sets) and global parameters (no predefined options)
 - July 10, 2025. Complete budget synchronization fix with comprehensive task parameter query invalidation - COMPLETED
   • Added missing 'task-parameter-values' and 'all-task-parameter-values' invalidations to all template editor mutations
   • Fixed update template unit mutation to include budget-affecting cache invalidations

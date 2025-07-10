@@ -723,7 +723,7 @@ export default function TaskTemplateEditorModal({
                               optionGroupId: newOptionGroupId || undefined
                             });
                           }}
-                          disabled={!newParameterId || !newOptionGroupId || addParameterMutation.isPending}
+                          disabled={!newParameterId || addParameterMutation.isPending}
                           className="w-full"
                         >
                           <Plus className="h-4 w-4 mr-2" />
@@ -734,7 +734,12 @@ export default function TaskTemplateEditorModal({
                     
                     {newParameterId && parameterOptionGroups.length === 0 && (
                       <div className="mt-2 text-xs text-muted-foreground">
-                        ⚠️ Este parámetro no tiene grupos de opciones configurados
+                        ✓ Este parámetro es global (no requiere grupo de opciones)
+                      </div>
+                    )}
+                    {newParameterId && parameterOptionGroups.length > 0 && (
+                      <div className="mt-2 text-xs text-muted-foreground">
+                        ℹ️ Puedes agregar sin grupo (parámetro global) o con un grupo específico
                       </div>
                     )}
                   </div>
