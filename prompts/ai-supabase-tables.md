@@ -274,6 +274,10 @@ TABLA TASK_GROUPS:
   {
     "column_name": "updated_at",
     "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "template_id",
+    "data_type": "uuid"
   }
 ]
 
