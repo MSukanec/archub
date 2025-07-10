@@ -55,7 +55,7 @@ export function SidebarSubmenu() {
   const { activeSidebarSection, setActiveSidebarSection, setSidebarContext } = useNavigationStore();
 
   const isMainSidebarExpanded = false; // Always collapsed
-  const isSecondarySidebarExpanded = isSecondaryDocked || isSecondaryHovered;
+  const isSecondarySidebarExpanded = isSecondaryDocked || isSecondaryHovered || isMainHovered;
 
   // Definir sección por defecto basada en la ruta actual
   const getDefaultSection = () => {

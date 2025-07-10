@@ -611,16 +611,23 @@ export default function ConstructionBudgets() {
                   filterOptions={filterOptions}
                 />
               </div>
-              <div className="w-24">
-                <Input
-                  type="number"
-                  value={quickQuantity}
-                  onChange={(e) => setQuickQuantity(Number(e.target.value) || 1)}
-                  placeholder="Cant."
-                  min="1"
-                  step="0.01"
-                  className="text-center"
-                />
+              <div className="w-32">
+                <div className="flex items-center gap-1">
+                  <Input
+                    type="number"
+                    value={quickQuantity}
+                    onChange={(e) => setQuickQuantity(Number(e.target.value) || 1)}
+                    placeholder="Cant."
+                    min="1"
+                    step="0.01"
+                    className="text-center w-20"
+                  />
+                  <span className="text-xs text-muted-foreground min-w-0">
+                    {quickTaskId ? (
+                      quickTasks.find(t => t.id === quickTaskId)?.unit_name || '-'
+                    ) : '-'}
+                  </span>
+                </div>
               </div>
               <Button
                 onClick={handleQuickAddTask}
@@ -754,23 +761,28 @@ export default function ConstructionBudgets() {
                             {getUnitName(task.task?.unit_id)}
                           </td>
                           <td className="p-2">
-                            <input
-                              type="number"
-                              value={task.quantity || 0}
-                              onChange={(e) => {
-                                const newQuantity = parseFloat(e.target.value) || 0;
-                                handleUpdateQuantity(task.id, newQuantity);
-                              }}
-                              onBlur={(e) => {
-                                const newQuantity = parseFloat(e.target.value) || 0;
-                                if (newQuantity !== task.quantity) {
+                            <div className="flex items-center gap-1">
+                              <input
+                                type="number"
+                                value={task.quantity || 0}
+                                onChange={(e) => {
+                                  const newQuantity = parseFloat(e.target.value) || 0;
                                   handleUpdateQuantity(task.id, newQuantity);
-                                }
-                              }}
-                              className="w-20 px-2 py-1 text-sm border rounded"
-                              min="0"
-                              step="0.01"
-                            />
+                                }}
+                                onBlur={(e) => {
+                                  const newQuantity = parseFloat(e.target.value) || 0;
+                                  if (newQuantity !== task.quantity) {
+                                    handleUpdateQuantity(task.id, newQuantity);
+                                  }
+                                }}
+                                className="w-16 px-2 py-1 text-sm border rounded"
+                                min="0"
+                                step="0.01"
+                              />
+                              <span className="text-xs text-muted-foreground">
+                                {task.task?.unit_name || getUnitName(task.task?.unit_id) || '-'}
+                              </span>
+                            </div>
                           </td>
                           <td className="p-2 text-sm">$0</td>
                           <td className="p-2 text-sm">$0</td>

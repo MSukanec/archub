@@ -31,12 +31,13 @@ interface LayoutProps {
 export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   const { isDark, setTheme } = useThemeStore();
   const { data } = useCurrentUser();
+  const { isDocked: isMainDocked, isHovered: isMainHovered } = useSidebarStore();
   const { isDocked: isSecondaryDocked, isHovered: isSecondaryHovered } = useSecondarySidebarStore();
   const { activeSidebarSection } = useNavigationStore();
   const { showActionBar } = useMobileActionBar();
   const isMobile = useMobile();
 
-  const isSecondaryExpanded = isSecondaryDocked || isSecondaryHovered;
+  const isSecondaryExpanded = isSecondaryDocked || isSecondaryHovered || isMainHovered;
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDark);
