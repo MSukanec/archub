@@ -624,7 +624,7 @@ export default function ConstructionBudgets() {
                   />
                   <span className="text-xs text-muted-foreground min-w-0">
                     {quickTaskId ? (
-                      quickTasks.find(t => t.id === quickTaskId)?.unit_name || '-'
+                      getUnitName(quickTasks.find(t => t.id === quickTaskId)?.unit_id) || '-'
                     ) : '-'}
                   </span>
                 </div>
@@ -780,7 +780,7 @@ export default function ConstructionBudgets() {
                                 step="0.01"
                               />
                               <span className="text-xs text-muted-foreground">
-                                {task.task?.unit_name || getUnitName(task.task?.unit_id) || '-'}
+                                {getUnitName(task.task?.unit_id) || '-'}
                               </span>
                             </div>
                           </td>

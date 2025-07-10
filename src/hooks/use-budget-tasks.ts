@@ -74,8 +74,7 @@ export function useBudgetTasks(budgetId: string) {
             category_name,
             subcategory_name,
             rubro_name,
-            display_name,
-            unit_name
+            display_name
           )
         `)
         .eq("budget_id", budgetId)
