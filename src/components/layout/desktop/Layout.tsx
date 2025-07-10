@@ -75,12 +75,12 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       </div>
 
       <main
-        className={`transition-all duration-300 ease-in-out flex-1 overflow-auto p-3 mt-1 ${
+        className={`transition-all duration-300 ease-in-out flex-1 overflow-auto p-3 mt-1 pb-8 ${
           // Calculate margin based on fixed main sidebar (40px) and variable secondary sidebar
           isSecondaryExpanded 
             ? "md:ml-[304px]" // 40px main + 264px secondary
             : "md:ml-[80px]"  // 40px main + 40px secondary
-        } ml-0 ${isMobile && showActionBar ? "pb-20" : ""}`}
+        } ml-0 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
       >
         <div className={wide ? "" : "max-w-[1440px] mx-auto"}>{children}</div>
       </main>

@@ -131,7 +131,6 @@ export default function ProjectBasicData() {
           .from('project_data')
           .upsert({
             project_id: projectId,
-            organization_id: organizationId,
             ...cleanData
           });
 
@@ -254,7 +253,7 @@ export default function ProjectBasicData() {
             </p>
           </div>
           <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
+            <div className="space-y-2 md:col-span-2">
               <Label htmlFor="project-name">Nombre del Proyecto</Label>
               <Input 
                 id="project-name"
