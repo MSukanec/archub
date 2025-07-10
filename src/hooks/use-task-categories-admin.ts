@@ -75,27 +75,28 @@ export function useTaskCategoriesAdmin() {
         throw categoriesError;
       }
 
-      // Fetch task groups and templates using the specific relationship
-      const { data: taskGroupsWithTemplates, error: templatesError } = await supabase
+      // Fetch task groups first without templates to avoid relationship conflicts
+      const { data: taskGroups, error: taskGroupsError } = await supabase
         .from('task_groups')
-        .select(`
-          id,
-          category_id,
-          name,
-          created_at,
-          updated_at,
-          task_templates!task_templates_task_group_id_fkey (
-            id,
-            name_template
-          )
-        `);
+        .select('*');
+
+      if (taskGroupsError) {
+        console.error('Error fetching task groups:', taskGroupsError);
+        throw taskGroupsError;
+      }
+
+      // Fetch templates separately if needed
+      const { data: templates, error: templatesError } = await supabase
+        .from('task_templates')
+        .select('id, name_template, task_group_id');
 
       if (templatesError) {
         console.error('Error fetching templates:', templatesError);
-        throw templatesError;
+        // Don't throw here, templates are optional
       }
 
-      console.log('Task groups with templates:', taskGroupsWithTemplates);
+      console.log('Task groups:', taskGroups);
+      console.log('Templates:', templates);
 
       // Build hierarchical structure
       const categoryMap = new Map();
@@ -104,12 +105,12 @@ export function useTaskCategoriesAdmin() {
       // First pass: create all categories with task groups and template info
       categories.forEach(category => {
         // Find task groups for this category
-        const categoryTaskGroups = taskGroupsWithTemplates?.filter(tg => tg.category_id === category.id) || [];
+        const categoryTaskGroups = taskGroups?.filter(tg => tg.category_id === category.id) || [];
         
         console.log(`Category ${category.name} has ${categoryTaskGroups.length} task groups:`, categoryTaskGroups);
         
         // Convert task groups to TaskGroupAdmin format
-        const taskGroups: TaskGroupAdmin[] = categoryTaskGroups.map(tg => ({
+        const taskGroupsForCategory: TaskGroupAdmin[] = categoryTaskGroups.map(tg => ({
           id: tg.id,
           name: tg.name,
           category_id: tg.category_id,
@@ -117,25 +118,26 @@ export function useTaskCategoriesAdmin() {
           updated_at: tg.updated_at,
         }));
 
-        // Check if category has templates
-        const hasTemplate = categoryTaskGroups.some(tg => tg.task_templates && tg.task_templates.length > 0);
+        // Check if category has templates (match templates with task groups)
+        const categoryTemplates = templates?.filter(t => 
+          categoryTaskGroups.some(tg => tg.id === t.task_group_id)
+        ) || [];
         
         let template = null;
-        if (hasTemplate) {
-          const firstGroupWithTemplate = categoryTaskGroups.find(tg => tg.task_templates && tg.task_templates.length > 0);
-          if (firstGroupWithTemplate && firstGroupWithTemplate.task_templates && firstGroupWithTemplate.task_templates.length > 0) {
-            template = {
-              id: firstGroupWithTemplate.task_templates[0].id,
-              name_template: firstGroupWithTemplate.task_templates[0].name_template,
-              task_group_name: firstGroupWithTemplate.name
-            };
-          }
+        if (categoryTemplates.length > 0) {
+          const firstTemplate = categoryTemplates[0];
+          const associatedTaskGroup = categoryTaskGroups.find(tg => tg.id === firstTemplate.task_group_id);
+          template = {
+            id: firstTemplate.id,
+            name_template: firstTemplate.name_template,
+            task_group_name: associatedTaskGroup?.name || ''
+          };
         }
         
         const categoryWithTemplate: TaskCategoryAdmin = {
           ...category,
           children: [],
-          taskGroups,
+          taskGroups: taskGroupsForCategory,
           template
         };
         categoryMap.set(category.id, categoryWithTemplate);
