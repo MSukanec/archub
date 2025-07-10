@@ -145,7 +145,6 @@ export default function ConstructionBudgets() {
   const [selectedBudgetId, setSelectedBudgetId] = useState<string>('')
   const [budgetTaskModalOpen, setBudgetTaskModalOpen] = useState(false)
   const [currentBudgetId, setCurrentBudgetId] = useState<string>('')
-  const [editingBudgetTask, setEditingBudgetTask] = useState<any>(null)
 
   const { data: userData, isLoading } = useCurrentUser()
   const { data: budgets = [], isLoading: budgetsLoading } = useBudgets(userData?.preferences?.last_project_id)
@@ -262,14 +261,6 @@ export default function ConstructionBudgets() {
   // Handle add task to budget
   const handleAddTask = (budgetId: string) => {
     setCurrentBudgetId(budgetId)
-    setEditingBudgetTask(null)
-    setBudgetTaskModalOpen(true)
-  }
-
-  // Handle edit task
-  const handleEditTask = (budgetId: string, task: any) => {
-    setCurrentBudgetId(budgetId)
-    setEditingBudgetTask(task)
     setBudgetTaskModalOpen(true)
   }
 
@@ -277,7 +268,6 @@ export default function ConstructionBudgets() {
   const handleCloseTaskModal = () => {
     setBudgetTaskModalOpen(false)
     setCurrentBudgetId('')
-    setEditingBudgetTask(null)
   }
 
   // Delete task mutation
@@ -560,14 +550,7 @@ export default function ConstructionBudgets() {
                     <td className="p-2 text-sm text-muted-foreground">{percentage.toFixed(1)}%</td>
                     <td className="p-2">
                       <div className="flex gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEditTask(budgetId, task)}
-                          className="h-7 w-7 p-0"
-                        >
-                          <Edit className="h-3 w-3" />
-                        </Button>
+
                         <Button
                           variant="ghost"
                           size="sm"
@@ -801,7 +784,6 @@ export default function ConstructionBudgets() {
           onClose={handleCloseTaskModal}
           budgetId={currentBudgetId}
           organizationId={userData?.organization?.id || ''}
-          editingTask={editingBudgetTask}
         />
       )}
 
