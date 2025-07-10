@@ -75,7 +75,7 @@ export function useTaskCategoriesAdmin() {
         throw categoriesError;
       }
 
-      // Fetch task groups and templates using the new relationship structure
+      // Fetch task groups and templates using the specific relationship
       const { data: taskGroupsWithTemplates, error: templatesError } = await supabase
         .from('task_groups')
         .select(`
@@ -84,7 +84,7 @@ export function useTaskCategoriesAdmin() {
           name,
           created_at,
           updated_at,
-          task_templates (
+          task_templates!task_templates_task_group_id_fkey (
             id,
             name_template
           )

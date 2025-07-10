@@ -1,52 +1,50 @@
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
-import { 
-  Calendar, 
-  Crown, 
-  Users,
-  Building
-} from 'lucide-react';
-import { useLocation } from 'wouter';
-import { useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
+import { Calendar, Crown, Users, Building } from "lucide-react";
+import { useLocation } from "wouter";
+import { useEffect } from "react";
+import { motion } from "framer-motion";
 
-import { Layout } from '@/components/layout/desktop/Layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { OrganizationStatsCards } from '@/components/ui-custom/cards/OrganizationStatsCards';
-import { OrganizationActivityChart } from '@/components/ui-custom/charts/OrganizationActivityChart';
-import { OrganizationQuickActions } from '@/components/ui-custom/cards/OrganizationQuickActions';
-import { OrganizationRecentProjects } from '@/components/ui-custom/cards/OrganizationRecentProjects';
+import { Layout } from "@/components/layout/desktop/Layout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { OrganizationStatsCards } from "@/components/ui-custom/cards/OrganizationStatsCards";
+import { OrganizationActivityChart } from "@/components/ui-custom/charts/OrganizationActivityChart";
+import { OrganizationQuickActions } from "@/components/ui-custom/cards/OrganizationQuickActions";
+import { OrganizationRecentProjects } from "@/components/ui-custom/cards/OrganizationRecentProjects";
 
-import { useCurrentUser } from '@/hooks/use-current-user';
-import { useOrganizationStats, useOrganizationActivity } from '@/hooks/use-organization-stats';
-import { useNavigationStore } from '@/stores/navigationStore';
-import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext';
-import { useMobile } from '@/hooks/use-mobile';
+import { useCurrentUser } from "@/hooks/use-current-user";
+import {
+  useOrganizationStats,
+  useOrganizationActivity,
+} from "@/hooks/use-organization-stats";
+import { useNavigationStore } from "@/stores/navigationStore";
+import { useMobileActionBar } from "@/components/layout/mobile/MobileActionBarContext";
+import { useMobile } from "@/hooks/use-mobile";
 
 // Function to get time-based greeting
 const getTimeBasedGreeting = () => {
-  const hour = new Date().getHours()
-  
+  const hour = new Date().getHours();
+
   if (hour >= 6 && hour < 12) {
-    return "Buen día"
+    return "Buen día";
   } else if (hour >= 12 && hour < 20) {
-    return "Buena tarde"
+    return "Buenas tardes";
   } else {
-    return "Buenas noches"
+    return "Buenas noches";
   }
-}
+};
 
 // Function to get organization initials
 const getOrganizationInitials = (name: string) => {
   return name
-    .split(' ')
-    .map(word => word.charAt(0))
-    .join('')
+    .split(" ")
+    .map((word) => word.charAt(0))
+    .join("")
     .toUpperCase()
-    .slice(0, 2)
-}
+    .slice(0, 2);
+};
 
 export default function OrganizationDashboard() {
   const [, navigate] = useLocation();
@@ -54,28 +52,30 @@ export default function OrganizationDashboard() {
   const { setSidebarContext } = useNavigationStore();
   const { setShowActionBar } = useMobileActionBar();
   const isMobile = useMobile();
-  
+
   const currentOrganization = userData?.organization;
   const { data: stats, isLoading: statsLoading } = useOrganizationStats();
-  const { data: activityData, isLoading: activityLoading } = useOrganizationActivity();
+  const { data: activityData, isLoading: activityLoading } =
+    useOrganizationActivity();
 
   // Set sidebar context and hide mobile action bar on dashboards
   useEffect(() => {
-    setSidebarContext('organization');
+    setSidebarContext("organization");
     if (isMobile) {
       setShowActionBar(false);
     }
   }, [setSidebarContext, setShowActionBar, isMobile]);
 
-  const greeting = getTimeBasedGreeting()
-  const fullFirstName = userData?.user_data?.first_name || userData?.user?.full_name || 'Usuario'
-  const firstName = fullFirstName.split(' ')[0] // Extract only first name
+  const greeting = getTimeBasedGreeting();
+  const fullFirstName =
+    userData?.user_data?.first_name || userData?.user?.full_name || "Usuario";
+  const firstName = fullFirstName.split(" ")[0]; // Extract only first name
 
   const headerProps = {
     title: "Resumen de la Organización",
     showSearch: false,
-    showFilters: false
-  }
+    showFilters: false,
+  };
 
   if (!currentOrganization) {
     return (
@@ -88,7 +88,7 @@ export default function OrganizationDashboard() {
           </p>
         </div>
       </Layout>
-    )
+    );
   }
 
   return (
@@ -106,7 +106,10 @@ export default function OrganizationDashboard() {
                 {/* Organization Avatar */}
                 <div className="flex-shrink-0">
                   <Avatar className="h-12 w-12 md:h-16 md:w-16 border-2 border-border">
-                    <AvatarImage src={currentOrganization.logo_url} alt={currentOrganization.name} />
+                    <AvatarImage
+                      src={currentOrganization.logo_url}
+                      alt={currentOrganization.name}
+                    />
                     <AvatarFallback className="text-sm md:text-lg font-bold text-white bg-[hsl(var(--accent))]">
                       {getOrganizationInitials(currentOrganization.name)}
                     </AvatarFallback>
@@ -115,7 +118,7 @@ export default function OrganizationDashboard() {
 
                 {/* Greeting and Organization Info */}
                 <div className="flex-1">
-                  <motion.h1 
+                  <motion.h1
                     className="text-2xl md:text-4xl font-black text-foreground mb-1"
                     initial={{ scale: 0.8 }}
                     animate={{ scale: 1 }}
@@ -124,13 +127,23 @@ export default function OrganizationDashboard() {
                     {greeting}, {firstName}
                   </motion.h1>
                   <p className="text-base md:text-lg text-muted-foreground mb-2 md:mb-3">
-                    Estás en <span className="font-semibold text-foreground">{currentOrganization.name}</span>
+                    Estás en{" "}
+                    <span className="font-semibold text-foreground">
+                      {currentOrganization.name}
+                    </span>
                   </p>
-                  
+
                   <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Calendar className="h-4 w-4" />
-                      <span>Creado el {format(new Date(currentOrganization.created_at), 'dd/MM/yyyy', { locale: es })}</span>
+                      <span>
+                        Creado el{" "}
+                        {format(
+                          new Date(currentOrganization.created_at),
+                          "dd/MM/yyyy",
+                          { locale: es },
+                        )}
+                      </span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Crown className="h-4 w-4" />
@@ -154,7 +167,9 @@ export default function OrganizationDashboard() {
           activeProjects={stats?.activeProjects || 0}
           documentsLast30Days={stats?.documentsLast30Days || 0}
           generatedTasks={stats?.generatedTasks || 0}
-          financialMovementsLast30Days={stats?.financialMovementsLast30Days || 0}
+          financialMovementsLast30Days={
+            stats?.financialMovementsLast30Days || 0
+          }
           isLoading={statsLoading}
         />
 
@@ -171,5 +186,5 @@ export default function OrganizationDashboard() {
         </div>
       </div>
     </Layout>
-  )
+  );
 }
