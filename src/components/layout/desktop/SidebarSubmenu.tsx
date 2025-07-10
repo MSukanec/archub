@@ -155,6 +155,13 @@ export function SidebarSubmenu() {
       ]},
       { type: 'accordion', label: 'TAREAS', items: [
         { icon: Tag, label: 'Categorías de Tareas', href: '/admin/task-categories' },
+        { icon: FileCode, label: 'Plantillas de Tareas', href: '/admin/task-templates' },
+        { icon: Search, label: 'Parámetros de Tareas', href: '/admin/task-parameters' },
+        { icon: CheckSquare, label: 'Tareas Generadas', href: '/admin/generated-tasks' },
+      ]},
+      { type: 'accordion', label: 'MATERIALES', items: [
+        { icon: Package, label: 'Categorías de Materiales', href: '/admin/material-categories' },
+        { icon: Package2, label: 'Materiales', href: '/admin/materials' },
       ]},
     ],
   };
@@ -215,10 +222,10 @@ export function SidebarSubmenu() {
             currentSubmenu.map((item, index) => {
               if (item.type === 'accordion') {
                 return (
-                  <div key={index} className="mb-2">
+                  <div key={index} className="mb-[1px]">
                     {/* Título del acordeón */}
                     {isSecondarySidebarExpanded && (
-                      <div className="px-3 py-1 mb-1">
+                      <div className="h-9 flex items-center px-3 mb-[1px]">
                         <span className="text-xs font-semibold text-[var(--secondary-sidebar-fg)] uppercase tracking-wider">
                           {item.label}
                         </span>
