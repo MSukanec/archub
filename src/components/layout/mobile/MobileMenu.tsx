@@ -288,11 +288,9 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         expanded: expandedAccordion === 'tareas',
         onToggle: () => toggleAccordion('tareas'),
         items: [
-          { icon: CheckSquare, label: 'Tareas', href: '/admin/tasks' },
           { icon: CheckSquare, label: 'Tareas Generadas', href: '/admin/generated-tasks' },
-          { icon: Settings, label: 'Parámetros', href: '/admin/task-parameters' },
-          { icon: Package2, label: 'Categorías', href: '/admin/categories' },
-          { icon: FileText, label: 'Plantillas de Tareas', href: '/admin/task-templates' },
+          { icon: Settings, label: 'Parámetros de Tareas', href: '/admin/task-parameters' },
+          { icon: Package2, label: 'Categorías de Tareas', href: '/admin/categories' },
         ]
       },
       {

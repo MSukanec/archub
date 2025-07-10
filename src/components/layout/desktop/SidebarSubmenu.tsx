@@ -154,10 +154,9 @@ export function SidebarSubmenu() {
         { icon: History, label: 'Changelog', href: '/admin/changelogs' },
       ]},
       { type: 'accordion', label: 'TAREAS', items: [
-        { icon: Tag, label: 'Categorías de Tareas', href: '/admin/categories' },
-        { icon: FileCode, label: 'Plantillas de Tareas', href: '/admin/task-templates' },
-        { icon: Search, label: 'Parámetros de Tareas', href: '/admin/task-parameters' },
         { icon: CheckSquare, label: 'Tareas Generadas', href: '/admin/generated-tasks' },
+        { icon: Search, label: 'Parámetros de Tareas', href: '/admin/task-parameters' },
+        { icon: Tag, label: 'Categorías de Tareas', href: '/admin/categories' },
       ]},
       { type: 'accordion', label: 'MATERIALES', items: [
         { icon: Package, label: 'Categorías de Materiales', href: '/admin/material-categories' },

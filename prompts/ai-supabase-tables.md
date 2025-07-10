@@ -28,7 +28,7 @@ TABLA TASK_TEMPLATES:
     "data_type": "uuid"
   },
   {
-    "column_name": "code",
+    "column_name": "task_code",
     "data_type": "text"
   }
 ]

@@ -119,6 +119,13 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 10, 2025. Admin sidebar reordering and task_code automatic storage implementation - COMPLETED
+  • Reordered admin sidebar TAREAS section: Tareas Generadas → Parámetros de Tareas → Categorías de Tareas (removed Plantillas de Tareas)
+  • Applied consistent ordering in both desktop SidebarSubmenu.tsx and mobile MobileMenu.tsx
+  • Implemented automatic task_code storage: when creating templates, system now obtains category code through task_group relationship
+  • Templates automatically save category code (e.g., "FFF") to task_code field in task_templates table
+  • Fixed PostgreSQL function parameter mismatch: updated from input_template_id to input_group_id for proper task generation
+  • Template creation now stores proper category code propagation for future task generation workflows
 - July 10, 2025. Complete template generation system using task group names and code cleanup - COMPLETED
   • Changed template generation logic to use task_groups.name instead of category names for proper naming convention
   • Templates now generate as "Task Group Name {{parameter}}." format (e.g., "Muretes {{brick-type}}." not "Muros simples {{brick-type}}.")
