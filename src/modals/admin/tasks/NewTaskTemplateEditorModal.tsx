@@ -81,9 +81,16 @@ function SortableParameterItem({
         <div className="w-6 h-6 bg-accent/20 text-accent-foreground rounded text-xs flex items-center justify-center font-medium">
           {index + 1}
         </div>
-        <span className="text-sm font-medium">
-          {parameter.task_parameters?.label || parameter.task_parameters?.name}
-        </span>
+        <div className="flex flex-col">
+          <span className="text-sm font-medium">
+            {parameter.task_parameters?.label || parameter.task_parameters?.name}
+          </span>
+          {parameter.task_parameters?.expression_template && (
+            <span className="text-xs text-muted-foreground">
+              {parameter.task_parameters.expression_template}
+            </span>
+          )}
+        </div>
         <Badge variant="outline" className="text-xs">
           {parameter.task_parameters?.type}
         </Badge>
