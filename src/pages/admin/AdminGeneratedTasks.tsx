@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { toast } from '@/hooks/use-toast'
@@ -47,6 +47,7 @@ export default function AdminGeneratedTasks() {
   const [newGeneratedTaskModalOpen, setNewGeneratedTaskModalOpen] = useState(false)
   const [editingGeneratedTask, setEditingGeneratedTask] = useState<GeneratedTask | null>(null)
   const [deletingGeneratedTask, setDeletingGeneratedTask] = useState<GeneratedTask | null>(null)
+  const [processedTaskNames, setProcessedTaskNames] = useState<Record<string, string>>({})
 
   // Real data from useGeneratedTasks hook
   const { data: generatedTasks = [], isLoading } = useGeneratedTasks()
@@ -56,33 +57,41 @@ export default function AdminGeneratedTasks() {
   const { data: templates = [] } = useTaskTemplates()
   const { data: parameterValues = [] } = useAllTaskParameterValues()
 
-  // Helper function to generate dynamic task name
-  const generateTaskName = (task: GeneratedTask): string => {
-    const template = templates.find(t => t.id === task.template_id)
-    if (!template) return 'Sin plantilla'
-
-    let result = template.name_template || '';
-
-    // Simple replacement for now - will be enhanced when we have parameter info
-    if (task.param_values) {
-      Object.entries(task.param_values).forEach(([paramName, paramValue]) => {
-        const placeholder = `{{${paramName}}}`;
-        
-        // For select parameters, try to find in parameterValues
-        const parameterOption = parameterValues.find(pv => pv.name === paramValue);
-        
-        if (parameterOption && parameterOption.expression_template) {
-          // Use expression template to format the value
-          const fragment = parameterOption.expression_template.replace('{value}', parameterOption.label);
-          result = result.replace(placeholder, fragment);
-        } else {
-          // Fallback to raw value
-          result = result.replace(placeholder, String(paramValue));
+  // Process task names when data changes
+  useEffect(() => {
+    const processTaskNames = async () => {
+      const newProcessedNames: Record<string, string> = {};
+      
+      for (const task of generatedTasks) {
+        const template = templates.find(t => t.id === task.template_id);
+        if (!template) {
+          newProcessedNames[task.id] = 'Sin plantilla';
+          continue;
         }
-      });
-    }
 
-    return result;
+        try {
+          const processedName = await generateTaskDescription(
+            template.name_template || '',
+            task.param_values || {}
+          );
+          newProcessedNames[task.id] = processedName;
+        } catch (error) {
+          console.error('Error generating task name:', error);
+          newProcessedNames[task.id] = template.name_template || 'Sin plantilla';
+        }
+      }
+      
+      setProcessedTaskNames(newProcessedNames);
+    };
+
+    if (generatedTasks.length > 0 && templates.length > 0) {
+      processTaskNames();
+    }
+  }, [generatedTasks, templates]);
+
+  // Helper function to get processed task name
+  const getProcessedTaskName = (task: GeneratedTask): string => {
+    return processedTaskNames[task.id] || 'Procesando...';
   }
 
   // Statistics calculations
@@ -172,7 +181,7 @@ export default function AdminGeneratedTasks() {
       key: 'name',
       label: 'Tarea',
       render: (task: GeneratedTask) => (
-        <span className="text-sm">{generateTaskName(task)}</span>
+        <span className="text-sm">{getProcessedTaskName(task)}</span>
       )
     },
     {

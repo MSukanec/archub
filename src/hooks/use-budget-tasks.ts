@@ -87,73 +87,26 @@ export function useBudgetTasks(budgetId: string) {
 
       console.log("Budget tasks data received:", data);
       
-      // Procesar los nombres de las tareas usando la misma lógica del modal
+      // Procesar los nombres de las tareas usando la función del taskDescriptionGenerator
       const processedTasks = await Promise.all(
         (data || []).map(async (task: any) => {
           if (task.task?.display_name && task.task?.param_values) {
             console.log('Processing task:', task.task.display_name, 'with params:', task.task.param_values);
             
-            // Obtener valores de parámetros
-            const paramValueIds = Object.values(task.task.param_values);
-            if (paramValueIds.length > 0) {
-              const { data: parameterValues, error: paramError } = await supabase
-                .from('task_parameter_values')
-                .select(`
-                  name, 
-                  label,
-                  parameter_id,
-                  task_parameters!inner(expression_template)
-                `)
-                .in('name', paramValueIds);
+            // Usar la función generateTaskDescription para procesar correctamente todos los tipos de parámetros
+            const { generateTaskDescription } = await import('@/utils/taskDescriptionGenerator');
+            
+            try {
+              const processedName = await generateTaskDescription(
+                task.task.display_name,
+                task.task.param_values
+              );
               
-              console.log('Parameter values fetched:', parameterValues);
-              
-              if (!paramError && parameterValues) {
-                let processed = task.task.display_name;
-                
-                // Reemplazar placeholders usando expression_template
-                Object.keys(task.task.param_values).forEach(key => {
-                  const placeholder = `{{${key}}}`;
-                  const paramValueId = task.task.param_values[key];
-                  
-                  const paramValue = parameterValues.find(pv => pv.name === paramValueId);
-                  
-                  console.log(`Processing ${key}:`, paramValueId, 'found:', paramValue);
-                  
-                  if (paramValue) {
-                    let replacement = paramValue.task_parameters?.expression_template || paramValue.label;
-                    
-                    if (replacement && replacement.includes('{value}')) {
-                      replacement = replacement.replace(/{value}/g, paramValue.label);
-                    }
-                    
-                    console.log(`Replacing ${placeholder} with:`, replacement);
-                    processed = processed.replace(new RegExp(placeholder, 'g'), replacement);
-                  }
-                });
-                
-                // También reemplazar valores de parámetros directos (como ladrillo-ceramico-081833)
-                Object.keys(task.task.param_values).forEach(key => {
-                  const paramValueId = task.task.param_values[key];
-                  const paramValue = parameterValues.find(pv => pv.name === paramValueId);
-                  
-                  if (paramValue) {
-                    // Reemplazar el valor directo con su expression_template procesado
-                    let replacement = paramValue.task_parameters?.expression_template || paramValue.label;
-                    
-                    if (replacement && replacement.includes('{value}')) {
-                      replacement = replacement.replace(/{value}/g, paramValue.label);
-                    }
-                    
-                    console.log(`Replacing direct value ${paramValueId} with:`, replacement);
-                    processed = processed.replace(new RegExp(paramValueId, 'g'), replacement);
-                  }
-                });
-                
-                console.log('Final processed name:', processed);
-                // Actualizar display_name procesado
-                task.task.display_name = processed;
-              }
+              console.log('Final processed name:', processedName);
+              task.task.display_name = processedName;
+            } catch (error) {
+              console.error('Error processing task description:', error);
+              // Mantener nombre original si hay error
             }
           }
           return task;

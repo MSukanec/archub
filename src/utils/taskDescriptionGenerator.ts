@@ -47,13 +47,14 @@ export async function generateTaskDescription(
       const param = parametersData?.find(p => p.name === paramName);
       return param?.type === 'select';
     })
-    .map(([, value]) => value);
+    .map(([, value]) => value)
+    .filter(value => typeof value === 'string'); // Only string values can be found in parameter_values
 
   let parameterValuesData: any[] = [];
   if (selectParamValues.length > 0) {
     const { data: valuesData, error: valuesError } = await supabase
       .from('task_parameter_values')
-      .select('name, label')
+      .select('name, label, parameter_id, task_parameters!inner(expression_template)')
       .in('name', selectParamValues);
 
     if (!valuesError) {
@@ -73,12 +74,18 @@ export async function generateTaskDescription(
         if (parameter.type === 'select') {
           // Find the option and use its label with expression_template
           const selectedOption = parameterValuesData.find(pv => pv.name === paramValue);
-          const optionLabel = selectedOption?.label || paramValue;
-          
-          if (parameter.expression_template) {
-            replacementText = parameter.expression_template.replace('{value}', optionLabel);
+          if (selectedOption) {
+            const optionLabel = selectedOption.label || paramValue;
+            const expressionTemplate = selectedOption.task_parameters?.expression_template;
+            
+            if (expressionTemplate) {
+              replacementText = expressionTemplate.replace('{value}', optionLabel);
+            } else {
+              replacementText = optionLabel;
+            }
           } else {
-            replacementText = optionLabel;
+            // Fallback to raw value for select types
+            replacementText = String(paramValue);
           }
         } else if (parameter.type === 'boolean') {
           replacementText = paramValue ? 'Sí' : 'No';
