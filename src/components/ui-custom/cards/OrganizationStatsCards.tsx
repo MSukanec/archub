@@ -57,7 +57,7 @@ export function OrganizationStatsCards({
       bgColor: "bg-[hsl(var(--accent))]",
       description: "proyectos en curso",
       trendData: generateTrendData(activeProjects),
-      lineColor: "hsl(var(--accent))"
+      lineColor: "#92c900"
     },
     {
       title: "Documentos (30 días)",
@@ -67,7 +67,7 @@ export function OrganizationStatsCards({
       bgColor: "bg-[hsl(var(--accent))]",
       description: "documentos subidos",
       trendData: generateTrendData(documentsLast30Days),
-      lineColor: "hsl(var(--accent))"
+      lineColor: "#92c900"
     },
     {
       title: "Tareas Generadas",
@@ -77,7 +77,7 @@ export function OrganizationStatsCards({
       bgColor: "bg-[hsl(var(--accent))]",
       description: "tareas creadas",
       trendData: generateTrendData(generatedTasks),
-      lineColor: "hsl(var(--accent))"
+      lineColor: "#92c900"
     },
     {
       title: "Movimientos (30 días)",
@@ -88,7 +88,7 @@ export function OrganizationStatsCards({
       description: "total movido",
       isAmount: true,
       trendData: generateTrendData(financialMovementsLast30Days / 1000),
-      lineColor: "hsl(var(--accent))"
+      lineColor: "#92c900"
     }
   ]
 

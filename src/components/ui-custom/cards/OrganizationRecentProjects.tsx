@@ -74,13 +74,9 @@ export function OrganizationRecentProjects() {
     }
   })
 
-  const handleProjectSelect = (projectId: string) => {
-    selectProjectMutation.mutate(projectId, {
-      onSuccess: () => {
-        setSidebarContext('project')
-        navigate('/project/dashboard')
-      }
-    })
+  const handleSetActiveProject = (projectId: string) => {
+    selectProjectMutation.mutate(projectId)
+    // Don't navigate or change context, just set as active
   }
 
   const getProjectInitials = (name: string) => {
@@ -159,7 +155,7 @@ export function OrganizationRecentProjects() {
                     ? 'ring-2 ring-offset-2 ring-[hsl(var(--accent))]' 
                     : ''
                 }`}
-                onClick={() => handleProjectSelect(project.id)}
+                onClick={() => handleSetActiveProject(project.id)}
               >
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10">

@@ -99,9 +99,9 @@
   --menues-fg: hsl(0, 0%, 45%);
   --menues-secondary-fg: hsl(0, 0%, 50%);
   --menues-border: hsl(0, 0%, 85%);
-  --menues-hover-bg: hsl(90, 50%, 50%);
+  --menues-hover-bg: hsl(76, 100%, 40%);
   --menues-hover-fg: hsl(0, 0%, 97%);
-  --menues-active-bg: hsl(90, 50%, 50%);
+  --menues-active-bg: hsl(76, 100%, 40%);
   --menues-active-fg: hsl(0, 0%, 97%);
 
   /* Cards */
@@ -117,10 +117,10 @@
   --secondary-card-border: hsl(0, 0%, 50%);
 
   /* Buttons - Primary */
-  --button-primary-bg: hsl(90, 50%, 50%);
+  --button-primary-bg: hsl(76, 100%, 40%);
   --button-primary-text: hsl(0, 0%, 100%);
   --button-primary-border: transparent;
-  --button-primary-hover-bg: hsl(90, 50%, 50%);
+  --button-primary-hover-bg: hsl(76, 100%, 40%);
   --button-primary-hover-text: hsl(0, 0%, 100%);
   --button-primary-hover-border: transparent;
   --button-primary-disabled-bg: hsl(240, 5%, 85%);
@@ -147,8 +147,8 @@
   --input-text: hsl(0, 0%, 0%);
   --input-border: hsl(0, 0%, 70%);
   --input-placeholder: hsl(0, 0%, 60%);
-  --input-focus-ring: hsl(90, 50%, 50%);
-  --input-focus-border: hsl(90, 50%, 50%);
+  --input-focus-ring: hsl(76, 100%, 40%);
+  --input-focus-border: hsl(76, 100%, 40%);
 
   /* Popover/Dropdown */
   --popover-bg: hsl(0, 0%, 97%);
@@ -156,17 +156,17 @@
   --accent-bg: hsl(90, 50%, 90%);
 
   /* Accent / State */
-  --accent: hsl(90, 50%, 50%);
+  --accent: hsl(76, 100%, 40%);
   --accent-text: hsl(0, 0%, 100%);
   --destructive: hsl(0, 84%, 60%);
   --destructive-text: hsl(0, 0%, 100%);
-  --success: hsl(120, 40%, 50%);
+  --success: hsl(76, 100%, 40%);
   --success-text: hsl(0, 0%, 100%);
   --warning: hsl(45, 90%, 50%);
   --warning-text: hsl(240, 10%, 4%);
 
   /* Charts */
-  --chart-1: hsl(110, 40%, 50%);
+  --chart-1: hsl(76, 100%, 40%);
   --chart-2: hsl(173, 58%, 39%);
   --chart-3: hsl(197, 37%, 24%);
   --chart-4: hsl(43, 74%, 66%);
@@ -188,7 +188,7 @@
   --table-row-hover-bg: hsl(0, 0%, 98%);
 
   /* Movement Row Gradients */
-  --movement-income-bg: linear-gradient(to right, hsl(90, 50%, 50%), hsl(90, 50%, 50%));
+  --movement-income-bg: linear-gradient(to right, hsl(76, 100%, 40%), hsl(76, 100%, 40%));
   --movement-expense-bg: linear-gradient(to right, hsl(0, 70%, 50%), hsl(0, 20%, 96%));
   --movement-income-border: hsl(90, 50%, 50%);
   --movement-expense-border: hsl(0, 70%, 50%);
@@ -196,7 +196,7 @@
   /* Borders and Rings */
   --border-default: hsl(240, 6%, 90%);
   --border-strong: hsl(240, 8%, 80%);
-  --ring-default: hsl(90, 50%, 50%);
+  --ring-default: hsl(76, 100%, 40%);
 
   /* Tailwind variables */
   --border: hsl(240, 6%, 90%);
@@ -226,9 +226,9 @@
   --menues-fg: hsl(0, 0%, 70%);
   --menues-secondary-fg: hsl(0, 0%, 60%);
   --menues-border: hsl(0, 0%, 16%);
-  --menues-hover-bg: hsl(90, 50%, 50%);
+  --menues-hover-bg: hsl(76, 100%, 40%);
   --menues-hover-fg: hsl(0, 0%, 90%);
-  --menues-active-bg: hsl(90, 50%, 50%);
+  --menues-active-bg: hsl(76, 100%, 40%);
   --menues-active-fg: hsl(0, 0%, 98%);
 
   /* Cards */
