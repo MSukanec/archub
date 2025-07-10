@@ -42,7 +42,11 @@ export default function ProjectHeroImage({
         description: "Imagen principal actualizada correctamente"
       });
       onImageUpdate?.(imageUrl);
+      // Invalidate multiple cache keys to update all views
       queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ['project', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['project-data', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['project-info', projectId] });
       setIsUploading(false);
     },
     onError: (error: any) => {
@@ -72,7 +76,11 @@ export default function ProjectHeroImage({
         description: "Imagen principal eliminada correctamente"
       });
       onImageUpdate?.(null);
+      // Invalidate multiple cache keys to update all views
       queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ['project', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['project-data', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['project-info', projectId] });
     },
     onError: (error: any) => {
       toast({
