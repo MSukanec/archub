@@ -119,6 +119,14 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 10, 2025. Complete category expansion state preservation and task group deletion cascade functionality - COMPLETED
+  • Fixed category expansion state preservation to prevent collapse when creating new task groups
+  • Added intelligent auto-expansion only on initial load, preserving user-expanded state during operations
+  • Implemented cascade deletion for task groups - automatically deletes associated templates before group deletion
+  • Cleaned up all debugging logs and console outputs for production-ready code quality
+  • Enhanced error handling for foreign key constraint violations with user-friendly messages
+  • Fixed cache invalidation system to maintain UI state consistency without manual refresh
+  • System now maintains perfect UX: categories stay expanded during operations, smooth create/delete workflows
 - July 10, 2025. Template detection system debugging and logic verification completed - COMPLETED
   • Added comprehensive debugging to verify template_id detection in task groups (confirmed working correctly)
   • Removed debugging logs after verification - clean production-ready code maintained

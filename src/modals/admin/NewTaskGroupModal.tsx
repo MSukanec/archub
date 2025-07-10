@@ -84,6 +84,7 @@ export function NewTaskGroupModal({
         });
       } else {
         // Creating new task group
+
         await createMutation.mutateAsync(data);
       }
       

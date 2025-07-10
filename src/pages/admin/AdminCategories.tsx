@@ -43,18 +43,14 @@ export default function AdminCategories() {
   const { data: categories = [], isLoading, error, isError, refetch } = useTaskCategoriesAdmin();
   const { data: allCategories = [] } = useAllTaskCategories();
 
-  // Debug query state
-  console.log('🎯 AdminCategories render - Query state:', {
-    isLoading,
-    isError,
-    error,
-    categoriesLength: categories.length,
-    hasData: !!categories
-  });
+  // Debug query state (only log errors)
+  if (isError) {
+    console.error('❌ AdminCategories error:', error);
+  }
 
-  // Auto-expand categories that have task groups
+  // Auto-expand categories that have task groups (only on initial load)
   React.useEffect(() => {
-    if (categories.length > 0) {
+    if (categories.length > 0 && expandedCategories.size === 0) {
       const categoriesToExpand = new Set<string>();
       
       const checkForTaskGroups = (cats: TaskCategoryAdmin[]) => {
@@ -62,7 +58,6 @@ export default function AdminCategories() {
           // If category has task groups, expand it
           if (cat.taskGroups && cat.taskGroups.length > 0) {
             categoriesToExpand.add(cat.id);
-            console.log(`🔍 Auto-expanding category "${cat.name}" because it has ${cat.taskGroups.length} task groups:`, cat.taskGroups.map(tg => tg.name));
           }
           
           // Also expand parent categories if they have children with task groups
@@ -72,7 +67,6 @@ export default function AdminCategories() {
             );
             if (hasChildrenWithTaskGroups) {
               categoriesToExpand.add(cat.id);
-              console.log(`🔍 Auto-expanding parent category "${cat.name}" because children have task groups`);
             }
             checkForTaskGroups(cat.children);
           }
@@ -82,11 +76,38 @@ export default function AdminCategories() {
       checkForTaskGroups(categories);
       
       if (categoriesToExpand.size > 0) {
-        console.log('🎯 Categories to auto-expand:', Array.from(categoriesToExpand));
         setExpandedCategories(categoriesToExpand);
       }
     }
-  }, [categories]);
+  }, [categories.length]); // Only depend on categories.length, not the full categories array
+
+  // Preserve expanded state after data updates
+  React.useEffect(() => {
+    if (categories.length > 0 && expandedCategories.size > 0) {
+      // When categories update but we already have expanded state, 
+      // ensure newly created task groups still keep their parent expanded
+      const currentExpanded = new Set(expandedCategories);
+      let hasChanges = false;
+      
+      const checkForNewTaskGroups = (cats: TaskCategoryAdmin[]) => {
+        cats.forEach(cat => {
+          if (cat.taskGroups && cat.taskGroups.length > 0 && !currentExpanded.has(cat.id)) {
+            currentExpanded.add(cat.id);
+            hasChanges = true;
+          }
+          if (cat.children && cat.children.length > 0) {
+            checkForNewTaskGroups(cat.children);
+          }
+        });
+      };
+      
+      checkForNewTaskGroups(categories);
+      
+      if (hasChanges) {
+        setExpandedCategories(currentExpanded);
+      }
+    }
+  }, [categories]); // Monitor full categories for new task groups
   const deleteCategoryMutation = useDeleteTaskCategory();
   const deleteTaskGroupMutation = useDeleteTaskGroup();
 
@@ -207,10 +228,6 @@ export default function AdminCategories() {
 
   // Handle task group template action - NEW: plantillas ahora van a nivel de grupo
   const handleTaskGroupTemplate = (taskGroup: TaskGroupAdmin, category: TaskCategoryAdmin) => {
-    console.log('🎯 Opening template modal for task group:', taskGroup.name, 'in category:', category.name);
-    console.log('🎯 TaskGroup data:', taskGroup);
-    console.log('🎯 Category data:', category);
-    
     // Usar la estructura correcta para task groups
     setTemplateCategory(category); // Mantener la categoría padre
     setTemplateTaskGroup(taskGroup); // Guardar el task group específico

@@ -84,9 +84,12 @@ export function useCreateTaskGroup() {
 
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // Invalidate all related queries
       queryClient.invalidateQueries({ queryKey: ['task-groups'] });
       queryClient.invalidateQueries({ queryKey: ['task-categories-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-task-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['task-groups', data.category_id] });
       toast({
         title: "Grupo de tareas creado",
         description: "El grupo de tareas se ha creado exitosamente.",
@@ -124,9 +127,12 @@ export function useUpdateTaskGroup() {
 
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // Invalidate all related queries
       queryClient.invalidateQueries({ queryKey: ['task-groups'] });
       queryClient.invalidateQueries({ queryKey: ['task-categories-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-task-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['task-groups', data.category_id] });
       toast({
         title: "Grupo de tareas actualizado",
         description: "El grupo de tareas se ha actualizado exitosamente.",
@@ -150,6 +156,18 @@ export function useDeleteTaskGroup() {
     mutationFn: async (taskGroupId: string) => {
       if (!supabase) throw new Error('Supabase client not initialized');
 
+      // First, delete all templates associated with this task group
+      const { error: templatesError } = await supabase
+        .from('task_templates')
+        .delete()
+        .eq('task_group_id', taskGroupId);
+
+      if (templatesError) {
+        console.error('Error deleting associated templates:', templatesError);
+        throw templatesError;
+      }
+
+      // Then delete the task group
       const { error } = await supabase
         .from('task_groups')
         .delete()
@@ -163,18 +181,27 @@ export function useDeleteTaskGroup() {
       return taskGroupId;
     },
     onSuccess: () => {
+      // Invalidate all related queries
       queryClient.invalidateQueries({ queryKey: ['task-groups'] });
       queryClient.invalidateQueries({ queryKey: ['task-categories-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-task-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['task-templates'] });
       toast({
         title: "Grupo de tareas eliminado",
-        description: "El grupo de tareas se ha eliminado exitosamente.",
+        description: "El grupo de tareas y sus plantillas se han eliminado exitosamente.",
       });
     },
     onError: (error: any) => {
       console.error('Delete task group error:', error);
+      let errorMessage = "No se pudo eliminar el grupo de tareas. Inténtalo de nuevo.";
+      
+      if (error?.code === '23503') {
+        errorMessage = "El grupo de tareas tiene elementos asociados que deben eliminarse primero.";
+      }
+      
       toast({
         title: "Error",
-        description: "No se pudo eliminar el grupo de tareas. Inténtalo de nuevo.",
+        description: errorMessage,
         variant: "destructive",
       });
     },

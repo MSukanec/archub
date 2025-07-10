@@ -65,14 +65,9 @@ export function useTaskCategoriesAdmin() {
     retry: false,
     refetchOnWindowFocus: false,
     queryFn: async () => {
-      console.log('🔍 Starting task categories admin query...');
-      
       if (!supabase) {
-        console.error('❌ Supabase client not initialized');
         throw new Error('Supabase client not initialized');
       }
-
-      console.log('✅ Supabase client OK, fetching categories...');
 
       // Fetch categories with their templates
       const { data: categories, error: categoriesError } = await supabase
@@ -81,14 +76,10 @@ export function useTaskCategoriesAdmin() {
         .order('name');
 
       if (categoriesError) {
-        console.error('❌ Error fetching categories:', categoriesError);
         throw categoriesError;
       }
 
-      console.log('✅ Categories fetched successfully:', categories?.length || 0);
-
-      // Fetch task groups with template_id field (this is what we need!)
-      console.log('Fetching task groups with template relationships...');
+      // Fetch task groups with template_id field
       const { data: taskGroups, error: taskGroupsError } = await supabase
         .from('task_groups')
         .select(`
@@ -101,33 +92,17 @@ export function useTaskCategoriesAdmin() {
         `);
 
       if (taskGroupsError) {
-        console.error('Error fetching task groups:', taskGroupsError);
         throw taskGroupsError;
       }
 
-      console.log('Task groups fetched successfully:', taskGroups?.length || 0, taskGroups);
-      
-      // Let's specifically look for the "MURETES" task group
-      const muretesGroup = taskGroups?.find(tg => tg.name.includes('MURETES') || tg.name.includes('JORGE'));
-      if (muretesGroup) {
-        console.log('🎯 Found MURETES/JORGE task group:', muretesGroup);
-      } else {
-        console.log('❌ MURETES/JORGE task group not found');
-        console.log('🔍 All task group names:', taskGroups?.map(tg => tg.name));
-      }
-
       // Fetch templates separately if needed
-      console.log('Fetching templates...');
       const { data: templates, error: templatesError } = await supabase
         .from('task_templates')
         .select('id, name_template, task_group_id');
 
       if (templatesError) {
-        console.error('Error fetching templates:', templatesError);
         // Don't throw here, templates are optional
       }
-
-      console.log('Templates fetched successfully:', templates?.length || 0, templates);
 
       // Build hierarchical structure
       const categoryMap = new Map();
@@ -138,11 +113,8 @@ export function useTaskCategoriesAdmin() {
         // Find task groups for this category
         const categoryTaskGroups = taskGroups?.filter(tg => tg.category_id === category.id) || [];
         
-        console.log(`Category ${category.name} has ${categoryTaskGroups.length} task groups:`, categoryTaskGroups);
-        
         // Convert task groups to TaskGroupAdmin format with template_id preservation
         const taskGroupsForCategory: TaskGroupAdmin[] = categoryTaskGroups.map(tg => {
-          console.log(`🔍 Processing task group: ${tg.name}, template_id: ${tg.template_id}`);
           return {
             id: tg.id,
             name: tg.name,
