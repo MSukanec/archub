@@ -115,15 +115,15 @@ export function NewTaskGroupModal({
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
               <CustomModalBody columns={1}>
-                <div className="space-y-4">
-                  {/* Category context */}
-                  <div className="p-3 bg-muted rounded-md">
-                    <p className="text-sm text-muted-foreground">
-                      Categoría: <span className="font-medium text-foreground">{categoryName}</span>
-                    </p>
-                  </div>
+                {/* Category context */}
+                <div className="col-span-1 p-3 bg-muted rounded-md">
+                  <p className="text-sm text-muted-foreground">
+                    Categoría: <span className="font-medium text-foreground">{categoryName}</span>
+                  </p>
+                </div>
 
-                  {/* Task Group Name */}
+                {/* Task Group Name */}
+                <div className="col-span-1">
                   <FormField
                     control={form.control}
                     name="name"

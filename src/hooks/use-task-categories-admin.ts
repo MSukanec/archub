@@ -95,6 +95,8 @@ export function useTaskCategoriesAdmin() {
         throw templatesError;
       }
 
+      console.log('Task groups with templates:', taskGroupsWithTemplates);
+
       // Build hierarchical structure
       const categoryMap = new Map();
       const rootCategories: TaskCategoryAdmin[] = [];
@@ -103,6 +105,8 @@ export function useTaskCategoriesAdmin() {
       categories.forEach(category => {
         // Find task groups for this category
         const categoryTaskGroups = taskGroupsWithTemplates?.filter(tg => tg.category_id === category.id) || [];
+        
+        console.log(`Category ${category.name} has ${categoryTaskGroups.length} task groups:`, categoryTaskGroups);
         
         // Convert task groups to TaskGroupAdmin format
         const taskGroups: TaskGroupAdmin[] = categoryTaskGroups.map(tg => ({
