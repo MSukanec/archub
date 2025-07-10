@@ -421,6 +421,17 @@ export default function TaskTemplateEditorModal({
         
         console.log('🚀 Resultado creación plantilla:', { data, error });
         if (error) throw error;
+        
+        // CRITICAL: Actualizar el template_id en task_groups
+        console.log('🔗 Actualizando template_id en task_groups...');
+        const { error: updateError } = await supabase
+          .from('task_groups')
+          .update({ template_id: data.id })
+          .eq('id', taskGroupId);
+        
+        console.log('🔗 Resultado actualización task_groups:', { updateError });
+        if (updateError) throw updateError;
+        
         return data;
       } else {
         // LEGACY: Crear plantilla para categoría - Solo campos que existen en la tabla
@@ -465,6 +476,18 @@ export default function TaskTemplateEditorModal({
         .from('task_template_parameters')
         .delete()
         .eq('template_id', templateId);
+      
+      // CRITICAL: Clear template_id from task_groups before deleting template
+      if (taskGroupId) {
+        console.log('🗑️ Limpiando template_id en task_groups...');
+        const { error: clearError } = await supabase
+          .from('task_groups')
+          .update({ template_id: null })
+          .eq('id', taskGroupId);
+        
+        console.log('🗑️ Resultado limpieza task_groups:', { clearError });
+        if (clearError) throw clearError;
+      }
       
       // Then delete the template
       const { error } = await supabase
