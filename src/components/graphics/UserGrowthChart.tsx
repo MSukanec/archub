@@ -235,7 +235,7 @@ export function UserGrowthChart() {
                 stroke="hsl(var(--accent))"
                 strokeWidth={3}
                 connectNulls={true}
-                dot={{ fill: "hsl(var(--accent))", strokeWidth: 2, r: 4 }}
+                dot={{ fill: "hsl(var(--accent))", stroke: "hsl(var(--accent))", strokeWidth: 2, r: 4 }}
                 activeDot={{ r: 6, stroke: "hsl(var(--accent))", strokeWidth: 2, fill: "hsl(var(--accent))" }}
               />
             </LineChart>

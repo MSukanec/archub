@@ -225,8 +225,8 @@ export function SidebarSubmenu() {
                   <div key={index} className="mb-[1px]">
                     {/* Título del acordeón */}
                     {isSecondarySidebarExpanded && (
-                      <div className="h-9 flex items-center px-3 mb-[1px]">
-                        <span className="text-xs font-semibold text-[var(--secondary-sidebar-fg)] uppercase tracking-wider">
+                      <div className="h-9 flex items-center px-3 mb-[1px] rounded-md">
+                        <span className="text-xs font-semibold text-[var(--secondary-sidebar-fg)] opacity-60 uppercase tracking-wider">
                           {item.label}
                         </span>
                       </div>
