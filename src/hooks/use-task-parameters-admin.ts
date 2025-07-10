@@ -18,6 +18,22 @@ export function useTaskSubcategories() {
   });
 }
 
+// Hook para task groups
+export function useTaskGroups() {
+  return useQuery({
+    queryKey: ['task-groups'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('task_groups')
+        .select('id, name, category_id, created_at')
+        .order('name');
+      
+      if (error) throw error;
+      return data || [];
+    },
+  });
+}
+
 export interface TaskParameter {
   id: string;
   template_id: string;
@@ -506,7 +522,7 @@ export function useCreateTaskParameterOptionGroup() {
     mutationFn: async (data: {
       parameter_id: string;
       name: string;
-      category_id?: string;
+      task_group_id?: string;
       position?: number;
     }) => {
       const { data: result, error } = await supabase
@@ -582,13 +598,13 @@ export function useUpdateTaskParameterOptionGroup() {
     mutationFn: async (data: {
       id: string;
       name: string;
-      category_id?: string;
+      task_group_id?: string;
     }) => {
       const { data: result, error } = await supabase
         .from('task_parameter_option_groups')
         .update({
           name: data.name,
-          category_id: data.category_id,
+          task_group_id: data.task_group_id,
         })
         .eq('id', data.id)
         .select()

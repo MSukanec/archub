@@ -19,7 +19,7 @@ import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
 import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter';
 import { useToast } from '@/hooks/use-toast';
 
-import { useCreateTaskParameter, useUpdateTaskParameter, TaskParameter, useTaskParameterOptionGroups, useCreateTaskParameterOptionGroup, useDeleteTaskParameterOptionGroup, useUpdateTaskParameterOptionGroup, useTaskSubcategories } from '@/hooks/use-task-parameters-admin';
+import { useCreateTaskParameter, useUpdateTaskParameter, TaskParameter, useTaskParameterOptionGroups, useCreateTaskParameterOptionGroup, useDeleteTaskParameterOptionGroup, useUpdateTaskParameterOptionGroup, useTaskGroups } from '@/hooks/use-task-parameters-admin';
 import { TaskParameterGroupAssignmentModal } from './NewTaskParameterGroupAssignmentModal';
 import { useUnits } from '@/hooks/use-units';
 
@@ -50,7 +50,7 @@ export function NewTaskParameterModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<any>(null);
-  const [selectedSubcategoryId, setSelectedSubcategoryId] = useState('');
+  const [selectedTaskGroupId, setSelectedTaskGroupId] = useState('');
   const [isCreatingGroup, setIsCreatingGroup] = useState(false);
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [editingGroupName, setEditingGroupName] = useState('');
@@ -71,8 +71,8 @@ export function NewTaskParameterModal({
   console.log('Loading groups for parameter:', { parameter, parameterId });
   const { data: optionGroups, isLoading: isLoadingGroups } = useTaskParameterOptionGroups(parameterId);
   
-  // Load subcategories for group creation
-  const { data: subcategories = [], isLoading: subcategoriesLoading } = useTaskSubcategories();
+  // Load task groups for group creation
+  const { data: taskGroups = [], isLoading: taskGroupsLoading } = useTaskGroups();
   
   const form = useForm<TaskParameterFormData>({
     resolver: zodResolver(taskParameterSchema),
@@ -86,18 +86,18 @@ export function NewTaskParameterModal({
 
   // Functions for inline group creation
   const handleCreateGroup = async () => {
-    if (!selectedSubcategoryId || !parameter?.parameter_id) return;
+    if (!selectedTaskGroupId || !parameter?.parameter_id) return;
     
-    const selectedSubcategory = subcategories.find(cat => cat.id === selectedSubcategoryId);
-    if (!selectedSubcategory) return;
+    const selectedTaskGroup = taskGroups.find(group => group.id === selectedTaskGroupId);
+    if (!selectedTaskGroup) return;
     
-    // Check if group already exists for this category
-    const existingGroup = optionGroups?.find(group => group.category_id === selectedSubcategoryId);
+    // Check if group already exists for this task group
+    const existingGroup = optionGroups?.find(group => group.task_group_id === selectedTaskGroupId);
     if (existingGroup) {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Ya existe un grupo para esta categoría'
+        description: 'Ya existe un grupo para este tipo de tarea'
       });
       return;
     }
@@ -106,10 +106,10 @@ export function NewTaskParameterModal({
     try {
       await createGroupMutation.mutateAsync({
         parameter_id: parameter.parameter_id,
-        name: selectedSubcategory.name,
-        category_id: selectedSubcategory.id,
+        name: selectedTaskGroup.name,
+        task_group_id: selectedTaskGroup.id,
       });
-      setSelectedSubcategoryId('');
+      setSelectedTaskGroupId('');
       toast({
         title: 'Éxito',
         description: 'Grupo creado correctamente'
@@ -136,20 +136,20 @@ export function NewTaskParameterModal({
 
   const handleEditGroup = (group: any) => {
     setEditingGroupId(group.id);
-    setEditingGroupName(group.category_id || '');
+    setEditingGroupName(group.task_group_id || '');
   };
 
   const handleSaveGroupEdit = async () => {
     if (!editingGroupId || !editingGroupName) return;
     
-    const selectedSubcategory = subcategories.find(cat => cat.id === editingGroupName);
-    if (!selectedSubcategory) return;
+    const selectedTaskGroup = taskGroups.find(group => group.id === editingGroupName);
+    if (!selectedTaskGroup) return;
     
     try {
       await updateGroupMutation.mutateAsync({
         id: editingGroupId,
-        name: selectedSubcategory.name,
-        category_id: selectedSubcategory.id,
+        name: selectedTaskGroup.name,
+        task_group_id: selectedTaskGroup.id,
       });
       setEditingGroupId(null);
       setEditingGroupName('');
@@ -345,26 +345,26 @@ export function NewTaskParameterModal({
                         {/* Inline group creation */}
                         {parameter && (
                           <div className="flex gap-2">
-                            <Select value={selectedSubcategoryId} onValueChange={setSelectedSubcategoryId}>
+                            <Select value={selectedTaskGroupId} onValueChange={setSelectedTaskGroupId}>
                               <SelectTrigger className="flex-1">
-                                <SelectValue placeholder="Seleccionar subcategoría..." />
+                                <SelectValue placeholder="Seleccionar tipo de tarea..." />
                               </SelectTrigger>
                               <SelectContent>
-                                {subcategoriesLoading ? (
+                                {taskGroupsLoading ? (
                                   <SelectItem value="loading" disabled>Cargando...</SelectItem>
-                                ) : subcategories.length > 0 ? (
-                                  subcategories
-                                    .filter(subcategory => !optionGroups?.some(group => group.category_id === subcategory.id))
-                                    .map((subcategory) => (
-                                      <SelectItem key={subcategory.id} value={subcategory.id}>
-                                        {subcategory.code || subcategory.name} {subcategory.name && subcategory.code ? '- ' + subcategory.name : ''}
+                                ) : taskGroups.length > 0 ? (
+                                  taskGroups
+                                    .filter(taskGroup => !optionGroups?.some(group => group.task_group_id === taskGroup.id))
+                                    .map((taskGroup) => (
+                                      <SelectItem key={taskGroup.id} value={taskGroup.id}>
+                                        {taskGroup.name}
                                       </SelectItem>
                                     ))
                                 ) : (
-                                  <SelectItem value="empty" disabled>No hay subcategorías disponibles</SelectItem>
+                                  <SelectItem value="empty" disabled>No hay tipos de tarea disponibles</SelectItem>
                                 )}
-                                {subcategories.length > 0 && subcategories.filter(subcategory => !optionGroups?.some(group => group.category_id === subcategory.id)).length === 0 && (
-                                  <SelectItem value="no-available" disabled>Todas las subcategorías ya tienen grupos</SelectItem>
+                                {taskGroups.length > 0 && taskGroups.filter(taskGroup => !optionGroups?.some(group => group.task_group_id === taskGroup.id)).length === 0 && (
+                                  <SelectItem value="no-available" disabled>Todos los tipos de tarea ya tienen grupos</SelectItem>
                                 )}
                               </SelectContent>
                             </Select>
@@ -372,7 +372,7 @@ export function NewTaskParameterModal({
                               type="button"
                               size="sm"
                               onClick={handleCreateGroup}
-                              disabled={!selectedSubcategoryId || isCreatingGroup}
+                              disabled={!selectedTaskGroupId || isCreatingGroup}
                               className="h-10"
                             >
                               {isCreatingGroup ? (
@@ -401,12 +401,12 @@ export function NewTaskParameterModal({
                                     <div className="flex gap-2">
                                       <Select value={editingGroupName} onValueChange={setEditingGroupName}>
                                         <SelectTrigger className="text-sm flex-1">
-                                          <SelectValue placeholder="Seleccionar subcategoría..." />
+                                          <SelectValue placeholder="Seleccionar tipo de tarea..." />
                                         </SelectTrigger>
                                         <SelectContent>
-                                          {subcategories.map((subcategory) => (
-                                            <SelectItem key={subcategory.id} value={subcategory.id}>
-                                              {subcategory.name} - {subcategory.label || subcategory.description}
+                                          {taskGroups.map((taskGroup) => (
+                                            <SelectItem key={taskGroup.id} value={taskGroup.id}>
+                                              {taskGroup.name}
                                             </SelectItem>
                                           ))}
                                         </SelectContent>
@@ -432,11 +432,10 @@ export function NewTaskParameterModal({
                                     <div>
                                       <p className="text-sm font-medium">{group.name}</p>
                                       <p className="text-xs text-muted-foreground">
-                                        {group.category_id ? 
-                                          subcategories.find(cat => cat.id === group.category_id)?.label || 
-                                          subcategories.find(cat => cat.id === group.category_id)?.description || 
-                                          'Categoría no encontrada' 
-                                          : 'Sin categoría asignada'
+                                        {group.task_group_id ? 
+                                          taskGroups.find(tg => tg.id === group.task_group_id)?.name || 
+                                          'Tipo de tarea no encontrado' 
+                                          : 'Sin tipo de tarea asignado'
                                         }
                                       </p>
                                     </div>
