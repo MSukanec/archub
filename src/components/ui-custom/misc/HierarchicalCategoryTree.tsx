@@ -52,13 +52,16 @@ export function HierarchicalCategoryTree({
     // Calculate indentation based on level
     const indentation = currentLevel * 24; // 24px per level for better hierarchy
     
-    // Calculate template completion for parent categories
+    // Calculate template completion based on task groups (NEW LOGIC)
     const getTemplateCompletion = (cat: CategoryTreeNode): { completed: number; total: number } => {
-      if (cat.code && cat.code.length === 3) {
-        // Es categoría final
-        return { completed: cat.template ? 1 : 0, total: 1 };
+      // Si es categoría final (3 letras) y tiene task groups, contar sus plantillas
+      if (cat.code && cat.code.length === 3 && cat.taskGroups && cat.taskGroups.length > 0) {
+        const completed = cat.taskGroups.filter(tg => tg.template_id).length;
+        const total = cat.taskGroups.length;
+        return { completed, total };
       }
       
+      // Si tiene hijos, agregar completions de sus hijos
       if (cat.children && cat.children.length > 0) {
         let completed = 0;
         let total = 0;
@@ -118,11 +121,7 @@ export function HierarchicalCategoryTree({
                   )}
                 </div>
               )}
-              {category.template && (
-                <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
-                  Con Plantilla
-                </Badge>
-              )}
+
             </div>
           </div>
           
@@ -202,17 +201,22 @@ export function HierarchicalCategoryTree({
                     <Badge variant="outline" className="text-xs px-1.5 py-0.5 bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-600">
                       Grupo
                     </Badge>
+                    {taskGroup.template_id && (
+                      <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
+                        Con Plantilla
+                      </Badge>
+                    )}
                   </div>
                 </div>
                 
-                {/* Right side: Task group actions */}
+                {/* Right side: Task group actions - SAME AS CATEGORIES */}
                 <div className="flex items-center space-x-1">
                   {onTaskGroupTemplate && (
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => onTaskGroupTemplate(taskGroup, category)}
-                      className="h-6 w-6 p-0 text-blue-600 dark:text-blue-400"
+                      className="h-6 w-6 p-0 hover:bg-accent text-muted-foreground hover:text-foreground"
                       style={{
                         backgroundColor: 'var(--button-primary-bg)',
                         color: 'var(--button-primary-text)',
@@ -237,21 +241,8 @@ export function HierarchicalCategoryTree({
                       variant="ghost"
                       size="sm"
                       onClick={() => onEditTaskGroup(taskGroup, category)}
-                      className="h-6 w-6 p-0"
-                      style={{
-                        backgroundColor: 'var(--button-secondary-bg)',
-                        color: 'var(--button-secondary-text)',
-                        border: '1px solid var(--button-secondary-border)'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = 'var(--button-secondary-hover-bg)';
-                        e.currentTarget.style.color = 'var(--button-secondary-hover-text)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'var(--button-secondary-bg)';
-                        e.currentTarget.style.color = 'var(--button-secondary-text)';
-                      }}
-                      title="Editar Grupo"
+                      className="h-6 w-6 p-0 hover:bg-accent text-muted-foreground hover:text-foreground"
+                      title="Editar"
                     >
                       <Edit className="h-3 w-3" />
                     </Button>
@@ -262,21 +253,8 @@ export function HierarchicalCategoryTree({
                       variant="ghost"
                       size="sm"
                       onClick={() => onDeleteTaskGroup(taskGroup.id)}
-                      className="h-6 w-6 p-0"
-                      style={{
-                        backgroundColor: 'transparent',
-                        color: 'var(--destructive)',
-                        border: '1px solid transparent'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = 'var(--destructive)';
-                        e.currentTarget.style.color = 'var(--destructive-text)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'transparent';
-                        e.currentTarget.style.color = 'var(--destructive)';
-                      }}
-                      title="Eliminar Grupo"
+                      className="h-6 w-6 p-0 hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
+                      title="Eliminar"
                     >
                       <Trash2 className="h-3 w-3" />
                     </Button>

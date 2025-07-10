@@ -90,25 +90,27 @@ export default function AdminCategories() {
   const deleteCategoryMutation = useDeleteTaskCategory();
   const deleteTaskGroupMutation = useDeleteTaskGroup();
 
-  // Calculate statistics - solo categorías NIETAS (finales con código de 3 letras)
+  // Calculate statistics - NOW BASED ON TASK GROUPS INSTEAD OF CATEGORIES
   const calculateStats = (categories: TaskCategoryAdmin[]) => {
     let totalCategories = 0;
-    let finalCategories = 0; // Categorías NIETAS (3 letras)
-    let finalCategoriesWithTemplates = 0;
-    let finalCategoriesWithoutTemplates = 0;
+    let totalTaskGroups = 0;
+    let taskGroupsWithTemplates = 0;
+    let taskGroupsWithoutTemplates = 0;
 
     const countRecursive = (cats: TaskCategoryAdmin[]) => {
       cats.forEach(cat => {
         totalCategories++;
         
-        // Solo contar estadísticas de plantillas para categorías NIETAS (3 letras)
-        if (cat.code && cat.code.length === 3) {
-          finalCategories++;
-          if (cat.template) {
-            finalCategoriesWithTemplates++;
-          } else {
-            finalCategoriesWithoutTemplates++;
-          }
+        // Contar task groups y sus plantillas
+        if (cat.taskGroups && cat.taskGroups.length > 0) {
+          totalTaskGroups += cat.taskGroups.length;
+          cat.taskGroups.forEach(tg => {
+            if (tg.template_id) {
+              taskGroupsWithTemplates++;
+            } else {
+              taskGroupsWithoutTemplates++;
+            }
+          });
         }
         
         if (cat.children && cat.children.length > 0) {
@@ -120,9 +122,9 @@ export default function AdminCategories() {
     countRecursive(categories);
     return { 
       totalCategories, 
-      finalCategories,
-      finalCategoriesWithTemplates, 
-      finalCategoriesWithoutTemplates 
+      totalTaskGroups,
+      taskGroupsWithTemplates, 
+      taskGroupsWithoutTemplates 
     };
   };
 
@@ -136,18 +138,18 @@ export default function AdminCategories() {
         category.name.toLowerCase().includes(term.toLowerCase()) ||
         category.code?.toLowerCase().includes(term.toLowerCase());
       
-      // Template filter (only apply to leaf/NIETO categories - level 2)
-      const hasChildrenLevel0 = category.children && category.children.length > 0;
-      const hasChildrenLevel1 = category.children?.some(child => child.children && child.children.length > 0);
-      const isLeafCategory = !hasChildrenLevel0 || (hasChildrenLevel0 && !hasChildrenLevel1);
-      
+      // Template filter - NOW BASED ON TASK GROUPS
       let matchesTemplate = true;
-      if (templateFilter !== 'all' && isLeafCategory) {
-        // Only apply template filter to leaf categories
+      if (templateFilter !== 'all') {
+        // Calculate if category has task groups with/without templates
+        const hasTaskGroups = category.taskGroups && category.taskGroups.length > 0;
+        const hasTaskGroupsWithTemplates = hasTaskGroups && category.taskGroups.some(tg => tg.template_id);
+        const hasTaskGroupsWithoutTemplates = hasTaskGroups && category.taskGroups.some(tg => !tg.template_id);
+        
         if (templateFilter === 'with-template') {
-          matchesTemplate = !!category.template;
+          matchesTemplate = hasTaskGroupsWithTemplates;
         } else if (templateFilter === 'without-template') {
-          matchesTemplate = !category.template;
+          matchesTemplate = hasTaskGroupsWithoutTemplates;
         }
       }
       
@@ -322,13 +324,13 @@ export default function AdminCategories() {
           
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Categorías Finales</CardTitle>
+              <CardTitle className="text-sm font-medium">Grupos de Tareas</CardTitle>
               <Settings className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.finalCategories}</div>
+              <div className="text-2xl font-bold">{stats.totalTaskGroups}</div>
               <p className="text-xs text-muted-foreground">
-                Categorías nietas (código 3 letras)
+                Total de grupos de tareas
               </p>
             </CardContent>
           </Card>
@@ -339,9 +341,9 @@ export default function AdminCategories() {
               <CheckCircle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.finalCategoriesWithTemplates}</div>
+              <div className="text-2xl font-bold">{stats.taskGroupsWithTemplates}</div>
               <p className="text-xs text-muted-foreground">
-                Categorías finales con plantillas
+                Grupos con plantillas
               </p>
             </CardContent>
           </Card>
@@ -352,9 +354,9 @@ export default function AdminCategories() {
               <XCircle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.finalCategoriesWithoutTemplates}</div>
+              <div className="text-2xl font-bold">{stats.taskGroupsWithoutTemplates}</div>
               <p className="text-xs text-muted-foreground">
-                Categorías finales sin plantillas
+                Grupos sin plantillas
               </p>
             </CardContent>
           </Card>

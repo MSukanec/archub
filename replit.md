@@ -119,6 +119,14 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 10, 2025. Complete UI restructure: Template management moved from categories to task groups level - COMPLETED
+  • Updated HierarchicalCategoryTree to show badges "Con Plantilla" on task groups instead of categories
+  • Modified counter logic: category (0/1) numbers now reflect template status of child task groups
+  • Changed statistics cards to count group templates: "Grupos de Tareas", "Con Plantillas", "Sin Plantillas"
+  • Unified task group action buttons to match category buttons: template (styled), edit, delete
+  • Fixed template completion calculation to aggregate task group templates instead of category templates
+  • Enhanced filtering system to work with task groups: "Con Plantilla" finds categories with templated groups
+  • Template badges now display at task group level where templates are actually created and managed
 - July 10, 2025. Completed TaskTemplateEditorModal migration to work with task groups (task_group_id) instead of categories - COMPLETED
   • Modal now fully supports creating and managing templates for task groups using task_group_id field
   • Updated all database queries: template search by task_group_id, template creation with task_group_id column
