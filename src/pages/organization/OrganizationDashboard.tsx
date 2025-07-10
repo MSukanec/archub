@@ -1,55 +1,61 @@
-import { useQuery, useMutation } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { 
-  Building, 
-  Users, 
-  DollarSign, 
-  Folder, 
-  Activity, 
   Calendar, 
   Crown, 
-  Plus,
-  FileText,
-  Construction,
-  Zap,
-  ExternalLink
+  Users,
+  Building
 } from 'lucide-react';
 import { useLocation } from 'wouter';
+import { useEffect } from 'react';
+import { motion } from 'framer-motion';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState';
+import { OrganizationStatsCards } from '@/components/ui-custom/cards/OrganizationStatsCards';
+import { OrganizationActivityChart } from '@/components/ui-custom/charts/OrganizationActivityChart';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { supabase } from '@/lib/supabase';
-import { queryClient } from '@/lib/queryClient';
-import { useToast } from '@/hooks/use-toast';
+import { useOrganizationStats, useOrganizationActivity } from '@/hooks/use-organization-stats';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext';
 import { useMobile } from '@/hooks/use-mobile';
-import { useEffect } from 'react';
 
-interface ActivityItem {
-  type: string;
-  icon: React.ComponentType<any>;
-  title: string;
-  description: string;
-  author: string;
-  created_at: string;
+// Function to get time-based greeting
+const getTimeBasedGreeting = () => {
+  const hour = new Date().getHours()
+  
+  if (hour >= 6 && hour < 12) {
+    return "Buen día"
+  } else if (hour >= 12 && hour < 20) {
+    return "Buena tarde"
+  } else {
+    return "Buena noche"
+  }
+}
+
+// Function to get organization initials
+const getOrganizationInitials = (name: string) => {
+  return name
+    .split(' ')
+    .map(word => word.charAt(0))
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
 }
 
 export default function OrganizationDashboard() {
   const [, navigate] = useLocation();
-  const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const { setSidebarContext } = useNavigationStore();
   const { setShowActionBar } = useMobileActionBar();
   const isMobile = useMobile();
   
   const currentOrganization = userData?.organization;
+  const { data: stats, isLoading: statsLoading } = useOrganizationStats();
+  const { data: activityData, isLoading: activityLoading } = useOrganizationActivity();
 
   // Set sidebar context and hide mobile action bar on dashboards
   useEffect(() => {
@@ -59,322 +65,102 @@ export default function OrganizationDashboard() {
     }
   }, [setSidebarContext, setShowActionBar, isMobile]);
 
-  // Fetch recent projects
-  const { data: recentProjects = [] } = useQuery({
-    queryKey: ['recent-projects', currentOrganization?.id],
-    queryFn: async () => {
-      if (!supabase || !currentOrganization?.id) return [];
-      
-      const { data, error } = await supabase
-        .from('projects')
-        .select('*')
-        .eq('organization_id', currentOrganization.id)
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .limit(5);
-      
-      if (error) throw error;
-      return data || [];
-    },
-    enabled: !!currentOrganization?.id
-  });
-
-  // Fetch recent activity
-  const { data: recentActivity = [] } = useQuery({
-    queryKey: ['recent-activity', currentOrganization?.id],
-    queryFn: async (): Promise<ActivityItem[]> => {
-      if (!supabase || !currentOrganization?.id) return [];
-      
-      const activities: ActivityItem[] = [];
-
-      // Get recent projects
-      const { data: projects } = await supabase
-        .from('projects')
-        .select('id, name, created_at')
-        .eq('organization_id', currentOrganization.id)
-        .order('created_at', { ascending: false })
-        .limit(3);
-
-      projects?.forEach(project => {
-        activities.push({
-          type: 'project',
-          icon: Folder,
-          title: 'Nuevo proyecto creado',
-          description: project.name,
-          author: 'Sistema',
-          created_at: project.created_at
-        });
-      });
-
-      // Get recent contacts
-      const { data: contacts } = await supabase
-        .from('contacts')
-        .select('id, first_name, last_name, created_at')
-        .eq('organization_id', currentOrganization.id)
-        .order('created_at', { ascending: false })
-        .limit(3);
-
-      contacts?.forEach(contact => {
-        activities.push({
-          type: 'contact',
-          icon: Users,
-          title: 'Nuevo contacto agregado',
-          description: `${contact.first_name} ${contact.last_name}`,
-          author: 'Sistema',
-          created_at: contact.created_at
-        });
-      });
-
-      return activities
-        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-        .slice(0, 6);
-    },
-    enabled: !!currentOrganization?.id
-  });
-
-  // Project selection mutation
-  const selectProjectMutation = useMutation({
-    mutationFn: async (projectId: string) => {
-      if (!userData?.preferences?.id || !supabase) throw new Error('No user preferences found');
-
-      const { error } = await supabase
-        .from('user_preferences')
-        .update({ last_project_id: projectId })
-        .eq('id', userData.preferences.id);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      toast({
-        title: "Proyecto seleccionado",
-        description: "El proyecto ha sido seleccionado correctamente"
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "No se pudo seleccionar el proyecto",
-        variant: "destructive"
-      });
-    }
-  });
-
-  const handleProjectSelect = (projectId: string) => {
-    selectProjectMutation.mutate(projectId, {
-      onSuccess: () => {
-        setSidebarContext('project');
-        navigate('/project/dashboard');
-      }
-    });
-  };
+  const greeting = getTimeBasedGreeting()
+  const firstName = userData?.user_data?.first_name || userData?.user?.full_name || 'Usuario'
 
   const headerProps = {
     title: "Resumen de la Organización",
     showSearch: false,
     showFilters: false
-  };
+  }
 
   if (!currentOrganization) {
     return (
       <Layout headerProps={headerProps} wide>
-        <CustomEmptyState
-          icon={<Building className="h-12 w-12" />}
-          title="No hay organización seleccionada"
-          description="Selecciona una organización para ver el resumen"
-        />
+        <div className="text-center py-12">
+          <Building className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+          <h3 className="font-medium mb-2">No hay organización seleccionada</h3>
+          <p className="text-sm text-muted-foreground">
+            Selecciona una organización para ver el resumen
+          </p>
+        </div>
       </Layout>
-    );
+    )
   }
 
   return (
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
-        {/* Organization Info Card */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-lg bg-muted">
-                  <Building className="h-8 w-8" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-3 mb-2">
-                    <CardTitle className="text-2xl">
-                      {currentOrganization.name}
-                    </CardTitle>
-                    {currentOrganization.is_active && (
-                      <Badge variant="default">Activa</Badge>
-                    )}
-                    {currentOrganization.plan && (
-                      <Badge variant="outline">
-                        <Crown className="h-3 w-3 mr-1" />
-                        {currentOrganization.plan.name}
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4" />
-                      Fundada el {currentOrganization.created_at ? 
-                        format(new Date(currentOrganization.created_at), 'dd/MM/yyyy', { locale: es }) 
-                        : '---'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardHeader>
-        </Card>
-
-        {/* Three Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Proyectos Recientes */}
+        {/* Welcome Card with Dynamic Greeting */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Folder className="h-5 w-5" />
-                Proyectos Recientes
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {recentProjects.length === 0 ? (
-                <div className="text-center py-8">
-                  <Folder className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="font-medium mb-2">No hay proyectos</h3>
-                  <p className="text-sm text-muted-foreground mb-4">Crea tu primer proyecto para comenzar</p>
-                  <Button onClick={() => navigate('/proyectos')}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Crear Proyecto
-                  </Button>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-6">
+                {/* Organization Avatar */}
+                <div className="flex-shrink-0">
+                  <Avatar className="h-16 w-16 border-2 border-gray-200">
+                    <AvatarImage src={currentOrganization.logo_url} alt={currentOrganization.name} />
+                    <AvatarFallback className="text-lg font-bold bg-gradient-to-br from-blue-500 to-purple-600 text-white">
+                      {getOrganizationInitials(currentOrganization.name)}
+                    </AvatarFallback>
+                  </Avatar>
                 </div>
-              ) : (
-                <div className="space-y-3">
-                  {recentProjects.map((project) => (
-                    <div 
-                      key={project.id}
-                      className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 cursor-pointer"
-                      onClick={() => handleProjectSelect(project.id)}
-                    >
-                      <div>
-                        <p className="font-medium">{project.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {format(new Date(project.created_at), 'dd/MM/yyyy', { locale: es })}
-                        </p>
-                      </div>
-                      <ExternalLink className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                  ))}
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => navigate('/proyectos')}
+
+                {/* Greeting and Organization Info */}
+                <div className="flex-1">
+                  <motion.h1 
+                    className="text-4xl font-black text-gray-900 mb-1"
+                    initial={{ scale: 0.8 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.2, duration: 0.3 }}
                   >
-                    Ver todos los proyectos
-                  </Button>
+                    {greeting}, {firstName}
+                  </motion.h1>
+                  <p className="text-lg text-gray-600 mb-3">
+                    Estás en <span className="font-semibold">{currentOrganization.name}</span>
+                  </p>
+                  
+                  <div className="flex items-center gap-4 text-sm text-gray-500">
+                    <div className="flex items-center gap-1">
+                      <Calendar className="h-4 w-4" />
+                      <span>Creado el {format(new Date(currentOrganization.created_at), 'dd/MM/yyyy', { locale: es })}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Crown className="h-4 w-4" />
+                      <Badge variant="outline" className="text-xs">
+                        Plan Pro
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Users className="h-4 w-4" />
+                      <span>Organización activa</span>
+                    </div>
+                  </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Actividad Reciente */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Activity className="h-5 w-5" />
-                Actividad Reciente
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {recentActivity.length === 0 ? (
-                <div className="text-center py-8">
-                  <Activity className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="font-medium mb-2">No hay actividad</h3>
-                  <p className="text-sm text-muted-foreground">La actividad aparecerá aquí cuando comiences a trabajar</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {recentActivity.map((activity, index) => {
-                    const IconComponent = activity.icon;
-                    return (
-                      <div key={index} className="flex items-start gap-3 p-3 rounded-lg border">
-                        <div className="p-2 rounded-lg bg-muted">
-                          <IconComponent className="h-4 w-4" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm">{activity.title}</p>
-                          <p className="text-sm text-muted-foreground">{activity.description}</p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {format(new Date(activity.created_at), 'dd/MM/yyyy HH:mm', { locale: es })}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Acciones Rápidas */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Zap className="h-5 w-5" />
-                Acciones Rápidas
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => navigate('/proyectos')}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Crear Nuevo Proyecto
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => navigate('/organization/contactos')}
-                >
-                  <Users className="h-4 w-4 mr-2" />
-                  Gestionar Contactos
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => navigate('/finanzas/movimientos')}
-                >
-                  <DollarSign className="h-4 w-4 mr-2" />
-                  Ver Movimientos
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => navigate('/obra/bitacora')}
-                >
-                  <FileText className="h-4 w-4 mr-2" />
-                  Bitácora de Obra
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => navigate('/construction/budgets')}
-                >
-                  <Construction className="h-4 w-4 mr-2" />
-                  Gestionar Presupuestos
-                </Button>
               </div>
             </CardContent>
           </Card>
-        </div>
+        </motion.div>
+
+        {/* Organization Stats Cards */}
+        <OrganizationStatsCards
+          activeProjects={stats?.activeProjects || 0}
+          documentsLast30Days={stats?.documentsLast30Days || 0}
+          generatedTasks={stats?.generatedTasks || 0}
+          financialMovementsLast30Days={stats?.financialMovementsLast30Days || 0}
+          isLoading={statsLoading}
+        />
+
+        {/* Activity Chart */}
+        <OrganizationActivityChart
+          data={activityData || []}
+          isLoading={activityLoading}
+        />
       </div>
     </Layout>
-  );
+  )
 }

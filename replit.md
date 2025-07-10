@@ -119,6 +119,17 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 10, 2025. Complete Organization Summary page refactor with dynamic greeting and analytics dashboard - COMPLETED
+  • Completely rebuilt OrganizationDashboard.tsx with modern time-based greeting system ("Buen día/tarde/noche, first_name")
+  • Created dynamic greeting card with 4xl font-black styling, organization avatar with gradient fallback showing initials
+  • Implemented OrganizationStatsCards.tsx component with 4 animated metric cards: active projects, documents (30 days), generated tasks, financial movements total
+  • Built OrganizationActivityChart.tsx using recharts with area chart visualization showing last 7 days activity breakdown
+  • Created comprehensive useOrganizationStats and useOrganizationActivity hooks with real Supabase data integration
+  • Added framer-motion animations for card appearance, counter scaling, and smooth page transitions
+  • Enhanced organization info display with creation date, plan badge, and organization status indicators
+  • Activity chart includes tooltips, legend, gradients, and proper responsive design for mobile/desktop
+  • Stats cards feature color-coded icons (projects/documents/tasks/money), animated counters, and loading states
+  • Organization avatar shows logo_url or generates colored initials fallback with gradient background
 - July 9, 2025. Critical sidebar tooltip fix and reusable UserSelector component implementation - COMPLETED
   • Completely removed tooltip functionality from SidebarButton component to eliminate z-index and display issues within sidebars
   • Created new reusable UserSelector component in src/components/ui-custom/misc/UserSelector.tsx for consistent avatar+name display
