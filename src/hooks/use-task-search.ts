@@ -97,8 +97,20 @@ export function useTaskSearch(
 
       // Construir query con filtros
       let query = supabase
-        .from("task_generated_view")
-        .select("*")
+        .from("task_generated")
+        .select(`
+          *,
+          task_templates (
+            name_template,
+            task_groups (
+              name,
+              task_categories (
+                name,
+                rubro_name
+              )
+            )
+          )
+        `)
         .limit(100);
 
       // Filtrar por origen (Sistema/Organización)
@@ -109,21 +121,6 @@ export function useTaskSearch(
       }
       // Si es 'all', no aplicar filtros adicionales
 
-      // Filtrar por rubro si se especifica
-      if (filters.rubro) {
-        query = query.eq('rubro_name', filters.rubro);
-      }
-
-      // Filtrar por categoría si se especifica
-      if (filters.category) {
-        query = query.eq('category_name', filters.category);
-      }
-
-      // Filtrar por subcategoría si se especifica
-      if (filters.subcategory) {
-        query = query.eq('subcategory_name', filters.subcategory);
-      }
-
       const { data: allTasks, error } = await query;
 
       if (error) {
@@ -131,16 +128,50 @@ export function useTaskSearch(
         throw error;
       }
       
-      // Procesar los display_name para reemplazar placeholders
+      // Transformar datos y procesar los display_name para reemplazar placeholders
       const processedData = await Promise.all(
-        allTasks?.map(async task => ({
-          ...task,
-          display_name: await processDisplayName(task.display_name, task.param_values)
-        })) || []
+        allTasks?.map(async task => {
+          const template = task.task_templates;
+          const taskGroup = template?.task_groups;
+          const category = taskGroup?.task_categories;
+          
+          const transformedTask = {
+            ...task,
+            display_name: template?.name_template || task.code,
+            rubro_name: category?.rubro_name || '',
+            category_name: category?.name || '',
+            subcategory_name: taskGroup?.name || ''
+          };
+          
+          return {
+            ...transformedTask,
+            display_name: await processDisplayName(transformedTask.display_name, task.param_values)
+          };
+        }) || []
       );
 
+      // Aplicar filtros después de la transformación
+      const filteredByMetadata = processedData.filter(task => {
+        // Filtrar por rubro si se especifica
+        if (filters.rubro && task.rubro_name !== filters.rubro) {
+          return false;
+        }
+        
+        // Filtrar por categoría si se especifica
+        if (filters.category && task.category_name !== filters.category) {
+          return false;
+        }
+        
+        // Filtrar por subcategoría si se especifica
+        if (filters.subcategory && task.subcategory_name !== filters.subcategory) {
+          return false;
+        }
+        
+        return true;
+      });
+
       // Filtrar por término de búsqueda en el display_name procesado
-      const filteredData = processedData.filter(task => 
+      const filteredData = filteredByMetadata.filter(task => 
         task.display_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         task.code.toLowerCase().includes(searchTerm.toLowerCase())
       );
@@ -162,8 +193,18 @@ export function useTaskSearchFilterOptions(organizationId: string) {
 
       // Obtener todos los valores únicos para los filtros
       const { data: filterData, error } = await supabase
-        .from("task_generated_view")
-        .select("rubro_name, category_name, subcategory_name")
+        .from("task_generated")
+        .select(`
+          task_templates (
+            task_groups (
+              name,
+              task_categories (
+                name,
+                rubro_name
+              )
+            )
+          )
+        `)
         .limit(1000);
 
       if (error) {
@@ -171,15 +212,25 @@ export function useTaskSearchFilterOptions(organizationId: string) {
         throw error;
       }
 
-      // Extraer valores únicos
-      const rubros = [...new Set(filterData?.map(item => item.rubro_name).filter(Boolean))].sort();
-      const categories = [...new Set(filterData?.map(item => item.category_name).filter(Boolean))].sort();
-      const subcategories = [...new Set(filterData?.map(item => item.subcategory_name).filter(Boolean))].sort();
+      // Transformar y extraer valores únicos
+      const rubros = new Set<string>();
+      const categories = new Set<string>();
+      const subcategories = new Set<string>();
+
+      filterData?.forEach(task => {
+        const template = task.task_templates;
+        const taskGroup = template?.task_groups;
+        const category = taskGroup?.task_categories;
+        
+        if (category?.rubro_name) rubros.add(category.rubro_name);
+        if (category?.name) categories.add(category.name);
+        if (taskGroup?.name) subcategories.add(taskGroup.name);
+      });
 
       return {
-        rubros,
-        categories,
-        subcategories
+        rubros: Array.from(rubros).sort(),
+        categories: Array.from(categories).sort(),
+        subcategories: Array.from(subcategories).sort()
       };
     },
     enabled: !!supabase && !!organizationId

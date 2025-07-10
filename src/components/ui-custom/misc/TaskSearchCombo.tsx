@@ -217,23 +217,39 @@ export function TaskSearchCombo({
       <div className="flex-1">
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
-            <button
-              role="combobox"
-              aria-expanded={open}
-              className={cn(
-                // Styled EXACTLY like Input component from ui/input.tsx
-                "flex w-full text-xs leading-tight py-2 px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 placeholder:text-[var(--input-placeholder)] file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent disabled:opacity-60 disabled:cursor-not-allowed",
-                "justify-between items-center cursor-pointer",
-                !selectedOption && "text-[var(--input-placeholder)]",
-                className
+            <div className="relative">
+              <button
+                role="combobox"
+                aria-expanded={open}
+                className={cn(
+                  // Styled EXACTLY like Input component from ui/input.tsx
+                  "flex w-full text-xs leading-tight py-2 px-3 pr-16 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 placeholder:text-[var(--input-placeholder)] file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent disabled:opacity-60 disabled:cursor-not-allowed",
+                  "justify-between items-center cursor-pointer",
+                  !selectedOption && "text-[var(--input-placeholder)]",
+                  className
+                )}
+                disabled={disabled}
+              >
+                <span className="truncate text-left">
+                  {selectedOption ? selectedOption.label : placeholder}
+                </span>
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </button>
+              
+              {/* Botón X para limpiar */}
+              {selectedOption && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onValueChange("");
+                  }}
+                  className="absolute right-8 top-1/2 transform -translate-y-1/2 h-4 w-4 rounded-sm hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <X className="h-3 w-3" />
+                </button>
               )}
-              disabled={disabled}
-            >
-              <span className="truncate text-left">
-                {selectedOption ? selectedOption.label : placeholder}
-              </span>
-              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </button>
+            </div>
           </PopoverTrigger>
           <PopoverContent 
             className="p-0 z-[9999] bg-background border border-[var(--input-border)]" 
@@ -249,24 +265,33 @@ export function TaskSearchCombo({
           
           {/* Solo mostrar CommandEmpty si no hay opciones Y hay una búsqueda activa */}
           {options.length === 0 && searchQuery.length >= 3 && (
-            <CommandEmpty className="text-xs py-3 px-3 text-center">
+            <CommandEmpty className="text-xs py-4 px-3">
               {showCreateButton && onCreateTask ? (
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">No hay tareas con "{searchQuery}"</p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setOpen(false);
-                      onCreateTask();
-                    }}
-                    className="flex items-center justify-center gap-2 w-full px-3 py-2 text-xs bg-accent text-accent-foreground rounded-md hover:bg-accent/80 transition-colors font-medium"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Crear Tarea Personalizada
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpen(false);
+                    onCreateTask();
+                  }}
+                  className="w-full p-4 text-left bg-muted/50 hover:bg-muted border border-dashed border-border rounded-md transition-colors group"
+                >
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-foreground group-hover:text-accent">
+                      Parece que esta tarea aún no existe en la comunidad
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      ¿Quieres crearla? Haz clic para agregar "{searchQuery}" como nueva tarea personalizada
+                    </p>
+                    <div className="flex items-center gap-2 text-xs text-accent mt-3">
+                      <Plus className="w-4 h-4" />
+                      <span className="font-medium">Crear Tarea Personalizada</span>
+                    </div>
+                  </div>
+                </button>
               ) : (
-                <p className="text-sm text-muted-foreground">{emptyText}</p>
+                <div className="text-center py-2">
+                  <p className="text-sm text-muted-foreground">{emptyText}</p>
+                </div>
               )}
             </CommandEmpty>
           )}
