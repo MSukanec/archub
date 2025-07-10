@@ -362,9 +362,9 @@ export function CreateGeneratedTaskUserModal({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {templates?.map((template) => (
+                            {templates?.map((template: any) => (
                               <SelectItem key={template.id} value={template.id}>
-                                {template.name_template || template.code}
+                                {template.task_groups?.name || template.name_template || template.code}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -427,8 +427,8 @@ export function CreateGeneratedTaskUserModal({
         ),
         footer: (
           <CustomModalFooter
-            onClose={handleClose}
-            isSubmitting={isSubmitting}
+            onCancel={handleClose}
+            isLoading={isSubmitting}
             submitText={isSubmitting ? "Creando..." : "Crear Tarea"}
             form="create-task-form"
           />
