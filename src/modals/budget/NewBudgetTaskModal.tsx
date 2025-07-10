@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { TaskSearchCombo } from "@/components/ui-custom/misc/TaskSearchCombo";
 import { Label } from "@/components/ui/label";
 import { Plus, Trash2, Package } from "lucide-react";
-import { useTaskSearch } from "@/hooks/use-task-search";
+import { useTaskSearch, useTaskSearchFilterOptions, TaskSearchFilters } from "@/hooks/use-task-search";
 import { useBudgetTasks } from "@/hooks/use-budget-tasks";
 import { useDebugTasks } from "@/hooks/use-debug-tasks";
 import { CreateGeneratedTaskUserModal } from "@/modals/user/CreateGeneratedTaskUserModal";
@@ -52,8 +52,16 @@ export default function NewBudgetTaskModal({
   const [searchQuery, setSearchQuery] = useState('');
   const [createTaskModalOpen, setCreateTaskModalOpen] = useState(false);
   const [pendingTasks, setPendingTasks] = useState<PendingTask[]>([]);
+  const [taskFilters, setTaskFilters] = useState<TaskSearchFilters>({ origin: 'all' });
   
-  const { data: tasks = [], isLoading: tasksLoading, refetch: refetchTasks } = useTaskSearch(searchQuery, organizationId, open);
+  const { data: tasks = [], isLoading: tasksLoading, refetch: refetchTasks } = useTaskSearch(
+    searchQuery, 
+    organizationId, 
+    taskFilters,
+    open
+  );
+  
+  const { data: filterOptions, isLoading: filterOptionsLoading } = useTaskSearchFilterOptions(organizationId);
   const budgetTasksHook = useBudgetTasks(budgetId);
   const { createBudgetTask, updateBudgetTask } = budgetTasksHook;
   const { data: userData } = useCurrentUser();
@@ -258,6 +266,10 @@ export default function NewBudgetTaskModal({
                       showCreateButton={!userData?.user_data?.user_type || userData.user_data.user_type !== 'admin'}
                       onCreateTask={handleCreateTask}
                       searchQuery={searchQuery}
+                      filters={taskFilters}
+                      onFiltersChange={setTaskFilters}
+                      filterOptions={filterOptions}
+                      isLoading={filterOptionsLoading}
                     />
                     {searchQuery.length >= 3 && tasks.length === 0 && !tasksLoading && !(!userData?.user_data?.user_type || userData.user_data.user_type !== 'admin') && (
                       <div className="text-center py-2">

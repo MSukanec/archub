@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Check, ChevronsUpDown, Plus } from 'lucide-react';
+import { Check, ChevronsUpDown, Plus, Filter, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Command,
@@ -13,10 +13,32 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface Option {
   value: string;
   label: string;
+}
+
+export interface TaskSearchFilters {
+  origin: 'all' | 'system' | 'organization';
+  rubro?: string;
+  category?: string;
+  subcategory?: string;
+}
+
+interface FilterOptions {
+  rubros: string[];
+  categories: string[];
+  subcategories: string[];
 }
 
 interface TaskSearchComboProps {
@@ -32,6 +54,11 @@ interface TaskSearchComboProps {
   showCreateButton?: boolean;
   onCreateTask?: () => void;
   searchQuery?: string;
+  // Nuevas props para filtros
+  filters?: TaskSearchFilters;
+  onFiltersChange?: (filters: TaskSearchFilters) => void;
+  filterOptions?: FilterOptions;
+  isLoading?: boolean;
 }
 
 export function TaskSearchCombo({
@@ -46,13 +73,19 @@ export function TaskSearchCombo({
   onSearchChange,
   showCreateButton = false,
   onCreateTask,
-  searchQuery = ""
+  searchQuery = "",
+  filters = { origin: 'all' },
+  onFiltersChange,
+  filterOptions,
+  isLoading = false
 }: TaskSearchComboProps) {
   const [open, setOpen] = useState(false);
-
-
+  const [showFilters, setShowFilters] = useState(false);
 
   const selectedOption = options.find((option) => option.value === value);
+
+  // Contar filtros activos
+  const activeFiltersCount = Object.values(filters).filter(f => f && f !== 'all').length;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -86,6 +119,135 @@ export function TaskSearchCombo({
             onValueChange={onSearchChange}
             className="text-xs h-8 border-0 bg-transparent placeholder:text-[var(--input-placeholder)] text-foreground"
           />
+
+          {/* Sección de Filtros */}
+          {onFiltersChange && filterOptions && (
+            <>
+              <div className="border-t border-border">
+                <div className="px-3 py-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Filter className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-xs font-medium text-foreground">Filtros</span>
+                      {activeFiltersCount > 0 && (
+                        <Badge variant="secondary" className="h-5 px-1.5 text-xs">
+                          {activeFiltersCount}
+                        </Badge>
+                      )}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowFilters(!showFilters)}
+                      className="h-6 w-6 p-0"
+                    >
+                      <ChevronsUpDown className={cn("w-3 h-3 transition-transform", showFilters && "rotate-180")} />
+                    </Button>
+                  </div>
+
+                  {showFilters && (
+                    <div className="mt-3 space-y-3">
+                      {/* Filtro por Origen */}
+                      <div className="space-y-1">
+                        <label className="text-xs font-medium text-muted-foreground">Origen</label>
+                        <Select
+                          value={filters.origin}
+                          onValueChange={(value: 'all' | 'system' | 'organization') => 
+                            onFiltersChange({ ...filters, origin: value })
+                          }
+                        >
+                          <SelectTrigger className="h-7 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Todo</SelectItem>
+                            <SelectItem value="system">Sistema</SelectItem>
+                            <SelectItem value="organization">Mi Organización</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Filtro por Rubro */}
+                      <div className="space-y-1">
+                        <label className="text-xs font-medium text-muted-foreground">Rubro</label>
+                        <Select
+                          value={filters.rubro || ""}
+                          onValueChange={(value) => 
+                            onFiltersChange({ ...filters, rubro: value || undefined })
+                          }
+                        >
+                          <SelectTrigger className="h-7 text-xs">
+                            <SelectValue placeholder="Todos los rubros" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">Todos los rubros</SelectItem>
+                            {filterOptions.rubros.map((rubro) => (
+                              <SelectItem key={rubro} value={rubro}>{rubro}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Filtro por Categoría */}
+                      <div className="space-y-1">
+                        <label className="text-xs font-medium text-muted-foreground">Categoría</label>
+                        <Select
+                          value={filters.category || ""}
+                          onValueChange={(value) => 
+                            onFiltersChange({ ...filters, category: value || undefined })
+                          }
+                        >
+                          <SelectTrigger className="h-7 text-xs">
+                            <SelectValue placeholder="Todas las categorías" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">Todas las categorías</SelectItem>
+                            {filterOptions.categories.map((category) => (
+                              <SelectItem key={category} value={category}>{category}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Filtro por Subcategoría */}
+                      <div className="space-y-1">
+                        <label className="text-xs font-medium text-muted-foreground">Subcategoría</label>
+                        <Select
+                          value={filters.subcategory || ""}
+                          onValueChange={(value) => 
+                            onFiltersChange({ ...filters, subcategory: value || undefined })
+                          }
+                        >
+                          <SelectTrigger className="h-7 text-xs">
+                            <SelectValue placeholder="Todas las subcategorías" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">Todas las subcategorías</SelectItem>
+                            {filterOptions.subcategories.map((subcategory) => (
+                              <SelectItem key={subcategory} value={subcategory}>{subcategory}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Botón para limpiar filtros */}
+                      {activeFiltersCount > 0 && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onFiltersChange({ origin: 'all' })}
+                          className="h-7 w-full text-xs"
+                        >
+                          <X className="w-3 h-3 mr-1" />
+                          Limpiar filtros
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
           
           {/* Solo mostrar CommandEmpty si no hay opciones Y hay una búsqueda activa */}
           {options.length === 0 && searchQuery.length >= 3 && (

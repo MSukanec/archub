@@ -15,7 +15,7 @@ import { NewBudgetModal } from '@/modals/budget/NewBudgetModal'
 import NewBudgetTaskModal from '@/modals/budget/NewBudgetTaskModal'
 import { useBudgets } from '@/hooks/use-budgets'
 import { useBudgetTasks } from '@/hooks/use-budget-tasks'
-import { useTaskSearch } from '@/hooks/use-task-search'
+import { useTaskSearch, useTaskSearchFilterOptions, TaskSearchFilters } from '@/hooks/use-task-search'
 import { useToast } from '@/hooks/use-toast'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
@@ -378,11 +378,20 @@ export default function ConstructionBudgets() {
     const [quickSearchQuery, setQuickSearchQuery] = useState('');
     const [isAddingQuickTask, setIsAddingQuickTask] = useState(false);
     
-    // Quick task search hook
+    // Estados para filtros de búsqueda de tareas
+    const [taskFilters, setTaskFilters] = useState<TaskSearchFilters>({ origin: 'all' });
+    
+    // Quick task search hook con filtros
     const { data: quickTasks = [], isLoading: quickTasksLoading } = useTaskSearch(
       quickSearchQuery, 
       userData?.organization?.id || '', 
+      taskFilters,
       true
+    );
+    
+    // Hook para opciones de filtros
+    const { data: filterOptions, isLoading: filterOptionsLoading } = useTaskSearchFilterOptions(
+      userData?.organization?.id || ''
     );
     
     // Hook para obtener unidades
@@ -552,6 +561,9 @@ export default function ConstructionBudgets() {
                   options={quickTaskOptions}
                   placeholder="Buscar tipo de tarea..."
                   isLoading={quickTasksLoading}
+                  filters={taskFilters}
+                  onFiltersChange={setTaskFilters}
+                  filterOptions={filterOptions}
                 />
               </div>
               <div className="w-24">

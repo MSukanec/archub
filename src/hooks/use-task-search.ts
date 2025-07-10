@@ -65,28 +65,66 @@ export interface TaskSearchResult {
   param_values: any;
   is_public: boolean;
   organization_id: string;
+  is_system?: boolean;
+  rubro_name?: string;
+  category_name?: string;
+  subcategory_name?: string;
 }
 
-export function useTaskSearch(searchTerm: string, organizationId: string, enabled: boolean = true) {
-  return useQuery({
-    queryKey: ["task-search", searchTerm, organizationId],
-    queryFn: async (): Promise<TaskSearchResult[]> => {
+export interface TaskSearchFilters {
+  origin: 'all' | 'system' | 'organization'; // Todo, Sistema, Mi Organización
+  rubro?: string;
+  category?: string;
+  subcategory?: string;
+}
 
-      
+export function useTaskSearch(
+  searchTerm: string, 
+  organizationId: string, 
+  filters: TaskSearchFilters = { origin: 'all' },
+  enabled: boolean = true
+) {
+  return useQuery({
+    queryKey: ["task-search", searchTerm, organizationId, filters],
+    queryFn: async (): Promise<TaskSearchResult[]> => {
       if (!supabase) {
         throw new Error("Supabase client not initialized");
       }
 
       if (!searchTerm || searchTerm.length < 3) {
-
         return [];
       }
 
-      // Obtener todas las tareas (SIN filtrar por organización para mostrar todas las tareas disponibles)
-      const { data: allTasks, error } = await supabase
+      // Construir query con filtros
+      let query = supabase
         .from("task_generated_view")
         .select("*")
         .limit(100);
+
+      // Filtrar por origen (Sistema/Organización)
+      if (filters.origin === 'system') {
+        query = query.eq('is_system', true);
+      } else if (filters.origin === 'organization') {
+        query = query.eq('organization_id', organizationId);
+      }
+      // Si es 'all', no aplicar filtros adicionales
+
+      // Filtrar por rubro si se especifica
+      if (filters.rubro) {
+        query = query.eq('rubro_name', filters.rubro);
+      }
+
+      // Filtrar por categoría si se especifica
+      if (filters.category) {
+        query = query.eq('category_name', filters.category);
+      }
+
+      // Filtrar por subcategoría si se especifica
+      if (filters.subcategory) {
+        query = query.eq('subcategory_name', filters.subcategory);
+      }
+
+      const { data: allTasks, error } = await query;
 
       if (error) {
         console.error("Error searching tasks:", error);
@@ -101,7 +139,7 @@ export function useTaskSearch(searchTerm: string, organizationId: string, enable
         })) || []
       );
 
-      // Ahora filtrar por término de búsqueda en el display_name procesado
+      // Filtrar por término de búsqueda en el display_name procesado
       const filteredData = processedData.filter(task => 
         task.display_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         task.code.toLowerCase().includes(searchTerm.toLowerCase())
@@ -110,5 +148,40 @@ export function useTaskSearch(searchTerm: string, organizationId: string, enable
       return filteredData;
     },
     enabled: enabled && !!supabase && !!organizationId && searchTerm.length >= 3
+  });
+}
+
+// Hook para obtener opciones de filtros
+export function useTaskSearchFilterOptions(organizationId: string) {
+  return useQuery({
+    queryKey: ["task-search-filter-options", organizationId],
+    queryFn: async () => {
+      if (!supabase) {
+        throw new Error("Supabase client not initialized");
+      }
+
+      // Obtener todos los valores únicos para los filtros
+      const { data: filterData, error } = await supabase
+        .from("task_generated_view")
+        .select("rubro_name, category_name, subcategory_name")
+        .limit(1000);
+
+      if (error) {
+        console.error("Error fetching filter options:", error);
+        throw error;
+      }
+
+      // Extraer valores únicos
+      const rubros = [...new Set(filterData?.map(item => item.rubro_name).filter(Boolean))].sort();
+      const categories = [...new Set(filterData?.map(item => item.category_name).filter(Boolean))].sort();
+      const subcategories = [...new Set(filterData?.map(item => item.subcategory_name).filter(Boolean))].sort();
+
+      return {
+        rubros,
+        categories,
+        subcategories
+      };
+    },
+    enabled: !!supabase && !!organizationId
   });
 }
