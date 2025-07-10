@@ -56,7 +56,10 @@ export function HierarchicalCategoryTree({
     const getTemplateCompletion = (cat: CategoryTreeNode): { completed: number; total: number } => {
       // Si es categoría final (3 letras) y tiene task groups, contar sus plantillas
       if (cat.code && cat.code.length === 3 && cat.taskGroups && cat.taskGroups.length > 0) {
-        const completed = cat.taskGroups.filter(tg => tg.template_id).length;
+        const completed = cat.taskGroups.filter(tg => {
+          const hasTemplate = tg.template_id !== null && tg.template_id !== undefined && tg.template_id !== '';
+          return hasTemplate;
+        }).length;
         const total = cat.taskGroups.length;
         return { completed, total };
       }
@@ -198,12 +201,13 @@ export function HierarchicalCategoryTree({
                   
                   <div className="flex items-center space-x-2 flex-1">
                     <span className="text-sm font-medium text-blue-800 dark:text-blue-200">{taskGroup.name}</span>
-                    <Badge variant="outline" className="text-xs px-1.5 py-0.5 bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-600">
-                      Grupo
-                    </Badge>
-                    {taskGroup.template_id && (
-                      <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
+                    {taskGroup.template_id ? (
+                      <Badge variant="secondary" className="text-xs px-1.5 py-0.5 bg-green-100 text-green-700 border-green-300 dark:bg-green-900/30 dark:text-green-300 dark:border-green-600">
                         Con Plantilla
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-xs px-1.5 py-0.5 bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-600">
+                        Sin Plantilla
                       </Badge>
                     )}
                   </div>
@@ -217,19 +221,6 @@ export function HierarchicalCategoryTree({
                       size="sm"
                       onClick={() => onTaskGroupTemplate(taskGroup, category)}
                       className="h-6 w-6 p-0 hover:bg-accent text-muted-foreground hover:text-foreground"
-                      style={{
-                        backgroundColor: 'var(--button-primary-bg)',
-                        color: 'var(--button-primary-text)',
-                        border: '1px solid var(--button-primary-border)'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = 'var(--button-primary-hover-bg)';
-                        e.currentTarget.style.color = 'var(--button-primary-hover-text)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'var(--button-primary-bg)';
-                        e.currentTarget.style.color = 'var(--button-primary-text)';
-                      }}
                       title="Plantilla"
                     >
                       <FileText className="h-3 w-3" />

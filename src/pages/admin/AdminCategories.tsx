@@ -101,11 +101,12 @@ export default function AdminCategories() {
       cats.forEach(cat => {
         totalCategories++;
         
-        // Contar task groups y sus plantillas
+        // Contar task groups y sus plantillas with debugging
         if (cat.taskGroups && cat.taskGroups.length > 0) {
           totalTaskGroups += cat.taskGroups.length;
           cat.taskGroups.forEach(tg => {
-            if (tg.template_id) {
+            const hasTemplate = tg.template_id !== null && tg.template_id !== undefined && tg.template_id !== '';
+            if (hasTemplate) {
               taskGroupsWithTemplates++;
             } else {
               taskGroupsWithoutTemplates++;

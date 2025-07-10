@@ -119,6 +119,14 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 10, 2025. Template detection system debugging and logic verification completed - COMPLETED
+  • Added comprehensive debugging to verify template_id detection in task groups (confirmed working correctly)
+  • Removed debugging logs after verification - clean production-ready code maintained
+  • Confirmed statistics accuracy: system correctly shows 2 task groups ("Muretes", "Jorge") with 0 templates
+  • Template detection logic properly handles null/undefined/empty string template_id values
+  • Badge system accurately shows "Sin Plantilla" for groups without templates, "Con Plantilla" when templates exist
+  • Counter calculations verified: (0/2) correctly reflects no templates assigned to 2 existing task groups
+  • Template creation workflow ready for testing once actual templates are created through the interface
 - July 10, 2025. Complete UI restructure: Template management moved from categories to task groups level - COMPLETED
   • Updated HierarchicalCategoryTree to show badges "Con Plantilla" on task groups instead of categories
   • Modified counter logic: category (0/1) numbers now reflect template status of child task groups

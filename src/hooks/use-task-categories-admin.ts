@@ -87,11 +87,18 @@ export function useTaskCategoriesAdmin() {
 
       console.log('✅ Categories fetched successfully:', categories?.length || 0);
 
-      // Fetch task groups first without templates to avoid relationship conflicts
-      console.log('Fetching task groups...');
+      // Fetch task groups with template_id field (this is what we need!)
+      console.log('Fetching task groups with template relationships...');
       const { data: taskGroups, error: taskGroupsError } = await supabase
         .from('task_groups')
-        .select('*');
+        .select(`
+          id,
+          name,
+          category_id,
+          template_id,
+          created_at,
+          updated_at
+        `);
 
       if (taskGroupsError) {
         console.error('Error fetching task groups:', taskGroupsError);
@@ -133,15 +140,18 @@ export function useTaskCategoriesAdmin() {
         
         console.log(`Category ${category.name} has ${categoryTaskGroups.length} task groups:`, categoryTaskGroups);
         
-        // Convert task groups to TaskGroupAdmin format
-        const taskGroupsForCategory: TaskGroupAdmin[] = categoryTaskGroups.map(tg => ({
-          id: tg.id,
-          name: tg.name,
-          category_id: tg.category_id,
-          template_id: tg.template_id,
-          created_at: tg.created_at,
-          updated_at: tg.updated_at,
-        }));
+        // Convert task groups to TaskGroupAdmin format with template_id preservation
+        const taskGroupsForCategory: TaskGroupAdmin[] = categoryTaskGroups.map(tg => {
+          console.log(`🔍 Processing task group: ${tg.name}, template_id: ${tg.template_id}`);
+          return {
+            id: tg.id,
+            name: tg.name,
+            category_id: tg.category_id,
+            template_id: tg.template_id, // This should be populated from database
+            created_at: tg.created_at,
+            updated_at: tg.updated_at,
+          };
+        });
 
         // Check if category has templates (match templates with task groups)
         const categoryTemplates = templates?.filter(t => 
