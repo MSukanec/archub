@@ -88,166 +88,164 @@ export function TaskSearchCombo({
   const activeFiltersCount = Object.values(filters).filter(f => f && f !== 'all').length;
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button
-          role="combobox"
-          aria-expanded={open}
-          className={cn(
-            // Styled EXACTLY like Input component from ui/input.tsx
-            "flex w-full text-xs leading-tight py-2 px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 placeholder:text-[var(--input-placeholder)] file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent disabled:opacity-60 disabled:cursor-not-allowed",
-            "justify-between items-center cursor-pointer",
-            !selectedOption && "text-[var(--input-placeholder)]",
-            className
-          )}
-          disabled={disabled}
-        >
-          <span className="truncate text-left">
-            {selectedOption ? selectedOption.label : placeholder}
-          </span>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </button>
-      </PopoverTrigger>
-      <PopoverContent 
-        className="p-0 z-[9999] bg-background border w-full" 
-        align="start"
-        style={{ width: 'var(--radix-popover-trigger-width)' }}
-      >
-        <Command className="bg-background rounded-md" shouldFilter={false}>
-          <CommandInput 
-            placeholder={searchPlaceholder} 
-            onValueChange={onSearchChange}
-            className="text-xs h-8 border-0 bg-transparent placeholder:text-[var(--input-placeholder)] text-foreground"
-          />
-
-          {/* Sección de Filtros */}
-          {onFiltersChange && filterOptions && (
-            <>
-              <div className="border-t border-border">
-                <div className="px-3 py-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Filter className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-xs font-medium text-foreground">Filtros</span>
-                      {activeFiltersCount > 0 && (
-                        <Badge variant="secondary" className="h-5 px-1.5 text-xs">
-                          {activeFiltersCount}
-                        </Badge>
-                      )}
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setShowFilters(!showFilters)}
-                      className="h-6 w-6 p-0"
-                    >
-                      <ChevronsUpDown className={cn("w-3 h-3 transition-transform", showFilters && "rotate-180")} />
-                    </Button>
-                  </div>
-
-                  {showFilters && (
-                    <div className="mt-3 space-y-3">
-                      {/* Filtro por Origen */}
-                      <div className="space-y-1">
-                        <label className="text-xs font-medium text-muted-foreground">Origen</label>
-                        <Select
-                          value={filters.origin}
-                          onValueChange={(value: 'all' | 'system' | 'organization') => 
-                            onFiltersChange({ ...filters, origin: value })
-                          }
-                        >
-                          <SelectTrigger className="h-7 text-xs">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">Todo</SelectItem>
-                            <SelectItem value="system">Sistema</SelectItem>
-                            <SelectItem value="organization">Mi Organización</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {/* Filtro por Rubro */}
-                      <div className="space-y-1">
-                        <label className="text-xs font-medium text-muted-foreground">Rubro</label>
-                        <Select
-                          value={filters.rubro || ""}
-                          onValueChange={(value) => 
-                            onFiltersChange({ ...filters, rubro: value || undefined })
-                          }
-                        >
-                          <SelectTrigger className="h-7 text-xs">
-                            <SelectValue placeholder="Todos los rubros" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="">Todos los rubros</SelectItem>
-                            {filterOptions.rubros.map((rubro) => (
-                              <SelectItem key={rubro} value={rubro}>{rubro}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {/* Filtro por Categoría */}
-                      <div className="space-y-1">
-                        <label className="text-xs font-medium text-muted-foreground">Categoría</label>
-                        <Select
-                          value={filters.category || ""}
-                          onValueChange={(value) => 
-                            onFiltersChange({ ...filters, category: value || undefined })
-                          }
-                        >
-                          <SelectTrigger className="h-7 text-xs">
-                            <SelectValue placeholder="Todas las categorías" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="">Todas las categorías</SelectItem>
-                            {filterOptions.categories.map((category) => (
-                              <SelectItem key={category} value={category}>{category}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {/* Filtro por Subcategoría */}
-                      <div className="space-y-1">
-                        <label className="text-xs font-medium text-muted-foreground">Subcategoría</label>
-                        <Select
-                          value={filters.subcategory || ""}
-                          onValueChange={(value) => 
-                            onFiltersChange({ ...filters, subcategory: value || undefined })
-                          }
-                        >
-                          <SelectTrigger className="h-7 text-xs">
-                            <SelectValue placeholder="Todas las subcategorías" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="">Todas las subcategorías</SelectItem>
-                            {filterOptions.subcategories.map((subcategory) => (
-                              <SelectItem key={subcategory} value={subcategory}>{subcategory}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {/* Botón para limpiar filtros */}
-                      {activeFiltersCount > 0 && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onFiltersChange({ origin: 'all' })}
-                          className="h-7 w-full text-xs"
-                        >
-                          <X className="w-3 h-3 mr-1" />
-                          Limpiar filtros
-                        </Button>
-                      )}
-                    </div>
-                  )}
-                </div>
+    <div className="flex items-center gap-2">
+      {/* Filtros a la izquierda */}
+      {onFiltersChange && filterOptions && (
+        <Popover open={showFilters} onOpenChange={setShowFilters}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className={cn(
+                "h-8 w-8 p-0 border-[var(--input-border)]",
+                activeFiltersCount > 0 && "bg-accent text-accent-foreground"
+              )}
+            >
+              <Filter className="w-4 h-4" />
+              {activeFiltersCount > 0 && (
+                <span className="absolute -top-1 -right-1 h-3 w-3 bg-accent text-accent-foreground rounded-full text-[8px] flex items-center justify-center">
+                  {activeFiltersCount}
+                </span>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-64 p-3" align="start">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-medium">Filtros</h4>
+                {activeFiltersCount > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onFiltersChange({ origin: 'all' })}
+                    className="h-6 px-2 text-xs"
+                  >
+                    <X className="w-3 h-3 mr-1" />
+                    Limpiar
+                  </Button>
+                )}
               </div>
-            </>
-          )}
+              
+              {/* Filtro por Origen */}
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-muted-foreground">Origen</label>
+                <Select
+                  value={filters.origin}
+                  onValueChange={(value: 'all' | 'system' | 'organization') => 
+                    onFiltersChange({ ...filters, origin: value })
+                  }
+                >
+                  <SelectTrigger className="h-7 text-xs border-[var(--input-border)]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todo</SelectItem>
+                    <SelectItem value="system">Sistema</SelectItem>
+                    <SelectItem value="organization">Mi Organización</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Filtro por Rubro */}
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-muted-foreground">Rubro</label>
+                <Select
+                  value={filters.rubro || ""}
+                  onValueChange={(value) => 
+                    onFiltersChange({ ...filters, rubro: value || undefined })
+                  }
+                >
+                  <SelectTrigger className="h-7 text-xs border-[var(--input-border)]">
+                    <SelectValue placeholder="Todos los rubros" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Todos los rubros</SelectItem>
+                    {filterOptions.rubros.map((rubro) => (
+                      <SelectItem key={rubro} value={rubro}>{rubro}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Filtro por Categoría */}
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-muted-foreground">Categoría</label>
+                <Select
+                  value={filters.category || ""}
+                  onValueChange={(value) => 
+                    onFiltersChange({ ...filters, category: value || undefined })
+                  }
+                >
+                  <SelectTrigger className="h-7 text-xs border-[var(--input-border)]">
+                    <SelectValue placeholder="Todas las categorías" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Todas las categorías</SelectItem>
+                    {filterOptions.categories.map((category) => (
+                      <SelectItem key={category} value={category}>{category}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Filtro por Subcategoría */}
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-muted-foreground">Subcategoría</label>
+                <Select
+                  value={filters.subcategory || ""}
+                  onValueChange={(value) => 
+                    onFiltersChange({ ...filters, subcategory: value || undefined })
+                  }
+                >
+                  <SelectTrigger className="h-7 text-xs border-[var(--input-border)]">
+                    <SelectValue placeholder="Todas las subcategorías" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Todas las subcategorías</SelectItem>
+                    {filterOptions.subcategories.map((subcategory) => (
+                      <SelectItem key={subcategory} value={subcategory}>{subcategory}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
+      )}
+
+      {/* Campo de búsqueda principal */}
+      <div className="flex-1">
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <button
+              role="combobox"
+              aria-expanded={open}
+              className={cn(
+                // Styled EXACTLY like Input component from ui/input.tsx
+                "flex w-full text-xs leading-tight py-2 px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 placeholder:text-[var(--input-placeholder)] file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent disabled:opacity-60 disabled:cursor-not-allowed",
+                "justify-between items-center cursor-pointer",
+                !selectedOption && "text-[var(--input-placeholder)]",
+                className
+              )}
+              disabled={disabled}
+            >
+              <span className="truncate text-left">
+                {selectedOption ? selectedOption.label : placeholder}
+              </span>
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent 
+            className="p-0 z-[9999] bg-background border border-[var(--input-border)]" 
+            align="start"
+            style={{ width: 'var(--radix-popover-trigger-width)' }}
+          >
+            <Command className="bg-background rounded-md border-[var(--input-border)]" shouldFilter={false}>
+              <CommandInput 
+                placeholder={searchPlaceholder} 
+                onValueChange={onSearchChange}
+                className="text-xs h-8 border-0 bg-transparent placeholder:text-[var(--input-placeholder)] text-foreground"
+              />
           
           {/* Solo mostrar CommandEmpty si no hay opciones Y hay una búsqueda activa */}
           {options.length === 0 && searchQuery.length >= 3 && (
@@ -300,12 +298,14 @@ export function TaskSearchCombo({
 
           {/* Estado vacío cuando no hay búsqueda activa */}
           {options.length === 0 && searchQuery.length < 3 && (
-            <div className="py-2 px-3 text-xs text-muted-foreground text-center">
+            <div className="py-2 px-3 text-xs text-[var(--input-placeholder)] text-center">
               Escribe al menos 3 caracteres para buscar
             </div>
           )}
-        </Command>
-      </PopoverContent>
-    </Popover>
+            </Command>
+          </PopoverContent>
+        </Popover>
+      </div>
+    </div>
   );
 }
