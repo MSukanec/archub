@@ -447,6 +447,18 @@ export function NewTaskParameterModal({
                                       type="button"
                                       size="sm"
                                       variant="ghost"
+                                      onClick={() => {
+                                        setSelectedGroup(group);
+                                        setIsAssignmentModalOpen(true);
+                                      }}
+                                      className="h-7 w-7 p-0"
+                                    >
+                                      <CheckSquare className="w-3 h-3" />
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="ghost"
                                       onClick={() => handleEditGroup(group)}
                                       className="h-7 w-7 p-0"
                                     >
@@ -460,18 +472,6 @@ export function NewTaskParameterModal({
                                       className="h-7 w-7 p-0"
                                     >
                                       <Trash2 className="w-3 h-3" />
-                                    </Button>
-                                    <Button
-                                      type="button"
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => {
-                                        setSelectedGroup(group);
-                                        setIsAssignmentModalOpen(true);
-                                      }}
-                                      className="h-7 w-7 p-0"
-                                    >
-                                      <CheckSquare className="w-3 h-3" />
                                     </Button>
                                   </div>
                                 )}

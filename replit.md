@@ -119,6 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 10, 2025. Complete budget synchronization fix with comprehensive task parameter query invalidation - COMPLETED
+  • Added missing 'task-parameter-values' and 'all-task-parameter-values' invalidations to all template editor mutations
+  • Fixed update template unit mutation to include budget-affecting cache invalidations
+  • Enhanced add parameter mutation with comprehensive query invalidation for real-time budget updates
+  • Corrected delete parameter mutation to properly refresh budget page data without F5 requirement
+  • Updated create template mutation to invalidate all parameter-related queries for immediate synchronization
+  • Fixed delete template mutation to ensure budget page reflects template deletions instantly
+  • Budget page (PRESUPUESTOS) now synchronizes perfectly with all template and parameter changes
+  • System eliminates need for manual page refresh after any template or parameter modifications
 - July 10, 2025. Admin sidebar reordering and task_code automatic storage implementation - COMPLETED
   • Reordered admin sidebar TAREAS section: Tareas Generadas → Parámetros de Tareas → Categorías de Tareas (removed Plantillas de Tareas)
   • Applied consistent ordering in both desktop SidebarSubmenu.tsx and mobile MobileMenu.tsx

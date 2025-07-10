@@ -69,6 +69,8 @@ export function useCreateTaskTemplate() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-task-templates'] });
       queryClient.invalidateQueries({ queryKey: ['admin-task-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
       toast({
         title: "Plantilla Creada",
         description: "La plantilla de tarea se ha creado exitosamente",
@@ -106,6 +108,8 @@ export function useUpdateTaskTemplate() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-task-templates'] });
       queryClient.invalidateQueries({ queryKey: ['admin-task-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
       toast({
         title: "Plantilla Actualizada",
         description: "La plantilla se ha actualizado exitosamente",
@@ -139,6 +143,8 @@ export function useDeleteTaskTemplate() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-task-templates'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
       toast({
         title: "Plantilla Eliminada",
         description: "La plantilla se ha eliminado exitosamente",

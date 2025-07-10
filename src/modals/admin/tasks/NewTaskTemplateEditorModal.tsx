@@ -192,6 +192,8 @@ export default function TaskTemplateEditorModal({
       queryClient.invalidateQueries({ queryKey: ['admin-task-templates'] });
       queryClient.invalidateQueries({ queryKey: ['admin-task-categories'] });
       queryClient.invalidateQueries({ queryKey: ['task-groups'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
       toast({
         title: "Plantilla actualizada",
         description: "La vista previa se ha guardado correctamente",
@@ -217,6 +219,8 @@ export default function TaskTemplateEditorModal({
       queryClient.invalidateQueries({ queryKey: ['admin-task-templates'] });
       queryClient.invalidateQueries({ queryKey: ['admin-task-categories'] });
       queryClient.invalidateQueries({ queryKey: ['task-groups'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
       toast({
         title: "Unidad actualizada",
         description: "La unidad se ha guardado correctamente",
@@ -241,6 +245,8 @@ export default function TaskTemplateEditorModal({
       queryClient.invalidateQueries({ queryKey: ['task-template', taskGroupId || categoryCode] });
       queryClient.invalidateQueries({ queryKey: ['admin-task-categories'] });
       queryClient.invalidateQueries({ queryKey: ['task-groups'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
       toast({
         title: 'Parámetro eliminado',
         description: 'Parámetro eliminado exitosamente de la plantilla'
@@ -395,6 +401,8 @@ export default function TaskTemplateEditorModal({
       queryClient.invalidateQueries({ queryKey: ['task-template', taskGroupId || categoryCode] });
       queryClient.invalidateQueries({ queryKey: ['admin-task-categories'] });
       queryClient.invalidateQueries({ queryKey: ['task-groups'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
       setNewParameterId('');
       setNewOptionGroupId('');
       toast({
@@ -483,6 +491,8 @@ export default function TaskTemplateEditorModal({
       queryClient.invalidateQueries({ queryKey: ['task-categories-admin'] }); // CRITICAL: For categories tree
       queryClient.invalidateQueries({ queryKey: ['admin-task-categories'] });
       queryClient.invalidateQueries({ queryKey: ['task-groups'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
       toast({
         title: 'Plantilla creada',
         description: `Plantilla creada exitosamente para ${taskGroupName || categoryName}`
@@ -535,6 +545,8 @@ export default function TaskTemplateEditorModal({
       queryClient.invalidateQueries({ queryKey: ['admin-task-templates'] });
       queryClient.invalidateQueries({ queryKey: ['admin-task-categories'] });
       queryClient.invalidateQueries({ queryKey: ['task-groups'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
       toast({
         title: 'Plantilla eliminada',
         description: 'Plantilla y todos sus parámetros eliminados exitosamente'

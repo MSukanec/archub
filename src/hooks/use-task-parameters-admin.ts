@@ -335,6 +335,7 @@ export function useCreateTaskParameterOption() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin-clean'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
       queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
       toast({
         title: 'Opción creada',
@@ -375,6 +376,7 @@ export function useUpdateTaskParameterOption() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin-clean'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
       queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
       toast({
         title: 'Opción actualizada',
@@ -408,6 +410,7 @@ export function useDeleteTaskParameterOption() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin-clean'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
       queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
       toast({
         title: 'Opción eliminada',
