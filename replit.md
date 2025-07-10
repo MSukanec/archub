@@ -119,6 +119,14 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 10, 2025. Complete template generation system using task group names and code cleanup - COMPLETED
+  • Changed template generation logic to use task_groups.name instead of category names for proper naming convention
+  • Templates now generate as "Task Group Name {{parameter}}." format (e.g., "Muretes {{brick-type}}." not "Muros simples {{brick-type}}.")
+  • Fixed generatePreview() function to use taskGroupName parameter when available for accurate template display
+  • Updated all mutation functions to pass taskGroupName correctly for both preview and database operations
+  • Maintained backward compatibility: legacy category-based templates still supported for existing data
+  • Removed all debugging console.log statements for production-ready code quality
+  • Template creation workflow: select task group → create template → template uses group name for accurate generation
 - July 10, 2025. Complete category expansion state preservation and task group deletion cascade functionality - COMPLETED
   • Fixed category expansion state preservation to prevent collapse when creating new task groups
   • Added intelligent auto-expansion only on initial load, preserving user-expanded state during operations

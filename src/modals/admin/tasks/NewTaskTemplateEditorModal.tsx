@@ -124,19 +124,22 @@ export default function TaskTemplateEditorModal({
     })
   );
 
-  // Generate dynamic preview based on category name and added parameters
+  // Generate dynamic preview based on task group name and added parameters
   const generatePreview = () => {
-    if (!template) return `${categoryName}.`;
+    // NEW: Use task group name instead of category name for template generation
+    const baseName = taskGroupName || categoryName;
+    
+    if (!template) return `${baseName}.`;
     
     if (templateParameters.length === 0) {
-      return `${categoryName}.`;
+      return `${baseName}.`;
     }
     
     const parameterPlaceholders = templateParameters
       .map(tp => `{{${tp.task_parameters?.name || 'parámetro'}}}`)
       .join(' ');
     
-    return `${categoryName} ${parameterPlaceholders}.`;
+    return `${baseName} ${parameterPlaceholders}.`;
   };
 
   // Update parameter positions mutation
@@ -406,12 +409,12 @@ export default function TaskTemplateEditorModal({
     mutationFn: async () => {
       if (taskGroupId) {
         // NEW: Crear plantilla para task group
-        console.log('🚀 Creando plantilla para task_group_id:', taskGroupId);
+
         const insertData = {
-          name_template: `${taskGroupName || categoryName}.`,
+          name_template: `${taskGroupName}.`,
           task_group_id: taskGroupId
         };
-        console.log('🚀 Datos a insertar:', insertData);
+
         
         const { data, error } = await supabase
           .from('task_templates')
@@ -419,23 +422,22 @@ export default function TaskTemplateEditorModal({
           .select()
           .single();
         
-        console.log('🚀 Resultado creación plantilla:', { data, error });
+
         if (error) throw error;
         
         // CRITICAL: Actualizar el template_id en task_groups
-        console.log('🔗 Actualizando template_id en task_groups...');
+
         const { error: updateError } = await supabase
           .from('task_groups')
           .update({ template_id: data.id })
           .eq('id', taskGroupId);
         
-        console.log('🔗 Resultado actualización task_groups:', { updateError });
+
         if (updateError) throw updateError;
         
         return data;
       } else {
         // LEGACY: Crear plantilla para categoría - Solo campos que existen en la tabla
-        console.log('🚀 Creando plantilla LEGACY para categoryName:', categoryName);
         const { data, error } = await supabase
           .from('task_templates')
           .insert({
@@ -444,7 +446,7 @@ export default function TaskTemplateEditorModal({
           .select()
           .single();
         
-        console.log('🚀 Resultado creación plantilla LEGACY:', { data, error });
+
         if (error) throw error;
         return data;
       }
@@ -479,13 +481,13 @@ export default function TaskTemplateEditorModal({
       
       // CRITICAL: Clear template_id from task_groups before deleting template
       if (taskGroupId) {
-        console.log('🗑️ Limpiando template_id en task_groups...');
+
         const { error: clearError } = await supabase
           .from('task_groups')
           .update({ template_id: null })
           .eq('id', taskGroupId);
         
-        console.log('🗑️ Resultado limpieza task_groups:', { clearError });
+
         if (clearError) throw clearError;
       }
       
