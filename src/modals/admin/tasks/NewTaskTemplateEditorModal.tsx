@@ -25,6 +25,8 @@ interface TaskTemplateEditorModalProps {
   categoryId: string;
   categoryCode: string;
   categoryName: string;
+  taskGroupId?: string; // NEW: Para plantillas de task groups
+  taskGroupName?: string; // NEW: Para mostrar el nombre del grupo
 }
 
 interface TaskTemplateParameterWithParameter extends TaskTemplateParameter {
@@ -103,7 +105,9 @@ export default function TaskTemplateEditorModal({
   onClose,
   categoryId,
   categoryCode,
-  categoryName
+  categoryName,
+  taskGroupId,
+  taskGroupName
 }: TaskTemplateEditorModalProps) {
   const [newParameterId, setNewParameterId] = useState('');
   const [newOptionGroupId, setNewOptionGroupId] = useState('');
@@ -155,6 +159,9 @@ export default function TaskTemplateEditorModal({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-template-parameters', template?.id] });
+      queryClient.invalidateQueries({ queryKey: ['task-template', taskGroupId || categoryCode] });
+      queryClient.invalidateQueries({ queryKey: ['admin-task-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['task-groups'] });
     }
   });
 
@@ -171,8 +178,10 @@ export default function TaskTemplateEditorModal({
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['task-template', categoryCode] });
+      queryClient.invalidateQueries({ queryKey: ['task-template', taskGroupId || categoryCode] });
       queryClient.invalidateQueries({ queryKey: ['admin-task-templates'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-task-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['task-groups'] });
       toast({
         title: "Plantilla actualizada",
         description: "La vista previa se ha guardado correctamente",
@@ -194,8 +203,10 @@ export default function TaskTemplateEditorModal({
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['task-template', categoryCode] });
+      queryClient.invalidateQueries({ queryKey: ['task-template', taskGroupId || categoryCode] });
       queryClient.invalidateQueries({ queryKey: ['admin-task-templates'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-task-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['task-groups'] });
       toast({
         title: "Unidad actualizada",
         description: "La unidad se ha guardado correctamente",
@@ -217,7 +228,9 @@ export default function TaskTemplateEditorModal({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-template-parameters', template?.id] });
       queryClient.invalidateQueries({ queryKey: ['admin-task-templates'] });
-      queryClient.invalidateQueries({ queryKey: ['task-template', categoryCode] });
+      queryClient.invalidateQueries({ queryKey: ['task-template', taskGroupId || categoryCode] });
+      queryClient.invalidateQueries({ queryKey: ['admin-task-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['task-groups'] });
       toast({
         title: 'Parámetro eliminado',
         description: 'Parámetro eliminado exitosamente de la plantilla'
@@ -245,18 +258,31 @@ export default function TaskTemplateEditorModal({
     }
   };
 
-  // Check if template exists
+  // Check if template exists - NEW: Buscar por task_group_id en lugar de categoryCode
   const { data: template, isLoading: templateLoading, error: templateError } = useQuery<TaskTemplate | null>({
-    queryKey: ['task-template', categoryCode],
+    queryKey: ['task-template', taskGroupId || categoryCode],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('task_templates')
-        .select('*')
-        .eq('code', categoryCode)
-        .maybeSingle();
-      
-      if (error && error.code !== 'PGRST116') throw error;
-      return data;
+      if (taskGroupId) {
+        // NEW: Buscar plantilla por task_group_id
+        const { data, error } = await supabase
+          .from('task_templates')
+          .select('*')
+          .eq('task_group_id', taskGroupId)
+          .maybeSingle();
+        
+        if (error && error.code !== 'PGRST116') throw error;
+        return data;
+      } else {
+        // LEGACY: Buscar por categoryCode (para compatibilidad)
+        const { data, error } = await supabase
+          .from('task_templates')
+          .select('*')
+          .eq('code', categoryCode)
+          .maybeSingle();
+        
+        if (error && error.code !== 'PGRST116') throw error;
+        return data;
+      }
     },
     enabled: open
   });
@@ -352,7 +378,9 @@ export default function TaskTemplateEditorModal({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-template-parameters', template?.id] });
       queryClient.invalidateQueries({ queryKey: ['admin-task-templates'] });
-      queryClient.invalidateQueries({ queryKey: ['task-template', categoryCode] });
+      queryClient.invalidateQueries({ queryKey: ['task-template', taskGroupId || categoryCode] });
+      queryClient.invalidateQueries({ queryKey: ['admin-task-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['task-groups'] });
       setNewParameterId('');
       setNewOptionGroupId('');
       toast({
@@ -369,28 +397,46 @@ export default function TaskTemplateEditorModal({
     }
   });
 
-  // Create template mutation
+  // Create template mutation - NEW: Crear plantilla para task group
   const createTemplateMutation = useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase
-        .from('task_templates')
-        .insert({
-          code: categoryCode,
-          name_template: `${categoryName}.`,
-          category_id: categoryId
-        })
-        .select()
-        .single();
-      
-      if (error) throw error;
-      return data;
+      if (taskGroupId) {
+        // NEW: Crear plantilla para task group
+        const { data, error } = await supabase
+          .from('task_templates')
+          .insert({
+            name_template: `${taskGroupName || categoryName}.`,
+            task_group_id: taskGroupId
+          })
+          .select()
+          .single();
+        
+        if (error) throw error;
+        return data;
+      } else {
+        // LEGACY: Crear plantilla para categoría
+        const { data, error } = await supabase
+          .from('task_templates')
+          .insert({
+            code: categoryCode,
+            name_template: `${categoryName}.`,
+            category_id: categoryId
+          })
+          .select()
+          .single();
+        
+        if (error) throw error;
+        return data;
+      }
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['task-template', categoryCode] });
+      queryClient.invalidateQueries({ queryKey: ['task-template', taskGroupId || categoryCode] });
       queryClient.invalidateQueries({ queryKey: ['task-template-parameters'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-task-categories'] }); // Refresh categories to show template status
+      queryClient.invalidateQueries({ queryKey: ['task-groups'] }); // Refresh task groups
       toast({
         title: 'Plantilla creada',
-        description: `Plantilla ${categoryCode} creada exitosamente`
+        description: `Plantilla creada exitosamente para ${taskGroupName || categoryName}`
       });
     },
     onError: (error: any) => {
@@ -420,9 +466,11 @@ export default function TaskTemplateEditorModal({
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['task-template', categoryCode] });
+      queryClient.invalidateQueries({ queryKey: ['task-template', taskGroupId || categoryCode] });
       queryClient.invalidateQueries({ queryKey: ['task-template-parameters'] });
       queryClient.invalidateQueries({ queryKey: ['admin-task-templates'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-task-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['task-groups'] });
       toast({
         title: 'Plantilla eliminada',
         description: 'Plantilla y todos sus parámetros eliminados exitosamente'
@@ -444,8 +492,8 @@ export default function TaskTemplateEditorModal({
       {{
         header: (
           <CustomModalHeader
-            title={`Editor de Plantilla - ${categoryCode}`}
-            subtitle={`${categoryName} • Gestionar parámetros de la plantilla`}
+            title={`Editor de Plantilla - ${taskGroupName || categoryName}`}
+            subtitle={`${taskGroupName ? `Grupo: ${taskGroupName}` : categoryName} • Gestionar parámetros de la plantilla`}
             onClose={onClose}
           />
         ),

@@ -26,6 +26,7 @@ interface HierarchicalCategoryTreeProps {
   onAddTaskGroup?: (category: CategoryTreeNode) => void;
   onEditTaskGroup?: (taskGroup: TaskGroupAdmin, category: CategoryTreeNode) => void;
   onDeleteTaskGroup?: (taskGroupId: string) => void;
+  onTaskGroupTemplate?: (taskGroup: TaskGroupAdmin, category: CategoryTreeNode) => void;
   level?: number;
 }
 
@@ -39,6 +40,7 @@ export function HierarchicalCategoryTree({
   onAddTaskGroup,
   onEditTaskGroup,
   onDeleteTaskGroup,
+  onTaskGroupTemplate,
   level = 0
 }: HierarchicalCategoryTreeProps) {
   const hasChildren = (category: CategoryTreeNode) => category.children && category.children.length > 0;
@@ -124,7 +126,7 @@ export function HierarchicalCategoryTree({
             </div>
           </div>
           
-          {/* Right side: Action buttons - +, PLANTILLA, EDITAR, BORRAR */}
+          {/* Right side: Action buttons - +, EDITAR, BORRAR */}
           <div className="flex items-center space-x-1" onClick={(e) => e.stopPropagation()}>
             {/* Solo mostrar botón + (Agregar Grupo) en categorías finales (3 letras) */}
             {category.code && category.code.length === 3 && onAddTaskGroup && (
@@ -136,19 +138,6 @@ export function HierarchicalCategoryTree({
                 title="Agregar Grupo de Tareas"
               >
                 <Plus className="h-3 w-3" />
-              </Button>
-            )}
-            
-            {/* Solo mostrar botón PLANTILLA en categorías finales (3 letras) */}
-            {category.code && category.code.length === 3 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onTemplate(category)}
-                className="h-6 w-6 p-0 hover:bg-accent text-muted-foreground hover:text-foreground"
-                title="Plantilla"
-              >
-                <FileText className="h-3 w-3" />
               </Button>
             )}
             
@@ -187,6 +176,7 @@ export function HierarchicalCategoryTree({
               onAddTaskGroup={onAddTaskGroup}
               onEditTaskGroup={onEditTaskGroup}
               onDeleteTaskGroup={onDeleteTaskGroup}
+              onTaskGroupTemplate={onTaskGroupTemplate}
               level={currentLevel + 1}
             />
           </div>
@@ -217,6 +207,18 @@ export function HierarchicalCategoryTree({
                 
                 {/* Right side: Task group actions */}
                 <div className="flex items-center space-x-1">
+                  {onTaskGroupTemplate && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onTaskGroupTemplate(taskGroup, category)}
+                      className="h-6 w-6 p-0 hover:bg-blue-200 text-blue-600 hover:text-blue-800 dark:hover:bg-blue-800/50 dark:text-blue-400 dark:hover:text-blue-200"
+                      title="Plantilla"
+                    >
+                      <FileText className="h-3 w-3" />
+                    </Button>
+                  )}
+
                   {onEditTaskGroup && (
                     <Button
                       variant="ghost"

@@ -191,12 +191,35 @@ export default function AdminCategories() {
     }
   };
 
-  // Handle template action - solo para categorías finales (3 letras)
+  // Handle template action - DEPRECATED: solo para categorías finales (3 letras)
   const handleTemplateAction = (category: TaskCategoryAdmin) => {
     if (category.code && category.code.length === 3) {
       setTemplateCategory(category);
       setIsTemplateModalOpen(true);
     }
+  };
+
+  // Handle task group template action - NEW: plantillas ahora van a nivel de grupo
+  const handleTaskGroupTemplate = (taskGroup: TaskGroupAdmin, category: TaskCategoryAdmin) => {
+    console.log('🎯 Opening template modal for task group:', taskGroup.name, 'in category:', category.name);
+    // Convertir TaskGroupAdmin a TaskCategoryAdmin para mantener compatibilidad con el modal
+    const groupAsCategory: TaskCategoryAdmin = {
+      id: taskGroup.id,
+      name: taskGroup.name,
+      code: category.code, // Usar el código de la categoría padre
+      parent_id: category.id,
+      children: [],
+      taskGroups: [],
+      template: taskGroup.template_id ? { 
+        id: taskGroup.template_id, 
+        name_template: '', 
+        task_group_name: taskGroup.name 
+      } : null,
+      created_at: taskGroup.created_at,
+      updated_at: taskGroup.updated_at
+    };
+    setTemplateCategory(groupAsCategory);
+    setIsTemplateModalOpen(true);
   };
 
   // Handle add task group
@@ -364,6 +387,7 @@ export default function AdminCategories() {
               onAddTaskGroup={handleAddTaskGroup}
               onEditTaskGroup={handleEditTaskGroup}
               onDeleteTaskGroup={setDeleteTaskGroupId}
+              onTaskGroupTemplate={handleTaskGroupTemplate}
             />
           )}
         </div>

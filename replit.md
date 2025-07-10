@@ -119,6 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 10, 2025. Completed TaskTemplateEditorModal migration to work with task groups (task_group_id) instead of categories - COMPLETED
+  • Modal now fully supports creating and managing templates for task groups using task_group_id field
+  • Updated all database queries: template search by task_group_id, template creation with task_group_id column
+  • Fixed modal title and subtitle to display task group name when working with task groups
+  • Corrected all cache invalidation keys to use taskGroupId || categoryCode for proper query cache management
+  • Added comprehensive invalidation for ['task-groups'] and ['admin-task-categories'] query keys
+  • Template creation mutation supports both new (task_group_id) and legacy (categoryCode) approaches
+  • All CRUD operations (create, update, delete template and parameters) now work seamlessly with task group context
+  • Modal fully functional for both category-level templates (legacy) and task group-level templates (new architecture)
 - July 10, 2025. Fixed layout background and dark mode compatibility for Organization Summary page - COMPLETED
   • Changed Layout background from bg-background to --layout-bg CSS variable for proper theme consistency
   • Updated Organization Summary welcome card to use semantic CSS variables: text-foreground, text-muted-foreground, border-border
