@@ -159,6 +159,7 @@ export default function ProjectHeroImage({
               src={currentImageUrl}
               alt="Imagen principal del proyecto"
               className="w-full h-full object-cover"
+              key={currentImageUrl} // Force re-render when URL changes
             />
             
             {/* Overlay with actions */}

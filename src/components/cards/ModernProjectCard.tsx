@@ -123,6 +123,7 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
               src={project.project_data.project_image_url} 
               alt={project.name}
               className="w-full h-full object-cover rounded-lg"
+              key={project.project_data.project_image_url} // Force re-render when URL changes
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-blue-200/50 rounded-lg">

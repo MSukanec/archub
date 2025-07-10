@@ -40,13 +40,16 @@ export async function uploadProjectImage(
       throw new Error(`Error al subir imagen: ${uploadError.message}`);
     }
 
-    // Get public URL
+    // Get public URL with cache busting timestamp
     const { data: urlData } = supabase.storage
       .from('project-image')
       .getPublicUrl(filePath);
 
+    // Add timestamp to prevent browser caching of old images
+    const urlWithCacheBust = `${urlData.publicUrl}?t=${Date.now()}`;
+
     return {
-      file_url: urlData.publicUrl,
+      file_url: urlWithCacheBust,
       file_path: filePath
     };
   } catch (error) {
