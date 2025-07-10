@@ -300,170 +300,166 @@ export default function ProjectDashboard() {
           </div>
         </div>
 
-        {/* Contenido en 3 columnas */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Actividad Reciente */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5" />
-                Actividad Reciente
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {(!recentActivity?.siteLogs?.length && !recentActivity?.documents?.length) ? (
-                <div className="text-center py-8">
-                  <CheckCircle2 className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="font-medium mb-2">Sin actividad reciente</h3>
-                  <p className="text-sm text-muted-foreground">
-                    La actividad del proyecto aparecerá aquí
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {/* Recent Documents */}
-                  {recentActivity?.documents?.map((doc) => (
-                    <div key={doc.id} className="flex items-start gap-3 p-3 rounded-lg border">
-                      <FileText className="h-4 w-4 text-blue-600 mt-0.5" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{doc.file_name || 'Documento sin nombre'}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {doc.creator?.full_name || 'Usuario'} • {format(new Date(doc.created_at), 'dd/MM/yyyy', { locale: es })}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                  
-                  {/* Recent Site Logs */}
-                  {recentActivity?.siteLogs?.map((log) => (
-                    <div key={log.id} className="flex items-start gap-3 p-3 rounded-lg border">
-                      <Construction className="h-4 w-4 text-orange-600 mt-0.5" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{log.comments || 'Registro de obra'}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {log.creator?.full_name || 'Usuario'} • {format(new Date(log.created_at), 'dd/MM/yyyy', { locale: es })}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Información del Proyecto */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FolderOpen className="h-5 w-5" />
-                Información del Proyecto
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {projectSummary?.project ? (
+        {/* Información del Proyecto - Full Width */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FolderOpen className="h-5 w-5" />
+              Información del Proyecto
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {projectSummary?.project ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-4">
                   <div>
-                    <h3 className="font-medium">{projectSummary.project.name}</h3>
+                    <h3 className="font-medium text-lg">{projectSummary.project.name}</h3>
                     <p className="text-sm text-muted-foreground">
                       {projectSummary.project.description || 'Sin descripción'}
                     </p>
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      Creado el {format(new Date(projectSummary.project.created_at), 'dd/MM/yyyy', { locale: es })}
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Building className="h-4 w-4 text-muted-foreground" />
-                      {getStatusBadge(projectSummary.project.status || 'active')}
-                    </div>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span>Creado el {format(new Date(projectSummary.project.created_at), 'dd/MM/yyyy', { locale: es })}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Building className="h-4 w-4 text-muted-foreground" />
+                    <span>Estado: </span>
+                    {getStatusBadge(projectSummary.project.status || 'active')}
                   </div>
                 </div>
-              ) : (
-                <div className="text-center py-8">
-                  <FolderOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="font-medium mb-2">Cargando información</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Obteniendo datos del proyecto...
-                  </p>
+                <div className="flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-muted-foreground mb-1">
+                      {((projectSummary?.totalDocuments || 0) + (projectSummary?.totalSiteLogs || 0) + (projectSummary?.totalBudgets || 0))}
+                    </div>
+                    <div className="text-xs text-muted-foreground">Total elementos</div>
+                  </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Acciones Rápidas */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Zap className="h-5 w-5" />
-                Acciones Rápidas
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => {
-                    setSidebarContext('design')
-                    navigate('/design/documentation')
-                  }}
-                >
-                  <PenTool className="h-4 w-4 mr-2" />
-                  Crear Documento de Diseño
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => {
-                    setSidebarContext('construction')
-                    navigate('/construction/budgets')
-                  }}
-                >
-                  <Calculator className="h-4 w-4 mr-2" />
-                  Gestionar Presupuestos
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => {
-                    setSidebarContext('construction')
-                    navigate('/construction/logs')
-                  }}
-                >
-                  <FileText className="h-4 w-4 mr-2" />
-                  Crear Registro de Obra
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => {
-                    setSidebarContext('finances')
-                    navigate('/finances/movements')
-                  }}
-                >
-                  <DollarSign className="h-4 w-4 mr-2" />
-                  Agregar Movimiento
-                </Button>
-
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => {
-                    setSidebarContext('finances')
-                    navigate('/finances/installments')
-                  }}
-                >
-                  <CreditCard className="h-4 w-4 mr-2" />
-                  Registrar Aporte
-                </Button>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            ) : (
+              <div className="text-center py-8">
+                <FolderOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="font-medium mb-2">Cargando información</h3>
+                <p className="text-sm text-muted-foreground">
+                  Obteniendo datos del proyecto...
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Acciones Rápidas - Full Width */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Zap className="h-5 w-5" />
+              Acciones Rápidas
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Button
+                variant="outline"
+                className="h-16 flex flex-col gap-2"
+                onClick={() => {
+                  setSidebarContext('design')
+                  navigate('/design/documentation')
+                }}
+              >
+                <PenTool className="h-5 w-5" />
+                <span className="text-sm">Crear Documento de Diseño</span>
+              </Button>
+              
+              <Button
+                variant="outline"
+                className="h-16 flex flex-col gap-2"
+                onClick={() => {
+                  setSidebarContext('construction')
+                  navigate('/construction/budgets')
+                }}
+              >
+                <Calculator className="h-5 w-5" />
+                <span className="text-sm">Gestionar Presupuestos</span>
+              </Button>
+              
+              <Button
+                variant="outline"
+                className="h-16 flex flex-col gap-2"
+                onClick={() => {
+                  setSidebarContext('construction')
+                  navigate('/construction/logs')
+                }}
+              >
+                <FileText className="h-5 w-5" />
+                <span className="text-sm">Crear Registro de Obra</span>
+              </Button>
+              
+              <Button
+                variant="outline"
+                className="h-16 flex flex-col gap-2"
+                onClick={() => {
+                  setSidebarContext('finances')
+                  navigate('/finances/movements')
+                }}
+              >
+                <DollarSign className="h-5 w-5" />
+                <span className="text-sm">Agregar Movimiento</span>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Actividad Reciente - Full Width */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5" />
+              Actividad Reciente
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {(!recentActivity?.siteLogs?.length && !recentActivity?.documents?.length) ? (
+              <div className="text-center py-8">
+                <CheckCircle2 className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="font-medium mb-2">Sin actividad reciente</h3>
+                <p className="text-sm text-muted-foreground">
+                  La actividad del proyecto aparecerá aquí
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* Recent Documents */}
+                {recentActivity?.documents?.map((doc) => (
+                  <div key={doc.id} className="flex items-start gap-3 p-4 rounded-lg border">
+                    <FileText className="h-4 w-4 text-blue-600 mt-0.5" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{doc.file_name || 'Documento sin nombre'}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {doc.creator?.full_name || 'Usuario'} • {format(new Date(doc.created_at), 'dd/MM/yyyy', { locale: es })}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+                
+                {/* Recent Site Logs */}
+                {recentActivity?.siteLogs?.map((log) => (
+                  <div key={log.id} className="flex items-start gap-3 p-4 rounded-lg border">
+                    <Construction className="h-4 w-4 text-orange-600 mt-0.5" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{log.comments || 'Registro de obra'}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {log.creator?.full_name || 'Usuario'} • {format(new Date(log.created_at), 'dd/MM/yyyy', { locale: es })}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </Layout>
   )
