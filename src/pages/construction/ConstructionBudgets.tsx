@@ -655,18 +655,18 @@ export default function ConstructionBudgets() {
                     className="rounded"
                   />
                 </th>
+                <th className="w-16 p-2 text-left text-xs font-medium">ID</th>
                 {!groupTasksByRubro && (
                   <th className="p-2 text-left text-xs font-medium">Rubro</th>
                 )}
-                <th className="w-16 p-2 text-left text-xs font-medium">ID</th>
                 <th className="p-2 text-left text-xs font-medium">Tarea</th>
-                <th className="p-2 text-left text-xs font-medium">Unidad</th>
-                <th className="p-2 text-left text-xs font-medium">Cantidad</th>
-                <th className="p-2 text-left text-xs font-medium">Costo de Mano de Obra</th>
-                <th className="p-2 text-left text-xs font-medium">Costo de Materiales</th>
+                <th className="p-2 text-left text-xs font-medium">Unid.</th>
+                <th className="p-2 text-left text-xs font-medium">Cant.</th>
+                <th className="p-2 text-left text-xs font-medium">M.O.</th>
+                <th className="p-2 text-left text-xs font-medium">Mat.</th>
                 <th className="p-2 text-left text-xs font-medium">Subtotal</th>
-                <th className="p-2 text-left text-xs font-medium">% de Incidencia</th>
-                <th className="p-2 text-left text-xs font-medium">Acciones</th>
+                <th className="p-2 text-left text-xs font-medium">% Inc.</th>
+                <th className="p-2 text-left text-xs font-medium">Acc.</th>
               </tr>
             </thead>
             <tbody>
@@ -739,14 +739,14 @@ export default function ConstructionBudgets() {
                               className="rounded"
                             />
                           </td>
+                          <td className="p-2 text-sm font-medium">
+                            {taskId}
+                          </td>
                           {!groupTasksByRubro && (
                             <td className="p-2">
                               <div className="font-medium text-sm">{task.task?.rubro_name || 'Sin rubro'}</div>
                             </td>
                           )}
-                          <td className="p-2 text-sm font-medium">
-                            {taskId}
-                          </td>
                           <td className="p-2 text-sm">
                             {generateTaskDisplayName(task.task, parameterValues)}
                           </td>
@@ -797,8 +797,8 @@ export default function ConstructionBudgets() {
               {/* TOTAL Row */}
               <tr className="border-b-2 bg-accent/10 font-medium">
                 <td className="p-2"></td>
-                {!groupTasksByRubro && <td className="p-2"></td>}
                 <td className="p-2"></td>
+                {!groupTasksByRubro && <td className="p-2"></td>}
                 <td className="p-2 text-sm font-semibold">TOTAL</td>
                 <td className="p-2"></td>
                 <td className="p-2"></td>
