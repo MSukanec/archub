@@ -97,7 +97,9 @@ export function TaskSearchCombo({
               variant="outline"
               size="sm"
               className={cn(
-                "h-10 w-10 p-0 border-input bg-background hover:bg-accent hover:text-accent-foreground",
+                // Usar EXACTAMENTE las mismas clases que el input de búsqueda
+                "flex items-center justify-center text-xs leading-tight py-2 px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent disabled:opacity-60 disabled:cursor-not-allowed",
+                "w-auto h-auto", // Permitir que se ajuste al contenido como el input
                 activeFiltersCount > 0 && "bg-accent text-accent-foreground"
               )}
             >
@@ -252,7 +254,7 @@ export function TaskSearchCombo({
             <CommandEmpty className="text-xs py-3 px-3 text-center">
               {showCreateButton && onCreateTask ? (
                 <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">No hay tareas con "{searchQuery}"</p>
+                  <p className="text-sm text-muted-foreground">Parece que esta tarea no existe, ¿quieres crearla tú?</p>
                   <button
                     type="button"
                     onClick={() => {
