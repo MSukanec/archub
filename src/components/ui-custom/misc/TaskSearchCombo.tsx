@@ -97,7 +97,7 @@ export function TaskSearchCombo({
               variant="outline"
               size="sm"
               className={cn(
-                "h-8 w-8 p-0 border-[var(--input-border)]",
+                "h-10 w-10 p-0 border-input bg-background hover:bg-accent hover:text-accent-foreground",
                 activeFiltersCount > 0 && "bg-accent text-accent-foreground"
               )}
             >

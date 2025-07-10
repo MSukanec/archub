@@ -96,11 +96,11 @@ export function CreateGeneratedTaskUserModal({
       template_id: "",
       ...paramValues
     },
-    mode: "onChange"
+    mode: "onBlur" // Cambiar de onChange a onBlur para evitar re-renderizados constantes
   });
 
-  // Watch all form values for real-time preview
-  const watchedValues = useWatch({ control: form.control });
+  // Watch only template_id for form reset, not all values
+  const templateId = useWatch({ control: form.control, name: "template_id" });
 
   // Reset form when template changes
   useEffect(() => {
@@ -118,10 +118,14 @@ export function CreateGeneratedTaskUserModal({
         }
       });
       setParamValues(newParamValues);
-      form.reset({
-        template_id: selectedTemplateId,
-        ...newParamValues
-      });
+      
+      // Use a timeout to prevent form reset conflicts
+      setTimeout(() => {
+        form.reset({
+          template_id: selectedTemplateId,
+          ...newParamValues
+        });
+      }, 50);
     }
   }, [selectedTemplateId, parameters, refetchParameters]);
 
@@ -307,6 +311,9 @@ export function CreateGeneratedTaskUserModal({
     }
   };
 
+  // Get current form values for preview
+  const formValues = form.getValues();
+
   // Generate preview description
   const generatePreview = () => {
     const selectedTemplate = templates?.find(t => t.id === selectedTemplateId);
@@ -315,7 +322,7 @@ export function CreateGeneratedTaskUserModal({
     try {
       return generatePreviewDescription(
         selectedTemplate.name_template || "",
-        watchedValues,
+        formValues,
         parameters,
         parameterOptions
       );
