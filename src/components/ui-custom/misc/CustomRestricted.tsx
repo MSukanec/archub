@@ -146,22 +146,44 @@ export function CustomRestricted({
         </PopoverTrigger>
 
         <PopoverContent
-          className="w-64 p-3 bg-black border border-gray-700 shadow-xl rounded-lg"
+          className="w-64 p-3 shadow-xl rounded-2xl"
+          style={{
+            backgroundColor: 'hsl(0, 0%, 10%)',
+            border: '1px solid hsl(0, 0%, 25%)',
+            borderRadius: '16px'
+          }}
           side="top"
         >
           <div className="flex items-start gap-2">
-            <div className="bg-[var(--accent)]/20 rounded-full p-1 flex-shrink-0">
-              <Lock className="h-3 w-3 text-[var(--accent)]" />
+            <div 
+              className="rounded-full p-1 flex-shrink-0"
+              style={{
+                backgroundColor: 'hsl(var(--accent), 0.2)',
+              }}
+            >
+              <Lock 
+                className="h-3 w-3" 
+                style={{ color: 'hsl(var(--accent))' }}
+              />
             </div>
             <div className="flex-1">
-              <h4 className="font-medium text-sm text-white">Función Bloqueada</h4>
-              <p className="text-xs text-gray-300 mt-1">
+              <h4 
+                className="font-medium text-sm" 
+                style={{ color: 'hsl(0, 0%, 95%)' }}
+              >
+                Función Bloqueada
+              </h4>
+              <p 
+                className="text-xs mt-1"
+                style={{ color: 'hsl(0, 0%, 70%)' }}
+              >
                 {restriction.message}
               </p>
               {restriction.actionLabel && restriction.actionUrl && (
                 <button
                   onClick={handleActionClick}
-                  className="text-xs text-[var(--accent)] hover:underline mt-1"
+                  className="text-xs hover:underline mt-1"
+                  style={{ color: 'hsl(var(--accent))' }}
                 >
                   {restriction.actionLabel}
                 </button>
