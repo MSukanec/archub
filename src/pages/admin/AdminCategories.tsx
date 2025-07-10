@@ -33,6 +33,9 @@ export default function AdminCategories() {
   const [editingTaskGroup, setEditingTaskGroup] = useState<TaskGroup | null>(null);
   const [taskGroupCategory, setTaskGroupCategory] = useState<TaskCategoryAdmin | null>(null);
   
+  // Template modal task group states - NEW: Para manejar plantillas de task groups
+  const [templateTaskGroup, setTemplateTaskGroup] = useState<TaskGroupAdmin | null>(null);
+  
   // Delete confirmation states
   const [deleteCategoryId, setDeleteCategoryId] = useState<string | null>(null);
   const [deleteTaskGroupId, setDeleteTaskGroupId] = useState<string | null>(null);
@@ -202,23 +205,12 @@ export default function AdminCategories() {
   // Handle task group template action - NEW: plantillas ahora van a nivel de grupo
   const handleTaskGroupTemplate = (taskGroup: TaskGroupAdmin, category: TaskCategoryAdmin) => {
     console.log('🎯 Opening template modal for task group:', taskGroup.name, 'in category:', category.name);
-    // Convertir TaskGroupAdmin a TaskCategoryAdmin para mantener compatibilidad con el modal
-    const groupAsCategory: TaskCategoryAdmin = {
-      id: taskGroup.id,
-      name: taskGroup.name,
-      code: category.code, // Usar el código de la categoría padre
-      parent_id: category.id,
-      children: [],
-      taskGroups: [],
-      template: taskGroup.template_id ? { 
-        id: taskGroup.template_id, 
-        name_template: '', 
-        task_group_name: taskGroup.name 
-      } : null,
-      created_at: taskGroup.created_at,
-      updated_at: taskGroup.updated_at
-    };
-    setTemplateCategory(groupAsCategory);
+    console.log('🎯 TaskGroup data:', taskGroup);
+    console.log('🎯 Category data:', category);
+    
+    // Usar la estructura correcta para task groups
+    setTemplateCategory(category); // Mantener la categoría padre
+    setTemplateTaskGroup(taskGroup); // Guardar el task group específico
     setIsTemplateModalOpen(true);
   };
 
@@ -411,10 +403,13 @@ export default function AdminCategories() {
           onClose={() => {
             setIsTemplateModalOpen(false);
             setTemplateCategory(null);
+            setTemplateTaskGroup(null);
           }}
           categoryId={templateCategory.id}
-          categoryCode={templateCategory.code}
+          categoryCode={templateCategory.code || ''}
           categoryName={templateCategory.name}
+          taskGroupId={templateTaskGroup?.id}
+          taskGroupName={templateTaskGroup?.name}
         />
       )}
 
