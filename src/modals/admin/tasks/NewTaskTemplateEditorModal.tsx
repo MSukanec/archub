@@ -264,22 +264,26 @@ export default function TaskTemplateEditorModal({
     queryFn: async () => {
       if (taskGroupId) {
         // NEW: Buscar plantilla por task_group_id
+        console.log('🔍 Buscando plantilla para task_group_id:', taskGroupId);
         const { data, error } = await supabase
           .from('task_templates')
           .select('*')
           .eq('task_group_id', taskGroupId)
           .maybeSingle();
         
+        console.log('🔍 Resultado búsqueda plantilla:', { data, error });
         if (error && error.code !== 'PGRST116') throw error;
         return data;
       } else {
         // LEGACY: Buscar por categoryCode (para compatibilidad)
+        console.log('🔍 Buscando plantilla LEGACY para categoryCode:', categoryCode);
         const { data, error } = await supabase
           .from('task_templates')
           .select('*')
           .eq('code', categoryCode)
           .maybeSingle();
         
+        console.log('🔍 Resultado búsqueda plantilla LEGACY:', { data, error });
         if (error && error.code !== 'PGRST116') throw error;
         return data;
       }
@@ -402,19 +406,25 @@ export default function TaskTemplateEditorModal({
     mutationFn: async () => {
       if (taskGroupId) {
         // NEW: Crear plantilla para task group
+        console.log('🚀 Creando plantilla para task_group_id:', taskGroupId);
+        const insertData = {
+          name_template: `${taskGroupName || categoryName}.`,
+          task_group_id: taskGroupId
+        };
+        console.log('🚀 Datos a insertar:', insertData);
+        
         const { data, error } = await supabase
           .from('task_templates')
-          .insert({
-            name_template: `${taskGroupName || categoryName}.`,
-            task_group_id: taskGroupId
-          })
+          .insert(insertData)
           .select()
           .single();
         
+        console.log('🚀 Resultado creación plantilla:', { data, error });
         if (error) throw error;
         return data;
       } else {
         // LEGACY: Crear plantilla para categoría - Solo campos que existen en la tabla
+        console.log('🚀 Creando plantilla LEGACY para categoryName:', categoryName);
         const { data, error } = await supabase
           .from('task_templates')
           .insert({
@@ -423,6 +433,7 @@ export default function TaskTemplateEditorModal({
           .select()
           .single();
         
+        console.log('🚀 Resultado creación plantilla LEGACY:', { data, error });
         if (error) throw error;
         return data;
       }
