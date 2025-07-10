@@ -263,6 +263,8 @@ export function Sidebar() {
         "fixed top-0 left-0 h-screen border-r bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)] transition-all duration-300 z-[1] flex flex-col",
         "w-[40px]"
       )}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
       {/* Logo Section */}
       <div className="h-9 flex items-center justify-center bg-[var(--main-sidebar-bg)]">

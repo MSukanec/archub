@@ -705,15 +705,15 @@ export default function ConstructionBudgets() {
                   <Fragment key={rubroName}>
                     {/* Rubro Header Row (only show if grouping is enabled) */}
                     {groupTasksByRubro && (
-                      <tr className="bg-gray-600 border-b border-gray-700">
+                      <tr className="bg-muted border-b">
                         <td className="p-3"></td>
                         <td className="p-3">
-                          <div className="font-semibold text-sm text-white">
+                          <div className="font-semibold text-sm text-foreground">
                             {rubroNumber}
                           </div>
                         </td>
                         <td className="p-3">
-                          <div className="font-semibold text-sm text-white capitalize">
+                          <div className="font-semibold text-sm text-foreground capitalize">
                             {rubroName.toLowerCase()}
                           </div>
                         </td>
@@ -721,8 +721,8 @@ export default function ConstructionBudgets() {
                         <td className="p-3"></td>
                         <td className="p-3"></td>
                         <td className="p-3"></td>
-                        <td className="p-3 text-sm font-semibold text-white">${rubroSubtotal.toLocaleString()}</td>
-                        <td className="p-3 text-sm font-semibold text-white">{rubroPercentage.toFixed(1)}%</td>
+                        <td className="p-3 text-sm font-semibold text-foreground">${rubroSubtotal.toLocaleString()}</td>
+                        <td className="p-3 text-sm font-semibold text-foreground">{rubroPercentage.toFixed(1)}%</td>
                         <td className="p-3"></td>
                       </tr>
                     )}
@@ -928,61 +928,9 @@ export default function ConstructionBudgets() {
               </Card>
             </div>
 
-            {/* Quick Add Task Section - Isolated */}
+            {/* Budget Controls Section - Isolated */}
             {selectedBudget && (
-              <Card className="border-dashed border-2 border-muted-foreground/30">
-                <div className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1">
-                      <TaskSearchCombo
-                        value={quickTaskId}
-                        onValueChange={setQuickTaskId}
-                        searchQuery={quickSearchQuery}
-                        onSearchChange={setQuickSearchQuery}
-                        options={quickTaskOptions}
-                        placeholder="Buscar tipo de tarea..."
-                        isLoading={quickTasksLoading}
-                        filters={taskFilters}
-                        onFiltersChange={setTaskFilters}
-                        filterOptions={filterOptions}
-                      />
-                    </div>
-                    <div className="w-32">
-                      <div className="flex items-center gap-1">
-                        <Input
-                          type="number"
-                          value={quickQuantity}
-                          onChange={(e) => setQuickQuantity(Number(e.target.value) || 1)}
-                          placeholder="Cant."
-                          min="1"
-                          step="0.01"
-                          className="text-center w-20"
-                        />
-                        <span className="text-xs text-muted-foreground min-w-0">
-                          {quickTaskId ? (
-                            getUnitName(quickTasks.find(t => t.id === quickTaskId)?.unit_id) || '-'
-                          ) : '-'}
-                        </span>
-                      </div>
-                    </div>
-                    <Button
-                      onClick={handleQuickAddTask}
-                      disabled={!quickTaskId || isAddingQuickTask}
-                      className="px-4"
-                    >
-                      {isAddingQuickTask ? "Agregando..." : "Agregar"}
-                    </Button>
-                  </div>
-                  <div className="mt-2 text-xs text-muted-foreground">
-                    Busca y agrega tareas rápidamente sin abrir el modal
-                  </div>
-                </div>
-              </Card>
-            )}
-
-            {/* Single Budget Card with Selector */}
-            <Card className="border rounded-lg overflow-hidden">
-              <div className="p-4 border-b">
+              <div className="border-dashed border-2 border-muted-foreground/30 rounded-lg p-4 bg-transparent">
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-center gap-4 flex-1">
                     {/* Budget Selector */}
@@ -1017,30 +965,29 @@ export default function ConstructionBudgets() {
                     </div>
 
                     {/* Group by Rubro Switch */}
-                    {selectedBudget && (
-                      <div className="flex items-center gap-2">
-                        <Switch
-                          id="group-by-rubro"
-                          checked={selectedBudget?.group_tasks_by_rubro || false}
-                          onCheckedChange={(checked) => {
-                            updateBudgetGroupingMutation.mutate({
-                              budgetId: selectedBudget.id,
-                              groupByRubro: checked
-                            });
-                          }}
-                        />
-                        <Label htmlFor="group-by-rubro" className="text-sm font-medium cursor-pointer">
-                          Agrupar por Rubro
-                        </Label>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        id="group-by-rubro"
+                        checked={selectedBudget?.group_tasks_by_rubro || false}
+                        onCheckedChange={(checked) => {
+                          updateBudgetGroupingMutation.mutate({ 
+                            budgetId: selectedBudget.id, 
+                            groupByRubro: checked 
+                          });
+                        }}
+                      />
+                      <Label htmlFor="group-by-rubro" className="text-sm text-muted-foreground">
+                        Agrupar por rubro
+                      </Label>
+                    </div>
                   </div>
-                  
+
+                  {/* Action Buttons */}
                   <div className="flex items-center gap-2">
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-7 w-7 p-0"
+                      className="h-8 w-8 p-0"
                       onClick={() => {
                         if (selectedBudget) {
                           setEditingBudget(selectedBudget)
@@ -1049,39 +996,92 @@ export default function ConstructionBudgets() {
                       }}
                       disabled={!selectedBudget}
                     >
-                      <Edit className="w-3 h-3" />
+                      <Edit className="w-4 h-4" />
                     </Button>
                     
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                      className="h-8 w-8 p-0 text-destructive hover:text-destructive"
                       onClick={() => selectedBudget && handleDeleteBudget(selectedBudget)}
                       disabled={!selectedBudget}
                     >
-                      <Trash2 className="w-3 h-3" />
+                      <Trash2 className="w-4 h-4" />
                     </Button>
                     
                     <Button
+                      variant="outline"
                       size="sm"
-                      className="h-7 px-2 text-xs"
-                      onClick={() => selectedBudget && handleAddTask(selectedBudget.id)}
-                      disabled={!selectedBudget}
+                      onClick={() => handleAddTask(selectedBudget.id)}
+                      className="h-8 px-3 text-sm"
                     >
-                      <Plus className="w-3 h-3 mr-1" />
+                      <Plus className="w-4 h-4 mr-1" />
                       Agregar Tarea
                     </Button>
                   </div>
                 </div>
-                
+
                 {/* Budget Description */}
-                {selectedBudget?.description && (
-                  <div className="mt-2 text-sm text-muted-foreground">
+                {selectedBudget.description && (
+                  <div className="mt-3 text-sm text-muted-foreground">
                     {selectedBudget.description}
                   </div>
                 )}
               </div>
-              
+            )}
+
+            {/* Quick Add Task Section - Isolated */}
+            {selectedBudget && (
+              <div className="border-dashed border-2 border-muted-foreground/30 rounded-lg p-4 bg-transparent">
+                <div className="flex items-center gap-3">
+                  <div className="flex-1">
+                    <TaskSearchCombo
+                      value={quickTaskId}
+                      onValueChange={setQuickTaskId}
+                      searchQuery={quickSearchQuery}
+                      onSearchChange={setQuickSearchQuery}
+                      options={quickTaskOptions}
+                      placeholder="Buscar tipo de tarea..."
+                      isLoading={quickTasksLoading}
+                      filters={taskFilters}
+                      onFiltersChange={setTaskFilters}
+                      filterOptions={filterOptions}
+                    />
+                  </div>
+                  <div className="w-32">
+                    <div className="flex items-center gap-1">
+                      <Input
+                        type="number"
+                        value={quickQuantity}
+                        onChange={(e) => setQuickQuantity(Number(e.target.value) || 1)}
+                        placeholder="Cant."
+                        min="1"
+                        step="0.01"
+                        className="text-center w-20"
+                      />
+                      <span className="text-xs text-muted-foreground min-w-0">
+                        {quickTaskId ? (
+                          getUnitName(quickTasks.find(t => t.id === quickTaskId)?.unit_id) || '-'
+                        ) : '-'}
+                      </span>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={handleQuickAddTask}
+                    disabled={!quickTaskId || isAddingQuickTask}
+                    className="px-4"
+                  >
+                    {isAddingQuickTask ? "Agregando..." : "Agregar"}
+                  </Button>
+                </div>
+                <div className="mt-2 text-xs text-muted-foreground">
+                  Busca y agrega tareas rápidamente sin abrir el modal
+                </div>
+              </div>
+            )}
+
+            {/* Budget Table Card - Clean without extra controls */}
+            <Card className="border rounded-lg overflow-hidden">
               {/* Budget Tasks Table */}
               <div className="p-4">
                 {selectedBudget ? (
