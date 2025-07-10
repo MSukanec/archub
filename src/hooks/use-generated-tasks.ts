@@ -91,7 +91,7 @@ export function useCreateGeneratedTask() {
       // Call RPC function that handles both code generation and task creation/verification
       const { data: taskData, error: taskError } = await supabase
         .rpc('task_generate_code', {
-          input_group_id: templateData.task_group_id,
+          input_task_group_id: templateData.task_group_id,
           input_param_values: payload.param_values,
           input_organization_id: payload.organization_id,
           input_is_system: payload.is_system || false

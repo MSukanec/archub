@@ -1,0 +1,79 @@
+
+declare
+  prefix text;
+  next_number int;
+  new_code text;
+  group_template_id uuid;
+  existing_task task_generated%rowtype;
+begin
+  -- Obtener el template_id desde el grupo
+  select tg.template_id into group_template_id
+  from task_groups tg
+  where tg.id = input_task_group_id;
+
+  if group_template_id is null then
+    raise exception 'Group not found or missing template_id';
+  end if;
+
+  -- Obtener prefijo desde task_templates.task_code
+  select tt.task_code into prefix
+  from task_templates tt
+  where tt.id = group_template_id;
+
+  if prefix is null then
+    raise exception 'Template not found or missing task_code';
+  end if;
+
+  -- Verificar si ya existe una tarea con ese grupo y parámetros
+  select *
+  into existing_task
+  from task_generated tg
+  where tg.task_group_id = input_task_group_id
+    and tg.param_values::jsonb = input_param_values::jsonb
+  limit 1;
+
+  if existing_task.id is not null then
+    return query
+    select tg.id, tg.code, tg.param_values, tg.created_at
+    from task_generated tg
+    where tg.id = existing_task.id;
+  end if;
+
+  -- Buscar el primer número libre con ese prefijo
+  select i
+  into next_number
+  from generate_series(1, 999999) as s(i)
+  where lpad(i::text, 6, '0') not in (
+    select regexp_replace(tg.code, '[^0-9]', '', 'g')
+    from task_generated tg
+    where tg.code like prefix || '-%'
+  )
+  limit 1;
+
+  -- Armar el nuevo código
+  new_code := prefix || '-' || lpad(next_number::text, 6, '0');
+
+  -- Insertar la nueva tarea
+  return query
+  insert into task_generated (
+    id,
+    template_id,
+    task_group_id,
+    code,
+    param_values,
+    organization_id,
+    is_system
+  ) values (
+    gen_random_uuid(),
+    group_template_id,
+    input_task_group_id,
+    new_code,
+    input_param_values,
+    case when input_is_system then null else input_organization_id end,
+    input_is_system
+  )
+  returning task_generated.id,
+           task_generated.code,
+           task_generated.param_values,
+           task_generated.created_at;
+end;
