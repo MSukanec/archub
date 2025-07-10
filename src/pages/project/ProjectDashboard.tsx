@@ -176,8 +176,8 @@ export default function ProjectDashboard() {
   return (
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
-        {/* Métricas Principales */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* Métricas Principales - Desktop */}
+        <div className="hidden md:grid grid-cols-4 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -237,6 +237,67 @@ export default function ProjectDashboard() {
               </p>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Métricas Principales - Mobile (Compactas) */}
+        <div className="md:hidden grid grid-cols-2 gap-3">
+          {/* Row 1 */}
+          <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm min-h-[80px]">
+            <div className="flex items-center justify-between mb-1">
+              <FileText className="h-4 w-4 text-gray-500" />
+            </div>
+            <div className="space-y-0.5">
+              <div className="text-xl font-bold text-gray-900">
+                {summaryLoading ? '...' : projectSummary?.totalDocuments || 0}
+              </div>
+              <div className="text-xs text-gray-500 font-medium leading-tight">
+                Documentos de Diseño
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm min-h-[80px]">
+            <div className="flex items-center justify-between mb-1">
+              <Construction className="h-4 w-4 text-gray-500" />
+            </div>
+            <div className="space-y-0.5">
+              <div className="text-xl font-bold text-gray-900">
+                {summaryLoading ? '...' : projectSummary?.totalSiteLogs || 0}
+              </div>
+              <div className="text-xs text-gray-500 font-medium leading-tight">
+                Registros de Obra
+              </div>
+            </div>
+          </div>
+
+          {/* Row 2 */}
+          <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm min-h-[80px]">
+            <div className="flex items-center justify-between mb-1">
+              <Calculator className="h-4 w-4 text-gray-500" />
+            </div>
+            <div className="space-y-0.5">
+              <div className="text-xl font-bold text-gray-900">
+                {summaryLoading ? '...' : projectSummary?.totalBudgets || 0}
+              </div>
+              <div className="text-xs text-gray-500 font-medium leading-tight">
+                Presupuestos
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm min-h-[80px]">
+            <div className="flex items-center justify-between mb-1">
+              <DollarSign className="h-4 w-4 text-gray-500" />
+            </div>
+            <div className="space-y-0.5">
+              <div className="text-xl font-bold text-gray-900">
+                {summaryLoading ? '...' : projectSummary?.totalMovements || 0}
+              </div>
+              <div className="text-xs text-gray-500 font-medium leading-tight">
+                Movimientos
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Contenido en 3 columnas */}

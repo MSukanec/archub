@@ -75,8 +75,8 @@ export default function DesignDashboard() {
   return (
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
-        {/* Métricas Principales */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* Métricas Principales - Desktop */}
+        <div className="hidden md:grid grid-cols-4 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Documentos Totales</CardTitle>
@@ -136,6 +136,65 @@ export default function DesignDashboard() {
               </p>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Métricas Principales - Mobile (Compactas) */}
+        <div className="md:hidden grid grid-cols-2 gap-3">
+          <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm min-h-[80px]">
+            <div className="flex items-center justify-between mb-1">
+              <FileText className="h-4 w-4 text-gray-500" />
+            </div>
+            <div className="space-y-0.5">
+              <div className="text-xl font-bold text-gray-900">
+                {summaryLoading ? '...' : designSummary?.totalDocuments || 0}
+              </div>
+              <div className="text-xs text-gray-500 font-medium leading-tight">
+                Documentos Totales
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm min-h-[80px]">
+            <div className="flex items-center justify-between mb-1">
+              <CheckCircle2 className="h-4 w-4 text-green-600" />
+            </div>
+            <div className="space-y-0.5">
+              <div className="text-xl font-bold text-green-600">
+                {summaryLoading ? '...' : designSummary?.approvedDocuments || 0}
+              </div>
+              <div className="text-xs text-gray-500 font-medium leading-tight">
+                Documentos Aprobados
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm min-h-[80px]">
+            <div className="flex items-center justify-between mb-1">
+              <Layers className="h-4 w-4 text-gray-500" />
+            </div>
+            <div className="space-y-0.5">
+              <div className="text-xl font-bold text-gray-900">
+                {summaryLoading ? '...' : designSummary?.totalPhases || 0}
+              </div>
+              <div className="text-xs text-gray-500 font-medium leading-tight">
+                Fases de Diseño
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm min-h-[80px]">
+            <div className="flex items-center justify-between mb-1">
+              <Clock className="h-4 w-4 text-gray-500" />
+            </div>
+            <div className="space-y-0.5">
+              <div className="text-xl font-bold text-gray-900">
+                {summaryLoading ? '...' : `${designSummary?.progress || 0}%`}
+              </div>
+              <div className="text-xs text-gray-500 font-medium leading-tight">
+                Progreso General
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Fases de Diseño y Documentación Reciente */}
