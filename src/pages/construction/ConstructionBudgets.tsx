@@ -5,7 +5,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
-import { useState, useEffect } from 'react'
+import { Switch } from '@/components/ui/switch'
+import { useState, useEffect, Fragment } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { Calculator, Plus, Trash2, Building2, Edit } from 'lucide-react'
 // Removed CustomTable import as we now use BudgetTable
@@ -115,6 +116,7 @@ interface Budget {
   status: string
   created_at: string
   created_by: string
+  group_tasks_by_rubro?: boolean
 }
 
 interface BudgetTask {
@@ -257,6 +259,35 @@ export default function ConstructionBudgets() {
     }
   })
 
+  // Update budget grouping mutation
+  const updateBudgetGroupingMutation = useMutation({
+    mutationFn: async ({ budgetId, groupByRubro }: { budgetId: string, groupByRubro: boolean }) => {
+      if (!supabase) throw new Error('Supabase client not available')
+      
+      const { error } = await supabase
+        .from('budgets')
+        .update({ group_tasks_by_rubro: groupByRubro })
+        .eq('id', budgetId)
+
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['budgets'] })
+      toast({
+        title: "Configuración actualizada",
+        description: "La vista del presupuesto ha sido actualizada",
+      })
+    },
+    onError: (error) => {
+      console.error('Error updating budget grouping:', error)
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar la configuración",
+        variant: "destructive",
+      })
+    }
+  })
+
   const handleDeleteBudget = (budget: Budget) => {
     setDeletingBudget(budget)
   }
@@ -371,6 +402,20 @@ export default function ConstructionBudgets() {
     const { budgetTasks, isLoading, updateBudgetTask, createBudgetTask } = useBudgetTasks(budgetId);
     const { data: parameterValues = [] } = useTaskParameterValues();
     const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
+    
+    // Group tasks by rubro if grouping is enabled
+    const groupTasksByRubro = selectedBudget?.group_tasks_by_rubro || false;
+    
+    const groupedTasks = groupTasksByRubro 
+      ? budgetTasks?.reduce((groups: Record<string, any[]>, task: any) => {
+          const rubro = task.task?.rubro_name || 'Sin Rubro';
+          if (!groups[rubro]) {
+            groups[rubro] = [];
+          }
+          groups[rubro].push(task);
+          return groups;
+        }, {}) || {}
+      : { 'Todas las Tareas': budgetTasks || [] };
     
     // Quick add task states
     const [quickTaskId, setQuickTaskId] = useState('');
@@ -622,74 +667,88 @@ export default function ConstructionBudgets() {
               </tr>
             </thead>
             <tbody>
-              {budgetTasks?.map((task: any) => {
-                // Simplified calculations since task_tasks doesn't have price fields
-                const percentage = totalBudgetAmount > 0 ? (1 / totalBudgetAmount) * 100 : 0;
+              {Object.entries(groupedTasks).map(([rubroName, tasks]) => (
+                <Fragment key={rubroName}>
+                  {/* Rubro Header Row (only show if grouping is enabled and not showing all tasks) */}
+                  {groupTasksByRubro && (
+                    <tr className="bg-accent/20 border-b border-accent">
+                      <td colSpan={10} className="p-3">
+                        <div className="font-semibold text-sm text-accent-foreground uppercase tracking-wide">
+                          {rubroName}
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                  
+                  {/* Task Rows */}
+                  {tasks.map((task: any) => {
+                    const percentage = totalBudgetAmount > 0 ? (1 / totalBudgetAmount) * 100 : 0;
 
-                return (
-                  <tr key={task.id} className="border-b hover:bg-muted/20">
-                    <td className="p-2">
-                      <input
-                        type="checkbox"
-                        checked={selectedTasks.includes(task.id)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedTasks(prev => [...prev, task.id]);
-                          } else {
-                            setSelectedTasks(prev => prev.filter(id => id !== task.id));
-                          }
-                        }}
-                        className="rounded"
-                      />
-                    </td>
-                    <td className="p-2">
-                      <div className="font-medium text-sm">{task.task?.rubro_name || 'Sin rubro'}</div>
-                    </td>
-                    <td className="p-2 text-sm">
-                      {generateTaskDisplayName(task.task, parameterValues)}
-                    </td>
-                    <td className="p-2 text-sm">
-                      {getUnitName(task.task?.unit_id)}
-                    </td>
-                    <td className="p-2">
-                      <input
-                        type="number"
-                        value={task.quantity || 0}
-                        onChange={(e) => {
-                          const newQuantity = parseFloat(e.target.value) || 0;
-                          handleUpdateQuantity(task.id, newQuantity);
-                        }}
-                        onBlur={(e) => {
-                          const newQuantity = parseFloat(e.target.value) || 0;
-                          if (newQuantity !== task.quantity) {
-                            handleUpdateQuantity(task.id, newQuantity);
-                          }
-                        }}
-                        className="w-20 px-2 py-1 text-sm border rounded"
-                        min="0"
-                        step="0.01"
-                      />
-                    </td>
-                    <td className="p-2 text-sm">$0</td>
-                    <td className="p-2 text-sm">$0</td>
-                    <td className="p-2 text-sm font-medium">$0</td>
-                    <td className="p-2 text-sm text-muted-foreground">{percentage.toFixed(1)}%</td>
-                    <td className="p-2">
-                      <div className="flex gap-1">
-
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteTask(task.id)}
-                          className="h-7 w-7 p-0 text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+                    return (
+                      <tr key={task.id} className="border-b hover:bg-muted/20">
+                        <td className="p-2">
+                          <input
+                            type="checkbox"
+                            checked={selectedTasks.includes(task.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedTasks(prev => [...prev, task.id]);
+                              } else {
+                                setSelectedTasks(prev => prev.filter(id => id !== task.id));
+                              }
+                            }}
+                            className="rounded"
+                          />
+                        </td>
+                        <td className="p-2">
+                          <div className="font-medium text-sm">{task.task?.rubro_name || 'Sin rubro'}</div>
+                        </td>
+                        <td className="p-2 text-sm">
+                          {generateTaskDisplayName(task.task, parameterValues)}
+                        </td>
+                        <td className="p-2 text-sm">
+                          {getUnitName(task.task?.unit_id)}
+                        </td>
+                        <td className="p-2">
+                          <input
+                            type="number"
+                            value={task.quantity || 0}
+                            onChange={(e) => {
+                              const newQuantity = parseFloat(e.target.value) || 0;
+                              handleUpdateQuantity(task.id, newQuantity);
+                            }}
+                            onBlur={(e) => {
+                              const newQuantity = parseFloat(e.target.value) || 0;
+                              if (newQuantity !== task.quantity) {
+                                handleUpdateQuantity(task.id, newQuantity);
+                              }
+                            }}
+                            className="w-20 px-2 py-1 text-sm border rounded"
+                            min="0"
+                            step="0.01"
+                          />
+                        </td>
+                        <td className="p-2 text-sm">$0</td>
+                        <td className="p-2 text-sm">$0</td>
+                        <td className="p-2 text-sm font-medium">$0</td>
+                        <td className="p-2 text-sm text-muted-foreground">{percentage.toFixed(1)}%</td>
+                        <td className="p-2">
+                          <div className="flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteTask(task.id)}
+                              className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </Fragment>
+              ))}
               {/* TOTAL Row */}
               <tr className="border-b-2 bg-accent/10 font-medium">
                 <td className="p-2"></td>
@@ -797,36 +856,56 @@ export default function ConstructionBudgets() {
             <Card className="border rounded-lg overflow-hidden">
               <div className="p-4 border-b">
                 <div className="flex items-center justify-between w-full">
-                  <div className="flex items-center gap-3 flex-1">
-                    <span className="text-sm font-medium text-muted-foreground">
-                      Presupuesto:
-                    </span>
-                    
+                  <div className="flex items-center gap-4 flex-1">
                     {/* Budget Selector */}
-                    <div className="flex-1">
-                      <Select value={selectedBudgetId} onValueChange={(value) => {
-                        console.log('Budget selector changed to:', value);
-                        console.log('User data available:', !!userData?.user?.id);
-                        console.log('Preferences ID available:', !!userData?.preferences?.id);
-                        
-                        setSelectedBudgetId(value);
-                        if (userData?.user?.id) {
-                          console.log('Executing budget preference mutation...');
-                          updateBudgetPreferenceMutation.mutate(value);
-                        }
-                      }}>
-                        <SelectTrigger className="w-full max-w-sm">
-                          <SelectValue placeholder="Selecciona un presupuesto" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {filteredBudgets.map((budget: Budget) => (
-                            <SelectItem key={budget.id} value={budget.id}>
-                              <span className="text-left">{budget.name}</span>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-medium text-muted-foreground">
+                        Presupuesto:
+                      </span>
+                      <div className="min-w-[200px]">
+                        <Select value={selectedBudgetId} onValueChange={(value) => {
+                          console.log('Budget selector changed to:', value);
+                          console.log('User data available:', !!userData?.user?.id);
+                          console.log('Preferences ID available:', !!userData?.preferences?.id);
+                          
+                          setSelectedBudgetId(value);
+                          if (userData?.user?.id) {
+                            console.log('Executing budget preference mutation...');
+                            updateBudgetPreferenceMutation.mutate(value);
+                          }
+                        }}>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Selecciona un presupuesto" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {filteredBudgets.map((budget: Budget) => (
+                              <SelectItem key={budget.id} value={budget.id}>
+                                <span className="text-left">{budget.name}</span>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
+
+                    {/* Group by Rubro Switch */}
+                    {selectedBudget && (
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          id="group-by-rubro"
+                          checked={selectedBudget?.group_tasks_by_rubro || false}
+                          onCheckedChange={(checked) => {
+                            updateBudgetGroupingMutation.mutate({
+                              budgetId: selectedBudget.id,
+                              groupByRubro: checked
+                            });
+                          }}
+                        />
+                        <Label htmlFor="group-by-rubro" className="text-sm font-medium cursor-pointer">
+                          Agrupar por Rubro
+                        </Label>
+                      </div>
+                    )}
                   </div>
                   
                   <div className="flex items-center gap-2">
