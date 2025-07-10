@@ -3,12 +3,11 @@ import { supabase } from "@/lib/supabase";
 
 export interface TaskTemplate {
   id: string;
-  code: string;
   name_template: string;
-  category_id: string;
-  action_id?: string;
+  task_group_id: string;
   unit_id?: string | null;
   created_at: string;
+  updated_at: string;
 }
 
 export interface TaskTemplateParameter {
@@ -39,8 +38,16 @@ export function useTaskTemplates() {
       
       const { data, error } = await supabase
         .from('task_templates')
-        .select('*, units(name)')
-        .order('code');
+        .select(`
+          *,
+          units(name),
+          task_groups(
+            name,
+            category_id,
+            task_categories(name, code)
+          )
+        `)
+        .order('name_template');
       
       if (error) {
         console.error('Error fetching templates:', error);

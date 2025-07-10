@@ -12,8 +12,8 @@ export interface TaskCategoryAdmin {
   children?: TaskCategoryAdmin[];
   template?: {
     id: string;
-    code: string;
     name_template: string;
+    task_group_name?: string;
   } | null;
 }
 
@@ -66,10 +66,18 @@ export function useTaskCategoriesAdmin() {
         throw categoriesError;
       }
 
-      // Fetch templates to map to categories
-      const { data: templates, error: templatesError } = await supabase
-        .from('task_templates')
-        .select('id, code, name_template, category_id');
+      // Fetch task groups and templates using the new relationship structure
+      const { data: taskGroupsWithTemplates, error: templatesError } = await supabase
+        .from('task_groups')
+        .select(`
+          id,
+          category_id,
+          name,
+          task_templates (
+            id,
+            name_template
+          )
+        `);
 
       if (templatesError) {
         console.error('Error fetching templates:', templatesError);
@@ -80,13 +88,28 @@ export function useTaskCategoriesAdmin() {
       const categoryMap = new Map();
       const rootCategories: TaskCategoryAdmin[] = [];
 
-      // First pass: create all categories with template info
+      // First pass: create all categories with template info from task_groups
       categories.forEach(category => {
-        const template = templates.find(t => t.category_id === category.id);
+        // Find if this category has any task groups with templates
+        const categoryTaskGroups = taskGroupsWithTemplates?.filter(tg => tg.category_id === category.id) || [];
+        const hasTemplate = categoryTaskGroups.some(tg => tg.task_templates && tg.task_templates.length > 0);
+        
+        let template = null;
+        if (hasTemplate) {
+          const firstGroupWithTemplate = categoryTaskGroups.find(tg => tg.task_templates && tg.task_templates.length > 0);
+          if (firstGroupWithTemplate && firstGroupWithTemplate.task_templates && firstGroupWithTemplate.task_templates.length > 0) {
+            template = {
+              id: firstGroupWithTemplate.task_templates[0].id,
+              name_template: firstGroupWithTemplate.task_templates[0].name_template,
+              task_group_name: firstGroupWithTemplate.name
+            };
+          }
+        }
+        
         const categoryWithTemplate: TaskCategoryAdmin = {
           ...category,
           children: [],
-          template: template || null
+          template
         };
         categoryMap.set(category.id, categoryWithTemplate);
       });

@@ -8,18 +8,6 @@ TABLA TASK_TEMPLATES:
     "data_type": "uuid"
   },
   {
-    "column_name": "category_id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "code",
-    "data_type": "text"
-  },
-  {
-    "column_name": "name",
-    "data_type": "text"
-  },
-  {
     "column_name": "name_template",
     "data_type": "text"
   },
@@ -30,7 +18,11 @@ TABLA TASK_TEMPLATES:
   {
     "column_name": "updated_at",
     "data_type": "timestamp with time zone"
-  }
+  },
+  {
+    "column_name": "task_group_id",
+    "data_type": "uuid"
+  },
   {
     "column_name": "unit_id",
     "data_type": "uuid"
@@ -152,7 +144,7 @@ TABLA TASK_PARAMETER_OPTION_GROUPS:
     "data_type": "timestamp with time zone"
   },
   {
-    "column_name": "category_id",
+    "column_name": "task_group_id",
     "data_type": "uuid"
   }
 ]
@@ -171,6 +163,47 @@ TABLA TASK_PARAMETERS_OPTION_GROUP_ITEMS
   {
     "column_name": "parameter_value_id",
     "data_type": "uuid"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  }
+]
+
+TABLA TASK_CATEGORIES:
+
+[
+  {
+    "column_name": "name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "position",
+    "data_type": "text"
+  },
+  {
+    "column_name": "code",
+    "data_type": "text"
+  },
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "parent_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
   }
 ]
 
@@ -211,7 +244,36 @@ TABLA TASK_GENERATED:
   },
   {
     "column_name": "is_system",
-    "data_type": "bool"
+    "data_type": "boolean"
+  },
+  {
+    "column_name": "task_group_id",
+    "data_type": "uuid"
+  }
+]
+
+TABLA TASK_GROUPS:
+
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "category_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
   }
 ]
 
@@ -240,12 +302,20 @@ TABLA (VISTA) TASK_GENERATED_VIEW:
     "data_type": "uuid"
   },
   {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
     "column_name": "unit_id",
     "data_type": "uuid"
   },
   {
-    "column_name": "created_at",
-    "data_type": "timestamp with time zone"
+    "column_name": "task_group_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "task_group_name",
+    "data_type": "text"
   },
   {
     "column_name": "category_id",
