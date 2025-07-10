@@ -232,11 +232,11 @@ export function UserGrowthChart() {
               <Line 
                 type="monotone" 
                 dataKey="cumulative" 
-                stroke="hsl(220, 70%, 50%)"
+                stroke="hsl(var(--accent))"
                 strokeWidth={3}
                 connectNulls={true}
-                dot={{ fill: "hsl(220, 70%, 50%)", strokeWidth: 2, r: 4 }}
-                activeDot={{ r: 6, stroke: "hsl(220, 70%, 50%)", strokeWidth: 2, fill: "#ffffff" }}
+                dot={{ fill: "hsl(var(--accent))", strokeWidth: 2, r: 4 }}
+                activeDot={{ r: 6, stroke: "hsl(var(--accent))", strokeWidth: 2, fill: "#ffffff" }}
               />
             </LineChart>
           </ResponsiveContainer>

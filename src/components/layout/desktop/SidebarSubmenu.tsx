@@ -108,11 +108,11 @@ export function SidebarSubmenu() {
     'diseno': [
       { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' },
       { icon: FileImage, label: 'Documentación', href: '/design/documentation' },
-      { icon: Calendar, label: 'Cronograma', href: '/design/timeline', restricted: true },
-      { icon: Layout, label: 'Tablero', href: '/design/board', restricted: true },
-      { icon: Calculator, label: 'Cómputo', href: '/design/compute', restricted: true },
-      { icon: FileCode, label: 'Datos', href: '/design/data', restricted: true },
-      { icon: History, label: 'Preferencias de Diseño', href: '/design/preferences', restricted: true },
+      { icon: Calendar, label: 'Cronograma', href: '/design/timeline', restricted: 'coming_soon' },
+      { icon: Layout, label: 'Tablero', href: '/design/board', restricted: 'coming_soon' },
+      { icon: Calculator, label: 'Cómputo', href: '/design/compute', restricted: 'coming_soon' },
+      { icon: FileCode, label: 'Datos', href: '/design/data', restricted: 'coming_soon' },
+      { icon: History, label: 'Preferencias de Diseño', href: '/design/preferences', restricted: 'coming_soon' },
     ],
 
     'obra': [
@@ -148,20 +148,13 @@ export function SidebarSubmenu() {
 
     'administracion': [
       { icon: Home, label: 'Resumen de Administración', href: '/admin/dashboard' },
-      { icon: Building, label: 'Gestión de Organizaciones', href: '/admin/organizations' },
-      { icon: Users, label: 'Gestión de Usuarios', href: '/admin/users' },
-      { type: 'accordion', label: 'Comunidad', items: [
+      { type: 'accordion', label: 'COMUNIDAD', items: [
+        { icon: Building, label: 'Organizaciones', href: '/admin/organizations' },
+        { icon: Users, label: 'Usuarios', href: '/admin/users' },
         { icon: History, label: 'Changelog', href: '/admin/changelogs' },
       ]},
-      { type: 'accordion', label: 'Tareas', items: [
+      { type: 'accordion', label: 'TAREAS', items: [
         { icon: Tag, label: 'Categorías de Tareas', href: '/admin/task-categories' },
-        { icon: FileCode, label: 'Plantillas de Tareas', href: '/admin/task-templates' },
-        { icon: Search, label: 'Parámetros de Tareas', href: '/admin/task-parameters' },
-        { icon: CheckSquare, label: 'Tareas Generadas', href: '/admin/generated-tasks' },
-      ]},
-      { type: 'accordion', label: 'Materiales', items: [
-        { icon: Package, label: 'Categorías de Materiales', href: '/admin/material-categories' },
-        { icon: Package2, label: 'Materiales', href: '/admin/materials' },
       ]},
     ],
   };
@@ -222,7 +215,16 @@ export function SidebarSubmenu() {
             currentSubmenu.map((item, index) => {
               if (item.type === 'accordion') {
                 return (
-                  <div key={index} className="mb-[1px]">
+                  <div key={index} className="mb-2">
+                    {/* Título del acordeón */}
+                    {isSecondarySidebarExpanded && (
+                      <div className="px-3 py-1 mb-1">
+                        <span className="text-xs font-semibold text-[var(--secondary-sidebar-fg)] uppercase tracking-wider">
+                          {item.label}
+                        </span>
+                      </div>
+                    )}
+                    {/* Items del acordeón */}
                     <div className="flex flex-col gap-[1px]">
                       {item.items?.map((subItem, subIndex) => (
                         <div key={subIndex} className="mb-[1px]">
@@ -243,10 +245,10 @@ export function SidebarSubmenu() {
               }
 
               // Botón normal con posible restricción
-              if (item.restricted && !isAdmin) {
+              if (item.restricted) {
                 return (
                   <div key={index} className="mb-[1px]">
-                    <CustomRestricted reason="coming_soon">
+                    <CustomRestricted reason={typeof item.restricted === 'string' ? item.restricted : 'coming_soon'}>
                       <SidebarButton
                         icon={<item.icon className="w-[18px] h-[18px]" />}
                         href="#"
