@@ -9,8 +9,10 @@ import { Badge } from '@/components/ui/badge';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { HierarchicalCategoryTree } from '@/components/ui-custom/misc/HierarchicalCategoryTree';
 
-import { useTaskCategoriesAdmin, useAllTaskCategories, useDeleteTaskCategory, TaskCategoryAdmin } from '@/hooks/use-task-categories-admin';
+import { useTaskCategoriesAdmin, useAllTaskCategories, useDeleteTaskCategory, TaskCategoryAdmin, TaskGroupAdmin } from '@/hooks/use-task-categories-admin';
+import { useDeleteTaskGroup } from '@/hooks/use-task-groups';
 import { NewAdminTaskCategoryModal } from '@/modals/admin/NewAdminTaskCategoryModal';
+import { NewTaskGroupModal, TaskGroup } from '@/modals/admin/NewTaskGroupModal';
 import TaskTemplateEditorModal from '@/modals/admin/tasks/NewTaskTemplateEditorModal';
 
 export default function AdminCategories() {
@@ -26,12 +28,19 @@ export default function AdminCategories() {
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
   const [templateCategory, setTemplateCategory] = useState<TaskCategoryAdmin | null>(null);
   
-  // Delete confirmation state
+  // Task Group modal states
+  const [isTaskGroupModalOpen, setIsTaskGroupModalOpen] = useState(false);
+  const [editingTaskGroup, setEditingTaskGroup] = useState<TaskGroup | null>(null);
+  const [taskGroupCategory, setTaskGroupCategory] = useState<TaskCategoryAdmin | null>(null);
+  
+  // Delete confirmation states
   const [deleteCategoryId, setDeleteCategoryId] = useState<string | null>(null);
+  const [deleteTaskGroupId, setDeleteTaskGroupId] = useState<string | null>(null);
 
   const { data: categories = [], isLoading } = useTaskCategoriesAdmin();
   const { data: allCategories = [] } = useAllTaskCategories();
   const deleteCategoryMutation = useDeleteTaskCategory();
+  const deleteTaskGroupMutation = useDeleteTaskGroup();
 
   // Calculate statistics - solo categorías NIETAS (finales con código de 3 letras)
   const calculateStats = (categories: TaskCategoryAdmin[]) => {
@@ -142,6 +151,33 @@ export default function AdminCategories() {
     if (category.code && category.code.length === 3) {
       setTemplateCategory(category);
       setIsTemplateModalOpen(true);
+    }
+  };
+
+  // Handle add task group
+  const handleAddTaskGroup = (category: TaskCategoryAdmin) => {
+    setTaskGroupCategory(category);
+    setEditingTaskGroup(null);
+    setIsTaskGroupModalOpen(true);
+  };
+
+  // Handle edit task group
+  const handleEditTaskGroup = (taskGroup: TaskGroupAdmin, category: TaskCategoryAdmin) => {
+    setTaskGroupCategory(category);
+    setEditingTaskGroup(taskGroup);
+    setIsTaskGroupModalOpen(true);
+  };
+
+  // Handle delete task group
+  const handleDeleteTaskGroup = async () => {
+    if (!deleteTaskGroupId) return;
+    
+    try {
+      await deleteTaskGroupMutation.mutateAsync(deleteTaskGroupId);
+    } catch (error) {
+      console.error('Error deleting task group:', error);
+    } finally {
+      setDeleteTaskGroupId(null);
     }
   };
 
@@ -271,6 +307,9 @@ export default function AdminCategories() {
               onEdit={handleEditCategory}
               onDelete={setDeleteCategoryId}
               onTemplate={handleTemplateAction}
+              onAddTaskGroup={handleAddTaskGroup}
+              onEditTaskGroup={handleEditTaskGroup}
+              onDeleteTaskGroup={setDeleteTaskGroupId}
             />
           )}
         </div>
@@ -301,7 +340,22 @@ export default function AdminCategories() {
         />
       )}
 
-      {/* Delete Confirmation Dialog */}
+      {/* Task Group Modal */}
+      {taskGroupCategory && (
+        <NewTaskGroupModal
+          open={isTaskGroupModalOpen}
+          onClose={() => {
+            setIsTaskGroupModalOpen(false);
+            setEditingTaskGroup(null);
+            setTaskGroupCategory(null);
+          }}
+          categoryId={taskGroupCategory.id}
+          categoryName={taskGroupCategory.name}
+          taskGroup={editingTaskGroup || undefined}
+        />
+      )}
+
+      {/* Delete Category Confirmation Dialog */}
       <AlertDialog open={!!deleteCategoryId} onOpenChange={() => setDeleteCategoryId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -313,6 +367,24 @@ export default function AdminCategories() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteCategory} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Task Group Confirmation Dialog */}
+      <AlertDialog open={!!deleteTaskGroupId} onOpenChange={() => setDeleteTaskGroupId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar grupo de tareas?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. El grupo de tareas será eliminado permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteTaskGroup} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               Eliminar
             </AlertDialogAction>
           </AlertDialogFooter>

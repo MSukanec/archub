@@ -1,15 +1,17 @@
 import { useState } from 'react';
-import { ChevronRight, ChevronDown, Edit, Trash2, FileText } from 'lucide-react';
+import { ChevronRight, ChevronDown, Edit, Trash2, FileText, Plus, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { TaskGroupAdmin } from '@/hooks/use-task-categories-admin';
 
 interface CategoryTreeNode {
   id: string;
   name: string;
   code?: string;
   children?: CategoryTreeNode[];
+  taskGroups?: TaskGroupAdmin[];
   template?: any;
   parent_id?: string | null;
 }
@@ -21,6 +23,9 @@ interface HierarchicalCategoryTreeProps {
   onEdit: (category: CategoryTreeNode) => void;
   onDelete: (categoryId: string) => void;
   onTemplate: (category: CategoryTreeNode) => void;
+  onAddTaskGroup?: (category: CategoryTreeNode) => void;
+  onEditTaskGroup?: (taskGroup: TaskGroupAdmin, category: CategoryTreeNode) => void;
+  onDeleteTaskGroup?: (taskGroupId: string) => void;
   level?: number;
 }
 
@@ -31,6 +36,9 @@ export function HierarchicalCategoryTree({
   onEdit,
   onDelete,
   onTemplate,
+  onAddTaskGroup,
+  onEditTaskGroup,
+  onDeleteTaskGroup,
   level = 0
 }: HierarchicalCategoryTreeProps) {
   const hasChildren = (category: CategoryTreeNode) => category.children && category.children.length > 0;
@@ -116,8 +124,21 @@ export function HierarchicalCategoryTree({
             </div>
           </div>
           
-          {/* Right side: Action buttons - PLANTILLA, EDITAR, BORRAR */}
+          {/* Right side: Action buttons - +, PLANTILLA, EDITAR, BORRAR */}
           <div className="flex items-center space-x-1" onClick={(e) => e.stopPropagation()}>
+            {/* Solo mostrar botón + (Agregar Grupo) en categorías finales (3 letras) */}
+            {category.code && category.code.length === 3 && onAddTaskGroup && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onAddTaskGroup(category)}
+                className="h-6 w-6 p-0 hover:bg-accent text-muted-foreground hover:text-foreground"
+                title="Agregar Grupo de Tareas"
+              >
+                <Plus className="h-3 w-3" />
+              </Button>
+            )}
+            
             {/* Solo mostrar botón PLANTILLA en categorías finales (3 letras) */}
             {category.code && category.code.length === 3 && (
               <Button
@@ -163,8 +184,65 @@ export function HierarchicalCategoryTree({
               onEdit={onEdit}
               onDelete={onDelete}
               onTemplate={onTemplate}
+              onAddTaskGroup={onAddTaskGroup}
+              onEditTaskGroup={onEditTaskGroup}
+              onDeleteTaskGroup={onDeleteTaskGroup}
               level={currentLevel + 1}
             />
+          </div>
+        )}
+
+        {/* Task Groups - 4th level (show for 3rd level categories with 3-letter codes) */}
+        {category.code && category.code.length === 3 && category.taskGroups && category.taskGroups.length > 0 && isExpanded && (
+          <div className="mt-1">
+            {category.taskGroups.map(taskGroup => (
+              <div 
+                key={taskGroup.id}
+                className="flex items-center justify-between rounded-md p-2 mb-1 hover:bg-accent/30 transition-colors border-l-2 border-blue-300 bg-blue-50/50 dark:bg-blue-950/20 dark:border-blue-700"
+                style={{ marginLeft: `${(currentLevel + 1) * 24}px` }}
+              >
+                {/* Left side: Task group info */}
+                <div className="flex items-center space-x-2 flex-1">
+                  <div className="w-5 flex justify-center">
+                    <Layers className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  
+                  <div className="flex items-center space-x-2 flex-1">
+                    <span className="text-sm font-medium text-blue-800 dark:text-blue-200">{taskGroup.name}</span>
+                    <Badge variant="outline" className="text-xs px-1.5 py-0.5 bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-600">
+                      Grupo
+                    </Badge>
+                  </div>
+                </div>
+                
+                {/* Right side: Task group actions */}
+                <div className="flex items-center space-x-1">
+                  {onEditTaskGroup && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onEditTaskGroup(taskGroup, category)}
+                      className="h-6 w-6 p-0 hover:bg-blue-200 text-blue-600 hover:text-blue-800 dark:hover:bg-blue-800/50 dark:text-blue-400 dark:hover:text-blue-200"
+                      title="Editar Grupo"
+                    >
+                      <Edit className="h-3 w-3" />
+                    </Button>
+                  )}
+                  
+                  {onDeleteTaskGroup && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onDeleteTaskGroup(taskGroup.id)}
+                      className="h-6 w-6 p-0 hover:bg-destructive/10 text-blue-600 hover:text-destructive dark:text-blue-400"
+                      title="Eliminar Grupo"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
