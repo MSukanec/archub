@@ -75,7 +75,10 @@ export function useTaskCategoriesAdmin() {
         throw categoriesError;
       }
 
+      console.log('Categories fetched successfully:', categories?.length || 0);
+
       // Fetch task groups first without templates to avoid relationship conflicts
+      console.log('Fetching task groups...');
       const { data: taskGroups, error: taskGroupsError } = await supabase
         .from('task_groups')
         .select('*');
@@ -85,7 +88,10 @@ export function useTaskCategoriesAdmin() {
         throw taskGroupsError;
       }
 
+      console.log('Task groups fetched successfully:', taskGroups?.length || 0, taskGroups);
+
       // Fetch templates separately if needed
+      console.log('Fetching templates...');
       const { data: templates, error: templatesError } = await supabase
         .from('task_templates')
         .select('id, name_template, task_group_id');
@@ -95,8 +101,7 @@ export function useTaskCategoriesAdmin() {
         // Don't throw here, templates are optional
       }
 
-      console.log('Task groups:', taskGroups);
-      console.log('Templates:', templates);
+      console.log('Templates fetched successfully:', templates?.length || 0, templates);
 
       // Build hierarchical structure
       const categoryMap = new Map();
