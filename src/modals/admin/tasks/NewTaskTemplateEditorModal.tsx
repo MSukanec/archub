@@ -409,10 +409,26 @@ export default function TaskTemplateEditorModal({
     mutationFn: async () => {
       if (taskGroupId) {
         // NEW: Crear plantilla para task group
+        // Primero obtener el código de la categoría a través del task group
+        const { data: groupData, error: groupError } = await supabase
+          .from('task_groups')
+          .select(`
+            category_id,
+            task_categories!inner (
+              code
+            )
+          `)
+          .eq('id', taskGroupId)
+          .single();
+
+        if (groupError) throw groupError;
+        
+        const categoryCode = groupData.task_categories.code;
 
         const insertData = {
           name_template: `${taskGroupName}.`,
-          task_group_id: taskGroupId
+          task_group_id: taskGroupId,
+          task_code: categoryCode
         };
 
         
@@ -441,7 +457,8 @@ export default function TaskTemplateEditorModal({
         const { data, error } = await supabase
           .from('task_templates')
           .insert({
-            name_template: `${categoryName}.`
+            name_template: `${categoryName}.`,
+            task_code: categoryCode
           })
           .select()
           .single();
