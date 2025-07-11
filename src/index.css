@@ -78,6 +78,18 @@
   }
 }
 
+@keyframes border-glow {
+  0% {
+    box-shadow: 0 0 5px var(--accent), 0 0 10px var(--accent), 0 0 15px var(--accent);
+  }
+  50% {
+    box-shadow: 0 0 10px var(--accent), 0 0 20px var(--accent), 0 0 30px var(--accent);
+  }
+  100% {
+    box-shadow: 0 0 5px var(--accent), 0 0 10px var(--accent), 0 0 15px var(--accent);
+  }
+}
+
 :root {
   /* Layout */
   --layout-bg: hsl(0, 0%, 90%);
@@ -223,6 +235,11 @@
   --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 10px;
+}
+
+/* Animated border class */
+.animated-border {
+  animation: border-glow 2s ease-in-out infinite;
 }
 
 .dark {

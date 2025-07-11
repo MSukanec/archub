@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { HelpCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface FeatureItem {
@@ -27,33 +28,28 @@ export function FeatureIntroduction({
   return (
     <div 
       className={cn(
-        "w-full text-white overflow-hidden shadow-lg mb-6 cursor-pointer transition-all duration-300 ease-in-out",
+        "w-full text-white overflow-hidden shadow-lg mb-6 cursor-pointer transition-all duration-300 ease-in-out animated-border",
         className
       )}
       style={{ 
         backgroundColor: 'var(--secondary-sidebar-bg)',
-        borderRadius: 'var(--radius-sm)'
+        borderRadius: 'var(--radius-sm)',
+        border: '3px solid var(--accent)'
       }}
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => setIsExpanded(false)}
     >
       {/* Always visible title */}
       <div className="p-6">
-        <h2 className="text-2xl font-bold text-white text-center">
+        <h2 className="text-2xl font-normal text-white text-center flex items-center justify-center gap-2">
           {title}
+          <HelpCircle className="w-6 h-6" />
         </h2>
       </div>
 
       {/* Expandable content */}
       {isExpanded && (
         <div className="pb-6 animate-in fade-in duration-300">
-          {/* Image */}
-          {image && (
-            <div className="flex justify-center mb-6">
-              {image}
-            </div>
-          )}
-
           {/* Features Grid */}
           <div className="px-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
