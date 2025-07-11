@@ -629,31 +629,7 @@ export default function FinancesInstallments() {
       }
     }))
 
-    // Add dollarized total column
-    const dollarizedColumn = {
-      key: "dollarized_total",
-      label: "APORTE DOLARIZADO",
-      width: "20%",
-      sortable: true,
-      sortType: 'number' as const,
-      render: (item: any) => {
-        if (!item.dollarizedTotal || item.dollarizedTotal === 0) {
-          return <div className="text-sm text-muted-foreground">-</div>
-        }
-
-        const formattedAmount = new Intl.NumberFormat('es-AR', {
-          minimumFractionDigits: 0,
-          maximumFractionDigits: 0
-        }).format(item.dollarizedTotal)
-        return (
-          <div className="text-sm font-medium text-green-600">
-            US$ {formattedAmount}
-          </div>
-        )
-      }
-    }
-
-    return [...baseColumns, ...currencyColumns, dollarizedColumn]
+    return [...baseColumns, ...currencyColumns]
   }, [availableCurrencies])
 
   // Detailed table columns (Fecha, Contacto, Moneda, Billetera, Monto, Cotización, Acciones)

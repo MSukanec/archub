@@ -235,7 +235,7 @@ export default function FinancesCommited() {
       label: "Moneda",
       width: "25%",
       render: (item: ProjectClient) => {
-        const currentCurrency = organizationCurrencies?.find(oc => oc.currencies?.id === item.currency_id)
+        const currentCurrency = organizationCurrencies?.find(oc => oc.currency_id === item.currency_id)
         
         return (
           <div className="text-sm">
@@ -251,13 +251,7 @@ export default function FinancesCommited() {
               }}
             >
               <SelectTrigger className="w-full h-8">
-                <SelectValue placeholder="Seleccionar moneda">
-                  {currentCurrency?.currencies ? (
-                    `${currentCurrency.currencies.code} - ${currentCurrency.currencies.name}`
-                  ) : (
-                    'Seleccionar moneda'
-                  )}
-                </SelectValue>
+                <SelectValue placeholder="Seleccionar moneda" />
               </SelectTrigger>
               <SelectContent>
                 {organizationCurrencies?.map((orgCurrency, index) => (
