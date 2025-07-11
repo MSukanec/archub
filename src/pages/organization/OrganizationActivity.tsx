@@ -17,7 +17,7 @@ import ActivityCard from '@/components/cards/ActivityCard';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { supabase } from '@/lib/supabase';
-import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
+import { FeatureIntroduction } from '@/components/ui-custom/layout/FeatureIntroduction';
 
 export default function OrganizationActivity() {
   const { data: userData } = useCurrentUser();
@@ -391,25 +391,22 @@ export default function OrganizationActivity() {
         {/* FeatureIntroduction */}
         <FeatureIntroduction
           title="Actividad de la Organización"
-          icon={<Activity className="w-6 h-6" />}
+          icon={Activity}
+          helpText="(click para más información)"
           features={[
             {
-              icon: <Folder className="w-4 h-4" />,
               title: "Seguimiento de proyectos",
               description: "Monitorea la creación y progreso de todos los proyectos de la organización en tiempo real."
             },
             {
-              icon: <DollarSign className="w-4 h-4" />,
               title: "Actividad financiera",
               description: "Rastrea movimientos financieros, ingresos y egresos para mantener el control económico."
             },
             {
-              icon: <Users className="w-4 h-4" />,
               title: "Gestión de contactos",
               description: "Supervisa la adición de nuevos contactos y clientes vinculados a los proyectos."
             },
             {
-              icon: <FileText className="w-4 h-4" />,
               title: "Registro de bitácoras",
               description: "Controla las entradas de bitácora de obra y el progreso de los trabajos de construcción."
             }

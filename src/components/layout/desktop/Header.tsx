@@ -25,6 +25,8 @@ import { useMobileMenuStore } from "../mobile/useMobileMenuStore";
 import { MobileAvatarMenu } from "../mobile/MobileAvatarMenu";
 import { useMobileAvatarMenuStore } from "../mobile/useMobileAvatarMenuStore";
 import { useMobile } from "@/hooks/use-mobile";
+import { ProjectSelector } from "@/components/navigation/ProjectSelector";
+import { useProjectContext } from "@/context/projectContext";
 
 interface HeaderProps {
   icon?: React.ComponentType<any> | React.ReactNode;
@@ -62,6 +64,7 @@ export function Header({
   const { data: userData } = useCurrentUser();
   const { data: projects = [] } = useProjects(userData?.preferences?.last_organization_id);
   const { setSidebarContext, currentSidebarContext } = useNavigationStore();
+  const { selectedProjectId } = useProjectContext();
 
   // Organization selection mutation
   const selectOrganizationMutation = useMutation({
@@ -107,7 +110,9 @@ export function Header({
   };
 
   const currentOrganization = userData?.organization;
-  const currentProject = projects.find(p => p.id === userData?.preferences?.last_project_id);
+  const currentProject = selectedProjectId 
+    ? projects.find(p => p.id === selectedProjectId)
+    : projects.find(p => p.id === userData?.preferences?.last_project_id);
 
   // Function to get main sidebar section name based on current context
   const getMainSidebarSection = (context: string) => {
@@ -245,63 +250,14 @@ export function Header({
             </DropdownMenu>
           </div>
 
-          {/* Project Breadcrumb - Show when there's a selected project */}
-          {currentProject && (
-            <>
-              <span className="text-[var(--menues-fg)] opacity-70">/</span>
-              
-              <div className="flex items-center">
-                <Button
-                  variant="ghost"
-                  className="h-8 px-2 text-sm font-medium text-[var(--menues-fg)] hover:bg-transparent hover:text-[var(--menues-fg)]"
-                  onClick={() => {
-                    setSidebarContext('project');
-                    navigate('/project/dashboard');
-                  }}
-                >
-                  {currentProject?.name || 'Sin proyecto'}
-                </Button>
-                
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-6 p-0 hover:bg-transparent"
-                    >
-                      <ChevronDown className="h-3 w-3 text-[var(--menues-fg)]" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="w-56">
-                    <div className="px-2 py-1.5 text-xs text-[var(--menues-fg)] opacity-70 font-medium">
-                      Buscar proyecto...
-                    </div>
-                    <DropdownMenuSeparator />
-                    {projects.map((project) => (
-                      <DropdownMenuItem
-                        key={project.id}
-                        onClick={() => handleProjectSelect(project.id)}
-                        className="flex items-center justify-between text-sm"
-                      >
-                        <span className="truncate">{project.name}</span>
-                        {project.id === currentProject?.id && (
-                          <div className="h-2 w-2 rounded-full bg-green-500 flex-shrink-0" />
-                        )}
-                      </DropdownMenuItem>
-                    ))}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem 
-                      className="text-sm"
-                      onClick={() => navigate('/organization/projects')}
-                    >
-                      <Folder className="mr-2 h-4 w-4" />
-                      Gestión de Proyectos
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </>
-          )}
+          {/* Project Breadcrumb - Show when there's a selected project or global view */}
+          <>
+            <span className="text-[var(--menues-fg)] opacity-70">/</span>
+            
+            <div className="flex items-center">
+              <ProjectSelector />
+            </div>
+          </>
 
           {/* Stage Breadcrumb - Show ONLY if in stage context (not project context) */}
           {['design', 'construction', 'finances', 'commercialization'].includes(currentSidebarContext) && (

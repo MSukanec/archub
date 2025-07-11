@@ -57,6 +57,7 @@ import { useNavigationStore } from "@/stores/navigationStore";
 import SidebarButton from "./SidebarButton";
 import CustomRestricted from "@/components/ui-custom/misc/CustomRestricted";
 import Plan from "@/components/ui-custom/misc/Plan";
+import { useProjectContext } from "@/context/projectContext";
 
 export function Sidebar() {
   const [location, navigate] = useLocation();

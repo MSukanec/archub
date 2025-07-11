@@ -6,6 +6,7 @@ import { useSidebarStore, useSecondarySidebarStore } from "@/stores/sidebarStore
 import { cn } from "@/lib/utils";
 import SidebarButton from "./SidebarButton";
 import { CustomRestricted } from "@/components/ui-custom/misc/CustomRestricted";
+import { useProjectContext } from "@/context/projectContext";
 
 import { 
   Home,
@@ -54,6 +55,7 @@ export function SidebarSubmenu() {
   const { isDocked: isMainDocked, isHovered: isMainHovered } = useSidebarStore();
   const { isDocked: isSecondaryDocked, isHovered: isSecondaryHovered, setDocked: setSecondaryDocked, setHovered: setSecondaryHovered } = useSecondarySidebarStore();
   const { activeSidebarSection, setActiveSidebarSection, setSidebarContext } = useNavigationStore();
+  const { isGlobalView } = useProjectContext();
 
   const isMainSidebarExpanded = false; // Always collapsed
   const isSecondarySidebarExpanded = isSecondaryDocked || isSecondaryHovered || isMainHovered;
@@ -102,44 +104,44 @@ export function SidebarSubmenu() {
     ],
     
     'proyecto': [
-      { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },
-      { icon: NotebookPen, label: 'Datos Básicos', href: '/project/basic-data' },
-      { icon: Users, label: 'Clientes', href: '/project/clients' },
+      { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard', requiresProject: true },
+      { icon: NotebookPen, label: 'Datos Básicos', href: '/project/basic-data', requiresProject: true },
+      { icon: Users, label: 'Clientes', href: '/project/clients', requiresProject: true },
     ],
 
     'diseno': [
-      { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' },
-      { icon: FileImage, label: 'Documentación', href: '/design/documentation' },
-      { icon: Calendar, label: 'Cronograma', href: '/design/timeline', restricted: 'coming_soon' },
-      { icon: Layout, label: 'Tablero', href: '/design/board', restricted: 'coming_soon' },
-      { icon: Calculator, label: 'Cómputo', href: '/design/compute', restricted: 'coming_soon' },
-      { icon: FileCode, label: 'Datos', href: '/design/data', restricted: 'coming_soon' },
-      { icon: History, label: 'Preferencias de Diseño', href: '/design/preferences', restricted: 'coming_soon' },
+      { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard', requiresProject: true },
+      { icon: FileImage, label: 'Documentación', href: '/design/documentation', requiresProject: true },
+      { icon: Calendar, label: 'Cronograma', href: '/design/timeline', restricted: 'coming_soon', requiresProject: true },
+      { icon: Layout, label: 'Tablero', href: '/design/board', restricted: 'coming_soon', requiresProject: true },
+      { icon: Calculator, label: 'Cómputo', href: '/design/compute', restricted: 'coming_soon', requiresProject: true },
+      { icon: FileCode, label: 'Datos', href: '/design/data', restricted: 'coming_soon', requiresProject: true },
+      { icon: History, label: 'Preferencias de Diseño', href: '/design/preferences', restricted: 'coming_soon', requiresProject: true },
     ],
 
     'obra': [
-      { icon: Home, label: 'Resumen de Obra', href: '/construction/dashboard' },
-      { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
-      { icon: Package, label: 'Materiales', href: '/construction/materials' },
-      { icon: FileText, label: 'Bitácora', href: '/construction/logs' },
-      { icon: Users, label: 'Asistencia', href: '/construction/personnel' },
-      { icon: Images, label: 'Galería', href: '/construction/gallery' },
+      { icon: Home, label: 'Resumen de Obra', href: '/construction/dashboard', requiresProject: true },
+      { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets', requiresProject: true },
+      { icon: Package, label: 'Materiales', href: '/construction/materials', requiresProject: true },
+      { icon: FileText, label: 'Bitácora', href: '/construction/logs', requiresProject: true },
+      { icon: Users, label: 'Asistencia', href: '/construction/personnel', requiresProject: true },
+      { icon: Images, label: 'Galería', href: '/construction/gallery', requiresProject: true },
     ],
 
     'finanzas': [
-      { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
-      { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
-      { icon: CreditCard, label: 'Compromisos', href: '/finances/commited' },
-      { icon: HandCoins, label: 'Aportes', href: '/finances/installments' },
+      { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard', requiresProject: true },
+      { icon: DollarSign, label: 'Movimientos', href: '/finances/movements', requiresProject: true },
+      { icon: CreditCard, label: 'Compromisos', href: '/finances/commited', requiresProject: true },
+      { icon: HandCoins, label: 'Aportes', href: '/finances/installments', requiresProject: true },
       { icon: FolderOpen, label: 'Preferencias de Finanzas', href: '/finances/preferences' },
     ],
 
     'comercializacion': [
-      { icon: Home, label: 'Resumen de Comercialización', href: '/commercialization/dashboard', restricted: true },
-      { icon: Handshake, label: 'Unidades', href: '/commercialization/units', restricted: true },
-      { icon: Users, label: 'Clientes', href: '/commercialization/clients', restricted: true },
-      { icon: DollarSign, label: 'Ventas', href: '/commercialization/sales', restricted: true },
-      { icon: FolderOpen, label: 'Preferencias de Comercialización', href: '/commercialization/preferences', restricted: true },
+      { icon: Home, label: 'Resumen de Comercialización', href: '/commercialization/dashboard', restricted: true, requiresProject: true },
+      { icon: Handshake, label: 'Unidades', href: '/commercialization/units', restricted: true, requiresProject: true },
+      { icon: Users, label: 'Clientes', href: '/commercialization/clients', restricted: true, requiresProject: true },
+      { icon: DollarSign, label: 'Ventas', href: '/commercialization/sales', restricted: true, requiresProject: true },
+      { icon: FolderOpen, label: 'Preferencias de Comercialización', href: '/commercialization/preferences', restricted: true, requiresProject: true },
     ],
 
     'post-venta': [
@@ -169,6 +171,16 @@ export function SidebarSubmenu() {
   };
 
   const currentSubmenu = submenuContent[currentSection as keyof typeof submenuContent] || [];
+
+  // Filter menu items based on project requirement
+  const filteredSubmenu = currentSubmenu.filter(item => {
+    // Always show separators and items without requiresProject
+    if (item.type === 'separator' || !item.requiresProject) {
+      return true;
+    }
+    // Hide items that require a project when in global view
+    return !isGlobalView;
+  });
 
   // Get section title and icon
   const getSectionInfo = () => {
@@ -220,8 +232,8 @@ export function SidebarSubmenu() {
       {/* Contenido del submenú */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden p-1 pt-3">
         <div className="flex flex-col gap-[1px]">
-          {currentSubmenu.length > 0 ? (
-            currentSubmenu.map((item, index) => {
+          {filteredSubmenu.length > 0 ? (
+            filteredSubmenu.map((item, index) => {
               if (item.type === 'accordion') {
                 return (
                   <div key={index} className="mb-[1px]">
