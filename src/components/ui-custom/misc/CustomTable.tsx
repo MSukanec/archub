@@ -3,14 +3,7 @@ import { ChevronUp, ChevronDown, ArrowUpDown, ChevronLeft, ChevronRight } from '
 import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { TableRowActions } from '@/components/ui-custom/misc/TableRowActions'
 
-interface TableRowAction {
-  icon: React.ReactNode
-  label: string
-  onClick: () => void
-  variant?: "default" | "destructive" | "primary" | "muted"
-}
 
 type SortDirection = 'asc' | 'desc' | null
 
@@ -43,8 +36,8 @@ interface CustomTableProps<T = any> {
   }
   // Nueva prop para renderizado de cards en mobile
   renderCard?: (item: T) => React.ReactNode
-  // Nueva prop para acciones flotantes
-  getRowActions?: (item: T) => TableRowAction[]
+  // Nuevo: Espaciado opcional para cards
+  cardSpacing?: string
 }
 
 export function CustomTable<T = any>({ 
@@ -61,7 +54,7 @@ export function CustomTable<T = any>({
   onCardClick,
   defaultSort,
   renderCard,
-  getRowActions
+  cardSpacing = "space-y-2"
 }: CustomTableProps<T>) {
   const [sortKey, setSortKey] = useState<string | null>(defaultSort?.key || null)
   const [sortDirection, setSortDirection] = useState<SortDirection>(defaultSort?.direction || null)
@@ -300,11 +293,7 @@ export function CustomTable<T = any>({
                   }
                 </div>
               ))}
-              
-              {/* Floating Actions */}
-              {getRowActions && (
-                <TableRowActions actions={getRowActions(item)} />
-              )}
+
             </div>
           ))}
         </div>

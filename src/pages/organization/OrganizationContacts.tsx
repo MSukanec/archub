@@ -450,19 +450,7 @@ export default function OrganizationContacts() {
               <p className="text-xs text-muted-foreground mt-1">Intenta ajustar los filtros o crear un nuevo contacto</p>
             </div>
           }
-          getRowActions={(contact: any) => [
-            {
-              icon: <Edit className="w-4 h-4" />,
-              label: "Editar",
-              onClick: () => handleEditContact(contact)
-            },
-            {
-              icon: <Trash2 className="w-4 h-4" />,
-              label: "Eliminar", 
-              onClick: () => handleDeleteContact(contact),
-              variant: "destructive" as const
-            }
-          ]}
+
           renderCard={(contact: any) => (
             <ContactCard
               key={contact.id}

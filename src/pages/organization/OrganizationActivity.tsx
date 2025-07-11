@@ -18,7 +18,7 @@ import ActivityCard from '@/components/cards/ActivityCard';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { supabase } from '@/lib/supabase';
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
-import { UserActivityChart } from '@/components/graphics/UserActivityChart';
+import { MemberActivityChart } from '@/components/graphics/MemberActivityChart';
 import { useUserActivity } from '@/hooks/use-user-activity';
 
 export default function OrganizationActivity() {
@@ -411,8 +411,8 @@ export default function OrganizationActivity() {
           ]}
         />
 
-        {/* User Activity Chart */}
-        <UserActivityChart 
+        {/* Member Activity Chart */}
+        <MemberActivityChart 
           data={userActivityData} 
           isLoading={userActivityLoading}
         />
