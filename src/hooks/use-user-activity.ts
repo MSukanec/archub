@@ -147,13 +147,13 @@ export function useUserActivity(organizationId: string | undefined, timePeriod: 
             }
           })
 
-          // Include all users (even with 0 activity) for consistent chart display
-          const allUsers = Object.values(usersActivity)
-          const total = allUsers.reduce((sum, user) => sum + user.activity_count, 0)
+          // Only include users with activity > 0
+          const activeUsers = Object.values(usersActivity).filter(user => user.activity_count > 0)
+          const total = activeUsers.reduce((sum, user) => sum + user.activity_count, 0)
 
           userActivityData.push({
             date: formattedDate,
-            users: allUsers,
+            users: activeUsers,
             total
           })
         }
