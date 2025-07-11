@@ -126,7 +126,7 @@ Changelog:
   • Added "(click para más información)" text hint next to help icon for better user guidance
   • Updated content to reflect actual page functionality: 1) Creating new projects with modal completion and ACTIVO selection, 2) Using header selector for quick project switching and "Todos los Proyectos" option
   • Removed selected project information card above projects list for cleaner interface
-  • ACTIVO badge properly implemented in ModernProjectCard with --accent background color and positioned left of action buttons
+  • ACTIVO badge properly implemented in ModernProjectCard with --accent background color, positioned left of action buttons, and shows for currently selected project (last_project_id)
   • Feature introduction uses proper hover expansion with detailed descriptions explaining actual user workflows
 - July 11, 2025. Complete PERSONAL page rename to ASISTENCIA across entire application - COMPLETED
   • Renamed ConstructionPersonnel.tsx to ConstructionAttendance.tsx with function name update

@@ -30,9 +30,10 @@ interface ModernProjectCardProps {
   onDelete: (project: any) => void;
   onSelect: (project: any) => void;
   onNavigateToBasicData: (project: any) => void;
+  isActiveProject?: boolean;
 }
 
-export default function ModernProjectCard({ project, onEdit, onDelete, onSelect, onNavigateToBasicData }: ModernProjectCardProps) {
+export default function ModernProjectCard({ project, onEdit, onDelete, onSelect, onNavigateToBasicData, isActiveProject = false }: ModernProjectCardProps) {
   const statusConfig = projectStatuses[project.status as keyof typeof projectStatuses] || projectStatuses.planning;
   
 
@@ -82,8 +83,8 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
           </div>
           
           <div className="flex items-center gap-2">
-            {/* Active Project Badge - Only show for active projects */}
-            {project.status === 'active' && (
+            {/* Active Project Badge - Only show for currently selected project */}
+            {isActiveProject && (
               <span className="text-xs font-medium px-2 py-1 rounded-full text-white" style={{backgroundColor: 'var(--accent)'}}>
                 ACTIVO
               </span>
