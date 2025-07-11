@@ -565,7 +565,7 @@ export default function FinancesInstallments() {
         if (item.isTotal) {
           const totalCommitted = item.totalCommittedAmount || 0
           return (
-            <div className="text-sm font-bold">
+            <div className="text-sm font-bold text-blue-600">
               US$ {totalCommitted.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
             </div>
           )
@@ -578,7 +578,7 @@ export default function FinancesInstallments() {
         return (
           <div className="text-sm">
             {committedAmount > 0 ? (
-              <div className="font-medium">
+              <div className="font-medium text-blue-600">
                 {symbol}{committedAmount.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </div>
             ) : (
@@ -644,7 +644,7 @@ export default function FinancesInstallments() {
           maximumFractionDigits: 0
         }).format(item.dollarizedTotal)
         return (
-          <div className="text-sm font-medium">
+          <div className="text-sm font-medium text-green-600">
             US$ {formattedAmount}
           </div>
         )
@@ -684,7 +684,7 @@ export default function FinancesInstallments() {
           const totalRemaining = item.totalRemainingAmount || 0
           const isPositive = totalRemaining >= 0
           return (
-            <div className={`text-sm font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+            <div className="text-sm font-bold text-red-600">
               {isPositive ? '+' : '-'}US$ {Math.abs(totalRemaining).toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
             </div>
           )
@@ -713,7 +713,7 @@ export default function FinancesInstallments() {
         }).format(Math.abs(remaining))
         
         return (
-          <div className={`text-sm font-medium ${remaining >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+          <div className="text-sm font-medium text-red-600">
             {remaining >= 0 ? '+' : '-'}US$ {formattedRemaining}
           </div>
         )
