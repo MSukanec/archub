@@ -119,6 +119,12 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 11, 2025. Fixed MemberActivityChart avatar filtering and chart margin optimization - COMPLETED
+  • Fixed chart left margin from 40px to 5px to eliminate empty space and reach card padding edge
+  • Updated user activity data logic to only show avatars for users with actual activity (activity_count > 0)
+  • Removed all inactive organization members from avatar display - now only active users appear as avatars
+  • Chart spacing optimized while maintaining identical chart functionality and visual appearance
+  • Avatar display logic now properly filters: only users who created projects, movements, contacts, or site logs appear
 - July 11, 2025. Complete MemberActivityChart time filtering and responsive Members page layout implementation - COMPLETED
   • Fixed MemberActivityChart to accept time period props from parent page instead of internal state management
   • Updated OrganizationActivity page to manage timePeriod state and pass it to MemberActivityChart component
