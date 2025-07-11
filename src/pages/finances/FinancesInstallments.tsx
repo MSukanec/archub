@@ -390,17 +390,71 @@ export default function FinancesInstallments() {
       })
       .filter(Boolean) // Remove null entries (clients without installments)
     
-    const currencies = Array.from(currenciesSet).sort()
+    // Calculate totals for percentages and totals row
+    const totalCommittedAmountUSD = summary.reduce((sum, item) => {
+      const committedAmount = item.client?.committed_amount || 0
+      const clientCurrency = allCurrencies.find(c => c.id === item.client?.currency_id)
+      
+      if (clientCurrency?.code === 'USD') {
+        return sum + committedAmount
+      } else if (clientCurrency?.code === 'ARS' && committedAmount > 0) {
+        // Use a basic conversion rate for ARS to USD (you might want to use actual exchange rates)
+        return sum + (committedAmount / 1200) // Assuming 1200 ARS = 1 USD
+      }
+      return sum + committedAmount // If no conversion available, add as-is
+    }, 0)
     
-    // Sort by contact name (A-Z) instead of dollarized total
-    const sortedSummary = summary.sort((a, b) => {
+    const totalDollarizedAmount = summary.reduce((sum, item) => sum + (item.dollarizedTotal || 0), 0)
+    
+    // Add percentages to each item
+    const summaryWithPercentages = summary.map(item => {
+      const committedAmount = item.client?.committed_amount || 0
+      const clientCurrency = allCurrencies.find(c => c.id === item.client?.currency_id)
+      let committedAmountUSD = committedAmount
+      
+      if (clientCurrency?.code === 'ARS' && committedAmount > 0) {
+        committedAmountUSD = committedAmount / 1200 // Convert ARS to USD
+      }
+      
+      const commitmentPercentage = totalCommittedAmountUSD > 0 ? (committedAmountUSD / totalCommittedAmountUSD) * 100 : 0
+      const contributionPercentage = totalDollarizedAmount > 0 ? ((item.dollarizedTotal || 0) / totalDollarizedAmount) * 100 : 0
+      
+      return {
+        ...item,
+        commitmentPercentage,
+        contributionPercentage
+      }
+    })
+    
+    // Sort by contact name (A-Z)
+    const sortedSummary = summaryWithPercentages.sort((a, b) => {
       const nameA = a.contact?.company_name || `${a.contact?.first_name || ''} ${a.contact?.last_name || ''}`.trim()
       const nameB = b.contact?.company_name || `${b.contact?.first_name || ''} ${b.contact?.last_name || ''}`.trim()
       return nameA.localeCompare(nameB)
     })
     
-    return { clientSummary: sortedSummary, availableCurrencies: currencies }
-  }, [projectClients, installments])
+    // Calculate total remaining amount
+    const totalRemainingAmount = totalCommittedAmountUSD - totalDollarizedAmount
+    
+    // Add totals row
+    const totalsRow = {
+      isTotal: true,
+      contact_id: 'total',
+      contact: null,
+      currencies: {},
+      dollarizedTotal: 0,
+      client: null,
+      commitmentPercentage: 100,
+      contributionPercentage: 100,
+      totalCommittedAmount: totalCommittedAmountUSD,
+      totalDollarizedAmount: totalDollarizedAmount,
+      totalRemainingAmount: totalRemainingAmount
+    }
+    
+    const currencies = Array.from(currenciesSet).sort()
+    
+    return { clientSummary: [...sortedSummary, totalsRow], availableCurrencies: currencies }
+  }, [projectClients, installments, allCurrencies])
 
   // Filter installments based on search
   const filteredInstallments = installments.filter(installment => {
@@ -438,6 +492,14 @@ export default function FinancesInstallments() {
       label: "Contacto",
       width: "25%",
       render: (item: any) => {
+        if (item.isTotal) {
+          return (
+            <div className="text-sm font-bold text-foreground">
+              TOTAL
+            </div>
+          )
+        }
+        
         if (!item.contact) {
           return <div className="text-sm text-muted-foreground">Sin contacto</div>
         }
@@ -470,6 +532,14 @@ export default function FinancesInstallments() {
       label: "Moneda",
       width: "15%",
       render: (item: any) => {
+        if (item.isTotal) {
+          return (
+            <div className="text-sm font-bold text-muted-foreground">
+              -
+            </div>
+          )
+        }
+        
         // Find currency data from project_clients (configured in Compromisos page)
         const clientCurrency = allCurrencies.find(c => c.id === item.client?.currency_id)
         
@@ -491,8 +561,17 @@ export default function FinancesInstallments() {
     {
       key: "monto_total",
       label: "Monto Comprometido",
-      width: "20%",
+      width: "15%",
       render: (item: any) => {
+        if (item.isTotal) {
+          const totalCommitted = item.totalCommittedAmount || 0
+          return (
+            <div className="text-sm font-bold">
+              US$ {totalCommitted.toLocaleString('es-AR')}
+            </div>
+          )
+        }
+        
         const committedAmount = item.client?.committed_amount || 0
         const clientCurrency = allCurrencies.find(c => c.id === item.client?.currency_id)
         const symbol = clientCurrency?.symbol || '$'
@@ -513,12 +592,46 @@ export default function FinancesInstallments() {
       }
     },
     {
+      key: "porcentaje_compromiso",
+      label: "% de Compromiso",
+      width: "12%",
+      render: (item: any) => {
+        if (item.isTotal) {
+          return <div className="text-sm font-bold">100%</div>
+        }
+        
+        const committedAmount = item.client?.committed_amount || 0
+        const percentage = item.commitmentPercentage || 0
+        
+        return (
+          <div className="text-sm">
+            {committedAmount > 0 ? (
+              <div className="font-medium text-purple-600">
+                {percentage.toFixed(1)}%
+              </div>
+            ) : (
+              <div className="text-muted-foreground text-xs">-</div>
+            )}
+          </div>
+        )
+      }
+    },
+    {
       key: "aporte_dolarizado",
       label: "Aporte Dolarizado",
-      width: "20%",
+      width: "15%",
       sortable: true,
       sortType: 'number' as const,
       render: (item: any) => {
+        if (item.isTotal) {
+          const totalDollarized = item.totalDollarizedAmount || 0
+          return (
+            <div className="text-sm font-bold text-green-600">
+              US$ {totalDollarized.toLocaleString('es-AR')}
+            </div>
+          )
+        }
+        
         if (!item.dollarizedTotal || item.dollarizedTotal === 0) {
           return <div className="text-sm text-muted-foreground">-</div>
         }
@@ -535,10 +648,45 @@ export default function FinancesInstallments() {
       }
     },
     {
+      key: "porcentaje_aporte",
+      label: "% de Aporte",
+      width: "12%",
+      render: (item: any) => {
+        if (item.isTotal) {
+          return <div className="text-sm font-bold">100%</div>
+        }
+        
+        const dollarizedTotal = item.dollarizedTotal || 0
+        const percentage = item.contributionPercentage || 0
+        
+        return (
+          <div className="text-sm">
+            {dollarizedTotal > 0 ? (
+              <div className="font-medium text-orange-600">
+                {percentage.toFixed(1)}%
+              </div>
+            ) : (
+              <div className="text-muted-foreground text-xs">-</div>
+            )}
+          </div>
+        )
+      }
+    },
+    {
       key: "monto_restante",
       label: "Monto Restante",
-      width: "20%",
+      width: "16%",
       render: (item: any) => {
+        if (item.isTotal) {
+          const totalRemaining = item.totalRemainingAmount || 0
+          const isPositive = totalRemaining >= 0
+          return (
+            <div className={`text-sm font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+              {isPositive ? '+' : '-'}US$ {Math.abs(totalRemaining).toLocaleString('es-AR')}
+            </div>
+          )
+        }
+        
         const committedAmount = item.client?.committed_amount || 0
         const dollarizedTotal = item.dollarizedTotal || 0
         
