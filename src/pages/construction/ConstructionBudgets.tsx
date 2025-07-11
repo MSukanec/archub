@@ -87,11 +87,11 @@ async function processDisplayName(displayName: string, paramValues: any): Promis
     
     if (paramValue) {
       // Usar expression_template si existe, sino usar label
-      let replacement = paramValue.task_parameters?.expression_template || paramValue.label;
+      let replacement = paramValue.task_parameters?.expression_template || paramValue.label || '';
       
       // Si el replacement contiene {value}, reemplazarlo con el label
-      if (replacement.includes('{value}')) {
-        replacement = replacement.replace(/{value}/g, paramValue.label);
+      if (replacement && replacement.includes('{value}')) {
+        replacement = replacement.replace(/{value}/g, paramValue.label || '');
       }
       
       processed = processed.replace(new RegExp(placeholder, 'g'), replacement);

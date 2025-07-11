@@ -92,6 +92,8 @@
   --accent-bg: hsl(90, 50%, 90%);
 
   /* Accent / State */
+  --accent: hsl(76, 100%, 40%);
+  --accent-foreground: hsl(0, 0%, 100%);
   --destructive: hsl(0, 84%, 60%);
   --destructive-text: hsl(0, 0%, 100%);
   --success: hsl(76, 100%, 40%);
