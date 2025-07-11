@@ -436,6 +436,9 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
                     onClick={() => {
                       // Reset everything and force dropzone reset
                       setParsedData(null)
+                      setColumnMapping({})
+                      setValidationErrors([])
+                      setSelectedRows(new Set())
                       setStep(1)
                       setDropzoneKey(prev => prev + 1)
                     }}
