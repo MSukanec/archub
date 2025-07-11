@@ -473,7 +473,7 @@ export default function FinancesInstallments() {
   ]
 
   const headerProps = {
-    title: "Aportes al Proyecto",
+    title: "Aportes",
     showSearch: true,
     searchValue,
     onSearchChange: setSearchValue,

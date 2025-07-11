@@ -22,6 +22,7 @@ import { cn } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
+import UserSelector from '@/components/ui-custom/misc/UserSelector'
 import { supabase } from '@/lib/supabase'
 
 const installmentSchema = z.object({
@@ -360,24 +361,6 @@ export function NewInstallmentModal({
         body: (
           <CustomModalBody columns={1}>
             <div className="space-y-2">
-              <Label htmlFor="movement_date">Fecha *</Label>
-              <Input
-                id="movement_date"
-                type="date"
-                value={form.watch('movement_date') ? format(form.watch('movement_date'), 'yyyy-MM-dd') : ''}
-                onChange={(e) => {
-                  const date = new Date(e.target.value + 'T00:00:00')
-                  form.setValue('movement_date', date)
-                }}
-              />
-              {form.formState.errors.movement_date && (
-                <p className="text-sm text-destructive">
-                  {form.formState.errors.movement_date.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
               <Label>Creador *</Label>
               <Select 
                 value={form.watch('created_by')} 
@@ -416,48 +399,43 @@ export function NewInstallmentModal({
             </div>
 
             <div className="space-y-2">
-              <Label>Contacto *</Label>
-
-              <Select 
-                value={form.watch('contact_id')} 
-                onValueChange={(value) => form.setValue('contact_id', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar contacto" />
-                </SelectTrigger>
-                <SelectContent>
-                  {organizationContacts?.map((contact, index) => {
-                    const displayName = contact.full_name || 
-                      contact.company_name || 
-                      `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 
-                      'Contacto sin nombre'
-                    const initials = contact.full_name
-                      ? contact.full_name.split(' ').map(n => n[0]).join('').toUpperCase()
-                      : contact.company_name 
-                        ? contact.company_name.split(' ').map(n => n[0]).join('').toUpperCase()
-                        : contact.first_name && contact.last_name
-                          ? `${contact.first_name[0]}${contact.last_name[0]}`.toUpperCase()
-                          : contact.first_name?.[0]?.toUpperCase() || 'C'
-                    
-                    return (
-                      <SelectItem key={`contact-${contact.id || index}`} value={contact.id || ''}>
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-6 w-6">
-                            <AvatarFallback className="text-xs">{initials}</AvatarFallback>
-                          </Avatar>
-                          <span>{displayName}</span>
-                        </div>
-                      </SelectItem>
-                    )
-                  })}
-                </SelectContent>
-              </Select>
-              {form.formState.errors.contact_id && (
+              <Label htmlFor="movement_date">Fecha *</Label>
+              <Input
+                id="movement_date"
+                type="date"
+                value={form.watch('movement_date') ? format(form.watch('movement_date'), 'yyyy-MM-dd') : ''}
+                onChange={(e) => {
+                  const date = new Date(e.target.value + 'T00:00:00')
+                  form.setValue('movement_date', date)
+                }}
+              />
+              {form.formState.errors.movement_date && (
                 <p className="text-sm text-destructive">
-                  {form.formState.errors.contact_id.message}
+                  {form.formState.errors.movement_date.message}
                 </p>
               )}
             </div>
+
+            <UserSelector
+              users={organizationContacts?.map(contact => ({
+                id: contact.id,
+                full_name: contact.full_name || contact.company_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim(),
+                email: contact.email || '',
+                avatar_url: contact.avatar_url,
+                first_name: contact.first_name,
+                last_name: contact.last_name
+              })) || []}
+              value={form.watch('contact_id')}
+              onChange={(value) => form.setValue('contact_id', value)}
+              label="Contacto"
+              placeholder="Seleccionar contacto"
+              required
+            />
+            {form.formState.errors.contact_id && (
+              <p className="text-sm text-destructive">
+                {form.formState.errors.contact_id.message}
+              </p>
+            )}
 
             <div className="space-y-2">
               <Label>Moneda *</Label>
