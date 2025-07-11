@@ -369,7 +369,10 @@ export default function OrganizationMembers() {
           <div className="lg:col-span-3">
             <div className="space-y-1">
               <div className="px-3 pt-2 pb-2">
-                <h2 className="text-lg font-semibold">Miembros</h2>
+                <div className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-[var(--accent)]" />
+                  <h2 className="text-lg font-semibold">Miembros</h2>
+                </div>
                 <p className="text-sm text-muted-foreground mt-1">
                   Gestiona el acceso y permisos del equipo.
                 </p>
