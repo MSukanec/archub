@@ -409,7 +409,7 @@ export default function Movements() {
           amount: parseFloat(movement.amount) || 0,
           movement_date: movementDate,
           organization_id: userData?.organization_id,
-          project_id: userData?.project_id,
+          project_id: movement.project_id || userData?.project_id,
           created_by: userData?.id,
           // Remove empty IDs to avoid UUID errors
           ...(movement.type_id && movement.type_id.trim() && { type_id: movement.type_id }),
@@ -417,6 +417,7 @@ export default function Movements() {
           ...(movement.subcategory_id && movement.subcategory_id.trim() && { subcategory_id: movement.subcategory_id }),
           ...(movement.currency_id && movement.currency_id.trim() && { currency_id: movement.currency_id }),
           ...(movement.wallet_id && movement.wallet_id.trim() && { wallet_id: movement.wallet_id }),
+          ...(movement.exchange_rate && { exchange_rate: parseFloat(movement.exchange_rate) }),
           is_favorite: false,
         };
         

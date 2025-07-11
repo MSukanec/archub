@@ -48,6 +48,7 @@ const FIELD_OPTIONS = [
   { value: 'movement_date', label: 'Fecha' },
   { value: 'description', label: 'Descripción' },
   { value: 'amount', label: 'Monto' },
+  { value: 'exchange_rate', label: 'Cotización' },
   { value: 'type', label: 'Tipo (Ingreso/Egreso)' },
   { value: 'category', label: 'Categoría' },
   { value: 'subcategory', label: 'Subcategoría' },
@@ -310,42 +311,52 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
   }
 
   // Process final import
-  const handleImport = () => {
+  const handleImport = async () => {
     if (!parsedData || !currentUser) return
     
-    // Only process selected rows
-    const processedMovements = parsedData.rows
-      .map((row, index) => {
-        // Skip if row is not selected
-        if (!selectedRows.has(index)) return null
-        
-        const movement: any = {}
-        
-        Object.entries(columnMapping).forEach(([header, field]) => {
-          if (field === '') return // Skip ignored columns
-          
-          const columnIndex = parsedData.headers.indexOf(header)
-          const value = row[columnIndex]
-          
-          if (value !== undefined && value !== null && value !== '') {
-            movement[field] = value
-          }
-        })
-        
-        // Add project_id from current user preferences
-        if (currentUser.preferences?.last_project_id) {
-          movement.project_id = currentUser.preferences.last_project_id
-        }
-        
-        return movement
-      })
-      .filter(movement => {
-        // Only include valid movements with required fields
-        return movement !== null && REQUIRED_FIELDS.every(field => movement[field] !== undefined)
-      })
+    setIsProcessing(true)
     
-    onImport(processedMovements)
-    handleClose()
+    try {
+      // Only process selected rows
+      const processedMovements = parsedData.rows
+        .map((row, index) => {
+          // Skip if row is not selected
+          if (!selectedRows.has(index)) return null
+          
+          const movement: any = {}
+          
+          Object.entries(columnMapping).forEach(([header, field]) => {
+            if (field === '') return // Skip ignored columns
+            
+            const columnIndex = parsedData.headers.indexOf(header)
+            const value = row[columnIndex]
+            
+            if (value !== undefined && value !== null && value !== '') {
+              movement[field] = value
+            }
+          })
+          
+          // Add project_id from current user preferences
+          if (currentUser.preferences?.last_project_id) {
+            movement.project_id = currentUser.preferences.last_project_id
+          }
+          
+          return movement
+        })
+        .filter(movement => {
+          // Only include valid movements with required fields
+          return movement !== null && REQUIRED_FIELDS.every(field => movement[field] !== undefined)
+        })
+      
+      console.log('Importing movements:', processedMovements)
+      
+      await onImport(processedMovements)
+      handleClose()
+    } catch (error) {
+      console.error('Error importing movements:', error)
+    } finally {
+      setIsProcessing(false)
+    }
   }
 
   // Handle row selection
@@ -457,7 +468,12 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
                   {parsedData.headers.map((header, index) => (
                     <div key={index} className="flex items-center gap-4 p-4 border rounded-lg">
                       <div className="flex-1">
-                        <Label className="font-medium">{header}</Label>
+                        <div className="flex items-center gap-2">
+                          <Label className="font-medium">{header}</Label>
+                          {REQUIRED_FIELDS.includes(columnMapping[header]) && (
+                            <Badge variant="destructive" className="text-white">Obligatorio</Badge>
+                          )}
+                        </div>
                         <p className="text-xs text-muted-foreground mt-1">
                           Ejemplo: {parsedData.rows[0]?.[index] || 'N/A'}
                         </p>
@@ -484,9 +500,6 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
                           </SelectContent>
                         </Select>
                       </div>
-                      {REQUIRED_FIELDS.includes(columnMapping[header]) && (
-                        <Badge variant="destructive">Obligatorio</Badge>
-                      )}
                     </div>
                   ))}
                 </div>
@@ -671,8 +684,17 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
           onClick={handleImport}
           disabled={hasBlockingErrors || isProcessing || selectedRows.size === 0}
         >
-          <CheckCircle className="w-4 h-4 mr-2" />
-          Importar {selectedRows.size} movimientos
+          {isProcessing ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              Importando...
+            </>
+          ) : (
+            <>
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Importar {selectedRows.size} movimientos
+            </>
+          )}
         </Button>
       )
     }
