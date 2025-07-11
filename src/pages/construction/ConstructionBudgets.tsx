@@ -519,27 +519,17 @@ export default function ConstructionBudgets() {
     )
   }
 
-  // Budget Task Table Component
+  // Budget Task Table Component using reusable BudgetTable
   function BudgetTaskTable({ budgetId }: { budgetId: string }) {
-    const { budgetTasks, isLoading, updateBudgetTask, createBudgetTask } = useBudgetTasks(budgetId);
+    const { budgetTasks, isLoading, updateBudgetTask, createBudgetTask, deleteBudgetTask } = useBudgetTasks(budgetId);
     const { data: parameterValues = [] } = useTaskParameterValues();
+    const { data: units = [] } = useUnits();
     const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
     
     // Group tasks by rubro if grouping is enabled
     const groupTasksByRubro = selectedBudget?.group_tasks_by_rubro || false;
-    
-    const groupedTasks = groupTasksByRubro 
-      ? budgetTasks?.reduce((groups: Record<string, any[]>, task: any) => {
-          const rubro = task.task?.rubro_name || 'Sin Rubro';
-          if (!groups[rubro]) {
-            groups[rubro] = [];
-          }
-          groups[rubro].push(task);
-          return groups;
-        }, {}) || {}
-      : { 'Todas las Tareas': budgetTasks || [] };
 
-    // Función para actualizar la cantidad de una tarea
+    // Helper functions
     const handleUpdateQuantity = async (taskId: string, newQuantity: number) => {
       try {
         const task = budgetTasks?.find(t => t.id === taskId);
@@ -554,15 +544,10 @@ export default function ConstructionBudgets() {
           end_date: task.end_date,
           priority: task.priority,
           dependencies: task.dependencies,
-          organization_id: task.organization_id
-        });
-
-        toast({
-          title: "Cantidad actualizada",
-          description: `Cantidad cambiada a ${newQuantity}`,
+          organization_id: task.organization_id,
         });
       } catch (error) {
-        console.error('Error updating quantity:', error);
+        console.error('Error updating task quantity:', error);
         toast({
           title: "Error",
           description: "No se pudo actualizar la cantidad",
@@ -571,314 +556,59 @@ export default function ConstructionBudgets() {
       }
     };
 
-    // Función para agregar tarea rápidamente
-    const handleQuickAddTask = async () => {
-      if (!quickTaskId) {
-        toast({
-          title: "Error",
-          description: "Selecciona una tarea para agregar",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Verificar si la tarea ya está en el presupuesto
-      if (budgetTasks?.some(t => t.task_id === quickTaskId)) {
-        toast({
-          title: "Tarea ya agregada",
-          description: "Esta tarea ya está en el presupuesto",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      setIsAddingQuickTask(true);
-
+    const handleDeleteTask = async (taskId: string) => {
       try {
-        await createBudgetTask.mutateAsync({
-          budget_id: budgetId,
-          task_id: quickTaskId,
-          quantity: quickQuantity,
-          organization_id: userData?.organization?.id || ''
-        });
+        if (!supabase) throw new Error('Supabase client not available');
+        
+        const { error } = await supabase
+          .from('budget_tasks')
+          .delete()
+          .eq('id', taskId);
 
-        // Reset form
-        setQuickTaskId('');
-        setQuickQuantity(1);
-        setQuickSearchQuery('');
+        if (error) throw error;
 
+        queryClient.invalidateQueries({ queryKey: ['budget-tasks', budgetId] });
+        
         toast({
-          title: "Tarea agregada",
-          description: "La tarea se agregó al presupuesto correctamente",
+          title: "Tarea eliminada",
+          description: "La tarea se eliminó del presupuesto correctamente",
         });
       } catch (error) {
-        console.error('Error adding task:', error);
+        console.error('Error deleting task:', error);
         toast({
           title: "Error",
-          description: "No se pudo agregar la tarea",
+          description: "No se pudo eliminar la tarea",
           variant: "destructive",
         });
-      } finally {
-        setIsAddingQuickTask(false);
       }
     };
 
-    // Preparar opciones para TaskSearchCombo
-    const quickTaskOptions = quickTasks.map(task => ({
-      value: task.id,
-      label: task.display_name || task.code || 'Sin nombre'
-    }));
+    const handleAddTask = (budgetId: string) => {
+      setCurrentBudgetId(budgetId);
+      setBudgetTaskModalOpen(true);
+    };
 
-    // Calculate totals for percentage calculations (simplified for task_tasks)
-    const totalBudgetAmount = budgetTasks?.length || 0;
-
-    if (isLoading) {
-      return <div className="p-4 text-center text-sm text-muted-foreground">Cargando tareas...</div>;
-    }
-
-    if (!budgetTasks || budgetTasks.length === 0) {
-      return (
-        <CustomEmptyState
-          icon={<Calculator className="w-8 h-8 text-muted-foreground" />}
-          title="No hay tareas en este presupuesto"
-          description="Comienza agregando la primera tarea para gestionar los costos y materiales"
-          action={
-            <Button 
-              size="sm" 
-              onClick={() => handleAddTask(budgetId)}
-              className="h-8 px-3 text-xs"
-            >
-              <Plus className="w-3 h-3 mr-1" />
-              Agregar Tarea
-            </Button>
-          }
-        />
-      );
-    }
-
-    // Calculate totals for TOTAL row (simplified since task_tasks doesn't have price fields)
-    const totalQuantity = budgetTasks?.reduce((total, task) => {
-      return total + (task.quantity || 0);
-    }, 0) || 0;
+    const getUnitName = (unitId: string | null): string => {
+      if (!unitId) return '-';
+      const unit = units.find(u => u.id === unitId);
+      return unit?.name || '-';
+    };
 
     return (
-      <div className="space-y-4">
-
-        {/* Desktop Table View */}
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b bg-muted/50">
-                <th className="w-8 p-2 text-left">
-                  <input
-                    type="checkbox"
-                    checked={selectedTasks.length === (budgetTasks?.length || 0) && (budgetTasks?.length || 0) > 0}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedTasks(budgetTasks?.map(task => task.id) || []);
-                      } else {
-                        setSelectedTasks([]);
-                      }
-                    }}
-                    className="rounded"
-                  />
-                </th>
-                <th className="w-16 p-2 text-left text-xs font-medium">ID</th>
-                {!groupTasksByRubro && (
-                  <th className="p-2 text-left text-xs font-medium">Rubro</th>
-                )}
-                <th className="p-2 text-left text-xs font-medium">Tarea</th>
-                <th className="p-2 text-left text-xs font-medium">Unid.</th>
-                <th className="p-2 text-left text-xs font-medium">Cant.</th>
-                <th className="p-2 text-left text-xs font-medium">M.O.</th>
-                <th className="p-2 text-left text-xs font-medium">Mat.</th>
-                <th className="p-2 text-left text-xs font-medium">Subtotal</th>
-                <th className="p-2 text-left text-xs font-medium">% Inc.</th>
-                <th className="p-2 text-left text-xs font-medium">Acc.</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.entries(groupedTasks).map(([rubroName, tasks], rubroIndex) => {
-                // Calculate rubro subtotal (all tasks in this rubro have subtotal $0 for now)
-                const rubroSubtotal = tasks.reduce((sum, task) => sum + 0, 0); // Will be $0 until real pricing is implemented
-                const rubroPercentage = totalBudgetAmount > 0 ? (rubroSubtotal / totalBudgetAmount) * 100 : 0;
-                const rubroNumber = rubroIndex + 1;
-                
-                return (
-                  <Fragment key={rubroName}>
-                    {/* Rubro Header Row (only show if grouping is enabled) */}
-                    {groupTasksByRubro && (
-                      <tr className="border-b" style={{ backgroundColor: 'var(--table-header-bg)' }}>
-                        <td className="p-3"></td>
-                        <td className="p-3">
-                          <div className="font-semibold text-sm" style={{ color: 'var(--table-header-fg)' }}>
-                            {rubroNumber}
-                          </div>
-                        </td>
-                        <td className="p-3">
-                          <div className="font-semibold text-sm capitalize" style={{ color: 'var(--table-header-fg)' }}>
-                            {rubroName.toLowerCase()}
-                          </div>
-                        </td>
-                        <td className="p-3"></td>
-                        <td className="p-3"></td>
-                        <td className="p-3"></td>
-                        <td className="p-3"></td>
-                        <td className="p-3 text-sm font-semibold" style={{ color: 'var(--table-header-fg)' }}>${rubroSubtotal.toLocaleString()}</td>
-                        <td className="p-3 text-sm font-semibold" style={{ color: 'var(--table-header-fg)' }}>{rubroPercentage.toFixed(1)}%</td>
-                        <td className="p-3"></td>
-                      </tr>
-                    )}
-                    
-                    {/* Task Rows */}
-                    {tasks.map((task: any, taskIndex) => {
-                      const percentage = totalBudgetAmount > 0 ? (1 / totalBudgetAmount) * 100 : 0;
-                      
-                      // Generate ID based on grouping mode
-                      let taskId: string;
-                      if (groupTasksByRubro) {
-                        // Hierarchical: 1.1, 1.2, 2.1, 2.2, etc.
-                        taskId = `${rubroNumber}.${taskIndex + 1}`;
-                      } else {
-                        // Sequential: calculate global task index
-                        let globalIndex = 0;
-                        const rubroEntries = Object.entries(groupedTasks);
-                        for (let i = 0; i < rubroIndex; i++) {
-                          globalIndex += rubroEntries[i][1].length;
-                        }
-                        globalIndex += taskIndex + 1;
-                        // Format as 001, 002, 003, etc.
-                        taskId = globalIndex.toString().padStart(3, '0');
-                      }
-
-                      return (
-                        <tr key={task.id} className="border-b hover:bg-muted/20">
-                          <td className="p-2">
-                            <input
-                              type="checkbox"
-                              checked={selectedTasks.includes(task.id)}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setSelectedTasks(prev => [...prev, task.id]);
-                                } else {
-                                  setSelectedTasks(prev => prev.filter(id => id !== task.id));
-                                }
-                              }}
-                              className="rounded"
-                            />
-                          </td>
-                          <td className="p-2 text-sm font-medium">
-                            {taskId}
-                          </td>
-                          {!groupTasksByRubro && (
-                            <td className="p-2">
-                              <div className="font-medium text-sm">{task.task?.rubro_name || 'Sin rubro'}</div>
-                            </td>
-                          )}
-                          <td className="p-2 text-sm">
-                            {generateTaskDisplayName(task.task, parameterValues)}
-                          </td>
-                          <td className="p-2 text-sm">
-                            {getUnitName(task.task?.unit_id)}
-                          </td>
-                          <td className="p-2">
-                            <div className="flex items-center gap-1">
-                              <input
-                                type="number"
-                                value={task.quantity || 0}
-                                onChange={(e) => {
-                                  const newQuantity = parseFloat(e.target.value) || 0;
-                                  handleUpdateQuantity(task.id, newQuantity);
-                                }}
-                                onBlur={(e) => {
-                                  const newQuantity = parseFloat(e.target.value) || 0;
-                                  if (newQuantity !== task.quantity) {
-                                    handleUpdateQuantity(task.id, newQuantity);
-                                  }
-                                }}
-                                className="w-16 px-2 py-1 text-sm border rounded"
-                                min="0"
-                                step="0.01"
-                              />
-                              <span className="text-xs text-muted-foreground">
-                                {getUnitName(task.task?.unit_id) || '-'}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="p-2 text-sm">$0</td>
-                          <td className="p-2 text-sm">$0</td>
-                          <td className="p-2 text-sm font-medium">$0</td>
-                          <td className="p-2 text-sm text-muted-foreground">{percentage.toFixed(1)}%</td>
-                          <td className="p-2">
-                            <div className="flex gap-1">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDeleteTask(task.id)}
-                                className="h-7 w-7 p-0 text-destructive hover:text-destructive"
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </Fragment>
-                );
-              })}
-              {/* TOTAL Row */}
-              <tr className="border-b-2 bg-accent/10 font-medium">
-                <td className="p-2"></td>
-                <td className="p-2 text-sm font-semibold">TOTAL</td>
-                {!groupTasksByRubro && <td className="p-2"></td>}
-                <td className="p-2"></td>
-                <td className="p-2"></td>
-                <td className="p-2"></td>
-                <td className="p-2"></td>
-                <td className="p-2"></td>
-                <td className="p-2 text-sm font-semibold">$0</td>
-                <td className="p-2 text-sm font-semibold">100.0%</td>
-                <td className="p-2"></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        {/* Mobile Cards View */}
-        <div className="md:hidden space-y-3">
-          {budgetTasks?.map((task: any) => {
-            const processedName = generateTaskDisplayName(task.task, parameterValues);
-            const unitName = getUnitName(task.task?.unit_id);
-            return (
-              <BudgetTaskCard
-                key={task.id}
-                task={task}
-                processedName={processedName}
-                unitName={unitName}
-                onEdit={(task) => {
-                  console.log('Edit task mobile:', task);
-                  // TODO: Implement edit functionality
-                }}
-                onDelete={handleDeleteTask}
-              />
-            );
-          })}
-          
-          {/* Mobile Total Card */}
-          <Card className="border-2 border-accent bg-accent/5">
-            <div className="p-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold">TOTAL</span>
-                <div className="flex items-center gap-4">
-                  <span className="text-sm font-semibold">$0</span>
-                  <span className="text-xs text-muted-foreground">100.0%</span>
-                </div>
-              </div>
-            </div>
-          </Card>
-        </div>
-      </div>
+      <BudgetTable
+        budgetId={budgetId}
+        budgetTasks={budgetTasks}
+        isLoading={isLoading}
+        groupTasksByRubro={groupTasksByRubro}
+        selectedTasks={selectedTasks}
+        setSelectedTasks={setSelectedTasks}
+        generateTaskDisplayName={generateTaskDisplayName}
+        parameterValues={parameterValues}
+        getUnitName={getUnitName}
+        handleUpdateQuantity={handleUpdateQuantity}
+        handleDeleteTask={handleDeleteTask}
+        handleAddTask={handleAddTask}
+      />
     );
   }
 

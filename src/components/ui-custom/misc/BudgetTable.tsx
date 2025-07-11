@@ -1,370 +1,367 @@
-import React, { useState, useMemo } from 'react'
-import { ChevronUp, ChevronDown, ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
-import { TableRowActions } from '@/components/ui-custom/misc/TableRowActions'
+import { Fragment, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Trash2, Plus } from 'lucide-react';
+import { Calculator } from 'lucide-react';
+import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState';
 
-interface TableRowAction {
-  icon: React.ReactNode
-  label: string
-  onClick: () => void
-  variant?: "default" | "destructive" | "primary" | "muted"
+interface BudgetTask {
+  id: string;
+  budget_id: string;
+  task_id: string;
+  quantity: number;
+  start_date: string | null;
+  end_date: string | null;
+  organization_id: string;
+  task: {
+    id: string;
+    code: string;
+    name: string;
+    template_id: string | null;
+    param_values: any;
+    is_public: boolean;
+    organization_id: string;
+    unit_id: string | null;
+    rubro_name?: string;
+    display_name?: string;
+    category_name?: string;
+    subcategory_name?: string;
+  };
 }
 
-type SortDirection = 'asc' | 'desc' | null
-
-interface BudgetTableProps<T = any> {
-  columns: {
-    key: keyof T | string
-    label: string
-    render?: (item: T) => React.ReactNode
-    sortable?: boolean // Por defecto true, usar false para deshabilitarlo
-    sortType?: 'string' | 'number' | 'date'
-    width?: string // Nuevo: ancho personalizado (ej: "10%", "100px", etc.)
-  }[]
-  data: T[]
-  emptyState?: React.ReactNode
-  isLoading?: boolean
-  className?: string
-  // Nuevas props para selección múltiple
-  selectable?: boolean
-  selectedItems?: T[]
-  onSelectionChange?: (selectedItems: T[]) => void
-  getItemId?: (item: T) => string | number
-  // Nueva prop para personalizar el estilo de las filas
-  getRowClassName?: (item: T) => string
-  // Nueva prop para click-to-edit en cards
-  onCardClick?: (item: T) => void
-  // Nueva prop para ordenamiento inicial
-  defaultSort?: {
-    key: string
-    direction: 'asc' | 'desc'
-  }
-  // Nueva prop para renderizado de cards en mobile
-  renderCard?: (item: T) => React.ReactNode
-  // Nueva prop para acciones flotantes
-  getRowActions?: (item: T) => TableRowAction[]
+interface BudgetTableProps {
+  budgetId: string;
+  budgetTasks: BudgetTask[] | undefined;
+  isLoading: boolean;
+  groupTasksByRubro: boolean;
+  selectedTasks: string[];
+  setSelectedTasks: (tasks: string[]) => void;
+  generateTaskDisplayName: (task: any, parameterValues: any[]) => string;
+  parameterValues: any[];
+  getUnitName: (unitId: string | null) => string;
+  handleUpdateQuantity: (taskId: string, quantity: number) => void;
+  handleDeleteTask: (taskId: string) => void;
+  handleAddTask: (budgetId: string) => void;
 }
 
-export function BudgetTable<T = any>({ 
-  columns,
-  data,
-  emptyState,
-  isLoading = false,
-  className,
-  selectable = false,
-  selectedItems = [],
-  onSelectionChange,
-  getItemId = (item) => (item as any).id,
-  getRowClassName,
-  onCardClick,
-  defaultSort,
-  renderCard,
-  getRowActions
-}: BudgetTableProps<T>) {
-  const [sortKey, setSortKey] = useState<string | null>(defaultSort?.key || null)
-  const [sortDirection, setSortDirection] = useState<SortDirection>(defaultSort?.direction || null)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [hoveredRow, setHoveredRow] = useState<string | null>(null)
-  const itemsPerPage = 50
-
-  // Función para obtener el valor de ordenamiento
-  const getSortValue = (item: T, key: string, sortType?: string) => {
-    const value = (item as any)[key]
-    
-    if (value === null || value === undefined) return ''
-    
-    switch (sortType) {
-      case 'number':
-        return Number(value) || 0
-      case 'date':
-        return new Date(value).getTime()
-      default:
-        return String(value).toLowerCase()
-    }
-  }
-
-  // Datos ordenados
-  const sortedData = useMemo(() => {
-    if (!sortKey || !sortDirection) return data
-
-    const column = columns.find(col => col.key === sortKey)
-    const sortType = column?.sortType || 'string'
-
-    return [...data].sort((a, b) => {
-      const aValue = getSortValue(a, sortKey, sortType)
-      const bValue = getSortValue(b, sortKey, sortType)
-      
-      if (aValue === bValue) return 0
-      
-      const result = aValue < bValue ? -1 : 1
-      return sortDirection === 'asc' ? result : -result
-    })
-  }, [data, sortKey, sortDirection, columns])
-
-  // Paginación
-  const totalPages = Math.ceil(sortedData.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const paginatedData = sortedData.slice(startIndex, startIndex + itemsPerPage)
-
-  const handleSort = (key: string, sortType?: string) => {
-    if (sortKey === key) {
-      setSortDirection(prev => {
-        if (prev === 'asc') return 'desc'
-        if (prev === 'desc') return null
-        return 'asc'
-      })
-    } else {
-      setSortKey(key)
-      setSortDirection('asc')
-    }
-    setCurrentPage(1)
-  }
-
-  const handleSelectAll = () => {
-    if (!onSelectionChange) return
-    
-    if (selectedItems.length === sortedData.length) {
-      onSelectionChange([])
-    } else {
-      onSelectionChange(sortedData)
-    }
-  }
-
-  const handleSelectItem = (item: T) => {
-    if (!onSelectionChange) return
-    
-    const itemId = getItemId(item)
-    const isSelected = selectedItems.some(selected => getItemId(selected) === itemId)
-    
-    if (isSelected) {
-      onSelectionChange(selectedItems.filter(selected => getItemId(selected) !== itemId))
-    } else {
-      onSelectionChange([...selectedItems, item])
-    }
-  }
-
+export function BudgetTable({
+  budgetId,
+  budgetTasks,
+  isLoading,
+  groupTasksByRubro,
+  selectedTasks,
+  setSelectedTasks,
+  generateTaskDisplayName,
+  parameterValues,
+  getUnitName,
+  handleUpdateQuantity,
+  handleDeleteTask,
+  handleAddTask
+}: BudgetTableProps) {
   if (isLoading) {
+    return <div className="p-4 text-center text-sm text-muted-foreground">Cargando tareas...</div>;
+  }
+
+  if (!budgetTasks || budgetTasks.length === 0) {
     return (
-      <div className="w-full">
-        <div className="border rounded-lg bg-card text-card-foreground shadow-sm">
-          <div className="p-8 text-center text-muted-foreground">
-            Cargando...
+      <CustomEmptyState
+        icon={<Calculator className="w-8 h-8 text-muted-foreground" />}
+        title="No hay tareas en este presupuesto"
+        description="Comienza agregando la primera tarea para gestionar los costos y materiales"
+        action={
+          <Button 
+            size="sm" 
+            onClick={() => handleAddTask(budgetId)}
+            className="h-8 px-3 text-xs"
+          >
+            <Plus className="w-3 h-3 mr-1" />
+            Agregar Tarea
+          </Button>
+        }
+      />
+    );
+  }
+
+  // Group tasks by rubro if enabled
+  const groupedTasks = groupTasksByRubro 
+    ? budgetTasks.reduce((acc, task) => {
+        const rubroName = task.task?.rubro_name || 'Sin rubro';
+        if (!acc[rubroName]) acc[rubroName] = [];
+        acc[rubroName].push(task);
+        return acc;
+      }, {} as Record<string, BudgetTask[]>)
+    : { 'Todas las tareas': budgetTasks };
+
+  // Calculate totals for TOTAL row (simplified since task_tasks doesn't have price fields)
+  const totalQuantity = budgetTasks?.reduce((total, task) => {
+    return total + (task.quantity || 0);
+  }, 0) || 0;
+
+  // Total budget amount (placeholder since we don't have real pricing yet)
+  const totalBudgetAmount = 0;
+
+  // Mobile card component for individual tasks
+  const BudgetTaskCard = ({ task, processedName, unitName, onEdit, onDelete }: any) => (
+    <Card className="p-3 space-y-2">
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          <div className="font-medium text-sm leading-tight mb-1">
+            {processedName}
+          </div>
+          <div className="text-xs text-muted-foreground">
+            {task.task?.rubro_name || 'Sin rubro'} • {task.task?.category_name || 'Sin categoría'}
           </div>
         </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onDelete(task.id)}
+          className="h-7 w-7 p-0 text-destructive hover:text-destructive ml-2"
+        >
+          <Trash2 className="h-3 w-3" />
+        </Button>
       </div>
-    )
-  }
-
-  if (data.length === 0) {
-    return (
-      <div className="w-full">
-        <div className="border rounded-lg bg-card text-card-foreground shadow-sm">
-          {emptyState || (
-            <div className="p-8 text-center text-muted-foreground">
-              No hay datos disponibles
-            </div>
-          )}
+      
+      <div className="flex items-center justify-between text-xs">
+        <div className="flex items-center gap-2">
+          <span className="text-muted-foreground">Cantidad:</span>
+          <input
+            type="number"
+            value={task.quantity || 0}
+            onChange={(e) => {
+              const newQuantity = parseFloat(e.target.value) || 0;
+              handleUpdateQuantity(task.id, newQuantity);
+            }}
+            className="w-16 px-1 py-0.5 text-xs border rounded"
+            min="0"
+            step="0.01"
+          />
+          <span className="text-muted-foreground">{unitName}</span>
+        </div>
+        <div className="text-right">
+          <div className="font-medium">$0</div>
+          <div className="text-muted-foreground">0.0%</div>
         </div>
       </div>
-    )
-  }
+    </Card>
+  );
 
   return (
-    <div className={cn("w-full", className)}>
-      {/* Vista Desktop */}
-      <div className="hidden md:block">
-        <div className="border rounded-lg bg-card text-card-foreground shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b bg-muted/50">
-                  {selectable && (
-                    <th className="w-8 p-2 text-left">
-                      <Checkbox
-                        checked={selectedItems.length === sortedData.length && sortedData.length > 0}
-                        onCheckedChange={handleSelectAll}
-                      />
-                    </th>
+    <div className="space-y-4">
+      {/* Desktop Table View */}
+      <div className="hidden md:block overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b bg-muted/50">
+              <th className="w-8 p-2 text-left">
+                <input
+                  type="checkbox"
+                  checked={selectedTasks.length === (budgetTasks?.length || 0) && (budgetTasks?.length || 0) > 0}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedTasks(budgetTasks?.map(task => task.id) || []);
+                    } else {
+                      setSelectedTasks([]);
+                    }
+                  }}
+                  className="rounded"
+                />
+              </th>
+              <th className="w-16 p-2 text-left text-xs font-medium">ID</th>
+              {!groupTasksByRubro && (
+                <th className="p-2 text-left text-xs font-medium">Rubro</th>
+              )}
+              <th className="p-2 text-left text-xs font-medium">Tarea</th>
+              <th className="p-2 text-left text-xs font-medium">Unid.</th>
+              <th className="p-2 text-left text-xs font-medium">Cant.</th>
+              <th className="p-2 text-left text-xs font-medium">M.O.</th>
+              <th className="p-2 text-left text-xs font-medium">Mat.</th>
+              <th className="p-2 text-left text-xs font-medium">Subtotal</th>
+              <th className="p-2 text-left text-xs font-medium">% Inc.</th>
+              <th className="p-2 text-left text-xs font-medium">Acc.</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Object.entries(groupedTasks).map(([rubroName, tasks], rubroIndex) => {
+              // Calculate rubro subtotal (all tasks in this rubro have subtotal $0 for now)
+              const rubroSubtotal = tasks.reduce((sum, task) => sum + 0, 0); // Will be $0 until real pricing is implemented
+              const rubroPercentage = totalBudgetAmount > 0 ? (rubroSubtotal / totalBudgetAmount) * 100 : 0;
+              const rubroNumber = rubroIndex + 1;
+              
+              return (
+                <Fragment key={rubroName}>
+                  {/* Rubro Header Row (only show if grouping is enabled) */}
+                  {groupTasksByRubro && (
+                    <tr className="border-b" style={{ backgroundColor: 'var(--table-header-bg)' }}>
+                      <td className="p-3"></td>
+                      <td className="p-3">
+                        <div className="font-semibold text-sm" style={{ color: 'var(--table-header-fg)' }}>
+                          {rubroNumber}
+                        </div>
+                      </td>
+                      <td className="p-3">
+                        <div className="font-semibold text-sm capitalize" style={{ color: 'var(--table-header-fg)' }}>
+                          {rubroName.toLowerCase()}
+                        </div>
+                      </td>
+                      <td className="p-3"></td>
+                      <td className="p-3"></td>
+                      <td className="p-3"></td>
+                      <td className="p-3"></td>
+                      <td className="p-3 text-sm font-semibold" style={{ color: 'var(--table-header-fg)' }}>${rubroSubtotal.toLocaleString()}</td>
+                      <td className="p-3 text-sm font-semibold" style={{ color: 'var(--table-header-fg)' }}>{rubroPercentage.toFixed(1)}%</td>
+                      <td className="p-3"></td>
+                    </tr>
                   )}
-                  {columns.map((column) => (
-                    <th 
-                      key={String(column.key)} 
-                      className="p-2 text-left text-xs font-medium"
-                      style={column.width ? { width: column.width } : undefined}
-                    >
-                      {column.sortable !== false ? (
-                        <button
-                          onClick={() => handleSort(String(column.key), column.sortType)}
-                          className="flex items-center gap-1 hover:text-foreground transition-colors"
-                        >
-                          {column.label}
-                          {sortKey === column.key ? (
-                            sortDirection === 'asc' ? (
-                              <ChevronUp className="h-3 w-3" />
-                            ) : (
-                              <ChevronDown className="h-3 w-3" />
-                            )
-                          ) : (
-                            <ArrowUpDown className="h-3 w-3 opacity-50" />
-                          )}
-                        </button>
-                      ) : (
-                        column.label
-                      )}
-                    </th>
-                  ))}
-                  {getRowActions && (
-                    <th className="w-12 p-2 text-left text-xs font-medium">
-                      Acciones
-                    </th>
-                  )}
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedData.map((item, index) => {
-                  const itemId = getItemId(item)
-                  const isSelected = selectedItems.some(selected => getItemId(selected) === itemId)
-                  const rowActions = getRowActions?.(item)
                   
-                  return (
-                    <tr 
-                      key={`${itemId}-${index}`}
-                      className={cn(
-                        "border-b hover:bg-muted/20 transition-colors relative",
-                        getRowClassName?.(item),
-                        isSelected && "bg-muted/30"
-                      )}
-                      onMouseEnter={() => setHoveredRow(String(itemId))}
-                      onMouseLeave={() => setHoveredRow(null)}
-                    >
-                      {selectable && (
+                  {/* Task Rows */}
+                  {tasks.map((task: any, taskIndex) => {
+                    const percentage = totalBudgetAmount > 0 ? (1 / totalBudgetAmount) * 100 : 0;
+                    
+                    // Generate ID based on grouping mode
+                    let taskId: string;
+                    if (groupTasksByRubro) {
+                      // Hierarchical: 1.1, 1.2, 2.1, 2.2, etc.
+                      taskId = `${rubroNumber}.${taskIndex + 1}`;
+                    } else {
+                      // Sequential: calculate global task index
+                      let globalIndex = 0;
+                      const rubroEntries = Object.entries(groupedTasks);
+                      for (let i = 0; i < rubroIndex; i++) {
+                        globalIndex += rubroEntries[i][1].length;
+                      }
+                      globalIndex += taskIndex + 1;
+                      // Format as 001, 002, 003, etc.
+                      taskId = globalIndex.toString().padStart(3, '0');
+                    }
+
+                    return (
+                      <tr key={task.id} className="border-b hover:bg-muted/20">
                         <td className="p-2">
-                          <Checkbox
-                            checked={isSelected}
-                            onCheckedChange={() => handleSelectItem(item)}
+                          <input
+                            type="checkbox"
+                            checked={selectedTasks.includes(task.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedTasks(prev => [...prev, task.id]);
+                              } else {
+                                setSelectedTasks(prev => prev.filter(id => id !== task.id));
+                              }
+                            }}
+                            className="rounded"
                           />
                         </td>
-                      )}
-                      {columns.map((column) => (
-                        <td 
-                          key={String(column.key)} 
-                          className="p-2 text-sm"
-                          style={column.width ? { width: column.width } : undefined}
-                        >
-                          {column.render ? column.render(item) : String((item as any)[column.key] || '')}
+                        <td className="p-2 text-sm font-medium">
+                          {taskId}
                         </td>
-                      ))}
-                      {rowActions && (
-                        <td className="p-2 relative">
-                          {hoveredRow === String(itemId) && (
-                            <TableRowActions
-                              actions={rowActions}
-                              className="absolute right-2 top-1/2 -translate-y-1/2 z-10"
+                        {!groupTasksByRubro && (
+                          <td className="p-2">
+                            <div className="font-medium text-sm">{task.task?.rubro_name || 'Sin rubro'}</div>
+                          </td>
+                        )}
+                        <td className="p-2 text-sm">
+                          {generateTaskDisplayName(task.task, parameterValues)}
+                        </td>
+                        <td className="p-2 text-sm">
+                          {getUnitName(task.task?.unit_id)}
+                        </td>
+                        <td className="p-2">
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="number"
+                              value={task.quantity || 0}
+                              onChange={(e) => {
+                                const newQuantity = parseFloat(e.target.value) || 0;
+                                handleUpdateQuantity(task.id, newQuantity);
+                              }}
+                              onBlur={(e) => {
+                                const newQuantity = parseFloat(e.target.value) || 0;
+                                if (newQuantity !== task.quantity) {
+                                  handleUpdateQuantity(task.id, newQuantity);
+                                }
+                              }}
+                              className="w-16 px-2 py-1 text-sm border rounded"
+                              min="0"
+                              step="0.01"
                             />
-                          )}
+                            <span className="text-xs text-muted-foreground">
+                              {getUnitName(task.task?.unit_id) || '-'}
+                            </span>
+                          </div>
                         </td>
-                      )}
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
-          
-          {/* Paginación */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between px-4 py-3 border-t">
-              <div className="text-sm text-muted-foreground">
-                Mostrando {startIndex + 1} a {Math.min(startIndex + itemsPerPage, sortedData.length)} de {sortedData.length} registros
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                  disabled={currentPage === 1}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  Anterior
-                </Button>
-                <span className="text-sm">
-                  Página {currentPage} de {totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                  disabled={currentPage === totalPages}
-                >
-                  Siguiente
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          )}
-        </div>
+                        <td className="p-2 text-sm">$0</td>
+                        <td className="p-2 text-sm">$0</td>
+                        <td className="p-2 text-sm font-medium">$0</td>
+                        <td className="p-2 text-sm text-muted-foreground">{percentage.toFixed(1)}%</td>
+                        <td className="p-2">
+                          <div className="flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteTask(task.id)}
+                              className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </Fragment>
+              );
+            })}
+            {/* TOTAL Row */}
+            <tr className="border-b-2 bg-accent/10 font-medium">
+              <td className="p-2"></td>
+              <td className="p-2 text-sm font-semibold">TOTAL</td>
+              {!groupTasksByRubro && <td className="p-2"></td>}
+              <td className="p-2"></td>
+              <td className="p-2"></td>
+              <td className="p-2"></td>
+              <td className="p-2"></td>
+              <td className="p-2"></td>
+              <td className="p-2 text-sm font-semibold">$0</td>
+              <td className="p-2 text-sm font-semibold">100.0%</td>
+              <td className="p-2"></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
-      {/* Vista Mobile */}
+      {/* Mobile Cards View */}
       <div className="md:hidden space-y-3">
-        {renderCard ? (
-          paginatedData.map((item, index) => (
-            <div 
-              key={`${getItemId(item)}-${index}`}
-              onClick={() => onCardClick?.(item)}
-              className={onCardClick ? "cursor-pointer" : undefined}
-            >
-              {renderCard(item)}
-            </div>
-          ))
-        ) : (
-          paginatedData.map((item, index) => (
-            <div 
-              key={`${getItemId(item)}-${index}`}
-              className="rounded-lg border bg-card p-4"
-              onClick={() => onCardClick?.(item)}
-            >
-              {columns.slice(0, 3).map((column) => (
-                <div key={String(column.key)} className="flex justify-between items-center mb-2 last:mb-0">
-                  <span className="text-sm font-medium text-muted-foreground">
-                    {column.label}
-                  </span>
-                  <span className="text-sm">
-                    {column.render ? column.render(item) : String((item as any)[column.key] || '')}
-                  </span>
-                </div>
-              ))}
-            </div>
-          ))
-        )}
+        {budgetTasks?.map((task: any) => {
+          const processedName = generateTaskDisplayName(task.task, parameterValues);
+          const unitName = getUnitName(task.task?.unit_id);
+          return (
+            <BudgetTaskCard
+              key={task.id}
+              task={task}
+              processedName={processedName}
+              unitName={unitName}
+              onEdit={(task) => {
+                console.log('Edit task mobile:', task);
+                // TODO: Implement edit functionality
+              }}
+              onDelete={handleDeleteTask}
+            />
+          );
+        })}
         
-        {/* Paginación Mobile */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 pt-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-              disabled={currentPage === 1}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <span className="text-sm">
-              {currentPage} / {totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-              disabled={currentPage === totalPages}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+        {/* Mobile Total Card */}
+        <Card className="border-2 border-accent bg-accent/5">
+          <div className="p-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold">TOTAL</span>
+              <div className="flex items-center gap-4">
+                <span className="text-sm font-semibold">$0</span>
+                <span className="text-xs text-muted-foreground">100.0%</span>
+              </div>
+            </div>
           </div>
-        )}
+        </Card>
       </div>
     </div>
-  )
+  );
 }
