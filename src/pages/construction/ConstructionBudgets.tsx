@@ -830,9 +830,9 @@ export default function ConstructionBudgets() {
               {/* TOTAL Row */}
               <tr className="border-b-2 bg-accent/10 font-medium">
                 <td className="p-2"></td>
-                <td className="p-2"></td>
-                {!groupTasksByRubro && <td className="p-2"></td>}
                 <td className="p-2 text-sm font-semibold">TOTAL</td>
+                {!groupTasksByRubro && <td className="p-2"></td>}
+                <td className="p-2"></td>
                 <td className="p-2"></td>
                 <td className="p-2"></td>
                 <td className="p-2"></td>

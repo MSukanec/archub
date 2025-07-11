@@ -2,105 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Remove number input arrows/spinners */
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-input[type="number"] {
-  -moz-appearance: textfield;
-}
-
-/* Gantt Timeline Scrollbar Styling */
-.gantt-timeline-scroll::-webkit-scrollbar {
-  height: 12px;
-}
-
-.gantt-timeline-scroll::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 6px;
-}
-
-.gantt-timeline-scroll::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 6px;
-  border: 2px solid #f1f5f9;
-}
-
-.gantt-timeline-scroll::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(5px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes float-horizontal {
-
-  0%,
-  100% {
-    transform: translateX(0px);
-  }
-
-  50% {
-    transform: translateX(20px);
-  }
-}
-
-@keyframes float-vertical {
-
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-
-  50% {
-    transform: translateY(-15px);
-  }
-}
-
-@keyframes float-diagonal {
-
-  0%,
-  100% {
-    transform: translate(0px, 0px);
-  }
-
-  25% {
-    transform: translate(10px, -8px);
-  }
-
-  50% {
-    transform: translate(-5px, -12px);
-  }
-
-  75% {
-    transform: translate(-10px, 5px);
-  }
-}
-
-@keyframes border-glow {
-  0% {
-    box-shadow: 0 0 5px var(--accent), 0 0 10px var(--accent), 0 0 15px var(--accent);
-  }
-  50% {
-    box-shadow: 0 0 10px var(--accent), 0 0 20px var(--accent), 0 0 30px var(--accent);
-  }
-  100% {
-    box-shadow: 0 0 5px var(--accent), 0 0 10px var(--accent), 0 0 15px var(--accent);
-  }
-}
-
 :root {
   /* Layout */
   --layout-bg: hsl(0, 0%, 90%);
@@ -468,4 +369,132 @@ label[data-required="true"]::after,
 /* Hide scrollbars while maintaining scroll functionality */
 .overflow-x-auto::-webkit-scrollbar {
   display: none;
+}
+
+/* Remove number input arrows/spinners */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float-diagonal {
+  0%, 100% {
+    transform: translate(0px, 0px);
+  }
+  25% {
+    transform: translate(10px, -8px);
+  }
+  50% {
+    transform: translate(-5px, -12px);
+  }
+  75% {
+    transform: translate(-10px, 5px);
+  }
+}
+
+/* Gantt Timeline Scrollbar Styling */
+.gantt-timeline-scroll::-webkit-scrollbar {
+  height: 12px;
+}
+
+.gantt-timeline-scroll::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 6px;
+}
+
+.gantt-timeline-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 6px;
+  border: 2px solid #f1f5f9;
+}
+
+.gantt-timeline-scroll::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float-horizontal {
+
+  0%,
+  100% {
+    transform: translateX(0px);
+  }
+
+  50% {
+    transform: translateX(20px);
+  }
+}
+
+@keyframes float-vertical {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+@keyframes float-diagonal {
+
+  0%,
+  100% {
+    transform: translate(0px, 0px);
+  }
+
+  25% {
+    transform: translate(10px, -8px);
+  }
+
+  50% {
+    transform: translate(-5px, -12px);
+  }
+
+  75% {
+    transform: translate(-10px, 5px);
+  }
+}
+
+@keyframes border-glow {
+  0% {
+    box-shadow: 0 0 5px var(--accent), 0 0 10px var(--accent), 0 0 15px var(--accent);
+  }
+
+  50% {
+    box-shadow: 0 0 10px var(--accent), 0 0 20px var(--accent), 0 0 30px var(--accent);
+  }
+
+  100% {
+    box-shadow: 0 0 5px var(--accent), 0 0 10px var(--accent), 0 0 15px var(--accent);
+  }
 }
