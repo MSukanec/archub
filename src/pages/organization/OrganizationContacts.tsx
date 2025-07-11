@@ -157,6 +157,12 @@ export default function OrganizationContacts() {
     setShowDangerousConfirmation(true)
   }
 
+  const confirmDeleteContact = () => {
+    if (contactToDelete) {
+      deleteContactMutation.mutate(contactToDelete.id)
+    }
+  }
+
   const handleClearFilters = () => {
     setSearchValue("")
     setFilterByType('all')
@@ -307,8 +313,7 @@ export default function OrganizationContacts() {
             size="sm"
             onClick={(e) => {
               e.stopPropagation()
-              setContactToDelete(contact)
-              setShowDeleteDialog(true)
+              handleDeleteContact(contact)
             }}
             className="h-8 w-8 p-0 text-destructive hover:text-destructive"
           >
@@ -498,7 +503,7 @@ export default function OrganizationContacts() {
             setShowDangerousConfirmation(false)
             setContactToDelete(null)
           }}
-          onConfirm={() => deleteContactMutation.mutate(contactToDelete.id)}
+          onConfirm={confirmDeleteContact}
           title="Eliminar contacto"
           description="Esta acción eliminará permanentemente el contacto de la organización y todos sus datos asociados."
           itemName={contactToDelete.full_name || `${contactToDelete.first_name || ''} ${contactToDelete.last_name || ''}`.trim()}
