@@ -28,7 +28,7 @@ export function FeatureIntroduction({
   return (
     <div 
       className={cn(
-        "w-full bg-card border border-border rounded-lg shadow-sm mb-6 cursor-pointer transition-all duration-300 ease-in-out hover:shadow-md",
+        "w-full bg-card border border-border rounded-md shadow-sm mb-6 cursor-pointer transition-all duration-300 ease-in-out hover:shadow-md",
         className
       )}
       onMouseEnter={() => setIsExpanded(true)}
@@ -36,10 +36,12 @@ export function FeatureIntroduction({
     >
       {/* Always visible title */}
       <div className="p-6">
-        <h2 className="text-xl font-semibold text-foreground text-center flex items-center justify-center gap-2">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-foreground">
+            {title}
+          </h2>
           <HelpCircle className="w-5 h-5 text-muted-foreground" />
-          {title}
-        </h2>
+        </div>
       </div>
 
       {/* Expandable content */}

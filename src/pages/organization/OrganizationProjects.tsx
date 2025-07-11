@@ -283,24 +283,14 @@ export default function OrganizationProjects() {
   // Define feature introduction content
   const projectFeatures = [
     {
-      icon: <Folder className="w-5 h-5" />,
-      title: "Gestión de Proyectos",
-      description: "Organiza y administra todos tus proyectos de construcción desde un lugar centralizado. Cada proyecto incluye información detallada, estado y configuraciones específicas."
+      icon: <Plus className="w-5 h-5" />,
+      title: "Crear Proyecto Nuevo",
+      description: "Haz clic en 'Nuevo Proyecto' para crear un proyecto para tu organización. Completa la información básica como nombre, tipología, modalidad y estado. Una vez creado, puedes seleccionarlo como 'ACTIVO' para trabajar en él desde todas las secciones de la aplicación (Diseño, Obra, Finanzas, etc.)."
     },
     {
-      icon: <Users className="w-5 h-5" />,
-      title: "Colaboración en Equipo",
-      description: "Invita colaboradores a tus proyectos, asigna roles y permisos específicos. Trabaja en equipo de manera eficiente con herramientas de colaboración integradas."
-    },
-    {
-      icon: <BarChart3 className="w-5 h-5" />,
-      title: "Seguimiento y Métricas",
-      description: "Monitorea el progreso de tus proyectos con métricas en tiempo real. Visualiza estadísticas de avance, presupuesto, timeline y recursos utilizados."
-    },
-    {
-      icon: <Settings className="w-5 h-5" />,
-      title: "Configuración Avanzada",
-      description: "Personaliza cada proyecto con tipologías específicas, modalidades de trabajo, estados personalizados y preferencias adaptadas a tu flujo de trabajo."
+      icon: <Crown className="w-5 h-5" />,
+      title: "Cambio de Proyecto Activo",
+      description: "No necesitas venir a esta página para cambiar de proyecto. Desde el selector del header (parte superior) puedes cambiar entre proyectos activos de forma rápida. También tienes la opción de seleccionar 'Todos los Proyectos' para ver información general de toda tu organización en lugar de datos específicos de un proyecto."
     }
   ]
 
@@ -310,7 +300,7 @@ export default function OrganizationProjects() {
       <div className="space-y-6">
         {/* Feature Introduction */}
         <FeatureIntroduction
-          title="Gestión de Proyectos de Construcción"
+          title="Proyectos"
           features={projectFeatures}
         />
 
