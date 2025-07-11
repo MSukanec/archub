@@ -49,54 +49,27 @@ export default function InstallmentDetailCard({
   const formattedDate = format(new Date(item.movement_date), "dd MMM yyyy", { locale: es });
 
   return (
-    <div className="p-4 bg-card border border-border rounded-lg space-y-3">
-      {/* Header with avatar and contact info */}
-      <div className="flex items-center gap-3">
-        <Avatar className="w-10 h-10">
-          <AvatarFallback className="text-sm">{initials}</AvatarFallback>
-        </Avatar>
-        <div className="flex-1">
-          <div className="font-medium text-sm">{displayName}</div>
-          {item.contact.company_name && (
-            <div className="text-xs text-muted-foreground">
-              {item.contact.first_name} {item.contact.last_name}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Financial details */}
-      <div className="grid grid-cols-2 gap-3 text-sm">
-        <div>
-          <div className="text-xs text-muted-foreground">Fecha</div>
-          <div className="font-medium">{formattedDate}</div>
-        </div>
-        
-        <div>
-          <div className="text-xs text-muted-foreground">Moneda</div>
-          <div className="font-medium">{item.currency?.code || '-'}</div>
+    <div className="p-4 bg-card border border-border rounded-lg">
+      <div className="flex items-center justify-between">
+        {/* Left side: Avatar, name and date */}
+        <div className="flex items-center gap-3">
+          <Avatar className="w-10 h-10">
+            <AvatarFallback className="text-sm">{initials}</AvatarFallback>
+          </Avatar>
+          <div>
+            <div className="font-medium text-sm">{displayName}</div>
+            <div className="text-xs text-muted-foreground">{formattedDate}</div>
+          </div>
         </div>
 
-        <div>
-          <div className="text-xs text-muted-foreground">Billetera</div>
-          <div className="font-medium">{item.wallet?.name || '-'}</div>
-        </div>
-
-        <div>
-          <div className="text-xs text-muted-foreground">Monto</div>
+        {/* Right side: Wallet and Currency/Amount */}
+        <div className="text-right">
+          <div className="text-sm">{item.wallet?.name || '-'}</div>
           <div className="font-medium">
-            {item.currency?.symbol || '$'}{item.amount.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+            {item.currency?.code || ''} {item.currency?.symbol || '$'}{item.amount.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
           </div>
         </div>
       </div>
-
-      {/* Description if available */}
-      {item.description && (
-        <div>
-          <div className="text-xs text-muted-foreground">Descripción</div>
-          <div className="text-sm">{item.description}</div>
-        </div>
-      )}
     </div>
   );
 }
