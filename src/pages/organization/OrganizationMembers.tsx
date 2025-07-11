@@ -42,10 +42,16 @@ function getInitials(name: string): string {
 
 function getRoleBadgeVariant(roleName: string) {
   const role = roleName?.toLowerCase() || '';
-  if (role.includes('admin')) return 'destructive';
-  if (role.includes('manager') || role.includes('editor')) return 'default';
-  if (role.includes('viewer') || role.includes('guest')) return 'secondary';
+  if (role.includes('admin')) return 'default'; // Will be styled with --accent background
+  if (role.includes('manager') || role.includes('editor')) return 'secondary';
+  if (role.includes('viewer') || role.includes('guest')) return 'outline';
   return 'outline';
+}
+
+function getRoleBadgeClassName(roleName: string) {
+  const role = roleName?.toLowerCase() || '';
+  if (role.includes('admin')) return 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90';
+  return '';
 }
 
 export default function OrganizationMembers() {
@@ -188,36 +194,40 @@ export default function OrganizationMembers() {
 
   return (
     <Layout headerProps={headerProps} breadcrumb={breadcrumb}>
-      <div className="space-y-6">
-        <FeatureIntroduction
-          title="Gestión de Miembros"
-          subtitle="(click para más información)"
-          icon={<Users className="h-5 w-5 text-[var(--accent)]" />}
-          features={[
-            {
-              icon: <Users className="h-4 w-4" />,
-              title: "Invitación de miembros",
-              description: "Invita a miembros de tu equipo que puedan acceder a todos los proyectos y herramientas de colaboración"
-            },
-            {
-              icon: <UserCheck className="h-4 w-4" />,
-              title: "Gestión de roles",
-              description: "Gestiona roles y permisos individuales para cada miembro según sus responsabilidades"
-            },
-            {
-              icon: <Clock className="h-4 w-4" />,
-              title: "Control de acceso",
-              description: "Controla el acceso a configuraciones de la organización y datos sensibles"
-            },
-            {
-              icon: <MoreHorizontal className="h-4 w-4" />,
-              title: "Supervisión de actividad",
-              description: "Supervisa la actividad y el estado de conexión de cada miembro del equipo"
-            }
-          ]}
-        />
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Left Column - Feature Introduction */}
+        <div className="lg:col-span-4">
+          <FeatureIntroduction
+            title="Gestión de Miembros"
+            subtitle="(click para más información)"
+            icon={<Users className="h-5 w-5 text-[var(--accent)]" />}
+            features={[
+              {
+                icon: <Users className="h-4 w-4" />,
+                title: "Invitación de miembros",
+                description: "Invita a miembros de tu equipo que puedan acceder a todos los proyectos y herramientas de colaboración"
+              },
+              {
+                icon: <UserCheck className="h-4 w-4" />,
+                title: "Gestión de roles",
+                description: "Gestiona roles y permisos individuales para cada miembro según sus responsabilidades"
+              },
+              {
+                icon: <Clock className="h-4 w-4" />,
+                title: "Control de acceso",
+                description: "Controla el acceso a configuraciones de la organización y datos sensibles"
+              },
+              {
+                icon: <MoreHorizontal className="h-4 w-4" />,
+                title: "Supervisión de actividad",
+                description: "Supervisa la actividad y el estado de conexión de cada miembro del equipo"
+              }
+            ]}
+          />
+        </div>
 
-        <div className="space-y-8">
+        {/* Right Column - Members Content */}
+        <div className="lg:col-span-8 space-y-8">
           {/* Members Section */}
           <div>
             <div className="flex items-center gap-2 mb-4">
@@ -275,7 +285,10 @@ export default function OrganizationMembers() {
                             <div>{format(new Date(member.joined_at), 'MMM dd, yyyy', { locale: es })}</div>
                           </div>
 
-                          <Badge variant={getRoleBadgeVariant(member.roles?.name || '')}>
+                          <Badge 
+                            variant={getRoleBadgeVariant(member.roles?.name || '')}
+                            className={getRoleBadgeClassName(member.roles?.name || '')}
+                          >
                             {member.roles?.name || 'Sin rol'}
                           </Badge>
 
@@ -482,8 +495,9 @@ export default function OrganizationMembers() {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Member Invitation Modal */}
+      {/* Member Invitation Modal */}
         <NewMemberModal 
           open={showInviteModal}
           onClose={() => setShowInviteModal(false)}
@@ -500,7 +514,6 @@ export default function OrganizationMembers() {
           itemName={memberToDelete?.users?.full_name || memberToDelete?.users?.email || ''}
           isLoading={removeMemberMutation.isPending}
         />
-      </div>
     </Layout>
   );
 }

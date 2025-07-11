@@ -27,10 +27,16 @@ function getInitials(name: string): string {
 
 function getRoleBadgeVariant(roleName: string) {
   const role = roleName?.toLowerCase() || '';
-  if (role.includes('admin')) return 'destructive';
-  if (role.includes('manager') || role.includes('editor')) return 'default';
-  if (role.includes('viewer') || role.includes('guest')) return 'secondary';
+  if (role.includes('admin')) return 'default'; // Will be styled with --accent background
+  if (role.includes('manager') || role.includes('editor')) return 'secondary';
+  if (role.includes('viewer') || role.includes('guest')) return 'outline';
   return 'outline';
+}
+
+function getRoleBadgeClassName(roleName: string) {
+  const role = roleName?.toLowerCase() || '';
+  if (role.includes('admin')) return 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90';
+  return '';
 }
 
 export function MemberCard({ member, onClick }: MemberCardProps) {
@@ -58,7 +64,10 @@ export function MemberCard({ member, onClick }: MemberCardProps) {
       </div>
 
       <div className="shrink-0 ml-3">
-        <Badge variant={getRoleBadgeVariant(member.roles?.name || '')}>
+        <Badge 
+          variant={getRoleBadgeVariant(member.roles?.name || '')}
+          className={getRoleBadgeClassName(member.roles?.name || '')}
+        >
           {member.roles?.name || 'Sin rol'}
         </Badge>
       </div>

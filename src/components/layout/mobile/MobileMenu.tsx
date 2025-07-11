@@ -206,10 +206,10 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: ArrowRight, label: 'Ir al Proyecto', href: '#', onClick: () => handleNavigationWithAnimation('/project/dashboard', 'project', 'left') },
       { type: 'divider' },
       { icon: FolderOpen, label: 'Proyectos', href: '/organization/projects' },
-      { icon: Activity, label: 'Actividad', href: '/organization/activity' },
       { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
-      { icon: Users, label: 'Miembros', href: '/organization/members' },
       { icon: CheckSquare, label: 'Tareas', href: '/tasks' },
+      { icon: Users, label: 'Miembros', href: '/organization/members' },
+      { icon: Activity, label: 'Actividad', href: '/organization/activity' },
     ],
     project: [
       { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },
