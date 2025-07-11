@@ -19,6 +19,7 @@ import ContactCard from '@/components/cards/ContactCard'
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
 import { useMobile } from '@/hooks/use-mobile'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
+import { DangerousConfirmationModal } from '@/components/ui-custom/DangerousConfirmationModal'
 
 export default function OrganizationContacts() {
   const [searchValue, setSearchValue] = useState("")
@@ -29,6 +30,7 @@ export default function OrganizationContacts() {
   const [editingContact, setEditingContact] = useState<any>(null)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [contactToDelete, setContactToDelete] = useState<any>(null)
+  const [showDangerousConfirmation, setShowDangerousConfirmation] = useState(false)
   
   const { data: userData, isLoading } = useCurrentUser()
   const { data: contacts = [], isLoading: contactsLoading } = useContacts()
@@ -152,7 +154,7 @@ export default function OrganizationContacts() {
 
   const handleDeleteContact = (contact: any) => {
     setContactToDelete(contact)
-    setShowDeleteDialog(true)
+    setShowDangerousConfirmation(true)
   }
 
   const handleClearFilters = () => {
@@ -183,7 +185,7 @@ export default function OrganizationContacts() {
       queryClient.invalidateQueries({ queryKey: ['contacts'] })
       queryClient.invalidateQueries({ queryKey: ['organization-contacts'] })
       
-      setShowDeleteDialog(false)
+      setShowDangerousConfirmation(false)
       setContactToDelete(null)
     },
     onError: (error) => {
@@ -488,32 +490,21 @@ export default function OrganizationContacts() {
         />
       )}
 
-      {/* Diálogo de confirmación para eliminar */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar contacto?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción no se puede deshacer. El contacto será eliminado permanentemente.
-              {contactToDelete && (
-                <span className="block mt-2 font-medium">
-                  {contactToDelete.full_name || `${contactToDelete.first_name || ''} ${contactToDelete.last_name || ''}`.trim()}
-                </span>
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => contactToDelete && deleteContactMutation.mutate(contactToDelete.id)}
-              disabled={deleteContactMutation.isPending}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {deleteContactMutation.isPending ? 'Eliminando...' : 'Eliminar'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Modal de confirmación peligrosa para eliminar */}
+      {contactToDelete && (
+        <DangerousConfirmationModal
+          open={showDangerousConfirmation}
+          onClose={() => {
+            setShowDangerousConfirmation(false)
+            setContactToDelete(null)
+          }}
+          onConfirm={() => deleteContactMutation.mutate(contactToDelete.id)}
+          title="Eliminar contacto"
+          description="Esta acción eliminará permanentemente el contacto de la organización y todos sus datos asociados."
+          itemName={contactToDelete.full_name || `${contactToDelete.first_name || ''} ${contactToDelete.last_name || ''}`.trim()}
+          isLoading={deleteContactMutation.isPending}
+        />
+      )}
     </Layout>
   )
 }

@@ -24,14 +24,16 @@ import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState'
 import ModernProjectCard from '@/components/cards/ModernProjectCard'
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
+import { DangerousConfirmationModal } from '@/components/ui-custom/DangerousConfirmationModal'
 
 export default function OrganizationProjects() {
   const [searchValue, setSearchValue] = useState("")
   const [sortBy, setSortBy] = useState('date_recent')
   const [filterByStatus, setFilterByStatus] = useState('all')
   const [editingProject, setEditingProject] = useState<any>(null)
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+
   const [projectToDelete, setProjectToDelete] = useState<any>(null)
+  const [showDangerousConfirmation, setShowDangerousConfirmation] = useState(false)
   const [showNewProjectModal, setShowNewProjectModal] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   
@@ -191,7 +193,7 @@ export default function OrganizationProjects() {
 
   const handleDeleteClick = (project: any) => {
     setProjectToDelete(project)
-    setDeleteDialogOpen(true)
+    setShowDangerousConfirmation(true)
   }
 
   // Function to navigate to basic data after setting project as active
@@ -200,6 +202,67 @@ export default function OrganizationProjects() {
     // Navigate to basic data page
     navigate('/project/basic-data')
   }
+
+  // Mutación para eliminar proyecto
+  const deleteProjectMutation = useMutation({
+    mutationFn: async (projectId: string) => {
+      if (!supabase) throw new Error('Supabase not initialized')
+      
+      try {
+        // CORREGIDO: Solo eliminar el proyecto específico usando transaction
+        const { error } = await supabase.rpc('delete_project_safely', {
+          project_id: projectId
+        })
+        
+        if (error) {
+          // Fallback: eliminar manualmente pero con más cuidado
+          console.log('RPC failed, using manual deletion:', error)
+          
+          // Primero eliminar project_data específico
+          const { error: projectDataError } = await supabase
+            .from('project_data')
+            .delete()
+            .eq('project_id', projectId)
+            .eq('organization_id', userData?.organization?.id) // SEGURIDAD EXTRA
+          
+          if (projectDataError) {
+            console.error('Error deleting project_data:', projectDataError)
+          }
+          
+          // Luego eliminar el proyecto principal
+          const { error: projectError } = await supabase
+            .from('projects')
+            .delete()
+            .eq('id', projectId)
+            .eq('organization_id', userData?.organization?.id) // SEGURIDAD EXTRA
+          
+          if (projectError) throw projectError
+        }
+      } catch (error: any) {
+        throw error
+      }
+    },
+    onSuccess: () => {
+      // Invalidar cache para actualizar lista
+      queryClient.invalidateQueries({ queryKey: ['projects', userData?.organization?.id] })
+      queryClient.invalidateQueries({ queryKey: ['current-user'] })
+      
+      toast({
+        title: "Proyecto eliminado",
+        description: "El proyecto se ha eliminado correctamente"
+      })
+      
+      setShowDangerousConfirmation(false)
+      setProjectToDelete(null)
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo eliminar el proyecto",
+        variant: "destructive"
+      })
+    }
+  })
 
   const clearFilters = () => {
     setSearchValue("")
@@ -361,78 +424,7 @@ export default function OrganizationProjects() {
           />
         )}
 
-        {/* Dialog de confirmación para eliminar */}
-        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>¿Eliminar proyecto?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Esta acción eliminará permanentemente el proyecto "{projectToDelete?.name}". 
-                Esta acción no se puede deshacer.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={async () => {
-                  if (projectToDelete && supabase) {
-                    try {
-                      // CORREGIDO: Solo eliminar el proyecto específico usando transaction
-                      const { error } = await supabase.rpc('delete_project_safely', {
-                        project_id: projectToDelete.id
-                      })
-                      
-                      if (error) {
-                        // Fallback: eliminar manualmente pero con más cuidado
-                        console.log('RPC failed, using manual deletion:', error)
-                        
-                        // Primero eliminar project_data específico
-                        const { error: projectDataError } = await supabase
-                          .from('project_data')
-                          .delete()
-                          .eq('project_id', projectToDelete.id)
-                          .eq('organization_id', userData?.organization?.id) // SEGURIDAD EXTRA
-                        
-                        if (projectDataError) {
-                          console.error('Error deleting project_data:', projectDataError)
-                        }
-                        
-                        // Luego eliminar el proyecto principal
-                        const { error: projectError } = await supabase
-                          .from('projects')
-                          .delete()
-                          .eq('id', projectToDelete.id)
-                          .eq('organization_id', userData?.organization?.id) // SEGURIDAD EXTRA
-                        
-                        if (projectError) throw projectError
-                      }
-                      
-                      // Invalidar cache para actualizar lista
-                      queryClient.invalidateQueries({ queryKey: ['projects', userData?.organization?.id] })
-                      queryClient.invalidateQueries({ queryKey: ['current-user'] })
-                      
-                      toast({
-                        title: "Proyecto eliminado",
-                        description: "El proyecto se ha eliminado correctamente"
-                      })
-                    } catch (error: any) {
-                      toast({
-                        title: "Error",
-                        description: error.message || "No se pudo eliminar el proyecto",
-                        variant: "destructive"
-                      })
-                    }
-                  }
-                  setDeleteDialogOpen(false)
-                  setProjectToDelete(null)
-                }}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              >
-                Eliminar
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+
 
       </div>
     </Layout>
@@ -446,6 +438,22 @@ export default function OrganizationProjects() {
       }}
       editingProject={editingProject}
     />
+
+    {/* Modal de confirmación peligrosa para eliminar */}
+    {projectToDelete && (
+      <DangerousConfirmationModal
+        open={showDangerousConfirmation}
+        onClose={() => {
+          setShowDangerousConfirmation(false)
+          setProjectToDelete(null)
+        }}
+        onConfirm={() => deleteProjectMutation.mutate(projectToDelete.id)}
+        title="Eliminar proyecto"
+        description="Esta acción eliminará permanentemente el proyecto y todos sus datos asociados (diseño, obra, finanzas, etc.)."
+        itemName={projectToDelete.name}
+        isLoading={deleteProjectMutation.isPending}
+      />
+    )}
   </>
   )
 }

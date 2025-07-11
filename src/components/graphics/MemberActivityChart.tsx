@@ -70,14 +70,14 @@ const CustomDot = (props: any) => {
       {topUsers.map((user: any, index: number) => (
         <foreignObject
           key={user.user_id}
-          x={cx - 10 + (index * 8)}
-          y={cy - 10 - (index * 2)}
-          width={20}
-          height={20}
+          x={cx - 16 + (index * 12)}
+          y={cy - 16 - (index * 3)}
+          width={32}
+          height={32}
         >
-          <Avatar className="h-5 w-5 border-2 border-white shadow-sm">
+          <Avatar className="h-8 w-8 border-2 border-white shadow-sm">
             <AvatarImage src={user.avatar_url} alt={user.full_name} />
-            <AvatarFallback className="text-xs bg-accent text-accent-foreground">
+            <AvatarFallback className="text-sm bg-accent text-accent-foreground">
               {user.full_name?.charAt(0) || 'U'}
             </AvatarFallback>
           </Avatar>
@@ -122,7 +122,7 @@ export function MemberActivityChart({ data, isLoading }: UserActivityChartProps)
       <CardContent>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data} margin={{ top: 10, right: 0, left: 15, bottom: 0 }}>
+            <AreaChart data={data} margin={{ top: 10, right: 0, left: 25, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorUserTotal" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#92c900" stopOpacity={0.8}/>

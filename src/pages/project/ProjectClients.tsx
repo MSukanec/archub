@@ -13,7 +13,7 @@ import { supabase } from '@/lib/supabase'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import DangerousConfirmationModal from '@/components/ui-custom/DangerousConfirmationModal'
+import { DangerousConfirmationModal } from '@/components/ui-custom/DangerousConfirmationModal'
 
 interface Contact {
   id: string
