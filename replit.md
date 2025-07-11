@@ -119,6 +119,14 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 11, 2025. Fixed task description spacing and name generation in PRESUPUESTOS page - COMPLETED
+  • Added trim() operations to all task description generation functions to eliminate extra spaces in output
+  • Implemented comprehensive space cleanup with replace(/\s+/g, ' ').trim() in taskDescriptionGenerator.ts, ConstructionBudgets.tsx, and use-task-search.ts
+  • Fixed useBudgetTasks hook to use name_template from task_templates instead of preformatted display_name
+  • Updated database query to fetch name_template, unit_id, and units data from task_templates relationship
+  • Corrected task name generation to show "de 08x18x33" instead of "ladrillo-ceramico-081833" codes
+  • Task descriptions now display properly formatted text: "Muros simples de ladrillo cerámico hueco de 08x18x33 con mortero de asiento de cal y cemento sin aditivos"
+  • Enhanced TypeScript interfaces to support new data structure with task_templates nested relationship
 - July 11, 2025. Fixed input quantity field to allow typing "0" and corrected auto-save interruption in PRESUPUESTOS - COMPLETED
   • Fixed NewAdminGeneratedTaskModal input that prevented typing "0" by changing parseFloat(value) || 1 to proper handling
   • Changed input min attribute from "1" to "0" to allow zero values in quantity fields

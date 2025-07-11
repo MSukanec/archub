@@ -22,10 +22,13 @@ export interface BudgetTask {
     template_id: string | null;
     param_values: any;
     organization_id: string;
-    unit_id: string | null;
     display_name?: string;
     task_templates?: {
       name_template: string;
+      unit_id: string | null;
+      units?: {
+        name: string;
+      };
     };
   };
 }
@@ -73,9 +76,10 @@ export function useBudgetTasks(budgetId: string) {
             template_id,
             param_values,
             organization_id,
-            unit_id,
             task_templates(
-              name_template
+              name_template,
+              unit_id,
+              units(name)
             )
           )
         `)
