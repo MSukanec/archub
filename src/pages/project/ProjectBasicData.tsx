@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Database, ImageIcon, FileText, Users, MapPin, Calendar, Ruler } from 'lucide-react';
+import { Database, ImageIcon, FileText, Users, MapPin } from 'lucide-react';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
@@ -80,11 +80,7 @@ export default function ProjectBasicData() {
   const [state, setState] = useState('');
   const [country, setCountry] = useState('');
   const [zipCode, setZipCode] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [estimatedEnd, setEstimatedEnd] = useState('');
-  const [surfaceTotal, setSurfaceTotal] = useState('');
-  const [surfaceCovered, setSurfaceCovered] = useState('');
-  const [surfaceSemi, setSurfaceSemi] = useState('');
+
   const [projectImageUrl, setProjectImageUrl] = useState<string | null>(null);
 
   // Auto-save mutation for project data
@@ -114,11 +110,6 @@ export default function ProjectBasicData() {
         state: dataToSave.state,
         country: dataToSave.country,
         zip_code: dataToSave.zip_code,
-        start_date: dataToSave.start_date,
-        estimated_end: dataToSave.estimated_end,
-        surface_total: dataToSave.surface_total ? parseFloat(dataToSave.surface_total) : null,
-        surface_covered: dataToSave.surface_covered ? parseFloat(dataToSave.surface_covered) : null,
-        surface_semi: dataToSave.surface_semi ? parseFloat(dataToSave.surface_semi) : null,
       };
 
       // Remove undefined values
@@ -160,11 +151,6 @@ export default function ProjectBasicData() {
       state,
       country,
       zip_code: zipCode,
-      start_date: startDate || null,
-      estimated_end: estimatedEnd || null,
-      surface_total: surfaceTotal,
-      surface_covered: surfaceCovered,
-      surface_semi: surfaceSemi,
     },
     saveFn: async (data) => {
       await saveProjectDataMutation.mutateAsync(data);
@@ -175,9 +161,10 @@ export default function ProjectBasicData() {
         description: "Los cambios se han guardado automáticamente",
       });
       
-      // Invalidate queries to refresh data
+      // Invalidate queries to refresh data including current user for header updates
       queryClient.invalidateQueries({ queryKey: ['project-info', projectId] });
       queryClient.invalidateQueries({ queryKey: ['project-data', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
     },
     delay: 750,
     enabled: !!projectId && !!userData?.user?.id
@@ -204,11 +191,6 @@ export default function ProjectBasicData() {
       setState(projectData.state || '');
       setCountry(projectData.country || '');
       setZipCode(projectData.zip_code || '');
-      setStartDate(projectData.start_date || '');
-      setEstimatedEnd(projectData.estimated_end || '');
-      setSurfaceTotal(projectData.surface_total?.toString() || '');
-      setSurfaceCovered(projectData.surface_covered?.toString() || '');
-      setSurfaceSemi(projectData.surface_semi?.toString() || '');
       setProjectImageUrl(projectData.project_image_url || null);
     }
   }, [projectInfo, projectData]);
@@ -245,20 +227,15 @@ export default function ProjectBasicData() {
               icon: <MapPin className="w-5 h-5" />,
               title: "Ubicación y medidas precisas",
               description: "Define la ubicación exacta de la obra y las superficies del proyecto. Esta información se usa automáticamente en cálculos de presupuestos y planificación de materiales."
-            },
-            {
-              icon: <Calendar className="w-5 h-5" />,
-              title: "Cronograma y fechas clave",
-              description: "Establece fechas de inicio y finalización que se integran con el sistema de planificación. El cronograma se sincroniza automáticamente con tareas y seguimiento de avance del proyecto."
             }
           ]}
         />
 
         {/* Two Column Layout - Section descriptions left, content right */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column - Imagen Principal */}
-          <div className="lg:col-span-4">
-            <div className="flex items-center gap-2 mb-4">
+          <div>
+            <div className="flex items-center gap-2 mb-6">
               <ImageIcon className="h-5 w-5 text-[var(--accent)]" />
               <h2 className="text-lg font-semibold">Imagen Principal</h2>
             </div>
@@ -269,7 +246,7 @@ export default function ProjectBasicData() {
           </div>
 
           {/* Right Column - Imagen Principal Content */}
-          <div className="lg:col-span-8">
+          <div>
             {projectId && organizationId && (
               <ProjectHeroImage
                 projectId={projectId}
@@ -281,8 +258,8 @@ export default function ProjectBasicData() {
           </div>
 
           {/* Left Column - Información Básica */}
-          <div className="lg:col-span-4">
-            <div className="flex items-center gap-2 mb-4">
+          <div>
+            <div className="flex items-center gap-2 mb-6">
               <FileText className="h-5 w-5 text-[var(--accent)]" />
               <h2 className="text-lg font-semibold">Información Básica</h2>
             </div>
@@ -292,9 +269,9 @@ export default function ProjectBasicData() {
           </div>
 
           {/* Right Column - Información Básica Content */}
-          <div className="lg:col-span-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2 md:col-span-2">
+          <div>
+            <div className="space-y-4">
+              <div className="space-y-2">
                 <Label htmlFor="project-name">Nombre del Proyecto</Label>
                 <Input 
                   id="project-name"
@@ -304,7 +281,7 @@ export default function ProjectBasicData() {
                 />
               </div>
 
-              <div className="space-y-2 md:col-span-2">
+              <div className="space-y-2">
                 <Label htmlFor="description">Descripción</Label>
                 <Textarea 
                   id="description"
@@ -315,7 +292,7 @@ export default function ProjectBasicData() {
                 />
               </div>
 
-              <div className="space-y-2 md:col-span-2">
+              <div className="space-y-2">
                 <Label htmlFor="internal-notes">Notas Internas</Label>
                 <Textarea 
                   id="internal-notes"
@@ -329,8 +306,8 @@ export default function ProjectBasicData() {
           </div>
 
           {/* Left Column - Información del Cliente */}
-          <div className="lg:col-span-4">
-            <div className="flex items-center gap-2 mb-4">
+          <div>
+            <div className="flex items-center gap-2 mb-6">
               <Users className="h-5 w-5 text-[var(--accent)]" />
               <h2 className="text-lg font-semibold">Información del Cliente</h2>
             </div>
@@ -340,8 +317,8 @@ export default function ProjectBasicData() {
           </div>
 
           {/* Right Column - Información del Cliente Content */}
-          <div className="lg:col-span-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="client-name">Nombre del Cliente</Label>
                 <Input 
@@ -362,7 +339,7 @@ export default function ProjectBasicData() {
                 />
               </div>
 
-              <div className="space-y-2 md:col-span-2">
+              <div className="space-y-2">
                 <Label htmlFor="email">Email de Contacto</Label>
                 <Input 
                   id="email"
@@ -376,8 +353,8 @@ export default function ProjectBasicData() {
           </div>
 
           {/* Left Column - Ubicación */}
-          <div className="lg:col-span-4">
-            <div className="flex items-center gap-2 mb-4">
+          <div>
+            <div className="flex items-center gap-2 mb-6">
               <MapPin className="h-5 w-5 text-[var(--accent)]" />
               <h2 className="text-lg font-semibold">Ubicación del Proyecto</h2>
             </div>
@@ -387,9 +364,9 @@ export default function ProjectBasicData() {
           </div>
 
           {/* Right Column - Ubicación Content */}
-          <div className="lg:col-span-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2 md:col-span-2">
+          <div>
+            <div className="space-y-4">
+              <div className="space-y-2">
                 <Label htmlFor="address">Dirección</Label>
                 <Input 
                   id="address"
@@ -436,91 +413,6 @@ export default function ProjectBasicData() {
                   placeholder="Ej: C1043AAX"
                   value={zipCode}
                   onChange={(e) => setZipCode(e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Left Column - Cronograma */}
-          <div className="lg:col-span-4">
-            <div className="flex items-center gap-2 mb-4">
-              <Calendar className="h-5 w-5 text-[var(--accent)]" />
-              <h2 className="text-lg font-semibold">Cronograma del Proyecto</h2>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Fechas de inicio y finalización que se integran con la planificación de tareas y seguimiento de avance del proyecto.
-            </p>
-          </div>
-
-          {/* Right Column - Cronograma Content */}
-          <div className="lg:col-span-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="start-date">Fecha de Inicio</Label>
-                <Input 
-                  id="start-date"
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="estimated-end">Fecha Estimada de Finalización</Label>
-                <Input 
-                  id="estimated-end"
-                  type="date"
-                  value={estimatedEnd}
-                  onChange={(e) => setEstimatedEnd(e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Left Column - Superficies */}
-          <div className="lg:col-span-4">
-            <div className="flex items-center gap-2 mb-4">
-              <Ruler className="h-5 w-5 text-[var(--accent)]" />
-              <h2 className="text-lg font-semibold">Superficies del Proyecto</h2>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Medidas y superficies que se usan automáticamente en cálculos de presupuestos, cantidad de materiales y planificación de espacios.
-            </p>
-          </div>
-
-          {/* Right Column - Superficies Content */}
-          <div className="lg:col-span-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="surface-total">Superficie Total (m²)</Label>
-                <Input 
-                  id="surface-total"
-                  type="number"
-                  placeholder="Ej: 150"
-                  value={surfaceTotal}
-                  onChange={(e) => setSurfaceTotal(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="surface-covered">Superficie Cubierta (m²)</Label>
-                <Input 
-                  id="surface-covered"
-                  type="number"
-                  placeholder="Ej: 120"
-                  value={surfaceCovered}
-                  onChange={(e) => setSurfaceCovered(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="surface-semi">Superficie Semicubierta (m²)</Label>
-                <Input 
-                  id="surface-semi"
-                  type="number"
-                  placeholder="Ej: 30"
-                  value={surfaceSemi}
-                  onChange={(e) => setSurfaceSemi(e.target.value)}
                 />
               </div>
             </div>
