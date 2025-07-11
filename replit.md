@@ -119,6 +119,17 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 11, 2025. Complete MemberActivityChart time filtering and responsive Members page layout implementation - COMPLETED
+  • Fixed MemberActivityChart to accept time period props from parent page instead of internal state management
+  • Updated OrganizationActivity page to manage timePeriod state and pass it to MemberActivityChart component
+  • Chart now properly responds to Semana/Mes/Año button clicks for filtering user activity data
+  • Completely restructured OrganizationMembers page layout to match MI PERFIL responsive design pattern
+  • Added FeatureIntroduction component explaining member management functionality and benefits
+  • Replaced hardcoded grid-cols-12 with responsive grid-cols-1 lg:grid-cols-12 for mobile-friendly layout
+  • Enhanced member cards with responsive flexbox layout and proper mobile text handling
+  • Fixed NewMemberModal to use CustomModalBody columns={1} and filtered roles to show only "organization" type
+  • Added role filtering in modal query to exclude "web" type roles from member invitation dropdown
+  • Improved mobile responsiveness with proper flex-col sm:flex-row breakpoints for member card layout
 - July 11, 2025. Enhanced MemberActivityChart with time filters and DangerousConfirmationModal visual improvements - COMPLETED
   • Fixed avatar overlap issues in MemberActivityChart by improving positioning logic and increasing margins (top: 30, left: 40)
   • Added time period filter buttons (Semana/Mes/Año) matching UserGrowthChart style in AdminDashboard

@@ -18,6 +18,8 @@ interface UserActivity {
 interface UserActivityChartProps {
   data: UserActivity[]
   isLoading?: boolean
+  timePeriod: TimePeriod
+  onTimePeriodChange: (period: TimePeriod) => void
 }
 
 type TimePeriod = 'week' | 'month' | 'year'
@@ -98,8 +100,7 @@ const CustomDot = (props: any) => {
   )
 }
 
-export function MemberActivityChart({ data, isLoading }: UserActivityChartProps) {
-  const [timePeriod, setTimePeriod] = useState<TimePeriod>('week')
+export function MemberActivityChart({ data, isLoading, timePeriod, onTimePeriodChange }: UserActivityChartProps) {
   
   const getTimePeriodLabel = (period: TimePeriod) => {
     switch (period) {
@@ -156,21 +157,21 @@ export function MemberActivityChart({ data, isLoading }: UserActivityChartProps)
             <Button 
               variant={timePeriod === 'week' ? "default" : "outline"} 
               size="sm"
-              onClick={() => setTimePeriod('week')}
+              onClick={() => onTimePeriodChange('week')}
             >
               Semana
             </Button>
             <Button 
               variant={timePeriod === 'month' ? "default" : "outline"} 
               size="sm"
-              onClick={() => setTimePeriod('month')}
+              onClick={() => onTimePeriodChange('month')}
             >
               Mes
             </Button>
             <Button 
               variant={timePeriod === 'year' ? "default" : "outline"} 
               size="sm"
-              onClick={() => setTimePeriod('year')}
+              onClick={() => onTimePeriodChange('year')}
             >
               Año
             </Button>

@@ -27,10 +27,11 @@ export default function OrganizationActivity() {
   const [searchValue, setSearchValue] = useState("");
   const [sortBy, setSortBy] = useState('date_recent');
   const [filterByType, setFilterByType] = useState('all');
+  const [timePeriod, setTimePeriod] = useState<'week' | 'month' | 'year'>('week');
   const currentOrganization = userData?.organization;
 
   // User activity data
-  const { data: userActivityData = [], isLoading: userActivityLoading } = useUserActivity(currentOrganization?.id);
+  const { data: userActivityData = [], isLoading: userActivityLoading } = useUserActivity(currentOrganization?.id, timePeriod);
 
   // Fetch all organization activity
   const { data: activities = [], isLoading } = useQuery({
@@ -415,6 +416,8 @@ export default function OrganizationActivity() {
         <MemberActivityChart 
           data={userActivityData} 
           isLoading={userActivityLoading}
+          timePeriod={timePeriod}
+          onTimePeriodChange={setTimePeriod}
         />
 
         <CustomTable

@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { CustomRestricted } from "@/components/ui-custom/misc/CustomRestricted";
 import { NewMemberModal } from "@/modals/organization/NewMemberModal";
+import { FeatureIntroduction } from "@/components/ui-custom/FeatureIntroduction";
 
 interface OrganizationMember {
   id: string;
@@ -334,15 +335,28 @@ export default function OrganizationMembers() {
 
   return (
     <Layout headerProps={headerProps}>
-      <div className="grid grid-cols-12 gap-8">
+      <div className="space-y-6">
+        {/* Feature Introduction */}
+        <FeatureIntroduction
+          icon={Users}
+          title="Gestión de Miembros"
+          description="Invita a miembros de tu equipo a Archub para trabajar juntos de forma rápida y colaborar fácilmente. Gestiona sus permisos para estructurar mejor los proyectos."
+          features={[
+            "Invita a miembros de tu equipo que puedan acceder a todos los proyectos y herramientas de colaboración",
+            "Gestiona roles y permisos individuales para cada miembro según sus responsabilidades",
+            "Controla el acceso a configuraciones de la organización y datos sensibles",
+            "Supervisa la actividad y el estado de conexión de cada miembro del equipo"
+          ]}
+        />
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Sidebar - Section Navigation */}
-          <div className="col-span-3">
+          <div className="lg:col-span-3">
             <div className="space-y-1">
               <div className="px-3 pt-2 pb-2">
                 <h2 className="text-lg font-semibold">Miembros</h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Invita a miembros de tu equipo a Archub para trabajar juntos de forma rápida y 
-                  colaborar fácilmente. Gestiona sus permisos para estructurar mejor los proyectos.
+                  Gestiona el acceso y permisos del equipo.
                 </p>
               </div>
               
@@ -368,8 +382,8 @@ export default function OrganizationMembers() {
           </div>
 
           {/* Right Content - Members List */}
-          <div className="col-span-9">
-            <div className="space-y-6 pt-2">
+          <div className="lg:col-span-9">
+            <div className="space-y-6">
               {/* Members Section */}
               <div>
                 <div className="space-y-2">
@@ -584,11 +598,12 @@ export default function OrganizationMembers() {
           </div>
         </div>
 
-      {/* Member Invitation Modal */}
-      <NewMemberModal 
-        open={showInviteModal}
-        onClose={() => setShowInviteModal(false)}
-      />
+        {/* Member Invitation Modal */}
+        <NewMemberModal 
+          open={showInviteModal}
+          onClose={() => setShowInviteModal(false)}
+        />
+      </div>
     </Layout>
   );
 }

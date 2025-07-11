@@ -45,7 +45,7 @@ export function NewMemberModal({ open, onClose }: NewMemberModalProps) {
     },
   });
 
-  // Fetch available roles
+  // Fetch available roles (only ORGANIZATION type)
   const { data: roles = [] } = useQuery({
     queryKey: ['organization-roles'],
     queryFn: async () => {
@@ -53,7 +53,8 @@ export function NewMemberModal({ open, onClose }: NewMemberModalProps) {
       
       const { data, error } = await supabase
         .from('roles')
-        .select('id, name')
+        .select('id, name, type')
+        .eq('type', 'organization')
         .order('name');
       
       if (error) throw error;
@@ -145,7 +146,7 @@ export function NewMemberModal({ open, onClose }: NewMemberModalProps) {
           />
         ),
         body: (
-          <CustomModalBody padding="md">
+          <CustomModalBody columns={1} padding="md">
             <Form {...form}>
               <form id="member-form" onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
                 <FormField

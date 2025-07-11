@@ -1,7 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { format, subDays } from 'date-fns'
+import { format, subDays, subWeeks, subMonths } from 'date-fns'
 import { es } from 'date-fns/locale'
+
+type TimePeriod = 'week' | 'month' | 'year'
 
 interface UserActivity {
   date: string
@@ -14,23 +16,53 @@ interface UserActivity {
   total: number
 }
 
-export function useUserActivity(organizationId: string | undefined) {
+export function useUserActivity(organizationId: string | undefined, timePeriod: TimePeriod = 'week') {
   return useQuery({
-    queryKey: ['user-activity', organizationId],
+    queryKey: ['user-activity', organizationId, timePeriod],
     queryFn: async (): Promise<UserActivity[]> => {
       if (!organizationId) return []
 
       const userActivityData: UserActivity[] = []
 
-      // Generate last 7 days
-      for (let i = 6; i >= 0; i--) {
-        const date = subDays(new Date(), i)
+      // Calculate number of days based on time period
+      let daysCount: number
+      let subtractFn: (date: Date, amount: number) => Date
+      
+      switch (timePeriod) {
+        case 'week':
+          daysCount = 7
+          subtractFn = subDays
+          break
+        case 'month':
+          daysCount = 30
+          subtractFn = subDays
+          break
+        case 'year':
+          daysCount = 365
+          subtractFn = subDays
+          break
+        default:
+          daysCount = 7
+          subtractFn = subDays
+      }
+
+      // Generate date range
+      for (let i = daysCount - 1; i >= 0; i--) {
+        const date = subtractFn(new Date(), i)
         const dayStart = format(date, 'yyyy-MM-dd')
         const dayEnd = format(date, 'yyyy-MM-dd 23:59:59')
 
-        const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
-        const dayName = dayNames[date.getDay()]
-        const formattedDate = format(date, 'dd/MM')
+        // Format date based on time period
+        let formattedDate: string
+        if (timePeriod === 'year') {
+          formattedDate = format(date, 'MMM', { locale: es })
+        } else if (timePeriod === 'month') {
+          formattedDate = format(date, 'dd/MM')
+        } else {
+          const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+          const dayName = dayNames[date.getDay()]
+          formattedDate = format(date, 'dd/MM')
+        }
 
         // Get organization members
         const { data: members } = await supabase
