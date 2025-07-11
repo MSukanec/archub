@@ -119,6 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 11, 2025. Enhanced MemberActivityChart with time filters and DangerousConfirmationModal visual improvements - COMPLETED
+  • Fixed avatar overlap issues in MemberActivityChart by improving positioning logic and increasing margins (top: 30, left: 40)
+  • Added time period filter buttons (Semana/Mes/Año) matching UserGrowthChart style in AdminDashboard
+  • Enhanced avatar positioning to prevent clipping at top and overlap with Y-axis numbers using smart offset calculations
+  • Completely redesigned DangerousConfirmationModal aesthetics with modern styling, larger icons, better spacing
+  • Applied 25%/75% button width ratio: Cancel button (25%) and Delete button (75%) for better visual hierarchy
+  • Enhanced modal with white text on red delete button, improved alert styling, better input focus states
+  • Fixed all import conflicts by standardizing DangerousConfirmationModal as named export across all pages
+  • Modal now features autofocus on input, larger warning icons, and improved mobile-friendly layout
 - July 11, 2025. Comprehensive layout fixes and UserActivityChart implementation - COMPLETED
   • Fixed Layout component responsive padding system: mobile uses p-3, desktop uses p-6
   • Corrected OrganizationActivityChart margin padding to eliminate left/right spacing for perfect card edge alignment

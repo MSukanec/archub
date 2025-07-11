@@ -50,48 +50,53 @@ export function DangerousConfirmationModal({
   
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
-              <AlertTriangle className="h-5 w-5 text-destructive" />
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader className="space-y-4">
+          <div className="flex items-start gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-destructive/15 flex-shrink-0">
+              <AlertTriangle className="h-6 w-6 text-destructive" />
             </div>
-            <div>
-              <DialogTitle className="text-left">{title}</DialogTitle>
-              <DialogDescription className="text-left">
+            <div className="flex-1">
+              <DialogTitle className="text-lg font-semibold text-left">{title}</DialogTitle>
+              <DialogDescription className="text-left text-base mt-2 leading-relaxed">
                 {description}
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
         
-        <div className="space-y-4">
-          <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-3">
-            <p className="text-sm text-destructive font-medium">
-              ⚠️ {confirmationText}
-            </p>
+        <div className="space-y-5">
+          <div className="rounded-lg border border-destructive/25 bg-destructive/10 p-4">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-destructive flex-shrink-0" />
+              <p className="text-sm text-destructive font-medium">
+                {confirmationText}
+              </p>
+            </div>
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="confirmation-input" className="text-sm font-medium">
-              Escribe <span className="font-mono bg-muted px-1 rounded">{itemName}</span> para confirmar:
+          <div className="space-y-3">
+            <Label htmlFor="confirmation-input" className="text-sm font-medium text-foreground">
+              Para confirmar, escribe: <span className="font-mono bg-muted px-2 py-1 rounded text-accent-foreground">{itemName}</span>
             </Label>
             <Input
               id="confirmation-input"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder={`Escribe "${itemName}" aquí`}
-              className="font-mono"
+              placeholder={`Escribe "${itemName}" para confirmar`}
+              className="font-mono border-2 focus:border-destructive"
               autoComplete="off"
+              autoFocus
             />
           </div>
         </div>
         
-        <DialogFooter className="gap-2">
+        <DialogFooter className="gap-3 pt-2">
           <Button
             variant="outline"
             onClick={handleClose}
             disabled={isLoading}
+            className="flex-1 max-w-[25%]"
           >
             Cancelar
           </Button>
@@ -99,6 +104,7 @@ export function DangerousConfirmationModal({
             variant="destructive"
             onClick={handleConfirm}
             disabled={!isValid || isLoading}
+            className="flex-1 max-w-[75%] bg-destructive hover:bg-destructive/90 text-white font-medium"
           >
             {isLoading ? 'Eliminando...' : 'Eliminar definitivamente'}
           </Button>
