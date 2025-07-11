@@ -908,7 +908,7 @@ export default function ConstructionBudgets() {
 
             {/* Budget Controls Section - Isolated */}
             {selectedBudget && (
-              <Card className="mb-4 border rounded-lg shadow-sm" style={{ backgroundColor: 'var(--secondary-sidebar-bg)' }}>
+              <Card className="mb-4 border rounded-lg bg-card text-card-foreground shadow-sm">
                 <CardContent className="p-4">
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-center gap-4 flex-1">
@@ -943,22 +943,7 @@ export default function ConstructionBudgets() {
                       </div>
                     </div>
 
-                    {/* Group by Rubro Switch */}
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        id="group-by-rubro"
-                        checked={selectedBudget?.group_tasks_by_rubro || false}
-                        onCheckedChange={(checked) => {
-                          updateBudgetGroupingMutation.mutate({ 
-                            budgetId: selectedBudget.id, 
-                            groupByRubro: checked 
-                          });
-                        }}
-                      />
-                      <Label htmlFor="group-by-rubro" className="text-sm text-muted-foreground">
-                        Agrupar por rubro
-                      </Label>
-                    </div>
+
                   </div>
 
                   {/* Action Buttons */}
@@ -988,15 +973,7 @@ export default function ConstructionBudgets() {
                       <Trash2 className="w-4 h-4" />
                     </Button>
                     
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleAddTask(selectedBudget.id)}
-                      className="h-8 px-3 text-sm"
-                    >
-                      <Plus className="w-4 h-4 mr-1" />
-                      Agregar Tarea
-                    </Button>
+
                   </div>
                 </div>
 
@@ -1044,6 +1021,24 @@ export default function ConstructionBudgets() {
                       </span>
                     </div>
                   </div>
+                  
+                  {/* Group by Rubro Switch */}
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      id="group-by-rubro-search"
+                      checked={selectedBudget?.group_tasks_by_rubro || false}
+                      onCheckedChange={(checked) => {
+                        updateBudgetGroupingMutation.mutate({ 
+                          budgetId: selectedBudget.id, 
+                          groupByRubro: checked 
+                        });
+                      }}
+                    />
+                    <Label htmlFor="group-by-rubro-search" className="text-xs text-muted-foreground">
+                      Agrupar por rubro
+                    </Label>
+                  </div>
+                  
                   <Button
                     onClick={handleQuickAddTask}
                     disabled={!quickTaskId || isAddingQuickTask}
