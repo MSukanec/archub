@@ -336,9 +336,12 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
             }
           })
           
-          // Add project_id from current user preferences
+          // Add project_id and organization_id from current user preferences
           if (currentUser.preferences?.last_project_id) {
             movement.project_id = currentUser.preferences.last_project_id
+          }
+          if (currentUser.preferences?.last_organization_id) {
+            movement.organization_id = currentUser.preferences.last_organization_id
           }
           
           return movement

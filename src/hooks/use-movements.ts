@@ -83,8 +83,8 @@ export function useMovements(organizationId: string | undefined, projectId: stri
           is_favorite,
           conversion_group_id
         `)
-        .order('created_at', { ascending: false })
-        .limit(20); // Temporary: get all recent movements to debug
+        .eq('organization_id', organizationId)
+        .order('created_at', { ascending: false });
 
       // If project is specified, filter by project
       if (projectId) {
