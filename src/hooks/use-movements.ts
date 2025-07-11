@@ -5,6 +5,7 @@ interface Movement {
   id: string
   description: string
   amount: number
+  exchange_rate?: number
   created_at: string
   movement_date: string
   created_by: string
@@ -68,6 +69,7 @@ export function useMovements(organizationId: string | undefined, projectId: stri
           id,
           description,
           amount,
+          exchange_rate,
           created_at,
           movement_date,
           created_by,
@@ -208,6 +210,7 @@ export function useMovements(organizationId: string | undefined, projectId: stri
 
         return {
           ...movement,
+          exchange_rate: movement.exchange_rate, // Ensure exchange_rate is preserved
           creator,
           movement_data: {
             type,
