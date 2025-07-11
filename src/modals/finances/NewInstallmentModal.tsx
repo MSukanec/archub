@@ -305,6 +305,22 @@ export function NewInstallmentModal({
     }
   }, [wallets, form])
 
+  // Set first contact as default when creating new installment
+  useEffect(() => {
+    if (organizationContacts && organizationContacts.length > 0 && !editingInstallment && open) {
+      const sortedContacts = organizationContacts.sort((a, b) => {
+        const nameA = a.full_name || a.company_name || `${a.first_name || ''} ${a.last_name || ''}`.trim()
+        const nameB = b.full_name || b.company_name || `${b.first_name || ''} ${b.last_name || ''}`.trim()
+        return nameA.localeCompare(nameB)
+      })
+      
+      const firstContact = sortedContacts[0]
+      if (firstContact && !form.getValues('contact_id')) {
+        form.setValue('contact_id', firstContact.id)
+      }
+    }
+  }, [organizationContacts, editingInstallment, open, form])
+
   // Set current user as default creator
   useEffect(() => {
     if (organizationMembers && organizationMembers.length > 0 && userData?.user?.id) {
@@ -424,7 +440,7 @@ export function NewInstallmentModal({
                 avatar_url: contact.avatar_url,
                 first_name: contact.first_name,
                 last_name: contact.last_name
-              })) || []}
+              })).sort((a, b) => a.full_name.localeCompare(b.full_name)) || []}
               value={form.watch('contact_id')}
               onChange={(value) => form.setValue('contact_id', value)}
               label="Contacto"

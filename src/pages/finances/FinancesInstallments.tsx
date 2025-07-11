@@ -458,7 +458,7 @@ export default function FinancesInstallments() {
     {
       key: "amount",
       label: "Monto",
-      width: "25%",
+      width: "20%",
       sortable: true,
       sortType: "number" as const,
       render: (item: Installment) => {
@@ -469,6 +469,31 @@ export default function FinancesInstallments() {
           </div>
         )
       }
+    },
+    {
+      key: "actions",
+      label: "Acciones",
+      width: "10%",
+      render: (item: Installment) => (
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleEdit(item)}
+            className="h-8 w-8 p-0"
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleDelete(item)}
+            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      )
     }
   ]
 
@@ -547,21 +572,6 @@ export default function FinancesInstallments() {
               data={filteredInstallments}
               columns={detailColumns}
               defaultSort={{ key: 'movement_date', direction: 'desc' }}
-              onCardClick={handleCardClick}
-              getRowActions={(item: Installment) => [
-                {
-                  icon: <Edit className="h-4 w-4" />,
-                  label: 'Editar',
-                  onClick: () => handleEdit(item),
-                  variant: 'default' as const
-                },
-                {
-                  icon: <Trash2 className="h-4 w-4" />,
-                  label: 'Eliminar',
-                  onClick: () => handleDelete(item),
-                  variant: 'destructive' as const
-                }
-              ]}
             />
           </div>
         ) : installments.length === 0 ? (
