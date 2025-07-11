@@ -55,6 +55,7 @@ export function useMovements(organizationId: string | undefined, projectId: stri
       if (!organizationId) return []
 
       console.log('Fetching movements for organization:', organizationId, 'project:', projectId)
+      console.log('Project filter active:', !!projectId)
 
       if (!supabase) {
         throw new Error('Supabase client not initialized')
@@ -103,6 +104,8 @@ export function useMovements(organizationId: string | undefined, projectId: stri
       }
 
       console.log('Found movements:', data.length)
+      console.log('First movement project_id:', data[0]?.project_id)
+      console.log('Expected project_id:', projectId)
 
       // Get related data in parallel
       const [membersResult, typesResult, categoriesResult, subcategoriesResult, currenciesResult, walletsResult] = await Promise.all([
