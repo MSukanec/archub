@@ -394,24 +394,14 @@ export default function OrganizationActivity() {
           icon={<Activity className="w-5 h-5" />}
           features={[
             {
-              icon: <Folder className="w-5 h-5" />,
-              title: "Seguimiento de proyectos",
-              description: "Monitorea la creación y progreso de todos los proyectos de la organización en tiempo real. Ve cuándo se crean nuevos proyectos y quién los está creando."
-            },
-            {
-              icon: <DollarSign className="w-5 h-5" />,
-              title: "Actividad financiera",
-              description: "Rastrea movimientos financieros, ingresos y egresos para mantener el control económico. Observa las transacciones más recientes y los cambios en las finanzas de la organización."
+              icon: <Building className="w-5 h-5" />,
+              title: "Registro central de actividades",
+              description: "En esta sección quedan asentadas todas las acciones importantes que realiza la organización, permitiendo dar seguimiento a cada cosa que sucede. Desde la creación de proyectos hasta movimientos financieros, todo queda registrado para mantener un historial completo."
             },
             {
               icon: <Users className="w-5 h-5" />,
-              title: "Gestión de contactos",
-              description: "Supervisa la adición de nuevos contactos y clientes vinculados a los proyectos. Mantente al día con las nuevas incorporaciones al equipo y red de contactos."
-            },
-            {
-              icon: <FileText className="w-5 h-5" />,
-              title: "Registro de bitácoras",
-              description: "Controla las entradas de bitácora de obra y el progreso de los trabajos de construcción. Ve las actualizaciones más recientes del estado de los proyectos en curso."
+              title: "Filtrado por miembro",
+              description: "Las acciones están organizadas y filtradas por miembro de la organización, de manera tal que se puede saber exactamente quién hizo cada cosa. Esto permite identificar responsabilidades, reconocer contribuciones y mantener la trazabilidad de las decisiones tomadas."
             }
           ]}
         />
