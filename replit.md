@@ -119,6 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 11, 2025. Complete table row CSS variables implementation and Profile page FeatureIntroduction enhancement - COMPLETED
+  • Updated CustomTable component to use --table-row-bg and --table-row-fg CSS variables for normal table rows (non-headers)
+  • Applied --table-row-hover-bg CSS variable for table row hover states across all tables
+  • Enhanced Profile page with FeatureIntroduction component explaining user profile management functionality
+  • Removed "MI PERFIL" title and description sections, replaced with comprehensive feature introduction card
+  • Added proper UserCircle icon to Profile FeatureIntroduction with 4 key feature explanations
+  • Updated all section dividers in Profile page to use --section-divider CSS variable instead of hardcoded colors
+  • Fixed missing Shield icon import in Profile page for proper feature introduction rendering
+  • All Profile page sections now use consistent theme-aware CSS variables for dividers
 - July 11, 2025. Complete card component color standardization for proper dark mode compatibility - COMPLETED
   • Fixed ProjectCard hardcoded white backgrounds and gray text colors to use CSS variables
   • Updated ActivityCard, MovementCard, and ConversionCard to use proper theme-aware colors

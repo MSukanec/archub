@@ -133,6 +133,8 @@
   --border-default: hsl(240, 6%, 90%);
   --border-strong: hsl(240, 8%, 80%);
   --ring-default: hsl(76, 100%, 40%);
+  --section-divider: hsl(240, 6%, 88%);
+  --section-divider-strong: hsl(240, 8%, 75%);
 
   /* Tailwind variables */
   --border: hsl(240, 6%, 90%);
@@ -194,7 +196,7 @@
   --card-bg: hsl(0, 0%, 14%);
   --card-fg: hsl(0, 0%, 90%);
   --card-text: hsl(0, 0%, 90%);
-  --card-border: hsl(0, 0%, 50%);
+  --card-border: hsl(0, 0%, 20%);
   --card-hover-bg: hsl(0, 0%, 14%);
 
   /* Secondary Cards */
@@ -259,10 +261,10 @@
   --chart-5: hsl(27, 87%, 70%);
 
   /* Tables */
-  --table-header-bg: hsl(210, 20%, 22%);
-  --table-header-fg: hsl(215, 16%, 70%);
+  --table-header-bg: hsl(0, 0%, 14%);
+  --table-header-fg: hsl(0, 0%, 100%);
   --table-header-border: hsl(0, 0%, 22%);
-  --table-row-bg: hsl(0, 0%, 16%);
+  --table-row-bg: hsl(0, 0%, 22%);
   --table-row-fg: hsl(0, 0%, 90%);
   --table-row-border: hsl(0, 0%, 22%);
   --table-row-hover-bg: hsl(0, 0%, 15%);
@@ -282,6 +284,8 @@
   /* Borders and Rings */
   --border-default: hsl(0, 0%, 16%);
   --border-strong: hsl(0, 50%, 50%);
+  --section-divider: hsl(0, 0%, 18%);
+  --section-divider-strong: hsl(0, 0%, 25%);
 
   /* Tailwind variables */
   --border: hsl(0, 0%, 22%);

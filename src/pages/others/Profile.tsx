@@ -8,7 +8,8 @@ import { Switch } from '@/components/ui/switch'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
-import { Upload, Link as LinkIcon, LogOut, Crown, MessageCircle, Camera, User, Settings, Building, Package, Hammer, Eye } from 'lucide-react'
+import { Upload, Link as LinkIcon, LogOut, Crown, MessageCircle, Camera, User, Settings, Building, Package, Hammer, Eye, UserCircle, Shield } from 'lucide-react'
+import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { useState, useEffect } from 'react'
 import { useLocation } from 'wouter'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -211,21 +212,41 @@ export default function Profile() {
   return (
     <Layout headerProps={headerProps}>
       <div className="max-w-4xl mx-auto space-y-8">
-        {/* Header Section */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold">Mi Perfil</h1>
-            {isSaving && (
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <div className="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
-                Guardando...
-              </div>
-            )}
+        {/* Feature Introduction */}
+        <FeatureIntroduction
+          title="Gestión de Perfil de Usuario"
+          icon={<UserCircle className="h-6 w-6" />}
+          features={[
+            {
+              icon: <User className="h-4 w-4" />,
+              title: "Información Personal",
+              description: "Administra tu información personal básica como nombre, apellido, país de origen y fecha de nacimiento."
+            },
+            {
+              icon: <Camera className="h-4 w-4" />,
+              title: "Avatar y Personalización", 
+              description: "Sube y personaliza tu foto de perfil para identificarte mejor en la plataforma."
+            },
+            {
+              icon: <Settings className="h-4 w-4" />,
+              title: "Preferencias de Aplicación",
+              description: "Configura el tema visual (claro/oscuro) y el comportamiento de la barra lateral según tus preferencias."
+            },
+            {
+              icon: <Shield className="h-4 w-4" />,
+              title: "Modo de Uso y Seguridad",
+              description: "Define tu perfil profesional y gestiona la seguridad de tu cuenta con opciones de cierre de sesión."
+            }
+          ]}
+        />
+
+        {/* Saving indicator */}
+        {isSaving && (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground justify-center">
+            <div className="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
+            Guardando...
           </div>
-          <p className="text-sm text-muted-foreground">
-            Esta es la información de tu perfil y las preferencias de tu cuenta.
-          </p>
-        </div>
+        )}
 
         {/* Plan Card */}
         <Card className="bg-muted/30">
@@ -254,7 +275,7 @@ export default function Profile() {
           </CardContent>
         </Card>
 
-        <hr className="border-t border-gray-200 dark:border-gray-700 my-8" />
+        <hr className="border-t border-[var(--section-divider)] my-8" />
 
         {/* Perfil Section */}
         <div>
@@ -326,7 +347,7 @@ export default function Profile() {
           </div>
         </div>
 
-        <hr className="border-t border-gray-200 dark:border-gray-700 my-8" />
+        <hr className="border-t border-[var(--section-divider)] my-8" />
 
         {/* Información Personal Section */}
         <div>
@@ -391,7 +412,7 @@ export default function Profile() {
           </div>
         </div>
 
-        <hr className="border-t border-gray-200 dark:border-gray-700 my-8" />
+        <hr className="border-t border-[var(--section-divider)] my-8" />
 
         {/* Preferencias Section */}
         <div>
@@ -440,7 +461,7 @@ export default function Profile() {
           </div>
         </div>
 
-        <hr className="border-t border-gray-200 dark:border-gray-700 my-8" />
+        <hr className="border-t border-[var(--section-divider)] my-8" />
 
         {/* Modo de Usuario */}
         <div>
@@ -492,7 +513,7 @@ export default function Profile() {
           </div>
         </div>
 
-        <hr className="border-t border-gray-200 dark:border-gray-700 my-8" />
+        <hr className="border-t border-[var(--section-divider)] my-8" />
 
         {/* Zona de Peligro */}
         <div>

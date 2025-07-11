@@ -269,8 +269,8 @@ export function CustomTable<T = any>({
             <div
               key={index}
               className={cn(
-                "group relative grid gap-4 px-4 py-3 bg-[var(--card-bg)] text-xs hover:bg-[var(--card-hover-bg)] transition-colors",
-                index < paginatedData.length - 1 ? "border-b border-[var(--card-border)]" : "",
+                "group relative grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors",
+                index < paginatedData.length - 1 ? "border-b border-[var(--table-row-border)]" : "",
                 getRowClassName?.(item)
               )}
               style={{ gridTemplateColumns: getGridTemplateColumns() }}
