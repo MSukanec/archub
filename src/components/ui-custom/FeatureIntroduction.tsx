@@ -28,22 +28,17 @@ export function FeatureIntroduction({
   return (
     <div 
       className={cn(
-        "w-full text-white overflow-hidden shadow-lg mb-6 cursor-pointer transition-all duration-300 ease-in-out animated-border",
+        "w-full bg-card border border-border rounded-lg shadow-sm mb-6 cursor-pointer transition-all duration-300 ease-in-out hover:shadow-md",
         className
       )}
-      style={{ 
-        backgroundColor: 'var(--secondary-sidebar-bg)',
-        borderRadius: 'var(--radius-sm)',
-        border: '3px solid var(--accent)'
-      }}
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => setIsExpanded(false)}
     >
       {/* Always visible title */}
       <div className="p-6">
-        <h2 className="text-xl font-normal text-white text-center flex items-center justify-center gap-2">
+        <h2 className="text-xl font-semibold text-foreground text-center flex items-center justify-center gap-2">
+          <HelpCircle className="w-5 h-5 text-muted-foreground" />
           {title}
-          <HelpCircle className="w-4 h-5" />
         </h2>
       </div>
 
@@ -55,14 +50,14 @@ export function FeatureIntroduction({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {features.map((feature, index) => (
                 <div key={index} className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 mt-1">
+                  <div className="flex-shrink-0 mt-1 text-primary">
                     {feature.icon}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-medium text-white mb-1">
+                    <h3 className="text-sm font-medium text-foreground mb-1">
                       {feature.title}
                     </h3>
-                    <p className="text-sm text-white/70 leading-relaxed">
+                    <p className="text-sm text-muted-foreground leading-relaxed">
                       {feature.description}
                     </p>
                   </div>

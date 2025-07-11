@@ -11,7 +11,7 @@ import { CustomRestricted } from '@/components/ui-custom/misc/CustomRestricted'
 import { useState, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects } from '@/hooks/use-projects'
-import { Folder, Crown, Plus, Calendar, MoreHorizontal, Edit, Trash2, Home, Search, Filter, X } from 'lucide-react'
+import { Folder, Crown, Plus, Calendar, MoreHorizontal, Edit, Trash2, Home, Search, Filter, X, Users, Settings, BarChart3, FileText } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
@@ -23,6 +23,7 @@ import { NewProjectModal } from '@/modals/project/NewProjectModal'
 import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState'
 import ModernProjectCard from '@/components/cards/ModernProjectCard'
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
+import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 
 export default function OrganizationProjects() {
   const [searchValue, setSearchValue] = useState("")
@@ -279,53 +280,39 @@ export default function OrganizationProjects() {
   // Obtener el proyecto seleccionado para mostrar información
   const selectedProject = projects?.find(p => p.id === userData?.preferences?.last_project_id);
 
+  // Define feature introduction content
+  const projectFeatures = [
+    {
+      icon: <Folder className="w-5 h-5" />,
+      title: "Gestión de Proyectos",
+      description: "Organiza y administra todos tus proyectos de construcción desde un lugar centralizado. Cada proyecto incluye información detallada, estado y configuraciones específicas."
+    },
+    {
+      icon: <Users className="w-5 h-5" />,
+      title: "Colaboración en Equipo",
+      description: "Invita colaboradores a tus proyectos, asigna roles y permisos específicos. Trabaja en equipo de manera eficiente con herramientas de colaboración integradas."
+    },
+    {
+      icon: <BarChart3 className="w-5 h-5" />,
+      title: "Seguimiento y Métricas",
+      description: "Monitorea el progreso de tus proyectos con métricas en tiempo real. Visualiza estadísticas de avance, presupuesto, timeline y recursos utilizados."
+    },
+    {
+      icon: <Settings className="w-5 h-5" />,
+      title: "Configuración Avanzada",
+      description: "Personaliza cada proyecto con tipologías específicas, modalidades de trabajo, estados personalizados y preferencias adaptadas a tu flujo de trabajo."
+    }
+  ]
+
   return (
     <>
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
-        {/* Card de información del proyecto seleccionado */}
-        {selectedProject && (
-          <div className="bg-card border rounded-lg p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Folder className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-lg">{selectedProject.name}</h3>
-                <p className="text-sm text-muted-foreground">Proyecto activo seleccionado</p>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-              <div>
-                <span className="text-muted-foreground">Creado:</span>
-                <p className="font-medium">{format(new Date(selectedProject.created_at), 'dd/MM/yyyy')}</p>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Tipología:</span>
-                <p className="font-medium">{selectedProject.project_data?.project_type?.name || 'Sin especificar'}</p>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Modalidad:</span>
-                <p className="font-medium">{selectedProject.project_data?.modality?.name || 'Sin especificar'}</p>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Estado:</span>
-                <Badge 
-                  variant={
-                    selectedProject.status === 'active' ? 'default' :
-                    selectedProject.status === 'planning' ? 'secondary' :
-                    selectedProject.status === 'completed' ? 'outline' : 'destructive'
-                  }
-                >
-                  {selectedProject.status === 'planning' ? 'Planificación' :
-                   selectedProject.status === 'active' ? 'Activo' :
-                   selectedProject.status === 'on-hold' ? 'En pausa' : 'Completado'}
-                </Badge>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Feature Introduction */}
+        <FeatureIntroduction
+          title="Gestión de Proyectos de Construcción"
+          features={projectFeatures}
+        />
 
         {/* Mostrar contenido solo si hay proyectos */}
         {filteredProjects.length > 0 ? (
