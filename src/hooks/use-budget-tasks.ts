@@ -90,8 +90,31 @@ export function useBudgetTasks(budgetId: string) {
 
       console.log("Budget tasks data received:", data);
       
-      // La vista ya incluye el display_name procesado, solo devolver los datos
-      const processedTasks = data || [];
+      // Procesar los nombres de las tareas usando la función del taskDescriptionGenerator
+      const processedTasks = await Promise.all(
+        (data || []).map(async (task: any) => {
+          if (task.task?.display_name && task.task?.param_values) {
+            console.log('Processing task with display_name:', task.task.display_name, 'and params:', task.task.param_values);
+            
+            // Usar la función generateTaskDescription para procesar correctamente todos los tipos de parámetros
+            const { generateTaskDescription } = await import('@/utils/taskDescriptionGenerator');
+            
+            try {
+              const processedName = await generateTaskDescription(
+                task.task.display_name,
+                task.task.param_values
+              );
+              
+              console.log('Final processed name:', processedName);
+              task.task.display_name = processedName;
+            } catch (error) {
+              console.error('Error processing task description:', error);
+              // Mantener display_name original como fallback
+            }
+          }
+          return task;
+        })
+      );
       
       return processedTasks;
     },
