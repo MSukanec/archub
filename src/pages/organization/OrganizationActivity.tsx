@@ -61,7 +61,7 @@ export default function OrganizationActivity() {
           title: 'Nuevo proyecto creado',
           description: `Se creó el proyecto "${project.name}"`,
           created_at: project.created_at,
-          author: project.organization_members?.users || { full_name: 'Sistema', avatar_url: '' },
+          author: project.organization_members?.users || { full_name: 'Sistema', avatar_url: null },
           status: project.status
         });
       });
@@ -93,7 +93,7 @@ export default function OrganizationActivity() {
           title: 'Movimiento financiero registrado',
           description: `${movement.description || 'Movimiento'}: $${movement.amount?.toLocaleString()}`,
           created_at: movement.created_at,
-          author: movement.organization_members?.users || { full_name: 'Usuario', avatar_url: '' },
+          author: movement.organization_members?.users || { full_name: 'Usuario', avatar_url: null },
           amount: movement.amount
         });
       });
@@ -126,7 +126,7 @@ export default function OrganizationActivity() {
           title: 'Nuevo contacto agregado',
           description: `Se agregó a ${contact.first_name} ${contact.last_name}${contact.company_name ? ` de ${contact.company_name}` : ''}`,
           created_at: contact.created_at,
-          author: contact.organization_members?.users || userData?.user || { full_name: 'Usuario', avatar_url: '' }
+          author: contact.organization_members?.users || userData?.user || { full_name: 'Usuario', avatar_url: null }
         });
       });
 

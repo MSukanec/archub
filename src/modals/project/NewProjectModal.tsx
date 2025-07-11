@@ -93,7 +93,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
       created_by: editingProject?.created_by || currentUserMember?.id || "",
       project_type_id: editingProject?.project_data?.project_type_id || "none",
       modality_id: editingProject?.project_data?.modality_id || "none",
-      status: editingProject?.status || "planning",
+      status: editingProject?.status || "active",
     },
   });
 
@@ -117,7 +117,7 @@ export function NewProjectModal({ open, onClose, editingProject }: NewProjectMod
         created_by: currentUserMember.id,
         project_type_id: "none",
         modality_id: "none",
-        status: "planning",
+        status: "active",
       });
     }
   }, [currentUserMember, editingProject, form]);

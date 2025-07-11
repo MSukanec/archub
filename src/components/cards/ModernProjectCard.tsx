@@ -82,8 +82,8 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
           </div>
           
           <div className="flex items-center gap-2">
-            {/* Active Project Badge - Only show for selected project */}
-            {project.is_active && (
+            {/* Active Project Badge - Only show for active projects */}
+            {project.status === 'active' && (
               <span className="text-xs font-medium px-2 py-1 rounded-full text-white" style={{backgroundColor: 'var(--accent)'}}>
                 ACTIVO
               </span>
