@@ -119,6 +119,13 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 11, 2025. Fixed Excel import 100-row limitation and exchange rate display issues - COMPLETED
+  • Removed hardcoded 100-row limit from ImportMovementsModal.tsx for both Excel (.xlsx/.xls) and CSV file processing
+  • Import system now processes all rows in uploaded files instead of limiting to first 100 records
+  • Fixed exchange_rate field missing from Movement interface and useMovements query SELECT statement
+  • Added exchange_rate preservation in data transformation to ensure cotizaciones display in movements table
+  • Corrected exchange_rate loading in NewMovementModal edit form - field now populates correctly when editing movements
+  • Exchange rates now display properly in "Cotización" column and load in edit modal as expected
 - July 11, 2025. Complete ImportMovementsModal fixes: reset functionality, file removal, UUID error handling, and layout improvements - COMPLETED
   • Fixed modal to completely reset when opened/closed using dropzoneKey state to force dropzone component reset
   • Added file removal button (X) with proper functionality to clear selected files and return to step 1

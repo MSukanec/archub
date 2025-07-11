@@ -136,7 +136,7 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
           
           const parsedResult = {
             headers: validHeaders,
-            rows: rows.slice(0, 100), // Limit to first 100 rows for preview
+            rows: rows, // Process all rows instead of limiting to 100
             fileName: file.name
           }
           
@@ -167,7 +167,7 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
               
               const parsedResult = {
                 headers: validHeaders,
-                rows: rows.slice(0, 100), // Limit to first 100 rows for preview
+                rows: rows, // Process all rows instead of limiting to 100
                 fileName: file.name
               }
               
