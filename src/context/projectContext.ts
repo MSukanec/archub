@@ -8,7 +8,7 @@ interface ProjectContextState {
 
 export const useProjectContext = create<ProjectContextState>((set) => ({
   selectedProjectId: null,
-  isGlobalView: false,
+  isGlobalView: true, // Start in global view by default
   setSelectedProject: (projectId: string | null) => set({ 
     selectedProjectId: projectId,
     isGlobalView: projectId === null

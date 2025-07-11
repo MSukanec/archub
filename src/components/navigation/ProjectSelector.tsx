@@ -22,7 +22,7 @@ export function ProjectSelector() {
 
   // Initialize project context with user preference if not set
   useEffect(() => {
-    if (userData?.preferences?.last_project_id && selectedProjectId === null) {
+    if (selectedProjectId === null && userData?.preferences?.last_project_id) {
       setSelectedProject(userData.preferences.last_project_id)
     }
   }, [userData?.preferences?.last_project_id, selectedProjectId, setSelectedProject])
@@ -51,9 +51,7 @@ export function ProjectSelector() {
 
   const handleProjectSelect = (projectId: string | null) => {
     setSelectedProject(projectId)
-    if (projectId !== null) {
-      updateProjectMutation.mutate(projectId)
-    }
+    updateProjectMutation.mutate(projectId)
   }
 
   // All projects options including "Todos los proyectos"
@@ -95,9 +93,9 @@ export function ProjectSelector() {
               <Folder className="w-4 h-4" />
             )}
             <span className="truncate">{option.name}</span>
-            {selectedProjectId === option.id && (
+            {(selectedProjectId === null && option.id === null) || (selectedProjectId === option.id) ? (
               <div className="w-2 h-2 bg-accent rounded-full ml-auto" />
-            )}
+            ) : null}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
