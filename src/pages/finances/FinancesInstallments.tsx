@@ -344,17 +344,14 @@ export default function FinancesInstallments() {
       }
     })
     
-    // Create summary only for project clients that have installments
+    // Create summary for ALL project clients (including those without installments)
     const summary = projectClients
       .map(client => {
         // Calculate dollarized total from installments for this client
         let dollarizedTotal = 0
         const clientInstallments = installments.filter(installment => installment.contact_id === client.client_id)
         
-        // Skip clients with no installments
-        if (clientInstallments.length === 0) {
-          return null
-        }
+        // Don't skip clients with no installments - show them with 0 amounts
         
         clientInstallments.forEach(installment => {
           const amount = installment.amount || 0
@@ -388,7 +385,6 @@ export default function FinancesInstallments() {
           client // Include full client data for committed_amount and currency_id
         }
       })
-      .filter(Boolean) // Remove null entries (clients without installments)
     
     // Calculate totals for percentages and totals row
     const totalCommittedAmountUSD = summary.reduce((sum, item) => {
@@ -703,7 +699,7 @@ export default function FinancesInstallments() {
           }
         }
         
-        const remaining = dollarizedTotal - committedAmountUSD
+        const remaining = committedAmountUSD - dollarizedTotal
         const formattedRemaining = new Intl.NumberFormat('es-AR', {
           minimumFractionDigits: 0,
           maximumFractionDigits: 0

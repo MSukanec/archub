@@ -256,7 +256,7 @@ export default function FinancesCommited() {
               <SelectContent>
                 {organizationCurrencies?.map((orgCurrency, index) => (
                   <SelectItem 
-                    key={`currency-${orgCurrency.currencies?.id || index}`} 
+                    key={`currency-${orgCurrency.currency_id || index}`} 
                     value={orgCurrency.currency_id || ''}
                   >
                     {orgCurrency.currencies?.code || 'N/A'} - {orgCurrency.currencies?.name || 'Sin nombre'}
