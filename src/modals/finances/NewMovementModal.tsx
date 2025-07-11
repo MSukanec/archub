@@ -642,6 +642,12 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                 <form 
                   key="conversion-form"
                   onSubmit={conversionForm.handleSubmit(onSubmitConversion)} 
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      conversionForm.handleSubmit(onSubmitConversion)();
+                    }
+                  }}
                   className="space-y-4"
                 >
                   <Accordion type="single" defaultValue="conversion-data" collapsible>
@@ -980,6 +986,12 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                 <form 
                   key={editingMovement?.id || 'new'} 
                   onSubmit={form.handleSubmit(onSubmit)} 
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      form.handleSubmit(onSubmit)();
+                    }
+                  }}
                   className="space-y-4"
                 >
                   <Accordion type="single" defaultValue="informacion-basica" collapsible>
