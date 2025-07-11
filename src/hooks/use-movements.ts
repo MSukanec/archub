@@ -83,8 +83,8 @@ export function useMovements(organizationId: string | undefined, projectId: stri
           is_favorite,
           conversion_group_id
         `)
-        .eq('organization_id', organizationId)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(20); // Temporary: get all recent movements to debug
 
       // If project is specified, filter by project
       if (projectId) {
@@ -104,8 +104,15 @@ export function useMovements(organizationId: string | undefined, projectId: stri
       }
 
       console.log('Found movements:', data.length)
-      console.log('First movement project_id:', data[0]?.project_id)
-      console.log('Expected project_id:', projectId)
+      if (data.length > 0) {
+        console.log('Sample movement data:', {
+          project_id: data[0]?.project_id,
+          organization_id: data[0]?.organization_id,
+          description: data[0]?.description
+        })
+        console.log('Expected organization_id:', organizationId)
+        console.log('Expected project_id:', projectId)
+      }
 
       // Get related data in parallel
       const [membersResult, typesResult, categoriesResult, subcategoriesResult, currenciesResult, walletsResult] = await Promise.all([
