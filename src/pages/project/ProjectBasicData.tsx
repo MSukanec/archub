@@ -146,7 +146,7 @@ export default function ProjectBasicData() {
     }
   });
 
-  // Auto-save hook
+  // Auto-save hook with proper configuration
   const { isSaving } = useDebouncedAutoSave({
     data: {
       name: projectName,
@@ -166,7 +166,21 @@ export default function ProjectBasicData() {
       surface_covered: surfaceCovered,
       surface_semi: surfaceSemi,
     },
-    saveFn: saveProjectDataMutation.mutateAsync
+    saveFn: async (data) => {
+      await saveProjectDataMutation.mutateAsync(data);
+      
+      // Show success toast
+      toast({
+        title: "Datos guardados",
+        description: "Los cambios se han guardado automáticamente",
+      });
+      
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['project-info', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['project-data', projectId] });
+    },
+    delay: 750,
+    enabled: !!projectId && !!userData?.user?.id
   });
 
   // Set sidebar context on component mount
