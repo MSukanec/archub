@@ -33,73 +33,25 @@ input[type="number"] {
   background: #94a3b8;
 }
 
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(5px);
-  }
+/* Accent / State */
+--destructive: hsl(0, 84%, 60%);
+--destructive-text: hsl(0, 0%, 100%);
+--success: hsl(76, 100%, 40%);
+--success-text: hsl(0, 0%, 100%);
+--warning: hsl(45, 90%, 50%);
+--warning-text: hsl(240, 10%, 4%);
 
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+/* Charts */
+--chart-1: hsl(76, 100%, 40%);
+--chart-2: hsl(173, 58%, 39%);
+--chart-3: hsl(197, 37%, 24%);
+--chart-4: hsl(43, 74%, 66%);
+--chart-5: hsl(0, 87%, 67%);
 
-@keyframes float-horizontal {
-
-  0%,
-  100% {
-    transform: translateX(0px);
-  }
-
-  50% {
-    transform: translateX(20px);
-  }
-}
-
-@keyframes float-vertical {
-
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-
-  50% {
-    transform: translateY(-15px);
-  }
-}
-
-@keyframes float-diagonal {
-
-  0%,
-  100% {
-    transform: translate(0px, 0px);
-  }
-
-  25% {
-    transform: translate(10px, -8px);
-  }
-
-  50% {
-    transform: translate(-5px, -12px);
-  }
-
-  75% {
-    transform: translate(-10px, 5px);
-  }
-}
-
-@keyframes border-glow {
-  0% {
-    box-shadow: 0 0 5px var(--accent), 0 0 10px var(--accent), 0 0 15px var(--accent);
-  }
-  50% {
-    box-shadow: 0 0 10px var(--accent), 0 0 20px var(--accent), 0 0 30px var(--accent);
-  }
-  100% {
-    box-shadow: 0 0 5px var(--accent), 0 0 10px var(--accent), 0 0 15px var(--accent);
-  }
-}
+/* Radius */
+--radius-sm: 6px;
+--radius-md: 8px;
+--radius-lg: 10px;
 
 :root {
   /* Layout */
@@ -190,21 +142,6 @@ input[type="number"] {
   --popover-fg: hsl(0, 0%, 35%);
   --accent-bg: hsl(90, 50%, 90%);
 
-  /* Accent / State */
-  --destructive: hsl(0, 84%, 60%);
-  --destructive-text: hsl(0, 0%, 100%);
-  --success: hsl(76, 100%, 40%);
-  --success-text: hsl(0, 0%, 100%);
-  --warning: hsl(45, 90%, 50%);
-  --warning-text: hsl(240, 10%, 4%);
-
-  /* Charts */
-  --chart-1: hsl(76, 100%, 40%);
-  --chart-2: hsl(173, 58%, 39%);
-  --chart-3: hsl(197, 37%, 24%);
-  --chart-4: hsl(43, 74%, 66%);
-  --chart-5: hsl(0, 87%, 67%);
-
   /* Text */
   --text-default: hsl(240, 10%, 4%);
   --text-muted: hsl(240, 5%, 45%);
@@ -219,12 +156,6 @@ input[type="number"] {
   --table-row-fg: hsl(0, 0%, 35%);
   --table-row-border: hsl(0, 0%, 90%);
   --table-row-hover-bg: hsl(0, 0%, 98%);
-
-  /* Movement Row Gradients */
-  --movement-income-bg: linear-gradient(to right, hsl(76, 100%, 40%), hsl(76, 100%, 40%));
-  --movement-expense-bg: linear-gradient(to right, hsl(0, 70%, 50%), hsl(0, 20%, 96%));
-  --movement-income-border: hsl(90, 50%, 50%);
-  --movement-expense-border: hsl(0, 70%, 50%);
 
   /* Borders and Rings */
   --border-default: hsl(240, 6%, 90%);
@@ -241,16 +172,6 @@ input[type="number"] {
   /* Shadcn accent definitions */
   --accent: 90 50% 50%;
   --accent-foreground: 0 0% 100%;
-
-  /* Radius */
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 10px;
-}
-
-/* Animated border class */
-.animated-border {
-  animation: border-glow 2s ease-in-out infinite;
 }
 
 .dark {
@@ -281,9 +202,9 @@ input[type="number"] {
   --main-sidebar-button-hover-fg: hsl(0, 0%, 100%);
 
   /* Secondary Sidebar */
-  --secondary-sidebar-bg: hsl(0, 0%, 14%);
+  --secondary-sidebar-bg: hsl(0, 0%, 18%);
   --secondary-sidebar-fg: hsl(0, 0%, 70%);
-  --secondary-sidebar-border: hsl(0, 0%, 15%);
+  --secondary-sidebar-border: hsl(0, 0%, 20%);
   --secondary-sidebar-button-bg: transparent;
   --secondary-sidebar-button-fg: hsl(0, 0%, 70%);
   --secondary-sidebar-button-active-bg: hsl(0, 0%, 50%);
@@ -342,23 +263,6 @@ input[type="number"] {
   --popover-fg: hsl(0, 0%, 98%);
   --accent-bg: hsl(90, 30%, 20%);
 
-  /* Accent / State */
-  --accent: hsl(76, 100%, 40%);
-  --accent-text: hsl(0, 0%, 100%);
-  --destructive: hsl(0, 84%, 65%);
-  --destructive-text: hsl(0, 0%, 100%);
-  --success: hsl(76, 100%, 40%);
-  --success-text: hsl(0, 0%, 100%);
-  --warning: hsl(45, 90%, 55%);
-  --warning-text: hsl(240, 10%, 4%);
-
-  /* Charts */
-  --chart-1: hsl(210, 40%, 55%);
-  --chart-2: hsl(173, 58%, 45%);
-  --chart-3: hsl(197, 37%, 35%);
-  --chart-4: hsl(43, 74%, 70%);
-  --chart-5: hsl(27, 87%, 70%);
-
   /* Tables */
   --table-header-bg: hsl(210, 20%, 22%);
   --table-header-fg: hsl(215, 16%, 70%);
@@ -367,12 +271,6 @@ input[type="number"] {
   --table-row-fg: hsl(0, 0%, 90%);
   --table-row-border: hsl(0, 0%, 22%);
   --table-row-hover-bg: hsl(0, 0%, 15%);
-
-  /* Movement Row Gradients */
-  --movement-income-bg: linear-gradient(to right, hsl(90, 50%, 50%), hsl(90, 50%, 50%));
-  --movement-expense-bg: linear-gradient(to right, hsl(0, 70%, 40%), hsl(0, 70%, 40%));
-  --movement-income-border: hsl(90, 50%, 50%);
-  --movement-expense-border: hsl(0, 70%, 40%);
 
   /* Text */
   --text-default: hsl(0, 0%, 98%);
@@ -393,35 +291,11 @@ input[type="number"] {
 
   /* Shadcn accent definitions */
   --accent: hsl(76, 100%, 40%);
-  --accent-foreground: 0 0% 100%;
-  --ring-default: hsl(0, 50%, 50%);
-
-  /* Radius */
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
+  --accent-foreground: hsl(0, 0%, 100%);
 }
 
-/* Movement row solid color classes */
-.movement-row-income {
-  background-color: rgba(34, 197, 94, 0.08) !important;
-  border-left: 4px solid var(--movement-income-border) !important;
-}
-
-.movement-row-expense {
-  background-color: rgba(239, 68, 68, 0.08) !important;
-  border-left: 4px solid var(--movement-expense-border) !important;
-}
-
-.movement-row-conversion {
-  background-color: rgba(59, 130, 246, 0.08) !important;
-  border-left: 4px solid rgb(59, 130, 246) !important;
-}
-
-/* Avatar styles - aplicar borde de 3px a todos los avatares */
-.avatar-border,
-[data-avatar],
-.avatar {
+/* Card with animated border for selection */
+.card-selection-border {
   border: 3px solid var(--card-border) !important;
 }
 
@@ -468,4 +342,21 @@ label[data-required="true"]::after,
 /* Hide scrollbars while maintaining scroll functionality */
 .overflow-x-auto::-webkit-scrollbar {
   display: none;
+}
+
+.overflow-x-auto {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Movement row conversion styling */
+.movement-row-conversion {
+  background-color: rgba(59, 130, 246, 0.08);
+  border-left: 3px solid #3b82f6;
+}
+
+/* Required field asterisks styling */
+.required::after {
+  content: " *";
+  color: hsl(var(--destructive));
 }
