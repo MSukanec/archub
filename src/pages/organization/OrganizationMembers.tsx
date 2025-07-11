@@ -194,49 +194,51 @@ export default function OrganizationMembers() {
 
   return (
     <Layout headerProps={headerProps} breadcrumb={breadcrumb}>
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column - Feature Introduction */}
-        <div className="lg:col-span-4">
-          <FeatureIntroduction
-            title="Gestión de Miembros"
-            subtitle="(click para más información)"
-            icon={<Users className="h-5 w-5 text-[var(--accent)]" />}
-            features={[
-              {
-                icon: <Users className="h-4 w-4" />,
-                title: "Invitación de miembros",
-                description: "Invita a miembros de tu equipo que puedan acceder a todos los proyectos y herramientas de colaboración"
-              },
-              {
-                icon: <UserCheck className="h-4 w-4" />,
-                title: "Gestión de roles",
-                description: "Gestiona roles y permisos individuales para cada miembro según sus responsabilidades"
-              },
-              {
-                icon: <Clock className="h-4 w-4" />,
-                title: "Control de acceso",
-                description: "Controla el acceso a configuraciones de la organización y datos sensibles"
-              },
-              {
-                icon: <MoreHorizontal className="h-4 w-4" />,
-                title: "Supervisión de actividad",
-                description: "Supervisa la actividad y el estado de conexión de cada miembro del equipo"
-              }
-            ]}
-          />
-        </div>
+      <div className="space-y-6">
+        {/* Feature Introduction - Above everything */}
+        <FeatureIntroduction
+          title="Gestión de Miembros"
+          subtitle="(click para más información)"
+          icon={<Users className="h-5 w-5 text-[var(--accent)]" />}
+          features={[
+            {
+              icon: <Users className="h-4 w-4" />,
+              title: "Invitación de miembros",
+              description: "Invita a miembros de tu equipo que puedan acceder a todos los proyectos y herramientas de colaboración"
+            },
+            {
+              icon: <UserCheck className="h-4 w-4" />,
+              title: "Gestión de roles",
+              description: "Gestiona roles y permisos individuales para cada miembro según sus responsabilidades"
+            },
+            {
+              icon: <Clock className="h-4 w-4" />,
+              title: "Control de acceso",
+              description: "Controla el acceso a configuraciones de la organización y datos sensibles"
+            },
+            {
+              icon: <MoreHorizontal className="h-4 w-4" />,
+              title: "Supervisión de actividad",
+              description: "Supervisa la actividad y el estado de conexión de cada miembro del equipo"
+            }
+          ]}
+        />
 
-        {/* Right Column - Members Content */}
-        <div className="lg:col-span-8 space-y-8">
-          {/* Members Section */}
-          <div>
+        {/* Two Column Layout - Section descriptions left, content right */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Left Column - Section Description */}
+          <div className="lg:col-span-4">
             <div className="flex items-center gap-2 mb-4">
               <Users className="h-5 w-5 text-[var(--accent)]" />
               <h2 className="text-lg font-semibold">Miembros</h2>
             </div>
-            <p className="text-sm text-muted-foreground mb-6">
+            <p className="text-sm text-muted-foreground">
               Invita a tu equipo para trabajar juntos y colaborar fácilmente. Gestiona sus permisos para proyectos mejores.
             </p>
+          </div>
+
+          {/* Right Column - Members Content */}
+          <div className="lg:col-span-8">
             
             {isMobile ? (
               <div className="space-y-3">
@@ -327,15 +329,19 @@ export default function OrganizationMembers() {
             )}
           </div>
 
-          {/* Guest Accounts Section */}
-          <div>
+          {/* Left Column - Guests Section Description */}
+          <div className="lg:col-span-4">
             <div className="flex items-center gap-2 mb-4">
               <UserCheck className="h-5 w-5 text-[var(--accent)]" />
               <h2 className="text-lg font-semibold">Invitados</h2>
             </div>
-            <p className="text-sm text-muted-foreground mb-6">
+            <p className="text-sm text-muted-foreground">
               Las cuentas de invitados permiten a tus socios externos colaborar y comunicarse contigo aquí en Archub.
             </p>
+          </div>
+
+          {/* Right Column - Guests Content */}
+          <div className="lg:col-span-8">
             
             {isMobile ? (
               <div className="space-y-3">
@@ -423,15 +429,19 @@ export default function OrganizationMembers() {
             )}
           </div>
 
-          {/* Pending Invites Section */}
-          <div>
+          {/* Left Column - Pending Invites Section Description */}
+          <div className="lg:col-span-4">
             <div className="flex items-center gap-2 mb-4">
               <Clock className="h-5 w-5 text-[var(--accent)]" />
               <h2 className="text-lg font-semibold">Invitaciones Pendientes</h2>
             </div>
-            <p className="text-sm text-muted-foreground mb-6">
+            <p className="text-sm text-muted-foreground">
               Las cuentas de invitados permiten a tus socios externos colaborar y comunicarse contigo aquí en Archub.
             </p>
+          </div>
+
+          {/* Right Column - Pending Invites Content */}
+          <div className="lg:col-span-8">
             
             <div className="space-y-2">
               {pendingInvites.map((invite) => (
