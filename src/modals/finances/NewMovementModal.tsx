@@ -257,14 +257,38 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
     }
   }, [open, editingMovement, members, organizationCurrencies, wallets, types])
 
-  // Effect to detect conversion type
+  // Effect to detect conversion type and preserve creator/date when switching
   useEffect(() => {
     if (!types || !selectedTypeId) return
     
     const selectedType = types.find((type: any) => type.id === selectedTypeId)
     const isConversionType = selectedType?.name?.toLowerCase() === 'conversión' || selectedType?.name?.toLowerCase() === 'conversion'
+    
+    // If switching TO conversion mode, preserve creator and date from regular form
+    if (isConversionType && !isConversion) {
+      const currentCreator = form.getValues('created_by')
+      const currentDate = form.getValues('movement_date')
+      
+      // Update conversion form with preserved values
+      conversionForm.setValue('created_by', currentCreator)
+      if (currentDate) {
+        conversionForm.setValue('movement_date', currentDate)
+      }
+    }
+    // If switching FROM conversion mode, preserve creator and date to regular form  
+    else if (!isConversionType && isConversion) {
+      const currentCreator = conversionForm.getValues('created_by')
+      const currentDate = conversionForm.getValues('movement_date')
+      
+      // Update regular form with preserved values
+      form.setValue('created_by', currentCreator)
+      if (currentDate) {
+        form.setValue('movement_date', currentDate)
+      }
+    }
+    
     setIsConversion(isConversionType)
-  }, [selectedTypeId, types])
+  }, [selectedTypeId, types, isConversion, form, conversionForm])
 
   // Effect specifically for updating categories when the type selection triggers loading
   useEffect(() => {
@@ -656,7 +680,26 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                         Datos de Conversión
                       </AccordionTrigger>
                       <AccordionContent className="space-y-3 pt-3">
-                        {/* Fecha y Creador */}
+                        {/* Creador y Fecha */}
+                        <FormField
+                          control={conversionForm.control}
+                          name="created_by"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Creador</FormLabel>
+                              <FormControl>
+                                <UserSelector
+                                  users={members || []}
+                                  value={field.value}
+                                  onChange={field.onChange}
+                                  placeholder="Seleccionar creador"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
                         <FormField
                           control={conversionForm.control}
                           name="movement_date"
@@ -671,25 +714,6 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                                     const localDate = new Date(e.target.value + 'T00:00:00');
                                     field.onChange(localDate);
                                   }}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={conversionForm.control}
-                          name="created_by"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Creador</FormLabel>
-                              <FormControl>
-                                <UserSelector
-                                  users={members || []}
-                                  value={field.value}
-                                  onChange={field.onChange}
-                                  placeholder="Seleccionar creador"
                                 />
                               </FormControl>
                               <FormMessage />
@@ -1002,6 +1026,27 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                       <AccordionContent className="space-y-3 pt-3">
                       <FormField
                         control={form.control}
+                        name="created_by"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Creador
+                            </FormLabel>
+                            <FormControl>
+                              <UserSelector
+                                users={members || []}
+                                value={field.value}
+                                onChange={field.onChange}
+                                placeholder="Seleccionar creador"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
                         name="movement_date"
                         render={({ field }) => (
                           <FormItem>
@@ -1017,27 +1062,6 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                                   const localDate = new Date(e.target.value + 'T00:00:00');
                                   field.onChange(localDate);
                                 }}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="created_by"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>
-                              Creador
-                            </FormLabel>
-                            <FormControl>
-                              <UserSelector
-                                users={members || []}
-                                value={field.value}
-                                onChange={field.onChange}
-                                placeholder="Seleccionar creador"
                               />
                             </FormControl>
                             <FormMessage />
