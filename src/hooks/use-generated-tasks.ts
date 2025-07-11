@@ -303,6 +303,42 @@ export function useDeleteTaskMaterial() {
   });
 }
 
+// Hook para actualizar material de tarea
+export function useUpdateTaskMaterial() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  
+  return useMutation({
+    mutationFn: async (data: { id: string; amount: number }) => {
+      if (!supabase) throw new Error('Supabase not initialized');
+      
+      const { data: result, error } = await supabase
+        .from('task_materials')
+        .update({ amount: data.amount })
+        .eq('id', data.id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['task-materials'] });
+      toast({
+        title: "Material Actualizado",
+        description: "La cantidad del material se ha actualizado exitosamente"
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Error al actualizar el material",
+        variant: "destructive"
+      });
+    }
+  });
+}
+
 // Hook para actualizar tarea generada
 export function useUpdateGeneratedTask() {
   const queryClient = useQueryClient();

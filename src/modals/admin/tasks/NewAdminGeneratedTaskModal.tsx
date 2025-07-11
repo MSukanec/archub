@@ -14,7 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { FileText, Settings, Package, Loader2, Plus, Trash2 } from "lucide-react";
 import { useTaskTemplates, useTaskTemplateParameters } from "@/hooks/use-task-templates";
-import { useCreateGeneratedTask, useUpdateGeneratedTask, useTaskMaterials, useCreateTaskMaterial, useDeleteTaskMaterial } from "@/hooks/use-generated-tasks";
+import { useCreateGeneratedTask, useUpdateGeneratedTask, useTaskMaterials, useCreateTaskMaterial, useDeleteTaskMaterial, useUpdateTaskMaterial } from "@/hooks/use-generated-tasks";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMaterials } from "@/hooks/use-materials";
 import { useUnits } from "@/hooks/use-units";
@@ -77,6 +77,7 @@ export function NewAdminGeneratedTaskModal({
   const updateGeneratedTask = useUpdateGeneratedTask();
   const createTaskMaterial = useCreateTaskMaterial();
   const deleteTaskMaterial = useDeleteTaskMaterial();
+  const updateTaskMaterial = useUpdateTaskMaterial();
   
   // Load parameter options for each parameter
   const [parameterOptions, setParameterOptions] = useState<Record<string, any[]>>({});
@@ -208,6 +209,14 @@ export function NewAdminGeneratedTaskModal({
     }
   }, [open, selectedTemplateId]);
 
+  // Cleanup timeouts when modal closes
+  useEffect(() => {
+    if (!open) {
+      Object.values(updateTimeouts).forEach(timeout => clearTimeout(timeout));
+      setUpdateTimeouts({});
+    }
+  }, [open, updateTimeouts]);
+
 
 
 
@@ -302,6 +311,42 @@ export function NewAdminGeneratedTaskModal({
     } catch (error) {
       console.error("Error deleting material:", error);
     }
+  };
+
+  // Estado para el debounce de actualización de materiales
+  const [updateTimeouts, setUpdateTimeouts] = useState<Record<string, NodeJS.Timeout>>({});
+
+  // Función para actualizar cantidad de material con debounce
+  const handleUpdateMaterialAmount = (materialId: string, newAmount: number) => {
+    // Cancelar timeout anterior si existe
+    if (updateTimeouts[materialId]) {
+      clearTimeout(updateTimeouts[materialId]);
+    }
+
+    // Crear nuevo timeout
+    const timeoutId = setTimeout(async () => {
+      try {
+        await updateTaskMaterial.mutateAsync({
+          id: materialId,
+          amount: newAmount
+        });
+        
+        // Limpiar timeout después de ejecutar
+        setUpdateTimeouts(prev => {
+          const newTimeouts = { ...prev };
+          delete newTimeouts[materialId];
+          return newTimeouts;
+        });
+      } catch (error) {
+        console.error("Error updating material amount:", error);
+      }
+    }, 500); // 500ms de delay
+
+    // Guardar el nuevo timeout
+    setUpdateTimeouts(prev => ({
+      ...prev,
+      [materialId]: timeoutId
+    }));
   };
 
   const ParameterField = ({ param }: { param: any }) => {
@@ -618,25 +663,39 @@ export function NewAdminGeneratedTaskModal({
                             {taskMaterials.map((taskMaterial) => (
                               <div
                                 key={taskMaterial.id}
-                                className="flex items-center justify-between p-3 border border-border rounded-md bg-card"
+                                className="flex items-center gap-3 p-3 border border-border rounded-md bg-card"
                               >
                                 <div className="flex-1">
                                   <div className="font-medium text-sm">
                                     {taskMaterial.materials?.name}
                                   </div>
                                   <div className="text-xs text-muted-foreground">
-                                    Cantidad: {taskMaterial.amount} {taskMaterial.materials?.units?.name}
+                                    Cantidad: {taskMaterial.materials?.units?.name}
                                   </div>
                                 </div>
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleDeleteMaterial(taskMaterial.id)}
-                                  className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
+                                <div className="flex items-center gap-2">
+                                  <Input
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    value={taskMaterial.amount}
+                                    onChange={(e) => {
+                                      const newAmount = parseFloat(e.target.value) || 0;
+                                      handleUpdateMaterialAmount(taskMaterial.id, newAmount);
+                                    }}
+                                    className="w-20 h-8 text-center"
+                                    placeholder="0"
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleDeleteMaterial(taskMaterial.id)}
+                                    className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
                               </div>
                             ))}
                           </div>
