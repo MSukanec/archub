@@ -207,15 +207,15 @@ export function UserGrowthChart() {
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid-text)" opacity={0.3} />
               <XAxis 
                 dataKey="date" 
                 fontSize={12}
-                tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                tick={{ fill: 'var(--chart-grid-text)' }}
               />
               <YAxis 
                 fontSize={12}
-                tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                tick={{ fill: 'var(--chart-grid-text)' }}
               />
               <Tooltip 
                 labelFormatter={(label) => `Fecha: ${label}`}

@@ -119,6 +119,13 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 11, 2025. Complete chart theming system implementation with CSS variables for grid lines and axis text - COMPLETED
+  • Added --chart-grid-text CSS variable to both light and dark themes for consistent chart styling
+  • Updated 6 chart components: MonthlyFlowChart, MemberActivityChart, OrganizationGrowthChart, UserGrowthChart, BudgetProgressChart, OrganizationActivityChart
+  • Replaced hardcoded grid line colors with var(--chart-grid-text) for CartesianGrid stroke property
+  • Applied chart grid text variable to XAxis and YAxis tick fill properties for consistent text coloring
+  • Chart grid lines and axis text now properly adapt to light/dark themes using dedicated CSS variable
+  • Light theme uses hsl(0, 0%, 50%) and dark theme uses hsl(0, 0%, 40%) for optimal contrast in both modes
 - July 11, 2025. Complete table row CSS variables implementation and Profile page FeatureIntroduction enhancement - COMPLETED
   • Updated CustomTable component to use --table-row-bg and --table-row-fg CSS variables for normal table rows (non-headers)
   • Applied --table-row-hover-bg CSS variable for table row hover states across all tables

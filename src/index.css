@@ -273,6 +273,7 @@
   --chart-3: hsl(197, 37%, 35%);
   --chart-4: hsl(43, 74%, 70%);
   --chart-5: hsl(27, 87%, 70%);
+  --chart-grid-text: hsl(0, 0%, 40%);
 
   /* Tables */
   --table-header-bg: hsl(0, 0%, 14%);

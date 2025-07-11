@@ -64,9 +64,9 @@ export function BudgetProgressChart({ data, isLoading }: BudgetProgressChartProp
   return (
     <ResponsiveContainer width="100%" height={300}>
       <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="category" />
-        <YAxis tickFormatter={formatCurrency} />
+        <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid-text)" />
+        <XAxis dataKey="category" tick={{ fill: 'var(--chart-grid-text)' }} />
+        <YAxis tickFormatter={formatCurrency} tick={{ fill: 'var(--chart-grid-text)' }} />
         <Tooltip content={<CustomTooltip />} />
         <Bar dataKey="spent" radius={[4, 4, 0, 0]}>
           {data.map((entry, index) => (

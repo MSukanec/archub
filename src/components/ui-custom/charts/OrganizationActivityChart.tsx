@@ -69,17 +69,15 @@ export function OrganizationActivityChart({ data, isLoading }: OrganizationActiv
                   <stop offset="95%" stopColor="#92c900" stopOpacity={0.1}/>
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid-text)" className="opacity-30" />
               <XAxis 
                 dataKey="date" 
-                tick={{ fontSize: 12 }}
-                className="text-gray-600"
+                tick={{ fontSize: 12, fill: 'var(--chart-grid-text)' }}
                 axisLine={false}
                 tickLine={false}
               />
               <YAxis 
-                tick={{ fontSize: 12 }}
-                className="text-gray-600"
+                tick={{ fontSize: 12, fill: 'var(--chart-grid-text)' }}
                 axisLine={false}
                 tickLine={false}
                 width={30}

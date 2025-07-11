@@ -192,14 +192,14 @@ export function MemberActivityChart({ data, isLoading, timePeriod, onTimePeriodC
                 dataKey="date" 
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 12, fill: '#6b7280' }}
+                tick={{ fontSize: 12, fill: 'var(--chart-grid-text)' }}
               />
               <YAxis
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 12, fill: '#6b7280' }}
+                tick={{ fontSize: 12, fill: 'var(--chart-grid-text)' }}
               />
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid-text)" />
               <Tooltip content={<CustomTooltip />} />
               <Area
                 type="monotone"

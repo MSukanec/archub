@@ -57,9 +57,9 @@ export function MonthlyFlowChart({ data, isLoading }: MonthlyFlowChartProps) {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="month" />
-        <YAxis tickFormatter={formatCurrency} />
+        <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid-text)" />
+        <XAxis dataKey="month" tick={{ fill: 'var(--chart-grid-text)' }} />
+        <YAxis tickFormatter={formatCurrency} tick={{ fill: 'var(--chart-grid-text)' }} />
         <Tooltip content={<CustomTooltip />} />
         <Legend />
         <Line 
