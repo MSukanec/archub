@@ -62,45 +62,52 @@ export async function generateTaskDescription(
     }
   }
 
-  // Replace placeholders
+  // Replace placeholders AND literal parameter values
   Object.entries(paramValues).forEach(([paramName, paramValue]) => {
     const placeholder = `{{${paramName}}}`;
-    if (result.includes(placeholder)) {
-      const parameter = parametersData?.find(p => p.name === paramName);
+    const parameter = parametersData?.find(p => p.name === paramName);
+    
+    if (parameter) {
+      let replacementText = '';
       
-      if (parameter) {
-        let replacementText = '';
-        
-        if (parameter.type === 'select') {
-          // Find the option and use its label with expression_template
-          const selectedOption = parameterValuesData.find(pv => pv.name === paramValue);
-          if (selectedOption) {
-            const optionLabel = selectedOption.label || paramValue;
-            const expressionTemplate = selectedOption.task_parameters?.expression_template;
-            
-            if (expressionTemplate) {
-              replacementText = expressionTemplate.replace('{value}', optionLabel);
-            } else {
-              replacementText = optionLabel;
-            }
+      if (parameter.type === 'select') {
+        // Find the option and use its label with expression_template
+        const selectedOption = parameterValuesData.find(pv => pv.name === paramValue);
+        if (selectedOption) {
+          const optionLabel = selectedOption.label || paramValue;
+          const expressionTemplate = selectedOption.task_parameters?.expression_template;
+          
+          if (expressionTemplate) {
+            replacementText = expressionTemplate.replace('{value}', optionLabel);
           } else {
-            // Fallback to raw value for select types
-            replacementText = String(paramValue);
+            replacementText = optionLabel;
           }
-        } else if (parameter.type === 'boolean') {
-          replacementText = paramValue ? 'Sí' : 'No';
         } else {
-          // For text, number types, use expression_template if available
-          if (parameter.expression_template) {
-            replacementText = parameter.expression_template.replace('{value}', String(paramValue));
-          } else {
-            replacementText = String(paramValue);
-          }
+          // Fallback to raw value for select types
+          replacementText = String(paramValue);
         }
-        
-        result = result.replace(placeholder, replacementText.trim());
+      } else if (parameter.type === 'boolean') {
+        replacementText = paramValue ? 'Sí' : 'No';
       } else {
-        // Fallback if parameter not found
+        // For text, number types, use expression_template if available
+        if (parameter.expression_template) {
+          replacementText = parameter.expression_template.replace('{value}', String(paramValue));
+        } else {
+          replacementText = String(paramValue);
+        }
+      }
+      
+      // Replace both placeholder and direct parameter value
+      if (result.includes(placeholder)) {
+        result = result.replace(placeholder, replacementText.trim());
+      }
+      // Also replace literal parameter values (like "ladrillo-ceramico-121833")
+      if (result.includes(String(paramValue))) {
+        result = result.replace(String(paramValue), replacementText.trim());
+      }
+    } else {
+      // Fallback if parameter not found - only replace placeholder
+      if (result.includes(placeholder)) {
         result = result.replace(placeholder, String(paramValue));
       }
     }
