@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Receipt, Edit, Trash2 } from 'lucide-react'
@@ -10,9 +10,11 @@ import { CustomTable } from '@/components/ui-custom/misc/CustomTable'
 import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { supabase } from '@/lib/supabase'
 import { NewInstallmentModal } from '@/modals/finances/NewInstallmentModal'
+import { useToast } from '@/hooks/use-toast'
 
 interface Installment {
   id: string
@@ -78,9 +80,62 @@ export default function FinancesInstallments() {
   const [searchValue, setSearchValue] = useState("")
   const [showModal, setShowModal] = useState(false)
   const [editingInstallment, setEditingInstallment] = useState<Installment | null>(null)
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
 
   const organizationId = userData?.organization?.id
   const projectId = userData?.preferences?.last_project_id
+
+  // Get project clients
+  const { data: projectClients = [] } = useQuery({
+    queryKey: ['project-clients', projectId],
+    queryFn: async () => {
+      if (!supabase || !projectId) return []
+      
+      const { data, error } = await supabase
+        .from('project_clients')
+        .select(`
+          *,
+          contact:contacts!inner(
+            id,
+            first_name,
+            last_name,
+            company_name,
+            full_name
+          )
+        `)
+        .eq('project_id', projectId)
+        .eq('is_active', true)
+
+      if (error) throw error
+      return data || []
+    },
+    enabled: !!projectId && !!supabase
+  })
+
+  // Get organization currencies
+  const { data: currencies = [] } = useQuery({
+    queryKey: ['organization-currencies', organizationId],
+    queryFn: async () => {
+      if (!supabase || !organizationId) return []
+      
+      const { data, error } = await supabase
+        .from('organization_currencies')
+        .select(`
+          currencies!inner(
+            id,
+            name,
+            code,
+            symbol
+          )
+        `)
+        .eq('organization_id', organizationId)
+
+      if (error) throw error
+      return data?.map(item => item.currencies) || []
+    },
+    enabled: !!organizationId && !!supabase
+  })
 
   // Get cuotas concept ID from movement concepts
   const { data: cuotasConcept } = useQuery({
@@ -247,6 +302,64 @@ export default function FinancesInstallments() {
     enabled: !!organizationId && !!projectId && !!cuotasConcept?.id
   })
 
+  // Mutation to update project client committed amount
+  const updateCommittedAmountMutation = useMutation({
+    mutationFn: async ({ clientId, amount }: { clientId: string; amount: number }) => {
+      if (!supabase) throw new Error('Supabase client not initialized')
+      
+      const { data, error } = await supabase
+        .from('project_clients')
+        .update({ 
+          committed_amount: amount,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', clientId)
+        .select()
+
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['project-clients', projectId] })
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error al actualizar monto",
+        description: error.message || "Hubo un problema al actualizar el monto comprometido",
+        variant: "destructive",
+      })
+    }
+  })
+
+  // Mutation to update project client currency
+  const updateCurrencyMutation = useMutation({
+    mutationFn: async ({ clientId, currencyId }: { clientId: string; currencyId: string }) => {
+      if (!supabase) throw new Error('Supabase client not initialized')
+      
+      const { data, error } = await supabase
+        .from('project_clients')
+        .update({ 
+          currency_id: currencyId,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', clientId)
+        .select()
+
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['project-clients', projectId] })
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error al actualizar moneda",
+        description: error.message || "Hubo un problema al actualizar la moneda",
+        variant: "destructive",
+      })
+    }
+  })
+
   // Calculate total contributed (dollarized)
   const totalContributedDollarized = installments.reduce((sum, installment) => {
     const amount = installment.amount || 0
@@ -349,7 +462,7 @@ export default function FinancesInstallments() {
     {
       key: "contact",
       label: "Contacto",
-      width: "30%",
+      width: "25%",
       render: (item: any) => {
         if (!item.contact) {
           return <div className="text-sm text-muted-foreground">Sin contacto</div>
@@ -379,17 +492,65 @@ export default function FinancesInstallments() {
       }
     },
     {
+      key: "moneda",
+      label: "Moneda",
+      width: "15%",
+      render: (item: any) => {
+        const clientData = projectClients.find(client => client.client_id === item.contact_id)
+        const currentCurrency = clientData?.currency_id || ''
+        
+        return (
+          <div className="text-sm">
+            <Select 
+              value={currentCurrency} 
+              onValueChange={(value) => {
+                if (clientData) {
+                  updateCurrencyMutation.mutate({ 
+                    clientId: clientData.id, 
+                    currencyId: value 
+                  })
+                }
+              }}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Moneda" />
+              </SelectTrigger>
+              <SelectContent>
+                {currencies.map(currency => (
+                  <SelectItem key={currency.id} value={currency.id}>
+                    {currency.code}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )
+      }
+    },
+    {
       key: "monto_total",
       label: "Monto Total",
-      width: "25%",
+      width: "20%",
       render: (item: any) => {
+        const clientData = projectClients.find(client => client.client_id === item.contact_id)
+        const currentAmount = clientData?.committed_amount || 0
+        
         return (
           <div className="text-sm">
             <input
               type="number"
               className="w-full px-2 py-1 border rounded text-sm"
               placeholder="0"
-              // TODO: Implement functionality
+              value={currentAmount}
+              onChange={(e) => {
+                const newAmount = parseFloat(e.target.value) || 0
+                if (clientData) {
+                  updateCommittedAmountMutation.mutate({ 
+                    clientId: clientData.id, 
+                    amount: newAmount 
+                  })
+                }
+              }}
             />
           </div>
         )
@@ -398,7 +559,7 @@ export default function FinancesInstallments() {
     {
       key: "aporte_dolarizado",
       label: "Aporte Dolarizado",
-      width: "25%",
+      width: "20%",
       sortable: true,
       sortType: 'number' as const,
       render: (item: any) => {
@@ -422,10 +583,32 @@ export default function FinancesInstallments() {
       label: "Monto Restante",
       width: "20%",
       render: (item: any) => {
-        // TODO: Calculate remaining amount (dollarized - total)
+        const clientData = projectClients.find(client => client.client_id === item.contact_id)
+        const committedAmount = clientData?.committed_amount || 0
+        const dollarizedTotal = item.dollarizedTotal || 0
+        
+        // Convert committed amount to USD if necessary
+        let committedAmountUSD = committedAmount
+        if (clientData?.currency_id) {
+          const clientCurrency = currencies.find(c => c.id === clientData.currency_id)
+          if (clientCurrency?.code !== 'USD') {
+            // For now, we'll need an exchange rate to convert
+            // In a real scenario, you might want to get this from the exchange rates table
+            // For now, we'll assume ARS to USD conversion rate of 1200
+            const exchangeRate = clientCurrency?.code === 'ARS' ? 1200 : 1
+            committedAmountUSD = committedAmount / exchangeRate
+          }
+        }
+        
+        const remaining = dollarizedTotal - committedAmountUSD
+        const formattedRemaining = new Intl.NumberFormat('es-AR', {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0
+        }).format(Math.abs(remaining))
+        
         return (
-          <div className="text-sm text-muted-foreground">
-            US$ 0
+          <div className={`text-sm font-medium ${remaining >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            {remaining >= 0 ? '+' : '-'}US$ {formattedRemaining}
           </div>
         )
       }
