@@ -80,13 +80,13 @@ export default function ProjectClients() {
   const { data: projectClients, isLoading: loadingClients } = useQuery({
     queryKey: ['project-clients', projectId],
     queryFn: async () => {
-      if (!supabase) throw new Error('Supabase client not initialized')
+      if (!supabase || !projectId || !organizationId) throw new Error('Missing required parameters')
       
       const { data, error } = await supabase
         .from('project_clients')
         .select(`
           *,
-          contact:contacts(
+          contact:contacts!inner(
             id,
             first_name,
             last_name,
@@ -98,6 +98,7 @@ export default function ProjectClients() {
         `)
         .eq('project_id', projectId)
         .eq('is_active', true)
+        .eq('contact.organization_id', organizationId)
         .order('created_at', { ascending: false })
 
       if (error) throw error
@@ -113,7 +114,7 @@ export default function ProjectClients() {
       
       return sortedData
     },
-    enabled: !!projectId && !!supabase
+    enabled: !!projectId && !!organizationId && !!supabase
   })
 
   // Add client mutation

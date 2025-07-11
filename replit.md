@@ -119,6 +119,14 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 11, 2025. Fixed organization and project data filtering in APORTES, CLIENTES, and COMPROMISOS pages - COMPLETED
+  • Added missing organization_id filters to project_clients queries across all three pages
+  • Enhanced contact relation joins using contacts!inner with organization_id filtering
+  • Fixed query conditions to require both projectId and organizationId before executing
+  • ProjectClients page now properly filters contacts by organization and project relationship
+  • FinancesCommited page filters project clients by organization membership through contact relation
+  • FinancesInstallments page ensures installments only show for organization members in current project
+  • All pages now respect organization boundaries and project context for data security
 - July 11, 2025. Complete client financial commitments system and dangerous deletion confirmation component - COMPLETED
   • Fixed FK violation in FinancesCommited page by using currency_id instead of currency.id for organization_currencies queries
   • Added alphabetical sorting to both FinancesCommited and ProjectClients pages - clients now display in alphabetical order by name

@@ -93,7 +93,7 @@ export default function FinancesInstallments() {
   const { data: projectClients = [] } = useQuery({
     queryKey: ['project-clients', projectId],
     queryFn: async () => {
-      if (!supabase || !projectId) return []
+      if (!supabase || !projectId || !organizationId) return []
       
       const { data, error } = await supabase
         .from('project_clients')
@@ -109,11 +109,12 @@ export default function FinancesInstallments() {
         `)
         .eq('project_id', projectId)
         .eq('is_active', true)
+        .eq('contact.organization_id', organizationId)
 
       if (error) throw error
       return data || []
     },
-    enabled: !!projectId && !!supabase
+    enabled: !!projectId && !!organizationId && !!supabase
   })
 
   // Get organization currencies
