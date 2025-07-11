@@ -98,7 +98,7 @@ export async function generateTaskDescription(
           }
         }
         
-        result = result.replace(placeholder, replacementText);
+        result = result.replace(placeholder, replacementText.trim());
       } else {
         // Fallback if parameter not found
         result = result.replace(placeholder, String(paramValue));
@@ -106,7 +106,8 @@ export async function generateTaskDescription(
     }
   });
 
-  return result;
+  // Clean up multiple spaces and trim the final result
+  return result.replace(/\s+/g, ' ').trim();
 }
 
 /**
@@ -155,7 +156,7 @@ export function generatePreviewDescription(
           }
         }
         
-        result = result.replace(placeholder, replacementText);
+        result = result.replace(placeholder, replacementText.trim());
       } else {
         // If no value, leave placeholder visible
         result = result.replace(placeholder, `[${param.label}]`);
@@ -163,5 +164,6 @@ export function generatePreviewDescription(
     }
   });
 
-  return result;
+  // Clean up multiple spaces and trim the final result
+  return result.replace(/\s+/g, ' ').trim();
 }

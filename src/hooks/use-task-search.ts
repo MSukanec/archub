@@ -54,7 +54,8 @@ async function processDisplayName(displayName: string, paramValues: any): Promis
     }
   });
   
-  return processed;
+  // Clean up multiple spaces and trim the final result
+  return processed.replace(/\s+/g, ' ').trim();
 }
 
 export interface TaskSearchResult {
