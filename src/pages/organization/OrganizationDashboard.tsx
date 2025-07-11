@@ -108,7 +108,7 @@ export default function OrganizationDashboard() {
                       src={currentOrganization.logo_url}
                       alt={currentOrganization.name}
                     />
-                    <AvatarFallback className="text-sm md:text-lg font-bold text-white bg-[hsl(var(--accent))]">
+                    <AvatarFallback className="text-sm md:text-lg font-bold text-[var(--accent-foreground)] bg-[var(--accent)]">
                       {getOrganizationInitials(currentOrganization.name)}
                     </AvatarFallback>
                   </Avatar>

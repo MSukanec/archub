@@ -37,9 +37,11 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity }) => {
     created_at
   } = activity;
 
-  // Calculate days ago
-  const daysAgo = Math.floor((Date.now() - new Date(created_at).getTime()) / (1000 * 60 * 60 * 24));
-  const daysDisplay = daysAgo === 0 ? 'Hoy' : daysAgo === 1 ? '1 día' : `${daysAgo} días`;
+  // Calculate days ago with validation
+  const dateValue = created_at ? new Date(created_at) : null;
+  const isValidDate = dateValue && !isNaN(dateValue.getTime());
+  const daysAgo = isValidDate ? Math.floor((Date.now() - dateValue.getTime()) / (1000 * 60 * 60 * 24)) : 0;
+  const daysDisplay = !isValidDate ? 'N/A' : daysAgo === 0 ? 'Hoy' : daysAgo === 1 ? '1 día' : `${daysAgo} días`;
 
   return (
     <div className="flex items-center justify-between gap-3 bg-[var(--card-bg)] hover:bg-[var(--card-hover-bg)] rounded-lg shadow-sm border border-[var(--card-border)] p-3 mb-2 transition-colors">
@@ -60,7 +62,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity }) => {
       <div className="flex-1 min-w-0 flex flex-col justify-center">
         <div className="flex items-center justify-between">
           <div className="text-[var(--card-fg)] font-medium text-sm">
-            {format(new Date(created_at), 'dd MMM yyyy', { locale: es })}
+            {isValidDate ? format(dateValue, 'dd MMM yyyy', { locale: es }) : 'Sin fecha'}
           </div>
           <div className="text-[var(--muted-fg)] text-sm ml-4">
             {daysDisplay}
