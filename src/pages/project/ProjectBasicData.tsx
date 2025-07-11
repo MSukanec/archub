@@ -256,7 +256,11 @@ export default function ProjectBasicData() {
               />
             )}
           </div>
+        </div>
 
+        <hr className="border-t border-[var(--section-divider)] my-8" />
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column - Información Básica */}
           <div>
             <div className="flex items-center gap-2 mb-6">
@@ -304,7 +308,11 @@ export default function ProjectBasicData() {
               </div>
             </div>
           </div>
+        </div>
 
+        <hr className="border-t border-[var(--section-divider)] my-8" />
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column - Información del Cliente */}
           <div>
             <div className="flex items-center gap-2 mb-6">

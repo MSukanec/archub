@@ -328,7 +328,11 @@ export default function OrganizationMembers() {
               </div>
             )}
           </div>
+        </div>
 
+        <hr className="border-t border-[var(--section-divider)] my-8" />
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Column - Guests Section Description */}
           <div className="lg:col-span-4">
             <div className="flex items-center gap-2 mb-4">
@@ -428,7 +432,11 @@ export default function OrganizationMembers() {
               </div>
             )}
           </div>
+        </div>
 
+        <hr className="border-t border-[var(--section-divider)] my-8" />
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Column - Pending Invites Section Description */}
           <div className="lg:col-span-4">
             <div className="flex items-center gap-2 mb-4">

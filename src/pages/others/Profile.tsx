@@ -71,62 +71,105 @@ export default function Profile() {
     theme: isDark ? 'dark' : 'light'
   }
 
-  // Centralized auto-save with debounce
-  const { isSaving } = useDebouncedAutoSave({
-    data: profileData,
-    saveFn: async (data) => {
-      if (!userData?.user?.id) return
-      
-      const updates = {
-        first_name: data.firstName,
-        last_name: data.lastName,
-        country: data.country,
-        birthdate: data.birthdate,
-        updated_at: new Date().toISOString(),
-      }
+  // Auto-save mutation for profile data
+  const saveProfileMutation = useMutation({
+    mutationFn: async (dataToSave: any) => {
+      if (!userData?.user?.id || !supabase) return;
 
       // Update user_data table
-      const { error: userDataError } = await supabase
-        .from('user_data')
-        .update(updates)
-        .eq('user_id', userData.user.id)
+      if (dataToSave.firstName !== undefined || dataToSave.lastName !== undefined || 
+          dataToSave.country !== undefined || dataToSave.birthdate !== undefined) {
+        const userDataFields = {
+          first_name: dataToSave.firstName,
+          last_name: dataToSave.lastName,
+          country: dataToSave.country,
+          birthdate: dataToSave.birthdate,
+          updated_at: new Date().toISOString(),
+        };
 
-      if (userDataError) throw userDataError
+        // Remove undefined values
+        const cleanUserData = Object.fromEntries(
+          Object.entries(userDataFields).filter(([_, value]) => value !== undefined)
+        );
+
+        if (Object.keys(cleanUserData).length > 0) {
+          const { error: userDataError } = await supabase
+            .from('user_data')
+            .update(cleanUserData)
+            .eq('user_id', userData.user.id);
+
+          if (userDataError) throw userDataError;
+        }
+      }
 
       // Update users table for avatar
-      if (data.avatarUrl !== undefined) {
+      if (dataToSave.avatarUrl !== undefined) {
         const { error: userError } = await supabase
           .from('users')
-          .update({ avatar_url: data.avatarUrl })
-          .eq('id', userData.user.id)
+          .update({ avatar_url: dataToSave.avatarUrl })
+          .eq('id', userData.user.id);
 
-        if (userError) throw userError
+        if (userError) throw userError;
       }
 
       // Update preferences table
-      const { error: preferencesError } = await supabase
-        .from('user_preferences')
-        .update({
-          sidebar_docked: data.sidebarDocked,
-          theme: data.theme,
+      if (dataToSave.sidebarDocked !== undefined || dataToSave.theme !== undefined) {
+        const preferencesFields = {
+          sidebar_docked: dataToSave.sidebarDocked,
+          theme: dataToSave.theme,
           updated_at: new Date().toISOString(),
-        })
-        .eq('user_id', userData.user.id)
+        };
 
-      if (preferencesError) throw preferencesError
+        // Remove undefined values
+        const cleanPreferences = Object.fromEntries(
+          Object.entries(preferencesFields).filter(([_, value]) => value !== undefined)
+        );
 
+        if (Object.keys(cleanPreferences).length > 0) {
+          const { error: preferencesError } = await supabase
+            .from('user_preferences')
+            .update(cleanPreferences)
+            .eq('user_id', userData.user.id);
+
+          if (preferencesError) throw preferencesError;
+        }
+      }
+    },
+    onError: (error) => {
+      toast({
+        title: "Error al guardar",
+        description: "No se pudieron guardar los cambios automáticamente",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Auto-save hook with proper configuration
+  const { isSaving } = useDebouncedAutoSave({
+    data: {
+      firstName,
+      lastName,
+      country,
+      birthdate,
+      avatarUrl,
+      sidebarDocked,
+      theme: isDark ? 'dark' : 'light'
+    },
+    saveFn: async (data) => {
+      await saveProfileMutation.mutateAsync(data);
+      
       // Show success toast
       toast({
-        title: "Perfil guardado",
+        title: "Datos guardados",
         description: "Los cambios se han guardado automáticamente",
-      })
-
-      // Invalidate cache
-      queryClient.invalidateQueries({ queryKey: ['current-user'] })
+      });
+      
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
     },
-    delay: 300,
+    delay: 750,
     enabled: !!userData?.user?.id
-  })
+  });
 
   // Simple state setters (auto-save handles the persistence)
   const handleFirstNameChange = (value: string) => setFirstName(value)
@@ -479,16 +522,16 @@ export default function Profile() {
 
             {/* Right Column - Current Mode and Change Button */}
             <div className="space-y-6">
-              <div className="space-y-4 p-4 border border-green-500 rounded-lg">
+              <div className="space-y-4 p-4 border border-[var(--accent)] rounded-lg">
                 {(() => {
                   const modeInfo = getUserModeInfo(userData?.preferences?.last_user_type);
                   const ModeIcon = modeInfo.icon;
                   return (
                     <>
                       <div className="space-y-2">
-                        <Label className="text-sm font-medium text-green-600">Modo de uso actual</Label>
+                        <Label className="text-sm font-medium text-[var(--accent)]">Modo de uso actual</Label>
                         <div className="flex items-center gap-3">
-                          <div className="p-2 rounded-md bg-green-50 dark:bg-green-900/20">
+                          <div className="p-2 rounded-md bg-[var(--accent)]/10">
                             <ModeIcon className="h-5 w-5 text-[var(--accent)]" />
                           </div>
                           <div className="flex-1">
@@ -501,7 +544,11 @@ export default function Profile() {
                       <Button
                         onClick={() => navigate('/select-mode')}
                         size="sm"
-                        className="bg-green-600 hover:bg-green-700 text-white"
+                        style={{
+                          backgroundColor: 'var(--accent)',
+                          color: 'var(--accent-foreground)'
+                        }}
+                        className="hover:opacity-90"
                       >
                         Elegir modo de uso
                       </Button>
