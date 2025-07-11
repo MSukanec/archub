@@ -119,6 +119,14 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 11, 2025. Fixed input quantity field to allow typing "0" and corrected header actions structure - COMPLETED
+  • Fixed NewAdminGeneratedTaskModal input that prevented typing "0" by changing parseFloat(value) || 1 to proper handling
+  • Changed input min attribute from "1" to "0" to allow zero values in quantity fields
+  • Updated validation logic from amount <= 0 to amount < 0 to permit zero quantities when needed
+  • Fixed NewBudgetTaskModal same issue with || 1 forcing minimum value, now allows 0 with proper validation
+  • Corrected AdminCategories headerProps actions from JSX element to array format for proper Header component rendering
+  • Fixed header expecting React.ReactNode[] but receiving wrapped JSX element causing "CREAR CATEGORÍA" button to not display
+  • All quantity inputs now allow typing "0" without automatic conversion to 1 or validation errors
 - July 10, 2025. Enhanced template editor to support global parameters without option groups - COMPLETED
   • Modified TaskTemplateEditorModal to allow adding parameters without requiring option groups
   • Removed mandatory option group requirement from "Agregar" button - now only requires parameter selection

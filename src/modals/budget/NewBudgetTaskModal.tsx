@@ -348,9 +348,12 @@ export default function NewBudgetTaskModal({
                           <Input
                             type="number"
                             step="0.01"
-                            min="0.01"
+                            min="0"
                             value={task.quantity}
-                            onChange={(e) => updatePendingTaskQuantity(task.id, parseFloat(e.target.value) || 1)}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              updatePendingTaskQuantity(task.id, value === '' ? 0 : parseFloat(value) || 0);
+                            }}
                             className="w-16 h-8 text-xs"
                           />
                           <Button

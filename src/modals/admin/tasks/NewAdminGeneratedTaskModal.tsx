@@ -262,10 +262,10 @@ export function NewAdminGeneratedTaskModal({
       generatedTaskId: generatedTask?.id
     });
     
-    if (!newMaterial.material_id || newMaterial.amount <= 0 || !userData?.organization?.id) {
+    if (!newMaterial.material_id || newMaterial.amount < 0 || !userData?.organization?.id) {
       console.log('Validation failed:', {
         hasMaterialId: !!newMaterial.material_id,
-        validAmount: newMaterial.amount > 0,
+        validAmount: newMaterial.amount >= 0,
         hasOrganization: !!userData?.organization?.id
       });
       return;
@@ -675,10 +675,17 @@ export function NewAdminGeneratedTaskModal({
                                 <Input
                                   id="quantity-input"
                                   type="number"
-                                  min="1"
+                                  min="0"
                                   step="0.01"
                                   value={newMaterial.amount}
-                                  onChange={(e) => setNewMaterial(prev => ({ ...prev, amount: parseFloat(e.target.value) || 1 }))}
+                                  onChange={(e) => {
+                                    const value = e.target.value;
+                                    // Allow empty string for user typing, use 0 as default for empty
+                                    setNewMaterial(prev => ({ 
+                                      ...prev, 
+                                      amount: value === '' ? 0 : parseFloat(value) || 0 
+                                    }));
+                                  }}
                                   placeholder="1"
                                 />
                               </div>
@@ -687,7 +694,7 @@ export function NewAdminGeneratedTaskModal({
                             <Button
                               type="button"
                               onClick={handleAddMaterial}
-                              disabled={!newMaterial.material_id || newMaterial.amount <= 0 || createTaskMaterial.isPending}
+                              disabled={!newMaterial.material_id || newMaterial.amount < 0 || createTaskMaterial.isPending}
                               size="sm"
                               className="w-full"
                             >
