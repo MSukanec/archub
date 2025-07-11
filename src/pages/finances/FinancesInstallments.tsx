@@ -24,7 +24,6 @@ interface Installment {
   wallet_id: string
   project_id: string
   created_by: string
-  created_at: string
   contact?: {
     id: string
     first_name: string
@@ -134,8 +133,7 @@ export default function FinancesInstallments() {
           currency_id,
           wallet_id,
           project_id,
-          created_by,
-          created_at
+          created_by
         `)
         .eq('organization_id', organizationId)
         .eq('project_id', projectId)
