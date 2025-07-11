@@ -724,8 +724,8 @@ export default function ConstructionBudgets() {
                         <td className="p-3"></td>
                         <td className="p-3"></td>
                         <td className="p-3"></td>
-                        <td className="p-3 text-sm font-semibold text-foreground">${rubroSubtotal.toLocaleString()}</td>
-                        <td className="p-3 text-sm font-semibold text-foreground">{rubroPercentage.toFixed(1)}%</td>
+                        <td className="p-3 text-sm font-semibold" style={{ color: 'var(--table-header-fg)' }}>${rubroSubtotal.toLocaleString()}</td>
+                        <td className="p-3 text-sm font-semibold" style={{ color: 'var(--table-header-fg)' }}>{rubroPercentage.toFixed(1)}%</td>
                         <td className="p-3"></td>
                       </tr>
                     )}

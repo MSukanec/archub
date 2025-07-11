@@ -113,8 +113,8 @@
   --text-inverted: hsl(0, 0%, 100%);
 
   /* Tables */
-  --table-header-bg: hsl(210, 20%, 96%);
-  --table-header-fg: hsl(215, 16%, 47%);
+  --table-header-bg: hsl(0, 0%, 35%);
+  --table-header-fg: hsl(0, 0%, 100%);
   --table-header-border: hsl(0, 0%, 85%);
   --table-row-bg: hsl(0, 0%, 100%);
   --table-row-fg: hsl(0, 0%, 35%);
@@ -380,33 +380,6 @@ input[type="number"]::-webkit-inner-spin-button {
 
 input[type="number"] {
   -moz-appearance: textfield;
-}
-
-/* Animations */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes float-diagonal {
-  0%, 100% {
-    transform: translate(0px, 0px);
-  }
-  25% {
-    transform: translate(10px, -8px);
-  }
-  50% {
-    transform: translate(-5px, -12px);
-  }
-  75% {
-    transform: translate(-10px, 5px);
-  }
 }
 
 /* Gantt Timeline Scrollbar Styling */

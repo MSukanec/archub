@@ -21,9 +21,9 @@ export function CustomEmptyState({
       <div className={cn(
         "w-full max-w-lg md:max-w-none mx-auto py-12 md:py-20 px-4 text-center",
         "min-h-[70vh] md:min-h-0 md:h-[70%]",
-        "border-2 border-dashed border-accent rounded-xl",
+        "border-2 border-dashed border-[hsl(var(--accent))] rounded-xl",
         "bg-background/50 backdrop-blur-sm transition-all duration-300",
-        "hover:border-accent/80 hover:bg-background/70",
+        "hover:border-[hsl(var(--accent))]/80 hover:bg-background/70",
         "flex flex-col justify-center items-center relative overflow-hidden",
         className
       )}>
@@ -46,21 +46,21 @@ export function CustomEmptyState({
         {/* Icon container */}
         {icon && (
           <div className="relative mb-8">
-            <div className="w-20 h-20 mx-auto bg-accent/10 rounded-full flex items-center justify-center shadow-lg border border-accent/20 transition-all duration-300 hover:scale-105 hover:shadow-xl">
-              <div className="text-accent [&>svg]:w-12 [&>svg]:h-12">
+            <div className="w-20 h-20 mx-auto bg-[hsl(var(--accent))]/10 rounded-full flex items-center justify-center shadow-lg border border-[hsl(var(--accent))]/20 transition-all duration-300 hover:scale-105 hover:shadow-xl">
+              <div className="text-[hsl(var(--accent))] [&>svg]:w-12 [&>svg]:h-12">
                 {icon}
               </div>
             </div>
             
             {/* Subtle icon glow */}
-            <div className="absolute inset-0 w-20 h-20 mx-auto bg-accent/5 rounded-full blur-md animate-pulse" />
+            <div className="absolute inset-0 w-20 h-20 mx-auto bg-[hsl(var(--accent))]/5 rounded-full blur-md animate-pulse" />
             
             {/* Floating particles */}
             <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute top-4 left-1/4 w-2 h-2 bg-accent/30 rounded-full animate-float-diagonal" style={{ animationDelay: '0s', animationDuration: '6s' }}></div>
-              <div className="absolute top-12 right-1/3 w-1 h-1 bg-accent/40 rounded-full animate-float-diagonal" style={{ animationDelay: '2s', animationDuration: '8s' }}></div>
-              <div className="absolute bottom-8 left-1/3 w-1.5 h-1.5 bg-accent/20 rounded-full animate-float-diagonal" style={{ animationDelay: '4s', animationDuration: '7s' }}></div>
-              <div className="absolute bottom-16 right-1/4 w-1 h-1 bg-accent/35 rounded-full animate-float-diagonal" style={{ animationDelay: '1s', animationDuration: '9s' }}></div>
+              <div className="absolute top-4 left-1/4 w-2 h-2 bg-[hsl(var(--accent))]/30 rounded-full animate-float-diagonal" style={{ animationDelay: '0s', animationDuration: '6s' }}></div>
+              <div className="absolute top-12 right-1/3 w-1 h-1 bg-[hsl(var(--accent))]/40 rounded-full animate-float-diagonal" style={{ animationDelay: '2s', animationDuration: '8s' }}></div>
+              <div className="absolute bottom-8 left-1/3 w-1.5 h-1.5 bg-[hsl(var(--accent))]/20 rounded-full animate-float-diagonal" style={{ animationDelay: '4s', animationDuration: '7s' }}></div>
+              <div className="absolute bottom-16 right-1/4 w-1 h-1 bg-[hsl(var(--accent))]/35 rounded-full animate-float-diagonal" style={{ animationDelay: '1s', animationDuration: '9s' }}></div>
             </div>
           </div>
         )}
