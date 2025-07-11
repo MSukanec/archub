@@ -274,7 +274,7 @@ export function Header({
                     <DropdownMenuSeparator />
                     <DropdownMenuItem 
                       className="text-sm"
-                      onClick={() => navigate('/proyectos')}
+                      onClick={() => navigate('/organization/projects')}
                     >
                       <Folder className="mr-2 h-4 w-4" />
                       Gestión de Proyectos

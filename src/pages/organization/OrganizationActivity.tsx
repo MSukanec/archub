@@ -170,9 +170,9 @@ export default function OrganizationActivity() {
 
   // Filtrar y ordenar actividades
   let filteredActivities = activities?.filter(activity => {
-    const matchesSearch = activity.description.toLowerCase().includes(searchValue.toLowerCase()) ||
-                         activity.type_label.toLowerCase().includes(searchValue.toLowerCase()) ||
-                         activity.author.full_name?.toLowerCase().includes(searchValue.toLowerCase()) || '';
+    const matchesSearch = (activity.description || '').toLowerCase().includes(searchValue.toLowerCase()) ||
+                         (activity.type_label || '').toLowerCase().includes(searchValue.toLowerCase()) ||
+                         (activity.author?.full_name || '').toLowerCase().includes(searchValue.toLowerCase());
     
     if (filterByType === "all") return matchesSearch;
     return matchesSearch && activity.type === filterByType;

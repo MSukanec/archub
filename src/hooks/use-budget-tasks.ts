@@ -73,23 +73,7 @@ export function useBudgetTasks(budgetId: string) {
         .from("budget_tasks")
         .select(`
           *,
-          task:task_generated_view(
-            id,
-            code,
-            template_id,
-            param_values,
-            organization_id,
-            name_template,
-            unit_id,
-            unit_name,
-            task_code,
-            task_group_id,
-            task_group_name,
-            category_id,
-            category_name,
-            category_code,
-            rubro_name
-          )
+          task:task_generated_view!inner(*)
         `)
         .eq("budget_id", budgetId)
         .order("created_at", { ascending: false });
