@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Database, ImageIcon } from 'lucide-react';
+import { Database, ImageIcon, FileText, Users, MapPin, Calendar, Ruler } from 'lucide-react';
 
 import { Layout } from '@/components/layout/desktop/Layout';
+import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { HelpPopover } from '@/components/ui-custom/HelpPopover';
 import ProjectHeroImage from '@/components/project/ProjectHeroImage';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -211,21 +211,51 @@ export default function ProjectBasicData() {
         ]
       }}
     >
-      <div className="max-w-6xl mx-auto space-y-8">
-        
-        {/* Imagen Principal Section */}
-        <div className="flex gap-8 items-start">
-          <div className="w-1/3 space-y-2">
-            <div className="flex items-center gap-2">
-              <ImageIcon className="h-5 w-5 text-accent" />
-              <h3 className="text-lg font-semibold">Imagen Principal</h3>
-              <HelpPopover content="Sube una imagen representativa de tu proyecto que se mostrará como imagen principal." />
+      <div className="space-y-6">
+        {/* FeatureIntroduction */}
+        <FeatureIntroduction
+          title="Datos Básicos"
+          icon={<Database className="w-5 h-5" />}
+          features={[
+            {
+              icon: <FileText className="w-5 h-5" />,
+              title: "Información completa del proyecto",
+              description: "Centraliza toda la información fundamental de tu proyecto en un solo lugar. Desde nombre y descripción hasta fechas importantes, mantén todos los datos organizados y actualizados automáticamente."
+            },
+            {
+              icon: <Users className="w-5 h-5" />,
+              title: "Datos del cliente integrados",
+              description: "Almacena la información de contacto del cliente directamente en el proyecto. Teléfonos, emails y datos de contacto siempre disponibles para todo el equipo cuando los necesiten."
+            },
+            {
+              icon: <MapPin className="w-5 h-5" />,
+              title: "Ubicación y medidas precisas",
+              description: "Define la ubicación exacta de la obra y las superficies del proyecto. Esta información se usa automáticamente en cálculos de presupuestos y planificación de materiales."
+            },
+            {
+              icon: <Calendar className="w-5 h-5" />,
+              title: "Cronograma y fechas clave",
+              description: "Establece fechas de inicio y finalización que se integran con el sistema de planificación. El cronograma se sincroniza automáticamente con tareas y seguimiento de avance del proyecto."
+            }
+          ]}
+        />
+
+        {/* Two Column Layout - Section descriptions left, content right */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Left Column - Imagen Principal */}
+          <div className="lg:col-span-4">
+            <div className="flex items-center gap-2 mb-4">
+              <ImageIcon className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Imagen Principal</h2>
             </div>
             <p className="text-sm text-muted-foreground">
-              Imagen que representa tu proyecto en tarjetas y vistas principales.
+              Imagen que representa tu proyecto en tarjetas y vistas principales. Esta imagen aparecerá en el dashboard y listados de proyectos.
+              {isSaving && <span className="block text-[var(--accent)] mt-2">Guardando...</span>}
             </p>
           </div>
-          <div className="flex-1">
+
+          {/* Right Column - Imagen Principal Content */}
+          <div className="lg:col-span-8">
             {projectId && organizationId && (
               <ProjectHeroImage
                 projectId={projectId}
@@ -235,256 +265,250 @@ export default function ProjectBasicData() {
               />
             )}
           </div>
-        </div>
 
-        <hr className="border-border" />
-
-        {/* Información Básica Section */}
-        <div className="flex gap-8 items-start">
-          <div className="w-1/3 space-y-2">
-            <div className="flex items-center gap-2">
-              <Database className="h-5 w-5 text-accent" />
-              <h3 className="text-lg font-semibold">Información Básica</h3>
-              <HelpPopover content="Datos fundamentales del proyecto que se usarán en todo el sistema." />
+          {/* Left Column - Información Básica */}
+          <div className="lg:col-span-4">
+            <div className="flex items-center gap-2 mb-4">
+              <FileText className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Información Básica</h2>
             </div>
             <p className="text-sm text-muted-foreground">
-              Configura los datos básicos que identifican tu proyecto.
-              {isSaving && <span className="block text-accent">Guardando...</span>}
+              Datos fundamentales del proyecto que se usarán en todo el sistema. Estos campos son la base para presupuestos, documentos y comunicaciones.
             </p>
           </div>
-          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="project-name">Nombre del Proyecto</Label>
-              <Input 
-                id="project-name"
-                placeholder="Ej: Casa Unifamiliar López"
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
-              />
-            </div>
 
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="description">Descripción</Label>
-              <Textarea 
-                id="description"
-                placeholder="Descripción general del proyecto..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={3}
-              />
-            </div>
+          {/* Right Column - Información Básica Content */}
+          <div className="lg:col-span-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="project-name">Nombre del Proyecto</Label>
+                <Input 
+                  id="project-name"
+                  placeholder="Ej: Casa Unifamiliar López"
+                  value={projectName}
+                  onChange={(e) => setProjectName(e.target.value)}
+                />
+              </div>
 
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="internal-notes">Notas Internas</Label>
-              <Textarea 
-                id="internal-notes"
-                placeholder="Notas internas para el equipo..."
-                value={internalNotes}
-                onChange={(e) => setInternalNotes(e.target.value)}
-                rows={2}
-              />
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="description">Descripción</Label>
+                <Textarea 
+                  id="description"
+                  placeholder="Descripción general del proyecto..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={3}
+                />
+              </div>
+
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="internal-notes">Notas Internas</Label>
+                <Textarea 
+                  id="internal-notes"
+                  placeholder="Notas internas para el equipo..."
+                  value={internalNotes}
+                  onChange={(e) => setInternalNotes(e.target.value)}
+                  rows={2}
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        <hr className="border-border" />
-
-        {/* Información del Cliente Section */}
-        <div className="flex gap-8 items-start">
-          <div className="w-1/3 space-y-2">
-            <div className="flex items-center gap-2">
-              <Database className="h-5 w-5 text-accent" />
-              <h3 className="text-lg font-semibold">Información del Cliente</h3>
-              <HelpPopover content="Datos de contacto del cliente para este proyecto." />
+          {/* Left Column - Información del Cliente */}
+          <div className="lg:col-span-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Users className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Información del Cliente</h2>
             </div>
             <p className="text-sm text-muted-foreground">
-              Información de contacto del cliente responsable del proyecto.
+              Datos de contacto del cliente responsable del proyecto. Esta información estará disponible para todo el equipo cuando necesiten comunicarse.
             </p>
           </div>
-          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="client-name">Nombre del Cliente</Label>
-              <Input 
-                id="client-name"
-                placeholder="Ej: Familia López"
-                value={clientName}
-                onChange={(e) => setClientName(e.target.value)}
-              />
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="contact-phone">Teléfono de Contacto</Label>
-              <Input 
-                id="contact-phone"
-                placeholder="Ej: +54 11 1234-5678"
-                value={contactPhone}
-                onChange={(e) => setContactPhone(e.target.value)}
-              />
-            </div>
+          {/* Right Column - Información del Cliente Content */}
+          <div className="lg:col-span-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="client-name">Nombre del Cliente</Label>
+                <Input 
+                  id="client-name"
+                  placeholder="Ej: Familia López"
+                  value={clientName}
+                  onChange={(e) => setClientName(e.target.value)}
+                />
+              </div>
 
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="email">Email de Contacto</Label>
-              <Input 
-                id="email"
-                type="email"
-                placeholder="Ej: contacto@cliente.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
+              <div className="space-y-2">
+                <Label htmlFor="contact-phone">Teléfono de Contacto</Label>
+                <Input 
+                  id="contact-phone"
+                  placeholder="Ej: +54 11 1234-5678"
+                  value={contactPhone}
+                  onChange={(e) => setContactPhone(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="email">Email de Contacto</Label>
+                <Input 
+                  id="email"
+                  type="email"
+                  placeholder="Ej: contacto@cliente.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        <hr className="border-border" />
-
-        {/* Ubicación Section */}
-        <div className="flex gap-8 items-start">
-          <div className="w-1/3 space-y-2">
-            <div className="flex items-center gap-2">
-              <Database className="h-5 w-5 text-accent" />
-              <h3 className="text-lg font-semibold">Ubicación del Proyecto</h3>
-              <HelpPopover content="Dirección completa donde se ejecutará el proyecto." />
+          {/* Left Column - Ubicación */}
+          <div className="lg:col-span-4">
+            <div className="flex items-center gap-2 mb-4">
+              <MapPin className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Ubicación del Proyecto</h2>
             </div>
             <p className="text-sm text-muted-foreground">
-              Ubicación física donde se desarrollará la obra.
+              Dirección completa donde se ejecutará la obra. Esta información se usa para logística, entregas y documentación oficial.
             </p>
           </div>
-          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="address">Dirección</Label>
-              <Input 
-                id="address"
-                placeholder="Ej: Av. Corrientes 1234"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-              />
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="city">Ciudad</Label>
-              <Input 
-                id="city"
-                placeholder="Ej: Buenos Aires"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-              />
-            </div>
+          {/* Right Column - Ubicación Content */}
+          <div className="lg:col-span-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="address">Dirección</Label>
+                <Input 
+                  id="address"
+                  placeholder="Ej: Av. Corrientes 1234"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="state">Provincia/Estado</Label>
-              <Input 
-                id="state"
-                placeholder="Ej: Buenos Aires"
-                value={state}
-                onChange={(e) => setState(e.target.value)}
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="city">Ciudad</Label>
+                <Input 
+                  id="city"
+                  placeholder="Ej: Buenos Aires"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="country">País</Label>
-              <Input 
-                id="country"
-                placeholder="Ej: Argentina"
-                value={country}
-                onChange={(e) => setCountry(e.target.value)}
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="state">Provincia/Estado</Label>
+                <Input 
+                  id="state"
+                  placeholder="Ej: Buenos Aires"
+                  value={state}
+                  onChange={(e) => setState(e.target.value)}
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="zip-code">Código Postal</Label>
-              <Input 
-                id="zip-code"
-                placeholder="Ej: C1043AAX"
-                value={zipCode}
-                onChange={(e) => setZipCode(e.target.value)}
-              />
+              <div className="space-y-2">
+                <Label htmlFor="country">País</Label>
+                <Input 
+                  id="country"
+                  placeholder="Ej: Argentina"
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="zip-code">Código Postal</Label>
+                <Input 
+                  id="zip-code"
+                  placeholder="Ej: C1043AAX"
+                  value={zipCode}
+                  onChange={(e) => setZipCode(e.target.value)}
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        <hr className="border-border" />
-
-        {/* Cronograma Section */}
-        <div className="flex gap-8 items-start">
-          <div className="w-1/3 space-y-2">
-            <div className="flex items-center gap-2">
-              <Database className="h-5 w-5 text-accent" />
-              <h3 className="text-lg font-semibold">Cronograma del Proyecto</h3>
-              <HelpPopover content="Fechas importantes para la planificación del proyecto." />
+          {/* Left Column - Cronograma */}
+          <div className="lg:col-span-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Calendar className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Cronograma del Proyecto</h2>
             </div>
             <p className="text-sm text-muted-foreground">
-              Fechas de inicio y finalización estimada del proyecto.
+              Fechas de inicio y finalización que se integran con la planificación de tareas y seguimiento de avance del proyecto.
             </p>
           </div>
-          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="start-date">Fecha de Inicio</Label>
-              <Input 
-                id="start-date"
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-              />
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="estimated-end">Fecha Estimada de Finalización</Label>
-              <Input 
-                id="estimated-end"
-                type="date"
-                value={estimatedEnd}
-                onChange={(e) => setEstimatedEnd(e.target.value)}
-              />
+          {/* Right Column - Cronograma Content */}
+          <div className="lg:col-span-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="start-date">Fecha de Inicio</Label>
+                <Input 
+                  id="start-date"
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="estimated-end">Fecha Estimada de Finalización</Label>
+                <Input 
+                  id="estimated-end"
+                  type="date"
+                  value={estimatedEnd}
+                  onChange={(e) => setEstimatedEnd(e.target.value)}
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        <hr className="border-border" />
-
-        {/* Superficies Section */}
-        <div className="flex gap-8 items-start">
-          <div className="w-1/3 space-y-2">
-            <div className="flex items-center gap-2">
-              <Database className="h-5 w-5 text-accent" />
-              <h3 className="text-lg font-semibold">Superficies del Proyecto</h3>
-              <HelpPopover content="Medidas de las diferentes áreas del proyecto." />
+          {/* Left Column - Superficies */}
+          <div className="lg:col-span-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Ruler className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Superficies del Proyecto</h2>
             </div>
             <p className="text-sm text-muted-foreground">
-              Especifica las superficies totales, cubiertas y semicubiertas en metros cuadrados.
+              Medidas y superficies que se usan automáticamente en cálculos de presupuestos, cantidad de materiales y planificación de espacios.
             </p>
           </div>
-          <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="surface-total">Superficie Total (m²)</Label>
-              <Input 
-                id="surface-total"
-                type="number"
-                placeholder="Ej: 250"
-                value={surfaceTotal}
-                onChange={(e) => setSurfaceTotal(e.target.value)}
-              />
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="surface-covered">Superficie Cubierta (m²)</Label>
-              <Input 
-                id="surface-covered"
-                type="number"
-                placeholder="Ej: 180"
-                value={surfaceCovered}
-                onChange={(e) => setSurfaceCovered(e.target.value)}
-              />
-            </div>
+          {/* Right Column - Superficies Content */}
+          <div className="lg:col-span-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="surface-total">Superficie Total (m²)</Label>
+                <Input 
+                  id="surface-total"
+                  type="number"
+                  placeholder="Ej: 150"
+                  value={surfaceTotal}
+                  onChange={(e) => setSurfaceTotal(e.target.value)}
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="surface-semi">Superficie Semicubierta (m²)</Label>
-              <Input 
-                id="surface-semi"
-                type="number"
-                placeholder="Ej: 70"
-                value={surfaceSemi}
-                onChange={(e) => setSurfaceSemi(e.target.value)}
-              />
+              <div className="space-y-2">
+                <Label htmlFor="surface-covered">Superficie Cubierta (m²)</Label>
+                <Input 
+                  id="surface-covered"
+                  type="number"
+                  placeholder="Ej: 120"
+                  value={surfaceCovered}
+                  onChange={(e) => setSurfaceCovered(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="surface-semi">Superficie Semicubierta (m²)</Label>
+                <Input 
+                  id="surface-semi"
+                  type="number"
+                  placeholder="Ej: 30"
+                  value={surfaceSemi}
+                  onChange={(e) => setSurfaceSemi(e.target.value)}
+                />
+              </div>
             </div>
           </div>
         </div>
