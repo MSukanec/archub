@@ -788,7 +788,7 @@ export default function FinancesInstallments() {
     {
       key: "movement_date",
       label: "Fecha",
-      width: "10%",
+      width: "14.3%",
       sortable: true,
       sortType: "date" as const,
       render: (item: Installment) => {
@@ -803,7 +803,7 @@ export default function FinancesInstallments() {
     {
       key: "contact",
       label: "Contacto",
-      width: "25%",
+      width: "14.3%",
       render: (item: Installment) => {
         if (!item.contact) {
           return <div className="text-sm text-muted-foreground">Sin contacto</div>
@@ -836,7 +836,7 @@ export default function FinancesInstallments() {
     {
       key: "currency",
       label: "Moneda",
-      width: "10%",
+      width: "14.3%",
       render: (item: Installment) => (
         <Badge variant="outline" className="text-xs">
           {item.currency?.code || 'N/A'}
@@ -846,7 +846,7 @@ export default function FinancesInstallments() {
     {
       key: "wallet",
       label: "Billetera",
-      width: "15%",
+      width: "14.3%",
       render: (item: Installment) => (
         <div className="text-sm">{item.wallet?.name || 'Sin billetera'}</div>
       )
@@ -854,7 +854,7 @@ export default function FinancesInstallments() {
     {
       key: "amount",
       label: "Monto",
-      width: "15%",
+      width: "14.3%",
       sortable: true,
       sortType: "number" as const,
       render: (item: Installment) => {
@@ -869,7 +869,7 @@ export default function FinancesInstallments() {
     {
       key: "exchange_rate",
       label: "Cotización",
-      width: "12%",
+      width: "14.3%",
       sortable: true,
       sortType: "number" as const,
       render: (item: Installment) => {
@@ -888,7 +888,7 @@ export default function FinancesInstallments() {
     {
       key: "actions",
       label: "Acciones",
-      width: "13%",
+      width: "14.3%",
       render: (item: Installment) => (
         <div className="flex items-center gap-1">
           <Button
