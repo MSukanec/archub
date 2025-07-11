@@ -32,7 +32,7 @@ import FinancesCommited from "@/pages/finances/FinancesCommited";
 import FinancesPreferences from "@/pages/finances/FinancesPreferences";
 import ConstructionDashboard from "@/pages/construction/ConstructionDashboard";
 import ConstructionLogs from "@/pages/construction/ConstructionLogs";
-import ConstructionPersonnel from "@/pages/construction/ConstructionPersonnel";
+import ConstructionAttendance from "@/pages/construction/ConstructionAttendance";
 import ConstructionBudgets from "@/pages/construction/ConstructionBudgets";
 import ConstructionMaterials from "@/pages/construction/ConstructionMaterials";
 import ConstructionGallery from "@/pages/construction/ConstructionGallery";
@@ -167,7 +167,7 @@ function Router() {
         </Route>
         <Route path="/construction/personnel">
           <ProtectedRoute>
-            <ConstructionPersonnel />
+            <ConstructionAttendance />
           </ProtectedRoute>
         </Route>
         <Route path="/construction/budgets">

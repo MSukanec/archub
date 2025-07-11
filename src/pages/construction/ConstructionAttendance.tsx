@@ -15,14 +15,14 @@ import { format } from 'date-fns'
 import { useLocation } from 'wouter'
 import { Link } from 'wouter'
 
-// Hook to fetch personnel attendance data
-function usePersonnelAttendance(projectId: string | undefined, organizationId: string | undefined) {
+// Hook to fetch attendance data
+function useAttendanceData(projectId: string | undefined, organizationId: string | undefined) {
   return useQuery({
     queryKey: ['personnel-attendance', projectId, organizationId],
     queryFn: async () => {
       if (!supabase || !projectId || !organizationId) return []
 
-      console.log('Fetching personnel attendance for project:', projectId, 'in organization:', organizationId)
+      console.log('Fetching attendance data for project:', projectId, 'in organization:', organizationId)
 
       // Now that site_logs has organization_id, filter by both project and organization
       const { data: attendanceData, error } = await supabase
@@ -62,7 +62,7 @@ function usePersonnelAttendance(projectId: string | undefined, organizationId: s
         item.site_log?.organization_id === organizationId
       )
 
-      console.log('Filtered personnel attendance data:', filteredData.length, 'records')
+      console.log('Filtered attendance data:', filteredData.length, 'records')
       
       return filteredData
     },
@@ -147,7 +147,7 @@ function transformAttendanceData(attendanceData: any[], selectedContactTypeId?: 
   return { workers, attendance }
 }
 
-export default function ConstructionPersonnel() {
+export default function ConstructionAttendance() {
   const [searchValue, setSearchValue] = useState("")
   const [startDate, setStartDate] = useState(new Date())
   const [endDate, setEndDate] = useState(new Date(new Date().setDate(new Date().getDate() + 30)))
@@ -156,7 +156,7 @@ export default function ConstructionPersonnel() {
 
   const [location, navigate] = useLocation()
   const { data: userData } = useCurrentUser()
-  const { data: attendanceData = [], isLoading } = usePersonnelAttendance(
+  const { data: attendanceData = [], isLoading } = useAttendanceData(
     userData?.preferences?.last_project_id,
     userData?.organization?.id
   )
@@ -209,10 +209,10 @@ export default function ConstructionPersonnel() {
   // Generate statistics cards dynamically
   const statisticsCards = useMemo(() => [
     {
-      title: "Total Personal",
+      title: "Total Asistencia",
       value: stats.totalWorkers,
       icon: Users,
-      description: "Personal registrado"
+      description: "Asistencia registrada"
     },
     {
       title: "Días Activos",
@@ -235,7 +235,7 @@ export default function ConstructionPersonnel() {
   ], [stats])
 
   const headerProps = {
-    title: "Personal",
+    title: "Asistencia",
     showSearch: true,
     searchValue,
     onSearchChange: setSearchValue,
@@ -246,7 +246,7 @@ export default function ConstructionPersonnel() {
     customFilters: (
       <div className="space-y-3">
         <div>
-          <Label className="text-xs font-medium mb-1">Tipo de Personal</Label>
+          <Label className="text-xs font-medium mb-1">Tipo de Trabajador</Label>
           <Select value={selectedContactType} onValueChange={setSelectedContactType}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Todos los tipos" />

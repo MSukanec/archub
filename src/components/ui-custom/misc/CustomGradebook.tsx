@@ -382,7 +382,7 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
             {/* Header - matching timeline header height exactly (25px + 40px) */}
             <div className="bg-muted/50 border-b h-[65px] flex items-end px-6 pb-2">
               <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Personal
+                Asistencia
               </span>
             </div>
             

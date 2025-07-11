@@ -206,7 +206,7 @@ export default function ConstructionDashboard() {
                 className="flex flex-col items-center p-4 rounded-md border hover:bg-muted/50 transition-colors"
               >
                 <Users className="h-8 w-8 text-muted-foreground mb-2" />
-                <span className="text-sm font-medium">Personal</span>
+                <span className="text-sm font-medium">Asistencia</span>
               </button>
             </div>
           </CardContent>

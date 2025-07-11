@@ -119,6 +119,17 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 11, 2025. Complete PERSONAL page rename to ASISTENCIA across entire application - COMPLETED
+  • Renamed ConstructionPersonnel.tsx to ConstructionAttendance.tsx with function name update
+  • Updated all imports and route references in App.tsx to use new component name
+  • Changed page title from "Personal" to "Asistencia" in header and all UI text
+  • Updated sidebar navigation buttons from "Personal" to "Asistencia" in desktop and mobile menus
+  • Modified ConstructionDashboard quick action button text from "Personal" to "Asistencia" 
+  • Updated CustomGradebook component header from "Personal" to "Asistencia"
+  • Renamed hook from usePersonnelAttendance to useAttendanceData with updated console logs
+  • Changed statistics card from "Total Personal" to "Total Asistencia" 
+  • Updated filter label from "Tipo de Personal" to "Tipo de Trabajador"
+  • All references throughout codebase now consistently use "Asistencia" terminology
 - July 11, 2025. Fixed organization and project data filtering in APORTES, CLIENTES, and COMPROMISOS pages - COMPLETED
   • Added missing organization_id filters to project_clients queries across all three pages
   • Enhanced contact relation joins using contacts!inner with organization_id filtering
