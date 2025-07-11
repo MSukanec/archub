@@ -247,9 +247,18 @@ export default function FinancesInstallments() {
     enabled: !!organizationId && !!projectId && !!cuotasConcept?.id
   })
 
-  // Calculate total contributed
-  const totalContributed = installments.reduce((sum, installment) => {
-    return sum + (installment.amount || 0)
+  // Calculate total contributed (dollarized)
+  const totalContributedDollarized = installments.reduce((sum, installment) => {
+    const amount = installment.amount || 0
+    const currencyCode = installment.currency?.code || 'N/A'
+    
+    if (currencyCode === 'USD') {
+      return sum + amount
+    } else if (currencyCode !== 'USD' && installment.exchange_rate) {
+      return sum + (amount / installment.exchange_rate)
+    }
+    
+    return sum
   }, 0)
 
   // Calculate installment summary by contact with dynamic currencies and dollarized amounts
@@ -335,6 +344,94 @@ export default function FinancesInstallments() {
     setEditingInstallment(null)
   }
 
+  // Create contact summary table (simplified)
+  const contactSummaryColumns = [
+    {
+      key: "contact",
+      label: "Contacto",
+      width: "30%",
+      render: (item: any) => {
+        if (!item.contact) {
+          return <div className="text-sm text-muted-foreground">Sin contacto</div>
+        }
+
+        const displayName = item.contact.company_name || 
+                           `${item.contact.first_name || ''} ${item.contact.last_name || ''}`.trim()
+        const initials = item.contact.company_name 
+          ? item.contact.company_name.charAt(0).toUpperCase()
+          : `${item.contact.first_name?.charAt(0) || ''}${item.contact.last_name?.charAt(0) || ''}`.toUpperCase()
+
+        return (
+          <div className="flex items-center gap-2">
+            <Avatar className="w-8 h-8">
+              <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+            </Avatar>
+            <div>
+              <div className="text-sm font-medium">{displayName}</div>
+              {item.contact.company_name && (
+                <div className="text-xs text-muted-foreground">
+                  {item.contact.first_name} {item.contact.last_name}
+                </div>
+              )}
+            </div>
+          </div>
+        )
+      }
+    },
+    {
+      key: "monto_total",
+      label: "Monto Total",
+      width: "25%",
+      render: (item: any) => {
+        return (
+          <div className="text-sm">
+            <input
+              type="number"
+              className="w-full px-2 py-1 border rounded text-sm"
+              placeholder="0"
+              // TODO: Implement functionality
+            />
+          </div>
+        )
+      }
+    },
+    {
+      key: "aporte_dolarizado",
+      label: "Aporte Dolarizado",
+      width: "25%",
+      sortable: true,
+      sortType: 'number' as const,
+      render: (item: any) => {
+        if (!item.dollarizedTotal || item.dollarizedTotal === 0) {
+          return <div className="text-sm text-muted-foreground">-</div>
+        }
+
+        const formattedAmount = new Intl.NumberFormat('es-AR', {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0
+        }).format(item.dollarizedTotal)
+        return (
+          <div className="text-sm font-medium text-green-600">
+            US$ {formattedAmount}
+          </div>
+        )
+      }
+    },
+    {
+      key: "monto_restante",
+      label: "Monto Restante",
+      width: "20%",
+      render: (item: any) => {
+        // TODO: Calculate remaining amount (dollarized - total)
+        return (
+          <div className="text-sm text-muted-foreground">
+            US$ 0
+          </div>
+        )
+      }
+    }
+  ]
+
   // Create dynamic columns based on available currencies
   const summaryColumns = React.useMemo(() => {
     const baseColumns = [
@@ -406,7 +503,10 @@ export default function FinancesInstallments() {
           return <div className="text-sm text-muted-foreground">-</div>
         }
 
-        const formattedAmount = new Intl.NumberFormat('es-AR').format(item.dollarizedTotal)
+        const formattedAmount = new Intl.NumberFormat('es-AR', {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0
+        }).format(item.dollarizedTotal)
         return (
           <div className="text-sm font-medium text-green-600">
             US$ {formattedAmount}
@@ -586,7 +686,10 @@ export default function FinancesInstallments() {
               <div>
                 <h3 className="text-lg font-semibold">Total Aportado</h3>
                 <p className="text-2xl font-bold text-green-600">
-                  ${Math.abs(totalContributed).toLocaleString('es-AR')}
+                  US$ {Math.abs(totalContributedDollarized).toLocaleString('es-AR', {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                  })}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {installments.length} aporte{installments.length !== 1 ? 's' : ''} registrado{installments.length !== 1 ? 's' : ''}
@@ -596,17 +699,32 @@ export default function FinancesInstallments() {
           </div>
         )}
 
-        {/* Summary Table by Contact */}
+        {/* Contact Summary Table (New simplified table) */}
         {installmentSummary.length > 0 && (
           <div className="space-y-4">
             <div>
               <h3 className="text-lg font-semibold">Resumen por Contacto</h3>
-              <p className="text-sm text-muted-foreground">Totales agregados por contacto, moneda y billetera</p>
+              <p className="text-sm text-muted-foreground">Resumen general por contacto con monto total y aporte dolarizado</p>
+            </div>
+            <CustomTable
+              data={installmentSummary}
+              columns={contactSummaryColumns}
+              defaultSort={{ key: 'aporte_dolarizado', direction: 'desc' }}
+            />
+          </div>
+        )}
+
+        {/* Detailed Summary Table by Currency */}
+        {installmentSummary.length > 0 && (
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold">Detalle por Moneda</h3>
+              <p className="text-sm text-muted-foreground">Totales detallados por contacto, moneda y billetera</p>
             </div>
             <CustomTable
               data={installmentSummary}
               columns={summaryColumns}
-              defaultSort={{ key: 'total_amount', direction: 'desc' }}
+              defaultSort={{ key: 'dollarized_total', direction: 'desc' }}
             />
           </div>
         )}
