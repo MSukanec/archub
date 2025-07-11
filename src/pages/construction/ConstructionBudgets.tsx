@@ -24,7 +24,7 @@ import { BudgetTaskCard } from '@/components/cards/BudgetTaskCard'
 import { useUnits } from '@/hooks/use-units'
 import { TaskSearchCombo } from '@/components/ui-custom/misc/TaskSearchCombo'
 import { Input } from '@/components/ui/input'
-import { NewCustomTaskModal } from '@/modals/tasks/NewCustomTaskModal'
+import { CreateGeneratedTaskUserModal } from '@/modals/user/CreateGeneratedTaskUserModal'
 
 
 // Hook para obtener valores de parámetros con expression_template
@@ -1108,10 +1108,15 @@ export default function ConstructionBudgets() {
 
       {/* Custom Task Modal from TaskSearchCombo */}
       {customTaskModalOpen && (
-        <NewCustomTaskModal
+        <CreateGeneratedTaskUserModal
           open={customTaskModalOpen}
           onClose={() => setCustomTaskModalOpen(false)}
           onTaskCreated={(taskId) => {
+            // Auto-select the created task and set quantity to 1
+            setQuickTaskId(taskId)
+            setQuickQuantity(1)
+            setCustomTaskModalOpen(false)
+            
             // Automatically add the created task to the budget
             if (selectedBudget && userData?.preferences?.last_organization_id) {
               createBudgetTaskMutation.mutate({
