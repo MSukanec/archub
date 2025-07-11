@@ -119,14 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- July 11, 2025. Enhanced PROYECTOS page with FeatureIntroduction component and improved project cards - COMPLETED
+- July 11, 2025. Enhanced PROYECTOS page with FeatureIntroduction component and ACTIVO badge fix - COMPLETED
   • Added FeatureIntroduction component to OrganizationProjects page with accurate functionality descriptions
   • Styled FeatureIntroduction as traditional card with rounded-md corners matching project cards instead of rounded-lg
   • Enhanced title layout: page icon (Folder) on left with --accent color, title in center, help text + icon on right
   • Added "(click para más información)" text hint next to help icon for better user guidance
   • Updated content to reflect actual page functionality: 1) Creating new projects with modal completion and ACTIVO selection, 2) Using header selector for quick project switching and "Todos los Proyectos" option
   • Removed selected project information card above projects list for cleaner interface
-  • ACTIVO badge properly implemented in ModernProjectCard with --accent background color, positioned left of action buttons, and shows for currently selected project (last_project_id)
+  • FIXED ACTIVO badge: changed logic from project.status to isActiveProject prop comparing with last_project_id
+  • Fixed CSS variable conflicts: removed duplicate --accent and --accent-foreground definitions that were causing styling issues
   • Feature introduction uses proper hover expansion with detailed descriptions explaining actual user workflows
 - July 11, 2025. Complete PERSONAL page rename to ASISTENCIA across entire application - COMPLETED
   • Renamed ConstructionPersonnel.tsx to ConstructionAttendance.tsx with function name update
