@@ -25,7 +25,7 @@ import { useUnits } from '@/hooks/use-units'
 import { TaskSearchCombo } from '@/components/ui-custom/misc/TaskSearchCombo'
 import { Input } from '@/components/ui/input'
 import { NewCustomTaskModal } from '@/modals/tasks/NewCustomTaskModal'
-import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
+
 
 // Hook para obtener valores de parámetros con expression_template
 const useTaskParameterValues = () => {
@@ -885,38 +885,6 @@ export default function ConstructionBudgets() {
   return (
     <Layout wide={true} headerProps={headerProps}>
       <div className="space-y-6">
-        {/* Feature Introduction */}
-        <FeatureIntroduction
-          title="Bienvenido a la sección de Presupuestos"
-          image={
-            <div className="w-20 h-20 bg-accent rounded-full flex items-center justify-center">
-              <Calculator className="w-10 h-10 text-accent-foreground" />
-            </div>
-          }
-          features={[
-            {
-              icon: <FileText className="w-5 h-5 text-accent" />,
-              title: "Gestiona tus presupuestos",
-              description: "Crea y organiza presupuestos detallados para cada proyecto de construcción."
-            },
-            {
-              icon: <BarChart3 className="w-5 h-5 text-accent" />,
-              title: "Agrupa por rubro",
-              description: "Visualiza las tareas organizadas por categorías para mejor control de costos."
-            },
-            {
-              icon: <Calculator className="w-5 h-5 text-accent" />,
-              title: "Búsqueda avanzada",
-              description: "Encuentra rápidamente tareas específicas o crea tareas personalizadas."
-            },
-            {
-              icon: <Settings className="w-5 h-5 text-accent" />,
-              title: "Control de cantidades",
-              description: "Ajusta cantidades y materiales directamente desde la tabla de presupuesto."
-            }
-          ]}
-        />
-
         {filteredBudgets.length === 0 ? (
           <CustomEmptyState
             icon={<Calculator className="w-12 h-12 text-muted-foreground" />}

@@ -41,9 +41,9 @@ export function FeatureIntroduction({
     >
       {/* Always visible title */}
       <div className="p-6">
-        <h2 className="text-2xl font-normal text-white text-center flex items-center justify-center gap-2">
+        <h2 className="text-xl font-normal text-white text-center flex items-center justify-center gap-2">
           {title}
-          <HelpCircle className="w-6 h-6" />
+          <HelpCircle className="w-4 h-5" />
         </h2>
       </div>
 
