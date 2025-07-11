@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/hooks/use-toast'
+import { useDebouncedAutoSave } from '@/hooks/useDebouncedAutoSave'
 
 interface ProjectClient {
   id: string
@@ -45,6 +46,26 @@ export default function FinancesCommited() {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const [searchValue, setSearchValue] = useState("")
+  const [localAmounts, setLocalAmounts] = useState<Record<string, number>>({})
+  
+  // Auto-save function for committed amounts
+  const { isSaving } = useDebouncedAutoSave(
+    localAmounts,
+    async (amounts) => {
+      // Save all changed amounts to database
+      for (const [clientId, amount] of Object.entries(amounts)) {
+        await supabase
+          .from('project_clients')
+          .update({ committed_amount: amount })
+          .eq('id', clientId)
+      }
+      // Clear local state after saving
+      setLocalAmounts({})
+      // Invalidate cache
+      queryClient.invalidateQueries({ queryKey: ['project-clients'] })
+    },
+    750
+  )
 
   const projectId = userData?.preferences?.last_project_id
   const organizationId = userData?.organization?.id
@@ -288,24 +309,20 @@ export default function FinancesCommited() {
               placeholder="0.00"
               step="0.01"
               min="0"
-              value={item.committed_amount || ''}
+              value={localAmounts[item.id] !== undefined ? localAmounts[item.id] : (item.committed_amount || '')}
               onChange={(e) => {
                 const newAmount = parseFloat(e.target.value) || 0
-                updateCommittedAmountMutation.mutate({ 
-                  clientId: item.id, 
-                  amount: newAmount 
-                })
-              }}
-              onBlur={(e) => {
-                const newAmount = parseFloat(e.target.value) || 0
-                if (newAmount !== item.committed_amount) {
-                  updateCommittedAmountMutation.mutate({ 
-                    clientId: item.id, 
-                    amount: newAmount 
-                  })
-                }
+                setLocalAmounts(prev => ({
+                  ...prev,
+                  [item.id]: newAmount
+                }))
               }}
             />
+            {isSaving && (
+              <div className="text-xs text-muted-foreground">
+                Guardando...
+              </div>
+            )}
           </div>
         )
       }

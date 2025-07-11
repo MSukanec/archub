@@ -543,7 +543,7 @@ export default function FinancesInstallments() {
           <div className="text-sm">
             {clientCurrency ? (
               <Badge variant="outline" className="text-xs">
-                {clientCurrency.code} - {clientCurrency.name}
+                {clientCurrency.code}
               </Badge>
             ) : (
               <div className="text-muted-foreground text-xs">
@@ -923,7 +923,7 @@ export default function FinancesInstallments() {
 
   if (isLoading) {
     return (
-      <Layout headerProps={headerProps}>
+      <Layout headerProps={headerProps} layout="wide">
         <div className="flex items-center justify-center h-64">
           <div className="text-sm text-muted-foreground">Cargando aportes...</div>
         </div>
@@ -932,7 +932,7 @@ export default function FinancesInstallments() {
   }
 
   return (
-    <Layout headerProps={headerProps}>
+    <Layout headerProps={headerProps} layout="wide">
       <div className="space-y-6">
         {/* Summary Card */}
         {installments.length > 0 && (
