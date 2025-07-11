@@ -906,11 +906,12 @@ export default function ConstructionBudgets() {
           <>
 
 
-            {/* Budget Controls Section - Isolated */}
+            {/* Quick Add Task Section - Consolidated */}
             {selectedBudget && (
               <Card className="mb-4 border rounded-lg bg-card text-card-foreground shadow-sm">
                 <CardContent className="p-4">
-                <div className="flex items-center justify-between w-full">
+                {/* First row: Budget Controls */}
+                <div className="flex items-center justify-between w-full mb-4">
                   <div className="flex items-center gap-4 flex-1">
                     {/* Budget Selector */}
                     <div className="flex items-center gap-3">
@@ -942,8 +943,6 @@ export default function ConstructionBudgets() {
                         </Select>
                       </div>
                     </div>
-
-
                   </div>
 
                   {/* Action Buttons */}
@@ -972,20 +971,13 @@ export default function ConstructionBudgets() {
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
-                    
-
                   </div>
                 </div>
 
+                {/* Divider */}
+                <div className="border-b border-border mb-4"></div>
 
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Quick Add Task Section - Isolated */}
-            {selectedBudget && (
-              <Card className="mb-4 border rounded-lg bg-card text-card-foreground shadow-sm">
-                <CardContent className="p-4">
+                {/* Second row: Task Search and Add */}
                 <div className="flex items-center gap-3">
                   <div className="flex-1">
                     <TaskSearchCombo
@@ -1004,7 +996,7 @@ export default function ConstructionBudgets() {
                     />
                   </div>
                   <div className="w-32">
-                    <div className="relative">
+                    <div className="flex items-center gap-1">
                       <Input
                         type="number"
                         value={quickQuantity}
@@ -1012,13 +1004,18 @@ export default function ConstructionBudgets() {
                         placeholder="Cantidad"
                         min="1"
                         step="0.01"
-                        className="text-center pr-8"
+                        className="text-center"
+                        style={{
+                          MozAppearance: 'textfield', // Firefox
+                          WebkitAppearance: 'none', // Chrome/Safari
+                        }}
+                        onWheel={(e) => e.preventDefault()} // Disable mouse wheel
                       />
-                      <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
-                        {quickTaskId ? (
-                          getUnitName(quickTasks.find(t => t.id === quickTaskId)?.unit_id) || '-'
-                        ) : '-'}
-                      </span>
+                      {quickTaskId && getUnitName(quickTasks.find(t => t.id === quickTaskId)?.unit_id) && (
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">
+                          {getUnitName(quickTasks.find(t => t.id === quickTaskId)?.unit_id)}
+                        </span>
+                      )}
                     </div>
                   </div>
                   
@@ -1044,7 +1041,7 @@ export default function ConstructionBudgets() {
                     disabled={!quickTaskId || isAddingQuickTask}
                     className="px-4"
                   >
-                    {isAddingQuickTask ? "Agregando..." : "Agregar"}
+                    {isAddingQuickTask ? "Agregando..." : "Agregar Tarea"}
                   </Button>
                 </div>
                 </CardContent>

@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Remove number input arrows/spinners */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
 /* Gantt Timeline Scrollbar Styling */
 .gantt-timeline-scroll::-webkit-scrollbar {
   height: 12px;
