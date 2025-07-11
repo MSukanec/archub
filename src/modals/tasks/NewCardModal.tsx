@@ -9,12 +9,11 @@ import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFoote
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useCreateKanbanCard } from '@/hooks/use-kanban';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useOrganizationMembers } from '@/hooks/use-organization-members';
 import { toast } from '@/hooks/use-toast';
+import UserSelector from '@/components/ui-custom/misc/UserSelector';
 
 const cardSchema = z.object({
   title: z.string().min(1, 'El título es requerido'),
@@ -35,7 +34,16 @@ interface NewCardModalProps {
 export function NewCardModal({ open, onClose, listId }: NewCardModalProps) {
   const createCardMutation = useCreateKanbanCard();
   const { data: userData } = useCurrentUser();
-  const { data: organizationMembers, isLoading: membersLoading } = useOrganizationMembers();
+  const organizationId = userData?.organization?.id;
+  const { data: members = [] } = useOrganizationMembers(organizationId);
+  
+  // Convert members to users format for UserSelector
+  const users = members.map(member => ({
+    id: member.user_id, // Use user_id for created_by and assigned_to fields
+    full_name: member.user?.full_name || member.user?.email || 'Usuario',
+    email: member.user?.email || '',
+    avatar_url: member.user?.avatar_url
+  }));
 
   const {
     register,
@@ -109,101 +117,60 @@ export function NewCardModal({ open, onClose, listId }: NewCardModalProps) {
           />
         ),
         body: (
-          <CustomModalBody>
-            <form id="card-form" onSubmit={handleSubmit(onSubmit)}>
-              <div className="grid grid-cols-1 gap-4">
-                <div className="col-span-1">
-                  <Label htmlFor="created_by">Creador</Label>
-                  <Select 
-                    value={watch('created_by')} 
-                    onValueChange={(value) => setValue('created_by', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar creador" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {organizationMembers?.map((member) => (
-                        <SelectItem key={member.id} value={member.user_id}>
-                          <div className="flex items-center gap-2">
-                            <Avatar className="h-5 w-5">
-                              {member.user.avatar_url && (
-                                <AvatarImage src={member.user.avatar_url} />
-                              )}
-                              <AvatarFallback className="text-xs">
-                                {member.user.full_name.charAt(0).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            {member.user.full_name}
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {errors.created_by && (
-                    <p className="text-sm text-red-500 mt-1">{errors.created_by.message}</p>
-                  )}
-                </div>
+          <CustomModalBody columns={1}>
+            <form id="card-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div>
+                <Label htmlFor="created_by">Creador</Label>
+                <UserSelector
+                  users={users}
+                  value={watch('created_by')}
+                  onChange={(value) => setValue('created_by', value)}
+                  placeholder="Seleccionar creador"
+                />
+                {errors.created_by && (
+                  <p className="text-sm text-red-500 mt-1">{errors.created_by.message}</p>
+                )}
+              </div>
 
-                <div className="col-span-1">
-                  <Label htmlFor="title">Título</Label>
-                  <Input 
-                    id="title"
-                    {...register('title')}
-                    placeholder="Escribir documentación"
-                  />
-                  {errors.title && (
-                    <p className="text-sm text-red-500 mt-1">{errors.title.message}</p>
-                  )}
-                </div>
+              <div>
+                <Label htmlFor="title">Título</Label>
+                <Input 
+                  id="title"
+                  {...register('title')}
+                  placeholder="Escribir documentación"
+                />
+                {errors.title && (
+                  <p className="text-sm text-red-500 mt-1">{errors.title.message}</p>
+                )}
+              </div>
 
-                <div className="col-span-1">
-                  <Label htmlFor="description">Descripción (opcional)</Label>
-                  <Textarea 
-                    id="description"
-                    {...register('description')}
-                    placeholder="Detalles adicionales sobre la tarea..."
-                    rows={3}
-                  />
-                </div>
+              <div>
+                <Label htmlFor="description">Descripción (opcional)</Label>
+                <Textarea 
+                  id="description"
+                  {...register('description')}
+                  placeholder="Detalles adicionales sobre la tarea..."
+                  rows={3}
+                />
+              </div>
 
-                <div className="col-span-1">
-                  <Label htmlFor="assigned_to">Asignado a (opcional)</Label>
-                  <Select 
-                    value={watch('assigned_to')} 
-                    onValueChange={(value) => setValue('assigned_to', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sin asignar" />
-                    </SelectTrigger>
-                    <SelectContent className="z-[9999]">
-                      <SelectItem value="">Sin asignar</SelectItem>
-                      {organizationMembers?.map((member) => (
-                        <SelectItem key={member.id} value={member.user_id}>
-                          <div className="flex items-center gap-2">
-                            <Avatar className="h-5 w-5">
-                              {member.user.avatar_url && (
-                                <AvatarImage src={member.user.avatar_url} />
-                              )}
-                              <AvatarFallback className="text-xs">
-                                {member.user.full_name.charAt(0).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            {member.user.full_name}
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div>
+                <Label htmlFor="assigned_to">Asignado a (opcional)</Label>
+                <UserSelector
+                  users={users}
+                  value={watch('assigned_to')}
+                  onChange={(value) => setValue('assigned_to', value)}
+                  placeholder="Sin asignar"
+                />
+              </div>
 
-                <div className="col-span-1">
-                  <Label htmlFor="due_date">Fecha límite (opcional)</Label>
-                  <Input 
-                    id="due_date"
-                    type="date"
-                    {...register('due_date')}
-                  />
-                </div>
+              <div>
+                <Label htmlFor="due_date">Fecha límite (opcional)</Label>
+                <Input 
+                  id="due_date"
+                  type="date"
+                  {...register('due_date')}
+                />
               </div>
             </form>
           </CustomModalBody>

@@ -4,8 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout';
 import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader';
 import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
@@ -14,6 +12,7 @@ import { useCreateKanbanList, useUpdateKanbanList, type KanbanList } from '@/hoo
 import { useOrganizationMembers } from '@/hooks/use-organization-members';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { toast } from '@/hooks/use-toast';
+import UserSelector from '@/components/ui-custom/misc/UserSelector';
 
 const listSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
@@ -37,6 +36,14 @@ export function NewListModal({ open, onClose, boardId, editingList }: NewListMod
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
   const { data: members = [] } = useOrganizationMembers(organizationId);
+  
+  // Convert members to users format for UserSelector
+  const users = members.map(member => ({
+    id: member.id, // Use member.id for created_by field
+    full_name: member.user?.full_name || member.user?.email || 'Usuario',
+    email: member.user?.email || '',
+    avatar_url: member.user?.avatar_url
+  }));
   
   // Find current user's member ID for default selection
   const currentUserMember = members.find(member => member.user_id === userData?.user?.id);
@@ -117,50 +124,31 @@ export function NewListModal({ open, onClose, boardId, editingList }: NewListMod
           />
         ),
         body: (
-          <CustomModalBody>
-            <form id="list-form" onSubmit={handleSubmit(onSubmit)}>
-              <div className="grid grid-cols-1 gap-4">
-                <div className="col-span-1">
-                  <Label htmlFor="name">Nombre de la lista</Label>
-                  <Input 
-                    id="name"
-                    {...register('name')}
-                    placeholder="Por Hacer"
-                  />
-                  {errors.name && (
-                    <p className="text-sm text-red-500 mt-1">{errors.name.message}</p>
-                  )}
-                </div>
-                
-                <div className="col-span-1">
-                  <Label htmlFor="created_by">Creador</Label>
-                  <Select 
-                    value={watchedCreatedBy} 
-                    onValueChange={(value) => setValue('created_by', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar creador" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {members.map((member) => (
-                        <SelectItem key={member.id} value={member.id}>
-                          <div className="flex items-center gap-2">
-                            <Avatar className="h-5 w-5">
-                              <AvatarImage src={member.user?.avatar_url} />
-                              <AvatarFallback className="text-xs">
-                                {member.user?.full_name?.split(' ').map(n => n[0]).join('') || 'U'}
-                              </AvatarFallback>
-                            </Avatar>
-                            <span>{member.user?.full_name || member.user?.email || 'Usuario'}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {errors.created_by && (
-                    <p className="text-sm text-red-500 mt-1">{errors.created_by.message}</p>
-                  )}
-                </div>
+          <CustomModalBody columns={1}>
+            <form id="list-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div>
+                <Label htmlFor="name">Nombre de la lista</Label>
+                <Input 
+                  id="name"
+                  {...register('name')}
+                  placeholder="Por Hacer"
+                />
+                {errors.name && (
+                  <p className="text-sm text-red-500 mt-1">{errors.name.message}</p>
+                )}
+              </div>
+              
+              <div>
+                <Label htmlFor="created_by">Creador</Label>
+                <UserSelector
+                  users={users}
+                  value={watchedCreatedBy}
+                  onChange={(value) => setValue('created_by', value)}
+                  placeholder="Seleccionar creador"
+                />
+                {errors.created_by && (
+                  <p className="text-sm text-red-500 mt-1">{errors.created_by.message}</p>
+                )}
               </div>
             </form>
           </CustomModalBody>

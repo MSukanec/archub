@@ -24,7 +24,7 @@ interface UserSelectorProps {
 }
 
 export default function UserSelector({
-  users,
+  users = [],
   value,
   onChange,
   label,
@@ -33,7 +33,7 @@ export default function UserSelector({
   disabled = false,
   className = ""
 }: UserSelectorProps) {
-  const selectedUser = users.find(user => user.id === value);
+  const selectedUser = users?.find(user => user.id === value);
 
   return (
     <div className={`space-y-2 ${className}`}>
@@ -63,7 +63,7 @@ export default function UserSelector({
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
-          {users.map((user) => (
+          {users?.map((user) => (
             <SelectItem key={user.id} value={user.id}>
               <div className="flex items-center gap-2">
                 <Avatar className="h-6 w-6">
