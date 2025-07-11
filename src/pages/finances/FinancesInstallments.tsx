@@ -923,7 +923,7 @@ export default function FinancesInstallments() {
 
   if (isLoading) {
     return (
-      <Layout headerProps={headerProps} layout="wide">
+      <Layout headerProps={headerProps} wide={true}>
         <div className="flex items-center justify-center h-64">
           <div className="text-sm text-muted-foreground">Cargando aportes...</div>
         </div>
@@ -932,7 +932,7 @@ export default function FinancesInstallments() {
   }
 
   return (
-    <Layout headerProps={headerProps} layout="wide">
+    <Layout headerProps={headerProps} wide={true}>
       <div className="space-y-6">
         {/* Summary Card */}
         {installments.length > 0 && (
