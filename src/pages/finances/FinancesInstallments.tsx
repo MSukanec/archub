@@ -385,47 +385,60 @@ export default function FinancesInstallments() {
       }
     })
     
-    // Create summary for each project client
-    const summary = projectClients.map(client => {
-      // Calculate dollarized total from installments for this client
-      let dollarizedTotal = 0
-      const clientInstallments = installments.filter(installment => installment.contact_id === client.client_id)
-      
-      clientInstallments.forEach(installment => {
-        const amount = installment.amount || 0
-        const currencyCode = installment.currency?.code || 'N/A'
+    // Create summary only for project clients that have installments
+    const summary = projectClients
+      .map(client => {
+        // Calculate dollarized total from installments for this client
+        let dollarizedTotal = 0
+        const clientInstallments = installments.filter(installment => installment.contact_id === client.client_id)
         
-        if (currencyCode === 'USD') {
-          dollarizedTotal += amount
-        } else if (currencyCode !== 'USD' && installment.exchange_rate) {
-          dollarizedTotal += amount / installment.exchange_rate
+        // Skip clients with no installments
+        if (clientInstallments.length === 0) {
+          return null
         }
-      })
-      
-      // Group installments by currency
-      const currencies: { [key: string]: { amount: number; currency: any } } = {}
-      clientInstallments.forEach(installment => {
-        const currencyCode = installment.currency?.code || 'N/A'
-        if (!currencies[currencyCode]) {
-          currencies[currencyCode] = {
-            amount: 0,
-            currency: installment.currency
+        
+        clientInstallments.forEach(installment => {
+          const amount = installment.amount || 0
+          const currencyCode = installment.currency?.code || 'N/A'
+          
+          if (currencyCode === 'USD') {
+            dollarizedTotal += amount
+          } else if (currencyCode !== 'USD' && installment.exchange_rate) {
+            dollarizedTotal += amount / installment.exchange_rate
           }
+        })
+        
+        // Group installments by currency
+        const currencies: { [key: string]: { amount: number; currency: any } } = {}
+        clientInstallments.forEach(installment => {
+          const currencyCode = installment.currency?.code || 'N/A'
+          if (!currencies[currencyCode]) {
+            currencies[currencyCode] = {
+              amount: 0,
+              currency: installment.currency
+            }
+          }
+          currencies[currencyCode].amount += installment.amount || 0
+        })
+        
+        return {
+          contact_id: client.client_id,
+          contact: client.contact,
+          currencies,
+          dollarizedTotal,
+          client // Include full client data for committed_amount and currency_id
         }
-        currencies[currencyCode].amount += installment.amount || 0
       })
-      
-      return {
-        contact_id: client.client_id,
-        contact: client.contact,
-        currencies,
-        dollarizedTotal,
-        client // Include full client data for committed_amount and currency_id
-      }
-    })
+      .filter(Boolean) // Remove null entries (clients without installments)
     
     const currencies = Array.from(currenciesSet).sort()
-    const sortedSummary = summary.sort((a, b) => b.dollarizedTotal - a.dollarizedTotal)
+    
+    // Sort by contact name (A-Z) instead of dollarized total
+    const sortedSummary = summary.sort((a, b) => {
+      const nameA = a.contact?.company_name || `${a.contact?.first_name || ''} ${a.contact?.last_name || ''}`.trim()
+      const nameB = b.contact?.company_name || `${b.contact?.first_name || ''} ${b.contact?.last_name || ''}`.trim()
+      return nameA.localeCompare(nameB)
+    })
     
     return { clientSummary: sortedSummary, availableCurrencies: currencies }
   }, [projectClients, installments])
@@ -891,7 +904,7 @@ export default function FinancesInstallments() {
             <CustomTable
               data={clientSummary}
               columns={contactSummaryColumns}
-              defaultSort={{ key: 'aporte_dolarizado', direction: 'desc' }}
+              defaultSort={{ key: 'contacto', direction: 'asc' }}
             />
           </div>
         )}
@@ -906,7 +919,7 @@ export default function FinancesInstallments() {
             <CustomTable
               data={clientSummary}
               columns={summaryColumns}
-              defaultSort={{ key: 'dollarized_total', direction: 'desc' }}
+              defaultSort={{ key: 'contacto', direction: 'asc' }}
             />
           </div>
         )}
