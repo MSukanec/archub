@@ -40,9 +40,9 @@ export function NewCardModal({ open, onClose, listId }: NewCardModalProps) {
   // Convert members to users format for UserSelector
   const users = members.map(member => ({
     id: member.user_id, // Use user_id for created_by and assigned_to fields
-    full_name: member.user?.full_name || member.user?.email || 'Usuario',
-    email: member.user?.email || '',
-    avatar_url: member.user?.avatar_url
+    full_name: member.full_name || member.email || 'Usuario',
+    email: member.email || '',
+    avatar_url: member.avatar_url
   }));
 
   const {

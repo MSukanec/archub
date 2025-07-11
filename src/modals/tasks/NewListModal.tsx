@@ -40,9 +40,9 @@ export function NewListModal({ open, onClose, boardId, editingList }: NewListMod
   // Convert members to users format for UserSelector
   const users = members.map(member => ({
     id: member.id, // Use member.id for created_by field
-    full_name: member.user?.full_name || member.user?.email || 'Usuario',
-    email: member.user?.email || '',
-    avatar_url: member.user?.avatar_url
+    full_name: member.full_name || member.email || 'Usuario',
+    email: member.email || '',
+    avatar_url: member.avatar_url
   }));
   
   // Find current user's member ID for default selection
@@ -127,18 +127,6 @@ export function NewListModal({ open, onClose, boardId, editingList }: NewListMod
           <CustomModalBody columns={1}>
             <form id="list-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div>
-                <Label htmlFor="name">Nombre de la lista</Label>
-                <Input 
-                  id="name"
-                  {...register('name')}
-                  placeholder="Por Hacer"
-                />
-                {errors.name && (
-                  <p className="text-sm text-red-500 mt-1">{errors.name.message}</p>
-                )}
-              </div>
-              
-              <div>
                 <Label htmlFor="created_by">Creador</Label>
                 <UserSelector
                   users={users}
@@ -148,6 +136,18 @@ export function NewListModal({ open, onClose, boardId, editingList }: NewListMod
                 />
                 {errors.created_by && (
                   <p className="text-sm text-red-500 mt-1">{errors.created_by.message}</p>
+                )}
+              </div>
+              
+              <div>
+                <Label htmlFor="name">Nombre de la lista</Label>
+                <Input 
+                  id="name"
+                  {...register('name')}
+                  placeholder="Por Hacer"
+                />
+                {errors.name && (
+                  <p className="text-sm text-red-500 mt-1">{errors.name.message}</p>
                 )}
               </div>
             </form>

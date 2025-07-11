@@ -179,7 +179,7 @@ function TasksContent() {
     };
 
     return (
-      <Layout headerProps={loadingHeaderProps}>
+      <Layout headerProps={loadingHeaderProps} wide={true}>
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="text-lg font-semibold">Cargando tableros...</div>
@@ -212,7 +212,7 @@ function TasksContent() {
     };
 
     return (
-      <Layout headerProps={emptyHeaderProps}>
+      <Layout headerProps={emptyHeaderProps} wide={true}>
         <CustomEmptyState
           icon={<Kanban className="w-8 h-8 text-muted-foreground" />}
           title="Aún no hay tareas!"
@@ -236,7 +236,7 @@ function TasksContent() {
   const selectedBoard = boards.find(board => board.id === currentBoardId);
 
   return (
-    <Layout headerProps={headerProps}>
+    <Layout headerProps={headerProps} wide={true}>
       {/* Board Title with Selector and Actions */}
       {boards.length > 0 && (
         <div className="mb-6">

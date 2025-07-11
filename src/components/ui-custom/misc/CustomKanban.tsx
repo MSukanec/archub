@@ -147,6 +147,7 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
               ref={provided.innerRef}
               {...provided.droppableProps}
               className="flex gap-4 h-full overflow-x-auto pb-4 md:gap-4 snap-x snap-mandatory md:snap-none"
+              style={{ minWidth: 'fit-content' }}
             >
               {lists.map((list, index) => (
                 <Draggable key={list.id} draggableId={`list-${list.id}`} index={index}>

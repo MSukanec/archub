@@ -112,30 +112,28 @@ export function NewBoardModal({ open, onClose, board, isEditing = false }: NewBo
           />
         ),
         body: (
-          <CustomModalBody>
-            <form id="board-form" onSubmit={handleSubmit(onSubmit)}>
-              <div className="grid grid-cols-1 gap-4">
-                <div className="col-span-1">
-                  <Label htmlFor="name">Nombre del tablero</Label>
-                  <Input 
-                    id="name"
-                    {...register('name')}
-                    placeholder="Cosas para Hacer"
-                  />
-                  {errors.name && (
-                    <p className="text-sm text-red-500 mt-1">{errors.name.message}</p>
-                  )}
-                </div>
+          <CustomModalBody columns={1}>
+            <form id="board-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div>
+                <Label htmlFor="name">Nombre del tablero</Label>
+                <Input 
+                  id="name"
+                  {...register('name')}
+                  placeholder="Cosas para Hacer"
+                />
+                {errors.name && (
+                  <p className="text-sm text-red-500 mt-1">{errors.name.message}</p>
+                )}
+              </div>
 
-                <div className="col-span-1">
-                  <Label htmlFor="description">Descripción (opcional)</Label>
-                  <Textarea 
-                    id="description"
-                    {...register('description')}
-                    placeholder="Describe el propósito de este tablero..."
-                    rows={3}
-                  />
-                </div>
+              <div>
+                <Label htmlFor="description">Descripción (opcional)</Label>
+                <Textarea 
+                  id="description"
+                  {...register('description')}
+                  placeholder="Describe el propósito de este tablero..."
+                  rows={3}
+                />
               </div>
             </form>
           </CustomModalBody>
