@@ -153,14 +153,14 @@ export function CardDetailsModal({ open, onClose, card }: CardDetailsModalProps)
                         <SelectItem key={member.id} value={member.user_id}>
                           <div className="flex items-center gap-2">
                             <Avatar className="h-5 w-5">
-                              {member.user.avatar_url && (
-                                <AvatarImage src={member.user.avatar_url} />
+                              {member.avatar_url && (
+                                <AvatarImage src={member.avatar_url} />
                               )}
                               <AvatarFallback className="text-xs">
-                                {member.user.full_name.charAt(0).toUpperCase()}
+                                {member.full_name?.charAt(0).toUpperCase() || 'U'}
                               </AvatarFallback>
                             </Avatar>
-                            {member.user.full_name}
+                            {member.full_name || member.email || 'Usuario'}
                           </div>
                         </SelectItem>
                       ))}
