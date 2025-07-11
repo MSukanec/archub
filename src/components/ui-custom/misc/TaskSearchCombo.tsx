@@ -132,7 +132,7 @@ export function TaskSearchCombo({
               <div className="space-y-1">
                 <label className="text-xs font-medium text-muted-foreground">Origen</label>
                 <Select
-                  value={filters.origin}
+                  value={filters.origin || "all"}
                   onValueChange={(value: 'all' | 'system' | 'organization') => 
                     onFiltersChange({ ...filters, origin: value })
                   }
@@ -154,7 +154,13 @@ export function TaskSearchCombo({
                 <Select
                   value={filters.rubro || ""}
                   onValueChange={(value) => 
-                    onFiltersChange({ ...filters, rubro: value || undefined })
+                    onFiltersChange({ 
+                      ...filters, 
+                      rubro: value || undefined,
+                      // Reset category and subcategory when rubro changes
+                      category: undefined,
+                      subcategory: undefined
+                    })
                   }
                 >
                   <SelectTrigger className="h-7 text-xs border-[var(--input-border)]">
@@ -162,7 +168,7 @@ export function TaskSearchCombo({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="">Todos los rubros</SelectItem>
-                    {filterOptions.rubros.map((rubro) => (
+                    {filterOptions?.rubros?.map((rubro) => (
                       <SelectItem key={rubro} value={rubro}>{rubro}</SelectItem>
                     ))}
                   </SelectContent>
@@ -175,15 +181,21 @@ export function TaskSearchCombo({
                 <Select
                   value={filters.category || ""}
                   onValueChange={(value) => 
-                    onFiltersChange({ ...filters, category: value || undefined })
+                    onFiltersChange({ 
+                      ...filters, 
+                      category: value || undefined,
+                      // Reset subcategory when category changes
+                      subcategory: undefined
+                    })
                   }
+                  disabled={!filters.rubro}
                 >
                   <SelectTrigger className="h-7 text-xs border-[var(--input-border)]">
-                    <SelectValue placeholder="Todas las categorías" />
+                    <SelectValue placeholder={filters.rubro ? "Todas las categorías" : "Selecciona rubro primero"} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="">Todas las categorías</SelectItem>
-                    {filterOptions.categories.map((category) => (
+                    {filterOptions?.categories?.map((category) => (
                       <SelectItem key={category} value={category}>{category}</SelectItem>
                     ))}
                   </SelectContent>
@@ -198,13 +210,14 @@ export function TaskSearchCombo({
                   onValueChange={(value) => 
                     onFiltersChange({ ...filters, subcategory: value || undefined })
                   }
+                  disabled={!filters.category}
                 >
                   <SelectTrigger className="h-7 text-xs border-[var(--input-border)]">
-                    <SelectValue placeholder="Todas las subcategorías" />
+                    <SelectValue placeholder={filters.category ? "Todas las subcategorías" : "Selecciona categoría primero"} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="">Todas las subcategorías</SelectItem>
-                    {filterOptions.subcategories.map((subcategory) => (
+                    {filterOptions?.subcategories?.map((subcategory) => (
                       <SelectItem key={subcategory} value={subcategory}>{subcategory}</SelectItem>
                     ))}
                   </SelectContent>

@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { useState, useEffect, Fragment } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { Calculator, Plus, Trash2, Building2, Edit } from 'lucide-react'
+import { Calculator, Plus, Trash2, Building2, Edit, FileText, BarChart3, Settings } from 'lucide-react'
 // Removed CustomTable import as we now use BudgetTable
 import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState'
 import { BudgetTable } from '@/components/ui-custom/misc/BudgetTable'
@@ -25,6 +25,7 @@ import { useUnits } from '@/hooks/use-units'
 import { TaskSearchCombo } from '@/components/ui-custom/misc/TaskSearchCombo'
 import { Input } from '@/components/ui/input'
 import { NewCustomTaskModal } from '@/modals/tasks/NewCustomTaskModal'
+import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 
 // Hook para obtener valores de parámetros con expression_template
 const useTaskParameterValues = () => {
@@ -884,6 +885,38 @@ export default function ConstructionBudgets() {
   return (
     <Layout wide={true} headerProps={headerProps}>
       <div className="space-y-6">
+        {/* Feature Introduction */}
+        <FeatureIntroduction
+          title="Bienvenido a Presupuestos"
+          image={
+            <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+              <Calculator className="w-10 h-10 text-white" />
+            </div>
+          }
+          features={[
+            {
+              icon: <FileText className="w-5 h-5 text-blue-400" />,
+              title: "Gestiona tus presupuestos",
+              description: "Crea y organiza presupuestos detallados para cada proyecto de construcción."
+            },
+            {
+              icon: <BarChart3 className="w-5 h-5 text-green-400" />,
+              title: "Agrupa por rubro",
+              description: "Visualiza las tareas organizadas por categorías para mejor control de costos."
+            },
+            {
+              icon: <Calculator className="w-5 h-5 text-purple-400" />,
+              title: "Búsqueda avanzada",
+              description: "Encuentra rápidamente tareas específicas o crea tareas personalizadas."
+            },
+            {
+              icon: <Settings className="w-5 h-5 text-orange-400" />,
+              title: "Control de cantidades",
+              description: "Ajusta cantidades y materiales directamente desde la tabla de presupuesto."
+            }
+          ]}
+        />
+
         {filteredBudgets.length === 0 ? (
           <CustomEmptyState
             icon={<Calculator className="w-12 h-12 text-muted-foreground" />}
