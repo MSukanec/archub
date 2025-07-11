@@ -17,7 +17,7 @@ import ActivityCard from '@/components/cards/ActivityCard';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { supabase } from '@/lib/supabase';
-import { FeatureIntroduction } from '@/components/ui-custom/layout/FeatureIntroduction';
+import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
 
 export default function OrganizationActivity() {
   const { data: userData } = useCurrentUser();
@@ -390,25 +390,28 @@ export default function OrganizationActivity() {
       <div className="space-y-6">
         {/* FeatureIntroduction */}
         <FeatureIntroduction
-          title="Actividad de la Organización"
-          icon={Activity}
-          helpText="(click para más información)"
+          title="Actividad"
+          icon={<Activity className="w-5 h-5" />}
           features={[
             {
+              icon: <Folder className="w-5 h-5" />,
               title: "Seguimiento de proyectos",
-              description: "Monitorea la creación y progreso de todos los proyectos de la organización en tiempo real."
+              description: "Monitorea la creación y progreso de todos los proyectos de la organización en tiempo real. Ve cuándo se crean nuevos proyectos y quién los está creando."
             },
             {
+              icon: <DollarSign className="w-5 h-5" />,
               title: "Actividad financiera",
-              description: "Rastrea movimientos financieros, ingresos y egresos para mantener el control económico."
+              description: "Rastrea movimientos financieros, ingresos y egresos para mantener el control económico. Observa las transacciones más recientes y los cambios en las finanzas de la organización."
             },
             {
+              icon: <Users className="w-5 h-5" />,
               title: "Gestión de contactos",
-              description: "Supervisa la adición de nuevos contactos y clientes vinculados a los proyectos."
+              description: "Supervisa la adición de nuevos contactos y clientes vinculados a los proyectos. Mantente al día con las nuevas incorporaciones al equipo y red de contactos."
             },
             {
+              icon: <FileText className="w-5 h-5" />,
               title: "Registro de bitácoras",
-              description: "Controla las entradas de bitácora de obra y el progreso de los trabajos de construcción."
+              description: "Controla las entradas de bitácora de obra y el progreso de los trabajos de construcción. Ve las actualizaciones más recientes del estado de los proyectos en curso."
             }
           ]}
         />
