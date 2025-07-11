@@ -549,7 +549,6 @@ export default function ConstructionBudgets() {
           quantity: newQuantity,
           start_date: task.start_date,
           end_date: task.end_date,
-          planned_days: task.planned_days,
           priority: task.priority,
           dependencies: task.dependencies,
           organization_id: task.organization_id
@@ -931,11 +930,7 @@ export default function ConstructionBudgets() {
 
             {/* Budget Controls Section - Isolated */}
             {selectedBudget && (
-              <Card style={{ 
-                backgroundColor: 'var(--secondary-card-bg)',
-                borderColor: 'var(--secondary-card-border)',
-                color: 'var(--secondary-card-fg)'
-              }} className="mb-4">
+              <Card className="mb-4 bg-[var(--secondary-card-bg)] border-[var(--secondary-card-border)] text-[var(--secondary-card-fg)]">
                 <CardContent className="p-4">
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-center gap-4 flex-1">
@@ -1039,7 +1034,7 @@ export default function ConstructionBudgets() {
 
             {/* Quick Add Task Section - Isolated */}
             {selectedBudget && (
-              <Card className="mb-4">
+              <Card className="mb-4 border rounded-lg bg-card text-card-foreground shadow-sm">
                 <CardContent className="p-4">
                 <div className="flex items-center gap-3">
                   <div className="flex-1">
@@ -1089,7 +1084,7 @@ export default function ConstructionBudgets() {
             )}
 
             {/* Budget Table Card - Clean without extra controls */}
-            <Card className="border rounded-lg overflow-hidden">
+            <Card className="border rounded-lg bg-card text-card-foreground shadow-sm overflow-hidden">
               {/* Budget Tasks Table */}
               <div className="p-4">
                 {selectedBudget ? (
@@ -1124,6 +1119,16 @@ export default function ConstructionBudgets() {
           open={budgetTaskModalOpen}
           onClose={handleCloseTaskModal}
           budgetId={currentBudgetId}
+          organizationId={userData?.organization?.id || ''}
+        />
+      )}
+
+      {/* New Task Modal from TaskSearchCombo */}
+      {newTaskModalOpen && (
+        <NewBudgetTaskModal
+          open={newTaskModalOpen}
+          onClose={() => setNewTaskModalOpen(false)}
+          budgetId={selectedBudget?.id || ''}
           organizationId={userData?.organization?.id || ''}
         />
       )}

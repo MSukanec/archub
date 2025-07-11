@@ -269,13 +269,13 @@
   --card-bg: hsl(0, 0%, 14%);
   --card-fg: hsl(0, 0%, 90%);
   --card-text: hsl(0, 0%, 90%);
-  --card-border: hsl(0, 0%, 16%);
+  --card-border: hsl(0, 0%, 50%);
   --card-hover-bg: hsl(0, 0%, 14%);
 
   /* Secondary Cards */
   --secondary-card-bg: hsl(0, 0%, 50%);
   --secondary-card-fg: hsl(0, 0%, 85%);
-  --secondary-card-border: hsl(250, 6%, 19%);
+  --secondary-card-border: hsl(0, 0%, 50%);
 
   /* Buttons - Primary */
   --button-primary-bg: hsl(76, 100%, 40%);
