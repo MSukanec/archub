@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { DollarSign, Plus, Edit, Trash2, Heart, Search, Filter, X, Pencil } from "lucide-react";
+import { DollarSign, Plus, Edit, Trash2, Heart, Search, Filter, X, Pencil, Upload } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -42,6 +42,7 @@ import ConversionCard from "@/components/cards/ConversionCard";
 import { transformMovementToCard } from "@/utils/movementCardAdapter";
 
 import { NewMovementModal } from "@/modals/finances/NewMovementModal";
+import ImportMovementsModal from "@/modals/finances/ImportMovementsModal";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMovements, useToggleMovementFavorite } from "@/hooks/use-movements";
 import { useOrganizationDefaultCurrency } from "@/hooks/use-currencies";
@@ -123,6 +124,7 @@ interface ConversionGroup {
 export default function Movements() {
   const [searchValue, setSearchValue] = useState("");
   const [showNewMovementModal, setShowNewMovementModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [editingMovement, setEditingMovement] = useState<Movement | null>(null);
   const [deletingMovement, setDeletingMovement] = useState<Movement | null>(
     null,
@@ -379,6 +381,63 @@ export default function Movements() {
       toast({
         title: "Error",
         description: "No se pudo actualizar el estado de favorito.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Handle imported movements
+  const handleImportMovements = async (importedMovements: any[]) => {
+    try {
+      console.log('Importing movements:', importedMovements);
+      
+      // Transform imported data to match our movement structure
+      const processedMovements = importedMovements.map(movement => {
+        // Basic field mapping
+        const processedMovement = {
+          description: movement.description || '',
+          amount: parseFloat(movement.amount) || 0,
+          movement_date: movement.movement_date,
+          organization_id: userData?.organization_id,
+          project_id: userData?.project_id,
+          created_by: userData?.id,
+          type_id: movement.type_id || '',
+          category_id: movement.category_id || '',
+          subcategory_id: movement.subcategory_id || null,
+          currency_id: movement.currency_id || '',
+          wallet_id: movement.wallet_id || '',
+          is_favorite: false,
+        };
+        
+        return processedMovement;
+      });
+      
+      // Batch insert movements
+      for (const movement of processedMovements) {
+        const { error } = await supabase
+          .from('movements')
+          .insert([movement]);
+        
+        if (error) {
+          console.error('Error inserting movement:', error);
+          throw error;
+        }
+      }
+      
+      // Refresh the movements data
+      queryClient.invalidateQueries({ queryKey: ['movements'] });
+      
+      toast({
+        title: "Movimientos importados",
+        description: `Se importaron ${processedMovements.length} movimientos correctamente.`,
+      });
+      
+      setShowImportModal(false);
+    } catch (error) {
+      console.error('Error importing movements:', error);
+      toast({
+        title: "Error al importar",
+        description: "Hubo un error al importar los movimientos. Revisa los datos e intenta nuevamente.",
         variant: "destructive",
       });
     }
@@ -955,6 +1014,15 @@ export default function Movements() {
         </Button>
       ),
       <Button
+        key="import-movements"
+        variant="outline"
+        onClick={() => setShowImportModal(true)}
+        className="h-8"
+      >
+        <Upload className="mr-2 h-4 w-4" />
+        Importar desde Excel
+      </Button>,
+      <Button
         key="new-movement"
         onClick={() => {
           setEditingMovement(null);
@@ -1066,6 +1134,13 @@ export default function Movements() {
           editingMovement={editingMovement}
         />
       )}
+
+      {/* Import Movements Modal */}
+      <ImportMovementsModal
+        open={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImport={handleImportMovements}
+      />
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog
