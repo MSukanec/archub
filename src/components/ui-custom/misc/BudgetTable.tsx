@@ -19,8 +19,22 @@ interface BudgetTask {
     template_id: string | null;
     param_values: any;
     organization_id: string;
-    description: string;
-    display_name?: string;
+    name_template: string;
+    unit_id: string | null;
+    unit_name: string | null;
+    task_code: string;
+    task_group_id: string | null;
+    task_group_name: string | null;
+    category_id: string | null;
+    category_name: string | null;
+    category_code: string | null;
+    subcategory_id: string | null;
+    subcategory_name: string | null;
+    subcategory_code: string | null;
+    rubro_id: string | null;
+    rubro_name: string | null;
+    rubro_code: string | null;
+    display_name: string;
   };
 }
 

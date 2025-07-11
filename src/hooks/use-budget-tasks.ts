@@ -15,15 +15,29 @@ export interface BudgetTask {
   organization_id: string;
   created_at: string;
   updated_at: string;
-  // Datos de la tarea relacionada (task_generated)
+  // Datos de la tarea relacionada (task_generated_view)
   task: {
     id: string;
     code: string;
     template_id: string | null;
     param_values: any;
     organization_id: string;
-    description: string;
-    display_name?: string;
+    name_template: string;
+    unit_id: string | null;
+    unit_name: string | null;
+    task_code: string;
+    task_group_id: string | null;
+    task_group_name: string | null;
+    category_id: string | null;
+    category_name: string | null;
+    category_code: string | null;
+    subcategory_id: string | null;
+    subcategory_name: string | null;
+    subcategory_code: string | null;
+    rubro_id: string | null;
+    rubro_name: string | null;
+    rubro_code: string | null;
+    display_name: string;
   };
 }
 
@@ -64,7 +78,7 @@ export function useBudgetTasks(budgetId: string) {
         .from("budget_tasks")
         .select(`
           *,
-          task:task_generated(*)
+          task:task_generated_view(*)
         `)
         .eq("budget_id", budgetId)
         .order("created_at", { ascending: false });
@@ -76,16 +90,8 @@ export function useBudgetTasks(budgetId: string) {
 
       console.log("Budget tasks data received:", data);
       
-      // Usar directamente los datos sin procesamiento adicional
-      const processedTasks = (data || []).map((task: any) => {
-        // Usar description como display_name
-        if (task.task?.description) {
-          task.task.display_name = task.task.description;
-        } else if (task.task?.code) {
-          task.task.display_name = task.task.code;
-        }
-        return task;
-      });
+      // La vista ya incluye el display_name procesado, solo devolver los datos
+      const processedTasks = data || [];
       
       return processedTasks;
     },
