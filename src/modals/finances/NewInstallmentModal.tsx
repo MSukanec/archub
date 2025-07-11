@@ -180,6 +180,44 @@ export function NewInstallmentModal({
     enabled: !!organizationId && !!supabase
   })
 
+  // Initialize form when modal opens or data becomes available
+  useEffect(() => {
+    if (!open) return
+    
+    // Find current user's organization member ID
+    const currentMember = organizationMembers?.find(member => 
+      member.user_id === userData?.user?.id
+    )
+    
+    if (editingInstallment) {
+      // Editing mode - populate form with installment data
+      const installmentDate = new Date(editingInstallment.movement_date + 'T00:00:00')
+      
+      form.reset({
+        movement_date: installmentDate,
+        created_by: editingInstallment.created_by,
+        contact_id: editingInstallment.contact_id,
+        currency_id: editingInstallment.currency_id,
+        wallet_id: editingInstallment.wallet_id,
+        amount: editingInstallment.amount,
+        description: editingInstallment.description || '',
+        exchange_rate: editingInstallment.exchange_rate || undefined,
+      })
+    } else if (currentMember) {
+      // New installment - set default creator to current user
+      form.reset({
+        movement_date: new Date(),
+        created_by: currentMember.id, // Use organization_member_id
+        contact_id: '',
+        currency_id: '',
+        wallet_id: '',
+        amount: 0,
+        description: '',
+        exchange_rate: undefined,
+      })
+    }
+  }, [open, editingInstallment, organizationMembers, userData, form])
+
   // Create installment mutation
   const createInstallmentMutation = useMutation({
     mutationFn: async (data: InstallmentForm) => {
@@ -325,42 +363,7 @@ export function NewInstallmentModal({
     }
   }, [organizationContacts, editingInstallment, open, form])
 
-  // Set current user as default creator (using user ID, not member ID)
-  useEffect(() => {
-    if (userData?.user?.id && !editingInstallment && open && !form.getValues('created_by')) {
-      form.setValue('created_by', userData.user.id)
-    }
-  }, [userData, editingInstallment, open, form])
 
-  // Load editing data when modal opens for editing
-  useEffect(() => {
-    if (editingInstallment && open) {
-      // Fix date parsing to avoid timezone issues
-      const movementDate = new Date(editingInstallment.movement_date + 'T00:00:00')
-      form.setValue('movement_date', movementDate)
-      form.setValue('amount', editingInstallment.amount)
-      form.setValue('description', editingInstallment.description || '')
-      form.setValue('contact_id', editingInstallment.contact_id)
-      form.setValue('currency_id', editingInstallment.currency_id)
-      form.setValue('wallet_id', editingInstallment.wallet_id)
-      form.setValue('exchange_rate', editingInstallment.exchange_rate || undefined)
-      
-      // Use the created_by user ID directly
-      form.setValue('created_by', editingInstallment.created_by)
-    } else if (!editingInstallment && open) {
-      // Reset form for new installment
-      form.reset({
-        movement_date: new Date(),
-        amount: 0,
-        description: '',
-        contact_id: '',
-        currency_id: '',
-        wallet_id: '',
-        created_by: userData?.user?.id || '',
-        exchange_rate: undefined
-      })
-    }
-  }, [editingInstallment, open, form, organizationMembers])
 
   return (
     <CustomModalLayout 
@@ -395,7 +398,7 @@ export function NewInstallmentModal({
                       : user?.email?.[0]?.toUpperCase() || 'U'
                     
                     return (
-                      <SelectItem key={`user-${user?.id || index}`} value={user?.id || ''}>
+                      <SelectItem key={`member-${member.id || index}`} value={member.id || ''}>
                         <div className="flex items-center gap-2">
                           <Avatar className="h-6 w-6">
                             <AvatarImage src={user?.avatar_url || ''} />
