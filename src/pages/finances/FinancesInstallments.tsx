@@ -486,7 +486,7 @@ export default function FinancesInstallments() {
     {
       key: "contact",
       label: "Contacto",
-      width: "25%",
+      width: "20%",
       render: (item: any) => {
         if (item.isTotal) {
           return (
@@ -526,7 +526,7 @@ export default function FinancesInstallments() {
     {
       key: "moneda",
       label: "Moneda",
-      width: "15%",
+      width: "8%",
       render: (item: any) => {
         if (item.isTotal) {
           return (
@@ -557,7 +557,7 @@ export default function FinancesInstallments() {
     {
       key: "monto_total",
       label: "Monto Comprometido",
-      width: "15%",
+      width: "18%",
       render: (item: any) => {
         if (item.isTotal) {
           const totalCommitted = item.totalCommittedAmount || 0
@@ -590,7 +590,7 @@ export default function FinancesInstallments() {
     {
       key: "porcentaje_compromiso",
       label: "% de Compromiso",
-      width: "12%",
+      width: "14%",
       render: (item: any) => {
         if (item.isTotal) {
           return <div className="text-sm font-bold">100%</div>
@@ -615,15 +615,19 @@ export default function FinancesInstallments() {
     {
       key: "aporte_dolarizado",
       label: "Aporte Dolarizado",
-      width: "15%",
+      width: "18%",
       sortable: true,
       sortType: 'number' as const,
       render: (item: any) => {
         if (item.isTotal) {
           const totalDollarized = item.totalDollarizedAmount || 0
+          const formattedTotal = new Intl.NumberFormat('es-AR', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+          }).format(totalDollarized)
           return (
             <div className="text-sm font-bold text-green-600">
-              US$ {totalDollarized.toLocaleString('es-AR')}
+              US$ {formattedTotal}
             </div>
           )
         }
@@ -646,7 +650,7 @@ export default function FinancesInstallments() {
     {
       key: "porcentaje_aporte",
       label: "% de Aporte",
-      width: "12%",
+      width: "10%",
       render: (item: any) => {
         if (item.isTotal) {
           return <div className="text-sm font-bold">100%</div>
@@ -671,7 +675,7 @@ export default function FinancesInstallments() {
     {
       key: "monto_restante",
       label: "Monto Restante",
-      width: "16%",
+      width: "12%",
       render: (item: any) => {
         if (item.isTotal) {
           const totalRemaining = item.totalRemainingAmount || 0
