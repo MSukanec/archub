@@ -147,7 +147,7 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
               ref={provided.innerRef}
               {...provided.droppableProps}
               className="flex gap-4 h-full overflow-x-auto pb-4 md:gap-4 snap-x snap-mandatory md:snap-none"
-              style={{ minWidth: 'fit-content' }}
+              style={{ minWidth: 'fit-content', width: '100%' }}
             >
               {lists.map((list, index) => (
                 <Draggable key={list.id} draggableId={`list-${list.id}`} index={index}>
@@ -155,7 +155,7 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
                     <div
                       ref={provided.innerRef}
                       {...provided.draggableProps}
-                      className="flex-shrink-0 w-[calc(100vw-2rem)] md:w-80 snap-center md:snap-align-none"
+                      className="flex-shrink-0 w-[280px] md:w-80 snap-center md:snap-align-none"
                     >
                       <Card className={`h-fit ${snapshot.isDragging ? 'shadow-lg rotate-1' : ''}`}>
                         {/* List Header */}
@@ -525,12 +525,13 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
               ))}
               
               {/* Add New List Button */}
-              <div className="flex-shrink-0 w-[calc(100vw-2rem)] md:w-80 snap-center md:snap-align-none">
-                <Card className="w-full md:w-80 h-fit bg-muted/20 border-dashed border-2 hover:bg-muted/30 transition-colors">
+              <div className="flex-shrink-0 w-[280px] md:w-80 snap-center md:snap-align-none">
+                <Card className="w-full md:w-80 h-fit bg-muted/20 border-dashed border-2 hover:bg-muted/30 transition-colors" style={{ borderColor: 'var(--accent)' }}>
                   <Button
                     variant="ghost"
                     onClick={onCreateList}
-                    className="w-full h-12 justify-center text-muted-foreground hover:text-foreground"
+                    className="w-full h-12 justify-center hover:text-foreground"
+                    style={{ color: 'var(--accent)' }}
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Añade otra lista

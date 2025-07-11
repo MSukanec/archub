@@ -15,6 +15,8 @@ import { NewListModal } from '@/modals/tasks/NewListModal';
 import { CustomRestricted } from '@/components/ui-custom/misc/CustomRestricted';
 import { MobileActionBarProvider, useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext';
 import { MobileActionBar } from '@/components/ui-custom/mobile/MobileActionBar';
+import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
+import { Card } from '@/components/ui/card';
 
 function TasksContent() {
   const [showNewBoardModal, setShowNewBoardModal] = useState(false);
@@ -237,83 +239,114 @@ function TasksContent() {
 
   return (
     <Layout headerProps={headerProps} wide={true}>
-      {/* Board Title with Selector and Actions */}
-      {boards.length > 0 && (
-        <div className="mb-6">
-          <div className="flex items-center gap-3">
-            <Select value={currentBoardId || undefined} onValueChange={handleBoardChange}>
-              <SelectTrigger className="w-[300px] h-10 border border-input bg-background px-3 py-2 text-sm ring-offset-background">
-                <SelectValue placeholder="Seleccionar tablero..." />
-              </SelectTrigger>
-              <SelectContent>
-                {boards.map((board) => (
-                  <SelectItem key={board.id} value={board.id}>
-                    {board.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            
-            {selectedBoard && (
-              <>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => handleEditBoard(selectedBoard)}
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-                
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>¿Eliminar tablero?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Esta acción eliminará permanentemente el tablero "{selectedBoard.name}" y todas sus listas y tarjetas.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction 
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        onClick={() => handleDeleteBoard(selectedBoard.id)}
-                      >
-                        Eliminar
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </>
-            )}
-          </div>
-          
-          {selectedBoard?.description && (
-            <p className="text-sm text-muted-foreground mt-2">{selectedBoard.description}</p>
-          )}
-        </div>
-      )}
-      
-      {selectedBoard && (
-        <CustomKanban 
-          lists={lists}
-          cards={cards}
-          boardId={currentBoardId || ''}
-          onCardMove={handleCardMove}
-          onCreateList={() => setShowNewListModal(true)}
-          onDeleteList={handleDeleteList}
-          loading={listsLoading || cardsLoading}
+      <div className="space-y-6 overflow-x-hidden">
+        {/* FeatureIntroduction */}
+        <FeatureIntroduction
+          title="Tareas"
+          icon={<CheckSquare className="w-5 h-5" />}
+          features={[
+            {
+              icon: <Kanban className="w-5 h-5" />,
+              title: "Tableros Kanban organizados",
+              description: "Gestiona tus tareas con un sistema visual tipo Kanban donde puedes organizar las tareas en listas personalizables como 'Por hacer', 'En progreso' y 'Completadas', facilitando el seguimiento del flujo de trabajo."
+            },
+            {
+              icon: <List className="w-5 h-5" />,
+              title: "Listas flexibles y personalizables",
+              description: "Crea tantas listas como necesites dentro de cada tablero, asigna responsables, establece fechas límite y mueve las tareas fácilmente entre diferentes estados según avance el proyecto."
+            },
+            {
+              icon: <CheckSquare className="w-5 h-5" />,
+              title: "Seguimiento de completitud",
+              description: "Marca tareas como completadas con un sistema de checkbox visual, mantén un historial de tareas terminadas y visualiza el progreso general del equipo en tiempo real."
+            },
+            {
+              icon: <Plus className="w-5 h-5" />,
+              title: "Colaboración en equipo",
+              description: "Asigna tareas a miembros específicos del equipo, agrega descripciones detalladas, comenta en las tareas y mantén a todos informados sobre el progreso del proyecto."
+            }
+          ]}
         />
-      )}
+
+        {/* Board Selector Card */}
+        {boards.length > 0 && (
+          <Card className="p-4">
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium">Tablero:</span>
+              <Select value={currentBoardId || undefined} onValueChange={handleBoardChange}>
+                <SelectTrigger className="flex-1 h-8">
+                  <SelectValue placeholder="Seleccionar tablero..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {boards.map((board) => (
+                    <SelectItem key={board.id} value={board.id}>
+                      {board.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              {selectedBoard && (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-2"
+                    onClick={() => handleEditBoard(selectedBoard)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 px-2"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>¿Eliminar tablero?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Esta acción eliminará permanentemente el tablero "{selectedBoard.name}" y todas sus listas y tarjetas.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction 
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          onClick={() => handleDeleteBoard(selectedBoard.id)}
+                        >
+                          Eliminar
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </>
+              )}
+            </div>
+            
+            {selectedBoard?.description && (
+              <p className="text-sm text-muted-foreground mt-2">{selectedBoard.description}</p>
+            )}
+          </Card>
+        )}
+      
+        {selectedBoard && (
+          <CustomKanban 
+            lists={lists}
+            cards={cards}
+            boardId={currentBoardId || ''}
+            onCardMove={handleCardMove}
+            onCreateList={() => setShowNewListModal(true)}
+            onDeleteList={handleDeleteList}
+            loading={listsLoading || cardsLoading}
+          />
+        )}
+      </div>
 
       {/* Modals */}
       <NewBoardModal
