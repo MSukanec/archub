@@ -85,6 +85,7 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
   const processFile = useCallback(async (file: File) => {
     setIsProcessing(true)
     try {
+      console.log('Processing file:', file.name, 'Size:', file.size)
       const isExcel = file.name.endsWith('.xlsx') || file.name.endsWith('.xls')
       
       if (isExcel) {
@@ -94,29 +95,40 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
         const worksheet = workbook.Sheets[worksheetName]
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 })
         
+        console.log('Excel data parsed:', jsonData.length, 'rows')
+        
         if (jsonData.length > 0) {
           const headers = jsonData[0] as string[]
           const rows = jsonData.slice(1) as any[][]
           
-          setParsedData({
+          const parsedResult = {
             headers: headers.filter(h => h && h.toString().trim()),
             rows: rows.slice(0, 100), // Limit to first 100 rows for preview
             fileName: file.name
-          })
+          }
+          
+          console.log('Parsed data:', parsedResult)
+          setParsedData(parsedResult)
+          setStep(2)
         }
       } else {
         const text = await file.text()
         Papa.parse(text, {
           complete: (results) => {
+            console.log('CSV data parsed:', results.data.length, 'rows')
             if (results.data.length > 0) {
               const headers = results.data[0] as string[]
               const rows = results.data.slice(1) as any[][]
               
-              setParsedData({
+              const parsedResult = {
                 headers: headers.filter(h => h && h.toString().trim()),
                 rows: rows.slice(0, 100), // Limit to first 100 rows for preview
                 fileName: file.name
-              })
+              }
+              
+              console.log('Parsed data:', parsedResult)
+              setParsedData(parsedResult)
+              setStep(2)
             }
           },
           header: false,
@@ -124,7 +136,6 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
         })
       }
       
-      setStep(2)
     } catch (error) {
       console.error('Error processing file:', error)
     } finally {
