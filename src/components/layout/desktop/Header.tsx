@@ -109,6 +109,23 @@ export function Header({
   const currentOrganization = userData?.organization;
   const currentProject = projects.find(p => p.id === userData?.preferences?.last_project_id);
 
+  // Function to get main sidebar section name based on current context
+  const getMainSidebarSection = (context: string) => {
+    const sectionMap: { [key: string]: string } = {
+      'organization': 'Organización',
+      'project': 'Proyecto',
+      'design': 'Diseño', 
+      'construction': 'Obra',
+      'finances': 'Finanzas',
+      'commercialization': 'Comercialización',
+      'data': 'Datos Básicos',
+      'postsale': 'Post-Venta',
+      'admin': 'Administración'
+    };
+    
+    return sectionMap[context] || null;
+  };
+
   // Function to get accordion parent name based on current route
   const getAccordionParent = (path: string) => {
     // Map routes to their accordion parent names
@@ -139,6 +156,7 @@ export function Header({
     return routeParentMap[path] || null;
   };
 
+  const mainSidebarSection = getMainSidebarSection(currentSidebarContext);
   const accordionParent = getAccordionParent(location);
   const hasFilters = filters.length > 0 || customFilters;
 
@@ -358,6 +376,14 @@ export function Header({
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
+            </>
+          )}
+
+          {/* Main Sidebar Section - Show for context pages (organization, admin, etc.) */}
+          {mainSidebarSection && !['design', 'construction', 'finances', 'commercialization'].includes(currentSidebarContext) && (
+            <>
+              <span className="text-[var(--menues-fg)] opacity-70">/</span>
+              <span className="text-sm font-medium text-[var(--menues-fg)]">{mainSidebarSection}</span>
             </>
           )}
 
