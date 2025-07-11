@@ -155,7 +155,7 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
                     <div
                       ref={provided.innerRef}
                       {...provided.draggableProps}
-                      className="flex-shrink-0 w-full md:w-80 snap-center md:snap-align-none px-4 md:px-0"
+                      className="flex-shrink-0 w-full md:w-80 snap-center md:snap-align-none px-3 md:px-0"
                     >
                       <Card className={`h-fit ${snapshot.isDragging ? 'shadow-lg rotate-1' : ''}`}>
                         {/* List Header */}
@@ -525,7 +525,7 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
               ))}
               
               {/* Add New List Button */}
-              <div className="flex-shrink-0 w-full md:w-80 snap-center md:snap-align-none px-4 md:px-0">
+              <div className="flex-shrink-0 w-full md:w-80 snap-center md:snap-align-none px-3 md:px-0">
                 <Card className="w-full h-fit bg-muted/20 border-dashed border-2 hover:bg-muted/30 transition-colors" style={{ borderColor: 'var(--accent)' }}>
                   <Button
                     variant="ghost"
