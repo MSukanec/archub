@@ -164,7 +164,7 @@ export function OrganizationRecentProjects() {
                 transition={{ delay: index * 0.05, duration: 0.2 }}
                 className={`p-4 border rounded-lg hover:shadow-md transition-all duration-200 cursor-pointer ${
                   userData?.preferences?.last_project_id === project.id 
-                    ? 'ring-2 ring-offset-2 ring-[hsl(var(--accent))]' 
+                    ? 'ring-2 ring-offset-2 ring-accent' 
                     : ''
                 }`}
                 onClick={() => handleSetActiveProject(project.id)}
@@ -172,7 +172,7 @@ export function OrganizationRecentProjects() {
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10">
                     <AvatarImage src={project.hero_image_url} alt={project.name} />
-                    <AvatarFallback className="text-sm font-bold text-white bg-[hsl(var(--accent))]">
+                    <AvatarFallback className="text-sm font-bold text-accent-foreground bg-accent">
                       {getProjectInitials(project.name)}
                     </AvatarFallback>
                   </Avatar>
@@ -181,7 +181,7 @@ export function OrganizationRecentProjects() {
                     <div className="flex items-center gap-2 mb-1">
                       <h4 className="font-medium text-sm truncate">{project.name}</h4>
                       {userData?.preferences?.last_project_id === project.id && (
-                        <Badge variant="outline" className="text-xs px-1 py-0 border-[hsl(var(--accent))] text-[hsl(var(--accent))]">
+                        <Badge variant="outline" className="text-xs px-1 py-0 border-accent text-accent">
                           ACTIVO
                         </Badge>
                       )}

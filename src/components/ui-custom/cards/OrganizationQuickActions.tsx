@@ -20,48 +20,48 @@ export function OrganizationQuickActions() {
       title: "Crear Proyecto",
       description: "Nuevo proyecto de construcción",
       icon: Building,
-      color: "text-white",
-      bgColor: "bg-[hsl(var(--accent))]",
+      color: "text-accent-foreground",
+      bgColor: "bg-accent",
       onClick: () => navigate('/organization/projects')
     },
     {
       title: "Agregar Contacto",
       description: "Nuevo cliente o proveedor",
       icon: Users,
-      color: "text-white",
-      bgColor: "bg-[hsl(var(--accent))]",
+      color: "text-accent-foreground",
+      bgColor: "bg-accent",
       onClick: () => navigate('/organization/contacts')
     },
     {
       title: "Subir Documento",
       description: "Documentos de diseño",
       icon: FileText,
-      color: "text-white",
-      bgColor: "bg-[hsl(var(--accent))]",
+      color: "text-accent-foreground",
+      bgColor: "bg-accent",
       onClick: () => navigate('/design/documentation')
     },
     {
       title: "Nuevo Movimiento",
       description: "Registrar ingreso o gasto",
       icon: DollarSign,
-      color: "text-white",
-      bgColor: "bg-[hsl(var(--accent))]",
+      color: "text-accent-foreground",
+      bgColor: "bg-accent",
       onClick: () => navigate('/finances/movements')
     },
     {
       title: "Bitácora de Obra",
       description: "Registrar actividad diaria",
       icon: Construction,
-      color: "text-white",
-      bgColor: "bg-[hsl(var(--accent))]",
+      color: "text-accent-foreground",
+      bgColor: "bg-accent",
       onClick: () => navigate('/construction/logs')
     },
     {
       title: "Invitar Miembro",
       description: "Nuevo miembro del equipo",
       icon: Users,
-      color: "text-white",
-      bgColor: "bg-[hsl(var(--accent))]",
+      color: "text-accent-foreground",
+      bgColor: "bg-accent",
       onClick: () => navigate('/organization/members')
     }
   ]

@@ -6,7 +6,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import CustomTable from '@/components/ui-custom/misc/CustomTable'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useContacts } from '@/hooks/use-contacts'
-import { Users, Plus, Edit, Trash2, CheckCircle, Send, Search, Filter, X, UserPlus } from 'lucide-react'
+import { Users, Plus, Edit, Trash2, CheckCircle, Send, Search, Filter, X, UserPlus, Building, Phone, Mail, Share2, UserCheck } from 'lucide-react'
 import React, { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -18,6 +18,7 @@ import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState'
 import ContactCard from '@/components/cards/ContactCard'
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
 import { useMobile } from '@/hooks/use-mobile'
+import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 
 export default function OrganizationContacts() {
   const [searchValue, setSearchValue] = useState("")
@@ -267,6 +268,54 @@ export default function OrganizationContacts() {
           {format(new Date(contact.created_at), 'dd/MM/yyyy', { locale: es })}
         </div>
       )
+    },
+    {
+      key: "actions" as const,
+      label: "Acciones",
+      sortable: false,
+      render: (contact: any) => (
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation()
+              navigator.clipboard.writeText(`${contact.full_name || `${contact.first_name} ${contact.last_name}`}\nEmail: ${contact.email || 'N/A'}\nTeléfono: ${contact.phone || 'N/A'}\nEmpresa: ${contact.company_name || 'N/A'}`)
+              toast({
+                title: "Información copiada",
+                description: "Los datos del contacto se han copiado al portapapeles"
+              })
+            }}
+            className="h-8 w-8 p-0"
+          >
+            <Share2 className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation()
+              setEditingContact(contact)
+              setShowEditModal(true)
+            }}
+            className="h-8 w-8 p-0"
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation()
+              setContactToDelete(contact)
+              setShowDeleteDialog(true)
+            }}
+            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      )
     }
   ]
 
@@ -363,40 +412,70 @@ export default function OrganizationContacts() {
 
   return (
     <Layout headerProps={headerProps}>
-      <CustomTable
-        data={filteredContacts}
-        columns={columns}
-        isLoading={contactsLoading}
-        emptyState={
-          <div className="text-center py-8">
-            <Users className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">No se encontraron contactos</p>
-            <p className="text-xs text-muted-foreground mt-1">Intenta ajustar los filtros o crear un nuevo contacto</p>
-          </div>
-        }
-        getRowActions={(contact: any) => [
-          {
-            icon: <Edit className="w-4 h-4" />,
-            label: "Editar",
-            onClick: () => handleEditContact(contact)
-          },
-          {
-            icon: <Trash2 className="w-4 h-4" />,
-            label: "Eliminar", 
-            onClick: () => handleDeleteContact(contact),
-            variant: "destructive" as const
+      <div className="space-y-6">
+        {/* FeatureIntroduction */}
+        <FeatureIntroduction
+          title="Contactos"
+          icon={<Users className="w-5 h-5" />}
+          features={[
+            {
+              icon: <Building className="w-5 h-5" />,
+              title: "Gestión integral de personas",
+              description: "Esta página tiene el rol de agregar cada persona que está vinculada a acciones que suceden en la plataforma, tales como compañeros de trabajo, clientes, asesores, trabajadores y cualquier persona relevante para los proyectos de la organización."
+            },
+            {
+              icon: <UserCheck className="w-5 h-5" />,
+              title: "Vinculación con usuarios de Archub",
+              description: "En el caso de que algún contacto estuviera registrado en Archub, se puede vincular ahí mismo de manera tal que se pueda contactar con él y enviarle avisos o información importante directamente a través de la plataforma."
+            },
+            {
+              icon: <Users className="w-5 h-5" />,
+              title: "Base fundamental para otras funciones",
+              description: "Es fundamental entender que los contactos se relacionan directamente con la gran mayoría de funciones de la página y por ende, el primer paso muchas veces es aquí. Desde asignar responsables hasta vincular clientes con proyectos."
+            },
+            {
+              icon: <Share2 className="w-5 h-5" />,
+              title: "Compartir información fácilmente",
+              description: "Se puede compartir información de un contacto (como el teléfono, el mail, empresa, etc.) muy fácilmente haciendo click en el botón 'Compartir Información' de las acciones, copiando automáticamente los datos al portapapeles."
+            }
+          ]}
+        />
+
+        <CustomTable
+          data={filteredContacts}
+          columns={columns}
+          isLoading={contactsLoading}
+          emptyState={
+            <div className="text-center py-8">
+              <Users className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">No se encontraron contactos</p>
+              <p className="text-xs text-muted-foreground mt-1">Intenta ajustar los filtros o crear un nuevo contacto</p>
+            </div>
           }
-        ]}
-        renderCard={(contact: any) => (
-          <ContactCard
-            key={contact.id}
-            contact={contact}
-            onEdit={handleEditContact}
-            onDelete={handleDeleteContact}
-          />
-        )}
-        cardSpacing="space-y-3"
-      />
+          getRowActions={(contact: any) => [
+            {
+              icon: <Edit className="w-4 h-4" />,
+              label: "Editar",
+              onClick: () => handleEditContact(contact)
+            },
+            {
+              icon: <Trash2 className="w-4 h-4" />,
+              label: "Eliminar", 
+              onClick: () => handleDeleteContact(contact),
+              variant: "destructive" as const
+            }
+          ]}
+          renderCard={(contact: any) => (
+            <ContactCard
+              key={contact.id}
+              contact={contact}
+              onEdit={handleEditContact}
+              onDelete={handleDeleteContact}
+            />
+          )}
+          cardSpacing="space-y-3"
+        />
+      </div>
 
       {/* Modales */}
       {showCreateModal && (
