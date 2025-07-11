@@ -38,8 +38,8 @@ export function FeatureIntroduction({
     >
       {/* Always visible title */}
       <div className="p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-3 mb-2 md:mb-0">
             {icon && (
               <div className="text-accent">
                 {icon}
@@ -49,7 +49,7 @@ export function FeatureIntroduction({
               {title}
             </h2>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 md:ml-auto">
             <span className="text-xs text-muted-foreground">
               (click para más información)
             </span>

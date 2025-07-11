@@ -90,11 +90,9 @@ export default function OrganizationContacts() {
     }
 
     return () => {
-      if (isMobile) {
-        clearActions()
-      }
+      clearActions()
     }
-  }, [isMobile, setActions, setShowActionBar, clearActions])
+  }, [isMobile])
 
   // Limpiar estado cuando cambia la organización
   React.useEffect(() => {
