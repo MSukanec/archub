@@ -27,9 +27,13 @@ export function FeatureIntroduction({
   return (
     <div 
       className={cn(
-        "w-full bg-black text-white rounded-lg overflow-hidden shadow-lg mb-6 cursor-pointer transition-all duration-300 ease-in-out",
+        "w-full text-white overflow-hidden shadow-lg mb-6 cursor-pointer transition-all duration-300 ease-in-out",
         className
       )}
+      style={{ 
+        backgroundColor: 'var(--secondary-sidebar-bg)',
+        borderRadius: 'var(--radius-sm)'
+      }}
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => setIsExpanded(false)}
     >
