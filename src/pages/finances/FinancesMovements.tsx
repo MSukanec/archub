@@ -58,6 +58,7 @@ interface Movement {
   id: string;
   description: string;
   amount: number;
+  exchange_rate?: number;
   created_at: string;
   movement_date: string;
   created_by: string;
@@ -889,6 +890,26 @@ export default function Movements() {
         return (
           <span className="text-xs font-medium">
             ${item.amount?.toLocaleString() || "0"}
+          </span>
+        );
+      },
+    },
+    {
+      key: "exchange_rate",
+      label: "Cotización",
+      width: "5%",
+      sortable: false,
+      render: (item: Movement | ConversionGroup) => {
+        if ('is_conversion_group' in item) {
+          return (
+            <div className="text-xs text-muted-foreground">
+              -
+            </div>
+          );
+        }
+        return (
+          <span className="text-xs">
+            {item.exchange_rate ? `$${item.exchange_rate?.toLocaleString()}` : "-"}
           </span>
         );
       },

@@ -30,6 +30,7 @@ const movementSchema = z.object({
   created_by: z.string().min(1, 'Creador es requerido'),
   description: z.string().optional(),
   amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0'),
+  exchange_rate: z.number().optional(),
   type_id: z.string().min(1, 'Tipo es requerido'),
   category_id: z.string().optional(),
   subcategory_id: z.string().optional(),
@@ -64,6 +65,7 @@ interface Movement {
   created_by: string
   description?: string
   amount: number
+  exchange_rate?: number
   type_id: string
   category_id?: string
   subcategory_id?: string
@@ -104,6 +106,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
     defaultValues: {
       movement_date: new Date(),
       amount: 0,
+      exchange_rate: undefined,
       description: '',
       created_by: '',
       type_id: '',
@@ -200,6 +203,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         created_by: editingMovement.created_by,
         description: editingMovement.description || '',
         amount: editingMovement.amount,
+        exchange_rate: editingMovement.exchange_rate,
         type_id: editingMovement.type_id,
         category_id: editingMovement.category_id || '',
         subcategory_id: editingMovement.subcategory_id || '',
@@ -228,6 +232,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
       form.reset({
         movement_date: new Date(),
         amount: 0,
+        exchange_rate: undefined,
         description: '',
         created_by: currentMember?.id || '',
         type_id: '',
@@ -408,6 +413,7 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         form.reset({
           movement_date: new Date(),
           amount: 0,
+          exchange_rate: undefined,
           description: '',
           created_by: '',
           type_id: '',
@@ -1180,6 +1186,35 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                                   value={field.value || ''}
                                   onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                                   className="pl-8"
+                                />
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="exchange_rate"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Cotización (optativo)
+                            </FormLabel>
+                            <FormControl>
+                              <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                                  $
+                                </span>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  min="0"
+                                  value={field.value || ''}
+                                  onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                                  className="pl-8"
+                                  placeholder="Ingrese la cotización"
                                 />
                               </div>
                             </FormControl>
