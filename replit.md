@@ -119,6 +119,13 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 11, 2025. Complete Tasks page enhancement with FeatureIntroduction, board selector, and mobile kanban optimization - COMPLETED
+  • Added FeatureIntroduction component explaining Kanban boards, flexible lists, completion tracking, and team collaboration
+  • Created board selector card with "Tablero:" label, dropdown, edit/delete buttons following PRESUPUESTOS page pattern
+  • Applied --accent CSS variable to "AÑADE OTRA LISTA" text and dotted border for consistent theming
+  • Fixed mobile kanban UX: lists now occupy 100% screen width with smooth horizontal swiping between centered lists
+  • Eliminated horizontal scrollbar issues by replacing calc(100vw-2rem) with proper full-width mobile layout
+  • Enhanced mobile kanban to behave like professional mobile apps with snap-to-center list navigation
 - July 11, 2025. Fixed MemberActivityChart avatar filtering and chart margin optimization - COMPLETED
   • Fixed chart left margin from 40px to 5px to eliminate empty space and reach card padding edge
   • Updated user activity data logic to only show avatars for users with actual activity (activity_count > 0)

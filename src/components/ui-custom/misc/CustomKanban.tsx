@@ -146,7 +146,7 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
             <div 
               ref={provided.innerRef}
               {...provided.droppableProps}
-              className="flex gap-4 h-full overflow-x-auto pb-4 md:gap-4 snap-x snap-mandatory md:snap-none"
+              className="flex h-full overflow-x-auto pb-4 gap-0 md:gap-4 snap-x snap-mandatory md:snap-none"
               style={{ minWidth: 'fit-content', width: '100%' }}
             >
               {lists.map((list, index) => (
@@ -155,7 +155,7 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
                     <div
                       ref={provided.innerRef}
                       {...provided.draggableProps}
-                      className="flex-shrink-0 w-[280px] md:w-80 snap-center md:snap-align-none"
+                      className="flex-shrink-0 w-full md:w-80 snap-center md:snap-align-none px-4 md:px-0"
                     >
                       <Card className={`h-fit ${snapshot.isDragging ? 'shadow-lg rotate-1' : ''}`}>
                         {/* List Header */}
@@ -525,8 +525,8 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
               ))}
               
               {/* Add New List Button */}
-              <div className="flex-shrink-0 w-[280px] md:w-80 snap-center md:snap-align-none">
-                <Card className="w-full md:w-80 h-fit bg-muted/20 border-dashed border-2 hover:bg-muted/30 transition-colors" style={{ borderColor: 'var(--accent)' }}>
+              <div className="flex-shrink-0 w-full md:w-80 snap-center md:snap-align-none px-4 md:px-0">
+                <Card className="w-full h-fit bg-muted/20 border-dashed border-2 hover:bg-muted/30 transition-colors" style={{ borderColor: 'var(--accent)' }}>
                   <Button
                     variant="ghost"
                     onClick={onCreateList}
