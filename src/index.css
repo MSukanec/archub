@@ -91,6 +91,13 @@
   --popover-fg: hsl(0, 0%, 35%);
   --accent-bg: hsl(90, 50%, 90%);
 
+  /* Toast */
+  --toast-bg: hsl(0, 0%, 100%);
+  --toast-fg: hsl(0, 0%, 35%);
+  --toast-border: hsl(0, 0%, 85%);
+  --toast-title: hsl(0, 0%, 10%);
+  --toast-description: hsl(240, 5%, 45%);
+
   /* Accent / State */
   --accent: hsl(76, 100%, 40%);
   --accent-foreground: hsl(0, 0%, 100%);
@@ -242,6 +249,13 @@
   --popover-bg: hsl(0, 0%, 14%);
   --popover-fg: hsl(0, 0%, 98%);
   --accent-bg: hsl(90, 30%, 20%);
+
+  /* Toast */
+  --toast-bg: hsl(0, 0%, 14%);
+  --toast-fg: hsl(0, 0%, 98%);
+  --toast-border: hsl(0, 0%, 22%);
+  --toast-title: hsl(0, 0%, 98%);
+  --toast-description: hsl(240, 5%, 65%);
 
   /* Accent / State */
   --accent: hsl(76, 100%, 40%);

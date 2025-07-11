@@ -522,7 +522,7 @@ export default function Profile() {
 
             {/* Right Column - Current Mode and Change Button */}
             <div className="space-y-6">
-              <div className="space-y-4 p-4 border border-[var(--accent)] rounded-lg">
+              <div className="space-y-4 p-4 border border-[var(--accent)] rounded-lg bg-[var(--card)] text-[var(--card-foreground)]">
                 {(() => {
                   const modeInfo = getUserModeInfo(userData?.preferences?.last_user_type);
                   const ModeIcon = modeInfo.icon;
