@@ -148,7 +148,7 @@ export function BudgetTable<T = any>({
   if (isLoading) {
     return (
       <div className="w-full">
-        <div className="rounded-lg border bg-card">
+        <div className="border rounded-lg bg-card text-card-foreground shadow-sm">
           <div className="p-8 text-center text-muted-foreground">
             Cargando...
           </div>
@@ -160,7 +160,7 @@ export function BudgetTable<T = any>({
   if (data.length === 0) {
     return (
       <div className="w-full">
-        <div className="rounded-lg border bg-card">
+        <div className="border rounded-lg bg-card text-card-foreground shadow-sm">
           {emptyState || (
             <div className="p-8 text-center text-muted-foreground">
               No hay datos disponibles
@@ -175,7 +175,7 @@ export function BudgetTable<T = any>({
     <div className={cn("w-full", className)}>
       {/* Vista Desktop */}
       <div className="hidden md:block">
-        <div className="rounded-lg border bg-card overflow-hidden">
+        <div className="border rounded-lg bg-card text-card-foreground shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>

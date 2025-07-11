@@ -930,7 +930,7 @@ export default function ConstructionBudgets() {
 
             {/* Budget Controls Section - Isolated */}
             {selectedBudget && (
-              <Card className="mb-4 bg-[var(--secondary-card-bg)] border-[var(--secondary-card-border)] text-[var(--secondary-card-fg)]">
+              <Card className="mb-4 border rounded-lg bg-card text-card-foreground shadow-sm">
                 <CardContent className="p-4">
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-center gap-4 flex-1">
@@ -1084,18 +1084,15 @@ export default function ConstructionBudgets() {
             )}
 
             {/* Budget Table Card - Clean without extra controls */}
-            <Card className="border rounded-lg bg-card text-card-foreground shadow-sm overflow-hidden">
-              {/* Budget Tasks Table */}
-              <div className="p-4">
-                {selectedBudget ? (
-                  <BudgetTaskTable budgetId={selectedBudget.id} />
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    Selecciona un presupuesto para ver sus tareas
-                  </div>
-                )}
-              </div>
-            </Card>
+            {selectedBudget ? (
+              <BudgetTaskTable budgetId={selectedBudget.id} />
+            ) : (
+              <Card className="border rounded-lg bg-card text-card-foreground shadow-sm">
+                <div className="text-center py-8 text-muted-foreground">
+                  Selecciona un presupuesto para ver sus tareas
+                </div>
+              </Card>
+            )}
           </>
         )}
       </div>
