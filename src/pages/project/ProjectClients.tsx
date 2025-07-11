@@ -1,0 +1,365 @@
+import { Layout } from '@/components/layout/desktop/Layout'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Separator } from '@/components/ui/separator'
+import { Users, Plus, Trash2, UserPlus } from 'lucide-react'
+import { useState } from 'react'
+import { useCurrentUser } from '@/hooks/use-current-user'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { queryClient } from '@/lib/queryClient'
+import { useToast } from '@/hooks/use-toast'
+import { supabase } from '@/lib/supabase'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Badge } from '@/components/ui/badge'
+
+interface Contact {
+  id: string
+  first_name: string
+  last_name: string
+  company_name: string
+  email: string
+  phone: string
+  full_name: string
+}
+
+interface ProjectClient {
+  id: string
+  project_id: string
+  client_id: string
+  committed_amount: number
+  currency_id: string
+  role: string
+  is_active: boolean
+  notes: string
+  created_at: string
+  updated_at: string
+  contact: Contact
+}
+
+export default function ProjectClients() {
+  const { data: userData, isLoading } = useCurrentUser()
+  const { toast } = useToast()
+  const [showAddClientModal, setShowAddClientModal] = useState(false)
+  const [selectedContactId, setSelectedContactId] = useState<string>('')
+
+  const projectId = userData?.preferences?.last_project_id
+  const organizationId = userData?.organization?.id
+
+  // Get organization contacts
+  const { data: organizationContacts } = useQuery({
+    queryKey: ['organization-contacts', organizationId],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase client not initialized')
+      
+      const { data, error } = await supabase
+        .from('contacts')
+        .select(`
+          id,
+          first_name,
+          last_name,
+          company_name,
+          email,
+          phone,
+          full_name
+        `)
+        .eq('organization_id', organizationId)
+        .order('first_name', { ascending: true })
+
+      if (error) throw error
+      return data || []
+    },
+    enabled: !!organizationId && !!supabase
+  })
+
+  // Get project clients
+  const { data: projectClients, isLoading: loadingClients } = useQuery({
+    queryKey: ['project-clients', projectId],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase client not initialized')
+      
+      const { data, error } = await supabase
+        .from('project_clients')
+        .select(`
+          *,
+          contact:contacts(
+            id,
+            first_name,
+            last_name,
+            company_name,
+            email,
+            phone,
+            full_name
+          )
+        `)
+        .eq('project_id', projectId)
+        .eq('is_active', true)
+
+      if (error) throw error
+      return data || []
+    },
+    enabled: !!projectId && !!supabase
+  })
+
+  // Add client mutation
+  const addClientMutation = useMutation({
+    mutationFn: async (contactId: string) => {
+      if (!supabase) throw new Error('Supabase client not initialized')
+      
+      const { data, error } = await supabase
+        .from('project_clients')
+        .insert({
+          project_id: projectId,
+          client_id: contactId,
+          committed_amount: 0,
+          role: 'cliente',
+          is_active: true,
+          notes: '',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .select()
+
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      toast({
+        title: "Cliente agregado",
+        description: "El cliente ha sido agregado al proyecto exitosamente",
+      })
+      queryClient.invalidateQueries({ queryKey: ['project-clients', projectId] })
+      setShowAddClientModal(false)
+      setSelectedContactId('')
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error al agregar cliente",
+        description: error.message || "Hubo un problema al agregar el cliente",
+        variant: "destructive",
+      })
+    }
+  })
+
+  // Remove client mutation
+  const removeClientMutation = useMutation({
+    mutationFn: async (clientId: string) => {
+      if (!supabase) throw new Error('Supabase client not initialized')
+      
+      const { error } = await supabase
+        .from('project_clients')
+        .update({ is_active: false })
+        .eq('id', clientId)
+
+      if (error) throw error
+    },
+    onSuccess: () => {
+      toast({
+        title: "Cliente removido",
+        description: "El cliente ha sido removido del proyecto",
+      })
+      queryClient.invalidateQueries({ queryKey: ['project-clients', projectId] })
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error al remover cliente",
+        description: error.message || "Hubo un problema al remover el cliente",
+        variant: "destructive",
+      })
+    }
+  })
+
+  const handleAddClient = () => {
+    if (!selectedContactId) return
+    addClientMutation.mutate(selectedContactId)
+  }
+
+  const handleRemoveClient = (clientId: string) => {
+    removeClientMutation.mutate(clientId)
+  }
+
+  // Get available contacts (not already clients)
+  const availableContacts = organizationContacts?.filter(contact => 
+    !projectClients?.some(client => client.client_id === contact.id)
+  ) || []
+
+  const headerProps = {
+    title: "Clientes del Proyecto",
+    actions: [(
+      <Dialog key="add-client" open={showAddClientModal} onOpenChange={setShowAddClientModal}>
+        <DialogTrigger asChild>
+          <Button className="h-8 px-3 text-sm">
+            <UserPlus className="w-4 h-4 mr-2" />
+            Agregar Cliente
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Agregar Cliente al Proyecto</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Seleccionar Contacto</label>
+              <Select value={selectedContactId} onValueChange={setSelectedContactId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecciona un contacto" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableContacts.map(contact => {
+                    const displayName = contact.company_name || 
+                                     `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
+                    return (
+                      <SelectItem key={contact.id} value={contact.id}>
+                        {displayName}
+                      </SelectItem>
+                    )
+                  })}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowAddClientModal(false)}>
+                Cancelar
+              </Button>
+              <Button 
+                onClick={handleAddClient} 
+                disabled={!selectedContactId || addClientMutation.isPending}
+              >
+                {addClientMutation.isPending ? 'Agregando...' : 'Agregar'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    )]
+  }
+
+  if (isLoading || loadingClients) {
+    return (
+      <Layout headerProps={headerProps}>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-sm text-muted-foreground">Cargando clientes...</div>
+        </div>
+      </Layout>
+    )
+  }
+
+  return (
+    <Layout headerProps={headerProps}>
+      <div className="flex gap-8 max-w-7xl mx-auto">
+        {/* Left Sidebar - Same structure as Profile */}
+        <div className="w-64 space-y-8">
+          {/* Project Clients Section */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-lg">
+                <Users className="w-5 h-5 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Clientes del Proyecto</h3>
+                <p className="text-sm text-muted-foreground">
+                  Gestiona los clientes vinculados
+                </p>
+              </div>
+            </div>
+            <Separator />
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Total de Clientes</span>
+                <Badge variant="secondary">
+                  {projectClients?.length || 0}
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Contactos Disponibles</span>
+                <Badge variant="outline">
+                  {availableContacts.length}
+                </Badge>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Content - Same structure as Profile */}
+        <div className="flex-1 space-y-6">
+          {/* Project Clients Card */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">Clientes Activos</h3>
+                  <div className="text-sm text-muted-foreground">
+                    {projectClients?.length || 0} cliente{projectClients?.length !== 1 ? 's' : ''}
+                  </div>
+                </div>
+                
+                {projectClients && projectClients.length > 0 ? (
+                  <div className="space-y-3">
+                    {projectClients.map((client) => {
+                      const contact = client.contact
+                      const displayName = contact?.company_name || 
+                                        `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim()
+                      const initials = contact?.company_name 
+                        ? contact.company_name.charAt(0).toUpperCase()
+                        : `${contact?.first_name?.charAt(0) || ''}${contact?.last_name?.charAt(0) || ''}`.toUpperCase()
+
+                      return (
+                        <div key={client.id} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="w-10 h-10">
+                              <AvatarFallback className="text-sm">{initials}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="font-medium">{displayName}</div>
+                              <div className="text-sm text-muted-foreground">
+                                {contact?.email || 'Sin email'}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary" className="text-xs">
+                              {client.role || 'Cliente'}
+                            </Badge>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemoveClient(client.id)}
+                              disabled={removeClientMutation.isPending}
+                            >
+                              <Trash2 className="w-4 h-4 text-red-500" />
+                            </Button>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>No hay clientes agregados al proyecto</p>
+                    <p className="text-sm">Usa el botón "Agregar Cliente" para vincular contactos</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Available Contacts Info */}
+          {availableContacts.length > 0 && (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Contactos Disponibles</h3>
+                  <div className="text-sm text-muted-foreground">
+                    Hay {availableContacts.length} contacto{availableContacts.length !== 1 ? 's' : ''} disponible{availableContacts.length !== 1 ? 's' : ''} para agregar como cliente{availableContacts.length !== 1 ? 's' : ''} del proyecto.
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
+    </Layout>
+  )
+}

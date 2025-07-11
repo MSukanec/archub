@@ -226,3 +226,105 @@ TABLA MOVEMENTS:
     "data_type": "numeric"
   }
 ]
+
+TABLA CONTACTS:
+
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "organization_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "first_name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "email",
+    "data_type": "text"
+  },
+  {
+    "column_name": "phone",
+    "data_type": "text"
+  },
+  {
+    "column_name": "company_name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "location",
+    "data_type": "text"
+  },
+  {
+    "column_name": "notes",
+    "data_type": "text"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "last_name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "contact_type_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "linked_user_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "full_name",
+    "data_type": "text"
+  }
+]
+
+TABLA PROJECT_CLIENTS:
+
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "project_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "client_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "committed_amount",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "currency_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "role",
+    "data_type": "text"
+  },
+  {
+    "column_name": "is_active",
+    "data_type": "boolean"
+  },
+  {
+    "column_name": "notes",
+    "data_type": "text"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  }
+]

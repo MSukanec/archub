@@ -103,6 +103,7 @@ export function SidebarSubmenu() {
     'proyecto': [
       { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },
       { icon: NotebookPen, label: 'Datos Básicos', href: '/project/basic-data' },
+      { icon: Users, label: 'Clientes', href: '/project/clients' },
     ],
 
     'diseno': [
