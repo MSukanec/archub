@@ -15,37 +15,24 @@ export interface BudgetTask {
   organization_id: string;
   created_at: string;
   updated_at: string;
-  // Datos de la tarea relacionada (task_generated)
+  // Datos de la tarea relacionada (task_generated_view)
   task: {
     id: string;
     code: string;
     template_id: string | null;
     param_values: any;
     organization_id: string;
+    name_template: string;
+    unit_id: string | null;
+    unit_name: string | null;
+    task_code: string;
+    task_group_id: string | null;
+    task_group_name: string | null;
+    category_id: string | null;
+    category_name: string | null;
+    category_code: string | null;
+    rubro_name: string | null;
     display_name?: string;
-    category_info?: {
-      id: string;
-      name: string;
-      code: string;
-    };
-    task_templates?: {
-      name_template: string;
-      unit_id: string | null;
-      task_code: string;
-      task_group_id: string | null;
-      units?: {
-        name: string;
-      };
-      task_groups?: {
-        name: string;
-        category_id: string | null;
-        task_categories?: {
-          id: string;
-          name: string;
-          code: string;
-        };
-      };
-    };
   };
 }
 
@@ -86,28 +73,22 @@ export function useBudgetTasks(budgetId: string) {
         .from("budget_tasks")
         .select(`
           *,
-          task:task_generated(
+          task:task_generated_view(
             id,
             code,
             template_id,
             param_values,
             organization_id,
-            task_templates(
-              name_template,
-              unit_id,
-              task_code,
-              task_group_id,
-              units(name),
-              task_groups(
-                name,
-                category_id,
-                task_categories(
-                  id,
-                  name,
-                  code
-                )
-              )
-            )
+            name_template,
+            unit_id,
+            unit_name,
+            task_code,
+            task_group_id,
+            task_group_name,
+            category_id,
+            category_name,
+            category_code,
+            rubro_name
           )
         `)
         .eq("budget_id", budgetId)
@@ -123,33 +104,24 @@ export function useBudgetTasks(budgetId: string) {
       // Procesar los nombres de las tareas usando la función del taskDescriptionGenerator
       const processedTasks = await Promise.all(
         (data || []).map(async (task: any) => {
-          if (task.task?.task_templates?.name_template && task.task?.param_values) {
-            console.log('Processing task with template:', task.task.task_templates.name_template, 'and params:', task.task.param_values);
+          if (task.task?.name_template && task.task?.param_values) {
+            console.log('Processing task with template:', task.task.name_template, 'and params:', task.task.param_values);
             
             // Usar la función generateTaskDescription para procesar correctamente todos los tipos de parámetros
             const { generateTaskDescription } = await import('@/utils/taskDescriptionGenerator');
             
             try {
               const processedName = await generateTaskDescription(
-                task.task.task_templates.name_template,
+                task.task.name_template,
                 task.task.param_values
               );
               
               console.log('Final processed name:', processedName);
               task.task.display_name = processedName;
-              
-              // Agregar información de categoría si está disponible
-              if (task.task.task_templates?.task_groups?.task_categories) {
-                task.task.category_info = {
-                  id: task.task.task_templates.task_groups.task_categories.id,
-                  name: task.task.task_templates.task_groups.task_categories.name,
-                  code: task.task.task_templates.task_groups.task_categories.code
-                };
-              }
             } catch (error) {
               console.error('Error processing task description:', error);
               // Usar name_template como fallback
-              task.task.display_name = task.task.task_templates.name_template;
+              task.task.display_name = task.task.name_template;
             }
           } else if (task.task?.code) {
             // Si no hay template, usar el código de la tarea

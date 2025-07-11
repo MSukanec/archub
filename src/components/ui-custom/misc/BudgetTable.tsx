@@ -16,21 +16,20 @@ interface BudgetTask {
   task: {
     id: string;
     code: string;
-    name: string;
     template_id: string | null;
     param_values: any;
-    is_public: boolean;
     organization_id: string;
+    name_template: string;
     unit_id: string | null;
-    rubro_name?: string;
+    unit_name: string | null;
+    task_code: string;
+    task_group_id: string | null;
+    task_group_name: string | null;
+    category_id: string | null;
+    category_name: string | null;
+    category_code: string | null;
+    rubro_name: string | null;
     display_name?: string;
-    category_name?: string;
-    subcategory_name?: string;
-    category_info?: {
-      id: string;
-      name: string;
-      code: string;
-    };
   };
 }
 
@@ -117,7 +116,7 @@ export function BudgetTable({
   // Group tasks by rubro if enabled
   const groupedTasks = groupTasksByRubro 
     ? budgetTasks.reduce((acc, task) => {
-        const rubroName = task.task?.category_info?.name || 'Sin rubro';
+        const rubroName = task.task?.rubro_name || 'Sin rubro';
         if (!acc[rubroName]) acc[rubroName] = [];
         acc[rubroName].push(task);
         return acc;
@@ -298,7 +297,7 @@ export function BudgetTable({
                           {generateTaskDisplayName(task.task, parameterValues)}
                         </td>
                         <td className="p-2 text-sm">
-                          {getUnitName(task.task?.unit_id)}
+                          {task.task?.unit_name || '-'}
                         </td>
                         <td className="p-2">
                           <div className="flex items-center gap-1">
