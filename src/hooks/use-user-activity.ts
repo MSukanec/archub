@@ -75,8 +75,18 @@ export function useUserActivity(organizationId: string | undefined, timePeriod: 
             formattedDate = format(date, 'dd/MM')
           }
 
-          const dayStart = format(date, 'yyyy-MM-dd')
-          const dayEnd = format(date, 'yyyy-MM-dd 23:59:59')
+          let dayStart: string
+          let dayEnd: string
+          
+          if (timePeriod === 'year') {
+            // For yearly view, query entire months
+            dayStart = format(date, 'yyyy-MM-01')
+            dayEnd = format(date, 'yyyy-MM-') + format(new Date(date.getFullYear(), date.getMonth() + 1, 0), 'dd') + ' 23:59:59'
+          } else {
+            // For week/month view, query by days
+            dayStart = format(date, 'yyyy-MM-dd')
+            dayEnd = format(date, 'yyyy-MM-dd 23:59:59')
+          }
 
           // Initialize activity for all members for this date
           const usersActivity: { [key: string]: { user_id: string; full_name: string; avatar_url?: string; activity_count: number } } = {}

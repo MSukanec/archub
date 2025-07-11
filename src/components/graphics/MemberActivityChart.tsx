@@ -181,7 +181,7 @@ export function MemberActivityChart({ data, isLoading, timePeriod, onTimePeriodC
       <CardContent>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data} margin={{ top: 30, right: 20, left: 5, bottom: 20 }}>
+            <AreaChart data={data} margin={{ top: 30, right: 20, left: 0, bottom: 20 }}>
               <defs>
                 <linearGradient id="colorUserTotal" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#92c900" stopOpacity={0.8}/>
