@@ -249,8 +249,8 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => handleNavigationWithAnimation('/project/dashboard', 'project', 'right') },
       { type: 'divider' },
       { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
-      { icon: CreditCard, label: 'Aportes', href: '/finances/installments' },
-      { icon: HandCoins, label: 'Compromisos', href: '/finances/commited' },
+      { icon: CreditCard, label: 'Compromisos', href: '/finances/commited' },
+      { icon: HandCoins, label: 'Aportes', href: '/finances/installments' },
       { icon: Settings, label: 'Preferencias de Finanzas', href: '/finances/preferences' },
     ],
     commercialization: [

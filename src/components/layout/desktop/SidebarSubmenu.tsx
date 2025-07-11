@@ -129,8 +129,8 @@ export function SidebarSubmenu() {
     'finanzas': [
       { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
       { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
-      { icon: CreditCard, label: 'Aportes', href: '/finances/installments' },
-      { icon: HandCoins, label: 'Compromisos', href: '/finances/commited' },
+      { icon: CreditCard, label: 'Compromisos', href: '/finances/commited' },
+      { icon: HandCoins, label: 'Aportes', href: '/finances/installments' },
       { icon: FolderOpen, label: 'Preferencias de Finanzas', href: '/finances/preferences' },
     ],
 

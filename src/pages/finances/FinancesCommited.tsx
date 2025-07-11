@@ -90,7 +90,7 @@ export default function FinancesCommited() {
           id,
           is_default,
           currency_id,
-          currency:currencies(
+          currencies!inner(
             id,
             name,
             code,
@@ -235,7 +235,7 @@ export default function FinancesCommited() {
       label: "Moneda",
       width: "25%",
       render: (item: ProjectClient) => {
-        const currentCurrency = organizationCurrencies?.find(oc => oc.currency_id === item.currency_id)
+        const currentCurrency = organizationCurrencies?.find(oc => oc.currencies?.id === item.currency_id)
         
         return (
           <div className="text-sm">
@@ -252,8 +252,8 @@ export default function FinancesCommited() {
             >
               <SelectTrigger className="w-full h-8">
                 <SelectValue placeholder="Seleccionar moneda">
-                  {currentCurrency?.currency ? (
-                    `${currentCurrency.currency.code} - ${currentCurrency.currency.name}`
+                  {currentCurrency?.currencies ? (
+                    `${currentCurrency.currencies.code} - ${currentCurrency.currencies.name}`
                   ) : (
                     'Seleccionar moneda'
                   )}
@@ -262,10 +262,10 @@ export default function FinancesCommited() {
               <SelectContent>
                 {organizationCurrencies?.map((orgCurrency, index) => (
                   <SelectItem 
-                    key={`currency-${orgCurrency.currency?.id || index}`} 
+                    key={`currency-${orgCurrency.currencies?.id || index}`} 
                     value={orgCurrency.currency_id || ''}
                   >
-                    {orgCurrency.currency?.code || 'N/A'} - {orgCurrency.currency?.name || 'Sin nombre'}
+                    {orgCurrency.currencies?.code || 'N/A'} - {orgCurrency.currencies?.name || 'Sin nombre'}
                     {orgCurrency.is_default && ' (Por defecto)'}
                   </SelectItem>
                 ))}
@@ -282,7 +282,7 @@ export default function FinancesCommited() {
       sortable: true,
       sortType: "number" as const,
       render: (item: ProjectClient) => {
-        const currency = organizationCurrencies?.find(oc => oc.currency_id === item.currency_id)?.currency
+        const currency = organizationCurrencies?.find(oc => oc.currency_id === item.currency_id)?.currencies
         const symbol = currency?.symbol || '$'
         
         return (
