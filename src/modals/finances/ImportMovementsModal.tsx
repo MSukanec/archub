@@ -17,6 +17,8 @@ import { Upload, FileText, AlertCircle, CheckCircle, X, MoreHorizontal } from 'l
 import { useMovementConcepts } from '@/hooks/use-movement-concepts'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useOrganizationWallets } from '@/hooks/use-organization-wallets'
+import { useCurrentUser } from '@/hooks/use-current-user'
+import { Checkbox } from '@/components/ui/checkbox'
 import { cn } from '@/lib/utils'
 
 interface ImportMovementsModalProps {
@@ -62,8 +64,10 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
   const [dropzoneKey, setDropzoneKey] = useState(0) // Force dropzone reset
+  const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set()) // Track selected rows
 
   // Data hooks
+  const { data: currentUser } = useCurrentUser()
   const { data: movementConcepts } = useMovementConcepts()
   const { data: organizationCurrencies } = useOrganizationCurrencies()
   const { data: organizationWallets } = useOrganizationWallets()
@@ -79,6 +83,7 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
     setColumnMapping({})
     setValidationErrors([])
     setIsProcessing(false)
+    setSelectedRows(new Set())
     setDropzoneKey(prev => prev + 1) // Force dropzone reset
     onClose()
   }
@@ -294,35 +299,78 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
   const handleMappingComplete = () => {
     const errors = validateData()
     setValidationErrors(errors)
+    
+    // Select all rows by default
+    if (parsedData) {
+      const allRowIndices = new Set(parsedData.rows.map((_, index) => index))
+      setSelectedRows(allRowIndices)
+    }
+    
     setStep(3)
   }
 
   // Process final import
   const handleImport = () => {
-    if (!parsedData) return
+    if (!parsedData || !currentUser) return
     
-    const processedMovements = parsedData.rows.map((row, index) => {
-      const movement: any = {}
-      
-      Object.entries(columnMapping).forEach(([header, field]) => {
-        if (field === '') return // Skip ignored columns
+    // Only process selected rows
+    const processedMovements = parsedData.rows
+      .map((row, index) => {
+        // Skip if row is not selected
+        if (!selectedRows.has(index)) return null
         
-        const columnIndex = parsedData.headers.indexOf(header)
-        const value = row[columnIndex]
+        const movement: any = {}
         
-        if (value !== undefined && value !== null && value !== '') {
-          movement[field] = value
+        Object.entries(columnMapping).forEach(([header, field]) => {
+          if (field === '') return // Skip ignored columns
+          
+          const columnIndex = parsedData.headers.indexOf(header)
+          const value = row[columnIndex]
+          
+          if (value !== undefined && value !== null && value !== '') {
+            movement[field] = value
+          }
+        })
+        
+        // Add project_id from current user preferences
+        if (currentUser.preferences?.last_project_id) {
+          movement.project_id = currentUser.preferences.last_project_id
         }
+        
+        return movement
       })
-      
-      return movement
-    }).filter(movement => {
-      // Only include rows with required fields
-      return REQUIRED_FIELDS.every(field => movement[field] !== undefined)
-    })
+      .filter(movement => {
+        // Only include valid movements with required fields
+        return movement !== null && REQUIRED_FIELDS.every(field => movement[field] !== undefined)
+      })
     
     onImport(processedMovements)
     handleClose()
+  }
+
+  // Handle row selection
+  const handleRowSelection = (rowIndex: number, checked: boolean) => {
+    setSelectedRows(prev => {
+      const newSet = new Set(prev)
+      if (checked) {
+        newSet.add(rowIndex)
+      } else {
+        newSet.delete(rowIndex)
+      }
+      return newSet
+    })
+  }
+
+  // Handle select all
+  const handleSelectAll = (checked: boolean) => {
+    if (!parsedData) return
+    
+    if (checked) {
+      const allRowIndices = new Set(parsedData.rows.map((_, index) => index))
+      setSelectedRows(allRowIndices)
+    } else {
+      setSelectedRows(new Set())
+    }
   }
 
   // Render step content
@@ -465,6 +513,16 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
               </p>
             </div>
             
+            {currentUser?.preferences?.last_project_id && (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Los movimientos se importarán al <strong>proyecto actual</strong>. 
+                  Selecciona las filas que deseas importar usando los checkboxes.
+                </AlertDescription>
+              </Alert>
+            )}
+            
             {validationErrors.length > 0 && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
@@ -489,6 +547,12 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-12">
+                        <Checkbox
+                          checked={selectedRows.size === parsedData.rows.length && parsedData.rows.length > 0}
+                          onCheckedChange={(checked) => handleSelectAll(checked === true)}
+                        />
+                      </TableHead>
                       <TableHead className="w-12">#</TableHead>
                       {Object.entries(columnMapping)
                         .filter(([, field]) => field !== '')
@@ -506,6 +570,12 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
                       
                       return (
                         <TableRow key={rowIndex} className={hasErrors ? 'bg-destructive/10' : ''}>
+                          <TableCell>
+                            <Checkbox
+                              checked={selectedRows.has(rowIndex)}
+                              onCheckedChange={(checked) => handleRowSelection(rowIndex, checked === true)}
+                            />
+                          </TableCell>
                           <TableCell className="text-xs text-muted-foreground">
                             {rowIndex + 1}
                           </TableCell>
@@ -599,10 +669,10 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
         <Button
           key="import"
           onClick={handleImport}
-          disabled={hasBlockingErrors || isProcessing}
+          disabled={hasBlockingErrors || isProcessing || selectedRows.size === 0}
         >
           <CheckCircle className="w-4 h-4 mr-2" />
-          Importar {parsedData?.rows.length || 0} movimientos
+          Importar {selectedRows.size} movimientos
         </Button>
       )
     }
