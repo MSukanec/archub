@@ -119,6 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 11, 2025. ProjectClients page simplified with single-column layout and navigation integration - COMPLETED
+  • Simplified ProjectClients.tsx to single-column layout with only "Clientes Activos" card as requested
+  • Removed left sidebar and secondary cards for cleaner, focused interface
+  • Added "Clientes" navigation button to both desktop SidebarSubmenu.tsx and mobile MobileMenu.tsx in project context
+  • Configured /project/clients route in App.tsx with proper ProtectedRoute wrapper
+  • Page displays project clients with avatar, name, email, role badge, and remove functionality
+  • Empty state shows when no clients are assigned with call-to-action to add first client
+  • "Agregar Cliente" button in header allows selecting from available organization contacts
+  • Successfully integrated with existing project navigation structure
 - July 11, 2025. CRITICAL ISSUE RESOLVED: USER_PREFERENCES "deletion" problem completely solved - COMPLETED
   • Root cause identified: Using auth_id instead of correct user_id from users table was causing foreign key constraint violations
   • Fixed incorrect user ID mapping: auth_id `92eb60ea-4d37-41ab-8461-17139dc88c3f` → user_id `0776911d-ccd9-4ac2-95c2-c1d7e270585b`

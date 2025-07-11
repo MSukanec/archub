@@ -247,118 +247,68 @@ export default function ProjectClients() {
 
   return (
     <Layout headerProps={headerProps}>
-      <div className="flex gap-8 max-w-7xl mx-auto">
-        {/* Left Sidebar - Same structure as Profile */}
-        <div className="w-64 space-y-8">
-          {/* Project Clients Section */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-lg">
-                <Users className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold">Clientes del Proyecto</h3>
-                <p className="text-sm text-muted-foreground">
-                  Gestiona los clientes vinculados
-                </p>
-              </div>
-            </div>
-            <Separator />
-            <div className="space-y-2">
+      <div className="space-y-6">
+        {/* Project Clients Card */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Total de Clientes</span>
-                <Badge variant="secondary">
-                  {projectClients?.length || 0}
-                </Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Contactos Disponibles</span>
-                <Badge variant="outline">
-                  {availableContacts.length}
-                </Badge>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Content - Same structure as Profile */}
-        <div className="flex-1 space-y-6">
-          {/* Project Clients Card */}
-          <Card>
-            <CardContent className="pt-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold">Clientes Activos</h3>
-                  <div className="text-sm text-muted-foreground">
-                    {projectClients?.length || 0} cliente{projectClients?.length !== 1 ? 's' : ''}
-                  </div>
+                <h3 className="text-lg font-semibold">Clientes Activos</h3>
+                <div className="text-sm text-muted-foreground">
+                  {projectClients?.length || 0} cliente{projectClients?.length !== 1 ? 's' : ''}
                 </div>
-                
-                {projectClients && projectClients.length > 0 ? (
-                  <div className="space-y-3">
-                    {projectClients.map((client) => {
-                      const contact = client.contact
-                      const displayName = contact?.company_name || 
-                                        `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim()
-                      const initials = contact?.company_name 
-                        ? contact.company_name.charAt(0).toUpperCase()
-                        : `${contact?.first_name?.charAt(0) || ''}${contact?.last_name?.charAt(0) || ''}`.toUpperCase()
+              </div>
+              
+              {projectClients && projectClients.length > 0 ? (
+                <div className="space-y-3">
+                  {projectClients.map((client) => {
+                    const contact = client.contact
+                    const displayName = contact?.company_name || 
+                                      `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim()
+                    const initials = contact?.company_name 
+                      ? contact.company_name.charAt(0).toUpperCase()
+                      : `${contact?.first_name?.charAt(0) || ''}${contact?.last_name?.charAt(0) || ''}`.toUpperCase()
 
-                      return (
-                        <div key={client.id} className="flex items-center justify-between p-3 border rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <Avatar className="w-10 h-10">
-                              <AvatarFallback className="text-sm">{initials}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <div className="font-medium">{displayName}</div>
-                              <div className="text-sm text-muted-foreground">
-                                {contact?.email || 'Sin email'}
-                              </div>
+                    return (
+                      <div key={client.id} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="w-10 h-10">
+                            <AvatarFallback className="text-sm">{initials}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <div className="font-medium">{displayName}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {contact?.email || 'Sin email'}
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="secondary" className="text-xs">
-                              {client.role || 'Cliente'}
-                            </Badge>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleRemoveClient(client.id)}
-                              disabled={removeClientMutation.isPending}
-                            >
-                              <Trash2 className="w-4 h-4 text-red-500" />
-                            </Button>
-                          </div>
                         </div>
-                      )
-                    })}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>No hay clientes agregados al proyecto</p>
-                    <p className="text-sm">Usa el botón "Agregar Cliente" para vincular contactos</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Available Contacts Info */}
-          {availableContacts.length > 0 && (
-            <Card>
-              <CardContent className="pt-6">
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Contactos Disponibles</h3>
-                  <div className="text-sm text-muted-foreground">
-                    Hay {availableContacts.length} contacto{availableContacts.length !== 1 ? 's' : ''} disponible{availableContacts.length !== 1 ? 's' : ''} para agregar como cliente{availableContacts.length !== 1 ? 's' : ''} del proyecto.
-                  </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="text-xs">
+                            {client.role || 'Cliente'}
+                          </Badge>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRemoveClient(client.id)}
+                            disabled={removeClientMutation.isPending}
+                          >
+                            <Trash2 className="w-4 h-4 text-red-500" />
+                          </Button>
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>No hay clientes agregados al proyecto</p>
+                  <p className="text-sm">Usa el botón "Agregar Cliente" para vincular contactos</p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </Layout>
   )
