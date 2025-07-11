@@ -214,8 +214,9 @@ export function NewAdminGeneratedTaskModal({
     if (!open) {
       Object.values(updateTimeouts).forEach(timeout => clearTimeout(timeout));
       setUpdateTimeouts({});
+      setLocalAmounts({});
     }
-  }, [open, updateTimeouts]);
+  }, [open]);
 
 
 
@@ -315,9 +316,16 @@ export function NewAdminGeneratedTaskModal({
 
   // Estado para el debounce de actualización de materiales
   const [updateTimeouts, setUpdateTimeouts] = useState<Record<string, NodeJS.Timeout>>({});
+  const [localAmounts, setLocalAmounts] = useState<Record<string, number>>({});
 
   // Función para actualizar cantidad de material con debounce
   const handleUpdateMaterialAmount = (materialId: string, newAmount: number) => {
+    // Actualizar estado local inmediatamente
+    setLocalAmounts(prev => ({
+      ...prev,
+      [materialId]: newAmount
+    }));
+
     // Cancelar timeout anterior si existe
     if (updateTimeouts[materialId]) {
       clearTimeout(updateTimeouts[materialId]);
@@ -678,7 +686,7 @@ export function NewAdminGeneratedTaskModal({
                                     type="number"
                                     min="0"
                                     step="0.01"
-                                    value={taskMaterial.amount}
+                                    value={localAmounts[taskMaterial.id] ?? taskMaterial.amount}
                                     onChange={(e) => {
                                       const newAmount = parseFloat(e.target.value) || 0;
                                       handleUpdateMaterialAmount(taskMaterial.id, newAmount);
