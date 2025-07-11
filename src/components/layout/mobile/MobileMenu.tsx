@@ -344,11 +344,12 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                     <CustomRestricted reason="coming_soon">
                       <button
                         onClick={item.isAccordion ? item.onToggle : (item.onClick || (() => handleNavigation(item.href)))}
-                        className="flex w-full items-center gap-3 px-2 py-3 text-base font-medium rounded-xl transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
-                        style={{
-                          color: isButtonActive(item.href) ? 'white' : 'var(--menues-fg)',
-                          backgroundColor: isButtonActive(item.href) ? 'var(--accent)' : 'transparent'
-                        }}
+                        className={cn(
+                          "flex w-full items-center gap-3 px-2 py-3 text-base font-medium rounded-xl transition-colors",
+                          isButtonActive(item.href) 
+                            ? "bg-[hsl(76,100%,40%)] text-white" 
+                            : "text-[var(--menues-fg)] hover:bg-[hsl(76,100%,40%)] hover:text-white"
+                        )}
                       >
                         <item.icon className="h-4 w-4" />
                         {item.label}
@@ -366,11 +367,12 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                   ) : (
                     <button
                       onClick={item.isAccordion ? item.onToggle : (item.onClick || (() => handleNavigation(item.href)))}
-                      className="flex w-full items-center gap-3 px-2 py-3 text-base font-medium rounded-xl transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
-                      style={{
-                        color: isButtonActive(item.href) ? 'white' : 'var(--menues-fg)',
-                        backgroundColor: isButtonActive(item.href) ? 'var(--accent)' : 'transparent'
-                      }}
+                      className={cn(
+                        "flex w-full items-center gap-3 px-2 py-3 text-base font-medium rounded-xl transition-colors",
+                        isButtonActive(item.href) 
+                          ? "bg-[hsl(76,100%,40%)] text-white" 
+                          : "text-[var(--menues-fg)] hover:bg-[hsl(76,100%,40%)] hover:text-white"
+                      )}
                     >
                       <item.icon className="h-4 w-4" />
                       {item.label}
@@ -393,11 +395,12 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                         <button
                           key={subIndex}
                           onClick={() => handleNavigation(subItem.href)}
-                          className="flex w-full items-center gap-2 px-2 py-3 text-base rounded-xl transition-colors hover:bg-[var(--menues-hover-bg)] hover:text-[var(--menues-hover-fg)]"
-                          style={{
-                            color: isButtonActive(subItem.href) ? 'white' : 'var(--menues-fg)',
-                            backgroundColor: isButtonActive(subItem.href) ? 'var(--accent)' : 'transparent'
-                          }}
+                          className={cn(
+                            "flex w-full items-center gap-2 px-2 py-3 text-base rounded-xl transition-colors",
+                            isButtonActive(subItem.href) 
+                              ? "bg-[hsl(76,100%,40%)] text-white" 
+                              : "text-[var(--menues-fg)] hover:bg-[hsl(76,100%,40%)] hover:text-white"
+                          )}
                         >
                           <subItem.icon className="h-4 w-4" />
                           {subItem.label}
