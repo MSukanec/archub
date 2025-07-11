@@ -71,7 +71,7 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
   const categories = movementConcepts?.filter(c => c.type === 'category') || []
   const subcategories = movementConcepts?.filter(c => c.type === 'subcategory') || []
 
-  // Reset modal state
+  // Reset modal state when closing
   const handleClose = () => {
     setStep(1)
     setParsedData(null)
@@ -80,6 +80,17 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
     setIsProcessing(false)
     onClose()
   }
+
+  // Reset modal state when opening
+  React.useEffect(() => {
+    if (open) {
+      setStep(1)
+      setParsedData(null)
+      setColumnMapping({})
+      setValidationErrors([])
+      setIsProcessing(false)
+    }
+  }, [open])
 
   // File processing
   const processFile = useCallback(async (file: File) => {
@@ -101,8 +112,20 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
           const headers = jsonData[0] as string[]
           const rows = jsonData.slice(1) as any[][]
           
+          // Filter out empty headers and keep track of original indices
+          const validHeaders = headers
+            .map((h, index) => ({ header: h, index }))
+            .filter(({ header }) => header && header.toString().trim())
+            .map(({ header }) => header.toString().trim())
+          
+          if (validHeaders.length === 0) {
+            console.error('No valid headers found in Excel file')
+            alert('No se encontraron columnas válidas en el archivo. Verifica que la primera fila contenga los nombres de las columnas.')
+            return
+          }
+          
           const parsedResult = {
-            headers: headers.filter(h => h && h.toString().trim()),
+            headers: validHeaders,
             rows: rows.slice(0, 100), // Limit to first 100 rows for preview
             fileName: file.name
           }
@@ -120,8 +143,20 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
               const headers = results.data[0] as string[]
               const rows = results.data.slice(1) as any[][]
               
+              // Filter out empty headers and keep track of original indices
+              const validHeaders = headers
+                .map((h, index) => ({ header: h, index }))
+                .filter(({ header }) => header && header.toString().trim())
+                .map(({ header }) => header.toString().trim())
+              
+              if (validHeaders.length === 0) {
+                console.error('No valid headers found in CSV file')
+                alert('No se encontraron columnas válidas en el archivo. Verifica que la primera fila contenga los nombres de las columnas.')
+                return
+              }
+              
               const parsedResult = {
-                headers: headers.filter(h => h && h.toString().trim()),
+                headers: validHeaders,
                 rows: rows.slice(0, 100), // Limit to first 100 rows for preview
                 fileName: file.name
               }
@@ -330,10 +365,29 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
             {acceptedFiles.length > 0 && (
               <div className="space-y-2">
                 <Label>Archivo seleccionado:</Label>
-                <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-                  <FileText className="h-4 w-4" />
-                  <span className="text-sm">{acceptedFiles[0].name}</span>
-                  <Badge variant="secondary">{(acceptedFiles[0].size / 1024).toFixed(1)} KB</Badge>
+                <div className="flex items-center justify-between gap-2 p-3 bg-muted rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    <span className="text-sm">{acceptedFiles[0].name}</span>
+                    <Badge variant="secondary">{(acceptedFiles[0].size / 1024).toFixed(1)} KB</Badge>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      // Reset the file input and clear accepted files
+                      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
+                      if (fileInput) {
+                        fileInput.value = ''
+                      }
+                      // Force re-render by setting parsedData to null
+                      setParsedData(null)
+                      setStep(1)
+                    }}
+                    className="h-8 w-8 p-0"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             )}
@@ -358,7 +412,7 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
                   <Badge variant="secondary">{parsedData.rows.length} filas</Badge>
                 </div>
                 
-                <div className="grid gap-4">
+                <div className="space-y-4">
                   {parsedData.headers.map((header, index) => (
                     <div key={index} className="flex items-center gap-4 p-4 border rounded-lg">
                       <div className="flex-1">
@@ -576,7 +630,7 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
           />
         ),
         body: (
-          <CustomModalBody padding="lg" className="min-h-[500px]">
+          <CustomModalBody padding="lg" columns={1} className="min-h-[500px]">
             {renderStepContent()}
           </CustomModalBody>
         ),
