@@ -61,6 +61,7 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
   const [columnMapping, setColumnMapping] = useState<ColumnMapping>({})
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
+  const [dropzoneKey, setDropzoneKey] = useState(0) // Force dropzone reset
 
   // Data hooks
   const { data: movementConcepts } = useMovementConcepts()
@@ -78,6 +79,7 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
     setColumnMapping({})
     setValidationErrors([])
     setIsProcessing(false)
+    setDropzoneKey(prev => prev + 1) // Force dropzone reset
     onClose()
   }
 
@@ -89,6 +91,8 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
       setColumnMapping({})
       setValidationErrors([])
       setIsProcessing(false)
+      // Force dropzone reset by changing key
+      setDropzoneKey(prev => prev + 1)
     }
   }, [open])
 
@@ -180,6 +184,7 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
 
   // Dropzone configuration
   const { getRootProps, getInputProps, isDragActive, acceptedFiles } = useDropzone({
+    key: dropzoneKey,
     onDrop: (files) => {
       if (files.length > 0) {
         processFile(files[0])
@@ -325,7 +330,7 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
     switch (step) {
       case 1:
         return (
-          <div className="space-y-6">
+          <div key={dropzoneKey} className="space-y-6">
             <div className="text-center">
               <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
               <h3 className="text-lg font-medium mb-2">Subir archivo de movimientos</h3>
@@ -375,14 +380,10 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
                     variant="ghost"
                     size="sm"
                     onClick={() => {
-                      // Reset the file input and clear accepted files
-                      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
-                      if (fileInput) {
-                        fileInput.value = ''
-                      }
-                      // Force re-render by setting parsedData to null
+                      // Reset everything and force dropzone reset
                       setParsedData(null)
                       setStep(1)
+                      setDropzoneKey(prev => prev + 1)
                     }}
                     className="h-8 w-8 p-0"
                   >

@@ -393,19 +393,29 @@ export default function Movements() {
       
       // Transform imported data to match our movement structure
       const processedMovements = importedMovements.map(movement => {
-        // Basic field mapping
+        // Convert Excel date serial number to proper date if needed
+        let movementDate = movement.movement_date;
+        if (typeof movementDate === 'number' && movementDate > 40000) {
+          // Excel date serial number to JavaScript date
+          const excelEpoch = new Date(1900, 0, 1);
+          const jsDate = new Date(excelEpoch.getTime() + (movementDate - 2) * 24 * 60 * 60 * 1000);
+          movementDate = jsDate.toISOString().split('T')[0];
+        }
+        
+        // Basic field mapping with proper validation
         const processedMovement = {
-          description: movement.description || '',
+          description: movement.description || 'Movimiento importado',
           amount: parseFloat(movement.amount) || 0,
-          movement_date: movement.movement_date,
+          movement_date: movementDate,
           organization_id: userData?.organization_id,
           project_id: userData?.project_id,
           created_by: userData?.id,
-          type_id: movement.type_id || '',
-          category_id: movement.category_id || '',
-          subcategory_id: movement.subcategory_id || null,
-          currency_id: movement.currency_id || '',
-          wallet_id: movement.wallet_id || '',
+          // Remove empty IDs to avoid UUID errors
+          ...(movement.type_id && movement.type_id.trim() && { type_id: movement.type_id }),
+          ...(movement.category_id && movement.category_id.trim() && { category_id: movement.category_id }),
+          ...(movement.subcategory_id && movement.subcategory_id.trim() && { subcategory_id: movement.subcategory_id }),
+          ...(movement.currency_id && movement.currency_id.trim() && { currency_id: movement.currency_id }),
+          ...(movement.wallet_id && movement.wallet_id.trim() && { wallet_id: movement.wallet_id }),
           is_favorite: false,
         };
         

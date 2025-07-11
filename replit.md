@@ -119,6 +119,16 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 11, 2025. Complete ImportMovementsModal fixes: reset functionality, file removal, UUID error handling, and layout improvements - COMPLETED
+  • Fixed modal to completely reset when opened/closed using dropzoneKey state to force dropzone component reset
+  • Added file removal button (X) with proper functionality to clear selected files and return to step 1
+  • Eliminated hardcoded grid layout by adding columns={1} prop to CustomModalBody for single-column layout
+  • Fixed UUID error during import by properly validating and excluding empty ID fields before database insertion
+  • Enhanced Excel date conversion from serial numbers to proper ISO date format for movement_date field
+  • Improved CSV and Excel file processing with better header validation and empty column filtering
+  • Added comprehensive error handling with user-friendly alerts when no valid headers are found
+  • Fixed processedMovements mapping to use spread operator for conditional ID fields avoiding empty UUID errors
+  • Enhanced import workflow: file upload → column mapping → preview → import with proper state management throughout
 - July 11, 2025. Fixed task description spacing and name generation in PRESUPUESTOS page - COMPLETED
   • Added trim() operations to all task description generation functions to eliminate extra spaces in output
   • Implemented comprehensive space cleanup with replace(/\s+/g, ' ').trim() in taskDescriptionGenerator.ts, ConstructionBudgets.tsx, and use-task-search.ts
