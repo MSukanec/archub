@@ -302,62 +302,21 @@ export default function FinancesInstallments() {
     enabled: !!organizationId && !!projectId && !!cuotasConcept?.id
   })
 
-  // Mutation to update project client committed amount
-  const updateCommittedAmountMutation = useMutation({
-    mutationFn: async ({ clientId, amount }: { clientId: string; amount: number }) => {
-      if (!supabase) throw new Error('Supabase client not initialized')
+  // Get organization currencies for read-only display
+  const { data: allCurrencies = [] } = useQuery({
+    queryKey: ['currencies'],
+    queryFn: async () => {
+      if (!supabase) return []
       
       const { data, error } = await supabase
-        .from('project_clients')
-        .update({ 
-          committed_amount: amount,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', clientId)
-        .select()
+        .from('currencies')
+        .select('id, name, code, symbol')
+        .order('code')
 
       if (error) throw error
-      return data
+      return data || []
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['project-clients', projectId] })
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error al actualizar monto",
-        description: error.message || "Hubo un problema al actualizar el monto comprometido",
-        variant: "destructive",
-      })
-    }
-  })
-
-  // Mutation to update project client currency
-  const updateCurrencyMutation = useMutation({
-    mutationFn: async ({ clientId, currencyId }: { clientId: string; currencyId: string }) => {
-      if (!supabase) throw new Error('Supabase client not initialized')
-      
-      const { data, error } = await supabase
-        .from('project_clients')
-        .update({ 
-          currency_id: currencyId,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', clientId)
-        .select()
-
-      if (error) throw error
-      return data
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['project-clients', projectId] })
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error al actualizar moneda",
-        description: error.message || "Hubo un problema al actualizar la moneda",
-        variant: "destructive",
-      })
-    }
+    enabled: !!supabase
   })
 
   // Calculate total contributed (dollarized)
@@ -511,60 +470,44 @@ export default function FinancesInstallments() {
       label: "Moneda",
       width: "15%",
       render: (item: any) => {
-        const currentCurrency = item.client?.currency_id || ''
+        // Find currency data from project_clients (configured in Compromisos page)
+        const clientCurrency = allCurrencies.find(c => c.id === item.client?.currency_id)
         
         return (
           <div className="text-sm">
-            <Select 
-              value={currentCurrency} 
-              onValueChange={(value) => {
-                if (item.client) {
-                  updateCurrencyMutation.mutate({ 
-                    clientId: item.client.id, 
-                    currencyId: value 
-                  })
-                }
-              }}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Moneda" />
-              </SelectTrigger>
-              <SelectContent>
-                {currencies.map(currency => (
-                  <SelectItem key={currency.id} value={currency.id}>
-                    {currency.code}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {clientCurrency ? (
+              <Badge variant="outline" className="text-xs">
+                {clientCurrency.code} - {clientCurrency.name}
+              </Badge>
+            ) : (
+              <div className="text-muted-foreground text-xs">
+                Sin configurar
+              </div>
+            )}
           </div>
         )
       }
     },
     {
       key: "monto_total",
-      label: "Monto Total",
+      label: "Monto Comprometido",
       width: "20%",
       render: (item: any) => {
-        const currentAmount = item.client?.committed_amount || 0
+        const committedAmount = item.client?.committed_amount || 0
+        const clientCurrency = allCurrencies.find(c => c.id === item.client?.currency_id)
+        const symbol = clientCurrency?.symbol || '$'
         
         return (
           <div className="text-sm">
-            <input
-              type="number"
-              className="w-full px-2 py-1 border rounded text-sm"
-              placeholder="0"
-              value={currentAmount}
-              onChange={(e) => {
-                const newAmount = parseFloat(e.target.value) || 0
-                if (item.client) {
-                  updateCommittedAmountMutation.mutate({ 
-                    clientId: item.client.id, 
-                    amount: newAmount 
-                  })
-                }
-              }}
-            />
+            {committedAmount > 0 ? (
+              <div className="font-medium text-blue-600">
+                {symbol}{committedAmount.toLocaleString('es-AR')}
+              </div>
+            ) : (
+              <div className="text-muted-foreground text-xs">
+                Sin monto comprometido
+              </div>
+            )}
           </div>
         )
       }
