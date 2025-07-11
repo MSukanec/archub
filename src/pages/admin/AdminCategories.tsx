@@ -292,27 +292,27 @@ export default function AdminCategories() {
       }
     ],
     onClearFilters: clearFilters,
-    actions: (
-      <div className="flex gap-2">
-        <Button 
-          onClick={() => refetch()}
-          variant="outline"
-          className="h-8 px-3 text-sm font-medium"
-        >
-          🔄 REFETCH
-        </Button>
-        <Button 
-          onClick={() => {
-            setEditingCategory(null);
-            setIsCategoryModalOpen(true);
-          }}
-          className="h-8 px-3 text-sm font-medium"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          CREAR CATEGORÍA
-        </Button>
-      </div>
-    )
+    actions: [
+      <Button 
+        key="refetch"
+        onClick={() => refetch()}
+        variant="outline"
+        className="h-8 px-3 text-sm font-medium"
+      >
+        🔄 REFETCH
+      </Button>,
+      <Button 
+        key="create"
+        onClick={() => {
+          setEditingCategory(null);
+          setIsCategoryModalOpen(true);
+        }}
+        className="h-8 px-3 text-sm font-medium"
+      >
+        <Plus className="mr-2 h-4 w-4" />
+        CREAR CATEGORÍA
+      </Button>
+    ]
   };
 
   if (isLoading) {
