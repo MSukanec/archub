@@ -15,6 +15,9 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { supabase } from '@/lib/supabase'
 import { NewInstallmentModal } from '@/modals/finances/NewInstallmentModal'
 import { useToast } from '@/hooks/use-toast'
+import ClientSummaryCard from "@/components/cards/ClientSummaryCard";
+import CurrencyDetailCard from "@/components/cards/CurrencyDetailCard";
+import InstallmentDetailCard from "@/components/cards/InstallmentDetailCard";
 
 interface Installment {
   id: string
@@ -486,7 +489,7 @@ export default function FinancesInstallments() {
     {
       key: "contact",
       label: "Contacto",
-      width: "20%",
+      width: "14.3%",
       render: (item: any) => {
         if (item.isTotal) {
           return (
@@ -526,7 +529,7 @@ export default function FinancesInstallments() {
     {
       key: "moneda",
       label: "Moneda",
-      width: "8%",
+      width: "14.3%",
       render: (item: any) => {
         if (item.isTotal) {
           return (
@@ -557,13 +560,13 @@ export default function FinancesInstallments() {
     {
       key: "monto_total",
       label: "Monto Comprometido",
-      width: "18%",
+      width: "14.3%",
       render: (item: any) => {
         if (item.isTotal) {
           const totalCommitted = item.totalCommittedAmount || 0
           return (
             <div className="text-sm font-bold">
-              US$ {totalCommitted.toLocaleString('es-AR')}
+              US$ {totalCommitted.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
             </div>
           )
         }
@@ -575,8 +578,8 @@ export default function FinancesInstallments() {
         return (
           <div className="text-sm">
             {committedAmount > 0 ? (
-              <div className="font-medium text-blue-600">
-                {symbol}{committedAmount.toLocaleString('es-AR')}
+              <div className="font-medium">
+                {symbol}{committedAmount.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </div>
             ) : (
               <div className="text-muted-foreground text-xs">
@@ -590,7 +593,7 @@ export default function FinancesInstallments() {
     {
       key: "porcentaje_compromiso",
       label: "% de Compromiso",
-      width: "14%",
+      width: "14.3%",
       render: (item: any) => {
         if (item.isTotal) {
           return <div className="text-sm font-bold">100%</div>
@@ -602,7 +605,7 @@ export default function FinancesInstallments() {
         return (
           <div className="text-sm">
             {committedAmount > 0 ? (
-              <div className="font-medium text-purple-600">
+              <div className="font-medium">
                 {percentage.toFixed(1)}%
               </div>
             ) : (
@@ -615,7 +618,7 @@ export default function FinancesInstallments() {
     {
       key: "aporte_dolarizado",
       label: "Aporte Dolarizado",
-      width: "18%",
+      width: "14.3%",
       sortable: true,
       sortType: 'number' as const,
       render: (item: any) => {
@@ -641,7 +644,7 @@ export default function FinancesInstallments() {
           maximumFractionDigits: 0
         }).format(item.dollarizedTotal)
         return (
-          <div className="text-sm font-medium text-green-600">
+          <div className="text-sm font-medium">
             US$ {formattedAmount}
           </div>
         )
@@ -650,7 +653,7 @@ export default function FinancesInstallments() {
     {
       key: "porcentaje_aporte",
       label: "% de Aporte",
-      width: "10%",
+      width: "14.3%",
       render: (item: any) => {
         if (item.isTotal) {
           return <div className="text-sm font-bold">100%</div>
@@ -662,7 +665,7 @@ export default function FinancesInstallments() {
         return (
           <div className="text-sm">
             {dollarizedTotal > 0 ? (
-              <div className="font-medium text-orange-600">
+              <div className="font-medium">
                 {percentage.toFixed(1)}%
               </div>
             ) : (
@@ -675,14 +678,14 @@ export default function FinancesInstallments() {
     {
       key: "monto_restante",
       label: "Monto Restante",
-      width: "12%",
+      width: "14.3%",
       render: (item: any) => {
         if (item.isTotal) {
           const totalRemaining = item.totalRemainingAmount || 0
           const isPositive = totalRemaining >= 0
           return (
             <div className={`text-sm font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-              {isPositive ? '+' : '-'}US$ {Math.abs(totalRemaining).toLocaleString('es-AR')}
+              {isPositive ? '+' : '-'}US$ {Math.abs(totalRemaining).toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
             </div>
           )
         }
@@ -972,6 +975,12 @@ export default function FinancesInstallments() {
               data={clientSummary}
               columns={contactSummaryColumns}
               defaultSort={{ key: 'contacto', direction: 'asc' }}
+              renderCard={(item) => (
+                <ClientSummaryCard 
+                  item={item} 
+                  allCurrencies={allCurrencies}
+                />
+              )}
             />
           </div>
         )}
@@ -987,6 +996,9 @@ export default function FinancesInstallments() {
               data={clientSummary}
               columns={summaryColumns}
               defaultSort={{ key: 'contacto', direction: 'asc' }}
+              renderCard={(item) => (
+                <CurrencyDetailCard item={item} />
+              )}
             />
           </div>
         )}
@@ -1002,6 +1014,13 @@ export default function FinancesInstallments() {
               data={filteredInstallments}
               columns={detailColumns}
               defaultSort={{ key: 'movement_date', direction: 'desc' }}
+              renderCard={(item) => (
+                <InstallmentDetailCard 
+                  item={item}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              )}
             />
           </div>
         ) : installments.length === 0 ? (
