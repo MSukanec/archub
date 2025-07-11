@@ -887,30 +887,30 @@ export default function ConstructionBudgets() {
       <div className="space-y-6">
         {/* Feature Introduction */}
         <FeatureIntroduction
-          title="Bienvenido a Presupuestos"
+          title="Bienvenido a la sección de Presupuestos"
           image={
-            <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-              <Calculator className="w-10 h-10 text-white" />
+            <div className="w-20 h-20 bg-accent rounded-full flex items-center justify-center">
+              <Calculator className="w-10 h-10 text-accent-foreground" />
             </div>
           }
           features={[
             {
-              icon: <FileText className="w-5 h-5 text-blue-400" />,
+              icon: <FileText className="w-5 h-5 text-accent" />,
               title: "Gestiona tus presupuestos",
               description: "Crea y organiza presupuestos detallados para cada proyecto de construcción."
             },
             {
-              icon: <BarChart3 className="w-5 h-5 text-green-400" />,
+              icon: <BarChart3 className="w-5 h-5 text-accent" />,
               title: "Agrupa por rubro",
               description: "Visualiza las tareas organizadas por categorías para mejor control de costos."
             },
             {
-              icon: <Calculator className="w-5 h-5 text-purple-400" />,
+              icon: <Calculator className="w-5 h-5 text-accent" />,
               title: "Búsqueda avanzada",
               description: "Encuentra rápidamente tareas específicas o crea tareas personalizadas."
             },
             {
-              icon: <Settings className="w-5 h-5 text-orange-400" />,
+              icon: <Settings className="w-5 h-5 text-accent" />,
               title: "Control de cantidades",
               description: "Ajusta cantidades y materiales directamente desde la tabla de presupuesto."
             }
