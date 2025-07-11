@@ -331,14 +331,6 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
       case 1:
         return (
           <div key={dropzoneKey} className="space-y-6">
-            <div className="text-center">
-              <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">Subir archivo de movimientos</h3>
-              <p className="text-sm text-muted-foreground">
-                Sube un archivo Excel (.xlsx) o CSV con los movimientos financieros
-              </p>
-            </div>
-            
             <div
               {...getRootProps()}
               className={cn(
@@ -577,7 +569,7 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
     buttons.push(
       <Button
         key="cancel"
-        variant="ghost"
+        variant="secondary"
         onClick={handleClose}
         disabled={isProcessing}
       >
