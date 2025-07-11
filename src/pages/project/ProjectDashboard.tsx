@@ -242,58 +242,58 @@ export default function ProjectDashboard() {
         {/* Métricas Principales - Mobile (Compactas) */}
         <div className="md:hidden grid grid-cols-2 gap-3">
           {/* Row 1 */}
-          <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm min-h-[80px]">
+          <div className="bg-[var(--card-bg)] rounded-xl p-3 border border-[var(--card-border)] shadow-sm min-h-[80px]">
             <div className="flex items-center justify-between mb-1">
-              <FileText className="h-4 w-4 text-gray-500" />
+              <FileText className="h-4 w-4 text-muted-foreground" />
             </div>
             <div className="space-y-0.5">
-              <div className="text-xl font-bold text-gray-900">
+              <div className="text-xl font-bold text-foreground">
                 {summaryLoading ? '...' : projectSummary?.totalDocuments || 0}
               </div>
-              <div className="text-xs text-gray-500 font-medium leading-tight">
+              <div className="text-xs text-muted-foreground font-medium leading-tight">
                 Documentos de Diseño
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm min-h-[80px]">
+          <div className="bg-[var(--card-bg)] rounded-xl p-3 border border-[var(--card-border)] shadow-sm min-h-[80px]">
             <div className="flex items-center justify-between mb-1">
-              <Construction className="h-4 w-4 text-gray-500" />
+              <Construction className="h-4 w-4 text-muted-foreground" />
             </div>
             <div className="space-y-0.5">
-              <div className="text-xl font-bold text-gray-900">
+              <div className="text-xl font-bold text-foreground">
                 {summaryLoading ? '...' : projectSummary?.totalSiteLogs || 0}
               </div>
-              <div className="text-xs text-gray-500 font-medium leading-tight">
+              <div className="text-xs text-muted-foreground font-medium leading-tight">
                 Registros de Obra
               </div>
             </div>
           </div>
 
           {/* Row 2 */}
-          <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm min-h-[80px]">
+          <div className="bg-[var(--card-bg)] rounded-xl p-3 border border-[var(--card-border)] shadow-sm min-h-[80px]">
             <div className="flex items-center justify-between mb-1">
-              <Calculator className="h-4 w-4 text-gray-500" />
+              <Calculator className="h-4 w-4 text-muted-foreground" />
             </div>
             <div className="space-y-0.5">
-              <div className="text-xl font-bold text-gray-900">
+              <div className="text-xl font-bold text-foreground">
                 {summaryLoading ? '...' : projectSummary?.totalBudgets || 0}
               </div>
-              <div className="text-xs text-gray-500 font-medium leading-tight">
+              <div className="text-xs text-muted-foreground font-medium leading-tight">
                 Presupuestos
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm min-h-[80px]">
+          <div className="bg-[var(--card-bg)] rounded-xl p-3 border border-[var(--card-border)] shadow-sm min-h-[80px]">
             <div className="flex items-center justify-between mb-1">
-              <DollarSign className="h-4 w-4 text-gray-500" />
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
             </div>
             <div className="space-y-0.5">
-              <div className="text-xl font-bold text-gray-900">
+              <div className="text-xl font-bold text-foreground">
                 {summaryLoading ? '...' : projectSummary?.totalMovements || 0}
               </div>
-              <div className="text-xs text-gray-500 font-medium leading-tight">
+              <div className="text-xs text-muted-foreground font-medium leading-tight">
                 Movimientos
               </div>
             </div>

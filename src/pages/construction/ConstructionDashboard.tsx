@@ -70,57 +70,57 @@ export default function ConstructionDashboard() {
 
         {/* Métricas Principales - Mobile (Compactas) */}
         <div className="md:hidden grid grid-cols-2 gap-3">
-          <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm min-h-[80px]">
+          <div className="bg-[var(--card-bg)] rounded-xl p-3 border border-[var(--card-border)] shadow-sm min-h-[80px]">
             <div className="flex items-center justify-between mb-1">
-              <Building className="h-4 w-4 text-gray-500" />
+              <Building className="h-4 w-4 text-muted-foreground" />
             </div>
             <div className="space-y-0.5">
-              <div className="text-xl font-bold text-gray-900">
+              <div className="text-xl font-bold text-foreground">
                 Planificación
               </div>
-              <div className="text-xs text-gray-500 font-medium leading-tight">
+              <div className="text-xs text-muted-foreground font-medium leading-tight">
                 Estado
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm min-h-[80px]">
+          <div className="bg-[var(--card-bg)] rounded-xl p-3 border border-[var(--card-border)] shadow-sm min-h-[80px]">
             <div className="flex items-center justify-between mb-1">
-              <Clock className="h-4 w-4 text-gray-500" />
+              <Clock className="h-4 w-4 text-muted-foreground" />
             </div>
             <div className="space-y-0.5">
-              <div className="text-xl font-bold text-gray-900">
+              <div className="text-xl font-bold text-foreground">
                 0%
               </div>
-              <div className="text-xs text-gray-500 font-medium leading-tight">
+              <div className="text-xs text-muted-foreground font-medium leading-tight">
                 Progreso
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm min-h-[80px]">
+          <div className="bg-[var(--card-bg)] rounded-xl p-3 border border-[var(--card-border)] shadow-sm min-h-[80px]">
             <div className="flex items-center justify-between mb-1">
-              <Users className="h-4 w-4 text-gray-500" />
+              <Users className="h-4 w-4 text-muted-foreground" />
             </div>
             <div className="space-y-0.5">
-              <div className="text-xl font-bold text-gray-900">
+              <div className="text-xl font-bold text-foreground">
                 0
               </div>
-              <div className="text-xs text-gray-500 font-medium leading-tight">
+              <div className="text-xs text-muted-foreground font-medium leading-tight">
                 Equipos
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm min-h-[80px]">
+          <div className="bg-[var(--card-bg)] rounded-xl p-3 border border-[var(--card-border)] shadow-sm min-h-[80px]">
             <div className="flex items-center justify-between mb-1">
-              <FileText className="h-4 w-4 text-gray-500" />
+              <FileText className="h-4 w-4 text-muted-foreground" />
             </div>
             <div className="space-y-0.5">
-              <div className="text-xl font-bold text-gray-900">
+              <div className="text-xl font-bold text-foreground">
                 0
               </div>
-              <div className="text-xs text-gray-500 font-medium leading-tight">
+              <div className="text-xs text-muted-foreground font-medium leading-tight">
                 Actividad
               </div>
             </div>

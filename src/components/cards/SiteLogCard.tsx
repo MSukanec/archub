@@ -113,7 +113,7 @@ export default function SiteLogCard({ siteLog, onEdit, onDelete, onToggleFavorit
               src={siteLog.creator?.avatar_url || ''} 
               alt={siteLog.creator?.full_name || 'Usuario'} 
             />
-            <AvatarFallback className="bg-gray-100 text-gray-600 text-xs font-medium">
+            <AvatarFallback className="text-xs font-medium">
               {getInitials(siteLog.creator?.full_name || 'Usuario')}
             </AvatarFallback>
           </Avatar>

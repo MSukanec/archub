@@ -70,7 +70,7 @@ const ConversionCard = ({ conversion, onEdit, onDelete, onToggleFavorite }: Conv
               src={creator?.avatar_url || ''} 
               alt={creator?.full_name || creator?.email || 'Usuario'} 
             />
-            <AvatarFallback className="bg-gray-100 text-gray-600 text-sm font-medium">
+            <AvatarFallback className="text-sm font-medium">
               {getInitials(creator?.full_name || creator?.email || 'Usuario')}
             </AvatarFallback>
           </Avatar>
@@ -82,7 +82,7 @@ const ConversionCard = ({ conversion, onEdit, onDelete, onToggleFavorite }: Conv
             <div className="text-[var(--card-fg)] font-medium text-sm">
               Conversión
             </div>
-            <div className="font-semibold text-sm text-blue-600 ml-4">
+            <div className="font-semibold text-sm text-blue-600 dark:text-blue-400 ml-4">
               ${formatAmount(from_amount)} → ${formatAmount(to_amount)}
             </div>
           </div>

@@ -52,7 +52,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity }) => {
             src={author?.avatar_url || ''} 
             alt={author?.full_name || 'Usuario'} 
           />
-          <AvatarFallback className="bg-gray-100 text-gray-600 text-sm font-medium">
+          <AvatarFallback className="text-sm font-medium">
             {getInitials(author?.full_name || 'Usuario')}
           </AvatarFallback>
         </Avatar>

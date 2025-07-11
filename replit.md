@@ -119,6 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 11, 2025. Complete card component color standardization for proper dark mode compatibility - COMPLETED
+  • Fixed ProjectCard hardcoded white backgrounds and gray text colors to use CSS variables
+  • Updated ActivityCard, MovementCard, and ConversionCard to use proper theme-aware colors
+  • Fixed SiteLogCard avatar fallback colors from hardcoded gray to CSS variables
+  • Corrected DesignDashboard mobile cards: replaced all bg-white/text-gray-900/border-gray-200 with CSS variables
+  • Fixed ProjectDashboard mobile cards: replaced hardcoded colors with bg-[var(--card-bg)]/text-foreground/border-[var(--card-border)]
+  • Updated ConstructionDashboard mobile cards to use proper CSS variables for dark mode compatibility
+  • Enhanced color consistency: green/red amount colors now include dark mode variants (dark:text-green-400, dark:text-red-400)
+  • All card components now properly adapt to light/dark themes using CSS variables instead of hardcoded colors
 - July 11, 2025. Complete Tasks page enhancement with FeatureIntroduction, board selector, and mobile kanban optimization - COMPLETED
   • Added FeatureIntroduction component explaining Kanban boards, flexible lists, completion tracking, and team collaboration
   • Created board selector card with "Tablero:" label, dropdown, edit/delete buttons following PRESUPUESTOS page pattern

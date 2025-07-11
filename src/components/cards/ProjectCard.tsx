@@ -60,7 +60,7 @@ export default function ProjectCard({ project, onEdit, onDelete, onSelect }: Pro
       ]}
     >
       <Card 
-        className="w-full cursor-pointer hover:shadow-md transition-shadow duration-200 bg-white border border-gray-200"
+        className="w-full cursor-pointer hover:shadow-md transition-shadow duration-200"
         onClick={() => onSelect(project)}
       >
         <CardContent className="p-3">
@@ -68,8 +68,8 @@ export default function ProjectCard({ project, onEdit, onDelete, onSelect }: Pro
         {/* Row 2: Project name and status (inline) */}
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            <Building className="h-4 w-4 text-gray-500 flex-shrink-0" />
-            <h3 className="font-medium text-sm text-gray-900 truncate">
+            <Building className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+            <h3 className="font-medium text-sm text-foreground truncate">
               {project.name}
             </h3>
           </div>
@@ -79,7 +79,7 @@ export default function ProjectCard({ project, onEdit, onDelete, onSelect }: Pro
         </div>
 
         {/* Row 3: Location and dates */}
-        <div className="flex items-center justify-between text-xs text-gray-500">
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center gap-1">
             <MapPin className="h-3 w-3" />
             <span className="truncate max-w-[120px]">

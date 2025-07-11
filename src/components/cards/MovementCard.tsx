@@ -60,7 +60,7 @@ const MovementCard: React.FC<MovementCardProps> = ({ movement, onEdit, onDelete,
   // Format amount with sign and color
   const isIngreso = type === 'Ingreso';
   const amountPrefix = isIngreso ? '+' : '-';
-  const amountColor = isIngreso ? 'text-green-600' : 'text-red-600';
+  const amountColor = isIngreso ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
   
   // Apply same CSS classes as desktop table rows
   const cardClassName = isIngreso ? 'movement-row-income' : 'movement-row-expense';
