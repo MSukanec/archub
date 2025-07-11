@@ -64,28 +64,27 @@ export function useUserActivity(organizationId: string | undefined, timePeriod: 
         for (let i = daysCount - 1; i >= 0; i--) {
           let date: Date
           let formattedDate: string
+          let dayStart: string
+          let dayEnd: string
           
           if (timePeriod === 'year') {
             // For yearly view, go back by months
             date = subMonths(new Date(), i)
             formattedDate = format(date, 'MMM', { locale: es })
+            
+            // Query entire month
+            const monthStart = new Date(date.getFullYear(), date.getMonth(), 1)
+            const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0)
+            
+            dayStart = format(monthStart, 'yyyy-MM-dd')
+            dayEnd = format(monthEnd, 'yyyy-MM-dd')
           } else {
             // For week/month view, go back by days
             date = subDays(new Date(), i)
             formattedDate = format(date, 'dd/MM')
-          }
-
-          let dayStart: string
-          let dayEnd: string
-          
-          if (timePeriod === 'year') {
-            // For yearly view, query entire months
-            dayStart = format(date, 'yyyy-MM-01')
-            dayEnd = format(date, 'yyyy-MM-') + format(new Date(date.getFullYear(), date.getMonth() + 1, 0), 'dd') + ' 23:59:59'
-          } else {
-            // For week/month view, query by days
+            
             dayStart = format(date, 'yyyy-MM-dd')
-            dayEnd = format(date, 'yyyy-MM-dd 23:59:59')
+            dayEnd = format(date, 'yyyy-MM-dd')
           }
 
           // Initialize activity for all members for this date
@@ -102,12 +101,16 @@ export function useUserActivity(organizationId: string | undefined, timePeriod: 
           })
 
           // Count projects created by each user
-          const { data: projects } = await supabase
+          const { data: projects, error: projectsError } = await supabase
             .from('projects')
             .select('created_by')
             .eq('organization_id', organizationId)
             .gte('created_at', dayStart)
             .lte('created_at', dayEnd)
+            
+          if (projectsError) {
+            console.error('Projects query error:', projectsError, { dayStart, dayEnd, timePeriod })
+          }
 
           projects?.forEach(project => {
             if (project.created_by && usersActivity[project.created_by]) {
@@ -116,12 +119,16 @@ export function useUserActivity(organizationId: string | undefined, timePeriod: 
           })
 
           // Count movements created by each user
-          const { data: movements } = await supabase
+          const { data: movements, error: movementsError } = await supabase
             .from('movements')
             .select('created_by')
             .eq('organization_id', organizationId)
             .gte('created_at', dayStart)
             .lte('created_at', dayEnd)
+            
+          if (movementsError) {
+            console.error('Movements query error:', movementsError, { dayStart, dayEnd, timePeriod })
+          }
 
           movements?.forEach(movement => {
             if (movement.created_by && usersActivity[movement.created_by]) {
@@ -130,12 +137,16 @@ export function useUserActivity(organizationId: string | undefined, timePeriod: 
           })
 
           // Count contacts created by each user
-          const { data: contacts } = await supabase
+          const { data: contacts, error: contactsError } = await supabase
             .from('contacts')
             .select('created_by')
             .eq('organization_id', organizationId)
             .gte('created_at', dayStart)
             .lte('created_at', dayEnd)
+            
+          if (contactsError) {
+            console.error('Contacts query error:', contactsError, { dayStart, dayEnd, timePeriod })
+          }
 
           contacts?.forEach(contact => {
             if (contact.created_by && usersActivity[contact.created_by]) {
@@ -144,12 +155,16 @@ export function useUserActivity(organizationId: string | undefined, timePeriod: 
           })
 
           // Count site logs created by each user
-          const { data: siteLogs } = await supabase
+          const { data: siteLogs, error: siteLogsError } = await supabase
             .from('site_logs')
             .select('created_by')
             .eq('organization_id', organizationId)
             .gte('created_at', dayStart)
             .lte('created_at', dayEnd)
+            
+          if (siteLogsError) {
+            console.error('Site logs query error:', siteLogsError, { dayStart, dayEnd, timePeriod })
+          }
 
           siteLogs?.forEach(siteLog => {
             if (siteLog.created_by && usersActivity[siteLog.created_by]) {
