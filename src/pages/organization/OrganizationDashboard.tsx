@@ -67,9 +67,7 @@ export default function OrganizationDashboard() {
   }, [setSidebarContext, setShowActionBar, isMobile]);
 
   const greeting = getTimeBasedGreeting();
-  const fullFirstName =
-    userData?.user_data?.first_name || userData?.user?.full_name || "Usuario";
-  const firstName = fullFirstName.split(" ")[0]; // Extract only first name
+  const userName = userData?.user_data?.first_name || userData?.user?.full_name || "Usuario";
 
   const headerProps = {
     title: "Resumen de la Organización",
@@ -124,7 +122,7 @@ export default function OrganizationDashboard() {
                     animate={{ scale: 1 }}
                     transition={{ delay: 0.2, duration: 0.3 }}
                   >
-                    {greeting}, {firstName}
+                    {greeting}, {userName}
                   </motion.h1>
                   <p className="text-base md:text-lg text-muted-foreground mb-2 md:mb-3">
                     Estás en{" "}
