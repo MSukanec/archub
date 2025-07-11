@@ -338,14 +338,29 @@ export default function OrganizationMembers() {
       <div className="space-y-6">
         {/* Feature Introduction */}
         <FeatureIntroduction
-          icon={Users}
+          icon={<Users className="h-6 w-6" />}
           title="Gestión de Miembros"
-          description="Invita a miembros de tu equipo a Archub para trabajar juntos de forma rápida y colaborar fácilmente. Gestiona sus permisos para estructurar mejor los proyectos."
           features={[
-            "Invita a miembros de tu equipo que puedan acceder a todos los proyectos y herramientas de colaboración",
-            "Gestiona roles y permisos individuales para cada miembro según sus responsabilidades",
-            "Controla el acceso a configuraciones de la organización y datos sensibles",
-            "Supervisa la actividad y el estado de conexión de cada miembro del equipo"
+            {
+              icon: <Users className="h-4 w-4" />,
+              title: "Invitación de miembros",
+              description: "Invita a miembros de tu equipo que puedan acceder a todos los proyectos y herramientas de colaboración"
+            },
+            {
+              icon: <UserCheck className="h-4 w-4" />,
+              title: "Gestión de roles",
+              description: "Gestiona roles y permisos individuales para cada miembro según sus responsabilidades"
+            },
+            {
+              icon: <Clock className="h-4 w-4" />,
+              title: "Control de acceso",
+              description: "Controla el acceso a configuraciones de la organización y datos sensibles"
+            },
+            {
+              icon: <MoreHorizontal className="h-4 w-4" />,
+              title: "Supervisión de actividad",
+              description: "Supervisa la actividad y el estado de conexión de cada miembro del equipo"
+            }
           ]}
         />
 
