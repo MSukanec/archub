@@ -43,7 +43,8 @@ import {
   FileImage,
   HardHat,
   Brush,
-  UserCircle
+  UserCircle,
+  HandCoins
 } from "lucide-react";
 
 export function SidebarSubmenu() {
@@ -129,6 +130,7 @@ export function SidebarSubmenu() {
       { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
       { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
       { icon: CreditCard, label: 'Aportes', href: '/finances/installments' },
+      { icon: HandCoins, label: 'Compromisos', href: '/finances/commited' },
       { icon: FolderOpen, label: 'Preferencias de Finanzas', href: '/finances/preferences' },
     ],
 

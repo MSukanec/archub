@@ -28,6 +28,7 @@ import ProjectClients from "@/pages/project/ProjectClients";
 import FinancesDashboard from "@/pages/finances/FinancesDashboard";
 import FinancesMovements from "@/pages/finances/FinancesMovements";
 import FinancesInstallments from "@/pages/finances/FinancesInstallments";
+import FinancesCommited from "@/pages/finances/FinancesCommited";
 import FinancesPreferences from "@/pages/finances/FinancesPreferences";
 import ConstructionDashboard from "@/pages/construction/ConstructionDashboard";
 import ConstructionLogs from "@/pages/construction/ConstructionLogs";
@@ -204,6 +205,11 @@ function Router() {
         <Route path="/finances/installments">
           <ProtectedRoute>
             <FinancesInstallments />
+          </ProtectedRoute>
+        </Route>
+        <Route path="/finances/commited">
+          <ProtectedRoute>
+            <FinancesCommited />
           </ProtectedRoute>
         </Route>
         <Route path="/finances/preferences">
