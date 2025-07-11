@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
 import { Plus, X, Folder, FileText, Trash2, Download } from 'lucide-react'
 import { uploadMovementFiles, getMovementFiles, deleteMovementFile } from '@/lib/storage/uploadMovementFiles'
+import UserSelector from '@/components/ui-custom/misc/UserSelector'
 
 const movementSchema = z.object({
   movement_date: z.date(),
@@ -671,20 +672,14 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Creador</FormLabel>
-                              <Select onValueChange={field.onChange} value={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Seleccionar creador" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {members?.map((member: any) => (
-                                    <SelectItem key={member.id} value={member.id}>
-                                      {member.full_name || member.email || 'Usuario sin nombre'}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+                              <FormControl>
+                                <UserSelector
+                                  users={members || []}
+                                  value={field.value}
+                                  onChange={field.onChange}
+                                  placeholder="Seleccionar creador"
+                                />
+                              </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -1019,20 +1014,14 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
                             <FormLabel>
                               Creador
                             </FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Seleccionar creador" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {members?.map((member: any) => (
-                                  <SelectItem key={member.id} value={member.id}>
-                                    {member.full_name || member.email || 'Usuario sin nombre'}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                            <FormControl>
+                              <UserSelector
+                                users={members || []}
+                                value={field.value}
+                                onChange={field.onChange}
+                                placeholder="Seleccionar creador"
+                              />
+                            </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}

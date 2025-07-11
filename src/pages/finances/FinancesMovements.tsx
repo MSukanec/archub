@@ -856,6 +856,81 @@ export default function Movements() {
         );
       },
     },
+    {
+      key: "actions",
+      label: "Acciones",
+      width: "8%",
+      sortable: false,
+      render: (item: Movement | ConversionGroup) => {
+        if ('is_conversion_group' in item) {
+          // Actions for conversion groups
+          const isGroupFavorited = item.movements.some(m => m.is_favorite);
+          return (
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  // Toggle favorite for all movements in the group
+                  item.movements.forEach(movement => {
+                    handleToggleFavorite(movement);
+                  });
+                }}
+                className="h-8 w-8 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
+              >
+                <Heart className={`w-4 h-4 ${isGroupFavorited ? 'fill-current text-red-500' : ''}`} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleEditConversion(item)}
+                className="h-8 w-8 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
+              >
+                <Pencil className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleDeleteConversion(item)}
+                className="h-8 w-8 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
+              >
+                <Trash2 className="w-4 h-4 text-red-500" />
+              </Button>
+            </div>
+          );
+        }
+        
+        // Actions for regular movements
+        return (
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleToggleFavorite(item)}
+              className="h-8 w-8 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
+            >
+              <Heart className={`w-4 h-4 ${item.is_favorite ? 'fill-current text-red-500' : ''}`} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleEdit(item)}
+              className="h-8 w-8 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
+            >
+              <Pencil className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleDelete(item)}
+              className="h-8 w-8 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
+            >
+              <Trash2 className="w-4 h-4 text-red-500" />
+            </Button>
+          </div>
+        );
+      },
+    },
   ];
 
   const headerProps = {
@@ -958,65 +1033,6 @@ export default function Movements() {
               />
             );
           }
-        }}
-
-
-        getRowActions={(item: Movement | ConversionGroup) => {
-          if ('is_conversion_group' in item) {
-            // Actions for conversion groups - apply to both movements
-            const isGroupFavorited = item.movements.some(m => m.is_favorite);
-            return [
-              {
-                icon: isGroupFavorited ? <Heart className="h-4 w-4 fill-current" /> : <Heart className="h-4 w-4" />,
-                label: isGroupFavorited ? "Quitar de favoritos" : "Agregar a favoritos",
-                onClick: () => {
-                  // Toggle favorite for all movements in the group
-                  item.movements.forEach(movement => {
-                    handleToggleFavorite(movement);
-                  });
-                },
-                variant: isGroupFavorited ? "muted" : "default",
-                isActive: isGroupFavorited
-              },
-              {
-                icon: <Pencil className="h-4 w-4" />,
-                label: "Editar conversión",
-                onClick: () => {
-                  handleEditConversion(item);
-                },
-                variant: "primary"
-              },
-              {
-                icon: <Trash2 className="h-4 w-4" />,
-                label: "Eliminar conversión",
-                onClick: () => {
-                  handleDeleteConversion(item);
-                },
-                variant: "destructive"
-              }
-            ];
-          }
-          return [
-            {
-              icon: item.is_favorite ? <Heart className="h-4 w-4 fill-current" /> : <Heart className="h-4 w-4" />,
-              label: item.is_favorite ? "Quitar de favoritos" : "Agregar a favoritos",
-              onClick: () => handleToggleFavorite(item),
-              variant: item.is_favorite ? "muted" : "default",
-              isActive: item.is_favorite
-            },
-            {
-              icon: <Pencil className="h-4 w-4" />,
-              label: "Editar",
-              onClick: () => handleEdit(item),
-              variant: "primary"
-            },
-            {
-              icon: <Trash2 className="h-4 w-4" />,
-              label: "Eliminar",
-              onClick: () => handleDelete(item),
-              variant: "destructive"
-            }
-          ];
         }}
         emptyState={
           <CustomEmptyState
