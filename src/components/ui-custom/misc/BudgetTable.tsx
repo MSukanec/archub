@@ -26,6 +26,11 @@ interface BudgetTask {
     display_name?: string;
     category_name?: string;
     subcategory_name?: string;
+    category_info?: {
+      id: string;
+      name: string;
+      code: string;
+    };
   };
 }
 
@@ -112,7 +117,7 @@ export function BudgetTable({
   // Group tasks by rubro if enabled
   const groupedTasks = groupTasksByRubro 
     ? budgetTasks.reduce((acc, task) => {
-        const rubroName = task.task?.rubro_name || 'Sin rubro';
+        const rubroName = task.task?.category_info?.name || 'Sin rubro';
         if (!acc[rubroName]) acc[rubroName] = [];
         acc[rubroName].push(task);
         return acc;
