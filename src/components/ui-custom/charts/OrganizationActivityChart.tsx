@@ -74,10 +74,15 @@ export function OrganizationActivityChart({ data, isLoading }: OrganizationActiv
                 dataKey="date" 
                 tick={{ fontSize: 12 }}
                 className="text-gray-600"
+                axisLine={false}
+                tickLine={false}
               />
               <YAxis 
                 tick={{ fontSize: 12 }}
                 className="text-gray-600"
+                axisLine={false}
+                tickLine={false}
+                width={30}
               />
               <Tooltip content={<CustomTooltip />} />
               

@@ -18,6 +18,8 @@ import ActivityCard from '@/components/cards/ActivityCard';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { supabase } from '@/lib/supabase';
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
+import { UserActivityChart } from '@/components/graphics/UserActivityChart';
+import { useUserActivity } from '@/hooks/use-user-activity';
 
 export default function OrganizationActivity() {
   const { data: userData } = useCurrentUser();
@@ -26,6 +28,9 @@ export default function OrganizationActivity() {
   const [sortBy, setSortBy] = useState('date_recent');
   const [filterByType, setFilterByType] = useState('all');
   const currentOrganization = userData?.organization;
+
+  // User activity data
+  const { data: userActivityData = [], isLoading: userActivityLoading } = useUserActivity(currentOrganization?.id);
 
   // Fetch all organization activity
   const { data: activities = [], isLoading } = useQuery({
@@ -404,6 +409,12 @@ export default function OrganizationActivity() {
               description: "Las acciones están organizadas y filtradas por miembro de la organización, de manera tal que se puede saber exactamente quién hizo cada cosa. Esto permite identificar responsabilidades, reconocer contribuciones y mantener la trazabilidad de las decisiones tomadas."
             }
           ]}
+        />
+
+        {/* User Activity Chart */}
+        <UserActivityChart 
+          data={userActivityData} 
+          isLoading={userActivityLoading}
         />
 
         <CustomTable
