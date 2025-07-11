@@ -212,8 +212,8 @@ input[type="number"] {
   --text-inverted: hsl(0, 0%, 100%);
 
   /* Tables */
-  --table-header-bg: hsl(0, 0%, 95%);
-  --table-header-fg: hsl(0, 0%, 35%);
+  --table-header-bg: hsl(210, 20%, 96%);
+  --table-header-fg: hsl(215, 16%, 47%);
   --table-header-border: hsl(0, 0%, 85%);
   --table-row-bg: hsl(0, 0%, 100%);
   --table-row-fg: hsl(0, 0%, 35%);
@@ -360,8 +360,8 @@ input[type="number"] {
   --chart-5: hsl(27, 87%, 70%);
 
   /* Tables */
-  --table-header-bg: hsl(0, 0%, 14%);
-  --table-header-fg: hsl(0, 0%, 60%);
+  --table-header-bg: hsl(210, 20%, 22%);
+  --table-header-fg: hsl(215, 16%, 70%);
   --table-header-border: hsl(0, 0%, 22%);
   --table-row-bg: hsl(0, 0%, 16%);
   --table-row-fg: hsl(0, 0%, 90%);

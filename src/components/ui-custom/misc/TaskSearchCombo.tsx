@@ -103,7 +103,7 @@ export function TaskSearchCombo({
                 activeFiltersCount > 0 && "bg-accent text-accent-foreground"
               )}
             >
-              <Filter className="w-4 h-4" />
+              <Filter className="w-4 h-4 font-normal" />
               {activeFiltersCount > 0 && (
                 <span className="absolute -top-1 -right-1 h-3 w-3 bg-accent text-accent-foreground rounded-full text-[8px] flex items-center justify-center">
                   {activeFiltersCount}
@@ -256,11 +256,28 @@ export function TaskSearchCombo({
             style={{ width: 'var(--radix-popover-trigger-width)' }}
           >
             <Command className="bg-background rounded-md border-[var(--input-border)]" shouldFilter={false}>
-              <CommandInput 
-                placeholder={searchPlaceholder} 
-                onValueChange={onSearchChange}
-                className="text-xs h-8 border-0 bg-transparent placeholder:text-[var(--input-placeholder)] text-foreground"
-              />
+              <div className="relative">
+                <CommandInput 
+                  placeholder={searchPlaceholder} 
+                  onValueChange={onSearchChange}
+                  className="text-xs h-8 border-0 bg-transparent placeholder:text-[var(--input-placeholder)] text-foreground pr-8"
+                  value={searchQuery}
+                />
+                {searchQuery && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0 hover:bg-accent/20"
+                    onClick={() => {
+                      if (onSearchChange) {
+                        onSearchChange('');
+                      }
+                    }}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                )}
+              </div>
           
           {/* Solo mostrar CommandEmpty si no hay opciones Y hay una búsqueda activa */}
           {options.length === 0 && searchQuery.length >= 3 && (

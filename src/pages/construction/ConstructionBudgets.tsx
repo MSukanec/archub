@@ -708,15 +708,15 @@ export default function ConstructionBudgets() {
                   <Fragment key={rubroName}>
                     {/* Rubro Header Row (only show if grouping is enabled) */}
                     {groupTasksByRubro && (
-                      <tr className="bg-muted border-b">
+                      <tr className="border-b" style={{ backgroundColor: 'var(--table-header-bg)' }}>
                         <td className="p-3"></td>
                         <td className="p-3">
-                          <div className="font-semibold text-sm text-foreground">
+                          <div className="font-semibold text-sm" style={{ color: 'var(--table-header-fg)' }}>
                             {rubroNumber}
                           </div>
                         </td>
                         <td className="p-3">
-                          <div className="font-semibold text-sm text-foreground capitalize">
+                          <div className="font-semibold text-sm capitalize" style={{ color: 'var(--table-header-fg)' }}>
                             {rubroName.toLowerCase()}
                           </div>
                         </td>
@@ -918,7 +918,7 @@ export default function ConstructionBudgets() {
                       <span className="text-sm font-medium text-muted-foreground">
                         Presupuesto:
                       </span>
-                      <div className="min-w-[200px]">
+                      <div className="min-w-[400px]">
                         <Select value={selectedBudgetId} onValueChange={(value) => {
                           console.log('Budget selector changed to:', value);
                           console.log('User data available:', !!userData?.user?.id);
@@ -947,6 +947,23 @@ export default function ConstructionBudgets() {
 
                   {/* Action Buttons */}
                   <div className="flex items-center gap-2">
+                    {/* Group by Rubro Switch */}
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        id="group-by-rubro-budget"
+                        checked={selectedBudget?.group_tasks_by_rubro || false}
+                        onCheckedChange={(checked) => {
+                          updateBudgetGroupingMutation.mutate({ 
+                            budgetId: selectedBudget.id, 
+                            groupByRubro: checked 
+                          });
+                        }}
+                      />
+                      <Label htmlFor="group-by-rubro-budget" className="text-xs text-muted-foreground">
+                        Agrupar por rubro
+                      </Label>
+                    </div>
+                    
                     <Button
                       variant="ghost"
                       size="sm"
@@ -1017,23 +1034,6 @@ export default function ConstructionBudgets() {
                         </span>
                       )}
                     </div>
-                  </div>
-                  
-                  {/* Group by Rubro Switch */}
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      id="group-by-rubro-search"
-                      checked={selectedBudget?.group_tasks_by_rubro || false}
-                      onCheckedChange={(checked) => {
-                        updateBudgetGroupingMutation.mutate({ 
-                          budgetId: selectedBudget.id, 
-                          groupByRubro: checked 
-                        });
-                      }}
-                    />
-                    <Label htmlFor="group-by-rubro-search" className="text-xs text-muted-foreground">
-                      Agrupar por rubro
-                    </Label>
                   </div>
                   
                   <Button
