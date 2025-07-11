@@ -252,7 +252,7 @@ export default function FinancesInstallments() {
     return sum + (installment.amount || 0)
   }, 0)
 
-  // Calculate installment summary by contact with dynamic currencies
+  // Calculate installment summary by contact with dynamic currencies and dollarized amounts
   const { installmentSummary, availableCurrencies } = React.useMemo(() => {
     const summaryMap = new Map<string, any>()
     const currenciesSet = new Set<string>()
@@ -270,7 +270,8 @@ export default function FinancesInstallments() {
         summaryMap.set(contactKey, {
           contact_id: installment.contact_id,
           contact: installment.contact,
-          currencies: {}
+          currencies: {},
+          dollarizedTotal: 0 // Nuevo campo para total dolarizado
         })
       }
       
@@ -283,14 +284,23 @@ export default function FinancesInstallments() {
       }
       
       contactSummary.currencies[currencyCode].amount += installment.amount || 0
+      
+      // Calcular aporte dolarizado
+      const amount = installment.amount || 0
+      if (currencyCode === 'USD') {
+        // Si ya está en dólares, sumar directamente
+        contactSummary.dollarizedTotal += amount
+      } else if (currencyCode !== 'USD' && installment.exchange_rate) {
+        // Si no es USD y tiene cotización, dividir por la cotización para obtener dólares
+        contactSummary.dollarizedTotal += amount / installment.exchange_rate
+      }
+      // Si no es USD y no tiene cotización, no se suma al total dolarizado
     })
     
     const currencies = Array.from(currenciesSet).sort()
     const summary = Array.from(summaryMap.values()).sort((a, b) => {
-      // Sort by total amount across all currencies (using first currency for comparison)
-      const aTotalFirstCurrency = Object.values(a.currencies)[0]?.amount || 0
-      const bTotalFirstCurrency = Object.values(b.currencies)[0]?.amount || 0
-      return bTotalFirstCurrency - aTotalFirstCurrency
+      // Sort by dollarized total
+      return b.dollarizedTotal - a.dollarizedTotal
     })
     
     return { installmentSummary: summary, availableCurrencies: currencies }
@@ -331,7 +341,7 @@ export default function FinancesInstallments() {
       {
         key: "contact",
         label: "Contacto",
-        width: "40%",
+        width: "30%",
         render: (item: any) => {
           if (!item.contact) {
             return <div className="text-sm text-muted-foreground">Sin contacto</div>
@@ -366,7 +376,7 @@ export default function FinancesInstallments() {
     const currencyColumns = availableCurrencies.map(currencyCode => ({
       key: `currency_${currencyCode}`,
       label: currencyCode,
-      width: `${Math.max(60 / availableCurrencies.length, 15)}%`,
+      width: `${Math.max(50 / availableCurrencies.length, 12)}%`,
       sortable: true,
       sortType: 'number' as const,
       render: (item: any) => {
@@ -384,7 +394,28 @@ export default function FinancesInstallments() {
       }
     }))
 
-    return [...baseColumns, ...currencyColumns]
+    // Add dollarized total column
+    const dollarizedColumn = {
+      key: "dollarized_total",
+      label: "APORTE DOLARIZADO",
+      width: "20%",
+      sortable: true,
+      sortType: 'number' as const,
+      render: (item: any) => {
+        if (!item.dollarizedTotal || item.dollarizedTotal === 0) {
+          return <div className="text-sm text-muted-foreground">-</div>
+        }
+
+        const formattedAmount = new Intl.NumberFormat('es-AR').format(item.dollarizedTotal)
+        return (
+          <div className="text-sm font-medium text-green-600">
+            US$ {formattedAmount}
+          </div>
+        )
+      }
+    }
+
+    return [...baseColumns, ...currencyColumns, dollarizedColumn]
   }, [availableCurrencies])
 
   // Detailed table columns (Fecha, Contacto, Moneda, Billetera, Monto, Cotización, Acciones)
@@ -396,7 +427,7 @@ export default function FinancesInstallments() {
       sortable: true,
       sortType: "date" as const,
       render: (item: Installment) => {
-        const date = new Date(item.movement_date)
+        const date = new Date(item.movement_date + 'T00:00:00')
         return (
           <div className="text-sm">
             {format(date, 'dd/MM/yyyy', { locale: es })}
