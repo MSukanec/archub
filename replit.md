@@ -119,6 +119,17 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 11, 2025. CRITICAL ISSUE RESOLVED: USER_PREFERENCES "deletion" problem completely solved - COMPLETED
+  • Root cause identified: Using auth_id instead of correct user_id from users table was causing foreign key constraint violations
+  • Fixed incorrect user ID mapping: auth_id `92eb60ea-4d37-41ab-8461-17139dc88c3f` → user_id `0776911d-ccd9-4ac2-95c2-c1d7e270585b`
+  • Corrected useCurrentUser hook and authStore to use proper user_id from users table instead of auth.user.id
+  • Investigation confirmed: RPC function `archub_get_user` was working correctly and NOT causing data deletion
+  • Database triggers, RLS policies, and all backend functions were functioning properly throughout
+  • No actual data deletion occurred - issue was foreign key constraint violations due to wrong ID usage
+  • Removed all monitoring and debugging code after successful resolution
+  • Fixed NewMovementModal field ordering: Creador now appears before Fecha in both regular and conversion forms
+  • Added logic to preserve creator and date values when switching between regular and conversion movement types
+Changelog:
 - July 11, 2025. Fixed Excel import 100-row limitation and exchange rate display issues - COMPLETED
   • Removed hardcoded 100-row limit from ImportMovementsModal.tsx for both Excel (.xlsx/.xls) and CSV file processing
   • Import system now processes all rows in uploaded files instead of limiting to first 100 records
