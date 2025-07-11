@@ -408,8 +408,8 @@ export default function Movements() {
           description: movement.description || 'Movimiento importado',
           amount: parseFloat(movement.amount) || 0,
           movement_date: movementDate,
-          organization_id: userData?.organization_id,
-          project_id: movement.project_id || userData?.project_id,
+          organization_id: movement.organization_id || userData?.preferences?.last_organization_id,
+          project_id: movement.project_id || userData?.preferences?.last_project_id,
           created_by: userData?.id,
           // Remove empty IDs to avoid UUID errors
           ...(movement.type_id && movement.type_id.trim() && { type_id: movement.type_id }),
