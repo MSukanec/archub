@@ -156,28 +156,31 @@ export function NewInstallmentModal({
     }
   })
 
-  // Get organization contacts (not just project investors)
-  const { data: organizationContacts } = useQuery({
-    queryKey: ['organization-contacts', organizationId],
+  // Get project clients instead of organization contacts
+  const { data: projectClients } = useQuery({
+    queryKey: ['project-clients', projectId],
     queryFn: async () => {
-      if (!supabase) throw new Error('Supabase client not initialized')
+      if (!supabase || !projectId) return []
       
       const { data, error } = await supabase
-        .from('contacts')
+        .from('project_clients')
         .select(`
-          id,
-          first_name,
-          last_name,
-          company_name,
-          email,
-          full_name
+          *,
+          contact:contacts!inner(
+            id,
+            first_name,
+            last_name,
+            company_name,
+            full_name
+          )
         `)
-        .eq('organization_id', organizationId)
+        .eq('project_id', projectId)
+        .eq('is_active', true)
 
       if (error) throw error
       return data || []
     },
-    enabled: !!organizationId && !!supabase
+    enabled: !!projectId && !!supabase
   })
 
   // Initialize form when modal opens or data becomes available
@@ -347,21 +350,21 @@ export function NewInstallmentModal({
     }
   }, [wallets, form])
 
-  // Set first contact as default when creating new installment
+  // Set first client as default when creating new installment
   useEffect(() => {
-    if (organizationContacts && organizationContacts.length > 0 && !editingInstallment && open) {
-      const sortedContacts = organizationContacts.sort((a, b) => {
-        const nameA = a.full_name || a.company_name || `${a.first_name || ''} ${a.last_name || ''}`.trim()
-        const nameB = b.full_name || b.company_name || `${b.first_name || ''} ${b.last_name || ''}`.trim()
+    if (projectClients && projectClients.length > 0 && !editingInstallment && open) {
+      const sortedClients = projectClients.sort((a, b) => {
+        const nameA = a.contact.full_name || a.contact.company_name || `${a.contact.first_name || ''} ${a.contact.last_name || ''}`.trim()
+        const nameB = b.contact.full_name || b.contact.company_name || `${b.contact.first_name || ''} ${b.contact.last_name || ''}`.trim()
         return nameA.localeCompare(nameB)
       })
       
-      const firstContact = sortedContacts[0]
-      if (firstContact && !form.getValues('contact_id')) {
-        form.setValue('contact_id', firstContact.id)
+      const firstClient = sortedClients[0]
+      if (firstClient && !form.getValues('contact_id')) {
+        form.setValue('contact_id', firstClient.contact.id)
       }
     }
-  }, [organizationContacts, editingInstallment, open, form])
+  }, [projectClients, editingInstallment, open, form])
 
 
 
@@ -437,18 +440,18 @@ export function NewInstallmentModal({
             </div>
 
             <UserSelector
-              users={organizationContacts?.map(contact => ({
-                id: contact.id,
-                full_name: contact.full_name || contact.company_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim(),
-                email: contact.email || '',
-                avatar_url: contact.avatar_url,
-                first_name: contact.first_name,
-                last_name: contact.last_name
+              users={projectClients?.map(client => ({
+                id: client.contact.id,
+                full_name: client.contact.full_name || client.contact.company_name || `${client.contact.first_name || ''} ${client.contact.last_name || ''}`.trim(),
+                email: '',
+                avatar_url: '',
+                first_name: client.contact.first_name,
+                last_name: client.contact.last_name
               })).sort((a, b) => a.full_name.localeCompare(b.full_name)) || []}
               value={form.watch('contact_id')}
               onChange={(value) => form.setValue('contact_id', value)}
-              label="Contacto"
-              placeholder="Seleccionar contacto"
+              label="Cliente"
+              placeholder="Seleccionar cliente"
               required
             />
             {form.formState.errors.contact_id && (

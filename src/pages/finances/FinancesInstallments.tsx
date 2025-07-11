@@ -374,59 +374,61 @@ export default function FinancesInstallments() {
     return sum
   }, 0)
 
-  // Calculate installment summary by contact with dynamic currencies and dollarized amounts
-  const { installmentSummary, availableCurrencies } = React.useMemo(() => {
-    const summaryMap = new Map<string, any>()
+  // Create client summary based on project_clients and installments
+  const { clientSummary, availableCurrencies } = React.useMemo(() => {
     const currenciesSet = new Set<string>()
     
+    // Track currencies from installments
     installments.forEach(installment => {
-      const contactKey = installment.contact_id
-      const currencyCode = installment.currency?.code || 'N/A'
-      
-      // Track available currencies
       if (installment.currency?.code) {
         currenciesSet.add(installment.currency.code)
       }
+    })
+    
+    // Create summary for each project client
+    const summary = projectClients.map(client => {
+      // Calculate dollarized total from installments for this client
+      let dollarizedTotal = 0
+      const clientInstallments = installments.filter(installment => installment.contact_id === client.client_id)
       
-      if (!summaryMap.has(contactKey)) {
-        summaryMap.set(contactKey, {
-          contact_id: installment.contact_id,
-          contact: installment.contact,
-          currencies: {},
-          dollarizedTotal: 0 // Nuevo campo para total dolarizado
-        })
-      }
-      
-      const contactSummary = summaryMap.get(contactKey)!
-      if (!contactSummary.currencies[currencyCode]) {
-        contactSummary.currencies[currencyCode] = {
-          amount: 0,
-          currency: installment.currency
+      clientInstallments.forEach(installment => {
+        const amount = installment.amount || 0
+        const currencyCode = installment.currency?.code || 'N/A'
+        
+        if (currencyCode === 'USD') {
+          dollarizedTotal += amount
+        } else if (currencyCode !== 'USD' && installment.exchange_rate) {
+          dollarizedTotal += amount / installment.exchange_rate
         }
-      }
+      })
       
-      contactSummary.currencies[currencyCode].amount += installment.amount || 0
+      // Group installments by currency
+      const currencies: { [key: string]: { amount: number; currency: any } } = {}
+      clientInstallments.forEach(installment => {
+        const currencyCode = installment.currency?.code || 'N/A'
+        if (!currencies[currencyCode]) {
+          currencies[currencyCode] = {
+            amount: 0,
+            currency: installment.currency
+          }
+        }
+        currencies[currencyCode].amount += installment.amount || 0
+      })
       
-      // Calcular aporte dolarizado
-      const amount = installment.amount || 0
-      if (currencyCode === 'USD') {
-        // Si ya está en dólares, sumar directamente
-        contactSummary.dollarizedTotal += amount
-      } else if (currencyCode !== 'USD' && installment.exchange_rate) {
-        // Si no es USD y tiene cotización, dividir por la cotización para obtener dólares
-        contactSummary.dollarizedTotal += amount / installment.exchange_rate
+      return {
+        contact_id: client.client_id,
+        contact: client.contact,
+        currencies,
+        dollarizedTotal,
+        client // Include full client data for committed_amount and currency_id
       }
-      // Si no es USD y no tiene cotización, no se suma al total dolarizado
     })
     
     const currencies = Array.from(currenciesSet).sort()
-    const summary = Array.from(summaryMap.values()).sort((a, b) => {
-      // Sort by dollarized total
-      return b.dollarizedTotal - a.dollarizedTotal
-    })
+    const sortedSummary = summary.sort((a, b) => b.dollarizedTotal - a.dollarizedTotal)
     
-    return { installmentSummary: summary, availableCurrencies: currencies }
-  }, [installments])
+    return { clientSummary: sortedSummary, availableCurrencies: currencies }
+  }, [projectClients, installments])
 
   // Filter installments based on search
   const filteredInstallments = installments.filter(installment => {
@@ -496,17 +498,16 @@ export default function FinancesInstallments() {
       label: "Moneda",
       width: "15%",
       render: (item: any) => {
-        const clientData = projectClients.find(client => client.client_id === item.contact_id)
-        const currentCurrency = clientData?.currency_id || ''
+        const currentCurrency = item.client?.currency_id || ''
         
         return (
           <div className="text-sm">
             <Select 
               value={currentCurrency} 
               onValueChange={(value) => {
-                if (clientData) {
+                if (item.client) {
                   updateCurrencyMutation.mutate({ 
-                    clientId: clientData.id, 
+                    clientId: item.client.id, 
                     currencyId: value 
                   })
                 }
@@ -532,8 +533,7 @@ export default function FinancesInstallments() {
       label: "Monto Total",
       width: "20%",
       render: (item: any) => {
-        const clientData = projectClients.find(client => client.client_id === item.contact_id)
-        const currentAmount = clientData?.committed_amount || 0
+        const currentAmount = item.client?.committed_amount || 0
         
         return (
           <div className="text-sm">
@@ -544,9 +544,9 @@ export default function FinancesInstallments() {
               value={currentAmount}
               onChange={(e) => {
                 const newAmount = parseFloat(e.target.value) || 0
-                if (clientData) {
+                if (item.client) {
                   updateCommittedAmountMutation.mutate({ 
-                    clientId: clientData.id, 
+                    clientId: item.client.id, 
                     amount: newAmount 
                   })
                 }
@@ -583,14 +583,13 @@ export default function FinancesInstallments() {
       label: "Monto Restante",
       width: "20%",
       render: (item: any) => {
-        const clientData = projectClients.find(client => client.client_id === item.contact_id)
-        const committedAmount = clientData?.committed_amount || 0
+        const committedAmount = item.client?.committed_amount || 0
         const dollarizedTotal = item.dollarizedTotal || 0
         
         // Convert committed amount to USD if necessary
         let committedAmountUSD = committedAmount
-        if (clientData?.currency_id) {
-          const clientCurrency = currencies.find(c => c.id === clientData.currency_id)
+        if (item.client?.currency_id) {
+          const clientCurrency = currencies.find(c => c.id === item.client.currency_id)
           if (clientCurrency?.code !== 'USD') {
             // For now, we'll need an exchange rate to convert
             // In a real scenario, you might want to get this from the exchange rates table
@@ -883,14 +882,14 @@ export default function FinancesInstallments() {
         )}
 
         {/* Contact Summary Table (New simplified table) */}
-        {installmentSummary.length > 0 && (
+        {clientSummary.length > 0 && (
           <div className="space-y-4">
             <div>
-              <h3 className="text-lg font-semibold">Resumen por Contacto</h3>
-              <p className="text-sm text-muted-foreground">Resumen general por contacto con monto total y aporte dolarizado</p>
+              <h3 className="text-lg font-semibold">Resumen por Cliente</h3>
+              <p className="text-sm text-muted-foreground">Resumen general por cliente con monto total y aporte dolarizado</p>
             </div>
             <CustomTable
-              data={installmentSummary}
+              data={clientSummary}
               columns={contactSummaryColumns}
               defaultSort={{ key: 'aporte_dolarizado', direction: 'desc' }}
             />
@@ -898,14 +897,14 @@ export default function FinancesInstallments() {
         )}
 
         {/* Detailed Summary Table by Currency */}
-        {installmentSummary.length > 0 && (
+        {clientSummary.length > 0 && (
           <div className="space-y-4">
             <div>
               <h3 className="text-lg font-semibold">Detalle por Moneda</h3>
-              <p className="text-sm text-muted-foreground">Totales detallados por contacto, moneda y billetera</p>
+              <p className="text-sm text-muted-foreground">Totales detallados por cliente, moneda y billetera</p>
             </div>
             <CustomTable
-              data={installmentSummary}
+              data={clientSummary}
               columns={summaryColumns}
               defaultSort={{ key: 'dollarized_total', direction: 'desc' }}
             />
