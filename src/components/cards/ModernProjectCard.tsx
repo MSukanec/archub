@@ -62,7 +62,7 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
       ]}
     >
       <Card 
-        className="w-full cursor-pointer hover:shadow-lg transition-all duration-200 bg-white border border-gray-200 overflow-hidden"
+        className="w-full cursor-pointer hover:shadow-lg transition-all duration-200 overflow-hidden"
         onClick={() => onSelect(project)}
       >
         {/* Creator Info - Top */}
@@ -70,13 +70,13 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
           <div className="flex items-center gap-3">
             <Avatar className="w-8 h-8">
               <AvatarImage src={project.creator?.avatar_url || ''} />
-              <AvatarFallback className="text-xs bg-gray-100">
+              <AvatarFallback className="text-xs">
                 {project.creator?.full_name?.split(' ').map(n => n[0]).join('') || 'U'}
               </AvatarFallback>
             </Avatar>
             <div>
-              <p className="text-sm font-medium text-gray-900">{project.creator?.full_name || project.creator?.first_name || 'Usuario'}</p>
-              <p className="text-xs text-gray-500">
+              <p className="text-sm font-medium text-foreground">{project.creator?.full_name || project.creator?.first_name || 'Usuario'}</p>
+              <p className="text-xs text-muted-foreground">
                 {project.created_at ? format(new Date(project.created_at), 'dd MMM, yyyy', { locale: es }) : ''}
               </p>
             </div>
@@ -94,8 +94,8 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
             <div className="md:block hidden">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center">
-                    <MoreHorizontal className="w-4 h-4 text-gray-600" />
+                  <button className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center">
+                    <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -118,7 +118,7 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
         </div>
 
         {/* Project Image/Thumbnail */}
-        <div className="relative h-40 bg-gradient-to-br from-blue-50 to-indigo-100 overflow-hidden mx-6 rounded-lg">
+        <div className="relative h-40 bg-gradient-to-br from-muted/30 to-muted/50 overflow-hidden mx-6 rounded-lg">
           {project.project_data?.project_image_url ? (
             <img 
               src={project.project_data.project_image_url} 
@@ -127,7 +127,7 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
               key={project.project_data.project_image_url} // Force re-render when URL changes
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-blue-200/50 rounded-lg">
+            <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-muted-foreground/30 rounded-lg">
               {project.name?.charAt(0)?.toUpperCase() || 'P'}
             </div>
           )}
@@ -135,18 +135,18 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
 
         {/* Project Info - Bottom */}
         <div className="p-6 pt-3 space-y-2">
-          <h3 className="font-semibold text-gray-900 text-lg leading-tight">
+          <h3 className="font-semibold text-foreground text-lg leading-tight">
             {project.name}
           </h3>
           
           <div className="space-y-1">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               <span className="font-medium">Tipología:</span> {project.project_data?.project_type?.name || 'Sin especificar'}
             </p>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               <span className="font-medium">Modalidad:</span> {project.project_data?.modality?.name || 'Sin especificar'}
             </p>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               <span className="font-medium">Estado:</span> {statusConfig.label}
             </p>
           </div>

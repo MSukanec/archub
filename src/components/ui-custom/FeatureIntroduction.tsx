@@ -30,7 +30,7 @@ export function FeatureIntroduction({
   return (
     <div 
       className={cn(
-        "w-full bg-card border border-border rounded-md shadow-sm mb-6 cursor-pointer transition-all duration-300 ease-in-out hover:shadow-md",
+        "w-full bg-[var(--card-bg)] border border-[var(--card-border)] rounded-[var(--radius-lg)] shadow-sm mb-6 cursor-pointer transition-all duration-300 ease-in-out hover:shadow-md",
         className
       )}
       onMouseEnter={() => setIsExpanded(true)}
