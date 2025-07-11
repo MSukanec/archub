@@ -127,78 +127,83 @@ export function NewCustomTaskModal({ open, onClose, onTaskCreated }: NewCustomTa
     <CustomModalLayout
       open={open}
       onClose={handleClose}
-    >
-      <CustomModalHeader
-        title="Crear Tarea Personalizada"
-        subtitle="Crea una tarea personalizada para este proyecto"
-      />
-      
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)}>
-          <CustomModalBody columns={1}>
-            <div className="space-y-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nombre de la Tarea *</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Ej: Instalación de ventanas especiales"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+      children={{
+        header: (
+          <CustomModalHeader
+            title="Crear Tarea Personalizada"
+            subtitle="Crea una tarea personalizada para este proyecto"
+          />
+        ),
+        body: (
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)}>
+              <CustomModalBody columns={1}>
+                <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nombre de la Tarea *</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Ej: Instalación de ventanas especiales"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Descripción</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Descripción detallada de la tarea (opcional)"
-                        rows={3}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Descripción</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Descripción detallada de la tarea (opcional)"
+                            rows={3}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <FormField
-                control={form.control}
-                name="unit_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Unidad de Medida *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar unidad" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {units?.map((unit) => (
-                          <SelectItem key={unit.id} value={unit.id}>
-                            {unit.name} ({unit.symbol})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </CustomModalBody>
-
+                  <FormField
+                    control={form.control}
+                    name="unit_id"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Unidad de Medida *</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Seleccionar unidad" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {units?.map((unit) => (
+                              <SelectItem key={unit.id} value={unit.id}>
+                                {unit.name} ({unit.symbol})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CustomModalBody>
+            </form>
+          </Form>
+        ),
+        footer: (
           <CustomModalFooter
             onCancel={handleClose}
             onSave={form.handleSubmit(handleSubmit)}
@@ -206,8 +211,8 @@ export function NewCustomTaskModal({ open, onClose, onTaskCreated }: NewCustomTa
             saveDisabled={createTaskMutation.isPending}
             saveLoading={createTaskMutation.isPending}
           />
-        </form>
-      </Form>
-    </CustomModalLayout>
+        )
+      }}
+    />
   )
 }

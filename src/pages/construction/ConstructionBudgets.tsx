@@ -904,36 +904,11 @@ export default function ConstructionBudgets() {
           />
         ) : (
           <>
-            {/* Summary Cards */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Total Presupuestos</p>
-                      <p className="text-2xl font-semibold">{filteredBudgets.length}</p>
-                    </div>
-                    <Calculator className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Total General</p>
-                      <p className="text-2xl font-semibold">$0</p>
-                    </div>
-                    <Building2 className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+
 
             {/* Budget Controls Section - Isolated */}
             {selectedBudget && (
-              <Card className="mb-4 border rounded-lg bg-card text-card-foreground shadow-sm">
+              <Card className="mb-4 border rounded-lg shadow-sm" style={{ backgroundColor: 'var(--secondary-sidebar-bg)' }}>
                 <CardContent className="p-4">
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-center gap-4 flex-1">
@@ -1025,12 +1000,7 @@ export default function ConstructionBudgets() {
                   </div>
                 </div>
 
-                {/* Budget Description */}
-                {selectedBudget.description && (
-                  <div className="mt-3 text-sm text-muted-foreground">
-                    {selectedBudget.description}
-                  </div>
-                )}
+
                 </CardContent>
               </Card>
             )}
