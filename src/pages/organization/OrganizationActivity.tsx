@@ -34,38 +34,27 @@ export default function OrganizationActivity() {
       if (!currentOrganization?.id) return [];
 
       const allActivities = [];
-      console.log('Fetching activities for organization:', currentOrganization.id);
 
-      // Get projects with user information - simplified approach
-      const { data: projects, error: projectsError } = await supabase
+      // Get projects
+      const { data: projects } = await supabase
         .from('projects')
-        .select('*')
+        .select(`
+          id, 
+          name, 
+          created_at, 
+          status,
+          created_by,
+          organization_members!projects_created_by_fkey (
+            users (
+              full_name,
+              avatar_url
+            )
+          )
+        `)
         .eq('organization_id', currentOrganization.id)
         .order('created_at', { ascending: false });
 
-      console.log('Projects data:', projects);
-      console.log('Projects error:', projectsError);
-
-      // Get users for project creators
-      let projectsWithUsers = [];
-      if (projects?.length) {
-        const creatorIds = [...new Set(projects.map(p => p.created_by).filter(Boolean))];
-        console.log('Creator IDs:', creatorIds);
-        
-        const { data: users } = await supabase
-          .from('users')
-          .select('id, full_name, avatar_url')
-          .in('id', creatorIds);
-        
-        console.log('Users data:', users);
-        
-        projectsWithUsers = projects.map(project => ({
-          ...project,
-          user: users?.find(u => u.id === project.created_by) || { full_name: 'Usuario', avatar_url: null }
-        }));
-      }
-
-      projectsWithUsers?.forEach(project => {
+      projects?.forEach(project => {
         allActivities.push({
           id: `project-${project.id}`,
           type: 'project',
@@ -73,38 +62,31 @@ export default function OrganizationActivity() {
           title: 'Nuevo proyecto creado',
           description: `Se creó el proyecto "${project.name}"`,
           created_at: project.created_at,
-          author: project.user,
+          author: project.organization_members?.users || { full_name: 'Sistema', avatar_url: null },
           status: project.status
         });
       });
 
       // Get movements
-      const { data: movements, error: movementsError } = await supabase
+      const { data: movements } = await supabase
         .from('movements')
-        .select('*')
+        .select(`
+          id, 
+          description, 
+          amount, 
+          created_at, 
+          created_by,
+          organization_members!movements_created_by_fkey (
+            users (
+              full_name,
+              avatar_url
+            )
+          )
+        `)
         .eq('organization_id', currentOrganization.id)
         .order('created_at', { ascending: false });
 
-      console.log('Movements data:', movements);
-      console.log('Movements error:', movementsError);
-
-      // Get users for movement creators
-      let movementsWithUsers = [];
-      if (movements?.length) {
-        const creatorIds = [...new Set(movements.map(m => m.created_by).filter(Boolean))];
-        
-        const { data: users } = await supabase
-          .from('users')
-          .select('id, full_name, avatar_url')
-          .in('id', creatorIds);
-        
-        movementsWithUsers = movements.map(movement => ({
-          ...movement,
-          user: users?.find(u => u.id === movement.created_by) || { full_name: 'Usuario', avatar_url: null }
-        }));
-      }
-
-      movementsWithUsers?.forEach(movement => {
+      movements?.forEach(movement => {
         allActivities.push({
           id: `movement-${movement.id}`,
           type: 'movement',
@@ -112,20 +94,30 @@ export default function OrganizationActivity() {
           title: 'Movimiento financiero registrado',
           description: `${movement.description || 'Movimiento'}: $${movement.amount?.toLocaleString()}`,
           created_at: movement.created_at,
-          author: movement.user,
+          author: movement.organization_members?.users || { full_name: 'Usuario', avatar_url: null },
           amount: movement.amount
         });
       });
 
-      // Get contacts - note: contacts table doesn't have created_by field based on schema
-      const { data: contacts, error: contactsError } = await supabase
+      // Get contacts
+      const { data: contacts } = await supabase
         .from('contacts')
-        .select('*')
+        .select(`
+          id, 
+          first_name, 
+          last_name, 
+          created_at, 
+          company_name,
+          created_by,
+          organization_members!contacts_created_by_fkey (
+            users (
+              full_name,
+              avatar_url
+            )
+          )
+        `)
         .eq('organization_id', currentOrganization.id)
         .order('created_at', { ascending: false });
-
-      console.log('Contacts data:', contacts);
-      console.log('Contacts error:', contactsError);
 
       contacts?.forEach(contact => {
         allActivities.push({
@@ -135,11 +127,11 @@ export default function OrganizationActivity() {
           title: 'Nuevo contacto agregado',
           description: `Se agregó a ${contact.first_name} ${contact.last_name}${contact.company_name ? ` de ${contact.company_name}` : ''}`,
           created_at: contact.created_at,
-          author: { full_name: 'Sistema', avatar_url: null } // Contacts don't have created_by field
+          author: contact.organization_members?.users || userData?.user || { full_name: 'Usuario', avatar_url: null }
         });
       });
 
-      // Get site logs with user information
+      // Get site logs
       const { data: siteLogs } = await supabase
         .from('site_logs')
         .select(`
@@ -149,9 +141,11 @@ export default function OrganizationActivity() {
           comments, 
           created_at,
           created_by,
-          users!site_logs_created_by_fkey (
-            full_name,
-            avatar_url
+          organization_members!site_logs_created_by_fkey (
+            users (
+              full_name,
+              avatar_url
+            )
           )
         `)
         .eq('organization_id', currentOrganization.id)
@@ -165,7 +159,7 @@ export default function OrganizationActivity() {
           title: 'Nueva entrada de bitácora',
           description: `Entrada ${log.entry_type} - ${log.weather}`,
           created_at: log.created_at,
-          author: log.users || { full_name: 'Usuario', avatar_url: null }
+          author: log.organization_members?.users || userData?.user || { full_name: 'Usuario', avatar_url: '' }
         });
       });
 
@@ -400,24 +394,24 @@ export default function OrganizationActivity() {
           icon={<Activity className="w-6 h-6" />}
           features={[
             {
-              icon: <Activity className="w-4 h-4" />,
-              title: "Seguimiento organizacional completo",
-              description: "Esta página te permite dar seguimiento a todo lo que sucede en tu organización y sus proyectos, manteniendo un registro detallado de todas las actividades."
-            },
-            {
-              icon: <Users className="w-4 h-4" />,
-              title: "Trackeo de acciones por miembro",
-              description: "Puedes ver quién de cada miembro del equipo hizo qué en cada momento, permitiendo un seguimiento preciso de las acciones y responsabilidades de cada persona."
-            },
-            {
               icon: <Folder className="w-4 h-4" />,
-              title: "Monitoreo de proyectos",
-              description: "Supervisa la creación y progreso de todos los proyectos con información detallada de fechas y responsables."
+              title: "Seguimiento de proyectos",
+              description: "Monitorea la creación y progreso de todos los proyectos de la organización en tiempo real."
             },
             {
               icon: <DollarSign className="w-4 h-4" />,
-              title: "Historial financiero",
-              description: "Rastrea todos los movimientos financieros con información de montos, fechas y quién realizó cada transacción."
+              title: "Actividad financiera",
+              description: "Rastrea movimientos financieros, ingresos y egresos para mantener el control económico."
+            },
+            {
+              icon: <Users className="w-4 h-4" />,
+              title: "Gestión de contactos",
+              description: "Supervisa la adición de nuevos contactos y clientes vinculados a los proyectos."
+            },
+            {
+              icon: <FileText className="w-4 h-4" />,
+              title: "Registro de bitácoras",
+              description: "Controla las entradas de bitácora de obra y el progreso de los trabajos de construcción."
             }
           ]}
         />
