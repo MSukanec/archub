@@ -24,6 +24,7 @@ import { BudgetTaskCard } from '@/components/cards/BudgetTaskCard'
 import { useUnits } from '@/hooks/use-units'
 import { TaskSearchCombo } from '@/components/ui-custom/misc/TaskSearchCombo'
 import { Input } from '@/components/ui/input'
+import { NewCustomTaskModal } from '@/modals/tasks/NewCustomTaskModal'
 
 // Hook para obtener valores de parámetros con expression_template
 const useTaskParameterValues = () => {
@@ -150,6 +151,7 @@ export default function ConstructionBudgets() {
   const [selectedBudgetId, setSelectedBudgetId] = useState<string>('')
   const [budgetTaskModalOpen, setBudgetTaskModalOpen] = useState(false)
   const [newTaskModalOpen, setNewTaskModalOpen] = useState(false)
+  const [customTaskModalOpen, setCustomTaskModalOpen] = useState(false)
   const [currentBudgetId, setCurrentBudgetId] = useState<string>('')
   
   // Quick Add Task states
@@ -1050,7 +1052,7 @@ export default function ConstructionBudgets() {
                       onFiltersChange={setTaskFilters}
                       filterOptions={filterOptions}
                       showCreateButton={true}
-                      onCreateTask={() => setNewTaskModalOpen(true)}
+                      onCreateTask={() => setCustomTaskModalOpen(true)}
                     />
                   </div>
                   <div className="w-32">
@@ -1084,15 +1086,18 @@ export default function ConstructionBudgets() {
             )}
 
             {/* Budget Table Card - Clean without extra controls */}
-            {selectedBudget ? (
-              <BudgetTaskTable budgetId={selectedBudget.id} />
-            ) : (
-              <Card className="border rounded-lg bg-card text-card-foreground shadow-sm">
-                <div className="text-center py-8 text-muted-foreground">
-                  Selecciona un presupuesto para ver sus tareas
-                </div>
-              </Card>
-            )}
+            <Card className="border rounded-lg bg-card text-card-foreground shadow-sm overflow-hidden">
+              {/* Budget Tasks Table */}
+              <div className="p-4">
+                {selectedBudget ? (
+                  <BudgetTaskTable budgetId={selectedBudget.id} />
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    Selecciona un presupuesto para ver sus tareas
+                  </div>
+                )}
+              </div>
+            </Card>
           </>
         )}
       </div>
@@ -1127,6 +1132,25 @@ export default function ConstructionBudgets() {
           onClose={() => setNewTaskModalOpen(false)}
           budgetId={selectedBudget?.id || ''}
           organizationId={userData?.organization?.id || ''}
+        />
+      )}
+
+      {/* Custom Task Modal from TaskSearchCombo */}
+      {customTaskModalOpen && (
+        <NewCustomTaskModal
+          open={customTaskModalOpen}
+          onClose={() => setCustomTaskModalOpen(false)}
+          onTaskCreated={(taskId) => {
+            // Automatically add the created task to the budget
+            if (selectedBudget && userData?.preferences?.last_organization_id) {
+              createBudgetTaskMutation.mutate({
+                budget_id: selectedBudget.id,
+                task_id: taskId,
+                quantity: 1,
+                organization_id: userData.preferences.last_organization_id
+              });
+            }
+          }}
         />
       )}
 
