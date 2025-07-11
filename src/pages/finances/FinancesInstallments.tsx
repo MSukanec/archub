@@ -24,6 +24,7 @@ interface Installment {
   wallet_id: string
   project_id: string
   created_by: string
+  exchange_rate?: number
   contact?: {
     id: string
     first_name: string
@@ -133,7 +134,8 @@ export default function FinancesInstallments() {
           currency_id,
           wallet_id,
           project_id,
-          created_by
+          created_by,
+          exchange_rate
         `)
         .eq('organization_id', organizationId)
         .eq('project_id', projectId)
@@ -456,7 +458,7 @@ export default function FinancesInstallments() {
     {
       key: "amount",
       label: "Monto",
-      width: "20%",
+      width: "15%",
       sortable: true,
       sortType: "number" as const,
       render: (item: Installment) => {
@@ -469,9 +471,28 @@ export default function FinancesInstallments() {
       }
     },
     {
+      key: "exchange_rate",
+      label: "Cotización",
+      width: "15%",
+      sortable: true,
+      sortType: "number" as const,
+      render: (item: Installment) => {
+        if (!item.exchange_rate) {
+          return <div className="text-sm text-muted-foreground">-</div>
+        }
+        
+        const symbol = item.currency?.symbol || '$'
+        return (
+          <div className="text-sm">
+            {symbol}{item.exchange_rate.toLocaleString('es-AR')}
+          </div>
+        )
+      }
+    },
+    {
       key: "actions",
       label: "Acciones",
-      width: "15%",
+      width: "10%",
       render: (item: Installment) => (
         <div className="flex items-center gap-1">
           <Button

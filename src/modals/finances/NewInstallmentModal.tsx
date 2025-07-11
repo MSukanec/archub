@@ -35,6 +35,7 @@ const installmentSchema = z.object({
   wallet_id: z.string().min(1, 'Billetera es requerida'),
   amount: z.number().min(0.01, 'Monto debe ser mayor a 0'),
   description: z.string().optional(),
+  exchange_rate: z.number().optional(),
 })
 
 type InstallmentForm = z.infer<typeof installmentSchema>
@@ -68,6 +69,7 @@ export function NewInstallmentModal({
       wallet_id: '',
       amount: 0,
       description: '',
+      exchange_rate: undefined,
     }
   })
 
@@ -195,6 +197,7 @@ export function NewInstallmentModal({
         project_id: projectId,
         organization_id: organizationId,
         created_by: data.created_by,
+        exchange_rate: data.exchange_rate || null,
         // Categorías automáticas para aportes: INGRESO > PREVENTA > CUOTAS
         type_id: '8862eee7-dd00-4f01-9335-5ea0070d3403', // INGRESO
         category_id: '5d5549d6-20d1-459b-a391-99295e65b6f2', // PREVENTA  
@@ -241,6 +244,7 @@ export function NewInstallmentModal({
         wallet_id: data.wallet_id,
         contact_id: data.contact_id,
         created_by: data.created_by,
+        exchange_rate: data.exchange_rate || null,
         // Categorías automáticas para aportes: INGRESO > PREVENTA > CUOTAS
         type_id: '8862eee7-dd00-4f01-9335-5ea0070d3403', // INGRESO
         category_id: '5d5549d6-20d1-459b-a391-99295e65b6f2', // PREVENTA  
@@ -321,32 +325,28 @@ export function NewInstallmentModal({
     }
   }, [organizationContacts, editingInstallment, open, form])
 
-  // Set current user as default creator
+  // Set current user as default creator (using user ID, not member ID)
   useEffect(() => {
-    if (organizationMembers && organizationMembers.length > 0 && userData?.user?.id) {
-      const currentUserMember = organizationMembers.find(m => m.users?.id === userData.user.id)
-      if (currentUserMember && !form.getValues('created_by')) {
-        form.setValue('created_by', currentUserMember.id)
-      }
+    if (userData?.user?.id && !editingInstallment && open && !form.getValues('created_by')) {
+      form.setValue('created_by', userData.user.id)
     }
-  }, [organizationMembers, userData, form])
+  }, [userData, editingInstallment, open, form])
 
   // Load editing data when modal opens for editing
   useEffect(() => {
     if (editingInstallment && open) {
-      form.setValue('movement_date', new Date(editingInstallment.movement_date))
+      // Fix date parsing to avoid timezone issues
+      const movementDate = new Date(editingInstallment.movement_date + 'T00:00:00')
+      form.setValue('movement_date', movementDate)
       form.setValue('amount', editingInstallment.amount)
       form.setValue('description', editingInstallment.description || '')
       form.setValue('contact_id', editingInstallment.contact_id)
       form.setValue('currency_id', editingInstallment.currency_id)
       form.setValue('wallet_id', editingInstallment.wallet_id)
-      // Find the created_by member ID by matching the user ID
-      if (organizationMembers) {
-        const creatorMember = organizationMembers.find(m => m.users?.id === editingInstallment.created_by)
-        if (creatorMember) {
-          form.setValue('created_by', creatorMember.id)
-        }
-      }
+      form.setValue('exchange_rate', editingInstallment.exchange_rate || undefined)
+      
+      // Use the created_by user ID directly
+      form.setValue('created_by', editingInstallment.created_by)
     } else if (!editingInstallment && open) {
       // Reset form for new installment
       form.reset({
@@ -356,7 +356,8 @@ export function NewInstallmentModal({
         contact_id: '',
         currency_id: '',
         wallet_id: '',
-        created_by: ''
+        created_by: userData?.user?.id || '',
+        exchange_rate: undefined
       })
     }
   }, [editingInstallment, open, form, organizationMembers])
@@ -394,7 +395,7 @@ export function NewInstallmentModal({
                       : user?.email?.[0]?.toUpperCase() || 'U'
                     
                     return (
-                      <SelectItem key={`member-${member.id || index}`} value={member.id || ''}>
+                      <SelectItem key={`user-${user?.id || index}`} value={user?.id || ''}>
                         <div className="flex items-center gap-2">
                           <Avatar className="h-6 w-6">
                             <AvatarImage src={user?.avatar_url || ''} />
@@ -519,7 +520,22 @@ export function NewInstallmentModal({
               )}
             </div>
 
-
+            <div className="space-y-2">
+              <Label htmlFor="exchange_rate">Cotización</Label>
+              <Input
+                id="exchange_rate"
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="0.00"
+                {...form.register('exchange_rate', { valueAsNumber: true })}
+              />
+              {form.formState.errors.exchange_rate && (
+                <p className="text-sm text-destructive">
+                  {form.formState.errors.exchange_rate.message}
+                </p>
+              )}
+            </div>
 
             <div className="space-y-2">
               <Label htmlFor="description">Notas</Label>
