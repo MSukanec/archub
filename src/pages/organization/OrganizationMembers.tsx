@@ -21,12 +21,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { FeatureIntroduction } from "@/components/ui-custom/FeatureIntroduction";
+import { DangerousConfirmationModal } from "@/components/ui-custom/DangerousConfirmationModal";
+import { MemberCard } from "@/components/cards/MemberCard";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { NewMemberModal } from "@/modals/organization/NewMemberModal";
+import { useMobile } from "@/hooks/use-mobile";
 
 function getInitials(name: string): string {
   return name
@@ -38,8 +41,10 @@ function getInitials(name: string): string {
 }
 
 function getRoleBadgeVariant(roleName: string) {
-  if (roleName?.toLowerCase().includes('admin')) return 'default';
-  if (roleName?.toLowerCase().includes('manager')) return 'secondary';
+  const role = roleName?.toLowerCase() || '';
+  if (role.includes('admin')) return 'destructive';
+  if (role.includes('manager') || role.includes('editor')) return 'default';
+  if (role.includes('viewer') || role.includes('guest')) return 'secondary';
   return 'outline';
 }
 
@@ -47,6 +52,8 @@ export default function OrganizationMembers() {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [memberToDelete, setMemberToDelete] = useState<any>(null);
+  const isMobile = useMobile();
 
   const organizationId = userData?.organization?.id;
 
@@ -113,6 +120,7 @@ export default function OrganizationMembers() {
         description: "El miembro ha sido eliminado de la organización.",
       });
       queryClient.invalidateQueries({ queryKey: ['organization-members'] });
+      setMemberToDelete(null);
     },
     onError: (error: any) => {
       toast({
@@ -122,6 +130,16 @@ export default function OrganizationMembers() {
       });
     },
   });
+
+  const handleDeleteMember = (member: any) => {
+    setMemberToDelete(member);
+  };
+
+  const confirmDeleteMember = () => {
+    if (memberToDelete) {
+      removeMemberMutation.mutate(memberToDelete.id);
+    }
+  };
 
   const resendInviteMutation = useMutation({
     mutationFn: async (inviteId: string) => {
@@ -210,76 +228,90 @@ export default function OrganizationMembers() {
               Invita a tu equipo para trabajar juntos y colaborar fácilmente. Gestiona sus permisos para proyectos mejores.
             </p>
             
-            <div className="space-y-2">
-              {members.map((member) => (
-                <Card key={member.id} className="p-4">
-                  <CardContent className="p-0">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage src={member.users?.avatar_url} />
-                          <AvatarFallback>
-                            {getInitials(member.users?.full_name || member.users?.email || 'U')}
-                          </AvatarFallback>
-                        </Avatar>
-                        
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-medium text-sm">
-                              {member.users?.full_name || 'Sin nombre'}
-                            </h4>
+            {isMobile ? (
+              <div className="space-y-3">
+                {members.map((member) => (
+                  <MemberCard 
+                    key={member.id} 
+                    member={member}
+                  />
+                ))}
+                {members.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Users className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                    <p className="text-sm">No hay miembros en esta organización.</p>
+                    <p className="text-xs">Invita al primer miembro para comenzar.</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {members.map((member) => (
+                  <Card key={member.id} className="p-4">
+                    <CardContent className="p-0">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-10 w-10">
+                            <AvatarImage src={member.users?.avatar_url} />
+                            <AvatarFallback>
+                              {getInitials(member.users?.full_name || member.users?.email || 'U')}
+                            </AvatarFallback>
+                          </Avatar>
+                          
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-medium text-sm">
+                                {member.users?.full_name || 'Sin nombre'}
+                              </h4>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {member.users?.email}
+                            </p>
                           </div>
-                          <p className="text-xs text-muted-foreground">
-                            {member.users?.email}
-                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                          <div className="text-xs text-muted-foreground text-right">
+                            <div>{format(new Date(member.joined_at), 'MMM dd, yyyy', { locale: es })}</div>
+                          </div>
+
+                          <Badge variant={getRoleBadgeVariant(member.roles?.name || '')}>
+                            {member.roles?.name || 'Sin rol'}
+                          </Badge>
+
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem>
+                                Editar rol
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                className="text-red-600"
+                                onClick={() => handleDeleteMember(member)}
+                              >
+                                Eliminar miembro
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </div>
+                    </CardContent>
+                  </Card>
+                ))}
 
-                      <div className="flex items-center gap-4">
-                        <div className="text-xs text-muted-foreground text-right">
-                          <div>{format(new Date(member.joined_at), 'MMM dd, yyyy', { locale: es })}</div>
-                        </div>
-                        
-                        <div className="text-xs text-muted-foreground text-right">
-                          <div>{format(new Date(member.last_active_at || member.joined_at), 'MMM dd, yyyy', { locale: es })}</div>
-                        </div>
-
-                        <Badge variant={getRoleBadgeVariant(member.roles?.name || '')}>
-                          {member.roles?.name || 'Sin rol'}
-                        </Badge>
-
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
-                              Editar rol
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              className="text-red-600"
-                              onClick={() => removeMemberMutation.mutate(member.id)}
-                            >
-                              Eliminar miembro
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-
-              {members.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Users className="h-12 w-12 mx-auto mb-4 opacity-20" />
-                  <p className="text-sm">No hay miembros en esta organización.</p>
-                  <p className="text-xs">Invita al primer miembro para comenzar.</p>
-                </div>
-              )}
-            </div>
+                {members.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Users className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                    <p className="text-sm">No hay miembros en esta organización.</p>
+                    <p className="text-xs">Invita al primer miembro para comenzar.</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Guest Accounts Section */}
@@ -292,76 +324,90 @@ export default function OrganizationMembers() {
               Las cuentas de invitados permiten a tus socios externos colaborar y comunicarse contigo aquí en Archub.
             </p>
             
-            <div className="space-y-2">
-              {guests.map((guest) => (
-                <Card key={guest.id} className="p-4">
-                  <CardContent className="p-0">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage src={guest.users?.avatar_url} />
-                          <AvatarFallback>
-                            {getInitials(guest.users?.full_name || guest.users?.email || 'G')}
-                          </AvatarFallback>
-                        </Avatar>
-                        
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-medium text-sm">
-                              {guest.users?.full_name || 'Sin nombre'}
-                            </h4>
+            {isMobile ? (
+              <div className="space-y-3">
+                {guests.map((guest) => (
+                  <MemberCard 
+                    key={guest.id} 
+                    member={guest}
+                  />
+                ))}
+                {guests.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <UserCheck className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                    <p className="text-sm">No hay invitados en esta organización.</p>
+                    <p className="text-xs">Los invitados pueden colaborar en proyectos específicos.</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {guests.map((guest) => (
+                  <Card key={guest.id} className="p-4">
+                    <CardContent className="p-0">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-10 w-10">
+                            <AvatarImage src={guest.users?.avatar_url} />
+                            <AvatarFallback>
+                              {getInitials(guest.users?.full_name || guest.users?.email || 'G')}
+                            </AvatarFallback>
+                          </Avatar>
+                          
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-medium text-sm">
+                                {guest.users?.full_name || 'Sin nombre'}
+                              </h4>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {guest.users?.email}
+                            </p>
                           </div>
-                          <p className="text-xs text-muted-foreground">
-                            {guest.users?.email}
-                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                          <div className="text-xs text-muted-foreground text-right">
+                            <div>{format(new Date(guest.joined_at), 'MMM dd, yyyy', { locale: es })}</div>
+                          </div>
+
+                          <Badge variant="secondary">
+                            {guest.roles?.name || 'Invitado'}
+                          </Badge>
+
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem>
+                                Editar rol
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                className="text-red-600"
+                                onClick={() => handleDeleteMember(guest)}
+                              >
+                                Eliminar invitado
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </div>
+                    </CardContent>
+                  </Card>
+                ))}
 
-                      <div className="flex items-center gap-4">
-                        <div className="text-xs text-muted-foreground text-right">
-                          <div>{format(new Date(guest.joined_at), 'MMM dd, yyyy', { locale: es })}</div>
-                        </div>
-                        
-                        <div className="text-xs text-muted-foreground text-right">
-                          <div>{format(new Date(guest.last_active_at || guest.joined_at), 'MMM dd, yyyy', { locale: es })}</div>
-                        </div>
-
-                        <Badge variant="secondary">
-                          {guest.roles?.name || 'Invitado'}
-                        </Badge>
-
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
-                              Editar rol
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              className="text-red-600"
-                              onClick={() => removeMemberMutation.mutate(guest.id)}
-                            >
-                              Eliminar invitado
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-
-              {guests.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  <UserCheck className="h-12 w-12 mx-auto mb-4 opacity-20" />
-                  <p className="text-sm">No hay invitados en esta organización.</p>
-                  <p className="text-xs">Los invitados pueden colaborar en proyectos específicos.</p>
-                </div>
-              )}
-            </div>
+                {guests.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <UserCheck className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                    <p className="text-sm">No hay invitados en esta organización.</p>
+                    <p className="text-xs">Los invitados pueden colaborar en proyectos específicos.</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Pending Invites Section */}
@@ -441,6 +487,18 @@ export default function OrganizationMembers() {
         <NewMemberModal 
           open={showInviteModal}
           onClose={() => setShowInviteModal(false)}
+        />
+
+        {/* Delete Member Confirmation Modal */}
+        <DangerousConfirmationModal
+          open={!!memberToDelete}
+          onClose={() => setMemberToDelete(null)}
+          onConfirm={confirmDeleteMember}
+          title="Eliminar miembro"
+          description="Esta acción eliminará permanentemente al miembro de la organización. No se puede deshacer."
+          confirmText="Eliminar miembro"
+          itemName={memberToDelete?.users?.full_name || memberToDelete?.users?.email || ''}
+          isLoading={removeMemberMutation.isPending}
         />
       </div>
     </Layout>
