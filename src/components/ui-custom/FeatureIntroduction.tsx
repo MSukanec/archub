@@ -10,6 +10,7 @@ interface FeatureItem {
 
 interface FeatureIntroductionProps {
   title: string
+  icon?: React.ReactNode
   image?: React.ReactNode
   features: FeatureItem[]
   onDismiss?: () => void
@@ -18,6 +19,7 @@ interface FeatureIntroductionProps {
 
 export function FeatureIntroduction({
   title,
+  icon,
   image,
   features,
   onDismiss,
@@ -37,10 +39,22 @@ export function FeatureIntroduction({
       {/* Always visible title */}
       <div className="p-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-foreground">
-            {title}
-          </h2>
-          <HelpCircle className="w-5 h-5 text-muted-foreground" />
+          <div className="flex items-center gap-3">
+            {icon && (
+              <div className="text-accent">
+                {icon}
+              </div>
+            )}
+            <h2 className="text-xl font-semibold text-foreground">
+              {title}
+            </h2>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">
+              (click para más información)
+            </span>
+            <HelpCircle className="w-5 h-5 text-muted-foreground" />
+          </div>
         </div>
       </div>
 

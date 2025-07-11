@@ -301,6 +301,7 @@ export default function OrganizationProjects() {
         {/* Feature Introduction */}
         <FeatureIntroduction
           title="Proyectos"
+          icon={<Folder className="w-5 h-5" />}
           features={projectFeatures}
         />
 

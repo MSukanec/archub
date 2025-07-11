@@ -122,7 +122,8 @@ Changelog:
 - July 11, 2025. Enhanced PROYECTOS page with FeatureIntroduction component and improved project cards - COMPLETED
   • Added FeatureIntroduction component to OrganizationProjects page with accurate functionality descriptions
   • Styled FeatureIntroduction as traditional card with rounded-md corners matching project cards instead of rounded-lg
-  • Changed title layout to left-aligned title with right-aligned help icon instead of centered design
+  • Enhanced title layout: page icon (Folder) on left with --accent color, title in center, help text + icon on right
+  • Added "(click para más información)" text hint next to help icon for better user guidance
   • Updated content to reflect actual page functionality: 1) Creating new projects with modal completion and ACTIVO selection, 2) Using header selector for quick project switching and "Todos los Proyectos" option
   • Removed selected project information card above projects list for cleaner interface
   • ACTIVO badge properly implemented in ModernProjectCard with --accent background color and positioned left of action buttons
