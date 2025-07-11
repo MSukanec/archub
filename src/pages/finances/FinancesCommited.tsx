@@ -89,6 +89,7 @@ export default function FinancesCommited() {
         .select(`
           id,
           is_default,
+          currency_id,
           currency:currencies(
             id,
             name,
@@ -171,17 +172,28 @@ export default function FinancesCommited() {
     }
   })
 
-  // Filter clients based on search
+  // Filter and sort clients based on search
   const filteredClients = React.useMemo(() => {
     if (!projectClients) return []
     
-    if (!searchValue) return projectClients
+    let filtered = projectClients
     
-    return projectClients.filter(client => {
-      const contact = client.contact
-      const displayName = contact?.company_name || 
-                         `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim()
-      return displayName.toLowerCase().includes(searchValue.toLowerCase())
+    if (searchValue) {
+      filtered = projectClients.filter(client => {
+        const contact = client.contact
+        const displayName = contact?.company_name || 
+                           `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim()
+        return displayName.toLowerCase().includes(searchValue.toLowerCase())
+      })
+    }
+    
+    // Sort alphabetically by client name
+    return filtered.sort((a, b) => {
+      const nameA = a.contact?.company_name || 
+                   `${a.contact?.first_name || ''} ${a.contact?.last_name || ''}`.trim()
+      const nameB = b.contact?.company_name || 
+                   `${b.contact?.first_name || ''} ${b.contact?.last_name || ''}`.trim()
+      return nameA.toLowerCase().localeCompare(nameB.toLowerCase())
     })
   }, [projectClients, searchValue])
 
@@ -223,7 +235,7 @@ export default function FinancesCommited() {
       label: "Moneda",
       width: "25%",
       render: (item: ProjectClient) => {
-        const currentCurrency = organizationCurrencies?.find(oc => oc.currency?.id === item.currency_id)
+        const currentCurrency = organizationCurrencies?.find(oc => oc.currency_id === item.currency_id)
         
         return (
           <div className="text-sm">
@@ -251,7 +263,7 @@ export default function FinancesCommited() {
                 {organizationCurrencies?.map((orgCurrency, index) => (
                   <SelectItem 
                     key={`currency-${orgCurrency.currency?.id || index}`} 
-                    value={orgCurrency.currency?.id || ''}
+                    value={orgCurrency.currency_id || ''}
                   >
                     {orgCurrency.currency?.code || 'N/A'} - {orgCurrency.currency?.name || 'Sin nombre'}
                     {orgCurrency.is_default && ' (Por defecto)'}
@@ -270,7 +282,7 @@ export default function FinancesCommited() {
       sortable: true,
       sortType: "number" as const,
       render: (item: ProjectClient) => {
-        const currency = organizationCurrencies?.find(oc => oc.currency?.id === item.currency_id)?.currency
+        const currency = organizationCurrencies?.find(oc => oc.currency_id === item.currency_id)?.currency
         const symbol = currency?.symbol || '$'
         
         return (

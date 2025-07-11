@@ -13,6 +13,7 @@ import { supabase } from '@/lib/supabase'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
+import DangerousConfirmationModal from '@/components/ui-custom/DangerousConfirmationModal'
 
 interface Contact {
   id: string
@@ -43,6 +44,8 @@ export default function ProjectClients() {
   const { toast } = useToast()
   const [showAddClientModal, setShowAddClientModal] = useState(false)
   const [selectedContactId, setSelectedContactId] = useState<string>('')
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [clientToDelete, setClientToDelete] = useState<ProjectClient | null>(null)
 
   const projectId = userData?.preferences?.last_project_id
   const organizationId = userData?.organization?.id
@@ -95,9 +98,20 @@ export default function ProjectClients() {
         `)
         .eq('project_id', projectId)
         .eq('is_active', true)
+        .order('created_at', { ascending: false })
 
       if (error) throw error
-      return data || []
+      
+      // Sort clients alphabetically by name
+      const sortedData = (data || []).sort((a, b) => {
+        const nameA = a.contact?.company_name || 
+                     `${a.contact?.first_name || ''} ${a.contact?.last_name || ''}`.trim()
+        const nameB = b.contact?.company_name || 
+                     `${b.contact?.first_name || ''} ${b.contact?.last_name || ''}`.trim()
+        return nameA.toLowerCase().localeCompare(nameB.toLowerCase())
+      })
+      
+      return sortedData
     },
     enabled: !!projectId && !!supabase
   })
@@ -175,8 +189,17 @@ export default function ProjectClients() {
     addClientMutation.mutate(selectedContactId)
   }
 
-  const handleRemoveClient = (clientId: string) => {
-    removeClientMutation.mutate(clientId)
+  const handleRemoveClient = (client: ProjectClient) => {
+    setClientToDelete(client)
+    setShowDeleteModal(true)
+  }
+
+  const confirmRemoveClient = () => {
+    if (clientToDelete) {
+      removeClientMutation.mutate(clientToDelete.id)
+      setShowDeleteModal(false)
+      setClientToDelete(null)
+    }
   }
 
   // Get available contacts (not already clients)
@@ -289,7 +312,7 @@ export default function ProjectClients() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleRemoveClient(client.id)}
+                            onClick={() => handleRemoveClient(client)}
                             disabled={removeClientMutation.isPending}
                           >
                             <Trash2 className="w-4 h-4 text-red-500" />
@@ -310,6 +333,26 @@ export default function ProjectClients() {
           </CardContent>
         </Card>
       </div>
+      
+      {/* Dangerous Confirmation Modal */}
+      {clientToDelete && (
+        <DangerousConfirmationModal
+          isOpen={showDeleteModal}
+          onClose={() => {
+            setShowDeleteModal(false)
+            setClientToDelete(null)
+          }}
+          onConfirm={confirmRemoveClient}
+          title="Remover Cliente del Proyecto"
+          description="Vas a remover este cliente del proyecto. Esta acción no se puede deshacer y el cliente perderá el acceso a toda la información del proyecto."
+          confirmationText={
+            clientToDelete.contact?.company_name || 
+            `${clientToDelete.contact?.first_name || ''} ${clientToDelete.contact?.last_name || ''}`.trim()
+          }
+          buttonText="Remover Cliente"
+          isLoading={removeClientMutation.isPending}
+        />
+      )}
     </Layout>
   )
 }

@@ -119,6 +119,16 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 11, 2025. Complete client financial commitments system and dangerous deletion confirmation component - COMPLETED
+  • Fixed FK violation in FinancesCommited page by using currency_id instead of currency.id for organization_currencies queries
+  • Added alphabetical sorting to both FinancesCommited and ProjectClients pages - clients now display in alphabetical order by name
+  • Created DangerousConfirmationModal component in src/components/ui-custom/ for high-risk deletion confirmations
+  • Modal requires typing exact item name (client name) to confirm dangerous deletions, following Supabase/GitHub pattern
+  • Applied dangerous confirmation to ProjectClients page - users must type client name to confirm removal
+  • Added "Compromisos" button to finances navigation (desktop & mobile) with HandCoins icon after "Aportes"
+  • FinancesCommited page shows all project clients with editable currency (select) and committed amount (input) fields
+  • All currency and amount changes save automatically to project_clients table with proper error handling
+  • Enhanced user safety with visual warnings, loading states, and "Esta acción no se puede deshacer" messaging
 - July 11, 2025. ProjectClients page simplified with single-column layout and navigation integration - COMPLETED
   • Simplified ProjectClients.tsx to single-column layout with only "Clientes Activos" card as requested
   • Removed left sidebar and secondary cards for cleaner, focused interface
