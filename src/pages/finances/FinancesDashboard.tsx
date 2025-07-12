@@ -428,8 +428,8 @@ export default function FinancesDashboard() {
 
         </div>
 
-        {/* Métricas Principales - Mobile (Una columna) */}
-        <div className="md:hidden grid grid-cols-1 gap-4">
+        {/* Métricas Principales - Mobile (2 columnas) */}
+        <div className="md:hidden grid grid-cols-2 gap-4">
           <Card className="relative overflow-hidden">
             <CardContent className="p-4 h-full flex flex-col">
               {/* Mini Chart */}
@@ -511,7 +511,7 @@ export default function FinancesDashboard() {
               </div>
               
               {/* Amount - smaller size like reference */}
-              <div className="text-lg font-bold" style={{ color: 'var(--chart-neutral)' }}>
+              <div className="text-lg font-bold" style={getBalanceColor(financialSummary?.balance || 0)}>
                 {summaryLoading ? '...' : formatCurrency(financialSummary?.balance || 0)}
               </div>
             </CardContent>
