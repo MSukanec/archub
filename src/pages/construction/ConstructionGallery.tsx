@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@supabase/supabase-js';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState';
+import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -41,7 +42,11 @@ import {
   PlayCircle, 
   X,
   Edit,
-  Trash2
+  Trash2,
+  Camera,
+  FolderOpen,
+  Calendar,
+  Eye
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -446,11 +451,41 @@ export default function ConstructionGallery() {
   if (galleryFiles.length === 0) {
     return (
       <Layout headerProps={headerProps}>
-        <CustomEmptyState
-          icon={<Images />}
-          title="No hay archivos en la galería"
-          description="Sube tu primer archivo para comenzar"
-        />
+        <div className="space-y-6">
+          {/* Feature Introduction */}
+          <FeatureIntroduction
+            title="Galería de Archivos"
+            icon={<Images className="w-6 h-6" />}
+            features={[
+              {
+                icon: <Camera className="w-4 h-4" />,
+                title: "Fotos y Videos",
+                description: "Captura y organiza fotos y videos del progreso de la obra directamente desde el móvil."
+              },
+              {
+                icon: <FolderOpen className="w-4 h-4" />,
+                title: "Organización Automática",
+                description: "Los archivos se organizan automáticamente por fecha y tipo de entrada para fácil navegación."
+              },
+              {
+                icon: <Calendar className="w-4 h-4" />,
+                title: "Histórico Visual",
+                description: "Mantén un registro visual completo del progreso de la obra con fechas y descripciones."
+              },
+              {
+                icon: <Eye className="w-4 h-4" />,
+                title: "Visor Integrado",
+                description: "Visualiza imágenes y reproduce videos directamente en la aplicación con navegación intuitiva."
+              }
+            ]}
+          />
+
+          <CustomEmptyState
+            icon={<Images />}
+            title="No hay archivos en la galería"
+            description="Sube tu primer archivo para comenzar"
+          />
+        </div>
       </Layout>
     );
   }
@@ -458,6 +493,34 @@ export default function ConstructionGallery() {
   return (
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
+        {/* Feature Introduction */}
+        <FeatureIntroduction
+          title="Galería de Archivos"
+          icon={<Images className="w-6 h-6" />}
+          features={[
+            {
+              icon: <Camera className="w-4 h-4" />,
+              title: "Fotos y Videos",
+              description: "Captura y organiza fotos y videos del progreso de la obra directamente desde el móvil."
+            },
+            {
+              icon: <FolderOpen className="w-4 h-4" />,
+              title: "Organización Automática",
+              description: "Los archivos se organizan automáticamente por fecha y tipo de entrada para fácil navegación."
+            },
+            {
+              icon: <Calendar className="w-4 h-4" />,
+              title: "Histórico Visual",
+              description: "Mantén un registro visual completo del progreso de la obra con fechas y descripciones."
+            },
+            {
+              icon: <Eye className="w-4 h-4" />,
+              title: "Visor Integrado",
+              description: "Visualiza imágenes y reproduce videos directamente en la aplicación con navegación intuitiva."
+            }
+          ]}
+        />
+
         {/* Gallery Grid */}
         {filteredFiles.length === 0 ? (
           <CustomEmptyState

@@ -119,6 +119,17 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 12, 2025. Enhanced construction module with FeatureIntroduction components and improved UI consistency - COMPLETED
+  • Added FeatureIntroduction component to ConstructionMaterials.tsx explaining material management functionality
+  • Enhanced Materials page with comprehensive feature descriptions: auto-calculation, inventory control, category analysis, purchase planning
+  • Added FeatureIntroduction component to ConstructionGallery.tsx explaining gallery functionality
+  • Enhanced Gallery page with detailed feature descriptions: photo/video capture, automatic organization, visual history, integrated viewer
+  • Fixed CustomEmptyState styling issues in Gallery page by removing conflicting CSS classes
+  • Gallery empty states now properly display with accent colors and proper visual hierarchy
+  • Both pages now follow consistent UI patterns with FeatureIntroduction at top and proper spacing
+  • Fixed input sizing in ConstructionBudgets.tsx by removing hardcoded height (h-10) for standard component sizing
+  • All construction module pages now maintain consistent visual design with proper component standardization
+Changelog:
 - July 12, 2025. Fixed onboarding Step1 theme field removal and Step3 double-click issue - COMPLETED
   • Removed "Tema de la aplicación" field from Step 1 of onboarding as requested by user
   • Fixed Step3Discovery double-click issue by adding isFinishing state to prevent multiple executions
