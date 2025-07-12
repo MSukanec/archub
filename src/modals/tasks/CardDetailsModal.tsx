@@ -20,11 +20,10 @@ import { toast } from '@/hooks/use-toast';
 import type { KanbanCard } from '@/hooks/use-kanban';
 
 const cardSchema = z.object({
+  created_by: z.string().min(1, 'El creador es requerido'),
   title: z.string().min(1, 'El título es requerido'),
   description: z.string().optional(),
-  created_by: z.string().min(1, 'El creador es requerido'),
   assigned_to: z.string().optional(),
-  due_date: z.string().optional(),
 });
 
 type CardFormData = z.infer<typeof cardSchema>;
@@ -50,11 +49,10 @@ export function CardDetailsModal({ open, onClose, card }: CardDetailsModalProps)
   } = useForm<CardFormData>({
     resolver: zodResolver(cardSchema),
     defaultValues: {
+      created_by: '',
       title: '',
       description: '',
-      created_by: '',
-      assigned_to: '',
-      due_date: ''
+      assigned_to: ''
     }
   });
 
@@ -62,11 +60,10 @@ export function CardDetailsModal({ open, onClose, card }: CardDetailsModalProps)
   useEffect(() => {
     if (open && card) {
       reset({
+        created_by: card.created_by || '',
         title: card.title || '',
         description: card.description || '',
-        created_by: card.created_by || '',
-        assigned_to: card.assigned_to || '',
-        due_date: card.due_date || ''
+        assigned_to: card.assigned_to || ''
       });
     }
   }, [open, card, reset]);
@@ -84,11 +81,10 @@ export function CardDetailsModal({ open, onClose, card }: CardDetailsModalProps)
     try {
       await updateCardMutation.mutateAsync({
         id: card.id,
+        created_by: data.created_by,
         title: data.title,
         description: data.description || undefined,
-        created_by: data.created_by,
         assigned_to: data.assigned_to || undefined,
-        due_date: data.due_date || undefined,
         list_id: card.list_id
       });
 
@@ -123,26 +119,6 @@ export function CardDetailsModal({ open, onClose, card }: CardDetailsModalProps)
             <form id="card-details-form" onSubmit={handleSubmit(onSubmit)}>
               <div className="grid grid-cols-1 gap-4">
                 <div className="col-span-1">
-                  <Label htmlFor="title">Título</Label>
-                  <Input 
-                    id="title"
-                    {...register('title')}
-                    placeholder="Nombre de la tarjeta"
-                  />
-                  {errors.title && <p className="text-xs text-destructive mt-1">{errors.title.message}</p>}
-                </div>
-
-                <div className="col-span-1">
-                  <Label htmlFor="description">Descripción (opcional)</Label>
-                  <Textarea 
-                    id="description"
-                    {...register('description')}
-                    placeholder="Detalles adicionales sobre la tarea..."
-                    rows={3}
-                  />
-                </div>
-
-                <div className="col-span-1">
                   <Label htmlFor="created_by">Creador <span className="text-red-500">*</span></Label>
                   <Select 
                     value={watch('created_by')} 
@@ -170,6 +146,36 @@ export function CardDetailsModal({ open, onClose, card }: CardDetailsModalProps)
                     </SelectContent>
                   </Select>
                   {errors.created_by && <p className="text-xs text-destructive mt-1">{errors.created_by.message}</p>}
+                </div>
+
+                <div className="col-span-1">
+                  <Label htmlFor="created_at">Fecha</Label>
+                  <Input 
+                    id="created_at"
+                    value={card?.created_at ? new Date(card.created_at).toLocaleDateString('es-ES') : ''}
+                    disabled
+                    className="bg-muted"
+                  />
+                </div>
+
+                <div className="col-span-1">
+                  <Label htmlFor="title">Título <span className="text-red-500">*</span></Label>
+                  <Input 
+                    id="title"
+                    {...register('title')}
+                    placeholder="Nombre de la tarjeta"
+                  />
+                  {errors.title && <p className="text-xs text-destructive mt-1">{errors.title.message}</p>}
+                </div>
+
+                <div className="col-span-1">
+                  <Label htmlFor="description">Descripción (opcional)</Label>
+                  <Textarea 
+                    id="description"
+                    {...register('description')}
+                    placeholder="Detalles adicionales sobre la tarea..."
+                    rows={3}
+                  />
                 </div>
 
                 <div className="col-span-1">
@@ -202,14 +208,7 @@ export function CardDetailsModal({ open, onClose, card }: CardDetailsModalProps)
                   </Select>
                 </div>
 
-                <div className="col-span-1">
-                  <Label htmlFor="due_date">Fecha límite (opcional)</Label>
-                  <Input 
-                    id="due_date"
-                    type="date"
-                    {...register('due_date')}
-                  />
-                </div>
+
               </div>
             </form>
           </CustomModalBody>

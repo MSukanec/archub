@@ -119,6 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 12, 2025. Complete CardDetailsModal field reorganization and modal positioning fix - COMPLETED
+  • Fixed modal positioning by moving CardDetailsModal management from CustomKanban to OrganizationTasks parent level
+  • Reorganized modal fields per user specification: CREADOR → Fecha (created_at) → TITULO → DESCRIPCION → ASIGNADO A
+  • Removed FECHA LIMITE field completely from task editing modal as requested
+  • Enhanced form schema to match new field order with proper validation for creator field
+  • Added read-only created_at date field displaying creation date in Spanish format
+  • Implemented proper component separation: CustomKanban handles display, OrganizationTasks manages modal state
+  • Fixed handleDeleteCard function with proper useDeleteKanbanCard hook integration
+  • Added selectedCard state management and onCardEdit callback system for clean component architecture
 - July 12, 2025. Enhanced DOCUMENTACIÓN page with FeatureIntroduction component and complete document versioning system - COMPLETED
   • Added FeatureIntroduction component explaining document management functionality: version control, folder organization, download/export capabilities, and team collaboration features
   • Created DocumentFolderCard component in src/components/ui-custom/ for comprehensive file version management
