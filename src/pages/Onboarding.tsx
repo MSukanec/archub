@@ -11,9 +11,9 @@ import { useThemeStore } from "@/stores/themeStore";
 import { Step1UserData } from "@/components/onboarding/Step1UserData";
 import { Step2FinancialSetup } from "@/components/onboarding/Step2FinancialSetup";
 import { Step3Discovery } from "@/components/onboarding/Step3Discovery";
-import { Step4SelectMode } from "@/components/onboarding/Step4SelectMode";
 
-export default function SelectMode() {
+
+export default function Onboarding() {
   const [, navigate] = useLocation();
   const { data: userData, isLoading: userLoading } = useCurrentUser();
   const { setSidebarContext } = useNavigationStore();
@@ -21,15 +21,14 @@ export default function SelectMode() {
   const { setTheme } = useThemeStore();
   const { 
     currentStep, 
-    totalSteps, 
     formData, 
     updateFormData, 
     resetOnboarding, 
     setCurrentStep 
   } = useOnboardingStore();
 
-  // Determine if this is onboarding (user hasn't completed it) or just mode change
-  const isOnboarding = !userData?.preferences?.onboarding_completed;
+  // This is now always onboarding (3 steps only)
+  const totalSteps = 3;
 
   // Initialize form data with existing user data if available
   useEffect(() => {
@@ -50,23 +49,26 @@ export default function SelectMode() {
         secondary_wallet_ids: [],
       });
 
-      // If not onboarding (user completed it), skip to step 4 (mode selection only)
-      if (!isOnboarding) {
-        setCurrentStep(4);
-      } else {
-        // If onboarding and has existing data, skip appropriate steps
-        if (userData.user_data?.first_name && userData.user_data?.last_name) {
-          if (userData.user_data?.discovered_by) {
-            setCurrentStep(4); // Skip to mode selection
-          } else {
-            setCurrentStep(3); // Skip to discovery step
-          }
+      // If onboarding and has existing data, skip appropriate steps
+      if (userData.user_data?.first_name && userData.user_data?.last_name) {
+        if (userData.user_data?.discovered_by) {
+          setCurrentStep(3); // Skip to discovery step (final step)
         } else {
-          setCurrentStep(1); // Start from beginning
+          setCurrentStep(3); // Skip to discovery step
         }
+      } else {
+        setCurrentStep(1); // Start from beginning
       }
     }
-  }, [userData, userLoading, isOnboarding, updateFormData, setCurrentStep]);
+  }, [userData, userLoading, updateFormData, setCurrentStep]);
+
+  // Auto-trigger onboarding completion when step goes beyond totalSteps
+  useEffect(() => {
+    if (currentStep > totalSteps) {
+      console.log('Auto-finishing onboarding - step exceeded total steps');
+      handleFinishOnboarding();
+    }
+  }, [currentStep, totalSteps, handleFinishOnboarding]);
 
   // Mutation to save all onboarding data
   const saveOnboardingMutation = useMutation({
@@ -197,13 +199,12 @@ export default function SelectMode() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
       toast({
-        title: "¡Bienvenido a Archub!",
-        description: "Tu configuración se ha guardado exitosamente.",
+        title: "¡Perfecto!",
+        description: "Configuración inicial completada. Ahora elige tu modo de uso.",
       });
       
-      // Redirect to organization dashboard after successful onboarding
-      setSidebarContext('organization');
-      navigate('/organization/dashboard');
+      // Redirect to mode selection after successful onboarding
+      navigate('/select-mode');
       resetOnboarding();
     },
     onError: (error) => {
@@ -216,69 +217,11 @@ export default function SelectMode() {
     },
   });
 
-  // Mutation for simple mode change (when not onboarding)
-  const updateUserTypeMutation = useMutation({
-    mutationFn: async (userType: string) => {
-      if (!userData?.user?.id) throw new Error('Usuario no encontrado');
-      if (!supabase) throw new Error('Supabase no está configurado');
 
-      const { error } = await supabase
-        .from('user_preferences')
-        .update({
-          last_user_type: userType,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('user_id', userData.user.id);
-
-      if (error) throw error;
-      return { success: true };
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      console.log('User type updated successfully, navigating to dashboard');
-      toast({
-        title: "Modo actualizado",
-        description: "Tu modo de uso se ha actualizado correctamente.",
-      });
-      
-      // Navigate to dashboard
-      setSidebarContext('organization');
-      navigate('/organization/dashboard');
-    },
-    onError: (error) => {
-      console.error('Error updating user type:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "No se pudo actualizar el modo. Intenta nuevamente.",
-      });
-    },
-  });
 
   const handleFinishOnboarding = () => {
-    console.log('handleFinishOnboarding called', { 
-      isOnboarding, 
-      last_user_type: formData.last_user_type,
-      currentStep,
-      hasUserData: !!userData?.user_data?.first_name 
-    });
-    
-    // Si el usuario está en el paso 4 pero ya tiene datos básicos (nombre, discovery), 
-    // solo actualizar el tipo de usuario, no hacer onboarding completo
-    if (currentStep === 4 && userData?.user_data?.first_name && userData?.user_data?.discovered_by) {
-      console.log('User has basic data, just updating user type');
-      if (formData.last_user_type) {
-        updateUserTypeMutation.mutate(formData.last_user_type);
-      }
-    } else if (isOnboarding) {
-      console.log('Running full onboarding save');
-      saveOnboardingMutation.mutate();
-    } else {
-      console.log('Just updating user type');
-      if (formData.last_user_type) {
-        updateUserTypeMutation.mutate(formData.last_user_type);
-      }
-    }
+    console.log('handleFinishOnboarding called - completing 3-step onboarding');
+    saveOnboardingMutation.mutate();
   };
 
   if (userLoading) {
@@ -300,14 +243,6 @@ export default function SelectMode() {
         return <Step2FinancialSetup />;
       case 3:
         return <Step3Discovery />;
-      case 4:
-        return (
-          <Step4SelectMode 
-            isOnboarding={isOnboarding}
-            onFinish={handleFinishOnboarding}
-            isLoading={saveOnboardingMutation.isPending || updateUserTypeMutation.isPending}
-          />
-        );
       default:
         return <Step1UserData />;
     }
@@ -319,28 +254,26 @@ export default function SelectMode() {
         {/* Header with step indicator */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-[var(--foreground)] mb-2">
-            {isOnboarding ? "¡Bienvenido a Archub!" : "Elegir modo de uso"}
+            ¡Bienvenido a Archub!
           </h1>
           
-          {isOnboarding && currentStep < 4 && (
-            <div className="flex items-center justify-center space-x-2 mt-4">
-              <p className="text-sm text-slate-600 dark:text-slate-300">
-                Paso {currentStep} de {totalSteps}
-              </p>
-              <div className="flex space-x-1">
-                {Array.from({ length: totalSteps }, (_, index) => (
-                  <div
-                    key={index}
-                    className={`h-2 w-8 rounded-full transition-colors ${
-                      index + 1 <= currentStep 
-                        ? 'bg-[var(--accent)]' 
-                        : 'bg-slate-300 dark:bg-slate-600'
-                    }`}
-                  />
-                ))}
-              </div>
+          <div className="flex items-center justify-center space-x-2 mt-4">
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              Paso {currentStep} de {totalSteps}
+            </p>
+            <div className="flex space-x-1">
+              {Array.from({ length: totalSteps }, (_, index) => (
+                <div
+                  key={index}
+                  className={`h-2 w-8 rounded-full transition-colors ${
+                    index + 1 <= currentStep 
+                      ? 'bg-[var(--accent)]' 
+                      : 'bg-slate-300 dark:bg-slate-600'
+                  }`}
+                />
+              ))}
             </div>
-          )}
+          </div>
         </div>
 
         {/* Current step content */}

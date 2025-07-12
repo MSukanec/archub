@@ -43,6 +43,7 @@ import OrganizationTasks from "@/pages/organization/OrganizationTasks";
 import Changelog from "@/pages/others/Changelog";
 import Profile from "@/pages/others/Profile";
 import Onboarding from "@/pages/Onboarding";
+import SelectMode from "@/pages/others/SelectMode";
 
 // Admin Pages
 import AdminDashboard from "@/pages/admin/AdminDashboard";
@@ -69,10 +70,16 @@ function Router() {
         <Route path="/register" component={Register} />
         <Route path="/forgot-password" component={ForgotPassword} />
 
-        {/* Onboarding Route */}
-        <Route path="/select-mode">
+        {/* Onboarding and Mode Selection Routes */}
+        <Route path="/onboarding">
           <ProtectedRoute>
             <Onboarding />
+          </ProtectedRoute>
+        </Route>
+        
+        <Route path="/select-mode">
+          <ProtectedRoute>
+            <SelectMode />
           </ProtectedRoute>
         </Route>
 

@@ -98,8 +98,9 @@ export function Step3Discovery() {
     }
   }, [userData?.user_data, updateFormData]);
 
-  const handleNext = () => {
+  const handleFinish = () => {
     if (formData.discovered_by && (formData.discovered_by !== 'Otro' || formData.discovered_by_other_text)) {
+      // This should trigger the onboarding completion
       goNextStep();
     }
   };
@@ -278,11 +279,11 @@ export function Step3Discovery() {
           </Button>
           
           <Button 
-            onClick={handleNext}
+            onClick={handleFinish}
             disabled={!formData.discovered_by || (formData.discovered_by === 'Otro' && !formData.discovered_by_other_text)}
             className="bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white px-8"
           >
-            Siguiente
+            Finalizar Configuración
           </Button>
         </div>
       </CardContent>

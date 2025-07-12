@@ -81,11 +81,19 @@ export function Step4SelectMode({ isOnboarding = true, onFinish, isLoading = fal
     console.log('Step4SelectMode - Processing mode selection:', modeType);
     setHasFinished(true);
     setSelectedMode(modeType);
-    updateFormData({ last_user_type: modeType });
     
-    // Llamar onFinish inmediatamente sin timeout
+    if (isOnboarding) {
+      updateFormData({ last_user_type: modeType });
+    }
+    
+    // Llamar onFinish inmediatamente
     if (onFinish) {
-      onFinish();
+      if (isOnboarding) {
+        onFinish();
+      } else {
+        // Para modo no-onboarding, pasar el tipo seleccionado
+        (onFinish as any)(modeType);
+      }
     }
   };
 

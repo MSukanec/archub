@@ -54,12 +54,12 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
       // Only redirect if onboarding is NOT completed
       // If onboarding is completed but no user type, let them continue (they can change it later)
       if (!onboardingCompleted) {
-        console.log('User needs to complete onboarding, redirecting to select-mode');
-        navigate('/select-mode');
+        console.log('User needs to complete onboarding, redirecting to /onboarding');
+        navigate('/onboarding');
       } else if (!hasPersonalData) {
         // Edge case: onboarding marked complete but missing basic data
-        console.log('Onboarding completed but missing personal data, redirecting to select-mode');
-        navigate('/select-mode');
+        console.log('Onboarding completed but missing personal data, redirecting to /onboarding');
+        navigate('/onboarding');
       }
     }
   }, [user, userData, userDataLoading, location, navigate])
