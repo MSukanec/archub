@@ -26,6 +26,7 @@ import { useToast } from '@/hooks/use-toast'
 import { Calendar, User, FileText, Cloud, MessageSquare, Star, Eye, Calendar as CalendarIcon, Plus, X, Settings, Truck, Trash2, Folder } from 'lucide-react'
 import { FileUploader } from '@/components/ui-custom/FileUploader'
 import { uploadSiteLogFiles, getSiteLogFiles, deleteSiteLogFile } from '@/lib/storage/uploadSiteLogFiles'
+import { logActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from '@/utils/logActivity'
 
 // ContactOptions component for rendering contact options
 interface ContactOptionsProps {
@@ -449,6 +450,31 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
             description: 'La entrada se guardó pero hubo un error al subir algunos archivos',
             variant: 'destructive'
           })
+        }
+      }
+
+      // Log activity after successful site log creation/update
+      if (siteLogResult.data) {
+        try {
+          await logActivity({
+            organization_id: userData?.preferences?.last_organization_id || '',
+            user_id: userData?.user?.id || '',
+            action: editingSiteLog ? ACTIVITY_ACTIONS.UPDATE_SITE_LOG : ACTIVITY_ACTIONS.CREATE_SITE_LOG,
+            target_table: TARGET_TABLES.SITE_LOGS,
+            target_id: siteLogResult.data.id,
+            metadata: {
+              entry_type: data.entry_type,
+              weather: data.weather,
+              log_date: data.log_date.toISOString(),
+              is_public: data.is_public,
+              events_count: events.length,
+              attendees_count: attendees.length,
+              equipment_count: equipmentList.length,
+              files_count: files.length
+            }
+          });
+        } catch (logError) {
+          console.error('Error logging site log activity:', logError);
         }
       }
 

@@ -393,3 +393,40 @@ TABLA USER_DATA:
     "data_type": "text"
   }
 ]
+
+TABLA ORGANIZATION_ACTIVITY_LOGS:
+
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "organization_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "user_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "action",
+    "data_type": "text"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "target_table",
+    "data_type": "text"
+  },
+  {
+    "column_name": "target_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "metadata",
+    "data_type": "jsonb"
+  }
+]
