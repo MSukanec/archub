@@ -11,16 +11,16 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 interface ProjectHeroCardProps {
-  project: {
+  project?: {
     id: string;
     name: string;
     status?: string;
     created_at?: string;
     project_data?: {
       project_image_url?: string | null;
-    };
-  };
-  organizationId: string;
+    } | null;
+  } | null;
+  organizationId?: string | null;
   onImageUpdate?: () => void;
 }
 
@@ -33,6 +33,10 @@ function getProjectInitials(name: string): string {
 }
 
 export default function ProjectHeroCard({ project, organizationId, onImageUpdate }: ProjectHeroCardProps) {
+  // Return null if no project data
+  if (!project || !organizationId) {
+    return null;
+  }
   const [imagePosition, setImagePosition] = useState(50); // Vertical position percentage
   const [isDragging, setIsDragging] = useState(false);
   const { toast } = useToast();

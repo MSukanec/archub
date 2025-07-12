@@ -25,15 +25,7 @@ export default function ProjectDashboard() {
   const { data: stats, isLoading: statsLoading, error: statsError } = useProjectStats(projectId)
   const { data: activityData, isLoading: activityLoading } = useProjectActivity(projectId)
 
-  // Debug logs to understand the issue
-  console.log('Dashboard debug:', { 
-    projectId, 
-    organizationId, 
-    stats, 
-    statsLoading, 
-    statsError,
-    userData: userData?.preferences 
-  })
+
 
   // Set sidebar context
   useEffect(() => {
@@ -68,11 +60,13 @@ export default function ProjectDashboard() {
   return (
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
-        {/* Hero Card with Project Background */}
-        <ProjectHeroCard 
-          project={currentProject}
-          organizationId={organizationId}
-        />
+        {/* Hero Card with Project Background - Only render if we have a project */}
+        {currentProject && organizationId && (
+          <ProjectHeroCard 
+            project={currentProject}
+            organizationId={organizationId}
+          />
+        )}
 
         {/* Statistics Cards */}
         <ProjectStatsCards stats={stats} isLoading={statsLoading} />
