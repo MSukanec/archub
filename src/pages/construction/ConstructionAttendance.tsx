@@ -7,7 +7,8 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import CustomGradebook from '@/components/ui-custom/CustomGradebook'
 import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState'
-import { Users, Download, Calendar, CalendarDays, FileText } from 'lucide-react'
+import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
+import { Users, Download, Calendar, CalendarDays, FileText, Clock, BarChart3, Filter } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
@@ -289,6 +290,34 @@ export default function ConstructionAttendance() {
   return (
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
+        {/* Feature Introduction */}
+        <FeatureIntroduction
+          title="Control de Asistencia de Personal"
+          icon={<Users className="w-6 h-6" />}
+          features={[
+            {
+              icon: <Calendar className="w-5 h-5" />,
+              title: "Registro Visual de Asistencia",
+              description: "Visualiza la asistencia del personal en formato de calendario con datos extraídos automáticamente de las entradas de bitácora del proyecto."
+            },
+            {
+              icon: <Filter className="w-5 h-5" />,
+              title: "Filtros por Tipo de Trabajador",
+              description: "Filtra la vista por tipos de personal (obreros, supervisores, técnicos) para análisis específicos por categoría profesional."
+            },
+            {
+              icon: <BarChart3 className="w-5 h-5" />,
+              title: "Estadísticas de Productividad",
+              description: "Revisa métricas de jornadas completas vs medias jornadas, días activos y tasas de asistencia para optimizar la gestión del equipo."
+            },
+            {
+              icon: <Clock className="w-5 h-5" />,
+              title: "Control de Períodos Flexibles",
+              description: "Configura rangos de fechas personalizados y oculta fines de semana para adaptar la vista a tu calendario de trabajo específico."
+            }
+          ]}
+        />
+
         {/* Dynamic Statistics Cards - Only show when there's data */}
         {filteredWorkers.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
