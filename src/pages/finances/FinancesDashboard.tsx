@@ -748,47 +748,7 @@ export default function FinancesDashboard() {
           </CardContent>
         </Card>
 
-        {/* Acciones Rápidas */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Acciones Rápidas</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Link 
-                href="/finances/movements"
-                className="flex flex-col items-center p-4 rounded-md border hover:bg-muted/50 transition-colors"
-              >
-                <FileText className="h-8 w-8 text-muted-foreground mb-2" />
-                <span className="text-sm font-medium">Ver Movimientos</span>
-              </Link>
-              
-              <Link 
-                href="/finances/preferences"
-                className="flex flex-col items-center p-4 rounded-md border hover:bg-muted/50 transition-colors"
-              >
-                <CreditCard className="h-8 w-8 text-muted-foreground mb-2" />
-                <span className="text-sm font-medium">Preferencias</span>
-              </Link>
-              
-              <Link 
-                href="/project/dashboard"
-                className="flex flex-col items-center p-4 rounded-md border hover:bg-muted/50 transition-colors"
-              >
-                <Calendar className="h-8 w-8 text-muted-foreground mb-2" />
-                <span className="text-sm font-medium">Volver al Proyecto</span>
-              </Link>
 
-              <Link 
-                href="/organization/dashboard"
-                className="flex flex-col items-center p-4 rounded-md border hover:bg-muted/50 transition-colors"
-              >
-                <User className="h-8 w-8 text-muted-foreground mb-2" />
-                <span className="text-sm font-medium">Ver Organización</span>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </Layout>
   )

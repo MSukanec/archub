@@ -97,7 +97,7 @@ export function ExpensesByCategoryChart({ data, isLoading }: ExpensesByCategoryC
           <Legend 
             verticalAlign="bottom" 
             height={16}
-            wrapperStyle={{ paddingTop: '4px' }}
+            wrapperStyle={{ paddingTop: '2px' }}
             formatter={(value, entry: any) => (
               <span style={{ color: entry.color }} className="text-sm">
                 {entry.payload.category}
