@@ -57,10 +57,11 @@ const teamSizeOptions = [
 export function Step3Discovery() {
   const { formData, updateFormData, goNextStep, goPrevStep } = useOnboardingStore();
   const { data: userData } = useCurrentUser();
+  const [initialized, setInitialized] = useState(false);
 
-  // Load existing user data if available
+  // Load existing user data if available - only once with state control
   useEffect(() => {
-    if (userData?.user_data) {
+    if (userData?.user_data && !initialized) {
       console.log('Step3Discovery - Loading existing data:', {
         discovered_by: userData.user_data.discovered_by,
         main_use: userData.user_data.main_use,
@@ -68,25 +69,25 @@ export function Step3Discovery() {
         team_size: userData.user_data.team_size
       });
       
-      // Update form data with existing values (overwrite form state with DB values)
+      // Update form data with existing values if form is empty
       const updateData: any = {};
       
-      if (userData.user_data.discovered_by) {
+      if (userData.user_data.discovered_by && !formData.discovered_by) {
         updateData.discovered_by = userData.user_data.discovered_by;
         updateData.discovered_by_other_text = userData.user_data.discovered_by_other_text || '';
       }
       
-      if (userData.user_data.main_use) {
+      if (userData.user_data.main_use && !formData.main_use) {
         updateData.main_use = userData.user_data.main_use;
         updateData.main_use_other = userData.user_data.main_use_other || '';
       }
       
-      if (userData.user_data.user_role) {
+      if (userData.user_data.user_role && !formData.user_role) {
         updateData.user_role = userData.user_data.user_role;
         updateData.user_role_other = userData.user_data.user_role_other || '';
       }
       
-      if (userData.user_data.team_size) {
+      if (userData.user_data.team_size && !formData.team_size) {
         updateData.team_size = userData.user_data.team_size;
       }
       
@@ -95,8 +96,10 @@ export function Step3Discovery() {
         console.log('Step3Discovery - Updating form with:', updateData);
         updateFormData(updateData);
       }
+      
+      setInitialized(true);
     }
-  }, [userData?.user_data, updateFormData]);
+  }, [userData?.user_data, initialized, formData.discovered_by, formData.main_use, formData.user_role, formData.team_size, updateFormData]);
 
   const handleFinish = () => {
     if (formData.discovered_by && (formData.discovered_by !== 'Otro' || formData.discovered_by_other_text)) {

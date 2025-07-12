@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useLocation } from 'wouter'
 import { useAuthStore } from '@/stores/authStore'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -13,6 +13,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { data: userData, isLoading: userDataLoading } = useCurrentUser()
   const [location, navigate] = useLocation()
   const [showAuthModal, setShowAuthModal] = useState(false)
+  const lastNavigationRef = useRef<string | null>(null)
 
   useEffect(() => {
     // Forzar inicialización si no se ha hecho
@@ -53,12 +54,21 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
       
       // Only redirect if not already on the target route to prevent loops
       if (!onboardingCompleted && location !== '/onboarding') {
-        console.log('User needs to complete onboarding, redirecting to /onboarding');
-        navigate('/onboarding');
+        if (lastNavigationRef.current !== '/onboarding') {
+          console.log('User needs to complete onboarding, redirecting to /onboarding');
+          lastNavigationRef.current = '/onboarding';
+          navigate('/onboarding');
+        }
       } else if (!hasPersonalData && location !== '/onboarding') {
         // Edge case: onboarding marked complete but missing basic data
-        console.log('Onboarding completed but missing personal data, redirecting to /onboarding');
-        navigate('/onboarding');
+        if (lastNavigationRef.current !== '/onboarding') {
+          console.log('Onboarding completed but missing personal data, redirecting to /onboarding');
+          lastNavigationRef.current = '/onboarding';
+          navigate('/onboarding');
+        }
+      } else {
+        // Reset navigation tracking when we're in a valid state
+        lastNavigationRef.current = null;
       }
     }
   }, [user, userData, userDataLoading, location, navigate])
