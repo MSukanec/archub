@@ -202,11 +202,14 @@ export function EditClientCommitmentModal({
                   <SelectValue placeholder="Selecciona una moneda" />
                 </SelectTrigger>
                 <SelectContent>
-                  {currencies.map((currency, index) => (
-                    <SelectItem key={`currency-${currency.id}-${index}`} value={currency.id}>
-                      {currency.code} - {currency.name}
-                    </SelectItem>
-                  ))}
+                  {currencies.map((currency, index) => {
+                    console.log('Rendering currency:', currency, 'Index:', index)
+                    return (
+                      <SelectItem key={`currency-${currency.id || 'no-id'}-${index}`} value={currency.id || ''}>
+                        {currency.code} - {currency.name}
+                      </SelectItem>
+                    )
+                  })}
                 </SelectContent>
               </Select>
             </div>
