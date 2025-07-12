@@ -226,6 +226,7 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
             location: formData.location || '',
             notes: formData.notes || '',
             linked_user_id: selectedUser?.id || null,
+            created_by: userData?.user?.id || null,
           })
           .select()
           .single();

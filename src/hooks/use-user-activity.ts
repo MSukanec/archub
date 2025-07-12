@@ -143,6 +143,7 @@ export function useUserActivity(organizationId: string | undefined, timePeriod: 
             .eq('organization_id', organizationId)
             .gte('created_at', dayStart)
             .lte('created_at', dayEnd)
+            .not('created_by', 'is', null)
             
           if (contactsError) {
             console.error('Contacts query error:', contactsError, { dayStart, dayEnd, timePeriod })

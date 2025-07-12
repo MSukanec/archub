@@ -18,7 +18,7 @@ export function useContacts() {
         .from('contacts')
         .select(`
           *,
-          linked_user:users(
+          linked_user:users!contacts_linked_user_id_fkey(
             id,
             full_name,
             email,
