@@ -302,63 +302,84 @@ export default function ProjectClients() {
           ]}
         />
 
-        {/* Project Clients Card - Only show when there are clients */}
-        {projectClients && projectClients.length > 0 && (
-          <Card>
-            <CardContent className="pt-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Clientes Activos</h3>
-                <div className="text-sm text-muted-foreground">
-                  {projectClients?.length || 0} cliente{projectClients?.length !== 1 ? 's' : ''}
-                </div>
-              </div>
-              
-              <div className="space-y-3">
-                {projectClients.map((client) => {
-                    const contact = client.contact
-                    const displayName = contact?.company_name || 
-                                      `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim()
-                    const initials = contact?.company_name 
-                      ? contact.company_name.charAt(0).toUpperCase()
-                      : `${contact?.first_name?.charAt(0) || ''}${contact?.last_name?.charAt(0) || ''}`.toUpperCase()
-
-                    return (
-                      <div key={client.id} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <Avatar className="w-10 h-10">
-                            <AvatarFallback className="text-sm">{initials}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <div className="font-medium">{displayName}</div>
-                            <div className="text-sm text-muted-foreground">
-                              {contact?.email || 'Sin email'}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant="secondary" className="text-xs">
-                            {client.role || 'Cliente'}
-                          </Badge>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleRemoveClient(client)}
-                            disabled={removeClientMutation.isPending}
-                          >
-                            <Trash2 className="w-4 h-4 text-red-500" />
-                          </Button>
-                        </div>
-                      </div>
-                    )
-                })}
+        {/* Two Column Layout - Section descriptions left, content right */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Left Column - Section Description */}
+          <div className="lg:col-span-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Handshake className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Clientes Activos</h2>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Gestiona los clientes vinculados al proyecto actual. Controla sus compromisos financieros y nivel de acceso.
+            </p>
+            <div className="mt-4 p-3 bg-muted/30 rounded-lg">
+              <div className="text-xs text-muted-foreground mb-1">Total de clientes</div>
+              <div className="text-2xl font-bold text-foreground">
+                {projectClients?.length || 0}
               </div>
             </div>
-          </CardContent>
-        </Card>
-        )}
+          </div>
 
-        {/* Custom Empty State - Only show when no clients */}
+          {/* Right Column - Clients Content */}
+          <div className="lg:col-span-8">
+            {projectClients && projectClients.length > 0 ? (
+              <div className="space-y-2">
+                {projectClients.map((client) => {
+                  const contact = client.contact
+                  const displayName = contact?.company_name || 
+                                    `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim()
+                  const initials = contact?.company_name 
+                    ? contact.company_name.charAt(0).toUpperCase()
+                    : `${contact?.first_name?.charAt(0) || ''}${contact?.last_name?.charAt(0) || ''}`.toUpperCase()
+
+                  return (
+                    <Card key={client.id} className="p-4">
+                      <CardContent className="p-0">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-10 w-10">
+                              <AvatarFallback className="text-sm">{initials}</AvatarFallback>
+                            </Avatar>
+                            
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <h4 className="font-medium text-sm">
+                                  {displayName}
+                                </h4>
+                              </div>
+                              <p className="text-xs text-muted-foreground">
+                                {contact?.email || 'Sin email'}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-4">
+                            <Badge variant="secondary" className="text-xs">
+                              {client.role || 'Cliente'}
+                            </Badge>
+
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemoveClient(client)}
+                              disabled={removeClientMutation.isPending}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Trash2 className="h-4 w-4 text-red-500" />
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )
+                })}
+              </div>
+            ) : null}
+          </div>
+        </div>
+
+        {/* Custom Empty State - Only show when no clients (outside the two-column layout) */}
         {(!projectClients || projectClients.length === 0) && (
           <CustomEmptyState
             icon={<Users className="w-16 h-16 text-muted-foreground/50" />}
