@@ -120,14 +120,15 @@ Archub is a modern construction management platform built with a React frontend 
 ```
 Changelog:
 - July 12, 2025. Centralized activity logging system implementation with comprehensive tracking capabilities - COMPLETED
-  • Created utils/logActivity.ts utility function using Supabase function log_organization_activity for centralized activity tracking
+  • Created utils/logActivity.ts utility function with fallback mechanism for robust activity tracking
   • Added comprehensive activity action constants (CREATE_MOVEMENT, UPDATE_MOVEMENT, CREATE_SITE_LOG, etc.) and target table definitions
-  • Integrated activity logging into NewSiteLogModal.tsx for tracking site log creation and updates with detailed metadata
-  • Created use-movements-with-logging.ts hook with logging-enabled CRUD operations for financial movements
-  • Built comprehensive integration examples in examples/integrationExamples.ts showing logging patterns for movements, contacts, tasks, documents, members, and clients
+  • Integrated activity logging into NewSiteLogModal.tsx and NewMovementModal.tsx for tracking creation and updates with detailed metadata
+  • Built comprehensive integration examples showing logging patterns for movements, contacts, tasks, documents, members, and clients
   • System tracks user actions with organization_id, user_id, action type, target table, target ID, and rich metadata for audit trails
+  • Implemented RPC function fallback to direct table insertion when database constraints fail (missing last_activity_at column)
+  • Fixed movement filtering logic to properly display created movements in the finance dashboard
   • Logging implementation is non-blocking - errors in logging don't interrupt main application workflows
-  • Activity tracking ready for integration across all major application features: construction, finance, design, and administration modules
+  • Activity tracking fully functional and ready for integration across all major application features
 Changelog:
 - July 12, 2025. Enhanced construction module with FeatureIntroduction components and improved UI consistency - COMPLETED
   • Added FeatureIntroduction component to ConstructionMaterials.tsx explaining material management functionality
