@@ -34,9 +34,9 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     }
   }, [user, initialized, loading])
 
-  // Check if user needs to complete onboarding or select a mode
+  // Check if user needs to complete onboarding
   useEffect(() => {
-    if (user && userData && !userDataLoading && location !== '/select-mode') {
+    if (user && userData && !userDataLoading) {
       const hasUserType = userData.preferences?.last_user_type;
       const onboardingCompleted = userData.preferences?.onboarding_completed;
       const hasPersonalData = userData.user_data?.first_name && userData.user_data?.last_name;
@@ -51,8 +51,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         currentLocation: location 
       });
       
-      // Only redirect if onboarding is NOT completed
-      // If onboarding is completed but no user type, let them continue (they can change it later)
+      // Always redirect to onboarding if not completed (regardless of current route)
       if (!onboardingCompleted) {
         console.log('User needs to complete onboarding, redirecting to /onboarding');
         navigate('/onboarding');
