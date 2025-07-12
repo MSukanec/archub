@@ -119,6 +119,13 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 12, 2025. Finance dashboard restructured with three-column layout: metrics column + two charts - COMPLETED
+  • Eliminated old card of movements from second row as requested
+  • Reorganized layout: first row (summary 75% + movements 25%), second row (3-column: metrics stack + 2 charts)
+  • Metrics now stacked vertically in left column: Ingresos, Egresos, Balance General
+  • Two charts occupy remaining space: Flujo Financiero Mensual + Balance por Billetera
+  • Fixed card positioning and spacing consistency (gap-4 mobile, gap-6 desktop)
+  • Movement card design matches organization dashboard reference exactly
 - July 12, 2025. Resolved infinite redirection loop between onboarding and select-mode pages - COMPLETED
   • Fixed infinite loop caused by multiple ProtectedRoute instances executing onboarding verification simultaneously
   • Corrected routing configuration: SelectMode now properly protected, Onboarding unprotected as intended

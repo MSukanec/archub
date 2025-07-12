@@ -193,65 +193,79 @@ export default function FinancesDashboard() {
           </motion.div>
         </div>
 
-        {/* Métricas Principales - Desktop */}
-        <div className="hidden md:grid grid-cols-4 gap-4 lg:gap-6">
+        {/* Segunda Fila: Métricas en columna + Gráficos */}
+        <div className="hidden md:grid grid-cols-3 gap-4 lg:gap-6">
+          {/* Columna de Métricas Verticales */}
+          <div className="space-y-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Ingresos Totales</CardTitle>
+                <TrendingUp className="h-4 w-4 text-green-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">
+                  {summaryLoading ? '...' : formatCurrency(financialSummary?.totalIncome || 0)}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  acumulado histórico
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Egresos Totales</CardTitle>
+                <TrendingDown className="h-4 w-4 text-red-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-red-600">
+                  {summaryLoading ? '...' : formatCurrency(financialSummary?.totalExpenses || 0)}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  total gastado
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Balance General</CardTitle>
+                <DollarSign className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className={`text-2xl font-bold ${getBalanceColor(financialSummary?.balance || 0)}`}>
+                  {summaryLoading ? '...' : formatCurrency(financialSummary?.balance || 0)}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  balance actual
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Gráfico de Flujo Financiero Mensual */}
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Ingresos Totales</CardTitle>
-              <TrendingUp className="h-4 w-4 text-green-600" />
+            <CardHeader>
+              <CardTitle className="text-lg">Flujo Financiero Mensual</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Ingresos, egresos y flujo neto de los últimos 12 meses
+              </p>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">
-                {summaryLoading ? '...' : formatCurrency(financialSummary?.totalIncome || 0)}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                acumulado histórico
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Egresos Totales</CardTitle>
-              <TrendingDown className="h-4 w-4 text-red-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">
-                {summaryLoading ? '...' : formatCurrency(financialSummary?.totalExpenses || 0)}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                total gastado
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Balance General</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className={`text-2xl font-bold ${getBalanceColor(financialSummary?.balance || 0)}`}>
-                {summaryLoading ? '...' : formatCurrency(financialSummary?.balance || 0)}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                balance actual
-              </p>
+              <MonthlyFlowChart data={monthlyFlow || []} isLoading={flowLoading} />
             </CardContent>
           </Card>
 
+          {/* Gráfico de Balance por Billetera */}
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Movimientos</CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
+            <CardHeader>
+              <CardTitle className="text-lg">Balance por Billetera</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Distribución de balances entre billeteras activas
+              </p>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {summaryLoading ? '...' : (financialSummary?.totalMovements || 0)}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                registros totales
-              </p>
+              <WalletBalanceChart data={walletBalances || []} isLoading={walletsLoading} />
             </CardContent>
           </Card>
         </div>
@@ -300,47 +314,10 @@ export default function FinancesDashboard() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm min-h-[80px]">
-            <div className="flex items-center justify-between mb-1">
-              <FileText className="h-4 w-4 text-gray-500" />
-            </div>
-            <div className="space-y-0.5">
-              <div className="text-xl font-bold text-gray-900">
-                {summaryLoading ? '...' : (financialSummary?.totalMovements || 0)}
-              </div>
-              <div className="text-xs text-gray-500 font-medium leading-tight">
-                Movimientos
-              </div>
-            </div>
-          </div>
+
         </div>
 
-        {/* Gráficos - Flujo Mensual y Balance de Billeteras */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Flujo Financiero Mensual</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Ingresos, egresos y flujo neto de los últimos 12 meses
-              </p>
-            </CardHeader>
-            <CardContent>
-              <MonthlyFlowChart data={monthlyFlow || []} isLoading={flowLoading} />
-            </CardContent>
-          </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Balance por Billetera</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Distribución de balances entre billeteras activas
-              </p>
-            </CardHeader>
-            <CardContent>
-              <WalletBalanceChart data={walletBalances || []} isLoading={walletsLoading} />
-            </CardContent>
-          </Card>
-        </div>
 
         {/* Resumen Mensual y Movimientos Recientes */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
