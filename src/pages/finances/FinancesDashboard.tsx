@@ -1,6 +1,6 @@
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { DollarSign, TrendingUp, TrendingDown, FileText, Calendar, CreditCard, User, ArrowUpDown, Plus } from 'lucide-react'
+import { DollarSign, TrendingUp, TrendingDown, FileText, Calendar, CreditCard, User, ArrowUpDown, Plus, Building } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useFinancialSummary, useMonthlyFlowData, useWalletBalances, useRecentMovements } from '@/hooks/use-finance-dashboard-simple'
 import { MonthlyFlowChart } from '@/components/graphics/MonthlyFlowChart'
@@ -9,8 +9,21 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Link } from 'wouter'
 import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState'
+import { motion } from 'framer-motion'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
 
 import { Button } from '@/components/ui/button'
+
+// Function to get organization initials
+const getOrganizationInitials = (name: string) => {
+  return name
+    .split(" ")
+    .map((word) => word.charAt(0))
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+};
 
 export default function FinancesDashboard() {
   const { data: userData } = useCurrentUser()
@@ -63,9 +76,84 @@ export default function FinancesDashboard() {
     )
   }
 
+  const currentOrganization = userData?.organization;
+  const currentProject = userData?.project;
+
   return (
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
+        {/* Welcome Card - Financial Summary */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Card>
+            <CardContent className="p-4 md:p-6">
+              <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6">
+                {/* Financial Icon */}
+                <div className="flex-shrink-0">
+                  <Avatar className="h-12 w-12 md:h-16 md:w-16 border-2 border-border">
+                    <AvatarFallback className="text-sm md:text-lg font-bold text-[var(--accent-foreground)] bg-[var(--accent)]">
+                      <DollarSign className="h-6 w-6 md:h-8 md:w-8" />
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+
+                {/* Financial Summary Info */}
+                <div className="flex-1">
+                  <motion.h1
+                    className="text-2xl md:text-4xl font-black text-foreground mb-1"
+                    initial={{ scale: 0.8 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.2, duration: 0.3 }}
+                  >
+                    Resumen de Finanzas
+                  </motion.h1>
+                  <p className="text-base md:text-lg text-muted-foreground mb-2 md:mb-3">
+                    {currentProject ? (
+                      <>
+                        Proyecto{" "}
+                        <span className="font-semibold text-foreground">
+                          {currentProject.name}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        Organización{" "}
+                        <span className="font-semibold text-foreground">
+                          {currentOrganization?.name || "Sin organización"}
+                        </span>
+                      </>
+                    )}
+                  </p>
+
+                  <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <FileText className="h-4 w-4" />
+                      <span>
+                        {summaryLoading ? '...' : (financialSummary?.totalMovements || 0)} movimientos registrados
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <TrendingUp className="h-4 w-4" />
+                      <span className="text-green-600">
+                        {summaryLoading ? '...' : formatCurrency(financialSummary?.totalIncome || 0)} ingresos
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <TrendingDown className="h-4 w-4" />
+                      <span className="text-red-600">
+                        {summaryLoading ? '...' : formatCurrency(financialSummary?.totalExpenses || 0)} egresos
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
         {/* Métricas Principales - Desktop */}
         <div className="hidden md:grid grid-cols-4 gap-4">
           <Card>
