@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { supabase } from '@/lib/supabase'
 import { NewInstallmentModal } from '@/modals/finances/NewInstallmentModal'
+import { EditClientCommitmentModal } from '@/modals/finances/EditClientCommitmentModal'
 import { useToast } from '@/hooks/use-toast'
 import ClientSummaryCard from "@/components/cards/ClientSummaryCard";
 import CurrencyDetailCard from "@/components/cards/CurrencyDetailCard";
@@ -84,6 +85,8 @@ export default function FinancesInstallments() {
   const [searchValue, setSearchValue] = useState("")
   const [showModal, setShowModal] = useState(false)
   const [editingInstallment, setEditingInstallment] = useState<Installment | null>(null)
+  const [showEditCommitmentModal, setShowEditCommitmentModal] = useState(false)
+  const [editingClientCommitment, setEditingClientCommitment] = useState<any>(null)
   const queryClient = useQueryClient()
   const { toast } = useToast()
 
@@ -486,6 +489,11 @@ export default function FinancesInstallments() {
     setEditingInstallment(null)
   }
 
+  const handleCloseEditCommitmentModal = () => {
+    setShowEditCommitmentModal(false)
+    setEditingClientCommitment(null)
+  }
+
   // Create contact summary table (simplified)
   const contactSummaryColumns = [
     {
@@ -736,8 +744,8 @@ export default function FinancesInstallments() {
               variant="ghost"
               size="sm"
               onClick={() => {
-                // Navigate to client detail or manage client installments
-                console.log('View client details:', item.contact_id)
+                setEditingClientCommitment(item)
+                setShowEditCommitmentModal(true)
               }}
               className="h-8 w-8 p-0"
             >
@@ -1059,11 +1067,19 @@ export default function FinancesInstallments() {
 
       </div>
 
-      {/* Modal */}
+      {/* Modals */}
       <NewInstallmentModal
         open={showModal}
         onClose={handleCloseModal}
         editingInstallment={editingInstallment}
+        organizationId={organizationId || ''}
+        projectId={projectId || ''}
+      />
+
+      <EditClientCommitmentModal
+        open={showEditCommitmentModal}
+        onClose={handleCloseEditCommitmentModal}
+        clientData={editingClientCommitment}
         organizationId={organizationId || ''}
         projectId={projectId || ''}
       />
