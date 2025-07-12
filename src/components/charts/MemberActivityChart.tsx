@@ -19,7 +19,7 @@ interface UserActivityChartProps {
   data: UserActivity[]
   isLoading?: boolean
   timePeriod: TimePeriod
-  onTimePeriodChange: (period: TimePeriod) => void
+  onTimePeriodChange?: (period: TimePeriod) => void
 }
 
 type TimePeriod = 'week' | 'month' | 'year'
@@ -157,21 +157,21 @@ export function MemberActivityChart({ data, isLoading, timePeriod, onTimePeriodC
             <Button 
               variant={timePeriod === 'week' ? "default" : "outline"} 
               size="sm"
-              onClick={() => onTimePeriodChange('week')}
+              onClick={() => onTimePeriodChange && onTimePeriodChange('week')}
             >
               Semana
             </Button>
             <Button 
               variant={timePeriod === 'month' ? "default" : "outline"} 
               size="sm"
-              onClick={() => onTimePeriodChange('month')}
+              onClick={() => onTimePeriodChange && onTimePeriodChange('month')}
             >
               Mes
             </Button>
             <Button 
               variant={timePeriod === 'year' ? "default" : "outline"} 
               size="sm"
-              onClick={() => onTimePeriodChange('year')}
+              onClick={() => onTimePeriodChange && onTimePeriodChange('year')}
             >
               Año
             </Button>

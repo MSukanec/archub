@@ -294,39 +294,12 @@ export default function OrganizationActivity() {
         />
 
         {/* Activity Chart */}
-        <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium">Actividad por Miembro</h3>
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                variant={timePeriod === 'week' ? 'default' : 'outline'}
-                onClick={() => setTimePeriod('week')}
-              >
-                Semana
-              </Button>
-              <Button
-                size="sm"
-                variant={timePeriod === 'month' ? 'default' : 'outline'}
-                onClick={() => setTimePeriod('month')}
-              >
-                Mes
-              </Button>
-              <Button
-                size="sm"
-                variant={timePeriod === 'year' ? 'default' : 'outline'}
-                onClick={() => setTimePeriod('year')}
-              >
-                Año
-              </Button>
-            </div>
-          </div>
-          <MemberActivityChart 
-            data={userActivityData} 
-            isLoading={userActivityLoading}
-            timePeriod={timePeriod}
-          />
-        </div>
+        <MemberActivityChart 
+          data={userActivityData} 
+          isLoading={userActivityLoading}
+          timePeriod={timePeriod}
+          onTimePeriodChange={setTimePeriod}
+        />
 
         {/* Activity Table */}
         {isLoading ? (
