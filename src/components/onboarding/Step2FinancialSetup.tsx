@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CustomMultiComboBox } from "@/components/ui-custom/misc/CustomMultiComboBox";
+import { MultiComboBox } from "@/components/ui-custom/MultiComboBox";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { useCurrencies } from "@/hooks/use-currencies";
 import { useAllWallets } from "@/hooks/use-wallets";
@@ -157,7 +157,7 @@ export function Step2FinancialSetup() {
               placement="top"
             />
           </div>
-          <CustomMultiComboBox
+          <MultiComboBox
             options={availableSecondaryCurrencies.map(currency => ({
               value: currency.id,
               label: `${currency.name} (${currency.symbol})`
@@ -206,7 +206,7 @@ export function Step2FinancialSetup() {
               placement="top"
             />
           </div>
-          <CustomMultiComboBox
+          <MultiComboBox
             options={availableSecondaryWallets.map(wallet => ({
               value: wallet.id,
               label: wallet.name

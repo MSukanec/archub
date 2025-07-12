@@ -5,7 +5,7 @@ import { Coins } from 'lucide-react';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CustomMultiComboBox } from '@/components/ui-custom/misc/CustomMultiComboBox';
+import { MultiComboBox } from '@/components/ui-custom/MultiComboBox';
 import { HelpPopover } from '@/components/ui-custom/HelpPopover';
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
 
@@ -325,7 +325,7 @@ export default function FinancesPreferences() {
 
               <div className="space-y-2">
                 <Label htmlFor="secondary-currencies">Monedas Secundarias</Label>
-                <CustomMultiComboBox
+                <MultiComboBox
                   options={availableSecondaryCurrencies.map(currency => ({
                     value: currency.id,
                     label: `${currency.name} (${currency.symbol})`
@@ -355,7 +355,7 @@ export default function FinancesPreferences() {
 
               <div className="space-y-2">
                 <Label htmlFor="secondary-wallets">Billeteras Secundarias</Label>
-                <CustomMultiComboBox
+                <MultiComboBox
                   options={availableSecondaryWallets.map(wallet => ({
                     value: wallet.id,
                     label: wallet.name
