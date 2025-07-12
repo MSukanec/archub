@@ -8,6 +8,10 @@ interface OnboardingState {
     last_name: string;
     organization_name: string;
     theme: 'light' | 'dark';
+    default_currency_id: string;
+    secondary_currency_ids: string[];
+    default_wallet_id: string;
+    secondary_wallet_ids: string[];
     discovered_by: string;
     discovered_by_other_text: string;
     main_use: string;
@@ -28,6 +32,10 @@ const initialFormData = {
   last_name: '',
   organization_name: '',
   theme: 'light' as const,
+  default_currency_id: '',
+  secondary_currency_ids: [] as string[],
+  default_wallet_id: '',
+  secondary_wallet_ids: [] as string[],
   discovered_by: '',
   discovered_by_other_text: '',
   main_use: '',
@@ -39,7 +47,7 @@ const initialFormData = {
 
 export const useOnboardingStore = create<OnboardingState>((set, get) => ({
   currentStep: 1,
-  totalSteps: 3,
+  totalSteps: 4,
   formData: initialFormData,
   
   setCurrentStep: (step) => set({ currentStep: step }),

@@ -52,7 +52,7 @@ const teamSizeOptions = [
   'Más de 15 personas'
 ];
 
-export function Step2Discovery() {
+export function Step3Discovery() {
   const { formData, updateFormData, goNextStep, goPrevStep } = useOnboardingStore();
 
   const handleNext = () => {

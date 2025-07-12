@@ -66,7 +66,7 @@ interface Step3SelectModeProps {
   isLoading?: boolean;
 }
 
-export function Step3SelectMode({ isOnboarding = true, onFinish, isLoading = false }: Step3SelectModeProps) {
+export function Step4SelectMode({ isOnboarding = true, onFinish, isLoading = false }: Step3SelectModeProps) {
   const { formData, updateFormData, goPrevStep } = useOnboardingStore();
   const [selectedMode, setSelectedMode] = useState<string | null>(null);
 

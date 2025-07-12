@@ -9,8 +9,9 @@ import { useToast } from "@/hooks/use-toast";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { useThemeStore } from "@/stores/themeStore";
 import { Step1UserData } from "@/components/onboarding/Step1UserData";
-import { Step2Discovery } from "@/components/onboarding/Step2Discovery";
-import { Step3SelectMode } from "@/components/onboarding/Step3SelectMode";
+import { Step2FinancialSetup } from "@/components/onboarding/Step2FinancialSetup";
+import { Step3Discovery } from "@/components/onboarding/Step3Discovery";
+import { Step4SelectMode } from "@/components/onboarding/Step4SelectMode";
 
 export default function SelectMode() {
   const [, navigate] = useLocation();
@@ -41,18 +42,22 @@ export default function SelectMode() {
         discovered_by: userData.user_data?.discovered_by || '',
         discovered_by_other_text: userData.user_data?.discovered_by_other_text || '',
         last_user_type: userData.preferences?.last_user_type || null,
+        default_currency_id: '',
+        secondary_currency_ids: [],
+        default_wallet_id: '',
+        secondary_wallet_ids: [],
       });
 
-      // If not onboarding (user completed it), skip to step 3 (mode selection only)
+      // If not onboarding (user completed it), skip to step 4 (mode selection only)
       if (!isOnboarding) {
-        setCurrentStep(3);
+        setCurrentStep(4);
       } else {
         // If onboarding and has existing data, skip appropriate steps
         if (userData.user_data?.first_name && userData.user_data?.last_name) {
           if (userData.user_data?.discovered_by) {
-            setCurrentStep(3); // Skip to mode selection
+            setCurrentStep(4); // Skip to mode selection
           } else {
-            setCurrentStep(2); // Skip to discovery step
+            setCurrentStep(3); // Skip to discovery step
           }
         } else {
           setCurrentStep(1); // Start from beginning
@@ -112,6 +117,72 @@ export default function SelectMode() {
           .eq('id', userData.organization.id);
 
         if (orgError) throw orgError;
+      }
+
+      // Save financial preferences if provided
+      if (formData.default_currency_id && userData.organization?.id) {
+        // Save organization preferences
+        const { error: orgPrefError } = await supabase
+          .from('organization_preferences')
+          .upsert({
+            organization_id: userData.organization.id,
+            default_currency_id: formData.default_currency_id,
+            updated_at: new Date().toISOString(),
+          }, { onConflict: 'organization_id' });
+
+        if (orgPrefError) throw orgPrefError;
+
+        // Save organization currencies
+        if (formData.default_currency_id) {
+          const { error: currencyError } = await supabase
+            .from('organization_currencies')
+            .upsert({
+              organization_id: userData.organization.id,
+              currency_id: formData.default_currency_id,
+              is_default: true,
+            }, { onConflict: 'organization_id,currency_id' });
+
+          if (currencyError) throw currencyError;
+        }
+
+        // Save secondary currencies
+        for (const currencyId of formData.secondary_currency_ids) {
+          const { error: secCurrencyError } = await supabase
+            .from('organization_currencies')
+            .upsert({
+              organization_id: userData.organization.id,
+              currency_id: currencyId,
+              is_default: false,
+            }, { onConflict: 'organization_id,currency_id' });
+
+          if (secCurrencyError) throw secCurrencyError;
+        }
+
+        // Save organization wallets
+        if (formData.default_wallet_id) {
+          const { error: walletError } = await supabase
+            .from('organization_wallets')
+            .upsert({
+              organization_id: userData.organization.id,
+              wallet_id: formData.default_wallet_id,
+              is_default: true,
+            }, { onConflict: 'organization_id,wallet_id' });
+
+          if (walletError) throw walletError;
+        }
+
+        // Save secondary wallets
+        for (const walletId of formData.secondary_wallet_ids) {
+          const { error: secWalletError } = await supabase
+            .from('organization_wallets')
+            .upsert({
+              organization_id: userData.organization.id,
+              wallet_id: walletId,
+              is_default: false,
+            }, { onConflict: 'organization_id,wallet_id' });
+
+          if (secWalletError) throw secWalletError;
+        }
       }
 
       // Apply theme immediately
@@ -203,10 +274,12 @@ export default function SelectMode() {
       case 1:
         return <Step1UserData />;
       case 2:
-        return <Step2Discovery />;
+        return <Step2FinancialSetup />;
       case 3:
+        return <Step3Discovery />;
+      case 4:
         return (
-          <Step3SelectMode 
+          <Step4SelectMode 
             isOnboarding={isOnboarding}
             onFinish={handleFinishOnboarding}
             isLoading={saveOnboardingMutation.isPending || updateUserTypeMutation.isPending}
@@ -226,7 +299,7 @@ export default function SelectMode() {
             {isOnboarding ? "¡Bienvenido a Archub!" : "Elegir modo de uso"}
           </h1>
           
-          {isOnboarding && currentStep < 3 && (
+          {isOnboarding && currentStep < 4 && (
             <div className="flex items-center justify-center space-x-2 mt-4">
               <p className="text-sm text-slate-600 dark:text-slate-300">
                 Paso {currentStep} de {totalSteps}
