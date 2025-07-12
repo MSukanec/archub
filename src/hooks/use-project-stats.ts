@@ -18,6 +18,16 @@ export function useProjectStats(projectId: string | null) {
         .eq('id', projectId)
         .single()
 
+      // Get project data (including image) separately
+      const { data: projectData } = await supabase
+        .from('project_data')
+        .select('project_image_url')
+        .eq('project_id', projectId)
+        .single()
+
+      console.log('Project query result:', project);
+      console.log('Project data query result:', projectData);
+
       // Get design documents count
       const { count: documentsCount } = await supabase
         .from('design_documents')
@@ -44,7 +54,10 @@ export function useProjectStats(projectId: string | null) {
         .eq('project_id', projectId)
 
       return {
-        project,
+        project: {
+          ...project,
+          project_data: projectData
+        },
         totalDocuments: documentsCount || 0,
         totalSiteLogs: siteLogsCount || 0,
         totalBudgets: budgetsCount || 0,

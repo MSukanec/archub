@@ -74,7 +74,7 @@ export function ProjectStatsCards({ stats, isLoading }: ProjectStatsCardsProps) 
       icon: FileText,
       value: stats?.totalDocuments || 0,
       description: "documentos creados",
-      color: "hsl(var(--accent))",
+      color: "#84cc16", // Using direct accent color for charts
       increase: "+12%",
       route: "/design/documentation",
       buttonText: "Ver Documentos"
@@ -84,7 +84,7 @@ export function ProjectStatsCards({ stats, isLoading }: ProjectStatsCardsProps) 
       icon: Construction,
       value: stats?.totalSiteLogs || 0,
       description: "entradas de bitácora",
-      color: "hsl(var(--accent))",
+      color: "#84cc16", // Using direct accent color for charts
       increase: "+8%",
       route: "/construction/site-logs",
       buttonText: "Ver Bitácora"
@@ -94,7 +94,7 @@ export function ProjectStatsCards({ stats, isLoading }: ProjectStatsCardsProps) 
       icon: Calculator,
       value: stats?.totalBudgets || 0,
       description: "presupuestos activos",
-      color: "hsl(var(--accent))",
+      color: "#84cc16", // Using direct accent color for charts
       increase: "+15%",
       route: "/construction/budgets",
       buttonText: "Ver Presupuestos"
@@ -104,7 +104,7 @@ export function ProjectStatsCards({ stats, isLoading }: ProjectStatsCardsProps) 
       icon: DollarSign,
       value: stats?.totalMovements || 0,
       description: "transacciones",
-      color: "hsl(var(--accent))",
+      color: "#84cc16", // Using direct accent color for charts
       increase: "+23%",
       route: "/finances/movements",
       buttonText: "Ver Movimientos"

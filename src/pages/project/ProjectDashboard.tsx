@@ -68,32 +68,18 @@ export default function ProjectDashboard() {
   // Mutation for uploading project image
   const updateProjectImageMutation = useMutation({
     mutationFn: async (file: File) => {
-      if (!supabase || !projectId) throw new Error('Missing supabase or project ID');
+      if (!supabase || !projectId || !organizationId) throw new Error('Missing required parameters');
 
-      // Upload to Supabase Storage
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${projectId}-${Date.now()}.${fileExt}`;
+      // Use the specialized upload function
+      const { uploadProjectImage, updateProjectImageUrl } = await import('@/lib/storage/uploadProjectImage');
       
-      const { error: uploadError } = await supabase.storage
-        .from('project-images')
-        .upload(fileName, file);
+      // Upload image
+      const uploadResult = await uploadProjectImage(file, projectId, organizationId);
       
-      if (uploadError) throw uploadError;
+      // Update project data table
+      await updateProjectImageUrl(projectId, uploadResult.file_url);
 
-      // Get public URL
-      const { data } = supabase.storage
-        .from('project-images')
-        .getPublicUrl(fileName);
-
-      // Update project record
-      const { error: updateError } = await supabase
-        .from('projects')
-        .update({ project_image_url: data.publicUrl })
-        .eq('id', projectId);
-
-      if (updateError) throw updateError;
-
-      return data.publicUrl;
+      return uploadResult.file_url;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['project-stats'] });
@@ -131,6 +117,10 @@ export default function ProjectDashboard() {
 
   // Find current project
   const currentProject = stats?.project;
+  
+  // Debug project data
+  console.log('Project data:', currentProject);
+  console.log('Project image URL:', currentProject?.project_data?.project_image_url);
 
   if (!currentProject && !statsLoading) {
     return (
@@ -157,18 +147,20 @@ export default function ProjectDashboard() {
         >
           <Card className="relative overflow-hidden border-[var(--card-border)] h-48 md:h-56">
             {/* Background Image */}
-            {currentProject?.project_image_url ? (
+            {currentProject?.project_data?.project_image_url ? (
               <img 
-                src={currentProject.project_image_url}
+                src={currentProject.project_data.project_image_url}
                 alt="Project background"
                 className="absolute inset-0 w-full h-full object-cover"
+                onError={(e) => {
+                  console.error('Error loading project image:', e);
+                  // Hide broken image and show fallback
+                  e.currentTarget.style.display = 'none';
+                }}
               />
             ) : (
               <div 
-                className="absolute inset-0"
-                style={{
-                  background: 'linear-gradient(135deg, rgb(147, 197, 253) 0%, rgb(59, 130, 246) 100%)'
-                }}
+                className="absolute inset-0 bg-[var(--accent)]"
               />
             )}
             
@@ -192,7 +184,17 @@ export default function ProjectDashboard() {
               variant="ghost"
               size="sm"
               className="absolute top-4 right-4 h-8 w-8 p-0 bg-white/10 hover:bg-white/20 text-white border border-white/20 disabled:opacity-50"
-              onClick={() => document.getElementById('project-image-upload')?.click()}
+              onClick={() => {
+                console.log('Settings button clicked');
+                const input = document.getElementById('project-image-upload') as HTMLInputElement;
+                console.log('Input element:', input);
+                if (input) {
+                  input.click();
+                  console.log('Input clicked');
+                } else {
+                  console.error('Input not found');
+                }
+              }}
               disabled={updateProjectImageMutation.isPending}
             >
               <Settings className="h-4 w-4" />

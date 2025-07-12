@@ -119,6 +119,14 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 12, 2025. Project dashboard hero card and stats improvements - IN PROGRESS
+  • Fixed hero card background color to use --accent CSS variable instead of hardcoded blue gradient when no image present
+  • Corrected chart line colors in stats cards to use direct accent color (#84cc16) for proper visibility
+  • Added primary navigation buttons below each stats card linking to respective pages (Ver Documentos, Ver Bitácora, Ver Presupuestos, Ver Movimientos)
+  • Removed ProjectQuickActions card completely as requested
+  • Updated project image loading logic to query project_data table separately for project_image_url field
+  • Enhanced file upload button with detailed logging to troubleshoot file explorer opening issue
+  • Implemented proper mutation using uploadProjectImage and updateProjectImageUrl functions for hero image updates
 - July 12, 2025. Project dashboard completely reformulated to match organization dashboard aesthetic with enhanced components - COMPLETED
   • Updated welcome card to display project name instead of greeting and "Resumen del proyecto" description
   • Completely rebuilt ProjectStatsCards with mini line charts matching organization dashboard style
