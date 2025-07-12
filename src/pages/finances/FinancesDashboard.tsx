@@ -312,12 +312,12 @@ export default function FinancesDashboard() {
             </Card>
           </div>
 
-          {/* Gráfico de Flujo Financiero Mensual */}
-          <Card>
+          {/* Gráfico de Flujo Financiero */}
+          <Card className="lg:col-span-2">
             <CardHeader>
-              <CardTitle className="text-lg">Flujo Financiero Mensual</CardTitle>
+              <CardTitle className="text-lg">Flujo Financiero</CardTitle>
               <p className="text-sm text-muted-foreground">
-                Ingresos, egresos y flujo neto de los últimos 12 meses
+                Ingresos, egresos y flujo neto del período seleccionado
               </p>
             </CardHeader>
             <CardContent>
@@ -325,18 +325,7 @@ export default function FinancesDashboard() {
             </CardContent>
           </Card>
 
-          {/* Gráfico de Balance por Billetera */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Balance por Billetera</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Distribución de balances entre billeteras activas
-              </p>
-            </CardHeader>
-            <CardContent>
-              <WalletBalanceChart data={walletBalances || []} isLoading={walletsLoading} />
-            </CardContent>
-          </Card>
+
         </div>
 
         {/* Métricas Principales - Mobile (Compactas) */}
@@ -388,8 +377,9 @@ export default function FinancesDashboard() {
 
 
 
-        {/* Resumen Mensual y Movimientos Recientes */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+        {/* Tercera fila: Este Mes + Balance por Billetera + Movimientos Recientes */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+          {/* Este Mes */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Este Mes</CardTitle>
@@ -423,6 +413,20 @@ export default function FinancesDashboard() {
             </CardContent>
           </Card>
 
+          {/* Balance por Billetera */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Balance por Billetera</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Distribución de balances entre billeteras activas
+              </p>
+            </CardHeader>
+            <CardContent>
+              <WalletBalanceChart data={walletBalances || []} isLoading={walletsLoading} />
+            </CardContent>
+          </Card>
+
+          {/* Movimientos Recientes */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Movimientos Recientes</CardTitle>

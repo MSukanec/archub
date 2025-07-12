@@ -182,10 +182,22 @@ export function useMonthlyFlowData(organizationId: string | undefined, projectId
       if (!organizationId || !supabase) return []
 
       try {
-        // Get last 12 months
-        const endDate = new Date()
-        const startDate = subMonths(endDate, 11)
-        const months = eachMonthOfInterval({ start: startDate, end: endDate })
+        // Adjust time range based on period
+        let endDate = new Date()
+        let startDate: Date
+        let months: Date[]
+
+        const dateRange = getDateRange(timePeriod)
+        if (dateRange) {
+          startDate = dateRange.start
+          endDate = dateRange.end
+        } else {
+          // Default: last 12 months
+          startDate = subMonths(endDate, 11)
+        }
+
+        // Generate months within the range
+        months = eachMonthOfInterval({ start: startDate, end: endDate })
 
         // Get movements data
         let movementsQuery = supabase
@@ -193,6 +205,7 @@ export function useMonthlyFlowData(organizationId: string | undefined, projectId
           .select('amount, movement_date, type_id')
           .eq('organization_id', organizationId)
           .gte('movement_date', startDate.toISOString())
+          .lte('movement_date', endDate.toISOString())
 
         if (projectId) {
           movementsQuery = movementsQuery.eq('project_id', projectId)
