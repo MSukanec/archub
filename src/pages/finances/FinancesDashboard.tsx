@@ -520,7 +520,7 @@ export default function FinancesDashboard() {
               </div>
               
               {/* Amount - smaller size like reference */}
-              <div className="text-lg font-bold" style={getBalanceColor(financialSummary?.balance || 0)}>
+              <div className="text-lg font-bold" style={{ color: 'var(--chart-neutral)' }}>
                 {summaryLoading ? '...' : formatCurrency(financialSummary?.balance || 0)}
               </div>
             </CardContent>

@@ -16,7 +16,7 @@ interface ExpensesByCategoryChartProps {
 export function ExpensesByCategoryChart({ data, isLoading }: ExpensesByCategoryChartProps) {
   if (isLoading) {
     return (
-      <div className="h-72 flex items-center justify-center">
+      <div className="h-64 flex items-center justify-center">
         <div className="text-sm text-muted-foreground">Cargando categorías...</div>
       </div>
     )
@@ -24,7 +24,7 @@ export function ExpensesByCategoryChart({ data, isLoading }: ExpensesByCategoryC
 
   if (!data || data.length === 0) {
     return (
-      <div className="h-72 flex items-center justify-center">
+      <div className="h-64 flex items-center justify-center">
         <div className="text-sm text-muted-foreground">No hay datos de egresos por categoría</div>
       </div>
     )
@@ -76,16 +76,16 @@ export function ExpensesByCategoryChart({ data, isLoading }: ExpensesByCategoryC
   }
 
   return (
-    <div className="h-72">
+    <div className="h-64">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
             data={data}
             cx="50%"
-            cy="45%"
+            cy="40%"
             labelLine={false}
             label={CustomLabel}
-            outerRadius={80}
+            outerRadius={75}
             fill="#8884d8"
             dataKey="amount"
           >
@@ -96,7 +96,7 @@ export function ExpensesByCategoryChart({ data, isLoading }: ExpensesByCategoryC
           <Tooltip content={<CustomTooltip />} />
           <Legend 
             verticalAlign="bottom" 
-            height={28}
+            height={24}
             formatter={(value, entry: any) => (
               <span style={{ color: entry.color }} className="text-sm">
                 {entry.payload.category}
