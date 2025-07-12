@@ -351,7 +351,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                           "flex w-full items-center gap-3 px-2 py-3 text-base font-medium rounded-xl transition-colors",
                           isButtonActive(item.href) 
                             ? "bg-[hsl(76,100%,40%)] text-white" 
-                            : "text-[var(--menues-fg)] hover:bg-[hsl(76,100%,40%)] hover:text-white"
+                            : "text-[var(--menues-fg)]"
                         )}
                       >
                         <item.icon className="h-4 w-4" />
@@ -374,7 +374,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                         "flex w-full items-center gap-3 px-2 py-3 text-base font-medium rounded-xl transition-colors",
                         isButtonActive(item.href) 
                           ? "bg-[hsl(76,100%,40%)] text-white" 
-                          : "text-[var(--menues-fg)] hover:bg-[hsl(76,100%,40%)] hover:text-white"
+                          : "text-[var(--menues-fg)]"
                       )}
                     >
                       <item.icon className="h-4 w-4" />
@@ -402,7 +402,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                             "flex w-full items-center gap-2 px-2 py-3 text-base rounded-xl transition-colors",
                             isButtonActive(subItem.href) 
                               ? "bg-[hsl(76,100%,40%)] text-white" 
-                              : "text-[var(--menues-fg)] hover:bg-[hsl(76,100%,40%)] hover:text-white"
+                              : "text-[var(--menues-fg)]"
                           )}
                         >
                           <subItem.icon className="h-4 w-4" />

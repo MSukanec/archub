@@ -261,10 +261,26 @@ export default function FinancesPreferences() {
           icon={<Coins className="h-5 w-5" />}
           title="Preferencias de la Organización"
           features={[
-            "Configurar monedas predeterminadas y secundarias para movimientos financieros",
-            "Establecer billeteras por defecto para optimizar la gestión de flujo de caja",
-            "Personalizar las opciones disponibles al crear nuevos movimientos", 
-            "Administrar las preferencias globales que afectan a todos los proyectos"
+            {
+              icon: <Coins className="h-4 w-4" />,
+              title: "Monedas Predeterminadas",
+              description: "Configurar monedas predeterminadas y secundarias para movimientos financieros"
+            },
+            {
+              icon: <Coins className="h-4 w-4" />,
+              title: "Billeteras por Defecto",
+              description: "Establecer billeteras por defecto para optimizar la gestión de flujo de caja"
+            },
+            {
+              icon: <Coins className="h-4 w-4" />,
+              title: "Opciones de Movimientos",
+              description: "Personalizar las opciones disponibles al crear nuevos movimientos"
+            },
+            {
+              icon: <Coins className="h-4 w-4" />,
+              title: "Preferencias Globales",
+              description: "Administrar las preferencias globales que afectan a todos los proyectos"
+            }
           ]}
         />
 
