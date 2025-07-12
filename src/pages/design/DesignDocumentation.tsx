@@ -4,12 +4,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@supabase/supabase-js';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
+import { DocumentFolderCard } from '@/components/ui-custom/DocumentFolderCard';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext';
 import { useMobile } from '@/hooks/use-mobile';
@@ -18,22 +17,12 @@ import {
   FileText, 
   FolderOpen,
   Calendar,
-  Download, 
-  MoreVertical,
-  Eye,
-  Edit,
-  Trash2,
   Upload,
-  FileImage,
-  File,
-  FileSpreadsheet
+  History,
+  Archive,
+  Share2,
+  Users
 } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,8 +33,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -78,47 +65,40 @@ interface DesignDocument {
 
 export default function DesignDocumentation() {
   const { data: userData } = useCurrentUser();
-  const projectId = userData?.preferences?.last_project_id;
-  const organizationId = userData?.preferences?.last_organization_id;
+  const [searchTerm, setSearchTerm] = useState('');
+  const [viewByPhase, setViewByPhase] = useState(false);
+  const [showDocumentModal, setShowDocumentModal] = useState(false);
+  const [editingDocument, setEditingDocument] = useState<DesignDocument | null>(null);
+  const [documentToDelete, setDocumentToDelete] = useState<DesignDocument | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { setActions, setShowActionBar } = useMobileActionBar();
   const isMobile = useMobile();
-  
-  // Modal states
-  const [showDocumentModal, setShowDocumentModal] = useState(false);
-  const [editingDocument, setEditingDocument] = useState<DesignDocument | null>(null);
-  const [documentToDelete, setDocumentToDelete] = useState<DesignDocument | null>(null);
-  
-  // View state
-  const [viewByPhase, setViewByPhase] = useState(false);
-  
-  // Search state
-  const [searchTerm, setSearchTerm] = useState('');
 
-  // Documents query
+  // Get project and organization IDs
+  const projectId = userData?.preferences?.last_project_id;
+  const organizationId = userData?.preferences?.last_organization_id;
+
+  // Documents query - gets ALL documents including versions
   const { data: documents = [], isLoading, error } = useQuery({
-    queryKey: ['designDocuments', projectId],
+    queryKey: ['designDocuments', projectId, organizationId],
     queryFn: async () => {
-      console.log('Fetching design documents for project:', projectId);
-      
-      if (!supabase || !projectId) {
-        throw new Error('Supabase client not initialized or no project selected');
-      }
+      if (!supabase || !projectId || !organizationId) return [];
 
-      // Get all documents for the project with creator information
+      console.log('Fetching design documents for project:', projectId);
+
       const { data, error } = await supabase
         .from('design_documents')
         .select(`
           *,
-          creator:created_by (
+          creator:users!design_documents_created_by_fkey (
             id,
             full_name,
             avatar_url
           )
         `)
         .eq('project_id', projectId)
-        .order('version_number', { ascending: false })
+        .eq('organization_id', organizationId)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -126,59 +106,10 @@ export default function DesignDocumentation() {
         throw error;
       }
 
-      // Filter to get only the latest version of each document (grouped by name + folder + design_phase_id)
-      const latestDocuments = new Map<string, DesignDocument>();
-      
-      if (data) {
-        data.forEach((doc: DesignDocument) => {
-          const groupKey = `${doc.file_name}-${doc.folder}-${doc.design_phase_id || 'null'}`;
-          const existing = latestDocuments.get(groupKey);
-          
-          if (!existing || doc.version_number > existing.version_number || 
-              (doc.version_number === existing.version_number && new Date(doc.created_at) > new Date(existing.created_at))) {
-            latestDocuments.set(groupKey, doc);
-          }
-        });
-      }
-
-      const filteredDocuments = Array.from(latestDocuments.values());
-      console.log('Design documents data received:', filteredDocuments);
-      
-      return filteredDocuments;
-
       console.log('Design documents data received:', data);
       return data as DesignDocument[];
     },
     enabled: !!projectId && !!supabase,
-  });
-
-  // Design phases query for grouping
-  const { data: designPhases = [] } = useQuery({
-    queryKey: ['designProjectPhases', projectId, organizationId],
-    queryFn: async () => {
-      if (!supabase || !projectId || !organizationId) return [];
-
-      const { data, error } = await supabase
-        .from('design_project_phases')
-        .select(`
-          *,
-          design_phases (
-            id,
-            name
-          )
-        `)
-        .eq('project_id', projectId)
-        .eq('organization_id', organizationId)
-        .order('created_at', { ascending: true });
-
-      if (error) {
-        console.error('Error fetching design phases:', error);
-        return [];
-      }
-
-      return data;
-    },
-    enabled: !!projectId && !!organizationId && !!supabase,
   });
 
   // Delete mutation
@@ -218,9 +149,8 @@ export default function DesignDocumentation() {
     );
   }, [documents, searchTerm]);
 
-  // Group documents
+  // Group documents by folder - includes all versions
   const groupedDocuments = useMemo(() => {
-    // Group by folder (phase functionality to be implemented later)
     const groups: Record<string, DesignDocument[]> = {};
     
     filteredDocuments.forEach(doc => {
@@ -250,33 +180,6 @@ export default function DesignDocumentation() {
     }
   }, [isMobile, setActions, setShowActionBar]);
 
-  // Helper functions
-  const getFileIcon = (fileType: string) => {
-    if (fileType.includes('image')) return <FileImage className="h-5 w-5" />;
-    if (fileType.includes('pdf')) return <FileText className="h-5 w-5" />;
-    if (fileType.includes('dwg') || fileType.includes('autocad')) return <File className="h-5 w-5" />;
-    if (fileType.includes('excel') || fileType.includes('spreadsheet')) return <FileSpreadsheet className="h-5 w-5" />;
-    return <File className="h-5 w-5" />;
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'aprobado': return 'bg-green-100 text-green-800';
-      case 'en_revision': return 'bg-yellow-100 text-yellow-800';
-      case 'rechazado': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'aprobado': return 'Aprobado';
-      case 'en_revision': return 'En Revisión';
-      case 'rechazado': return 'Rechazado';
-      default: return 'Pendiente';
-    }
-  };
-
   const handleEdit = (document: DesignDocument) => {
     setEditingDocument(document);
     setShowDocumentModal(true);
@@ -291,14 +194,6 @@ export default function DesignDocumentation() {
       deleteDocumentMutation.mutate(documentToDelete.id);
       setDocumentToDelete(null);
     }
-  };
-
-  const downloadFile = (document: DesignDocument) => {
-    const link = window.document.createElement('a');
-    link.href = document.file_url;
-    link.download = document.file_name;
-    link.target = '_blank';
-    link.click();
   };
 
   const handleCloseModal = () => {
@@ -346,6 +241,34 @@ export default function DesignDocumentation() {
 
   return (
     <Layout headerProps={headerProps}>
+      {/* Feature Introduction */}
+      <FeatureIntroduction 
+        title="Gestión de Documentación"
+        icon={<FileText className="h-6 w-6" />}
+        features={[
+          {
+            icon: <Archive className="h-5 w-5" />,
+            title: "Versionado de Archivos",
+            description: "Cada carpeta mantiene un historial completo de versiones. Puedes actualizar documentos y acceder a versiones anteriores."
+          },
+          {
+            icon: <FolderOpen className="h-5 w-5" />,
+            title: "Organización por Carpetas",
+            description: "Organiza tus documentos por carpetas temáticas. Cada carpeta muestra el archivo más reciente con opciones de actualización."
+          },
+          {
+            icon: <Share2 className="h-5 w-5" />,
+            title: "Descarga y Exportación",
+            description: "Descarga la versión actual o exporta cualquier versión anterior. Historial completo disponible en cada carpeta."
+          },
+          {
+            icon: <Users className="h-5 w-5" />,
+            title: "Colaboración del Equipo",
+            description: "Rastrea quién subió cada versión y cuándo. Estados de aprobación para control de calidad del proyecto."
+          }
+        ]}
+      />
+
       {/* View Toggle - only show when documents exist */}
       {documents.length > 0 && (
         <div className="mb-6">
@@ -381,111 +304,17 @@ export default function DesignDocumentation() {
           }
         />
       ) : (
-        <div className="space-y-8">
-          {Object.entries(groupedDocuments).map(([groupName, docs]) => (
-            <div key={groupName}>
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                {viewByPhase ? <Calendar className="h-5 w-5" /> : <FolderOpen className="h-5 w-5" />}
-                {groupName}
-                <Badge variant="secondary" className="ml-2">
-                  {docs.length}
-                </Badge>
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {docs.map((document) => (
-                  <Card key={document.id} className="hover:shadow-md transition-shadow">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-2">
-                          {getFileIcon(document.file_type)}
-                          <div>
-                            <CardTitle className="text-sm font-medium truncate">
-                              {document.file_name || 'Documento sin nombre'}
-                            </CardTitle>
-                            {document.version_number > 1 && (
-                              <Badge variant="outline" className="text-xs mt-1">
-                                v{document.version_number}
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => downloadFile(document)}>
-                              <Download className="mr-2 h-4 w-4" />
-                              Descargar
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleEdit(document)}>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Editar
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={() => handleDelete(document)}
-                              className="text-destructive"
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Eliminar
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </CardHeader>
-                    
-                    <CardContent className="pt-0">
-                      <div className="space-y-3">
-                        {document.description && (
-                          <p className="text-xs text-muted-foreground line-clamp-2">
-                            {document.description}
-                          </p>
-                        )}
-                        
-                        <div className="flex items-center justify-between">
-                          <Badge className={getStatusColor(document.status)}>
-                            {getStatusLabel(document.status)}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground">
-                            v{document.version_number}
-                          </span>
-                        </div>
-                        
-                        <div className="flex items-center justify-between text-xs text-muted-foreground">
-                          <span>{format(new Date(document.created_at), 'dd MMM yyyy', { locale: es })}</span>
-                          {document.creator && (
-                            <div className="flex items-center gap-1">
-                              <Avatar className="h-4 w-4">
-                                <AvatarImage src={document.creator.avatar_url} />
-                                <AvatarFallback className="text-xs">
-                                  {document.creator.full_name?.split(' ').map(n => n[0]).join('') || '?'}
-                                </AvatarFallback>
-                              </Avatar>
-                              <span className="truncate max-w-[80px]">{document.creator.full_name}</span>
-                            </div>
-                          )}
-                        </div>
-                        
-                        <div className="flex gap-2">
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            className="flex-1 text-xs"
-                            onClick={() => downloadFile(document)}
-                          >
-                            <Download className="mr-1 h-3 w-3" />
-                            Descargar
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
+        <div className="space-y-6">
+          {Object.entries(groupedDocuments).map(([folderName, documents]) => (
+            <DocumentFolderCard
+              key={folderName}
+              folder={folderName}
+              documents={documents}
+              projectId={projectId!}
+              organizationId={organizationId!}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
           ))}
         </div>
       )}

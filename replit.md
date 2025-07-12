@@ -119,6 +119,17 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 12, 2025. Enhanced DOCUMENTACIÓN page with FeatureIntroduction component and complete document versioning system - COMPLETED
+  • Added FeatureIntroduction component explaining document management functionality: version control, folder organization, download/export capabilities, and team collaboration features
+  • Created DocumentFolderCard component in src/components/ui-custom/ for comprehensive file version management
+  • Implemented full-width folder cards with ACTUALIZAR button for uploading new versions and VER HISTORIAL button for expandable version history
+  • Each folder displays latest version prominently with options to upload updates while maintaining complete version history
+  • Expandable version history shows all previous versions with individual export buttons for downloading any version
+  • Enhanced document query to fetch ALL versions (not just latest) for complete version tracking
+  • Added automatic version numbering system that increments when new versions are uploaded
+  • Integrated proper file upload handling with Supabase Storage for design-documents bucket
+  • Version cards show creator information, upload dates, status badges, and proper file type icons
+  • Preserved existing edit/delete functionality while adding comprehensive version management capabilities
 - July 12, 2025. Project dashboard hero card and stats improvements - COMPLETED
   • Fixed hero card background color to use --accent CSS variable instead of hardcoded blue gradient when no image present
   • Corrected chart line colors in stats cards to use direct accent color (#84cc16) for proper visibility
