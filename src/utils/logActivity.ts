@@ -36,19 +36,23 @@ export async function logActivity({
   metadata = {}
 }: LogActivityParams): Promise<void> {
   try {
-    // Llamar a la función Supabase log_organization_activity
-    const { data, error } = await supabase.rpc('log_organization_activity', {
-      input_organization_id: organization_id,
-      input_user_id: user_id,
-      input_action: action,
-      input_target_table: target_table,
-      input_target_id: target_id,
-      input_metadata: metadata
-    });
+    // Insertar directamente en organization_activity_logs para evitar problemas con la función de Supabase
+    const { data, error } = await supabase
+      .from('organization_activity_logs')
+      .insert({
+        organization_id,
+        user_id,
+        action,
+        target_table,
+        target_id,
+        metadata,
+        created_at: new Date().toISOString()
+      });
 
     if (error) {
       console.error('Error logging activity:', error);
-      throw new Error(`Failed to log activity: ${error.message}`);
+      // No lanzamos el error para evitar que interrumpa el flujo principal
+      return;
     }
 
     console.log(`Activity logged: ${action} on ${target_table}`, { target_id, metadata });
