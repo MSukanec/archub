@@ -6,6 +6,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@supabase/supabase-js';
+import { UpdateDocumentVersionModal } from '@/modals/design/UpdateDocumentVersionModal';
 import { 
   FolderOpen,
   Download, 
@@ -67,10 +68,15 @@ interface DocumentFolderCardProps {
 }
 
 const getFileIcon = (fileType: string) => {
-  if (fileType.startsWith('image/')) return <FileImage className="h-4 w-4" />;
-  if (fileType.includes('pdf')) return <FileText className="h-4 w-4" />;
-  if (fileType.includes('sheet') || fileType.includes('excel')) return <FileSpreadsheet className="h-4 w-4" />;
-  return <File className="h-4 w-4" />;
+  if (fileType.startsWith('image/')) {
+    return <FileImage className="h-5 w-5 text-blue-500" />;
+  } else if (fileType.includes('pdf')) {
+    return <FileText className="h-5 w-5 text-red-500" />;
+  } else if (fileType.includes('spreadsheet') || fileType.includes('excel')) {
+    return <FileSpreadsheet className="h-5 w-5 text-green-500" />;
+  } else {
+    return <File className="h-5 w-5 text-gray-500" />;
+  }
 };
 
 const getStatusBadge = (status: string) => {
@@ -94,7 +100,7 @@ export function DocumentFolderCard({
   onDelete 
 }: DocumentFolderCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -102,81 +108,6 @@ export function DocumentFolderCard({
   const sortedDocuments = [...documents].sort((a, b) => b.version_number - a.version_number);
   const latestDocument = sortedDocuments[0];
   const hasVersions = sortedDocuments.length > 1;
-
-  const uploadNewVersionMutation = useMutation({
-    mutationFn: async (file: File) => {
-      setIsUploading(true);
-      
-      // Calculate next version number
-      const nextVersion = Math.max(...documents.map(d => d.version_number)) + 1;
-      
-      // Upload file to Supabase Storage
-      const fileExtension = file.name.split('.').pop();
-      const fileName = `${crypto.randomUUID()}.${fileExtension}`;
-      
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('design-documents')
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      // Get file URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('design-documents')
-        .getPublicUrl(fileName);
-
-      // Save document metadata
-      const { data, error } = await supabase
-        .from('design_documents')
-        .insert({
-          file_name: latestDocument.file_name, // Keep same name
-          description: latestDocument.description, // Keep same description
-          file_path: fileName,
-          file_url: publicUrl,
-          file_type: file.type,
-          file_size: file.size,
-          version_number: nextVersion,
-          project_id: projectId,
-          organization_id: organizationId,
-          design_phase_id: latestDocument.design_phase_id,
-          folder: folder,
-          status: 'pendiente',
-          visibility: latestDocument.visibility,
-          created_by: latestDocument.created_by
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['design-documents'] });
-      toast({
-        title: "Nueva versión agregada",
-        description: `Se ha agregado la versión ${Math.max(...documents.map(d => d.version_number)) + 1} del documento.`,
-      });
-      setIsUploading(false);
-    },
-    onError: (error) => {
-      console.error('Error uploading new version:', error);
-      toast({
-        title: "Error",
-        description: "No se pudo subir la nueva versión del documento.",
-        variant: "destructive",
-      });
-      setIsUploading(false);
-    },
-  });
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      uploadNewVersionMutation.mutate(file);
-    }
-    // Reset input
-    event.target.value = '';
-  };
 
   const handleDownload = (document: DesignDocument) => {
     const link = document.createElement('a');
@@ -215,93 +146,115 @@ export function DocumentFolderCard({
 
       <CardContent className="space-y-4">
         {/* Latest Version - Always Visible */}
-        <div className="border border-[var(--card-border)] rounded-lg p-4 bg-[var(--card-bg)]">
-          <div className="flex items-start justify-between mb-3">
-            <div className="flex items-center gap-3">
+        <div className="p-4 border rounded-lg bg-muted/30">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start gap-3 flex-1">
               {getFileIcon(latestDocument.file_type)}
-              <div>
-                <h4 className="font-semibold text-foreground">{latestDocument.file_name}</h4>
-                {latestDocument.description && (
-                  <p className="text-sm text-muted-foreground">{latestDocument.description}</p>
-                )}
-                <div className="flex items-center gap-2 mt-1">
-                  <Badge variant="outline">v{latestDocument.version_number}</Badge>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <h4 className="font-medium text-sm truncate">{latestDocument.file_name}</h4>
+                  <Badge variant="default" className="text-xs">v{latestDocument.version_number}</Badge>
                   {getStatusBadge(latestDocument.status)}
+                </div>
+                
+                {latestDocument.description && (
+                  <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                    {latestDocument.description}
+                  </p>
+                )}
+                
+                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  <span>{format(new Date(latestDocument.created_at), 'dd MMM yyyy', { locale: es })}</span>
+                  {latestDocument.creator && (
+                    <div className="flex items-center gap-1">
+                      <Avatar className="h-4 w-4">
+                        <AvatarImage src={latestDocument.creator.avatar_url} />
+                        <AvatarFallback className="text-xs">
+                          {latestDocument.creator.full_name?.charAt(0) || '?'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="truncate max-w-[80px]">{latestDocument.creator.full_name}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
             
             <div className="flex flex-col gap-2">
               {/* Update Version Button */}
-              <div className="relative">
-                <input
-                  type="file"
-                  id={`upload-${folder}`}
-                  className="hidden"
-                  onChange={handleFileUpload}
-                  disabled={isUploading}
-                />
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={isUploading}
-                  onClick={() => document.getElementById(`upload-${folder}`)?.click()}
-                  className="w-full"
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  {isUploading ? 'Subiendo...' : 'Actualizar'}
-                </Button>
-              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setShowUpdateModal(true)}
+                className="w-full"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Actualizar
+              </Button>
               
               {/* Download Button */}
               <Button
                 size="sm"
+                variant="outline"
                 onClick={() => handleDownload(latestDocument)}
                 className="w-full"
               >
                 <Download className="h-4 w-4 mr-2" />
                 Descargar
               </Button>
+              
+              {/* More Actions Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="w-full">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => onEdit?.(latestDocument)}>
+                    Editar
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => onDelete?.(latestDocument)}
+                    className="text-destructive"
+                  >
+                    Eliminar
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
-          </div>
-
-          {/* Document metadata */}
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <div className="flex items-center gap-2">
-              {latestDocument.creator && (
-                <>
-                  <Avatar className="h-4 w-4">
-                    <AvatarImage src={latestDocument.creator.avatar_url} />
-                    <AvatarFallback className="text-xs">
-                      {latestDocument.creator.full_name?.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span>{latestDocument.creator.full_name}</span>
-                </>
-              )}
-            </div>
-            <span>{format(new Date(latestDocument.created_at), 'dd MMM yyyy', { locale: es })}</span>
           </div>
         </div>
 
         {/* Version History - Expandable */}
-        {isExpanded && hasVersions && (
+        {hasVersions && isExpanded && (
           <div className="space-y-2">
-            <h5 className="text-sm font-medium text-muted-foreground">Versiones Anteriores</h5>
+            <h5 className="text-sm font-medium text-muted-foreground">Versiones anteriores</h5>
             {sortedDocuments.slice(1).map((document) => (
-              <div key={document.id} className="border border-[var(--card-border)] rounded-lg p-3 bg-muted/20">
+              <div key={document.id} className="p-3 border rounded-lg bg-background">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 flex-1">
                     {getFileIcon(document.file_type)}
-                    <div>
-                      <div className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
                         <span className="text-sm font-medium">{document.file_name}</span>
-                        <Badge variant="secondary" className="text-xs">v{document.version_number}</Badge>
+                        <Badge variant="outline" className="text-xs">v{document.version_number}</Badge>
                         {getStatusBadge(document.status)}
                       </div>
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
+                      
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
                         <span>{format(new Date(document.created_at), 'dd MMM yyyy', { locale: es })}</span>
-                        {document.creator && <span>{document.creator.full_name}</span>}
+                        {document.creator && (
+                          <div className="flex items-center gap-1">
+                            <Avatar className="h-4 w-4">
+                              <AvatarImage src={document.creator.avatar_url} />
+                              <AvatarFallback className="text-xs">
+                                {document.creator.full_name?.charAt(0) || '?'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="truncate max-w-[80px]">{document.creator.full_name}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -310,8 +263,9 @@ export function DocumentFolderCard({
                     size="sm"
                     variant="outline"
                     onClick={() => handleDownload(document)}
+                    className="ml-2"
                   >
-                    <Download className="h-4 w-4 mr-2" />
+                    <Download className="h-4 w-4 mr-1" />
                     Exportar
                   </Button>
                 </div>
@@ -320,6 +274,13 @@ export function DocumentFolderCard({
           </div>
         )}
       </CardContent>
+      
+      {/* Update Version Modal */}
+      <UpdateDocumentVersionModal
+        open={showUpdateModal}
+        onClose={() => setShowUpdateModal(false)}
+        latestDocument={latestDocument}
+      />
     </Card>
   );
 }
