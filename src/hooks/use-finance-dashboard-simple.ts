@@ -458,7 +458,7 @@ export function useExpensesByCategory(organizationId: string | undefined, projec
       if (!organizationId || !supabase) return []
 
       try {
-        // Base query for movements
+        // Base query for movements - get all movements and filter by amount
         let movementsQuery = supabase
           .from('movements')
           .select(`
@@ -468,7 +468,7 @@ export function useExpensesByCategory(organizationId: string | undefined, projec
             subcategory_id
           `)
           .eq('organization_id', organizationId)
-          .lt('amount', 0) // Only expenses (negative amounts)
+          .neq('amount', 0) // Exclude zero amounts
 
         if (projectId) {
           movementsQuery = movementsQuery.eq('project_id', projectId)
@@ -485,7 +485,10 @@ export function useExpensesByCategory(organizationId: string | undefined, projec
         const { data: movements, error } = await movementsQuery
 
         if (error) throw error
-        if (!movements || movements.length === 0) return []
+        
+        if (!movements || movements.length === 0) {
+          return []
+        }
 
         // Get unique category IDs
         const categoryIds = Array.from(new Set(movements.map(m => m.category_id).filter(Boolean)))
@@ -506,7 +509,11 @@ export function useExpensesByCategory(organizationId: string | undefined, projec
         const categoryTotals = new Map<string, number>()
         let totalExpenses = 0
 
+        // Filter and process only expense movements
         movements.forEach((movement: any) => {
+          // Skip if this is an income (positive amount indicates expense in this context)
+          if (movement.amount <= 0) return
+          
           const categoryName = categoriesMap.get(movement.category_id) || 'Sin Categoría'
           const amount = Math.abs(movement.amount) // Convert to positive for display
           
@@ -537,6 +544,8 @@ export function useExpensesByCategory(organizationId: string | undefined, projec
           }))
           .sort((a, b) => b.amount - a.amount) // Sort by amount descending
           .filter(item => item.amount > 0) // Only include positive amounts
+
+
 
         return result
       } catch (error) {

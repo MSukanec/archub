@@ -307,7 +307,7 @@ export default function FinancesDashboard() {
         </div>
 
         {/* Segunda Fila: Métricas en columna + Gráficos */}
-        <div className="hidden md:grid grid-cols-4 gap-4 lg:gap-6">
+        <div className="hidden md:grid grid-cols-3 gap-4 lg:gap-6">
           {/* Columna de Métricas Verticales */}
           <div className="flex flex-col gap-4 lg:gap-6 h-full">
             {/* Card de Ingresos */}
@@ -433,21 +433,7 @@ export default function FinancesDashboard() {
             </CardContent>
           </Card>
 
-          {/* Gráfico de Balance por Billetera */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Wallet className="h-5 w-5" />
-                Balance por Billetera
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Distribución de fondos entre billeteras
-              </p>
-            </CardHeader>
-            <CardContent className="pb-2">
-              <WalletBalanceChart data={walletBalances || []} isLoading={walletsLoading} />
-            </CardContent>
-          </Card>
+
 
         </div>
 
