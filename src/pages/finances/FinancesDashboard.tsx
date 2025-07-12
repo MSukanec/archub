@@ -659,6 +659,161 @@ export default function FinancesDashboard() {
           </Card>
         </div>
 
+        {/* Gráficos - Mobile (Una columna) */}
+        <div className="md:hidden space-y-4">
+          {/* Flujo Financiero Mensual - Mobile */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                Flujo Financiero
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Ingresos, egresos y flujo neto del período seleccionado
+              </p>
+            </CardHeader>
+            <CardContent className="pb-2">
+              <MonthlyFlowChart data={monthlyFlow || []} isLoading={flowLoading} />
+            </CardContent>
+          </Card>
+
+          {/* Egresos por Categoría - Mobile */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <TrendingDown className="h-5 w-5" />
+                Egresos por Categoría
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Distribución de gastos por tipo de categoría
+              </p>
+            </CardHeader>
+            <CardContent className="pb-2">
+              <ExpensesByCategoryChart data={expensesByCategory || []} isLoading={categoriesLoading} />
+            </CardContent>
+          </Card>
+
+          {/* Balance por Billetera - Mobile */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Wallet className="h-5 w-5" />
+                Balance por Billetera
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Distribución de balances entre billeteras activas
+              </p>
+            </CardHeader>
+            <CardContent>
+              <WalletBalanceChart data={walletBalances || []} isLoading={walletsLoading} />
+            </CardContent>
+          </Card>
+
+          {/* Este Mes - Mobile */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                Este Mes
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                {format(new Date(), 'MMMM yyyy', { locale: es })}
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Ingresos</span>
+                  <span className="font-medium" style={{ color: 'var(--chart-positive)' }}>
+                    {summaryLoading ? '...' : formatCurrency(financialSummary?.thisMonthIncome || 0)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Egresos</span>
+                  <span className="font-medium" style={{ color: 'var(--chart-negative)' }}>
+                    {summaryLoading ? '...' : formatCurrency(financialSummary?.thisMonthExpenses || 0)}
+                  </span>
+                </div>
+                <div className="border-t pt-2">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">Balance Mensual</span>
+                    <span className="font-bold" style={getBalanceColor(financialSummary?.thisMonthBalance || 0)}>
+                      {summaryLoading ? '...' : formatCurrency(financialSummary?.thisMonthBalance || 0)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Movimientos Recientes - Mobile */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Clock className="h-5 w-5" />
+                Movimientos Recientes
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Últimos 5 movimientos registrados
+              </p>
+            </CardHeader>
+            <CardContent>
+              {recentLoading ? (
+                <div className="text-sm text-muted-foreground">Cargando movimientos...</div>
+              ) : recentMovements && recentMovements.length > 0 ? (
+                <div className="space-y-3">
+                  {recentMovements.map((movement: any) => {
+                    const isIncome = movement.movement_concepts?.name?.toLowerCase().includes('ingreso')
+                    const amount = Math.abs(movement.amount || 0)
+                    
+                    return (
+                      <div key={movement.id} className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <div className="p-1 rounded" style={{ 
+                            backgroundColor: isIncome ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)', 
+                            color: isIncome ? 'var(--chart-positive)' : 'var(--chart-negative)' 
+                          }}>
+                            {isIncome ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium line-clamp-1">
+                              {movement.description || 'Sin descripción'}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {format(new Date(movement.movement_date), 'dd/MM/yyyy', { locale: es })}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-sm font-medium" style={{ color: isIncome ? 'var(--chart-positive)' : 'var(--chart-negative)' }}>
+                          {isIncome ? '+' : '-'}{formatCurrency(amount)}
+                        </div>
+                      </div>
+                    )
+                  })}
+                  <div className="pt-2 border-t">
+                    <Link href="/finances/movements" className="text-sm text-primary hover:underline">
+                      Ver todos los movimientos →
+                    </Link>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <ArrowUpDown className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground mb-3">
+                    No hay movimientos registrados
+                  </p>
+                  <Link 
+                    href="/finances/movements"
+                    className="inline-flex items-center px-3 py-2 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                  >
+                    Crear Primer Movimiento
+                  </Link>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Balances Detallados */}
         <Card>
           <CardHeader>
