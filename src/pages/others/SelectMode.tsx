@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMutation } from "@tanstack/react-query";
@@ -69,11 +69,13 @@ function getHelpDescription(type: string): string {
 
 export default function SelectMode() {
   const [, navigate] = useLocation();
-  const { data: userData } = useCurrentUser();
+  const { data: userData, isLoading: userDataLoading } = useCurrentUser();
   const { setSidebarContext } = useNavigationStore();
   const { toast } = useToast();
   const [selectedMode, setSelectedMode] = useState<string | null>(null);
   const [hasFinished, setHasFinished] = useState(false);
+
+
 
   // Mutation for updating user type
   const updateUserTypeMutation = useMutation({
@@ -129,16 +131,11 @@ export default function SelectMode() {
     updateUserTypeMutation.mutate(modeType);
   };
 
+
+
   return (
     <div className="min-h-screen bg-[var(--background)] flex items-center justify-center p-4">
       <div className="w-full max-w-4xl">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-[var(--foreground)] mb-2">
-            Elegir modo de uso
-          </h1>
-        </div>
-
         {/* Mode selection card */}
         <Card className="w-full max-w-2xl mx-auto bg-[var(--card-bg)] border-[var(--card-border)]">
           <CardHeader className="text-center pb-4">
