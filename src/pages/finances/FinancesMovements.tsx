@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { DollarSign, Plus, Edit, Trash2, Heart, Search, Filter, X, Pencil, Upload } from "lucide-react";
+import { DollarSign, Plus, Edit, Trash2, Heart, Search, Filter, X, Pencil, Upload, Paperclip, TrendingUp, FileText, Users, BarChart3 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -37,6 +37,7 @@ import { Switch } from "@/components/ui/switch";
 import { CustomTable } from "@/components/ui-custom/misc/CustomTable";
 import { CustomEmptyState } from "@/components/ui-custom/CustomEmptyState";
 import { FinancialCards } from "@/components/ui-custom/misc/FinancialCards";
+import { FeatureIntroduction } from "@/components/ui-custom/FeatureIntroduction";
 import MovementCard from "@/components/cards/MovementCard";
 import ConversionCard from "@/components/cards/ConversionCard";
 import { transformMovementToCard } from "@/utils/movementCardAdapter";
@@ -179,7 +180,7 @@ export default function Movements() {
             setSearchValue("");
             setFilterByType("all");
             setFilterByCategory("all");
-            setShowConversions(false);
+            setFilterByFavorites("all");
           },
         }
       });
@@ -197,7 +198,7 @@ export default function Movements() {
   // Filter states
   const [filterByType, setFilterByType] = useState("all");
   const [filterByCategory, setFilterByCategory] = useState("all");
-  const [showConversions, setShowConversions] = useState(false);
+  const [filterByFavorites, setFilterByFavorites] = useState("all");
 
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
@@ -571,10 +572,12 @@ export default function Movements() {
       const matchesCategory =
         filterByCategory === "all" ||
         movement.movement_data?.category?.name === filterByCategory;
-      const matchesConversion = true; // Add conversion logic if needed
+      const matchesFavorites =
+        filterByFavorites === "all" ||
+        (filterByFavorites === "favorites" && movement.is_favorite);
 
       return (
-        matchesSearch && matchesType && matchesCategory && matchesConversion
+        matchesSearch && matchesType && matchesCategory && matchesFavorites
       );
     });
 
@@ -624,16 +627,19 @@ export default function Movements() {
         </Select>
       </div>
 
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <Label className="text-xs font-medium text-muted-foreground">
-            Mostrar conversiones
-          </Label>
-          <Switch
-            checked={showConversions}
-            onCheckedChange={setShowConversions}
-          />
-        </div>
+      <div>
+        <Label className="text-xs font-medium text-muted-foreground">
+          Filtrar por favoritos
+        </Label>
+        <Select value={filterByFavorites} onValueChange={setFilterByFavorites}>
+          <SelectTrigger className="mt-1">
+            <SelectValue placeholder="Todos los movimientos" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos los movimientos</SelectItem>
+            <SelectItem value="favorites">Solo favoritos</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );
@@ -641,7 +647,7 @@ export default function Movements() {
   const handleClearFilters = () => {
     setFilterByType("all");
     setFilterByCategory("all");
-    setShowConversions(false);
+    setFilterByFavorites("all");
     setSearchValue("");
   };
 
@@ -929,9 +935,9 @@ export default function Movements() {
           const fileCount = egresoMovement ? movementFileCounts[egresoMovement.id] || 0 : 0;
           return (
             <div className="flex items-center justify-center">
-              <span className={`text-xs ${fileCount > 0 ? 'text-accent font-medium' : 'text-muted-foreground'}`}>
-                {fileCount}
-              </span>
+              {fileCount > 0 ? (
+                <Paperclip className="h-4 w-4 text-accent" />
+              ) : null}
             </div>
           );
         }
@@ -940,9 +946,9 @@ export default function Movements() {
         const fileCount = movementFileCounts[item.id] || 0;
         return (
           <div className="flex items-center justify-center">
-            <span className={`text-xs ${fileCount > 0 ? 'text-accent font-medium' : 'text-muted-foreground'}`}>
-              {fileCount}
-            </span>
+            {fileCount > 0 ? (
+              <Paperclip className="h-4 w-4 text-accent" />
+            ) : null}
           </div>
         );
       },
@@ -1070,6 +1076,34 @@ export default function Movements() {
 
   return (
     <Layout headerProps={headerProps} wide={true}>
+      {/* Feature Introduction */}
+      <FeatureIntroduction
+        title="Gestión de Movimientos Financieros"
+        icon={<DollarSign className="h-6 w-6" />}
+        features={[
+          {
+            icon: <TrendingUp className="h-5 w-5" />,
+            title: "Seguimiento en Tiempo Real",
+            description: "Monitorea todos tus ingresos y egresos con actualizaciones instantáneas y balances por moneda"
+          },
+          {
+            icon: <FileText className="h-5 w-5" />,
+            title: "Importación de Excel",
+            description: "Importa movimientos masivos desde archivos Excel con mapeo automático de columnas"
+          },
+          {
+            icon: <Users className="h-5 w-5" />,
+            title: "Conversiones Multi-moneda",
+            description: "Gestiona conversiones entre diferentes monedas con tipos de cambio y seguimiento completo"
+          },
+          {
+            icon: <BarChart3 className="h-5 w-5" />,
+            title: "Filtros y Búsqueda Avanzada",
+            description: "Filtra por tipo, categoría, favoritos y busca por descripción para encontrar movimientos específicos"
+          }
+        ]}
+      />
+      
       {/* Financial Cards - Responsive */}
       <FinancialCards 
         balances={currencyBalances} 
