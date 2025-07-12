@@ -99,26 +99,42 @@ export function useCurrentUser() {
         throw new Error('User not authenticated')
       }
 
-      const { data, error } = await supabase.rpc('archub_get_user')
+      // First get the main user data from RPC
+      const { data: mainData, error: rpcError } = await supabase.rpc('archub_get_user')
       
-      if (error) {
-        console.error('Supabase RPC Error:', error)
-        console.error('Error details:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        })
-        throw error
+      if (rpcError) {
+        console.error('Supabase RPC Error:', rpcError)
+        throw rpcError
       }
       
-      if (!data) {
+      if (!mainData) {
         console.error('No user data returned from RPC function')
         throw new Error('No user data returned')
       }
 
-      console.log('User data received:', data)
-      return data as UserData
+      // Then get the discovery fields directly from user_data table
+      const { data: discoveryData, error: discoveryError } = await supabase
+        .from('user_data')
+        .select('discovered_by, discovered_by_other_text, main_use, main_use_other, user_role, user_role_other, team_size')
+        .eq('user_id', mainData.user.id)
+        .single()
+
+      if (discoveryError && discoveryError.code !== 'PGRST116') { // PGRST116 = no rows found
+        console.error('Error fetching discovery data:', discoveryError)
+      }
+
+      // Merge the discovery data into the main user_data object
+      const userData = {
+        ...mainData,
+        user_data: {
+          ...mainData.user_data,
+          ...(discoveryData || {})
+        }
+      }
+
+      console.log('User data received:', userData)
+      console.log('Discovery data:', discoveryData)
+      return userData as UserData
     },
     enabled: !!authUser && !!supabase,
     retry: 3,
