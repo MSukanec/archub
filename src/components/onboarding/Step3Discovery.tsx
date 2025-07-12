@@ -80,15 +80,12 @@ export function Step3Discovery({ onFinish }: Step3DiscoveryProps) {
 
   const handleFinish = () => {
     if (discoveredBy && (discoveredBy !== 'Otro' || discoveredByOther)) {
-      // Update store with final values
+      // Update store with final values (removed user_role and team_size)
       updateFormData({
         discovered_by: discoveredBy,
         discovered_by_other_text: discoveredByOther,
         main_use: mainUse,
-        main_use_other: mainUseOther,
-        user_role: userRole,
-        user_role_other: userRoleOther,
-        team_size: teamSize
+        main_use_other: mainUseOther
       });
       
       console.log('Step3Discovery - Finishing onboarding, calling finish function from parent');
@@ -205,80 +202,6 @@ export function Step3Discovery({ onFinish }: Step3DiscoveryProps) {
             />
           </div>
         )}
-
-        {/* Rol profesional - OPCIONAL */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Label htmlFor="user_role">¿Cuál es tu rol profesional?</Label>
-            <HelpPopover
-              title="Rol Profesional"
-              description="Tu rol nos ayuda a adaptar el contenido, las funciones disponibles y las sugerencias del sistema para que sean más relevantes a tu área profesional."
-              primaryActionText="Entendido"
-              placement="top"
-            />
-          </div>
-          <Select
-            value={userRole}
-            onValueChange={(value) => {
-              setUserRole(value);
-              if (value !== 'Otro') {
-                setUserRoleOther('');
-              }
-            }}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Selecciona una opción" />
-            </SelectTrigger>
-            <SelectContent>
-              {userRoleOptions.map((option) => (
-                <SelectItem key={option} value={option}>
-                  {option}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Campo adicional si elige "Otro" en rol */}
-        {userRole === 'Otro' && (
-          <div className="space-y-2">
-            <Label htmlFor="user_role_other">Especifica tu rol profesional</Label>
-            <Input
-              id="user_role_other"
-              placeholder="Escribe aquí..."
-              value={userRoleOther}
-              onChange={(e) => setUserRoleOther(e.target.value)}
-            />
-          </div>
-        )}
-
-        {/* Tamaño del equipo - OPCIONAL */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Label htmlFor="team_size">¿Cuántas personas trabajan en tu equipo/empresa?</Label>
-            <HelpPopover
-              title="Tamaño del Equipo"
-              description="El tamaño de tu equipo nos permite configurar funciones colaborativas apropiadas y sugerir flujos de trabajo que se adapten mejor a tu estructura organizacional."
-              primaryActionText="Entendido"
-              placement="top"
-            />
-          </div>
-          <Select
-            value={teamSize}
-            onValueChange={setTeamSize}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Selecciona una opción" />
-            </SelectTrigger>
-            <SelectContent>
-              {teamSizeOptions.map((option) => (
-                <SelectItem key={option} value={option}>
-                  {option}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
 
         {/* Botones de navegación */}
         <div className="flex justify-between pt-6">

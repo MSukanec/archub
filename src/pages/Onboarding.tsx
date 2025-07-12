@@ -109,9 +109,6 @@ export default function Onboarding() {
           discovered_by: formData.discovered_by,
           discovered_by_other_text: formData.discovered_by_other_text || null,
           main_use: formData.main_use || null,
-          user_role: formData.user_role || null,
-          user_role_other: formData.user_role_other || null,
-          team_size: formData.team_size || null,
           updated_at: new Date().toISOString(),
         })
         .eq('user_id', userId);

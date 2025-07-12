@@ -1,7 +1,7 @@
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { DollarSign, TrendingUp, TrendingDown, FileText, Calendar, CreditCard, User, ArrowUpDown, Plus, Building } from 'lucide-react'
+import { DollarSign, TrendingUp, TrendingDown, FileText, Calendar, CreditCard, User, ArrowUpDown, Plus, Building, Wallet, Clock } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useFinancialSummary, useMonthlyFlowData, useWalletBalances, useRecentMovements } from '@/hooks/use-finance-dashboard-simple'
 import { MonthlyFlowChart } from '@/components/graphics/MonthlyFlowChart'
@@ -402,12 +402,15 @@ export default function FinancesDashboard() {
           {/* Gráfico de Flujo Financiero */}
           <Card className="lg:col-span-2">
             <CardHeader>
-              <CardTitle className="text-lg">Flujo Financiero</CardTitle>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                Flujo Financiero
+              </CardTitle>
               <p className="text-sm text-muted-foreground">
                 Ingresos, egresos y flujo neto del período seleccionado
               </p>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pb-1">
               <MonthlyFlowChart data={monthlyFlow || []} isLoading={flowLoading} />
             </CardContent>
           </Card>
@@ -512,7 +515,10 @@ export default function FinancesDashboard() {
           {/* Este Mes */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Este Mes</CardTitle>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                Este Mes
+              </CardTitle>
               <p className="text-sm text-muted-foreground">
                 {format(new Date(), 'MMMM yyyy', { locale: es })}
               </p>
@@ -546,7 +552,10 @@ export default function FinancesDashboard() {
           {/* Balance por Billetera */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Balance por Billetera</CardTitle>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Wallet className="h-5 w-5" />
+                Balance por Billetera
+              </CardTitle>
               <p className="text-sm text-muted-foreground">
                 Distribución de balances entre billeteras activas
               </p>
@@ -559,7 +568,10 @@ export default function FinancesDashboard() {
           {/* Movimientos Recientes */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Movimientos Recientes</CardTitle>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Clock className="h-5 w-5" />
+                Movimientos Recientes
+              </CardTitle>
               <p className="text-sm text-muted-foreground">
                 Últimos 5 movimientos registrados
               </p>
@@ -624,7 +636,10 @@ export default function FinancesDashboard() {
         {/* Balances Detallados */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Balances por Billetera y Moneda</CardTitle>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <DollarSign className="h-5 w-5" />
+              Balances por Billetera y Moneda
+            </CardTitle>
             <p className="text-sm text-muted-foreground">
               Resumen detallado de saldos organizados por billetera y moneda
             </p>
