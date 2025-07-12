@@ -1,25 +1,24 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Activity, Folder, DollarSign, Users, FileText, Building, Eye } from 'lucide-react';
+import { Activity, Building, Eye, Search, Filter, X } from 'lucide-react';
 import { useLocation } from 'wouter';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { CustomTable } from '@/components/ui-custom/CustomTable';
 import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState';
-import ActivityCard from '@/components/cards/ActivityCard';
-
-import { useCurrentUser } from '@/hooks/use-current-user';
-import { supabase } from '@/lib/supabase';
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
 import { MemberActivityChart } from '@/components/charts/MemberActivityChart';
+
+import { useCurrentUser } from '@/hooks/use-current-user';
 import { useUserActivity } from '@/hooks/use-user-activity';
+import { useOrganizationActivityLogs, getActivityDisplayInfo } from '@/hooks/use-organization-activity-logs';
 
 export default function OrganizationActivity() {
   const { data: userData } = useCurrentUser();
@@ -28,182 +27,98 @@ export default function OrganizationActivity() {
   const [sortBy, setSortBy] = useState('date_recent');
   const [filterByType, setFilterByType] = useState('all');
   const [timePeriod, setTimePeriod] = useState<'week' | 'month' | 'year'>('week');
-  const currentOrganization = userData?.organization;
+  const organizationId = userData?.preferences?.last_organization_id;
 
-  // User activity data
-  const { data: userActivityData = [], isLoading: userActivityLoading } = useUserActivity(currentOrganization?.id, timePeriod);
+  // User activity data for chart
+  const { data: userActivityData = [], isLoading: userActivityLoading } = useUserActivity(organizationId, timePeriod);
 
-  // Fetch all organization activity
-  const { data: activities = [], isLoading } = useQuery({
-    queryKey: ['organization-activity', currentOrganization?.id],
-    queryFn: async () => {
-      if (!currentOrganization?.id) return [];
+  // Fetch activity logs from the new centralized table
+  const { data: activityLogs = [], isLoading } = useOrganizationActivityLogs(organizationId);
 
-      const allActivities = [];
-
-      // Get projects
-      const { data: projects } = await supabase
-        .from('projects')
-        .select(`
-          id, 
-          name, 
-          created_at, 
-          status,
-          created_by,
-          organization_members!projects_created_by_fkey (
-            users (
-              full_name,
-              avatar_url
-            )
-          )
-        `)
-        .eq('organization_id', currentOrganization.id)
-        .order('created_at', { ascending: false });
-
-      projects?.forEach(project => {
-        allActivities.push({
-          id: `project-${project.id}`,
-          type: 'project',
-          type_label: 'Nuevo Proyecto',
-          title: 'Nuevo proyecto creado',
-          description: `Se creó el proyecto "${project.name}"`,
-          created_at: project.created_at,
-          author: project.organization_members?.users || { full_name: 'Sistema', avatar_url: null },
-          status: project.status
-        });
-      });
-
-      // Get movements
-      const { data: movements } = await supabase
-        .from('movements')
-        .select(`
-          id, 
-          description, 
-          amount, 
-          created_at, 
-          created_by,
-          organization_members!movements_created_by_fkey (
-            users (
-              full_name,
-              avatar_url
-            )
-          )
-        `)
-        .eq('organization_id', currentOrganization.id)
-        .order('created_at', { ascending: false });
-
-      movements?.forEach(movement => {
-        allActivities.push({
-          id: `movement-${movement.id}`,
-          type: 'movement',
-          type_label: movement.amount && movement.amount > 0 ? 'Nuevo Ingreso' : 'Nuevo Egreso',
-          title: 'Movimiento financiero registrado',
-          description: `${movement.description || 'Movimiento'}: $${movement.amount?.toLocaleString()}`,
-          created_at: movement.created_at,
-          author: movement.organization_members?.users || { full_name: 'Usuario', avatar_url: null },
-          amount: movement.amount
-        });
-      });
-
-      // Get contacts
-      const { data: contacts } = await supabase
-        .from('contacts')
-        .select(`
-          id, 
-          first_name, 
-          last_name, 
-          created_at, 
-          company_name,
-          created_by,
-          organization_members!contacts_created_by_fkey (
-            users (
-              full_name,
-              avatar_url
-            )
-          )
-        `)
-        .eq('organization_id', currentOrganization.id)
-        .order('created_at', { ascending: false });
-
-      contacts?.forEach(contact => {
-        allActivities.push({
-          id: `contact-${contact.id}`,
-          type: 'contact',
-          type_label: 'Nuevo Contacto',
-          title: 'Nuevo contacto agregado',
-          description: `Se agregó a ${contact.first_name} ${contact.last_name}${contact.company_name ? ` de ${contact.company_name}` : ''}`,
-          created_at: contact.created_at,
-          author: contact.organization_members?.users || userData?.user || { full_name: 'Usuario', avatar_url: null }
-        });
-      });
-
-      // Get site logs
-      const { data: siteLogs } = await supabase
-        .from('site_logs')
-        .select(`
-          id, 
-          entry_type, 
-          weather, 
-          comments, 
-          created_at,
-          created_by,
-          organization_members!site_logs_created_by_fkey (
-            users (
-              full_name,
-              avatar_url
-            )
-          )
-        `)
-        .eq('organization_id', currentOrganization.id)
-        .order('created_at', { ascending: false });
-
-      siteLogs?.forEach(log => {
-        allActivities.push({
-          id: `site_log-${log.id}`,
-          type: 'site_log',
-          type_label: 'Nueva Bitácora',
-          title: 'Nueva entrada de bitácora',
-          description: `Entrada ${log.entry_type} - ${log.weather}`,
-          created_at: log.created_at,
-          author: log.organization_members?.users || userData?.user || { full_name: 'Usuario', avatar_url: '' }
-        });
-      });
-
-      // Sort all activities by date
-      return allActivities.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-    },
-    enabled: !!currentOrganization?.id
+  // Transform activity logs for display
+  const activities = activityLogs.map(log => {
+    const displayInfo = getActivityDisplayInfo(log);
+    return {
+      id: log.id,
+      type: log.action.split('_')[0], // Extract type from action (create_movement -> create)
+      type_label: displayInfo.label,
+      title: displayInfo.title,
+      description: displayInfo.description,
+      created_at: log.created_at,
+      author: log.user || { full_name: 'Usuario', avatar_url: null },
+      action: log.action,
+      target_table: log.target_table,
+      metadata: log.metadata
+    };
   });
 
-  // Filtrar y ordenar actividades
-  let filteredActivities = activities?.filter(activity => {
-    const matchesSearch = (activity.description || '').toLowerCase().includes(searchValue.toLowerCase()) ||
-                         (activity.type_label || '').toLowerCase().includes(searchValue.toLowerCase()) ||
-                         (activity.author?.full_name || '').toLowerCase().includes(searchValue.toLowerCase());
+  // Filter and sort activities
+  const filteredActivities = activities.filter(activity => {
+    // Filter by search
+    if (searchValue) {
+      const searchLower = searchValue.toLowerCase();
+      return (
+        activity.description.toLowerCase().includes(searchLower) ||
+        activity.author?.full_name?.toLowerCase().includes(searchLower) ||
+        activity.type_label.toLowerCase().includes(searchLower)
+      );
+    }
     
-    if (filterByType === "all") return matchesSearch;
-    return matchesSearch && activity.type === filterByType;
-  }) || [];
+    // Filter by type
+    if (filterByType !== 'all') {
+      return activity.type === filterByType;
+    }
+    
+    return true;
+  });
 
-  // Aplicar ordenamiento
-  filteredActivities = [...filteredActivities].sort((a, b) => {
+  // Sort activities
+  const sortedActivities = [...filteredActivities].sort((a, b) => {
     switch (sortBy) {
       case 'date_recent':
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      case 'date_oldest':
+      case 'date_old':
         return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-      case 'type_asc':
+      case 'author':
+        return (a.author?.full_name || '').localeCompare(b.author?.full_name || '');
+      case 'type':
         return a.type_label.localeCompare(b.type_label);
-      case 'type_desc':
-        return b.type_label.localeCompare(a.type_label);
-      case 'author_asc':
-        return (a.author.full_name || '').localeCompare(b.author.full_name || '');
-      case 'author_desc':
-        return (b.author.full_name || '').localeCompare(a.author.full_name || '');
       default:
         return 0;
     }
   });
+
+  // Helper function for initials
+  const getInitials = (name: string) => {
+    return name
+      ?.split(' ')
+      .map(word => word.charAt(0))
+      .join('')
+      .toUpperCase()
+      .slice(0, 2) || 'U';
+  };
+
+  // Handle activity click
+  const handleActivityClick = (activity: any) => {
+    console.log('Activity clicked:', activity);
+    // Navigate to related sections based on activity type
+    switch (activity.target_table) {
+      case 'movements':
+        navigate('/finances/movements');
+        break;
+      case 'site_logs':
+        navigate('/construction/logs');
+        break;
+      case 'design_documents':
+        navigate('/design/documentation');
+        break;
+      case 'contacts':
+        navigate('/organization/contacts');
+        break;
+      default:
+        console.log('Activity details:', activity);
+    }
+  };
 
   const clearFilters = () => {
     setSearchValue("");
@@ -211,38 +126,7 @@ export default function OrganizationActivity() {
     setFilterByType('all');
   };
 
-  const handleActivityClick = (activity: any) => {
-    console.log('Detalles de actividad:', activity);
-    
-    // Usar las rutas exactas del App.tsx
-    switch (activity.type) {
-      case 'project':
-        navigate('/proyectos');
-        break;
-      case 'movement':
-        navigate('/movimientos');
-        break;
-      case 'contact':
-        navigate('/organization/contactos');
-        break;
-      case 'site_log':
-        navigate('/bitacora');
-        break;
-      default:
-        alert(`Ver detalles de: ${activity.type_label}\n${activity.description}`);
-        break;
-    }
-  };
-
-  const getInitials = (name: string) => {
-    return name?.split(' ')
-      .map(n => n.charAt(0))
-      .join('')
-      .toUpperCase()
-      .slice(0, 2) || 'U';
-  };
-
-  // Filtros personalizados
+  // Custom filters
   const customFilters = (
     <div className="w-64 p-3 space-y-3">
       <div className="space-y-1.5">
@@ -253,11 +137,9 @@ export default function OrganizationActivity() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="date_recent">Fecha (Más reciente)</SelectItem>
-            <SelectItem value="date_oldest">Fecha (Más antigua)</SelectItem>
-            <SelectItem value="type_asc">Tipo (A-Z)</SelectItem>
-            <SelectItem value="type_desc">Tipo (Z-A)</SelectItem>
-            <SelectItem value="author_asc">Autor (A-Z)</SelectItem>
-            <SelectItem value="author_desc">Autor (Z-A)</SelectItem>
+            <SelectItem value="date_old">Fecha (Más antigua)</SelectItem>
+            <SelectItem value="type">Tipo (A-Z)</SelectItem>
+            <SelectItem value="author">Autor (A-Z)</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -270,28 +152,28 @@ export default function OrganizationActivity() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos los tipos</SelectItem>
-            <SelectItem value="project">Proyectos</SelectItem>
-            <SelectItem value="movement">Movimientos</SelectItem>
-            <SelectItem value="contact">Contactos</SelectItem>
+            <SelectItem value="create">Creaciones</SelectItem>
+            <SelectItem value="update">Ediciones</SelectItem>
+            <SelectItem value="delete">Eliminaciones</SelectItem>
           </SelectContent>
         </Select>
       </div>
     </div>
   );
 
+  // Header props
   const headerProps = {
-    icon: Activity,
-    title: "Actividad",
-    showSearch: true,
+    title: 'Actividad',
+    icon: <Activity className="w-5 h-5 text-[var(--accent)]" />,
     searchValue,
     onSearchChange: setSearchValue,
-    showFilters: true,
+    searchPlaceholder: 'Buscar actividades...',
     customFilters,
     onClearFilters: clearFilters,
     actions: []
   };
 
-  if (!currentOrganization) {
+  if (!organizationId) {
     return (
       <Layout headerProps={headerProps}>
         <div className="text-center py-12 text-muted-foreground">
@@ -303,12 +185,12 @@ export default function OrganizationActivity() {
     );
   }
 
-  // Configuración de columnas para la tabla con anchos personalizados
+  // Table columns configuration
   const columns = [
     {
       key: 'created_at',
       label: 'Fecha',
-      width: '10%',
+      width: '15%',
       render: (activity: any) => (
         <div className="flex flex-col">
           <span className="text-sm font-medium">
@@ -328,7 +210,7 @@ export default function OrganizationActivity() {
     {
       key: 'author',
       label: 'Autor',
-      width: '10%',
+      width: '15%',
       render: (activity: any) => (
         <div className="flex items-center gap-2">
           <Avatar className="w-8 h-8">
@@ -348,7 +230,7 @@ export default function OrganizationActivity() {
     {
       key: 'type_label',
       label: 'Tipo',
-      width: '10%',
+      width: '15%',
       render: (activity: any) => (
         <Badge variant="outline" className="text-xs">
           {activity.type_label}
@@ -360,7 +242,6 @@ export default function OrganizationActivity() {
     {
       key: 'description',
       label: 'Descripción',
-      // Sin width definido - ocupará el resto del espacio automáticamente
       render: (activity: any) => (
         <span className="text-sm text-muted-foreground">
           {activity.description}
@@ -394,7 +275,7 @@ export default function OrganizationActivity() {
   return (
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
-        {/* FeatureIntroduction */}
+        {/* Feature Introduction */}
         <FeatureIntroduction
           title="Actividad"
           icon={<Activity className="w-5 h-5" />}
@@ -405,36 +286,73 @@ export default function OrganizationActivity() {
               description: "En esta sección quedan asentadas todas las acciones importantes que realiza la organización, permitiendo dar seguimiento a cada cosa que sucede. Desde la creación de proyectos hasta movimientos financieros, todo queda registrado para mantener un historial completo."
             },
             {
-              icon: <Users className="w-5 h-5" />,
+              icon: <Activity className="w-5 h-5" />,
               title: "Filtrado por miembro",
               description: "Las acciones están organizadas y filtradas por miembro de la organización, de manera tal que se puede saber exactamente quién hizo cada cosa. Esto permite identificar responsabilidades, reconocer contribuciones y mantener la trazabilidad de las decisiones tomadas."
             }
           ]}
         />
 
-        {/* Member Activity Chart */}
-        <MemberActivityChart 
-          data={userActivityData} 
-          isLoading={userActivityLoading}
-          timePeriod={timePeriod}
-          onTimePeriodChange={setTimePeriod}
-        />
+        {/* Activity Chart */}
+        <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-medium">Actividad por Miembro</h3>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant={timePeriod === 'week' ? 'default' : 'outline'}
+                onClick={() => setTimePeriod('week')}
+              >
+                Semana
+              </Button>
+              <Button
+                size="sm"
+                variant={timePeriod === 'month' ? 'default' : 'outline'}
+                onClick={() => setTimePeriod('month')}
+              >
+                Mes
+              </Button>
+              <Button
+                size="sm"
+                variant={timePeriod === 'year' ? 'default' : 'outline'}
+                onClick={() => setTimePeriod('year')}
+              >
+                Año
+              </Button>
+            </div>
+          </div>
+          <MemberActivityChart 
+            data={userActivityData} 
+            isLoading={userActivityLoading}
+            timePeriod={timePeriod}
+          />
+        </div>
 
-        <CustomTable
-          columns={columns}
-          data={filteredActivities}
-          isLoading={isLoading}
-          renderCard={(activity) => (
-            <ActivityCard activity={activity} />
-          )}
-          emptyState={
-            <CustomEmptyState
-              icon={<Activity className="h-12 w-12" />}
-              title="No hay actividad reciente"
-              description="La actividad aparecerá aquí cuando se creen proyectos, movimientos o contactos en esta organización."
-            />
-          }
-        />
+        {/* Activity Table */}
+        {isLoading ? (
+          <div className="text-center py-12 text-muted-foreground">
+            <Activity className="h-12 w-12 mx-auto mb-4 opacity-20 animate-pulse" />
+            <p className="text-sm">Cargando actividades...</p>
+          </div>
+        ) : sortedActivities.length === 0 ? (
+          <CustomEmptyState
+            icon={Activity}
+            title="No hay actividades registradas"
+            description="Cuando se realicen acciones en la organización, aparecerán aquí."
+            actionLabel="Ver movimientos"
+            actionOnClick={() => navigate('/finances/movements')}
+          />
+        ) : (
+          <CustomTable
+            data={sortedActivities}
+            columns={columns}
+            searchValue={searchValue}
+            onSearchChange={setSearchValue}
+            emptyStateMessage="No se encontraron actividades"
+            showSearch={false} // Search is handled in header
+            showHeader={false} // Header is handled by Layout
+          />
+        )}
       </div>
     </Layout>
   );
