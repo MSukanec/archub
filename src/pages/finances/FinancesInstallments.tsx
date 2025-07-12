@@ -499,7 +499,7 @@ export default function FinancesInstallments() {
     {
       key: "contact",
       label: "Contacto",
-      width: "14.3%",
+      width: "12.5%",
       render: (item: any) => {
         if (item.isTotal) {
           return (
@@ -539,7 +539,7 @@ export default function FinancesInstallments() {
     {
       key: "moneda",
       label: "Moneda",
-      width: "14.3%",
+      width: "12.5%",
       render: (item: any) => {
         if (item.isTotal) {
           return (
@@ -570,7 +570,7 @@ export default function FinancesInstallments() {
     {
       key: "monto_total",
       label: "Monto Comprometido",
-      width: "14.3%",
+      width: "12.5%",
       render: (item: any) => {
         if (item.isTotal) {
           const totalCommitted = item.totalCommittedAmount || 0
@@ -603,7 +603,7 @@ export default function FinancesInstallments() {
     {
       key: "porcentaje_compromiso",
       label: "% de Compromiso",
-      width: "14.3%",
+      width: "12.5%",
       render: (item: any) => {
         if (item.isTotal) {
           return <div className="text-sm font-bold">100%</div>
@@ -628,7 +628,7 @@ export default function FinancesInstallments() {
     {
       key: "aporte_dolarizado",
       label: "Aporte Dolarizado",
-      width: "14.3%",
+      width: "12.5%",
       sortable: true,
       sortType: 'number' as const,
       render: (item: any) => {
@@ -663,7 +663,7 @@ export default function FinancesInstallments() {
     {
       key: "porcentaje_aporte",
       label: "% de Aporte",
-      width: "14.3%",
+      width: "12.5%",
       render: (item: any) => {
         if (item.isTotal) {
           return <div className="text-sm font-bold">100%</div>
@@ -688,7 +688,7 @@ export default function FinancesInstallments() {
     {
       key: "monto_restante",
       label: "Monto Restante",
-      width: "14.3%",
+      width: "12.5%",
       render: (item: any) => {
         if (item.isTotal) {
           const totalRemaining = item.totalRemainingAmount || 0
@@ -732,7 +732,7 @@ export default function FinancesInstallments() {
     {
       key: "actions",
       label: "Acciones",
-      width: "14.3%",
+      width: "12.5%",
       render: (item: any) => {
         if (item.isTotal) {
           return <div className="text-sm text-muted-foreground">-</div>
