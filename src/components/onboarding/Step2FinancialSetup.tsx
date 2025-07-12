@@ -2,20 +2,24 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CustomMultiComboBox } from "@/components/ui-custom/misc/CustomMultiComboBox";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { useCurrencies } from "@/hooks/use-currencies";
 import { useAllWallets } from "@/hooks/use-wallets";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { Coins, ArrowLeft, Wallet, HelpCircle } from "lucide-react";
+import { useOrganizationCurrencies } from "@/hooks/use-currencies";
+import { useWallets } from "@/hooks/use-wallets";
+import { Coins, ArrowLeft } from "lucide-react";
 import { HelpPopover } from "@/components/ui-custom/HelpPopover";
-import { Input } from "@/components/ui/input";
 
 export function Step2FinancialSetup() {
   const { data: userData } = useCurrentUser();
   const { data: allCurrencies } = useCurrencies();
   const { data: allWallets } = useAllWallets();
+  const { data: orgCurrencies } = useOrganizationCurrencies(userData?.organization?.id);
+  const { data: orgWallets } = useWallets(userData?.organization?.id);
   const { 
     formData, 
     updateFormData, 
@@ -28,6 +32,31 @@ export function Step2FinancialSetup() {
   const [secondaryCurrencies, setSecondaryCurrencies] = useState<string[]>(formData.secondary_currency_ids || []);
   const [defaultWallet, setDefaultWallet] = useState(formData.default_wallet_id || '');
   const [secondaryWallets, setSecondaryWallets] = useState<string[]>(formData.secondary_wallet_ids || []);
+
+  // Load existing financial preferences
+  useEffect(() => {
+    if (orgCurrencies && orgWallets && userData?.organization?.id) {
+      // For currencies: find default from organization_currencies
+      const defaultCurr = orgCurrencies.find((oc: any) => oc.currency)?.currency?.id || '';
+      const secondaryCurr = orgCurrencies.filter((oc: any) => oc.currency && oc.currency.id !== defaultCurr).map((oc: any) => oc.currency.id);
+      
+      // For wallets: find default from organization_wallets
+      const defaultWall = orgWallets.find((ow: any) => ow.is_default && ow.wallets)?.wallets?.id || '';
+      const secondaryWall = orgWallets.filter((ow: any) => !ow.is_default && ow.wallets).map((ow: any) => ow.wallets.id);
+      
+      setDefaultCurrency(defaultCurr);
+      setSecondaryCurrencies(secondaryCurr);
+      setDefaultWallet(defaultWall);
+      setSecondaryWallets(secondaryWall);
+      
+      updateFormData({
+        default_currency_id: defaultCurr,
+        secondary_currency_ids: secondaryCurr,
+        default_wallet_id: defaultWall,
+        secondary_wallet_ids: secondaryWall,
+      });
+    }
+  }, [orgCurrencies, orgWallets, userData?.organization?.id, updateFormData]);
 
   // Available options for secondary selections (exclude defaults)
   const availableSecondaryCurrencies = allCurrencies?.filter(c => c.id !== defaultCurrency) || [];
@@ -59,170 +88,147 @@ export function Step2FinancialSetup() {
   const isValid = formData.organization_name && defaultCurrency && defaultWallet;
 
   return (
-    <div className="w-full max-w-2xl mx-auto p-4">
-      <Card className="bg-[var(--card-bg)] border-[var(--card-border)]">
-        <CardHeader className="text-center">
-          <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-accent/10 rounded-full">
-            <Coins className="w-8 h-8 text-accent" />
+    <Card className="w-full max-w-2xl mx-auto bg-[var(--card-bg)] border-[var(--card-border)]">
+      <CardHeader className="text-center pb-4">
+        <div className="flex items-center justify-center mb-4">
+          <div className="p-3 rounded-lg bg-[var(--accent)] text-white">
+            <Coins className="h-8 w-8" />
           </div>
-          <CardTitle className="text-2xl font-bold text-foreground">
-            Configuración Financiera
-          </CardTitle>
-          <CardDescription className="text-base text-muted-foreground">
-            Configura las monedas y billeteras que utilizará tu organización por defecto
-          </CardDescription>
-        </CardHeader>
+        </div>
+        <CardTitle className="text-2xl font-bold">Configuración de Organización</CardTitle>
+        <CardDescription className="text-base">
+          Define el nombre de tu organización y sus preferencias financieras iniciales.
+        </CardDescription>
+      </CardHeader>
 
-        <CardContent className="space-y-8">
-          {/* Nombre de Organización */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Label htmlFor="organization_name">Nombre de Organización / Empresa <span className="text-[var(--accent)]">*</span></Label>
-              <HelpPopover
-                content="El nombre de tu empresa o estudio será visible en reportes, presupuestos y documentación oficial. Asegúrate de usar el nombre legal completo."
-                title="Organización"
-              >
-                <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
-              </HelpPopover>
-            </div>
-            <Input
-              id="organization_name"
-              placeholder="Nombre de tu organización"
-              value={formData.organization_name}
-              onChange={(e) => updateFormData({ organization_name: e.target.value })}
+      <CardContent className="space-y-6">
+        {/* Nombre de Organización */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Label htmlFor="organization_name">Nombre de Organización / Empresa <span className="text-[var(--accent)]">*</span></Label>
+            <HelpPopover
+              title="Organización"
+              description="El nombre de tu empresa o estudio será visible en reportes, presupuestos y documentación oficial. Asegúrate de usar el nombre legal completo."
+              primaryActionText="Entendido"
+              placement="top"
             />
           </div>
+          <Input
+            id="organization_name"
+            placeholder="Nombre de tu organización"
+            value={formData.organization_name}
+            onChange={(e) => updateFormData({ organization_name: e.target.value })}
+          />
+        </div>
 
-          {/* Monedas Section */}
-          <div className="space-y-6">
-            <div className="flex items-center gap-2">
-              <Coins className="h-5 w-5 text-accent" />
-              <h3 className="text-lg font-semibold text-foreground">Monedas y Billetes</h3>
-              <HelpPopover
-                content="Configura las monedas que utilizas frecuentemente en tu organización"
-                title="Configuración de Monedas"
-              >
-                <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
-              </HelpPopover>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Default Currency */}
-              <div className="space-y-2">
-                <Label htmlFor="default-currency" className="text-sm font-medium text-foreground">
-                  Moneda por Defecto <span className="text-accent">*</span>
-                </Label>
-                <Select value={defaultCurrency} onValueChange={handleDefaultCurrencyChange}>
-                  <SelectTrigger className="bg-background">
-                    <SelectValue placeholder="Selecciona una moneda" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {allCurrencies?.map((currency) => (
-                      <SelectItem key={currency.id} value={currency.id}>
-                        {currency.name} ({currency.symbol})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Secondary Currencies */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-foreground">
-                  Monedas Secundarias
-                </Label>
-                <CustomMultiComboBox
-                  options={availableSecondaryCurrencies.map(currency => ({
-                    value: currency.id,
-                    label: `${currency.name} (${currency.symbol})`
-                  }))}
-                  values={secondaryCurrencies}
-                  onValuesChange={setSecondaryCurrencies}
-                  placeholder="Selecciona monedas adicionales"
-                  searchPlaceholder="Buscar monedas..."
-                  emptyText="No se encontraron monedas"
-                />
-              </div>
-            </div>
+        {/* Moneda por Defecto */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Label htmlFor="default-currency">Moneda por Defecto <span className="text-[var(--accent)]">*</span></Label>
+            <HelpPopover
+              title="Moneda Principal"
+              description="La moneda principal que utilizarás para la mayoría de tus transacciones y reportes financieros."
+              primaryActionText="Entendido"
+              placement="top"
+            />
           </div>
+          <Select value={defaultCurrency} onValueChange={handleDefaultCurrencyChange}>
+            <SelectTrigger>
+              <SelectValue placeholder="Selecciona moneda principal" />
+            </SelectTrigger>
+            <SelectContent>
+              {allCurrencies?.map((currency) => (
+                <SelectItem key={currency.id} value={currency.id}>
+                  {currency.name} ({currency.symbol})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-          {/* Wallets Section */}
-          <div className="space-y-6">
-            <div className="flex items-center gap-2">
-              <Wallet className="h-5 w-5 text-accent" />
-              <h3 className="text-lg font-semibold text-foreground">Billeteras</h3>
-              <HelpPopover
-                content="Configura las billeteras que utilizas para gestionar tus movimientos financieros"
-                title="Configuración de Billeteras"
-              >
-                <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
-              </HelpPopover>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Default Wallet */}
-              <div className="space-y-2">
-                <Label htmlFor="default-wallet" className="text-sm font-medium text-foreground">
-                  Billetera por Defecto <span className="text-accent">*</span>
-                </Label>
-                <Select value={defaultWallet} onValueChange={handleDefaultWalletChange}>
-                  <SelectTrigger className="bg-background">
-                    <SelectValue placeholder="Selecciona una billetera" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {allWallets?.map((wallet) => (
-                      <SelectItem key={wallet.id} value={wallet.id}>
-                        {wallet.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Secondary Wallets */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-foreground">
-                  Billeteras Secundarias
-                </Label>
-                <CustomMultiComboBox
-                  options={availableSecondaryWallets.map(wallet => ({
-                    value: wallet.id,
-                    label: wallet.name
-                  }))}
-                  values={secondaryWallets}
-                  onValuesChange={setSecondaryWallets}
-                  placeholder="Selecciona billeteras adicionales"
-                  searchPlaceholder="Buscar billeteras..."
-                  emptyText="No se encontraron billeteras"
-                />
-              </div>
-            </div>
+        {/* Monedas Secundarias */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Label>Monedas Secundarias</Label>
+            <HelpPopover
+              title="Monedas Adicionales"
+              description="Otras monedas que puedes utilizar ocasionalmente en tu organización."
+              primaryActionText="Entendido"
+              placement="top"
+            />
           </div>
+          <CustomMultiComboBox
+            options={availableSecondaryCurrencies.map(currency => ({
+              value: currency.id,
+              label: `${currency.name} (${currency.symbol})`
+            }))}
+            values={secondaryCurrencies}
+            onValuesChange={setSecondaryCurrencies}
+            placeholder="Selecciona monedas adicionales"
+            searchPlaceholder="Buscar monedas..."
+            emptyText="No se encontraron monedas"
+          />
+        </div>
 
-          {/* Navigation Buttons */}
-          <div className="flex justify-between pt-6">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={goPrevStep}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Anterior
-            </Button>
-
-            <Button
-              type="button"
-              onClick={handleNext}
-              disabled={!isValid}
-              className="flex items-center gap-2"
-            >
-              Continuar
-              <span className="text-xs opacity-70">(3/4)</span>
-            </Button>
+        {/* Billetera por Defecto */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Label htmlFor="default-wallet">Billetera por Defecto <span className="text-[var(--accent)]">*</span></Label>
+            <HelpPopover
+              title="Billetera Principal"
+              description="La cuenta o método de pago principal que utilizarás para la mayoría de tus transacciones."
+              primaryActionText="Entendido"
+              placement="top"
+            />
           </div>
-        </CardContent>
-      </Card>
-    </div>
+          <Select value={defaultWallet} onValueChange={handleDefaultWalletChange}>
+            <SelectTrigger>
+              <SelectValue placeholder="Selecciona billetera principal" />
+            </SelectTrigger>
+            <SelectContent>
+              {allWallets?.map((wallet) => (
+                <SelectItem key={wallet.id} value={wallet.id}>
+                  {wallet.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Billeteras Secundarias */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Label>Billeteras Secundarias</Label>
+            <HelpPopover
+              title="Billeteras Adicionales"
+              description="Otras cuentas o métodos de pago que puedes utilizar ocasionalmente."
+              primaryActionText="Entendido"
+              placement="top"
+            />
+          </div>
+          <CustomMultiComboBox
+            options={availableSecondaryWallets.map(wallet => ({
+              value: wallet.id,
+              label: wallet.name
+            }))}
+            values={secondaryWallets}
+            onValuesChange={setSecondaryWallets}
+            placeholder="Selecciona billeteras adicionales"
+            searchPlaceholder="Buscar billeteras..."
+            emptyText="No se encontraron billeteras"
+          />
+        </div>
+
+        <div className="flex justify-end pt-4">
+          <Button 
+            onClick={handleNext}
+            disabled={!isValid}
+            className="bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white px-8"
+          >
+            Siguiente
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
