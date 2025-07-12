@@ -58,19 +58,29 @@ export function Step3Discovery() {
   const { formData, updateFormData, goNextStep, goPrevStep } = useOnboardingStore();
   const { data: userData } = useCurrentUser();
 
-  // Load existing user data if available
+  // Load existing user data if available (only once when userData loads)
   useEffect(() => {
-    if (userData?.user_data) {
+    console.log('Step3Discovery - userData loaded:', userData?.user_data);
+    console.log('Step3Discovery - current formData.discovered_by:', formData.discovered_by);
+    
+    if (userData?.user_data && !formData.discovered_by) {
+      console.log('Step3Discovery - Loading user data:', {
+        discovered_by: userData.user_data.discovered_by,
+        main_use: userData.user_data.main_use,
+        user_role: userData.user_data.user_role,
+        team_size: userData.user_data.team_size
+      });
+      
       updateFormData({
-        discovered_by: userData.user_data.discovered_by || formData.discovered_by,
-        discovered_by_other_text: userData.user_data.discovered_by_other_text || formData.discovered_by_other_text,
-        main_use: userData.user_data.main_use || formData.main_use,
-        user_role: userData.user_data.user_role || formData.user_role,
-        user_role_other: userData.user_data.user_role_other || formData.user_role_other,
-        team_size: userData.user_data.team_size || formData.team_size,
+        discovered_by: userData.user_data.discovered_by || '',
+        discovered_by_other_text: userData.user_data.discovered_by_other_text || '',
+        main_use: userData.user_data.main_use || '',
+        user_role: userData.user_data.user_role || '',
+        user_role_other: userData.user_data.user_role_other || '',
+        team_size: userData.user_data.team_size || '',
       });
     }
-  }, [userData, updateFormData]);
+  }, [userData?.user_data, updateFormData, formData.discovered_by]);
 
   const handleNext = () => {
     if (formData.discovered_by && (formData.discovered_by !== 'Otro' || formData.discovered_by_other_text)) {
