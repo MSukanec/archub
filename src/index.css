@@ -115,6 +115,9 @@
   --chart-4: hsl(43, 74%, 66%);
   --chart-5: hsl(0, 87%, 67%);
   --chart-grid-text: hsl(0, 0%, 40%);
+  --chart-positive: #22c55e;
+  --chart-negative: #ef4444;
+  --chart-neutral: #84cc16;
 
   /* Text */
   --text-default: hsl(240, 10%, 4%);
@@ -151,13 +154,6 @@
   --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 10px;
-}
-
-/* Financial Charts Colors - Theme Independent */
-:root {
-  --chart-positive: #22c55e;  /* Verde para ingresos/positivos */
-  --chart-negative: #ef4444;  /* Rojo para egresos/negativos */
-  --chart-neutral: #84cc16;   /* Verde lime para balance/flujo neto */
 }
 
 /* Animated border class */
@@ -278,6 +274,9 @@
   --chart-4: hsl(43, 74%, 70%);
   --chart-5: hsl(27, 87%, 70%);
   --chart-grid-text: hsl(0, 0%, 40%);
+  --chart-positive: #22c55e;
+  --chart-negative: #ef4444;
+  --chart-neutral: #84cc16;
 
   /* Tables */
   --table-header-bg: hsl(0, 0%, 14%);
