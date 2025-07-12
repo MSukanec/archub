@@ -520,10 +520,10 @@ export default function FinancesDashboard() {
 
 
 
-        {/* Tercera fila: Egresos por Categoría (2 cols) + Balance por Billetera (2 cols) */}
+        {/* Tercera fila: 4 columnas - Egresos por Categoría, Balance por Billetera, Este Mes, Movimientos Recientes */}
         <div className="hidden md:grid grid-cols-4 gap-4 lg:gap-6">
-          {/* Gráfico de Egresos por Categoría - ocupa 2 columnas */}
-          <Card className="col-span-2">
+          {/* Gráfico de Egresos por Categoría */}
+          <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <TrendingDown className="h-5 w-5" />
@@ -538,8 +538,8 @@ export default function FinancesDashboard() {
             </CardContent>
           </Card>
 
-          {/* Balance por Billetera - ocupa 2 columnas */}
-          <Card className="col-span-2">
+          {/* Balance por Billetera */}
+          <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <Wallet className="h-5 w-5" />
@@ -553,10 +553,7 @@ export default function FinancesDashboard() {
               <WalletBalanceChart data={walletBalances || []} isLoading={walletsLoading} />
             </CardContent>
           </Card>
-        </div>
 
-        {/* Cuarta fila: Este Mes + Movimientos Recientes (solo mobile y desktop) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
           {/* Este Mes */}
           <Card>
             <CardHeader>
