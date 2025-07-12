@@ -87,13 +87,7 @@ export default function Onboarding() {
     saveOnboardingMutation.mutate();
   };
 
-  // Auto-trigger onboarding completion when step goes beyond totalSteps
-  useEffect(() => {
-    if (currentStep > totalSteps) {
-      console.log('Auto-finishing onboarding - step exceeded total steps, currentStep:', currentStep, 'totalSteps:', totalSteps);
-      handleFinishOnboarding();
-    }
-  }, [currentStep, totalSteps]);
+  // Note: Onboarding completion is now handled directly by Step3Discovery component
 
   // Mutation to save all onboarding data
   const saveOnboardingMutation = useMutation({
@@ -265,7 +259,7 @@ export default function Onboarding() {
       case 2:
         return <Step2FinancialSetup />;
       case 3:
-        return <Step3Discovery />;
+        return <Step3Discovery onFinish={handleFinishOnboarding} />;
       default:
         return <Step1UserData />;
     }

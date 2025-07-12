@@ -57,8 +57,12 @@ const teamSizeOptions = [
   'Más de 15 personas'
 ];
 
-export function Step3Discovery() {
-  const { formData, updateFormData, goNextStep, goPrevStep } = useOnboardingStore();
+interface Step3DiscoveryProps {
+  onFinish?: () => void;
+}
+
+export function Step3Discovery({ onFinish }: Step3DiscoveryProps) {
+  const { formData, updateFormData, goPrevStep } = useOnboardingStore();
   const { data: userData } = useCurrentUser();
 
   // Initialize local state with form data or user data
@@ -87,8 +91,11 @@ export function Step3Discovery() {
         team_size: teamSize
       });
       
-      console.log('Step3Discovery - Finishing onboarding, calling goNextStep');
-      goNextStep();
+      console.log('Step3Discovery - Finishing onboarding, calling finish function from parent');
+      // Call the finish function passed from parent instead of goNextStep
+      if (onFinish) {
+        onFinish();
+      }
     }
   };
 
