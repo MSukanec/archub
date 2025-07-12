@@ -119,6 +119,16 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 12, 2025. Onboarding system enhancement with 4-step flow and reorganized fields - COMPLETED
+  • Enhanced onboarding from 3 to 4 steps: 1) Personal data → 2) Organization & Financial setup → 3) Discovery → 4) Mode selection
+  • Restructured Step 1 to single-column layout with fields: Nombre/s, Apellido/s, País, Fecha de Nacimiento, Tema de aplicación
+  • Moved organization name field from Step 1 to Step 2 (financial setup) for better logical flow
+  • Added country and birthdate fields to user_data schema and onboarding form data
+  • Created use-countries hook for country selection dropdown integration
+  • Fixed CustomMultiComboBox component initialization with proper default values to prevent undefined errors
+  • Enhanced Step 3 Discovery to automatically load existing user data when available
+  • Step 2 now combines organization setup with financial configuration (currencies/wallets)
+  • All validation updated to reflect new required fields and step dependencies
 - July 12, 2025. Navigation restructuring: Moved "Preferencias de Finanzas" to organization submenu as "Preferencias" - COMPLETED
   • Relocated "Preferencias de Finanzas" from finances submenu to organization submenu (bottom position)
   • Changed button label from "Preferencias de Finanzas" to simply "Preferencias" 

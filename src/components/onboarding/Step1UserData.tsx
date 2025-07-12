@@ -5,12 +5,14 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { useThemeStore } from "@/stores/themeStore";
+import { useCountries } from "@/hooks/use-countries";
 import { User, Palette } from "lucide-react";
 import { HelpPopover } from "@/components/ui-custom/HelpPopover";
 
 export function Step1UserData() {
   const { formData, updateFormData, goNextStep } = useOnboardingStore();
   const { setTheme } = useThemeStore();
+  const { data: countries } = useCountries();
 
   const handleThemeChange = (value: 'light' | 'dark') => {
     // Update form data
@@ -21,7 +23,7 @@ export function Step1UserData() {
   };
 
   const handleNext = () => {
-    if (formData.first_name && formData.last_name && formData.organization_name) {
+    if (formData.first_name && formData.last_name && formData.country && formData.birthdate) {
       goNextStep();
     }
   };
@@ -41,104 +43,132 @@ export function Step1UserData() {
       </CardHeader>
       
       <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Label htmlFor="first_name">Nombre/s <span className="text-[var(--accent)]">*</span></Label>
-              <HelpPopover
-                title="Nombre Personal"
-                description="Usamos tu nombre para personalizar tu experiencia y para que tu equipo pueda identificarte en colaboraciones. Puedes usar uno o varios nombres."
-                primaryActionText="Entendido"
-                placement="top"
-              />
-            </div>
-            <Input
-              id="first_name"
-              placeholder="Tu nombre"
-              value={formData.first_name}
-              onChange={(e) => updateFormData({ first_name: e.target.value })}
+        {/* Nombre */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Label htmlFor="first_name">Nombre/s <span className="text-[var(--accent)]">*</span></Label>
+            <HelpPopover
+              title="Nombre Personal"
+              description="Usamos tu nombre para personalizar tu experiencia y para que tu equipo pueda identificarte en colaboraciones. Puedes usar uno o varios nombres."
+              primaryActionText="Entendido"
+              placement="top"
             />
           </div>
-          
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Label htmlFor="last_name">Apellido/s <span className="text-[var(--accent)]">*</span></Label>
-              <HelpPopover
-                title="Apellido Personal"
-                description="Tu apellido completa tu identificación en la plataforma y es útil para reportes oficiales y documentación del proyecto."
-                primaryActionText="Entendido"
-                placement="top"
-              />
-            </div>
-            <Input
-              id="last_name"
-              placeholder="Tu apellido"
-              value={formData.last_name}
-              onChange={(e) => updateFormData({ last_name: e.target.value })}
+          <Input
+            id="first_name"
+            placeholder="Tu nombre"
+            value={formData.first_name}
+            onChange={(e) => updateFormData({ first_name: e.target.value })}
+          />
+        </div>
+        
+        {/* Apellido */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Label htmlFor="last_name">Apellido/s <span className="text-[var(--accent)]">*</span></Label>
+            <HelpPopover
+              title="Apellido Personal"
+              description="Tu apellido completa tu identificación en la plataforma y es útil para reportes oficiales y documentación del proyecto."
+              primaryActionText="Entendido"
+              placement="top"
             />
           </div>
+          <Input
+            id="last_name"
+            placeholder="Tu apellido"
+            value={formData.last_name}
+            onChange={(e) => updateFormData({ last_name: e.target.value })}
+          />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Label htmlFor="organization_name">Nombre de Organización / Empresa <span className="text-[var(--accent)]">*</span></Label>
-              <HelpPopover
-                title="Organización"
-                description="El nombre de tu empresa o estudio será visible en reportes, presupuestos y documentación oficial. Asegúrate de usar el nombre legal completo."
-                primaryActionText="Entendido"
-                placement="top"
-              />
-            </div>
-            <Input
-              id="organization_name"
-              placeholder="Nombre de tu organización"
-              value={formData.organization_name}
-              onChange={(e) => updateFormData({ organization_name: e.target.value })}
+        {/* País */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Label htmlFor="country">País <span className="text-[var(--accent)]">*</span></Label>
+            <HelpPopover
+              title="País de Residencia"
+              description="Tu país nos ayuda a configurar monedas locales, regulaciones y funcionalidades específicas de tu región."
+              primaryActionText="Entendido"
+              placement="top"
             />
           </div>
+          <Select
+            value={formData.country}
+            onValueChange={(value) => updateFormData({ country: value })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Selecciona tu país" />
+            </SelectTrigger>
+            <SelectContent>
+              {countries?.map((country) => (
+                <SelectItem key={country.id} value={country.id}>
+                  {country.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Label htmlFor="theme">Tema de la aplicación</Label>
-              <HelpPopover
-                title="Modo Oscuro"
-                description="Activa el modo oscuro para reducir fatiga visual y ahorrar batería. Puedes cambiarlo después desde tu perfil."
-                primaryActionText="Entendido"
-                secondaryActionText="Más info"
-                onSecondaryAction={() => console.log("Más información sobre temas")}
-                placement="top"
-              />
-            </div>
-            <Select
-              value={formData.theme}
-              onValueChange={handleThemeChange}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecciona un tema" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="light">
-                  <div className="flex items-center gap-2">
-                    <Palette className="h-4 w-4" />
-                    Claro
-                  </div>
-                </SelectItem>
-                <SelectItem value="dark">
-                  <div className="flex items-center gap-2">
-                    <Palette className="h-4 w-4" />
-                    Oscuro
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
+        {/* Fecha de Nacimiento */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Label htmlFor="birthdate">Fecha de Nacimiento <span className="text-[var(--accent)]">*</span></Label>
+            <HelpPopover
+              title="Fecha de Nacimiento"
+              description="Tu fecha de nacimiento es privada y se usa únicamente para estadísticas demográficas internas y funcionalidades de edad requerida."
+              primaryActionText="Entendido"
+              placement="top"
+            />
           </div>
+          <Input
+            id="birthdate"
+            type="date"
+            value={formData.birthdate}
+            onChange={(e) => updateFormData({ birthdate: e.target.value })}
+          />
+        </div>
+
+        {/* Tema de la aplicación */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Label htmlFor="theme">Tema de la aplicación</Label>
+            <HelpPopover
+              title="Modo Oscuro"
+              description="Activa el modo oscuro para reducir fatiga visual y ahorrar batería. Puedes cambiarlo después desde tu perfil."
+              primaryActionText="Entendido"
+              secondaryActionText="Más info"
+              onSecondaryAction={() => console.log("Más información sobre temas")}
+              placement="top"
+            />
+          </div>
+          <Select
+            value={formData.theme}
+            onValueChange={handleThemeChange}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Selecciona un tema" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="light">
+                <div className="flex items-center gap-2">
+                  <Palette className="h-4 w-4" />
+                  Claro
+                </div>
+              </SelectItem>
+              <SelectItem value="dark">
+                <div className="flex items-center gap-2">
+                  <Palette className="h-4 w-4" />
+                  Oscuro
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="flex justify-end pt-4">
           <Button 
             onClick={handleNext}
-            disabled={!formData.first_name || !formData.last_name || !formData.organization_name}
+            disabled={!formData.first_name || !formData.last_name || !formData.country || !formData.birthdate}
             className="bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white px-8"
           >
             Siguiente

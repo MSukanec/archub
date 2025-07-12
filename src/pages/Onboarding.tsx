@@ -37,6 +37,8 @@ export default function SelectMode() {
       updateFormData({
         first_name: userData.user_data?.first_name || '',
         last_name: userData.user_data?.last_name || '',
+        country: userData.user_data?.country || '',
+        birthdate: userData.user_data?.birthdate || '',
         organization_name: userData.organization?.name || '',
         theme: (userData.preferences?.theme === 'dark' ? 'dark' : 'light'),
         discovered_by: userData.user_data?.discovered_by || '',
@@ -81,6 +83,8 @@ export default function SelectMode() {
         .update({
           first_name: formData.first_name,
           last_name: formData.last_name,
+          country: formData.country || null,
+          birthdate: formData.birthdate || null,
           discovered_by: formData.discovered_by,
           discovered_by_other_text: formData.discovered_by_other_text || null,
           main_use: formData.main_use || null,

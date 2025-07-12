@@ -30,6 +30,8 @@ interface OnboardingState {
 const initialFormData = {
   first_name: '',
   last_name: '',
+  country: '',
+  birthdate: '',
   organization_name: '',
   theme: 'light' as const,
   default_currency_id: '',

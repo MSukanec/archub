@@ -10,6 +10,7 @@ import { useAllWallets } from "@/hooks/use-wallets";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { Coins, ArrowLeft, Wallet, HelpCircle } from "lucide-react";
 import { HelpPopover } from "@/components/ui-custom/HelpPopover";
+import { Input } from "@/components/ui/input";
 
 export function Step2FinancialSetup() {
   const { data: userData } = useCurrentUser();
@@ -55,7 +56,7 @@ export function Step2FinancialSetup() {
     setSecondaryWallets(prev => prev.filter(id => id !== walletId));
   };
 
-  const isValid = defaultCurrency && defaultWallet;
+  const isValid = formData.organization_name && defaultCurrency && defaultWallet;
 
   return (
     <div className="w-full max-w-2xl mx-auto p-4">
@@ -73,6 +74,25 @@ export function Step2FinancialSetup() {
         </CardHeader>
 
         <CardContent className="space-y-8">
+          {/* Nombre de Organización */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Label htmlFor="organization_name">Nombre de Organización / Empresa <span className="text-[var(--accent)]">*</span></Label>
+              <HelpPopover
+                content="El nombre de tu empresa o estudio será visible en reportes, presupuestos y documentación oficial. Asegúrate de usar el nombre legal completo."
+                title="Organización"
+              >
+                <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+              </HelpPopover>
+            </div>
+            <Input
+              id="organization_name"
+              placeholder="Nombre de tu organización"
+              value={formData.organization_name}
+              onChange={(e) => updateFormData({ organization_name: e.target.value })}
+            />
+          </div>
+
           {/* Monedas Section */}
           <div className="space-y-6">
             <div className="flex items-center gap-2">
