@@ -89,8 +89,12 @@ export function useMovements(organizationId: string | undefined, projectId: stri
         .order('created_at', { ascending: false });
 
       // If project is specified, filter by project
-      if (projectId) {
+      // Only filter by project if projectId is explicitly provided and not null
+      if (projectId && projectId !== 'null') {
+        console.log('Filtering by project_id:', projectId);
         query = query.eq('project_id', projectId);
+      } else {
+        console.log('Not filtering by project - showing all movements for organization');
       }
 
       const { data, error } = await query;

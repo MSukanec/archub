@@ -24,6 +24,7 @@ import { useToast } from '@/hooks/use-toast'
 import { Plus, X, Folder, FileText, Trash2, Download } from 'lucide-react'
 import { uploadMovementFiles, getMovementFiles, deleteMovementFile } from '@/lib/storage/uploadMovementFiles'
 import UserSelector from '@/components/ui-custom/UserSelector'
+import { logActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from '@/utils/logActivity'
 
 const movementSchema = z.object({
   movement_date: z.date(),
@@ -391,6 +392,30 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
           .single()
 
         if (error) throw error
+        
+        // Log activity for movement update
+        try {
+          await logActivity({
+            organization_id: organizationId,
+            user_id: currentUser?.user?.id || '',
+            action: ACTIVITY_ACTIONS.UPDATE_MOVEMENT,
+            target_table: TARGET_TABLES.MOVEMENTS,
+            target_id: result.id,
+            metadata: {
+              amount: result.amount,
+              description: result.description || '',
+              currency_id: result.currency_id,
+              wallet_id: result.wallet_id,
+              type_id: result.type_id,
+              category_id: result.category_id,
+              movement_date: result.movement_date,
+              project_id: result.project_id
+            }
+          });
+        } catch (logError) {
+          console.error('Error logging movement update:', logError);
+        }
+        
         return result
       } else {
         const { data: result, error } = await supabase
@@ -400,6 +425,31 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
           .single()
 
         if (error) throw error
+        
+        // Log activity for movement creation
+        try {
+          await logActivity({
+            organization_id: organizationId,
+            user_id: currentUser?.user?.id || '',
+            action: ACTIVITY_ACTIONS.CREATE_MOVEMENT,
+            target_table: TARGET_TABLES.MOVEMENTS,
+            target_id: result.id,
+            metadata: {
+              amount: result.amount,
+              description: result.description || '',
+              currency_id: result.currency_id,
+              wallet_id: result.wallet_id,
+              type_id: result.type_id,
+              category_id: result.category_id,
+              movement_date: result.movement_date,
+              project_id: result.project_id,
+              exchange_rate: result.exchange_rate
+            }
+          });
+        } catch (logError) {
+          console.error('Error logging movement creation:', logError);
+        }
+        
         return result
       }
     },
