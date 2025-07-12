@@ -87,7 +87,7 @@ export default function FinancesDashboard() {
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
         {/* Header Row - Welcome Card (75%) + Movements Card (25%) */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-6">
           {/* Welcome Card - Financial Summary (75% width) */}
           <motion.div
             className="lg:col-span-3"
@@ -168,24 +168,27 @@ export default function FinancesDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            <Card className="h-full">
-              <CardContent className="p-4 md:p-6 h-full flex flex-col">
-                {/* Accent Line */}
+            <Card className="h-full relative overflow-hidden">
+              <CardContent className="p-4 h-full flex flex-col">
+                {/* Accent Line at top */}
                 <div className="w-full h-1 bg-[var(--accent)] rounded-full mb-4"></div>
                 
-                {/* Icon */}
-                <div className="flex items-center gap-2 mb-3">
+                {/* Icon and Title Section */}
+                <div className="flex items-center gap-2 mb-4">
                   <DollarSign className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm text-muted-foreground font-medium">
                     Movimientos (30 días)
                   </span>
                 </div>
                 
-                {/* Amount */}
-                <div className="flex-1 flex flex-col justify-center">
-                  <div className="text-xl md:text-2xl font-bold text-foreground">
+                {/* Large Amount at Bottom */}
+                <div className="flex-1 flex flex-col justify-end">
+                  <div className="text-2xl font-bold text-foreground mb-1">
                     {summaryLoading ? '...' : formatCurrency(movementsLast30Days)}
                   </div>
+                  <p className="text-xs text-muted-foreground">
+                    total movido
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -193,7 +196,7 @@ export default function FinancesDashboard() {
         </div>
 
         {/* Métricas Principales - Desktop */}
-        <div className="hidden md:grid grid-cols-4 gap-4">
+        <div className="hidden md:grid grid-cols-4 gap-4 lg:gap-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Ingresos Totales</CardTitle>
@@ -256,7 +259,7 @@ export default function FinancesDashboard() {
         </div>
 
         {/* Métricas Principales - Mobile (Compactas) */}
-        <div className="md:hidden grid grid-cols-2 gap-3">
+        <div className="md:hidden grid grid-cols-2 gap-4">
           <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm min-h-[80px]">
             <div className="flex items-center justify-between mb-1">
               <TrendingUp className="h-4 w-4 text-green-600" />
@@ -315,7 +318,7 @@ export default function FinancesDashboard() {
         </div>
 
         {/* Gráficos - Flujo Mensual y Balance de Billeteras */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Flujo Financiero Mensual</CardTitle>
@@ -342,7 +345,7 @@ export default function FinancesDashboard() {
         </div>
 
         {/* Resumen Mensual y Movimientos Recientes */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Este Mes</CardTitle>
