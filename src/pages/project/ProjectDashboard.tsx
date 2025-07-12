@@ -142,7 +142,41 @@ export default function ProjectDashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
+          className="relative"
         >
+          {/* Settings Button - Outside the card to avoid z-index issues */}
+          <input
+            type="file"
+            id="project-image-upload"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                updateProjectImageMutation.mutate(file);
+              }
+              // Reset input value to allow re-uploading same file
+              e.target.value = '';
+            }}
+          />
+          <Button
+            variant="ghost"
+            size="sm"
+            className="absolute top-4 right-4 h-8 w-8 p-0 bg-white/10 hover:bg-white/20 text-white border border-white/20 disabled:opacity-50 cursor-pointer z-50"
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              const input = document.getElementById('project-image-upload') as HTMLInputElement;
+              if (input) {
+                input.click();
+              }
+            }}
+            disabled={updateProjectImageMutation.isPending}
+          >
+            <Settings className="h-4 w-4" />
+          </Button>
+
           <Card className="relative overflow-hidden border-[var(--card-border)] h-48 md:h-56">
             {/* Background Image */}
             {currentProject?.project_data?.project_image_url ? (
@@ -164,39 +198,6 @@ export default function ProjectDashboard() {
             
             {/* Overlay */}
             <div className="absolute inset-0 bg-black/40" />
-            
-            {/* Settings Button */}
-            <input
-              type="file"
-              id="project-image-upload"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  updateProjectImageMutation.mutate(file);
-                }
-                // Reset input value to allow re-uploading same file
-                e.target.value = '';
-              }}
-            />
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute top-4 right-4 h-8 w-8 p-0 bg-white/10 hover:bg-white/20 text-white border border-white/20 disabled:opacity-50 cursor-pointer"
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const input = document.getElementById('project-image-upload') as HTMLInputElement;
-                if (input) {
-                  input.click();
-                }
-              }}
-              disabled={updateProjectImageMutation.isPending}
-            >
-              <Settings className="h-4 w-4" />
-            </Button>
 
             {/* Content */}
             <CardContent className="relative z-10 p-4 md:p-6 h-full flex flex-col justify-end">
