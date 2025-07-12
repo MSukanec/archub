@@ -1,7 +1,7 @@
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Building, FileText, Users, Package, Calculator, Clock } from 'lucide-react'
-import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState'
+import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState'
 
 export default function ConstructionDashboard() {
   const headerProps = {

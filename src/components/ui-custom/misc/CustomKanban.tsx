@@ -8,7 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Plus, MoreHorizontal, List, Edit, Trash2, CheckCircle, Circle, ChevronRight } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState';
+import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState';
 import { NewCardModal } from '@/modals/tasks/NewCardModal';
 import { NewListModal } from '@/modals/tasks/NewListModal';
 import { CardDetailsModal } from '@/modals/tasks/CardDetailsModal';

@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { CustomTable } from '@/components/ui-custom/misc/CustomTable';
-import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState';
+import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState';
 import ActivityCard from '@/components/cards/ActivityCard';
 
 import { useCurrentUser } from '@/hooks/use-current-user';

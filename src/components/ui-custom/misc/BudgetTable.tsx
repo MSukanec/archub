@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Trash2, Plus } from 'lucide-react';
 import { Calculator } from 'lucide-react';
-import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState';
+import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState';
 
 interface BudgetTask {
   id: string;

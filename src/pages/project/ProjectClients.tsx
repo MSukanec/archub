@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
-import { Users, Plus, Trash2, UserPlus } from 'lucide-react'
+import { Users, Plus, Trash2, UserPlus, Handshake, CreditCard, UserCheck, TrendingUp } from 'lucide-react'
 import { useState } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useMutation, useQuery } from '@tanstack/react-query'
@@ -14,6 +14,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { DangerousConfirmationModal } from '@/components/ui-custom/DangerousConfirmationModal'
+import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
+import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState'
 
 interface Contact {
   id: string
@@ -272,9 +274,38 @@ export default function ProjectClients() {
   return (
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
-        {/* Project Clients Card */}
-        <Card>
-          <CardContent className="pt-6">
+        {/* Feature Introduction */}
+        <FeatureIntroduction
+          title="Gestión de Clientes del Proyecto"
+          icon={<Handshake className="h-6 w-6" />}
+          features={[
+            {
+              icon: <UserCheck className="h-4 w-4" />,
+              title: "Vincular Contactos al Proyecto",
+              description: "Agrega contactos de tu organización como clientes del proyecto actual para un control detallado."
+            },
+            {
+              icon: <CreditCard className="h-4 w-4" />,
+              title: "Gestión de Compromisos Financieros",
+              description: "Administra los montos comprometidos por cada cliente y configura las monedas correspondientes."
+            },
+            {
+              icon: <Users className="h-4 w-4" />,
+              title: "Roles y Permisos",
+              description: "Asigna roles específicos a cada cliente y controla su nivel de acceso a la información del proyecto."
+            },
+            {
+              icon: <TrendingUp className="h-4 w-4" />,
+              title: "Seguimiento de Aportes",
+              description: "Conecta automáticamente los aportes financieros con los clientes correspondientes para un seguimiento completo."
+            }
+          ]}
+        />
+
+        {/* Project Clients Card - Only show when there are clients */}
+        {projectClients && projectClients.length > 0 && (
+          <Card>
+            <CardContent className="pt-6">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Clientes Activos</h3>
@@ -283,9 +314,8 @@ export default function ProjectClients() {
                 </div>
               </div>
               
-              {projectClients && projectClients.length > 0 ? (
-                <div className="space-y-3">
-                  {projectClients.map((client) => {
+              <div className="space-y-3">
+                {projectClients.map((client) => {
                     const contact = client.contact
                     const displayName = contact?.company_name || 
                                       `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim()
@@ -321,18 +351,68 @@ export default function ProjectClients() {
                         </div>
                       </div>
                     )
-                  })}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>No hay clientes agregados al proyecto</p>
-                  <p className="text-sm">Usa el botón "Agregar Cliente" para vincular contactos</p>
-                </div>
-              )}
+                })}
+              </div>
             </div>
           </CardContent>
         </Card>
+        )}
+
+        {/* Custom Empty State - Only show when no clients */}
+        {(!projectClients || projectClients.length === 0) && (
+          <CustomEmptyState
+            icon={<Users className="w-16 h-16 text-muted-foreground/50" />}
+            title="No hay clientes agregados"
+            description="Comienza agregando el primer cliente al proyecto desde tus contactos organizacionales."
+            action={
+              <Dialog open={showAddClientModal} onOpenChange={setShowAddClientModal}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Agregar Primer Cliente
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Agregar Cliente al Proyecto</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Seleccionar Contacto</label>
+                      <Select value={selectedContactId} onValueChange={setSelectedContactId}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona un contacto" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableContacts.map(contact => {
+                            const displayName = contact.company_name || 
+                                             `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
+                            return (
+                              <SelectItem key={contact.id} value={contact.id}>
+                                {displayName}
+                              </SelectItem>
+                            )
+                          })}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <Button variant="outline" onClick={() => setShowAddClientModal(false)}>
+                        Cancelar
+                      </Button>
+                      <Button 
+                        onClick={handleAddClient} 
+                        disabled={!selectedContactId || addClientMutation.isPending}
+                      >
+                        {addClientMutation.isPending ? 'Agregando...' : 'Agregar'}
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            }
+          />
+        )}
       </div>
       
       {/* Dangerous Confirmation Modal */}

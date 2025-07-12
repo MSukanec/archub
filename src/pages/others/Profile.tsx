@@ -292,7 +292,7 @@ export default function Profile() {
         )}
 
         {/* Plan Card */}
-        <Card className="bg-muted/30">
+        <Card className="bg-[var(--card-bg)] border border-[var(--card-border)]">
           <CardContent className="p-4 md:p-6">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div className="space-y-1 flex-1 min-w-0">

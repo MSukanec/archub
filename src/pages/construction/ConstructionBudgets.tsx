@@ -10,7 +10,7 @@ import { useState, useEffect, Fragment } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { Calculator, Plus, Trash2, Building2, Edit, FileText, BarChart3, Settings } from 'lucide-react'
 // Removed CustomTable import as we now use BudgetTable
-import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState'
+import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState'
 import { BudgetTable } from '@/components/ui-custom/misc/BudgetTable'
 import { NewBudgetModal } from '@/modals/budget/NewBudgetModal'
 import NewBudgetTaskModal from '@/modals/budget/NewBudgetTaskModal'

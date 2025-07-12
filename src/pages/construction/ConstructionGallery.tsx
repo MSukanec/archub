@@ -3,7 +3,7 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@supabase/supabase-js';
 import { Layout } from '@/components/layout/desktop/Layout';
-import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState';
+import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';

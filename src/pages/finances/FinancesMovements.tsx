@@ -35,7 +35,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { CustomTable } from "@/components/ui-custom/misc/CustomTable";
-import { CustomEmptyState } from "@/components/ui-custom/misc/CustomEmptyState";
+import { CustomEmptyState } from "@/components/ui-custom/CustomEmptyState";
 import { FinancialCards } from "@/components/ui-custom/misc/FinancialCards";
 import MovementCard from "@/components/cards/MovementCard";
 import ConversionCard from "@/components/cards/ConversionCard";

@@ -119,6 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 11, 2025. Profile page plan section background fix and ProjectClients page enhancement with FeatureIntroduction and CustomEmptyState - COMPLETED
+  • Fixed Profile page plan section to use --card-bg and --card-border CSS variables instead of transparent background
+  • Plan section now matches FeatureIntroduction component styling with proper theme-aware background
+  • Added FeatureIntroduction component to ProjectClients page explaining client management functionality
+  • Replaced empty card display with CustomEmptyState component when no clients exist in project
+  • Moved CustomEmptyState from src/components/ui-custom/misc/ to src/components/ui-custom/ directory
+  • Updated all import references across 10+ files to use new CustomEmptyState location
+  • Enhanced ProjectClients page with conditional rendering: FeatureIntroduction always shows, client card only when clients exist, CustomEmptyState when no clients
+  • Added comprehensive feature descriptions for client management: linking contacts, financial commitments, roles/permissions, contribution tracking
 - July 11, 2025. Complete chart theming system implementation with CSS variables for grid lines and axis text - COMPLETED
   • Added --chart-grid-text CSS variable to both light and dark themes for consistent chart styling
   • Updated 6 chart components: MonthlyFlowChart, MemberActivityChart, OrganizationGrowthChart, UserGrowthChart, BudgetProgressChart, OrganizationActivityChart

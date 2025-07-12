@@ -114,6 +114,7 @@
   --chart-3: hsl(197, 37%, 24%);
   --chart-4: hsl(43, 74%, 66%);
   --chart-5: hsl(0, 87%, 67%);
+  --chart-grid-text: hsl(0, 0%, 40%);
 
   /* Text */
   --text-default: hsl(240, 10%, 4%);

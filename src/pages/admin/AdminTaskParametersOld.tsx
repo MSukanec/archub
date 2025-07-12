@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { CustomTable } from '@/components/ui-custom/misc/CustomTable';
-import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState';
+import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState';
 
 import { useTaskParametersAdmin, useDeleteTaskParameter, useDeleteTaskParameterOption, TaskParameter, TaskParameterOption } from '@/hooks/use-task-parameters-admin';
 import { NewTaskParameterModal } from '@/modals/tasks/NewTaskParameterModal';

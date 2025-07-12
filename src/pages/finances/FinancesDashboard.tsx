@@ -8,7 +8,7 @@ import { WalletBalanceChart } from '@/components/graphics/WalletBalanceChart'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Link } from 'wouter'
-import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState'
+import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState'
 
 import { Button } from '@/components/ui/button'
 

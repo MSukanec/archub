@@ -31,7 +31,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
 import { useMobile } from '@/hooks/use-mobile'
-import { CustomEmptyState } from '@/components/ui-custom/misc/CustomEmptyState'
+import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 export default function ProjectDashboard() {
