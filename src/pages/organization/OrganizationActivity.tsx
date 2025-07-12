@@ -18,7 +18,7 @@ import ActivityCard from '@/components/cards/ActivityCard';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { supabase } from '@/lib/supabase';
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
-import { MemberActivityChart } from '@/components/graphics/MemberActivityChart';
+import { MemberActivityChart } from '@/components/ui-custom/charts/MemberActivityChart';
 import { useUserActivity } from '@/hooks/use-user-activity';
 
 export default function OrganizationActivity() {
