@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Search, ArrowLeft } from "lucide-react";
 import { HelpPopover } from "@/components/ui-custom/HelpPopover";
 
@@ -38,17 +38,20 @@ const userRoleOptions = [
   'Arquitecto/a',
   'Ingeniero/a',
   'Maestro Mayor de Obras',
+  'Constructor/a',
+  'Desarrollador inmobiliario',
   'Estudiante',
-  'Estudio de arquitectura',
-  'Empresa constructora',
-  'Proveedor de materiales',
-  'Oficio profesional (instalador, herrero, carpintero, etc.)',
+  'Docente',
+  'Investigador/a',
+  'Consultor/a',
+  'Propietario/a',
+  'Inversión inmobiliaria',
   'Otro'
 ];
 
 // Team size options (enum team_size)
 const teamSizeOptions = [
-  'Trabajo solo/a',
+  'Solo yo',
   '2–5 personas',
   '6–15 personas',
   'Más de 15 personas'
@@ -57,53 +60,33 @@ const teamSizeOptions = [
 export function Step3Discovery() {
   const { formData, updateFormData, goNextStep, goPrevStep } = useOnboardingStore();
   const { data: userData } = useCurrentUser();
-  const [initialized, setInitialized] = useState(false);
 
-  // Load existing user data if available - only once with state control
-  useEffect(() => {
-    if (userData?.user_data && !initialized) {
-      console.log('Step3Discovery - Loading existing data:', {
-        discovered_by: userData.user_data.discovered_by,
-        main_use: userData.user_data.main_use,
-        user_role: userData.user_data.user_role,
-        team_size: userData.user_data.team_size
-      });
-      
-      // Update form data with existing values if form is empty
-      const updateData: any = {};
-      
-      if (userData.user_data.discovered_by && !formData.discovered_by) {
-        updateData.discovered_by = userData.user_data.discovered_by;
-        updateData.discovered_by_other_text = userData.user_data.discovered_by_other_text || '';
-      }
-      
-      if (userData.user_data.main_use && !formData.main_use) {
-        updateData.main_use = userData.user_data.main_use;
-        updateData.main_use_other = userData.user_data.main_use_other || '';
-      }
-      
-      if (userData.user_data.user_role && !formData.user_role) {
-        updateData.user_role = userData.user_data.user_role;
-        updateData.user_role_other = userData.user_data.user_role_other || '';
-      }
-      
-      if (userData.user_data.team_size && !formData.team_size) {
-        updateData.team_size = userData.user_data.team_size;
-      }
-      
-      // Only update if we have data to update
-      if (Object.keys(updateData).length > 0) {
-        console.log('Step3Discovery - Updating form with:', updateData);
-        updateFormData(updateData);
-      }
-      
-      setInitialized(true);
-    }
-  }, [userData?.user_data, initialized, formData.discovered_by, formData.main_use, formData.user_role, formData.team_size, updateFormData]);
+  // Initialize local state with form data or user data
+  const initValue = (field: string) => {
+    return formData[field] || userData?.user_data?.[field] || '';
+  };
+
+  const [discoveredBy, setDiscoveredBy] = useState(() => initValue('discovered_by'));
+  const [discoveredByOther, setDiscoveredByOther] = useState(() => initValue('discovered_by_other_text'));
+  const [mainUse, setMainUse] = useState(() => initValue('main_use'));
+  const [mainUseOther, setMainUseOther] = useState(() => initValue('main_use_other'));
+  const [userRole, setUserRole] = useState(() => initValue('user_role'));
+  const [userRoleOther, setUserRoleOther] = useState(() => initValue('user_role_other'));
+  const [teamSize, setTeamSize] = useState(() => initValue('team_size'));
 
   const handleFinish = () => {
-    if (formData.discovered_by && (formData.discovered_by !== 'Otro' || formData.discovered_by_other_text)) {
-      // This should trigger the onboarding completion
+    if (discoveredBy && (discoveredBy !== 'Otro' || discoveredByOther)) {
+      // Update store with final values
+      updateFormData({
+        discovered_by: discoveredBy,
+        discovered_by_other_text: discoveredByOther,
+        main_use: mainUse,
+        main_use_other: mainUseOther,
+        user_role: userRole,
+        user_role_other: userRoleOther,
+        team_size: teamSize
+      });
+      
       console.log('Step3Discovery - Finishing onboarding, calling goNextStep');
       goNextStep();
     }
@@ -127,7 +110,7 @@ export function Step3Discovery() {
         {/* Fuente de descubrimiento - OBLIGATORIO */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Label htmlFor="discovered_by">¿Cómo conociste Archub? *</Label>
+            <Label htmlFor="discovered_by">¿Cómo conociste Archub? <span className="text-[var(--accent)]">*</span></Label>
             <HelpPopover
               title="Fuente de Descubrimiento"
               description="Conocer cómo nos encontraste nos ayuda a entender qué canales funcionan mejor y donde enfocar nuestros esfuerzos para llegar a más profesionales como tú."
@@ -136,11 +119,11 @@ export function Step3Discovery() {
             />
           </div>
           <Select
-            value={formData.discovered_by}
+            value={discoveredBy}
             onValueChange={(value) => {
-              updateFormData({ discovered_by: value });
+              setDiscoveredBy(value);
               if (value !== 'Otro') {
-                updateFormData({ discovered_by_other_text: '' });
+                setDiscoveredByOther('');
               }
             }}
           >
@@ -158,14 +141,14 @@ export function Step3Discovery() {
         </div>
 
         {/* Campo adicional si elige "Otro" */}
-        {formData.discovered_by === 'Otro' && (
+        {discoveredBy === 'Otro' && (
           <div className="space-y-2">
-            <Label htmlFor="discovered_by_other_text">Especifica cómo nos conociste *</Label>
+            <Label htmlFor="discovered_by_other_text">Especifica cómo nos conociste <span className="text-[var(--accent)]">*</span></Label>
             <Input
               id="discovered_by_other_text"
               placeholder="Escribe aquí..."
-              value={formData.discovered_by_other_text}
-              onChange={(e) => updateFormData({ discovered_by_other_text: e.target.value })}
+              value={discoveredByOther}
+              onChange={(e) => setDiscoveredByOther(e.target.value)}
             />
           </div>
         )}
@@ -182,11 +165,16 @@ export function Step3Discovery() {
             />
           </div>
           <Select
-            value={formData.main_use || ''}
-            onValueChange={(value) => updateFormData({ main_use: value })}
+            value={mainUse}
+            onValueChange={(value) => {
+              setMainUse(value);
+              if (value !== 'Otro') {
+                setMainUseOther('');
+              }
+            }}
           >
             <SelectTrigger>
-              <SelectValue placeholder="¿Para qué vas a usar principalmente Archub?" />
+              <SelectValue placeholder="Selecciona una opción" />
             </SelectTrigger>
             <SelectContent>
               {mainUseOptions.map((option) => (
@@ -198,28 +186,41 @@ export function Step3Discovery() {
           </Select>
         </div>
 
+        {/* Campo adicional si elige "Otro" en uso principal */}
+        {mainUse === 'Otro' && (
+          <div className="space-y-2">
+            <Label htmlFor="main_use_other">Especifica tu uso principal</Label>
+            <Input
+              id="main_use_other"
+              placeholder="Escribe aquí..."
+              value={mainUseOther}
+              onChange={(e) => setMainUseOther(e.target.value)}
+            />
+          </div>
+        )}
+
         {/* Rol profesional - OPCIONAL */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Label htmlFor="user_role">¿Cuál es tu rol profesional?</Label>
             <HelpPopover
               title="Rol Profesional"
-              description="Tu rol nos ayuda a mostrar las herramientas más relevantes para tu trabajo y conectarte con funciones específicas de tu profesión. Puedes actualizarlo en cualquier momento."
+              description="Tu rol nos ayuda a adaptar el contenido, las funciones disponibles y las sugerencias del sistema para que sean más relevantes a tu área profesional."
               primaryActionText="Entendido"
               placement="top"
             />
           </div>
           <Select
-            value={formData.user_role || ''}
+            value={userRole}
             onValueChange={(value) => {
-              updateFormData({ user_role: value });
+              setUserRole(value);
               if (value !== 'Otro') {
-                updateFormData({ user_role_other: '' });
+                setUserRoleOther('');
               }
             }}
           >
             <SelectTrigger>
-              <SelectValue placeholder="¿Cuál es tu rol profesional?" />
+              <SelectValue placeholder="Selecciona una opción" />
             </SelectTrigger>
             <SelectContent>
               {userRoleOptions.map((option) => (
@@ -232,35 +233,35 @@ export function Step3Discovery() {
         </div>
 
         {/* Campo adicional si elige "Otro" en rol */}
-        {formData.user_role === 'Otro' && (
+        {userRole === 'Otro' && (
           <div className="space-y-2">
-            <Label htmlFor="user_role_other">Especifica tu rol</Label>
+            <Label htmlFor="user_role_other">Especifica tu rol profesional</Label>
             <Input
               id="user_role_other"
               placeholder="Escribe aquí..."
-              value={formData.user_role_other}
-              onChange={(e) => updateFormData({ user_role_other: e.target.value })}
+              value={userRoleOther}
+              onChange={(e) => setUserRoleOther(e.target.value)}
             />
           </div>
         )}
 
-        {/* Tamaño de equipo - OPCIONAL */}
+        {/* Tamaño del equipo - OPCIONAL */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Label htmlFor="team_size">¿Cuántas personas trabajan con vos?</Label>
+            <Label htmlFor="team_size">¿Cuántas personas trabajan en tu equipo/empresa?</Label>
             <HelpPopover
               title="Tamaño del Equipo"
-              description="El tamaño de tu equipo nos ayuda a configurar permisos apropiados, sugerir planes de colaboración y ajustar funciones grupales según tu escala de trabajo."
+              description="El tamaño de tu equipo nos permite configurar funciones colaborativas apropiadas y sugerir flujos de trabajo que se adapten mejor a tu estructura organizacional."
               primaryActionText="Entendido"
               placement="top"
             />
           </div>
           <Select
-            value={formData.team_size || ''}
-            onValueChange={(value) => updateFormData({ team_size: value })}
+            value={teamSize}
+            onValueChange={setTeamSize}
           >
             <SelectTrigger>
-              <SelectValue placeholder="¿Cuántas personas trabajan con vos?" />
+              <SelectValue placeholder="Selecciona una opción" />
             </SelectTrigger>
             <SelectContent>
               {teamSizeOptions.map((option) => (
@@ -272,22 +273,24 @@ export function Step3Discovery() {
           </Select>
         </div>
 
-        <div className="flex justify-between pt-4">
-          <Button 
+        {/* Botones de navegación */}
+        <div className="flex justify-between pt-6">
+          <Button
+            type="button"
             variant="outline"
             onClick={goPrevStep}
-            className="px-8"
+            className="flex items-center gap-2"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className="h-4 w-4" />
             Volver
           </Button>
           
           <Button 
             onClick={handleFinish}
-            disabled={!formData.discovered_by || (formData.discovered_by === 'Otro' && !formData.discovered_by_other_text)}
-            className="bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white px-8"
+            disabled={!discoveredBy || (discoveredBy === 'Otro' && !discoveredByOther)}
+            className="bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white"
           >
-            Finalizar Configuración
+            Finalizar configuración
           </Button>
         </div>
       </CardContent>
