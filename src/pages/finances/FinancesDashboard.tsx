@@ -171,24 +171,22 @@ export default function FinancesDashboard() {
             <Card className="h-full relative overflow-hidden">
               <CardContent className="p-4 h-full flex flex-col">
                 {/* Accent Line at top */}
-                <div className="w-full h-1 bg-[var(--accent)] rounded-full mb-4"></div>
+                <div className="w-full h-1 bg-[var(--accent)] rounded-full mb-6"></div>
                 
-                {/* Icon and Title Section */}
-                <div className="flex items-center gap-2 mb-4">
+                {/* Spacer to push content down */}
+                <div className="flex-1"></div>
+                
+                {/* Icon and Title Section - positioned lower */}
+                <div className="flex items-center gap-2 mb-2">
                   <DollarSign className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground font-medium">
+                  <span className="text-sm text-muted-foreground">
                     Movimientos (30 días)
                   </span>
                 </div>
                 
-                {/* Large Amount at Bottom */}
-                <div className="flex-1 flex flex-col justify-end">
-                  <div className="text-2xl font-bold text-foreground mb-1">
-                    {summaryLoading ? '...' : formatCurrency(movementsLast30Days)}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    total movido
-                  </p>
+                {/* Amount - smaller size like reference */}
+                <div className="text-lg font-bold text-foreground">
+                  {summaryLoading ? '...' : formatCurrency(movementsLast30Days)}
                 </div>
               </CardContent>
             </Card>
