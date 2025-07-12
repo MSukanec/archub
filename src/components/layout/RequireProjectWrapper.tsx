@@ -3,7 +3,7 @@ import { FolderX } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Layout } from '@/components/layout/desktop/Layout'
-import { useProjectContext } from '@/context/projectContext'
+import { useProjectContext } from '@/stores/projectContext'
 import { ProjectSelector } from '@/components/navigation/ProjectSelector'
 
 interface RequireProjectWrapperProps {

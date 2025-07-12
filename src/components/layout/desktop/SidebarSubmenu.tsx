@@ -6,7 +6,7 @@ import { useSidebarStore, useSecondarySidebarStore } from "@/stores/sidebarStore
 import { cn } from "@/lib/utils";
 import SidebarButton from "./SidebarButton";
 import { CustomRestricted } from "@/components/ui-custom/CustomRestricted";
-import { useProjectContext } from "@/context/projectContext";
+import { useProjectContext } from "@/stores/projectContext";
 
 import { 
   Home,

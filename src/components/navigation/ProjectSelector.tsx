@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects } from '@/hooks/use-projects'
-import { useProjectContext } from '@/context/projectContext'
+import { useProjectContext } from '@/stores/projectContext'
 import { useMutation } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { queryClient } from '@/lib/queryClient'

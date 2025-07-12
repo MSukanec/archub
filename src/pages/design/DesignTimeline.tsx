@@ -5,7 +5,7 @@ import { Plus } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useDesignProjectPhases, useGanttPhasesWithTasks } from '@/hooks/use-design-phases';
 import { useProject } from '@/hooks/use-projects';
-import { Gantt } from '@/components/ui-custom/gantt';
+import { Gantt } from '@/components/gantt';
 import { NewPhaseModal } from '@/modals/design/NewPhaseModal';
 import { NewPhaseTaskModal } from '@/modals/design/NewPhaseTaskModal';
 

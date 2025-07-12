@@ -26,7 +26,7 @@ import { MobileAvatarMenu } from "../mobile/MobileAvatarMenu";
 import { useMobileAvatarMenuStore } from "../mobile/useMobileAvatarMenuStore";
 import { useMobile } from "@/hooks/use-mobile";
 import { ProjectSelector } from "@/components/navigation/ProjectSelector";
-import { useProjectContext } from "@/context/projectContext";
+import { useProjectContext } from "@/stores/projectContext";
 import { useEffect } from "react";
 
 interface HeaderProps {
