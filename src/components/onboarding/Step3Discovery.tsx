@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Search, ArrowLeft } from "lucide-react";
 import { HelpPopover } from "@/components/ui-custom/HelpPopover";
 
