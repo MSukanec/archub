@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Check, ChevronsUpDown, X } from 'lucide-react';
+import { Check, ChevronDown, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -92,8 +92,8 @@ export function CustomMultiComboBox({
             role="combobox"
             aria-expanded={open}
             className={cn(
-              "w-full justify-between text-xs leading-tight py-2 px-3 h-auto border border-[var(--input-border)] bg-[var(--input-bg)] rounded-md transition-all duration-150 hover:bg-[var(--input-bg)] focus-visible:ring-1 focus-visible:ring-accent",
-              selectedOptions.length === 0 && "text-[var(--input-placeholder)]"
+              "w-full justify-between font-normal h-10 px-3 py-2 text-sm bg-background border border-input rounded-md hover:bg-background hover:text-foreground focus:bg-background focus:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+              selectedOptions.length === 0 && "text-muted-foreground"
             )}
             disabled={disabled}
           >
@@ -101,19 +101,20 @@ export function CustomMultiComboBox({
               ? `${selectedOptions.length} seleccionado${selectedOptions.length > 1 ? 's' : ''}`
               : placeholder
             }
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[var(--radix-popover-trigger-width)] max-w-[var(--radix-popover-trigger-width)] p-0" align="start">
           <Command>
-            <CommandInput placeholder={searchPlaceholder} />
-            <CommandEmpty>{emptyText}</CommandEmpty>
+            <CommandInput placeholder={searchPlaceholder} className="h-9" />
+            <CommandEmpty className="py-6 text-center text-sm">{emptyText}</CommandEmpty>
             <CommandGroup className={cn("overflow-auto", maxHeight)}>
               {options.map((option) => (
                 <CommandItem
                   key={option.value}
                   value={option.value}
                   onSelect={() => handleSelect(option.value)}
+                  className="text-sm"
                 >
                   <Check
                     className={cn(
