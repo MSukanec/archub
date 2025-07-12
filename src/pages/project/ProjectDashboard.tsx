@@ -13,7 +13,7 @@ import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState'
 import { Button } from '@/components/ui/button'
 
 export default function ProjectDashboard() {
-  const { userData } = useCurrentUser()
+  const { data: userData } = useCurrentUser()
   const { setSidebarContext } = useNavigationStore()
   const isMobile = useMobile()
 
