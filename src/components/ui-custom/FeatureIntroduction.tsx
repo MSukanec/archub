@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { HelpCircle } from 'lucide-react'
+import { HelpCircle, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface FeatureItem {
@@ -27,14 +27,17 @@ export function FeatureIntroduction({
 }: FeatureIntroductionProps) {
   const [isExpanded, setIsExpanded] = useState(false)
 
+  const handleToggle = () => {
+    setIsExpanded(!isExpanded)
+  }
+
   return (
     <div 
       className={cn(
         "w-full bg-[var(--card-bg)] border border-[var(--card-border)] rounded-[var(--radius-lg)] shadow-sm mb-6 cursor-pointer transition-all duration-300 ease-in-out hover:shadow-md",
         className
       )}
-      onMouseEnter={() => setIsExpanded(true)}
-      onMouseLeave={() => setIsExpanded(false)}
+      onClick={handleToggle}
     >
       {/* Always visible title */}
       <div className="p-6">
@@ -53,14 +56,24 @@ export function FeatureIntroduction({
             <span className="text-xs text-muted-foreground">
               (click para más información)
             </span>
-            <HelpCircle className="w-5 h-5 text-muted-foreground" />
+            <ChevronDown 
+              className={cn(
+                "w-5 h-5 text-muted-foreground transition-transform duration-200",
+                isExpanded && "rotate-180"
+              )} 
+            />
           </div>
         </div>
       </div>
 
       {/* Expandable content */}
-      {isExpanded && (
-        <div className="pb-6 animate-in fade-in duration-300">
+      <div 
+        className={cn(
+          "overflow-hidden transition-all duration-300 ease-in-out",
+          isExpanded ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+        )}
+      >
+        <div className="pb-6">
           {/* Features Grid */}
           <div className="px-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -82,7 +95,7 @@ export function FeatureIntroduction({
             </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   )
 }
