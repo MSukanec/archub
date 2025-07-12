@@ -1,12 +1,13 @@
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { Calendar, FolderOpen, FileText, Construction, Calculator, DollarSign } from "lucide-react";
+import { Calendar, FolderOpen, FileText, Construction, Calculator, DollarSign, Settings } from "lucide-react";
 import { useLocation } from "wouter";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 
 import { Layout } from "@/components/layout/desktop/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ProjectStatsCards } from "@/components/ui-custom/cards/ProjectStatsCards";
@@ -97,19 +98,43 @@ export default function ProjectDashboard() {
   return (
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
-        {/* Welcome Card with Project Info */}
+        {/* Hero Card with Project Background */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <Card className="bg-[var(--card-bg)] border-[var(--card-border)]">
-            <CardContent className="p-4 md:p-6">
-              <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6">
+          <Card className="relative overflow-hidden border-[var(--card-border)] h-48 md:h-56">
+            {/* Background Image */}
+            <div 
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+              style={{
+                backgroundImage: currentProject?.project_image_url 
+                  ? `url(${currentProject.project_image_url})` 
+                  : 'linear-gradient(135deg, rgb(147, 197, 253) 0%, rgb(59, 130, 246) 100%)'
+              }}
+            />
+            
+            {/* Overlay */}
+            <div className="absolute inset-0 bg-black/40" />
+            
+            {/* Settings Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute top-4 right-4 h-8 w-8 p-0 bg-white/10 hover:bg-white/20 text-white border border-white/20"
+              onClick={() => navigate('/project/basic-data')}
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
+
+            {/* Content */}
+            <CardContent className="relative z-10 p-4 md:p-6 h-full flex flex-col justify-end">
+              <div className="flex flex-col md:flex-row items-start md:items-end gap-4 md:gap-6">
                 {/* Project Icon */}
                 <div className="flex-shrink-0">
-                  <Avatar className="h-12 w-12 md:h-16 md:w-16 border-2 border-border">
-                    <AvatarFallback className="text-sm md:text-lg font-bold text-[var(--accent-foreground)] bg-[var(--accent)]">
+                  <Avatar className="h-12 w-12 md:h-16 md:w-16 border-2 border-white/30">
+                    <AvatarFallback className="text-sm md:text-lg font-bold text-white bg-white/20">
                       {currentProject ? getProjectInitials(currentProject.name) : 'P'}
                     </AvatarFallback>
                   </Avatar>
@@ -118,7 +143,7 @@ export default function ProjectDashboard() {
                 {/* Project Info */}
                 <div className="flex-1">
                   <motion.h1
-                    className="text-2xl md:text-4xl font-black text-foreground mb-1"
+                    className="text-2xl md:text-4xl font-black text-white mb-1"
                     initial={{ scale: 0.8 }}
                     animate={{ scale: 1 }}
                     transition={{ delay: 0.2, duration: 0.3 }}
@@ -126,11 +151,11 @@ export default function ProjectDashboard() {
                     {currentProject?.name || 'Proyecto'}
                   </motion.h1>
                   <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-4">
-                    <p className="text-base md:text-lg text-muted-foreground">
+                    <p className="text-base md:text-lg text-white/90">
                       Resumen del proyecto
                     </p>
                     {currentProject?.status && (
-                      <Badge variant="outline" className="w-fit">
+                      <Badge variant="outline" className="w-fit bg-white/10 text-white border-white/30">
                         {currentProject.status === 'active' ? 'Activo' : 
                          currentProject.status === 'completed' ? 'Completado' : 
                          currentProject.status === 'on_hold' ? 'En Pausa' : 'Estado'}
@@ -138,7 +163,7 @@ export default function ProjectDashboard() {
                     )}
                   </div>
                   {currentProject?.created_at && (
-                    <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1 mt-2 text-xs text-white/80">
                       <Calendar className="h-3 w-3" />
                       <span>
                         Creado el {format(new Date(currentProject.created_at), "d 'de' MMMM 'de' yyyy", { locale: es })}
