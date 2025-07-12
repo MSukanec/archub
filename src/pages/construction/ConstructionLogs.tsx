@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { FileText, Plus, Star, Globe, Lock, ChevronDown, ChevronRight, Edit, Trash2, MoreHorizontal, Flame, Package, StickyNote, Sun, Cloud, CloudRain, CloudSnow, Wind, CloudDrizzle, CloudLightning, Thermometer, TrendingUp, Users, AlertTriangle, CloudSun, CheckCircle, Search, Camera, Eye, Calendar, Filter, X, Image, Video } from "lucide-react";
+import { FileText, Plus, Star, Globe, Lock, ChevronDown, ChevronRight, Edit, Trash2, MoreHorizontal, Flame, Package, StickyNote, Sun, Cloud, CloudRain, CloudSnow, Wind, CloudDrizzle, CloudLightning, Thermometer, TrendingUp, Users, AlertTriangle, CloudSun, CheckCircle, Search, Camera, Eye, Calendar, Filter, X, Image, Video, Clock, Settings } from "lucide-react";
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { CustomEmptyState } from "@/components/ui-custom/CustomEmptyState";
+import { FeatureIntroduction } from "@/components/ui-custom/FeatureIntroduction";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/hooks/use-organization-members";
@@ -421,6 +422,34 @@ export default function ConstructionLogs() {
   return (
     <Layout wide headerProps={headerProps}>
       <div className="space-y-6">
+        {/* Feature Introduction */}
+        <FeatureIntroduction
+          title="Bitácora de Obra"
+          icon={<FileText className="w-6 h-6" />}
+          features={[
+            {
+              icon: <StickyNote className="w-5 h-5" />,
+              title: "Registro Diario Completo",
+              description: "Documenta avances de obra, visitas técnicas, problemas detectados, pedidos de material y notas climáticas con clasificación automática por tipo de entrada."
+            },
+            {
+              icon: <Camera className="w-5 h-5" />,
+              title: "Documentación Visual",
+              description: "Adjunta fotos y videos directamente a cada entrada para crear un registro visual completo del progreso y evidenciar cada etapa del proyecto."
+            },
+            {
+              icon: <Settings className="w-5 h-5" />,
+              title: "Control de Privacidad",
+              description: "Gestiona visibilidad de entradas (públicas/privadas), marca favoritos importantes y configura qué información es accesible para cada miembro del equipo."
+            },
+            {
+              icon: <Clock className="w-5 h-5" />,
+              title: "Seguimiento Temporal",
+              description: "Filtra entradas por fecha, tipo y estado para revisar cronológicamente el desarrollo del proyecto y generar reportes de progreso periódicos."
+            }
+          ]}
+        />
+
         {/* Tarjetas de estadísticas - Only show when there's data */}
         {filteredSiteLogs && filteredSiteLogs.length > 0 && (
           <div className="grid grid-cols-4 gap-4">

@@ -119,12 +119,14 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- July 12, 2025. Added FeatureIntroduction component to ASISTENCIA page with comprehensive functionality overview - COMPLETED
+- July 12, 2025. Added FeatureIntroduction components to ASISTENCIA and BITÁCORA pages with comprehensive functionality overviews - COMPLETED
   • Added FeatureIntroduction component to ConstructionAttendance.tsx explaining attendance control functionality
-  • Enhanced page with 4 key feature descriptions: visual calendar attendance tracking, worker type filtering, productivity statistics, and flexible period control
-  • Feature introduction explains automatic data extraction from site logs and professional category analysis
-  • Added proper imports for Calendar, Filter, BarChart3, and Clock icons for comprehensive feature visualization
-  • Page now follows consistent pattern with other construction module pages for better user onboarding experience
+  • Enhanced ASISTENCIA page with 4 key feature descriptions: visual calendar attendance tracking, worker type filtering, productivity statistics, and flexible period control
+  • Added FeatureIntroduction component to ConstructionLogs.tsx explaining site log management functionality
+  • Enhanced BITÁCORA page with 4 key feature descriptions: daily complete logging, visual documentation, privacy control, and temporal tracking
+  • Feature introductions explain automatic data extraction, professional categorization, photo/video attachments, and progress reporting capabilities
+  • Added proper imports for Calendar, Filter, BarChart3, Clock, StickyNote, Camera, Settings icons for comprehensive feature visualization
+  • Both pages now follow consistent pattern with other construction module pages for better user onboarding experience
 - July 12, 2025. Centralized activity logging system implementation with comprehensive tracking capabilities - COMPLETED
   • Created utils/logActivity.ts utility function using Supabase function log_organization_activity for centralized activity tracking
   • Added comprehensive activity action constants (CREATE_MOVEMENT, UPDATE_MOVEMENT, CREATE_SITE_LOG, etc.) and target table definitions
