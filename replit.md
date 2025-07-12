@@ -119,14 +119,6 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- July 12, 2025. Onboarding theme selector removal and MultiComboBox dark mode color fixes - COMPLETED
-  • Removed theme selection field completely from Step1UserData.tsx onboarding step
-  • Updated onboarding store interface to remove theme field from formData
-  • Cleaned up all theme-related imports and functions from onboarding components
-  • Fixed MultiComboBox component dark mode compatibility using proper CSS variables
-  • Changed hardcoded colors to semantic variables: border-input, bg-background, text-foreground, text-muted-foreground
-  • Updated focus states to use focus:ring-ring and focus:ring-offset-2 for proper theme adaptation
-  • Removed theme persistence from onboarding mutation - users can set theme later in profile
 - July 12, 2025. Finance dashboard enhanced with mini-chart metrics and time period filtering - COMPLETED
   • Eliminated double lines from metric cards: removed accent lines, kept only mini trend charts for clean visualization
   • Added time period selector in summary card top-right corner with options: DESDE SIEMPRE, Este mes, Trimestre, Semestre, Año

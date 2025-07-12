@@ -6,9 +6,8 @@ interface OnboardingState {
   formData: {
     first_name: string;
     last_name: string;
-    country: string;
-    birthdate: string;
     organization_name: string;
+    theme: 'light' | 'dark';
     default_currency_id: string;
     secondary_currency_ids: string[];
     default_wallet_id: string;
@@ -34,6 +33,7 @@ const initialFormData = {
   country: '',
   birthdate: '',
   organization_name: '',
+  theme: 'light' as const,
   default_currency_id: '',
   secondary_currency_ids: [] as string[],
   default_wallet_id: '',
