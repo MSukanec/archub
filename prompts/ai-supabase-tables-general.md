@@ -328,3 +328,68 @@ TABLA PROJECT_CLIENTS:
     "data_type": "timestamp with time zone"
   }
 ]
+
+TABLA USER_DATA:
+
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "user_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "country",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "birthdate",
+    "data_type": "date"
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "first_name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "last_name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "discovered_by",
+    "data_type": "USER-DEFINED"
+  },
+  {
+    "column_name": "discovered_by_other_text",
+    "data_type": "text"
+  },
+  {
+    "column_name": "main_use",
+    "data_type": "USER-DEFINED"
+  },
+  {
+    "column_name": "user_role",
+    "data_type": "USER-DEFINED"
+  },
+  {
+    "column_name": "team_size",
+    "data_type": "USER-DEFINED"
+  },
+  {
+    "column_name": "main_use_other",
+    "data_type": "text"
+  },
+  {
+    "column_name": "user_role_other",
+    "data_type": "text"
+  }
+]
