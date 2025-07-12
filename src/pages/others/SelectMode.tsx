@@ -24,6 +24,7 @@ export default function SelectMode() {
         .from('user_preferences')
         .update({
           last_user_type: userType,
+          onboarding_completed: true,
           updated_at: new Date().toISOString(),
         })
         .eq('user_id', userData.user.id);
