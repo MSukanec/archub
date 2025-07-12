@@ -108,30 +108,71 @@ export default function FinancesDashboard() {
             <Card>
               <CardContent className="p-4 md:p-6">
                 <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6">
-                  {/* Financial Icon */}
-                  <div className="flex-shrink-0">
-                    <Avatar className="h-12 w-12 md:h-16 md:w-16 border-2 border-border">
-                      <AvatarFallback className="text-sm md:text-lg font-bold text-[var(--accent-foreground)] bg-[var(--accent)]">
-                        <DollarSign className="h-6 w-6 md:h-8 md:w-8" />
-                      </AvatarFallback>
-                    </Avatar>
-                  </div>
-
-                  {/* Financial Summary Info */}
-                  <div className="flex-1">
-                    {/* Mobile: Icon inline with title, desktop: title and selector inline */}
-                    <div className="flex items-center gap-3 mb-1">
+                  {/* Mobile Layout: Icon left, title right */}
+                  <div className="flex md:hidden items-center gap-3 w-full">
+                    {/* Financial Icon */}
+                    <div className="flex-shrink-0">
+                      <Avatar className="h-12 w-12 border-2 border-border">
+                        <AvatarFallback className="text-sm font-bold text-[var(--accent-foreground)] bg-[var(--accent)]">
+                          <DollarSign className="h-6 w-6" />
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
+                    
+                    {/* Title and organization info */}
+                    <div className="flex-1">
                       <motion.h1
-                        className="text-xl md:text-4xl font-black text-foreground flex-1"
+                        className="text-xl font-black text-foreground"
                         initial={{ scale: 0.8 }}
                         animate={{ scale: 1 }}
                         transition={{ delay: 0.2, duration: 0.3 }}
                       >
                         Resumen de Finanzas
                       </motion.h1>
-                      
-                      {/* Desktop: selector inline */}
-                      <div className="hidden md:block">
+                      <p className="text-base text-muted-foreground">
+                        {currentProject ? (
+                          <>
+                            Proyecto{" "}
+                            <span className="font-semibold text-foreground">
+                              {currentProject.name}
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            Organización{" "}
+                            <span className="font-semibold text-foreground">
+                              {currentOrganization?.name || "Sin organización"}
+                            </span>
+                          </>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Desktop Layout: Icon + info side by side */}
+                  <div className="hidden md:flex items-start gap-6 w-full">
+                    {/* Financial Icon */}
+                    <div className="flex-shrink-0">
+                      <Avatar className="h-16 w-16 border-2 border-border">
+                        <AvatarFallback className="text-lg font-bold text-[var(--accent-foreground)] bg-[var(--accent)]">
+                          <DollarSign className="h-8 w-8" />
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
+
+                    {/* Financial Summary Info */}
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between gap-4 mb-1">
+                        <motion.h1
+                          className="text-4xl font-black text-foreground"
+                          initial={{ scale: 0.8 }}
+                          animate={{ scale: 1 }}
+                          transition={{ delay: 0.2, duration: 0.3 }}
+                        >
+                          Resumen de Finanzas
+                        </motion.h1>
+                        
+                        {/* Desktop: selector inline */}
                         <Select value={timePeriod} onValueChange={setTimePeriod}>
                           <SelectTrigger className="w-40">
                             <SelectValue placeholder="Período" />
@@ -145,60 +186,85 @@ export default function FinancesDashboard() {
                           </SelectContent>
                         </Select>
                       </div>
+                      <p className="text-lg text-muted-foreground mb-3">
+                        {currentProject ? (
+                          <>
+                            Proyecto{" "}
+                            <span className="font-semibold text-foreground">
+                              {currentProject.name}
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            Organización{" "}
+                            <span className="font-semibold text-foreground">
+                              {currentOrganization?.name || "Sin organización"}
+                            </span>
+                          </>
+                        )}
+                      </p>
                     </div>
-                    
-                    {/* Mobile: selector below title */}
-                    <div className="md:hidden mb-3">
-                      <Select value={timePeriod} onValueChange={setTimePeriod}>
-                        <SelectTrigger className="w-40">
-                          <SelectValue placeholder="Período" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="desde-siempre">Desde siempre</SelectItem>
-                          <SelectItem value="año">Año</SelectItem>
-                          <SelectItem value="semestre">Semestre</SelectItem>
-                          <SelectItem value="trimestre">Trimestre</SelectItem>
-                          <SelectItem value="mes">Mes</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <p className="text-base md:text-lg text-muted-foreground mb-2 md:mb-3">
-                      {currentProject ? (
-                        <>
-                          Proyecto{" "}
-                          <span className="font-semibold text-foreground">
-                            {currentProject.name}
-                          </span>
-                        </>
-                      ) : (
-                        <>
-                          Organización{" "}
-                          <span className="font-semibold text-foreground">
-                            {currentOrganization?.name || "Sin organización"}
-                          </span>
-                        </>
-                      )}
-                    </p>
+                  </div>
+                </div>
 
-                    <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <FileText className="h-4 w-4" />
-                        <span>
-                          {summaryLoading ? '...' : (financialSummary?.totalMovements || 0)} movimientos registrados
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <TrendingUp className="h-4 w-4" />
-                        <span style={{ color: 'var(--chart-positive)' }}>
-                          {summaryLoading ? '...' : formatCurrency(financialSummary?.totalIncome || 0)} ingresos
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <TrendingDown className="h-4 w-4" />
-                        <span style={{ color: 'var(--chart-negative)' }}>
-                          {summaryLoading ? '...' : formatCurrency(financialSummary?.totalExpenses || 0)} egresos
-                        </span>
-                      </div>
+                {/* Mobile: Stats info below icon and title */}
+                <div className="md:hidden mt-4 space-y-2">
+                  <div className="flex items-center gap-1">
+                    <FileText className="h-4 w-4" />
+                    <span className="text-sm text-muted-foreground">
+                      {summaryLoading ? '...' : (financialSummary?.totalMovements || 0)} movimientos registrados
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <TrendingUp className="h-4 w-4" />
+                    <span className="text-sm" style={{ color: 'var(--chart-positive)' }}>
+                      {summaryLoading ? '...' : formatCurrency(financialSummary?.totalIncome || 0)} ingresos
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <TrendingDown className="h-4 w-4" />
+                    <span className="text-sm" style={{ color: 'var(--chart-negative)' }}>
+                      {summaryLoading ? '...' : formatCurrency(financialSummary?.totalExpenses || 0)} egresos
+                    </span>
+                  </div>
+                </div>
+
+                {/* Mobile: Period selector at bottom - full width */}
+                <div className="md:hidden mt-4">
+                  <Select value={timePeriod} onValueChange={setTimePeriod}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Período" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="desde-siempre">Desde siempre</SelectItem>
+                      <SelectItem value="año">Año</SelectItem>
+                      <SelectItem value="semestre">Semestre</SelectItem>
+                      <SelectItem value="trimestre">Trimestre</SelectItem>
+                      <SelectItem value="mes">Mes</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Desktop: Stats info inline */}
+                <div className="hidden md:block">
+                  <div className="flex flex-row items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <FileText className="h-4 w-4" />
+                      <span>
+                        {summaryLoading ? '...' : (financialSummary?.totalMovements || 0)} movimientos registrados
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <TrendingUp className="h-4 w-4" />
+                      <span style={{ color: 'var(--chart-positive)' }}>
+                        {summaryLoading ? '...' : formatCurrency(financialSummary?.totalIncome || 0)} ingresos
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <TrendingDown className="h-4 w-4" />
+                      <span style={{ color: 'var(--chart-negative)' }}>
+                        {summaryLoading ? '...' : formatCurrency(financialSummary?.totalExpenses || 0)} egresos
+                      </span>
                     </div>
                   </div>
                 </div>
