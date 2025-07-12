@@ -119,6 +119,14 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 12, 2025. Resolved infinite redirection loop between onboarding and select-mode pages - COMPLETED
+  • Fixed infinite loop caused by multiple ProtectedRoute instances executing onboarding verification simultaneously
+  • Corrected routing configuration: SelectMode now properly protected, Onboarding unprotected as intended
+  • Removed duplicate authentication verification from individual pages (Onboarding.tsx, SelectMode.tsx)
+  • Fixed onboarding completion logic to properly mark onboarding_completed=true in database
+  • SelectMode page works with single click and properly updates user_type in database
+  • System now correctly redirects: incomplete onboarding → /onboarding → completion → /organization/dashboard
+  • Eliminated Step4SelectMode completely as it was redundant and causing architectural issues
 - July 12, 2025. Fixed SelectMode double-click issue and onboarding navigation problems - COMPLETED
   • Eliminated function duplication handleFinishOnboarding that caused initialization error
   • Simplified SelectMode to execute mutation directly without intermediate state (selectedMode)

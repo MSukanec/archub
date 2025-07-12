@@ -90,7 +90,7 @@ export default function Onboarding() {
   // Auto-trigger onboarding completion when step goes beyond totalSteps
   useEffect(() => {
     if (currentStep > totalSteps) {
-      console.log('Auto-finishing onboarding - step exceeded total steps');
+      console.log('Auto-finishing onboarding - step exceeded total steps, currentStep:', currentStep, 'totalSteps:', totalSteps);
       handleFinishOnboarding();
     }
   }, [currentStep, totalSteps]);
@@ -135,7 +135,12 @@ export default function Onboarding() {
         })
         .eq('user_id', userId);
 
-      if (preferencesError) throw preferencesError;
+      if (preferencesError) {
+        console.error('Error updating user preferences:', preferencesError);
+        throw preferencesError;
+      } else {
+        console.log('Successfully updated user preferences with onboarding_completed: true');
+      }
 
       // Update organization name if provided
       if (formData.organization_name && userData.organization?.id) {
@@ -228,8 +233,8 @@ export default function Onboarding() {
         description: "Configuración inicial completada. Ahora elige tu modo de uso.",
       });
       
-      // Redirect to mode selection after successful onboarding
-      navigate('/select-mode');
+      // Redirect to organization dashboard after successful onboarding
+      navigate('/organization/dashboard');
       resetOnboarding();
     },
     onError: (error) => {

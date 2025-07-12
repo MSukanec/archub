@@ -72,7 +72,11 @@ function Router() {
 
         {/* Onboarding and Mode Selection Routes */}
         <Route path="/onboarding" component={Onboarding} />
-        <Route path="/select-mode" component={SelectMode} />
+        <Route path="/select-mode">
+          <ProtectedRoute>
+            <SelectMode />
+          </ProtectedRoute>
+        </Route>
 
         {/* Main Dashboard - redirects to Organization Dashboard */}
         <Route path="/dashboard">

@@ -101,6 +101,7 @@ export function Step3Discovery() {
   const handleFinish = () => {
     if (formData.discovered_by && (formData.discovered_by !== 'Otro' || formData.discovered_by_other_text)) {
       // This should trigger the onboarding completion
+      console.log('Step3Discovery - Finishing onboarding, calling goNextStep');
       goNextStep();
     }
   };
