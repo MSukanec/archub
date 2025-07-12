@@ -238,14 +238,14 @@ export default function FinancesDashboard() {
                 
                 {/* Icon and Title Section - positioned lower */}
                 <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp className="h-4 w-4 text-green-600" />
+                  <TrendingUp className="h-4 w-4" style={{ color: 'var(--chart-positive)' }} />
                   <span className="text-sm text-muted-foreground">
                     Ingresos Totales
                   </span>
                 </div>
                 
                 {/* Amount - smaller size like reference */}
-                <div className="text-lg font-bold text-green-600">
+                <div className="text-lg font-bold" style={{ color: 'var(--chart-positive)' }}>
                   {summaryLoading ? '...' : formatCurrency(financialSummary?.totalIncome || 0)}
                 </div>
               </CardContent>
@@ -268,14 +268,14 @@ export default function FinancesDashboard() {
                 
                 {/* Icon and Title Section - positioned lower */}
                 <div className="flex items-center gap-2 mb-2">
-                  <TrendingDown className="h-4 w-4 text-red-600" />
+                  <TrendingDown className="h-4 w-4" style={{ color: 'var(--chart-negative)' }} />
                   <span className="text-sm text-muted-foreground">
                     Egresos Totales
                   </span>
                 </div>
                 
                 {/* Amount - smaller size like reference */}
-                <div className="text-lg font-bold text-red-600">
+                <div className="text-lg font-bold" style={{ color: 'var(--chart-negative)' }}>
                   {summaryLoading ? '...' : formatCurrency(financialSummary?.totalExpenses || 0)}
                 </div>
               </CardContent>
@@ -298,7 +298,7 @@ export default function FinancesDashboard() {
                 
                 {/* Icon and Title Section - positioned lower */}
                 <div className="flex items-center gap-2 mb-2">
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  <DollarSign className="h-4 w-4" style={{ color: 'var(--chart-neutral)' }} />
                   <span className="text-sm text-muted-foreground">
                     Balance General
                   </span>
@@ -446,7 +446,10 @@ export default function FinancesDashboard() {
                     return (
                       <div key={movement.id} className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
-                          <div className={`p-1 rounded ${isIncome ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                          <div className="p-1 rounded" style={{ 
+                            backgroundColor: isIncome ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)', 
+                            color: isIncome ? 'var(--chart-positive)' : 'var(--chart-negative)' 
+                          }}>
                             {isIncome ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
                           </div>
                           <div>
@@ -458,7 +461,7 @@ export default function FinancesDashboard() {
                             </p>
                           </div>
                         </div>
-                        <div className={`text-sm font-medium ${isIncome ? 'text-green-600' : 'text-red-600'}`}>
+                        <div className="text-sm font-medium" style={{ color: isIncome ? 'var(--chart-positive)' : 'var(--chart-negative)' }}>
                           {isIncome ? '+' : '-'}{formatCurrency(amount)}
                         </div>
                       </div>
@@ -528,26 +531,26 @@ export default function FinancesDashboard() {
                             <span className="text-sm text-muted-foreground">ARS</span>
                           </td>
                           <td className="py-3 px-4 text-right">
-                            <span className={`font-medium text-sm ${getBalanceColor(balance)}`}>
+                            <span className="font-medium text-sm" style={getBalanceColor(balance)}>
                               {formatCurrency(Math.abs(balance))}
                             </span>
                           </td>
                           <td className="py-3 px-4 text-right">
                             <div className="flex items-center justify-end">
                               {isPositive && (
-                                <div className="flex items-center space-x-1 text-green-600">
+                                <div className="flex items-center space-x-1" style={{ color: 'var(--chart-positive)' }}>
                                   <TrendingUp className="h-3 w-3" />
                                   <span className="text-xs font-medium">Positivo</span>
                                 </div>
                               )}
                               {isNegative && (
-                                <div className="flex items-center space-x-1 text-red-600">
+                                <div className="flex items-center space-x-1" style={{ color: 'var(--chart-negative)' }}>
                                   <TrendingDown className="h-3 w-3" />
                                   <span className="text-xs font-medium">Negativo</span>
                                 </div>
                               )}
                               {balance === 0 && (
-                                <span className="text-xs font-medium text-muted-foreground">Neutral</span>
+                                <span className="text-xs font-medium" style={{ color: 'var(--chart-neutral)' }}>Neutral</span>
                               )}
                             </div>
                           </td>

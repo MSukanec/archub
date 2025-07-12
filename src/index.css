@@ -115,9 +115,9 @@
   --chart-4: hsl(43, 74%, 66%);
   --chart-5: hsl(0, 87%, 67%);
   --chart-grid-text: hsl(0, 0%, 40%);
-  --chart-positive: #22c55e;
-  --chart-negative: #ef4444;
-  --chart-neutral: #84cc16;
+  --chart-positive: hsl(76, 100%, 40%);
+  --chart-negative: hsl(0, 50%, 50%);
+  --chart-neutral: hsl(200, 30%, 40%);
 
   /* Text */
   --text-default: hsl(240, 10%, 4%);
