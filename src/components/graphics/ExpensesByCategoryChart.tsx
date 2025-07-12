@@ -16,7 +16,7 @@ interface ExpensesByCategoryChartProps {
 export function ExpensesByCategoryChart({ data, isLoading }: ExpensesByCategoryChartProps) {
   if (isLoading) {
     return (
-      <div className="h-64 flex items-center justify-center">
+      <div className="h-72 flex items-center justify-center">
         <div className="text-sm text-muted-foreground">Cargando categorías...</div>
       </div>
     )
@@ -24,7 +24,7 @@ export function ExpensesByCategoryChart({ data, isLoading }: ExpensesByCategoryC
 
   if (!data || data.length === 0) {
     return (
-      <div className="h-64 flex items-center justify-center">
+      <div className="h-72 flex items-center justify-center">
         <div className="text-sm text-muted-foreground">No hay datos de egresos por categoría</div>
       </div>
     )
@@ -76,7 +76,7 @@ export function ExpensesByCategoryChart({ data, isLoading }: ExpensesByCategoryC
   }
 
   return (
-    <div className="h-64">
+    <div className="h-72">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
           <Pie
@@ -85,7 +85,7 @@ export function ExpensesByCategoryChart({ data, isLoading }: ExpensesByCategoryC
             cy="45%"
             labelLine={false}
             label={CustomLabel}
-            outerRadius={85}
+            outerRadius={95}
             fill="#8884d8"
             dataKey="amount"
           >

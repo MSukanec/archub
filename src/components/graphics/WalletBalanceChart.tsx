@@ -15,7 +15,7 @@ interface WalletBalanceChartProps {
 export function WalletBalanceChart({ data, isLoading }: WalletBalanceChartProps) {
   if (isLoading) {
     return (
-      <div className="h-64 flex items-center justify-center">
+      <div className="h-72 flex items-center justify-center">
         <div className="text-sm text-muted-foreground">Cargando datos de billeteras...</div>
       </div>
     )
@@ -23,7 +23,7 @@ export function WalletBalanceChart({ data, isLoading }: WalletBalanceChartProps)
 
   if (!data || data.length === 0) {
     return (
-      <div className="h-64 flex items-center justify-center">
+      <div className="h-72 flex items-center justify-center">
         <div className="text-sm text-muted-foreground">No hay datos de billeteras disponibles</div>
       </div>
     )
@@ -75,7 +75,7 @@ export function WalletBalanceChart({ data, isLoading }: WalletBalanceChartProps)
   }
 
   return (
-    <div className="h-64">
+    <div className="h-72">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
           <Pie
@@ -84,7 +84,7 @@ export function WalletBalanceChart({ data, isLoading }: WalletBalanceChartProps)
             cy="45%"
             labelLine={false}
             label={CustomLabel}
-            outerRadius={85}
+            outerRadius={95}
             fill="hsl(110, 40%, 50%)"
             dataKey="balance"
           >
