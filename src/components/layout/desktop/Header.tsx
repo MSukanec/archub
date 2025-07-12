@@ -87,7 +87,7 @@ export function Header({
 
   // Project selection mutation
   const selectProjectMutation = useMutation({
-    mutationFn: async (projectId: string) => {
+    mutationFn: async (projectId: string | null) => {
       if (!supabase || !userData?.preferences?.id) {
         throw new Error('Missing required data');
       }
@@ -105,7 +105,7 @@ export function Header({
     }
   });
 
-  const handleProjectSelect = (projectId: string) => {
+  const handleProjectSelect = (projectId: string | null) => {
     selectProjectMutation.mutate(projectId);
   };
 
@@ -255,7 +255,68 @@ export function Header({
             <span className="text-[var(--menues-fg)] opacity-70">/</span>
             
             <div className="flex items-center">
-              <ProjectSelector />
+              <Button
+                variant="ghost"
+                className="h-8 px-2 text-sm font-medium text-[var(--menues-fg)] hover:bg-transparent hover:text-[var(--menues-fg)]"
+                onClick={() => {
+                  setSidebarContext('project');
+                  navigate('/project/dashboard');
+                }}
+              >
+                {selectedProjectId === null 
+                  ? "Todos los proyectos"
+                  : currentProject?.name || "Seleccionar proyecto"}
+              </Button>
+            
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-6 p-0 hover:bg-transparent"
+                  >
+                    <ChevronDown className="h-3 w-3 text-[var(--menues-fg)]" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-56">
+                  <div className="px-2 py-1.5 text-xs text-[var(--menues-fg)] opacity-70 font-medium">
+                    Seleccionar proyecto...
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => handleProjectSelect(null)}
+                    className="flex items-center justify-between text-sm"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Folder className="h-4 w-4" />
+                      <span className="truncate">Todos los proyectos</span>
+                    </div>
+                    {selectedProjectId === null && (
+                      <div className="h-2 w-2 rounded-full bg-green-500 flex-shrink-0" />
+                    )}
+                  </DropdownMenuItem>
+                  {projects.map((project) => (
+                    <DropdownMenuItem
+                      key={project.id}
+                      onClick={() => handleProjectSelect(project.id)}
+                      className="flex items-center justify-between text-sm"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Folder className="h-4 w-4" />
+                        <span className="truncate">{project.name}</span>
+                      </div>
+                      {selectedProjectId === project.id && (
+                        <div className="h-2 w-2 rounded-full bg-green-500 flex-shrink-0" />
+                      )}
+                    </DropdownMenuItem>
+                  ))}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setShowNewProjectModal(true)}>
+                    <Folder className="mr-2 h-4 w-4" />
+                    Crear Nuevo Proyecto
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </>
 

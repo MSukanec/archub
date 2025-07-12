@@ -119,6 +119,13 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 12, 2025. Header project button split into separate navigation and selector buttons matching organization pattern - COMPLETED
+  • Modified Header.tsx to split project button into two separate buttons like organization header
+  • Project name button navigates to /project/dashboard when clicked (maintains original navigation functionality)
+  • Separate dropdown selector button opens project selection popover with all projects and "Todos los proyectos" option
+  • Preserved all existing project selection logic and mutations without changing functionality
+  • Updated project selection mutation to handle null values for "Todos los proyectos" selection
+  • Maintained consistent styling and behavior with organization button pattern for better UI consistency
 - July 12, 2025. ProjectClients page restructured with two-column layout matching OrganizationMembers design - COMPLETED
   • Rebuilt ProjectClients page layout to match GESTIÓN DE MIEMBROS two-column desktop structure
   • Left column displays section description with title, explanation text, and client count summary card
