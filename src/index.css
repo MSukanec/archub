@@ -153,6 +153,13 @@
   --radius-lg: 10px;
 }
 
+/* Financial Charts Colors - Theme Independent */
+:root {
+  --chart-positive: #22c55e;  /* Verde para ingresos/positivos */
+  --chart-negative: #ef4444;  /* Rojo para egresos/negativos */
+  --chart-neutral: #84cc16;   /* Verde lime para balance/flujo neto */
+}
+
 /* Animated border class */
 .animated-border {
   animation: border-glow 2s ease-in-out infinite;

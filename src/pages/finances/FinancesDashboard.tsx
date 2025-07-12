@@ -64,9 +64,9 @@ export default function FinancesDashboard() {
   }
 
   const getBalanceColor = (balance: number) => {
-    if (balance > 0) return 'text-green-600'
-    if (balance < 0) return 'text-red-600'
-    return 'text-muted-foreground'
+    if (balance > 0) return { color: 'var(--chart-positive)' }
+    if (balance < 0) return { color: 'var(--chart-negative)' }
+    return { color: 'var(--chart-neutral)' }
   }
 
   // Show empty state if no movements exist
@@ -228,7 +228,7 @@ export default function FinancesDashboard() {
                 <div className="mb-4">
                   <MiniTrendChart 
                     data={incomeTrend} 
-                    color="#22c55e" 
+                    color="var(--chart-positive)" 
                     isLoading={flowLoading} 
                   />
                 </div>
@@ -258,7 +258,7 @@ export default function FinancesDashboard() {
                 <div className="mb-4">
                   <MiniTrendChart 
                     data={expensesTrend} 
-                    color="#ef4444" 
+                    color="var(--chart-negative)" 
                     isLoading={flowLoading} 
                   />
                 </div>
@@ -288,7 +288,7 @@ export default function FinancesDashboard() {
                 <div className="mb-4">
                   <MiniTrendChart 
                     data={balanceTrend} 
-                    color="hsl(var(--accent))" 
+                    color="var(--chart-neutral)" 
                     isLoading={flowLoading} 
                   />
                 </div>
@@ -305,7 +305,7 @@ export default function FinancesDashboard() {
                 </div>
                 
                 {/* Amount - smaller size like reference */}
-                <div className={`text-lg font-bold ${getBalanceColor(financialSummary?.balance || 0)}`}>
+                <div className="text-lg font-bold" style={getBalanceColor(financialSummary?.balance || 0)}>
                   {summaryLoading ? '...' : formatCurrency(financialSummary?.balance || 0)}
                 </div>
               </CardContent>
@@ -391,20 +391,20 @@ export default function FinancesDashboard() {
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Ingresos</span>
-                  <span className="font-medium text-green-600">
+                  <span className="font-medium" style={{ color: 'var(--chart-positive)' }}>
                     {summaryLoading ? '...' : formatCurrency(financialSummary?.thisMonthIncome || 0)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Egresos</span>
-                  <span className="font-medium text-red-600">
+                  <span className="font-medium" style={{ color: 'var(--chart-negative)' }}>
                     {summaryLoading ? '...' : formatCurrency(financialSummary?.thisMonthExpenses || 0)}
                   </span>
                 </div>
                 <div className="border-t pt-2">
                   <div className="flex justify-between items-center">
                     <span className="font-medium">Balance Mensual</span>
-                    <span className={`font-bold ${getBalanceColor(financialSummary?.thisMonthBalance || 0)}`}>
+                    <span className="font-bold" style={getBalanceColor(financialSummary?.thisMonthBalance || 0)}>
                       {summaryLoading ? '...' : formatCurrency(financialSummary?.thisMonthBalance || 0)}
                     </span>
                   </div>
