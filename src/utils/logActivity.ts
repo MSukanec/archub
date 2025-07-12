@@ -35,57 +35,29 @@ export async function logActivity({
   target_id,
   metadata = {}
 }: LogActivityParams): Promise<void> {
-  console.log('logActivity called with:', {
-    organization_id,
-    user_id,
-    action,
-    target_table,
-    target_id,
-    metadata
-  });
-
   try {
-    // Intentar usar la función RPC primero (con handling para columna faltante)
-    const { data: rpcData, error: rpcError } = await supabase.rpc('log_organization_activity', {
-      input_organization_id: organization_id,
-      input_user_id: user_id,
-      input_action: action,
-      input_target_table: target_table,
-      input_target_id: target_id,
-      input_metadata: metadata
-    });
-
-    if (rpcError) {
-      console.log('RPC function failed, trying direct insert...', rpcError.message);
-      
-      // Si la función RPC falla, intentar inserción directa
-      const insertData = {
+    // Insertar directamente en organization_activity_logs para evitar problemas con la función de Supabase
+    const { data, error } = await supabase
+      .from('organization_activity_logs')
+      .insert({
         organization_id,
         user_id,
         action,
         target_table,
         target_id,
-        metadata
-      };
+        metadata,
+        created_at: new Date().toISOString()
+      });
 
-      console.log('Inserting activity log with direct insert:', insertData);
-
-      const { data, error } = await supabase
-        .from('organization_activity_logs')
-        .insert(insertData);
-
-      if (error) {
-        console.error('Direct insert also failed:', error);
-        console.error('Failed insert data:', insertData);
-        return;
-      }
-
-      console.log(`✅ Activity logged successfully (direct insert): ${action} on ${target_table}`, { target_id, data });
-    } else {
-      console.log(`✅ Activity logged successfully (RPC): ${action} on ${target_table}`, { target_id, rpcData });
+    if (error) {
+      console.error('Error logging activity:', error);
+      // No lanzamos el error para evitar que interrumpa el flujo principal
+      return;
     }
+
+    console.log(`Activity logged: ${action} on ${target_table}`, { target_id, metadata });
   } catch (error) {
-    console.error('Exception in logActivity:', error);
+    console.error('Error in logActivity:', error);
     // No lanzamos el error para evitar que interrumpa el flujo principal
     // pero lo registramos para debugging
   }

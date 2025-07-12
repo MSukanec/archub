@@ -427,12 +427,6 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
         if (error) throw error
         
         // Log activity for movement creation
-        console.log('💰 About to log movement creation:', {
-          organizationId,
-          userId: currentUser?.user?.id,
-          movementId: result.id
-        });
-        
         try {
           await logActivity({
             organization_id: organizationId,
@@ -452,9 +446,8 @@ export function NewMovementModal({ open, onClose, editingMovement }: NewMovement
               exchange_rate: result.exchange_rate
             }
           });
-          console.log('💰 Movement creation logged successfully!');
         } catch (logError) {
-          console.error('❌ Error logging movement creation:', logError);
+          console.error('Error logging movement creation:', logError);
         }
         
         return result
