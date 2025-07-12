@@ -24,6 +24,9 @@ import { useNavigationStore } from "@/stores/navigationStore";
 import { useMobileActionBar } from "@/components/layout/mobile/MobileActionBarContext";
 import { useMobile } from "@/hooks/use-mobile";
 import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from '@/hooks/use-toast'
+import { supabase } from '@/lib/supabase'
 
 // Function to get time-based greeting
 const getTimeBasedGreeting = () => {
@@ -50,6 +53,7 @@ const getProjectInitials = (name: string) => {
 
 export default function ProjectDashboard() {
   const [, navigate] = useLocation();
+  const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();
   const { setSidebarContext } = useNavigationStore();
   const { setShowActionBar } = useMobileActionBar();
@@ -60,6 +64,53 @@ export default function ProjectDashboard() {
   
   const { data: stats, isLoading: statsLoading } = useProjectStats(projectId);
   const { data: activityData, isLoading: activityLoading } = useProjectActivity(projectId);
+
+  // Mutation for uploading project image
+  const updateProjectImageMutation = useMutation({
+    mutationFn: async (file: File) => {
+      if (!supabase || !projectId) throw new Error('Missing supabase or project ID');
+
+      // Upload to Supabase Storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${projectId}-${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('project-images')
+        .upload(fileName, file);
+      
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data } = supabase.storage
+        .from('project-images')
+        .getPublicUrl(fileName);
+
+      // Update project record
+      const { error: updateError } = await supabase
+        .from('projects')
+        .update({ project_image_url: data.publicUrl })
+        .eq('id', projectId);
+
+      if (updateError) throw updateError;
+
+      return data.publicUrl;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['project-stats'] });
+      toast({
+        title: "Imagen actualizada",
+        description: "La imagen del proyecto se ha actualizado correctamente.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error al subir imagen",
+        description: "No se pudo actualizar la imagen del proyecto.",
+        variant: "destructive",
+      });
+      console.error('Error uploading image:', error);
+    },
+  });
 
   // Set sidebar context and hide mobile action bar on dashboards
   useEffect(() => {
@@ -106,24 +157,43 @@ export default function ProjectDashboard() {
         >
           <Card className="relative overflow-hidden border-[var(--card-border)] h-48 md:h-56">
             {/* Background Image */}
-            <div 
-              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-              style={{
-                backgroundImage: currentProject?.project_image_url 
-                  ? `url(${currentProject.project_image_url})` 
-                  : 'linear-gradient(135deg, rgb(147, 197, 253) 0%, rgb(59, 130, 246) 100%)'
-              }}
-            />
+            {currentProject?.project_image_url ? (
+              <img 
+                src={currentProject.project_image_url}
+                alt="Project background"
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            ) : (
+              <div 
+                className="absolute inset-0"
+                style={{
+                  background: 'linear-gradient(135deg, rgb(147, 197, 253) 0%, rgb(59, 130, 246) 100%)'
+                }}
+              />
+            )}
             
             {/* Overlay */}
             <div className="absolute inset-0 bg-black/40" />
             
             {/* Settings Button */}
+            <input
+              type="file"
+              id="project-image-upload"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  updateProjectImageMutation.mutate(file);
+                }
+              }}
+            />
             <Button
               variant="ghost"
               size="sm"
-              className="absolute top-4 right-4 h-8 w-8 p-0 bg-white/10 hover:bg-white/20 text-white border border-white/20"
-              onClick={() => navigate('/project/basic-data')}
+              className="absolute top-4 right-4 h-8 w-8 p-0 bg-white/10 hover:bg-white/20 text-white border border-white/20 disabled:opacity-50"
+              onClick={() => document.getElementById('project-image-upload')?.click()}
+              disabled={updateProjectImageMutation.isPending}
             >
               <Settings className="h-4 w-4" />
             </Button>
@@ -182,11 +252,8 @@ export default function ProjectDashboard() {
         {/* Activity Chart - Full Width */}
         <ProjectActivityChart data={activityData || []} isLoading={activityLoading} />
 
-        {/* Quick Actions and Recent Activity */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ProjectQuickActions />
-          <ProjectRecentActivity projectId={projectId} />
-        </div>
+        {/* Recent Activity */}
+        <ProjectRecentActivity projectId={projectId} />
       </div>
     </Layout>
   );
