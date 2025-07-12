@@ -43,7 +43,7 @@ export default function FinancesDashboard() {
   // Generate mini trend data from monthly flow for each metric
   const incomeTrend = monthlyFlow?.map(month => ({ value: month.income || 0 })) || []
   const expensesTrend = monthlyFlow?.map(month => ({ value: Math.abs(month.expenses || 0) })) || []
-  const balanceTrend = monthlyFlow?.map(month => ({ value: (month.income || 0) + (month.expenses || 0) })) || []
+  const balanceTrend = monthlyFlow?.map(month => ({ value: month.net || 0 })) || []
   
   // Calculate movements from last 30 days
   const movementsLast30Days = financialSummary ? 
