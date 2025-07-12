@@ -187,11 +187,11 @@ export function Header({
             variant="ghost"
             size="icon"
             onClick={openAvatarMenu}
-            className="h-8 w-8 p-0 hover:bg-transparent"
+            className="h-10 w-10 p-0 hover:bg-transparent"
           >
-            <Avatar className="h-7 w-7">
+            <Avatar className="h-9 w-9">
               <AvatarImage src={userData?.user?.avatar_url || ""} />
-              <AvatarFallback className="text-xs bg-[var(--accent)] text-[var(--accent-foreground)]">
+              <AvatarFallback className="text-sm bg-[var(--accent)] text-[var(--accent-foreground)]">
                 {userData?.user_data?.first_name?.charAt(0) || userData?.user?.full_name?.charAt(0) || 'U'}
               </AvatarFallback>
             </Avatar>
@@ -449,9 +449,9 @@ export function Header({
           variant="ghost"
           size="icon"
           onClick={openMenu}
-          className="md:hidden h-8 w-8 p-0 hover:bg-transparent"
+          className="md:hidden h-10 w-10 p-0 hover:bg-transparent"
         >
-          <Menu className="h-4 w-4 text-[var(--menues-fg)]" />
+          <Menu className="h-6 w-6 text-[var(--menues-fg)]" />
         </Button>
         {/* Search, Filters, and Actions - Hidden on mobile */}
         <div className="hidden md:flex items-center gap-2">
