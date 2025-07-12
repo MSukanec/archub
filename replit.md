@@ -119,6 +119,13 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 12, 2025. Fixed MiniTrendChart hardcoded line visualization and enhanced onboarding field compatibility - COMPLETED
+  • Removed problematic onboarding fields (user_role and team_size) preventing database enum constraint violations
+  • Added comprehensive icon integration to finance dashboard cards: TrendingUp, Calendar, Wallet, Clock, DollarSign
+  • Fixed MiniTrendChart component rendering: eliminated hardcoded horizontal lines, added proper data validation
+  • Enhanced chart sizing with fixed height (48px) and minimum dimensions to prevent rendering issues
+  • Improved chart logic to handle zero values and ensure proper line visualization with real financial data
+  • Reduced excessive padding in MonthlyFlowChart card for optimal layout spacing
 - July 12, 2025. Fixed onboarding enum field compatibility and completed mobile finance dashboard layout - COMPLETED
   • Fixed user_role enum values: removed special characters (/ symbols) from role options like "Arquitecto/a" → "Arquitecto"
   • Fixed team_size enum values: replaced EN DASH (–) with standard hyphen (-) in "2–5 personas" → "2-5 personas"
