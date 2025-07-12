@@ -55,8 +55,8 @@ export function MonthlyFlowChart({ data, isLoading }: MonthlyFlowChartProps) {
   }
 
   return (
-    <ResponsiveContainer width="100%" height={300}>
-      <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+    <ResponsiveContainer width="100%" height={380}>
+      <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 20 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid-text)" />
         <XAxis dataKey="month" tick={{ fill: 'var(--chart-grid-text)' }} />
         <YAxis tickFormatter={formatCurrency} tick={{ fill: 'var(--chart-grid-text)' }} />

@@ -410,7 +410,7 @@ export default function FinancesDashboard() {
                 Ingresos, egresos y flujo neto del período seleccionado
               </p>
             </CardHeader>
-            <CardContent className="pb-1">
+            <CardContent className="pb-2">
               <MonthlyFlowChart data={monthlyFlow || []} isLoading={flowLoading} />
             </CardContent>
           </Card>
