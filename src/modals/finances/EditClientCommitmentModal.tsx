@@ -49,7 +49,12 @@ export function EditClientCommitmentModal({
   const { data: currencies = [] } = useQuery({
     queryKey: ['organization-currencies', organizationId],
     queryFn: async () => {
-      if (!supabase || !organizationId) return []
+      if (!supabase || !organizationId) {
+        console.log('Missing supabase or organizationId:', { supabase: !!supabase, organizationId })
+        return []
+      }
+      
+      console.log('Fetching currencies for organizationId:', organizationId)
       
       const { data, error } = await supabase
         .from('organization_currencies')
@@ -63,8 +68,14 @@ export function EditClientCommitmentModal({
         `)
         .eq('organization_id', organizationId)
 
-      if (error) throw error
-      return data?.map(item => item.currencies) || []
+      if (error) {
+        console.error('Error fetching currencies:', error)
+        throw error
+      }
+      
+      const mappedCurrencies = data?.map(item => item.currencies) || []
+      console.log('Mapped currencies:', mappedCurrencies)
+      return mappedCurrencies
     },
     enabled: !!organizationId && !!supabase && open
   })
@@ -72,10 +83,18 @@ export function EditClientCommitmentModal({
   // Initialize form when modal opens or clientData changes
   useEffect(() => {
     if (open && clientData) {
+      console.log('Modal opened with clientData:', clientData)
+      console.log('Setting currency_id:', clientData.client?.currency_id)
+      console.log('Setting committed_amount:', clientData.client?.committed_amount)
       setCurrencyId(clientData.client?.currency_id || '')
       setCommittedAmount(clientData.client?.committed_amount?.toString() || '')
     }
   }, [open, clientData])
+
+  // Debug currencies
+  useEffect(() => {
+    console.log('Currencies loaded:', currencies)
+  }, [currencies])
 
   const handleSave = async () => {
     if (!clientData || !currencyId || !committedAmount) {
