@@ -25,8 +25,7 @@ export function useProjectStats(projectId: string | null) {
         .eq('project_id', projectId)
         .single()
 
-      console.log('Project query result:', project);
-      console.log('Project data query result:', projectData);
+
 
       // Get design documents count
       const { count: documentsCount } = await supabase

@@ -118,9 +118,7 @@ export default function ProjectDashboard() {
   // Find current project
   const currentProject = stats?.project;
   
-  // Debug project data
-  console.log('Project data:', currentProject);
-  console.log('Project image URL:', currentProject?.project_data?.project_image_url);
+
 
   if (!currentProject && !statsLoading) {
     return (
@@ -178,21 +176,21 @@ export default function ProjectDashboard() {
                 if (file) {
                   updateProjectImageMutation.mutate(file);
                 }
+                // Reset input value to allow re-uploading same file
+                e.target.value = '';
               }}
             />
             <Button
               variant="ghost"
               size="sm"
-              className="absolute top-4 right-4 h-8 w-8 p-0 bg-white/10 hover:bg-white/20 text-white border border-white/20 disabled:opacity-50"
-              onClick={() => {
-                console.log('Settings button clicked');
+              className="absolute top-4 right-4 h-8 w-8 p-0 bg-white/10 hover:bg-white/20 text-white border border-white/20 disabled:opacity-50 cursor-pointer"
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 const input = document.getElementById('project-image-upload') as HTMLInputElement;
-                console.log('Input element:', input);
                 if (input) {
                   input.click();
-                  console.log('Input clicked');
-                } else {
-                  console.error('Input not found');
                 }
               }}
               disabled={updateProjectImageMutation.isPending}

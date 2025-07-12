@@ -112,7 +112,7 @@ export function ProjectStatsCards({ stats, isLoading }: ProjectStatsCardsProps) 
   ]
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       {statCards.map((card, index) => (
         <motion.div
           key={card.title}
