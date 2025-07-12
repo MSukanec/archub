@@ -1,4 +1,4 @@
-import { useState } from "react";
+
 import { useLocation } from "wouter";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMutation } from "@tanstack/react-query";
@@ -13,7 +13,6 @@ export default function SelectMode() {
   const { data: userData } = useCurrentUser();
   const { setSidebarContext } = useNavigationStore();
   const { toast } = useToast();
-  const [selectedMode, setSelectedMode] = useState<string | null>(null);
 
   // Mutation for updating user type
   const updateUserTypeMutation = useMutation({
@@ -53,17 +52,6 @@ export default function SelectMode() {
       });
     },
   });
-
-  const handleModeSelect = (modeType: string) => {
-    console.log('SelectMode - Processing mode selection:', modeType);
-    setSelectedMode(modeType);
-  };
-
-  const handleFinish = () => {
-    if (selectedMode) {
-      updateUserTypeMutation.mutate(selectedMode);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-[var(--background)] flex items-center justify-center p-4">

@@ -62,13 +62,18 @@ export default function Onboarding() {
     }
   }, [userData, userLoading, updateFormData, setCurrentStep]);
 
+  const handleFinishOnboarding = () => {
+    console.log('handleFinishOnboarding called - completing 3-step onboarding');
+    saveOnboardingMutation.mutate();
+  };
+
   // Auto-trigger onboarding completion when step goes beyond totalSteps
   useEffect(() => {
     if (currentStep > totalSteps) {
       console.log('Auto-finishing onboarding - step exceeded total steps');
       handleFinishOnboarding();
     }
-  }, [currentStep, totalSteps, handleFinishOnboarding]);
+  }, [currentStep, totalSteps]);
 
   // Mutation to save all onboarding data
   const saveOnboardingMutation = useMutation({
@@ -216,13 +221,6 @@ export default function Onboarding() {
       });
     },
   });
-
-
-
-  const handleFinishOnboarding = () => {
-    console.log('handleFinishOnboarding called - completing 3-step onboarding');
-    saveOnboardingMutation.mutate();
-  };
 
   if (userLoading) {
     return (
