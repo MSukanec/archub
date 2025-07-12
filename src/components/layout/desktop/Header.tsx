@@ -451,7 +451,7 @@ export function Header({
           onClick={openMenu}
           className="md:hidden h-10 w-10 p-0 hover:bg-transparent"
         >
-          <Menu className="h-8 w-8 text-[var(--menues-fg)]" />
+          <Menu className="h-10 w-10 text-[var(--menues-fg)]" />
         </Button>
         {/* Search, Filters, and Actions - Hidden on mobile */}
         <div className="hidden md:flex items-center gap-2">
