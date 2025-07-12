@@ -146,7 +146,7 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
             <div 
               ref={provided.innerRef}
               {...provided.droppableProps}
-              className="flex h-full overflow-x-auto pb-4 gap-0 md:gap-4 snap-x snap-mandatory md:snap-none justify-center md:justify-start"
+              className="flex h-full overflow-x-auto pb-4 gap-0 md:gap-4 snap-x snap-mandatory md:snap-none"
               style={{ minWidth: 'fit-content', width: '100%' }}
             >
               {lists.map((list, index) => (
@@ -155,9 +155,9 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
                     <div
                       ref={provided.innerRef}
                       {...provided.draggableProps}
-                      className="flex-shrink-0 w-full max-w-sm md:w-80 snap-center md:snap-align-none px-3 md:px-0"
+                      className="flex-shrink-0 w-full md:w-80 snap-center md:snap-align-none px-3 md:px-0 flex justify-center md:justify-start"
                     >
-                      <Card className={`h-fit ${snapshot.isDragging ? 'shadow-lg rotate-1' : ''}`}>
+                      <Card className={`h-fit max-w-sm w-full md:max-w-none ${snapshot.isDragging ? 'shadow-lg rotate-1' : ''}`}>
                         {/* List Header */}
                         <div 
                           {...provided.dragHandleProps}
