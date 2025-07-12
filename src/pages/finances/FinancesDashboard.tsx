@@ -5,6 +5,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useFinancialSummary, useMonthlyFlowData, useWalletBalances, useRecentMovements } from '@/hooks/use-finance-dashboard-simple'
 import { MonthlyFlowChart } from '@/components/graphics/MonthlyFlowChart'
 import { WalletBalanceChart } from '@/components/graphics/WalletBalanceChart'
+import { MiniTrendChart } from '@/components/graphics/MiniTrendChart'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Link } from 'wouter'
@@ -34,6 +35,11 @@ export default function FinancesDashboard() {
   const { data: monthlyFlow, isLoading: flowLoading } = useMonthlyFlowData(organizationId, projectId)
   const { data: walletBalances, isLoading: walletsLoading } = useWalletBalances(organizationId, projectId)
   const { data: recentMovements, isLoading: recentLoading } = useRecentMovements(organizationId, projectId, 5)
+  
+  // Generate mini trend data from monthly flow for each metric
+  const incomeTrend = monthlyFlow?.map(month => ({ value: month.income || 0 })) || []
+  const expensesTrend = monthlyFlow?.map(month => ({ value: Math.abs(month.expenses || 0) })) || []
+  const balanceTrend = monthlyFlow?.map(month => ({ value: (month.income || 0) + (month.expenses || 0) })) || []
   
   // Calculate movements from last 30 days
   const movementsLast30Days = financialSummary ? 
@@ -196,49 +202,103 @@ export default function FinancesDashboard() {
         {/* Segunda Fila: Métricas en columna + Gráficos */}
         <div className="hidden md:grid grid-cols-3 gap-4 lg:gap-6">
           {/* Columna de Métricas Verticales */}
-          <div className="space-y-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Ingresos Totales</CardTitle>
-                <TrendingUp className="h-4 w-4 text-green-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-green-600">
+          <div className="flex flex-col gap-4 lg:gap-6 h-full">
+            {/* Card de Ingresos */}
+            <Card className="flex-1 relative overflow-hidden">
+              <CardContent className="p-4 h-full flex flex-col">
+                {/* Accent Line at top */}
+                <div className="w-full h-1 bg-green-500 rounded-full mb-4"></div>
+                
+                {/* Mini Chart */}
+                <div className="mb-4">
+                  <MiniTrendChart 
+                    data={incomeTrend} 
+                    color="#22c55e" 
+                    isLoading={flowLoading} 
+                  />
+                </div>
+                
+                {/* Spacer to push content down */}
+                <div className="flex-1"></div>
+                
+                {/* Icon and Title Section - positioned lower */}
+                <div className="flex items-center gap-2 mb-2">
+                  <TrendingUp className="h-4 w-4 text-green-600" />
+                  <span className="text-sm text-muted-foreground">
+                    Ingresos Totales
+                  </span>
+                </div>
+                
+                {/* Amount - smaller size like reference */}
+                <div className="text-lg font-bold text-green-600">
                   {summaryLoading ? '...' : formatCurrency(financialSummary?.totalIncome || 0)}
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  acumulado histórico
-                </p>
               </CardContent>
             </Card>
             
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Egresos Totales</CardTitle>
-                <TrendingDown className="h-4 w-4 text-red-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-red-600">
+            {/* Card de Egresos */}
+            <Card className="flex-1 relative overflow-hidden">
+              <CardContent className="p-4 h-full flex flex-col">
+                {/* Accent Line at top */}
+                <div className="w-full h-1 bg-red-500 rounded-full mb-4"></div>
+                
+                {/* Mini Chart */}
+                <div className="mb-4">
+                  <MiniTrendChart 
+                    data={expensesTrend} 
+                    color="#ef4444" 
+                    isLoading={flowLoading} 
+                  />
+                </div>
+                
+                {/* Spacer to push content down */}
+                <div className="flex-1"></div>
+                
+                {/* Icon and Title Section - positioned lower */}
+                <div className="flex items-center gap-2 mb-2">
+                  <TrendingDown className="h-4 w-4 text-red-600" />
+                  <span className="text-sm text-muted-foreground">
+                    Egresos Totales
+                  </span>
+                </div>
+                
+                {/* Amount - smaller size like reference */}
+                <div className="text-lg font-bold text-red-600">
                   {summaryLoading ? '...' : formatCurrency(financialSummary?.totalExpenses || 0)}
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  total gastado
-                </p>
               </CardContent>
             </Card>
             
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Balance General</CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className={`text-2xl font-bold ${getBalanceColor(financialSummary?.balance || 0)}`}>
+            {/* Card de Balance */}
+            <Card className="flex-1 relative overflow-hidden">
+              <CardContent className="p-4 h-full flex flex-col">
+                {/* Accent Line at top */}
+                <div className="w-full h-1 bg-[var(--accent)] rounded-full mb-4"></div>
+                
+                {/* Mini Chart */}
+                <div className="mb-4">
+                  <MiniTrendChart 
+                    data={balanceTrend} 
+                    color="hsl(var(--accent))" 
+                    isLoading={flowLoading} 
+                  />
+                </div>
+                
+                {/* Spacer to push content down */}
+                <div className="flex-1"></div>
+                
+                {/* Icon and Title Section - positioned lower */}
+                <div className="flex items-center gap-2 mb-2">
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">
+                    Balance General
+                  </span>
+                </div>
+                
+                {/* Amount - smaller size like reference */}
+                <div className={`text-lg font-bold ${getBalanceColor(financialSummary?.balance || 0)}`}>
                   {summaryLoading ? '...' : formatCurrency(financialSummary?.balance || 0)}
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  balance actual
-                </p>
               </CardContent>
             </Card>
           </div>

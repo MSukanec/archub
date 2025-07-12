@@ -45,7 +45,7 @@
   --card-fg: hsl(0, 0%, 35%);
   --card-text: hsl(0, 0%, 35%);
   --card-border: hsl(0, 0%, 85%);
-  --card-hover-bg: hsl(0, 0%, 97%);
+  --card-hover-bg: hsl(60, 8%, 95%);
 
   /* Secondary Cards */
   --secondary-card-bg: hsl(0, 0%, 95%);
