@@ -122,8 +122,9 @@ Changelog:
 - July 12, 2025. Enhanced finance dashboard with expenses by category pie chart and layout optimization - COMPLETED
   • Added ExpensesByCategoryChart component with Recharts pie chart visualization showing expense distribution by categories
   • Removed Balance por Billetera chart from second row as requested, changed layout back to 3 columns
-  • Fixed expense data query to properly filter movements by amount instead of incorrect type filtering
-  • Enhanced useExpensesByCategory hook with proper movement filtering and category aggregation
+  • Fixed expense data query to filter movements by EGRESO type and use subcategory_id for proper categorization
+  • Enhanced useExpensesByCategory hook to search for movements containing "egreso" in name and group by subcategory
+  • Changed FinancesDashboard layout to isWide={true} for better space utilization on large screens
   • Integrated new chart into finance dashboard between metrics column and financial flow chart
   • Applied consistent chart styling and responsive design patterns throughout the new visualization
 - July 12, 2025. Fixed MiniTrendChart hardcoded line visualization and optimized MonthlyFlowChart spacing - COMPLETED

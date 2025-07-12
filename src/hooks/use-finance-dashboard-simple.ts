@@ -458,7 +458,19 @@ export function useExpensesByCategory(organizationId: string | undefined, projec
       if (!organizationId || !supabase) return []
 
       try {
-        // Base query for movements - get all movements and filter by amount
+        // First, get the EGRESO type concept IDs
+        const { data: egresoTypes } = await supabase
+          .from('movement_concepts')
+          .select('id, name')
+          .ilike('name', '%egreso%')
+          
+        if (!egresoTypes || egresoTypes.length === 0) {
+          return []
+        }
+        
+        const egresoTypeIds = egresoTypes.map(type => type.id)
+        
+        // Base query for movements - get all movements filtered by EGRESO types
         let movementsQuery = supabase
           .from('movements')
           .select(`
@@ -468,6 +480,7 @@ export function useExpensesByCategory(organizationId: string | undefined, projec
             subcategory_id
           `)
           .eq('organization_id', organizationId)
+          .in('type_id', egresoTypeIds) // Only EGRESO movements
           .neq('amount', 0) // Exclude zero amounts
 
         if (projectId) {
@@ -490,34 +503,31 @@ export function useExpensesByCategory(organizationId: string | undefined, projec
           return []
         }
 
-        // Get unique category IDs
-        const categoryIds = Array.from(new Set(movements.map(m => m.category_id).filter(Boolean)))
+        // Get unique subcategory IDs
+        const subcategoryIds = Array.from(new Set(movements.map(m => m.subcategory_id).filter(Boolean)))
         
-        // Get movement concept categories
-        const { data: categories } = await supabase
-          .from('movement_concept_categories')
+        // Get movement concepts (subcategories)
+        const { data: subcategories } = await supabase
+          .from('movement_concepts')
           .select('id, name')
-          .in('id', categoryIds)
+          .in('id', subcategoryIds)
 
         // Create lookup map
-        const categoriesMap = new Map()
-        categories?.forEach(category => {
-          categoriesMap.set(category.id, category.name)
+        const subcategoriesMap = new Map()
+        subcategories?.forEach(subcategory => {
+          subcategoriesMap.set(subcategory.id, subcategory.name)
         })
 
         // Group by category and sum amounts
         const categoryTotals = new Map<string, number>()
         let totalExpenses = 0
 
-        // Filter and process only expense movements
+        // Process expense movements by subcategory
         movements.forEach((movement: any) => {
-          // Skip if this is an income (positive amount indicates expense in this context)
-          if (movement.amount <= 0) return
-          
-          const categoryName = categoriesMap.get(movement.category_id) || 'Sin Categoría'
+          const subcategoryName = subcategoriesMap.get(movement.subcategory_id) || 'Sin Categoría'
           const amount = Math.abs(movement.amount) // Convert to positive for display
           
-          categoryTotals.set(categoryName, (categoryTotals.get(categoryName) || 0) + amount)
+          categoryTotals.set(subcategoryName, (categoryTotals.get(subcategoryName) || 0) + amount)
           totalExpenses += amount
         })
 
