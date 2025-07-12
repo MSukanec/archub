@@ -58,9 +58,60 @@ export function useUserActivity(organizationId: string | undefined, timePeriod: 
           return []
         }
 
+        // Calculate overall date range for optimization
+        let overallStartDate: string
+        let overallEndDate: string
+
+        if (timePeriod === 'year') {
+          const startDate = subMonths(new Date(), 11)
+          overallStartDate = format(new Date(startDate.getFullYear(), startDate.getMonth(), 1), 'yyyy-MM-dd') + 'T00:00:00.000Z'
+          overallEndDate = format(new Date(), 'yyyy-MM-dd') + 'T23:59:59.999Z'
+        } else {
+          const startDate = subDays(new Date(), daysCount - 1)
+          overallStartDate = format(startDate, 'yyyy-MM-dd') + 'T00:00:00.000Z'
+          overallEndDate = format(new Date(), 'yyyy-MM-dd') + 'T23:59:59.999Z'
+        }
+
+        // Fetch ALL data in one go for the entire period
+        const [projectsResult, movementsResult, contactsResult, siteLogsResult] = await Promise.all([
+          supabase
+            .from('projects')
+            .select('created_by, created_at')
+            .eq('organization_id', organizationId)
+            .gte('created_at', overallStartDate)
+            .lte('created_at', overallEndDate),
+          
+          supabase
+            .from('movements')
+            .select('created_by, created_at')
+            .eq('organization_id', organizationId)
+            .gte('created_at', overallStartDate)
+            .lte('created_at', overallEndDate),
+          
+          supabase
+            .from('contacts')
+            .select('created_by, created_at')
+            .eq('organization_id', organizationId)
+            .gte('created_at', overallStartDate)
+            .lte('created_at', overallEndDate)
+            .not('created_by', 'is', null),
+          
+          supabase
+            .from('site_logs')
+            .select('created_by, created_at')
+            .eq('organization_id', organizationId)
+            .gte('created_at', overallStartDate)
+            .lte('created_at', overallEndDate)
+        ])
+
+        const allProjects = projectsResult.data || []
+        const allMovements = movementsResult.data || []
+        const allContacts = contactsResult.data || []
+        const allSiteLogs = siteLogsResult.data || []
+
         const userActivityData: UserActivity[] = []
 
-        // Generate date range
+        // Now process each date period using the cached data
         for (let i = daysCount - 1; i >= 0; i--) {
           let date: Date
           let formattedDate: string
@@ -100,87 +151,34 @@ export function useUserActivity(organizationId: string | undefined, timePeriod: 
             }
           })
 
-          // Count projects created by each user
-          const { data: projects, error: projectsError } = await supabase
-            .from('projects')
-            .select('created_by')
-            .eq('organization_id', organizationId)
-            .gte('created_at', dayStart)
-            .lte('created_at', dayEnd)
-            
-          if (projectsError) {
-            console.error('Projects query error:', projectsError, { dayStart, dayEnd, timePeriod })
-          }
-
-          projects?.forEach(project => {
-            if (project.created_by && usersActivity[project.created_by]) {
-              usersActivity[project.created_by].activity_count += 1
-            }
-          })
-
-          // Count movements created by each user
-          const { data: movements, error: movementsError } = await supabase
-            .from('movements')
-            .select('created_by, created_at')
-            .eq('organization_id', organizationId)
-            .gte('created_at', dayStart)
-            .lte('created_at', dayEnd)
-            
-          if (movementsError) {
-            console.error('Movements query error:', movementsError, { dayStart, dayEnd, timePeriod })
-          }
-
-          // Debug logging for movements
-          if (movements && movements.length > 0) {
-            console.log(`Found ${movements.length} movements for date ${formattedDate}:`, {
-              dayStart,
-              dayEnd,
-              movements: movements.map(m => ({ created_by: m.created_by, created_at: m.created_at }))
+          // Filter and count activities from cached data
+          allProjects.filter(p => p.created_at >= dayStart && p.created_at <= dayEnd)
+            .forEach(project => {
+              if (project.created_by && usersActivity[project.created_by]) {
+                usersActivity[project.created_by].activity_count += 1
+              }
             })
-          }
 
-          movements?.forEach(movement => {
-            if (movement.created_by && usersActivity[movement.created_by]) {
-              usersActivity[movement.created_by].activity_count += 1
-            }
-          })
+          allMovements.filter(m => m.created_at >= dayStart && m.created_at <= dayEnd)
+            .forEach(movement => {
+              if (movement.created_by && usersActivity[movement.created_by]) {
+                usersActivity[movement.created_by].activity_count += 1
+              }
+            })
 
-          // Count contacts created by each user
-          const { data: contacts, error: contactsError } = await supabase
-            .from('contacts')
-            .select('created_by')
-            .eq('organization_id', organizationId)
-            .gte('created_at', dayStart)
-            .lte('created_at', dayEnd)
-            .not('created_by', 'is', null)
-            
-          if (contactsError) {
-            console.error('Contacts query error:', contactsError, { dayStart, dayEnd, timePeriod })
-          }
+          allContacts.filter(c => c.created_at >= dayStart && c.created_at <= dayEnd)
+            .forEach(contact => {
+              if (contact.created_by && usersActivity[contact.created_by]) {
+                usersActivity[contact.created_by].activity_count += 1
+              }
+            })
 
-          contacts?.forEach(contact => {
-            if (contact.created_by && usersActivity[contact.created_by]) {
-              usersActivity[contact.created_by].activity_count += 1
-            }
-          })
-
-          // Count site logs created by each user
-          const { data: siteLogs, error: siteLogsError } = await supabase
-            .from('site_logs')
-            .select('created_by')
-            .eq('organization_id', organizationId)
-            .gte('created_at', dayStart)
-            .lte('created_at', dayEnd)
-            
-          if (siteLogsError) {
-            console.error('Site logs query error:', siteLogsError, { dayStart, dayEnd, timePeriod })
-          }
-
-          siteLogs?.forEach(siteLog => {
-            if (siteLog.created_by && usersActivity[siteLog.created_by]) {
-              usersActivity[siteLog.created_by].activity_count += 1
-            }
-          })
+          allSiteLogs.filter(s => s.created_at >= dayStart && s.created_at <= dayEnd)
+            .forEach(siteLog => {
+              if (siteLog.created_by && usersActivity[siteLog.created_by]) {
+                usersActivity[siteLog.created_by].activity_count += 1
+              }
+            })
 
           // Only include users with activity > 0 (don't show all members, only active ones)
           const activeUsers = Object.values(usersActivity).filter(user => user.activity_count > 0)
