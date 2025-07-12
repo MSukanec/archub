@@ -485,6 +485,10 @@ export function useExpensesByCategory(organizationId: string | undefined, projec
         const { data: movements, error } = await movementsQuery
 
         if (error) throw error
+        
+        console.log('Expenses query - movements found:', movements?.length)
+        console.log('Expenses query - sample movements:', movements?.slice(0, 3))
+        
         if (!movements || movements.length === 0) return []
 
         // Get unique category IDs
