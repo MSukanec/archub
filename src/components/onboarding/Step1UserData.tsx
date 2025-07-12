@@ -4,23 +4,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useOnboardingStore } from "@/stores/onboardingStore";
-import { useThemeStore } from "@/stores/themeStore";
 import { useCountries } from "@/hooks/use-countries";
-import { User, Palette } from "lucide-react";
+import { User } from "lucide-react";
 import { HelpPopover } from "@/components/ui-custom/HelpPopover";
 
 export function Step1UserData() {
   const { formData, updateFormData, goNextStep } = useOnboardingStore();
-  const { setTheme } = useThemeStore();
   const { data: countries } = useCountries();
-
-  const handleThemeChange = (value: 'light' | 'dark') => {
-    // Update form data
-    updateFormData({ theme: value });
-    
-    // Apply theme immediately
-    setTheme(value === 'dark');
-  };
 
   const handleNext = () => {
     if (formData.first_name && formData.last_name && formData.country && formData.birthdate) {
@@ -128,42 +118,7 @@ export function Step1UserData() {
           />
         </div>
 
-        {/* Tema de la aplicación */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Label htmlFor="theme">Tema de la aplicación</Label>
-            <HelpPopover
-              title="Modo Oscuro"
-              description="Activa el modo oscuro para reducir fatiga visual y ahorrar batería. Puedes cambiarlo después desde tu perfil."
-              primaryActionText="Entendido"
-              secondaryActionText="Más info"
-              onSecondaryAction={() => console.log("Más información sobre temas")}
-              placement="top"
-            />
-          </div>
-          <Select
-            value={formData.theme}
-            onValueChange={handleThemeChange}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Selecciona un tema" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="light">
-                <div className="flex items-center gap-2">
-                  <Palette className="h-4 w-4" />
-                  Claro
-                </div>
-              </SelectItem>
-              <SelectItem value="dark">
-                <div className="flex items-center gap-2">
-                  <Palette className="h-4 w-4" />
-                  Oscuro
-                </div>
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+
 
         <div className="flex justify-end pt-4">
           <Button 

@@ -119,6 +119,13 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 12, 2025. Fixed onboarding Step1 theme field removal and Step3 double-click issue - COMPLETED
+  • Removed "Tema de la aplicación" field from Step 1 of onboarding as requested by user
+  • Fixed Step3Discovery double-click issue by adding isFinishing state to prevent multiple executions
+  • Added loading state to "Finalizar configuración" button showing "Finalizando..." while processing
+  • Enhanced button disable logic to prevent clicks during processing state
+  • Added setTimeout delay to ensure proper state management before mutation execution
+  • Cleaned up unused imports and theme-related code from Step1UserData component
 - July 12, 2025. Enhanced finance dashboard with expenses by category pie chart and layout optimization - COMPLETED
   • Added ExpensesByCategoryChart component with Recharts pie chart visualization showing expense distribution by categories
   • Removed Balance por Billetera chart from second row as requested, changed layout back to 3 columns

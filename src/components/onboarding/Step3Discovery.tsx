@@ -77,9 +77,14 @@ export function Step3Discovery({ onFinish }: Step3DiscoveryProps) {
   const [userRole, setUserRole] = useState(() => initValue('user_role'));
   const [userRoleOther, setUserRoleOther] = useState(() => initValue('user_role_other'));
   const [teamSize, setTeamSize] = useState(() => initValue('team_size'));
+  const [isFinishing, setIsFinishing] = useState(false);
 
   const handleFinish = () => {
+    if (isFinishing) return; // Prevent multiple executions
+    
     if (discoveredBy && (discoveredBy !== 'Otro' || discoveredByOther)) {
+      setIsFinishing(true);
+      
       // Update store with final values (removed user_role and team_size)
       updateFormData({
         discovered_by: discoveredBy,
@@ -91,7 +96,10 @@ export function Step3Discovery({ onFinish }: Step3DiscoveryProps) {
       console.log('Step3Discovery - Finishing onboarding, calling finish function from parent');
       // Call the finish function passed from parent instead of goNextStep
       if (onFinish) {
-        onFinish();
+        // Use setTimeout to ensure the state update happens before the mutation
+        setTimeout(() => {
+          onFinish();
+        }, 50);
       }
     }
   };
@@ -217,10 +225,10 @@ export function Step3Discovery({ onFinish }: Step3DiscoveryProps) {
           
           <Button 
             onClick={handleFinish}
-            disabled={!discoveredBy || (discoveredBy === 'Otro' && !discoveredByOther)}
+            disabled={!discoveredBy || (discoveredBy === 'Otro' && !discoveredByOther) || isFinishing}
             className="bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white"
           >
-            Finalizar configuración
+            {isFinishing ? 'Finalizando...' : 'Finalizar configuración'}
           </Button>
         </div>
       </CardContent>
