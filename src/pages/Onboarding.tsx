@@ -7,7 +7,6 @@ import { queryClient } from "@/lib/queryClient";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useToast } from "@/hooks/use-toast";
 import { useOnboardingStore } from "@/stores/onboardingStore";
-import { useThemeStore } from "@/stores/themeStore";
 import { useAuthStore } from "@/stores/authStore";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { Step1UserData } from "@/components/onboarding/Step1UserData";
@@ -21,7 +20,6 @@ export default function Onboarding() {
   const { data: userData, isLoading: userLoading } = useCurrentUser();
   const { setSidebarContext } = useNavigationStore();
   const { toast } = useToast();
-  const { setTheme } = useThemeStore();
   const { 
     currentStep, 
     formData, 
@@ -59,7 +57,7 @@ export default function Onboarding() {
         country: userData.user_data?.country || '',
         birthdate: userData.user_data?.birthdate || '',
         organization_name: userData.organization?.name || '',
-        theme: (userData.preferences?.theme === 'dark' ? 'dark' : 'light'),
+
         discovered_by: userData.user_data?.discovered_by || '',
         discovered_by_other_text: userData.user_data?.discovered_by_other_text || '',
         last_user_type: userData.preferences?.last_user_type || null,
@@ -122,7 +120,6 @@ export default function Onboarding() {
       const { error: preferencesError } = await supabase
         .from('user_preferences')
         .update({
-          theme: formData.theme,
           last_user_type: formData.last_user_type,
           onboarding_completed: true,
           updated_at: new Date().toISOString(),
