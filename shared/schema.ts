@@ -30,6 +30,10 @@ export const user_data = pgTable("user_data", {
   birthdate: text("birthdate"),
   discovered_by: text("discovered_by", { enum: ["YouTube", "Instagram", "TikTok", "Google", "Recomendación", "LinkedIn", "Twitter/X", "Otro"] }),
   discovered_by_other_text: text("discovered_by_other_text"),
+  main_use: text("main_use", { enum: ["Documentación técnica", "Presupuestos de obra", "Organización de proyectos", "Seguimiento de obra", "Colaboración con clientes", "Capacitación / aprendizaje", "Exploración / curiosidad", "Otro"] }),
+  user_role: text("user_role", { enum: ["Arquitecto/a", "Ingeniero/a", "Maestro Mayor de Obras", "Estudiante", "Estudio de arquitectura", "Empresa constructora", "Proveedor de materiales", "Oficio profesional (instalador, herrero, carpintero, etc.)", "Otro"] }),
+  user_role_other: text("user_role_other"),
+  team_size: text("team_size", { enum: ["Trabajo solo/a", "2–5 personas", "6–15 personas", "Más de 15 personas"] }),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
 });
