@@ -202,9 +202,9 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   // Exact sidebar structure from Sidebar.tsx
   const sidebarContexts = {
     organization: [
-      { icon: Home, label: 'Resumen de la Organización', href: '/organization/dashboard' },
       { icon: ArrowRight, label: 'Ir al Proyecto', href: '#', onClick: () => handleNavigationWithAnimation('/project/dashboard', 'project', 'left') },
       { type: 'divider' },
+      { icon: Home, label: 'Resumen de la Organización', href: '/organization/dashboard' },
       { icon: FolderOpen, label: 'Proyectos', href: '/organization/projects' },
       { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
       { icon: CheckSquare, label: 'Tareas', href: '/tasks' },
@@ -213,9 +213,9 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: Settings, label: 'Preferencias', href: '/finances/preferences' },
     ],
     project: [
-      { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },
       { icon: ArrowLeft, label: 'Volver a Organización', href: '#', onClick: () => handleNavigationWithAnimation('/organization/dashboard', 'organization', 'right') },
       { type: 'divider' },
+      { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },
       { icon: Database, label: 'Datos Básicos', href: '#', onClick: () => handleNavigationWithAnimation('/project/basic-data', 'data', 'left') },
       { icon: Users, label: 'Clientes', href: '/project/clients' },
       { icon: FolderOpen, label: 'Diseño', href: '#', onClick: () => handleNavigationWithAnimation('/design/dashboard', 'design', 'left') },
@@ -225,9 +225,9 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: Handshake, label: 'Post-Venta', href: '#', onClick: () => handleNavigationWithAnimation('/postsale/dashboard', 'postsale', 'left'), restricted: true },
     ],
     design: [
-      { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' },
       { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => handleNavigationWithAnimation('/project/dashboard', 'project', 'right') },
       { type: 'divider' },
+      { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' },
       { icon: FileText, label: 'Documentación', href: '/design/documentation' },
       { icon: Database, label: 'Datos', href: '/design/data', restricted: true },
       { icon: Calendar, label: 'Cronograma', href: '/design/timeline', restricted: true },
@@ -236,9 +236,9 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: Settings, label: 'Preferencias de Diseño', href: '/design/preferences', restricted: true },
     ],
     construction: [
-      { icon: Home, label: 'Resumen de Obra', href: '/construction/dashboard' },
       { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => handleNavigationWithAnimation('/project/dashboard', 'project', 'right') },
       { type: 'divider' },
+      { icon: Home, label: 'Resumen de Obra', href: '/construction/dashboard' },
       { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
       { icon: Package, label: 'Materiales', href: '/construction/materials' },
       { icon: FileText, label: 'Bitácora', href: '/construction/logs' },
@@ -246,34 +246,34 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: Images, label: 'Galería', href: '/construction/gallery' },
     ],
     finances: [
-      { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
       { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => handleNavigationWithAnimation('/project/dashboard', 'project', 'right') },
       { type: 'divider' },
+      { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
       { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
       { icon: HandCoins, label: 'Compromisos de Pago', href: '/finances/installments' },
     ],
     commercialization: [
-      { icon: Home, label: 'Resumen de Comercialización', href: '/commercialization/dashboard' },
       { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => handleNavigationWithAnimation('/project/dashboard', 'project', 'right') },
       { type: 'divider' },
+      { icon: Home, label: 'Resumen de Comercialización', href: '/commercialization/dashboard' },
       { icon: Building, label: 'Listado de unidades', href: '/commercialization/unidades' },
       { icon: Users, label: 'Clientes interesados', href: '/commercialization/clientes' },
       { icon: FileText, label: 'Estadísticas de venta', href: '/commercialization/estadisticas' },
     ],
     data: [
-      { icon: Database, label: 'Resumen de Datos', href: '/project/basic-data' },
       { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => handleNavigationWithAnimation('/project/dashboard', 'project', 'right') },
       { type: 'divider' },
+      { icon: Database, label: 'Resumen de Datos', href: '/project/basic-data' },
       { icon: Database, label: 'Datos Básicos', href: '/project/basic-data' },
     ],
     postsale: [
-      { icon: Handshake, label: 'Resumen de Post-Venta', href: '/postsale/dashboard' },
       { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => handleNavigationWithAnimation('/project/dashboard', 'project', 'right') },
       { type: 'divider' },
+      { icon: Handshake, label: 'Resumen de Post-Venta', href: '/postsale/dashboard' },
     ],
     admin: [
-      { icon: Home, label: 'Resumen de Administración', href: '/admin/dashboard' },
       { type: 'divider' },
+      { icon: Home, label: 'Resumen de Administración', href: '/admin/dashboard' },
       {
         label: 'Comunidad',
         isAccordion: true,
