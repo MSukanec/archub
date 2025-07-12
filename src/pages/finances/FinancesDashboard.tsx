@@ -313,8 +313,8 @@ export default function FinancesDashboard() {
           </motion.div>
         </div>
 
-        {/* Segunda Fila: Métricas en columna + Gráficos */}
-        <div className="hidden md:grid grid-cols-3 gap-4 lg:gap-6">
+        {/* Segunda Fila: Métricas (1 col) + Gráfico de Flujo Financiero (3 cols) */}
+        <div className="hidden md:grid grid-cols-4 gap-4 lg:gap-6">
           {/* Columna de Métricas Verticales */}
           <div className="flex flex-col gap-4 lg:gap-6 h-full">
             {/* Card de Ingresos */}
@@ -408,24 +408,8 @@ export default function FinancesDashboard() {
             </Card>
           </div>
 
-          {/* Gráfico de Egresos por Categoría */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <TrendingDown className="h-5 w-5" />
-                Egresos por Categoría
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Distribución de gastos por tipo de categoría
-              </p>
-            </CardHeader>
-            <CardContent className="pb-2">
-              <ExpensesByCategoryChart data={expensesByCategory || []} isLoading={categoriesLoading} />
-            </CardContent>
-          </Card>
-
-          {/* Gráfico de Flujo Financiero */}
-          <Card>
+          {/* Gráfico de Flujo Financiero - ocupa 3 columnas */}
+          <Card className="col-span-3">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <TrendingUp className="h-5 w-5" />
@@ -536,8 +520,43 @@ export default function FinancesDashboard() {
 
 
 
-        {/* Tercera fila: Este Mes + Balance por Billetera + Movimientos Recientes */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+        {/* Tercera fila: Egresos por Categoría (2 cols) + Balance por Billetera (2 cols) */}
+        <div className="hidden md:grid grid-cols-4 gap-4 lg:gap-6">
+          {/* Gráfico de Egresos por Categoría - ocupa 2 columnas */}
+          <Card className="col-span-2">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <TrendingDown className="h-5 w-5" />
+                Egresos por Categoría
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Distribución de gastos por tipo de categoría
+              </p>
+            </CardHeader>
+            <CardContent className="pb-2">
+              <ExpensesByCategoryChart data={expensesByCategory || []} isLoading={categoriesLoading} />
+            </CardContent>
+          </Card>
+
+          {/* Balance por Billetera - ocupa 2 columnas */}
+          <Card className="col-span-2">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Wallet className="h-5 w-5" />
+                Balance por Billetera
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Distribución de balances entre billeteras activas
+              </p>
+            </CardHeader>
+            <CardContent>
+              <WalletBalanceChart data={walletBalances || []} isLoading={walletsLoading} />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Cuarta fila: Este Mes + Movimientos Recientes (solo mobile y desktop) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
           {/* Este Mes */}
           <Card>
             <CardHeader>
@@ -572,22 +591,6 @@ export default function FinancesDashboard() {
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Balance por Billetera */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Wallet className="h-5 w-5" />
-                Balance por Billetera
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Distribución de balances entre billeteras activas
-              </p>
-            </CardHeader>
-            <CardContent>
-              <WalletBalanceChart data={walletBalances || []} isLoading={walletsLoading} />
             </CardContent>
           </Card>
 
