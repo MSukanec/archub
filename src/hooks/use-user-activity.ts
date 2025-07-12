@@ -76,15 +76,15 @@ export function useUserActivity(organizationId: string | undefined, timePeriod: 
             const monthStart = new Date(date.getFullYear(), date.getMonth(), 1)
             const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0)
             
-            dayStart = format(monthStart, 'yyyy-MM-dd')
-            dayEnd = format(monthEnd, 'yyyy-MM-dd')
+            dayStart = format(monthStart, 'yyyy-MM-dd') + 'T00:00:00.000Z'
+            dayEnd = format(monthEnd, 'yyyy-MM-dd') + 'T23:59:59.999Z'
           } else {
             // For week/month view, go back by days
             date = subDays(new Date(), i)
             formattedDate = format(date, 'dd/MM')
             
-            dayStart = format(date, 'yyyy-MM-dd')
-            dayEnd = format(date, 'yyyy-MM-dd')
+            dayStart = format(date, 'yyyy-MM-dd') + 'T00:00:00.000Z'
+            dayEnd = format(date, 'yyyy-MM-dd') + 'T23:59:59.999Z'
           }
 
           // Initialize activity for all members for this date
@@ -121,13 +121,22 @@ export function useUserActivity(organizationId: string | undefined, timePeriod: 
           // Count movements created by each user
           const { data: movements, error: movementsError } = await supabase
             .from('movements')
-            .select('created_by')
+            .select('created_by, created_at')
             .eq('organization_id', organizationId)
             .gte('created_at', dayStart)
             .lte('created_at', dayEnd)
             
           if (movementsError) {
             console.error('Movements query error:', movementsError, { dayStart, dayEnd, timePeriod })
+          }
+
+          // Debug logging for movements
+          if (movements && movements.length > 0) {
+            console.log(`Found ${movements.length} movements for date ${formattedDate}:`, {
+              dayStart,
+              dayEnd,
+              movements: movements.map(m => ({ created_by: m.created_by, created_at: m.created_at }))
+            })
           }
 
           movements?.forEach(movement => {
