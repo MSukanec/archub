@@ -250,8 +250,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => handleNavigationWithAnimation('/project/dashboard', 'project', 'right') },
       { type: 'divider' },
       { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
-      { icon: CreditCard, label: 'Aportes', href: '/finances/installments' },
-      { icon: HandCoins, label: 'Compromisos', href: '/finances/committed' },
+      { icon: HandCoins, label: 'Compromisos de Pago', href: '/finances/installments' },
     ],
     commercialization: [
       { icon: Home, label: 'Resumen de Comercialización', href: '/commercialization/dashboard' },
