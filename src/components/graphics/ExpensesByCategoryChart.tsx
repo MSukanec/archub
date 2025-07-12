@@ -82,10 +82,10 @@ export function ExpensesByCategoryChart({ data, isLoading }: ExpensesByCategoryC
           <Pie
             data={data}
             cx="50%"
-            cy="45%"
+            cy="40%"
             labelLine={false}
             label={CustomLabel}
-            outerRadius={95}
+            outerRadius={80}
             fill="#8884d8"
             dataKey="amount"
           >
@@ -96,10 +96,10 @@ export function ExpensesByCategoryChart({ data, isLoading }: ExpensesByCategoryC
           <Tooltip content={<CustomTooltip />} />
           <Legend 
             verticalAlign="bottom" 
-            height={16}
-            wrapperStyle={{ paddingTop: '2px' }}
+            height={36}
+            wrapperStyle={{ paddingTop: '8px', fontSize: '12px' }}
             formatter={(value, entry: any) => (
-              <span style={{ color: entry.color }} className="text-sm">
+              <span style={{ color: entry.color }} className="text-xs">
                 {entry.payload.category}
               </span>
             )}

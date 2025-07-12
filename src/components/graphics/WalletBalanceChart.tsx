@@ -81,10 +81,10 @@ export function WalletBalanceChart({ data, isLoading }: WalletBalanceChartProps)
           <Pie
             data={data}
             cx="50%"
-            cy="45%"
+            cy="40%"
             labelLine={false}
             label={CustomLabel}
-            outerRadius={95}
+            outerRadius={80}
             fill="hsl(110, 40%, 50%)"
             dataKey="balance"
           >
@@ -104,10 +104,10 @@ export function WalletBalanceChart({ data, isLoading }: WalletBalanceChartProps)
           <Tooltip content={<CustomTooltip />} />
           <Legend 
             verticalAlign="bottom" 
-            height={16}
-            wrapperStyle={{ paddingTop: '2px' }}
+            height={36}
+            wrapperStyle={{ paddingTop: '8px', fontSize: '12px' }}
             formatter={(value, entry: any) => (
-              <span style={{ color: entry.color }} className="text-sm">
+              <span style={{ color: entry.color }} className="text-xs">
                 {entry.payload.wallet}
               </span>
             )}
