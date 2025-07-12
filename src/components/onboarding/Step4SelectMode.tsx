@@ -69,16 +69,23 @@ interface Step3SelectModeProps {
 export function Step4SelectMode({ isOnboarding = true, onFinish, isLoading = false }: Step3SelectModeProps) {
   const { formData, updateFormData, goPrevStep } = useOnboardingStore();
   const [selectedMode, setSelectedMode] = useState<string | null>(null);
+  const [hasFinished, setHasFinished] = useState(false);
 
   const handleModeSelect = (modeType: ModeOption['type']) => {
+    // Prevenir múltiples clics
+    if (hasFinished || isLoading) {
+      console.log('Step4SelectMode - Preventing duplicate click', { hasFinished, isLoading });
+      return;
+    }
+    
+    console.log('Step4SelectMode - Processing mode selection:', modeType);
+    setHasFinished(true);
     setSelectedMode(modeType);
     updateFormData({ last_user_type: modeType });
     
-    // Usar setTimeout para asegurar que el estado se actualice antes de llamar onFinish
+    // Llamar onFinish inmediatamente sin timeout
     if (onFinish) {
-      setTimeout(() => {
-        onFinish();
-      }, 300); // Aumentar el delay para asegurar que el estado se actualice
+      onFinish();
     }
   };
 
@@ -113,14 +120,14 @@ export function Step4SelectMode({ isOnboarding = true, onFinish, isLoading = fal
                   ${isSelected ? 'ring-2 ring-[var(--accent)]' : ''}
                   ${isLoading ? 'opacity-75' : ''}
                 `}
-                onClick={() => isAvailable && !isLoading && handleModeSelect(mode.type)}
+                onClick={() => isAvailable && !isLoading && !hasFinished && handleModeSelect(mode.type)}
               >
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
                     <div className={`p-2 rounded-lg ${mode.color} text-white`}>
                       <Icon className="h-5 w-5" />
                     </div>
-                    {isLoading && isSelected && (
+                    {(isLoading || hasFinished) && isSelected && (
                       <div className="flex items-center text-blue-600 dark:text-blue-400">
                         <Loader2 className="h-4 w-4 mr-1 animate-spin" />
                         <span className="text-xs font-medium">Guardando...</span>
@@ -166,7 +173,7 @@ export function Step4SelectMode({ isOnboarding = true, onFinish, isLoading = fal
               variant="outline"
               onClick={goPrevStep}
               className="px-8"
-              disabled={isLoading}
+              disabled={isLoading || hasFinished}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Volver
