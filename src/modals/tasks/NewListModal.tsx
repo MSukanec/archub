@@ -4,15 +4,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout';
-import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader';
-import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
-import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter';
+import { CustomModalLayout } from '@/components/modal/CustomModalLayout';
+import { CustomModalHeader } from '@/components/modal/CustomModalHeader';
+import { CustomModalBody } from '@/components/modal/CustomModalBody';
+import { CustomModalFooter } from '@/components/modal/CustomModalFooter';
 import { useCreateKanbanList, useUpdateKanbanList, type KanbanList } from '@/hooks/use-kanban';
 import { useOrganizationMembers } from '@/hooks/use-organization-members';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { toast } from '@/hooks/use-toast';
-import UserSelector from '@/components/ui-custom/misc/UserSelector';
+import UserSelector from '@/components/ui-custom/UserSelector';
 
 const listSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),

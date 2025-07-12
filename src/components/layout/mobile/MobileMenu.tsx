@@ -40,7 +40,7 @@ import { useLocation } from "wouter";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useProjects } from "@/hooks/use-projects";
-import CustomRestricted from "@/components/ui-custom/misc/CustomRestricted";
+import CustomRestricted from "@/components/ui-custom/CustomRestricted";
 
 interface MobileMenuProps {
   onClose: () => void;

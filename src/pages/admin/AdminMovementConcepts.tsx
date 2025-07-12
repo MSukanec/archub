@@ -6,7 +6,7 @@ import { Plus, Users, CheckCircle, FolderTree } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
-import { HierarchicalTree, type HierarchicalItem } from '@/components/ui-custom/misc/HierarchicalTree'
+import { HierarchicalTree, type HierarchicalItem } from '@/components/ui-custom/HierarchicalTree'
 import { NewAdminMovementConceptModal } from '@/modals/admin/NewAdminMovementConceptModal'
 import { useMovementConceptsAdmin, useDeleteMovementConcept, type MovementConceptAdmin } from '@/hooks/use-movement-concepts-admin'
 

@@ -7,7 +7,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from '@/components/ui/badge';
 
 import { Layout } from '@/components/layout/desktop/Layout';
-import { HierarchicalCategoryTree } from '@/components/ui-custom/misc/HierarchicalCategoryTree';
+import { HierarchicalCategoryTree } from '@/components/ui-custom/HierarchicalCategoryTree';
 
 import { useTaskCategoriesAdmin, useAllTaskCategories, useDeleteTaskCategory, TaskCategoryAdmin, TaskGroupAdmin } from '@/hooks/use-task-categories-admin';
 import { useDeleteTaskGroup } from '@/hooks/use-task-groups';

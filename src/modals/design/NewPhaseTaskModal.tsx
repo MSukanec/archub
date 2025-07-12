@@ -3,10 +3,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useEffect } from 'react';
 
-import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout';
-import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
-import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader';
-import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter';
+import { CustomModalLayout } from '@/components/modal/CustomModalLayout';
+import { CustomModalBody } from '@/components/modal/CustomModalBody';
+import { CustomModalHeader } from '@/components/modal/CustomModalHeader';
+import { CustomModalFooter } from '@/components/modal/CustomModalFooter';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';

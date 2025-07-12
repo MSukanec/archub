@@ -11,14 +11,14 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { CustomTable } from '@/components/ui-custom/misc/CustomTable';
+import { CustomTable } from '@/components/ui-custom/CustomTable';
 import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState';
 import ActivityCard from '@/components/cards/ActivityCard';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { supabase } from '@/lib/supabase';
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
-import { MemberActivityChart } from '@/components/ui-custom/charts/MemberActivityChart';
+import { MemberActivityChart } from '@/components/charts/MemberActivityChart';
 import { useUserActivity } from '@/hooks/use-user-activity';
 
 export default function OrganizationActivity() {

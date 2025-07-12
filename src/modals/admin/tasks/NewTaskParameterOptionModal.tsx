@@ -7,10 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 
-import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout';
-import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader';
-import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
-import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter';
+import { CustomModalLayout } from '@/components/modal/CustomModalLayout';
+import { CustomModalHeader } from '@/components/modal/CustomModalHeader';
+import { CustomModalBody } from '@/components/modal/CustomModalBody';
+import { CustomModalFooter } from '@/components/modal/CustomModalFooter';
 
 import { useCreateTaskParameterOption, useUpdateTaskParameterOption, TaskParameterOption } from '@/hooks/use-task-parameters-admin';
 

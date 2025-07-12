@@ -3,9 +3,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useEffect } from 'react';
 
-import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout';
-import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
-import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader';
+import { CustomModalLayout } from '@/components/modal/CustomModalLayout';
+import { CustomModalBody } from '@/components/modal/CustomModalBody';
+import { CustomModalHeader } from '@/components/modal/CustomModalHeader';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';

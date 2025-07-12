@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { Plus, X, Type } from "lucide-react";
-import { CustomCombobox } from "@/components/ui-custom/misc/CustomCombobox";
+import { CustomCombobox } from "@/components/ui-custom/CustomCombobox";
 import { useActions } from "@/hooks/use-actions";
 
 export interface TaskTemplateParameter {

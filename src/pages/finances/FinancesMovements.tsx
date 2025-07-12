@@ -34,9 +34,9 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { CustomTable } from "@/components/ui-custom/misc/CustomTable";
+import { CustomTable } from "@/components/ui-custom/CustomTable";
 import { CustomEmptyState } from "@/components/ui-custom/CustomEmptyState";
-import { FinancialCards } from "@/components/ui-custom/misc/FinancialCards";
+import { FinancialCards } from "@/components/ui-custom/FinancialCards";
 import { FeatureIntroduction } from "@/components/ui-custom/FeatureIntroduction";
 import MovementCard from "@/components/cards/MovementCard";
 import ConversionCard from "@/components/cards/ConversionCard";

@@ -7,10 +7,10 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Calendar } from "lucide-react";
 
-import { CustomModalLayout } from "@/components/ui-custom/modal/CustomModalLayout";
-import { CustomModalHeader } from "@/components/ui-custom/modal/CustomModalHeader";
-import { CustomModalBody } from "@/components/ui-custom/modal/CustomModalBody";
-import { CustomModalFooter } from "@/components/ui-custom/modal/CustomModalFooter";
+import { CustomModalLayout } from "@/components/modal/CustomModalLayout";
+import { CustomModalHeader } from "@/components/modal/CustomModalHeader";
+import { CustomModalBody } from "@/components/modal/CustomModalBody";
+import { CustomModalFooter } from "@/components/modal/CustomModalFooter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -26,7 +26,7 @@ import { useProjectModalities } from "@/hooks/use-project-modalities";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
-import UserSelector from "@/components/ui-custom/misc/UserSelector";
+import UserSelector from "@/components/ui-custom/UserSelector";
 
 const createProjectSchema = z.object({
   name: z.string().min(1, "El nombre es requerido"),

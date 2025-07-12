@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Layout } from '@/components/layout/desktop/Layout';
-import { CustomTable } from '@/components/ui-custom/misc/CustomTable';
+import { CustomTable } from '@/components/ui-custom/CustomTable';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';

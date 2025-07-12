@@ -10,7 +10,7 @@ import { es } from 'date-fns/locale';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext';
 import { useMobile } from '@/hooks/use-mobile';
-import { UserGrowthChart } from '@/components/ui-custom/charts/UserGrowthChart';
+import { UserGrowthChart } from '@/components/charts/UserGrowthChart';
 
 // Hook para obtener estadísticas del sistema
 function useSystemStats() {

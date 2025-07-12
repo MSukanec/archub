@@ -6,7 +6,7 @@ import { Receipt, Edit, Trash2 } from 'lucide-react'
 
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
-import { CustomTable } from '@/components/ui-custom/misc/CustomTable'
+import { CustomTable } from '@/components/ui-custom/CustomTable'
 import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { Badge } from '@/components/ui/badge'

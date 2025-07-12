@@ -25,10 +25,10 @@ import { useToast } from '@/hooks/use-toast';
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext';
 import { useMobile } from '@/hooks/use-mobile';
 import { NewGalleryModal } from '@/modals/construction/NewGalleryModal';
-import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout';
-import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader';
-import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
-import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter';
+import { CustomModalLayout } from '@/components/modal/CustomModalLayout';
+import { CustomModalHeader } from '@/components/modal/CustomModalHeader';
+import { CustomModalBody } from '@/components/modal/CustomModalBody';
+import { CustomModalFooter } from '@/components/modal/CustomModalFooter';
 import { 
   Images, 
   Filter, 

@@ -7,10 +7,10 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Calendar, User, Search, Check, X, Link, Unlink, CheckCircle, Mail, MessageSquare, UserPlus } from "lucide-react";
 
-import { CustomModalLayout } from "@/components/ui-custom/modal/CustomModalLayout";
-import { CustomModalHeader } from "@/components/ui-custom/modal/CustomModalHeader";
-import { CustomModalBody } from "@/components/ui-custom/modal/CustomModalBody";
-import { CustomModalFooter } from "@/components/ui-custom/modal/CustomModalFooter";
+import { CustomModalLayout } from "@/components/modal/CustomModalLayout";
+import { CustomModalHeader } from "@/components/modal/CustomModalHeader";
+import { CustomModalBody } from "@/components/modal/CustomModalBody";
+import { CustomModalFooter } from "@/components/modal/CustomModalFooter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,7 +26,7 @@ import { useSearchUsers } from "@/hooks/use-search-users";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
-import { CustomPhoneInput } from "@/components/ui-custom/misc/CustomPhoneInput";
+import { CustomPhoneInput } from "@/components/ui-custom/CustomPhoneInput";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 

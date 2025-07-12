@@ -9,10 +9,10 @@ import { Layout } from "@/components/layout/desktop/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { OrganizationStatsCards } from "@/components/ui-custom/cards/OrganizationStatsCards";
-import { OrganizationActivityChart } from "@/components/ui-custom/charts/OrganizationActivityChart";
-import { OrganizationQuickActions } from "@/components/ui-custom/cards/OrganizationQuickActions";
-import { OrganizationRecentProjects } from "@/components/ui-custom/cards/OrganizationRecentProjects";
+import { OrganizationStatsCards } from "@/components/cards/OrganizationStatsCards";
+import { OrganizationActivityChart } from "@/components/charts/OrganizationActivityChart";
+import { OrganizationQuickActions } from "@/components/cards/OrganizationQuickActions";
+import { OrganizationRecentProjects } from "@/components/cards/OrganizationRecentProjects";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import {

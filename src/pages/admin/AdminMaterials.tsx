@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 
 import { Layout } from '@/components/layout/desktop/Layout'
-import { CustomTable } from '@/components/ui-custom/misc/CustomTable'
+import { CustomTable } from '@/components/ui-custom/CustomTable'
 import { NewAdminMaterialModal } from '@/modals/admin/NewAdminMaterialModal'
 
 import { Plus, Edit, Trash2, Package, Crown } from 'lucide-react'

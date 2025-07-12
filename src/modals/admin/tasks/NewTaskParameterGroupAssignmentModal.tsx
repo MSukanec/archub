@@ -3,10 +3,10 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 
-import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout';
-import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader';
-import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
-import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter';
+import { CustomModalLayout } from '@/components/modal/CustomModalLayout';
+import { CustomModalHeader } from '@/components/modal/CustomModalHeader';
+import { CustomModalBody } from '@/components/modal/CustomModalBody';
+import { CustomModalFooter } from '@/components/modal/CustomModalFooter';
 
 import { useTaskParameterValues, useTaskParameterOptionGroupItems, useToggleTaskParameterOptionInGroup } from '@/hooks/use-task-parameters-admin';
 

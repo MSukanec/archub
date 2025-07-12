@@ -6,9 +6,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuthStore } from "@/stores/authStore";
 import { MobileActionBarProvider } from "@/components/layout/mobile/MobileActionBarContext";
-import { AuthRedirect } from "@/components/ui-custom/misc/AuthRedirect";
-import { ProtectedRoute } from "@/components/ui-custom/misc/ProtectedRoute";
-import { AdminProtectedRoute } from "@/components/ui-custom/misc/AdminProtectedRoute";
+import { AuthRedirect } from "@/components/ui-custom/AuthRedirect";
+import { ProtectedRoute } from "@/components/ui-custom/ProtectedRoute";
+import { AdminProtectedRoute } from "@/components/ui-custom/AdminProtectedRoute";
 
 // Public Pages
 import Landing from "@/pages/Landing";

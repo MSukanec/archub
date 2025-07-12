@@ -14,7 +14,7 @@ import { NewListModal } from '@/modals/tasks/NewListModal';
 
 import { useOrganizationMembers } from '@/hooks/use-organization-members';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { TaskListWithCompleted } from '@/components/ui-custom/misc/TaskListWithCompleted';
+import { TaskListWithCompleted } from '@/components/ui-custom/TaskListWithCompleted';
 import { useToggleKanbanCardCompleted } from '@/hooks/use-kanban';
 import type { KanbanList, KanbanCard } from '@/hooks/use-kanban';
 

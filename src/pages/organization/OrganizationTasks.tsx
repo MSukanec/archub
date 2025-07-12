@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/layout/desktop/Layout';
-import { CustomKanban } from '@/components/ui-custom/misc/CustomKanban';
+import { CustomKanban } from '@/components/ui-custom/CustomKanban';
 import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -13,9 +13,9 @@ import { useKanbanStore } from '@/stores/kanbanStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { NewBoardModal } from '@/modals/tasks/NewBoardModal';
 import { NewListModal } from '@/modals/tasks/NewListModal';
-import { CustomRestricted } from '@/components/ui-custom/misc/CustomRestricted';
+import { CustomRestricted } from '@/components/ui-custom/CustomRestricted';
 import { MobileActionBarProvider, useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext';
-import { MobileActionBar } from '@/components/ui-custom/mobile/MobileActionBar';
+import { MobileActionBar } from '@/components/layout/mobile/MobileActionBar';
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
 import { Card } from '@/components/ui/card';
 

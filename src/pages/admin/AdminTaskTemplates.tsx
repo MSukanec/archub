@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 
 import { Layout } from '@/components/layout/desktop/Layout'
-import { CustomTable } from '@/components/ui-custom/misc/CustomTable'
+import { CustomTable } from '@/components/ui-custom/CustomTable'
 import { NewTaskTemplateModal } from '@/modals/tasks/NewTaskTemplateModal'
 import { useTaskTemplatesAdmin, useDeleteTaskTemplate, type TaskTemplate } from '@/hooks/use-task-templates-admin'
 

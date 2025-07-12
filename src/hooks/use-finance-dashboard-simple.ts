@@ -348,13 +348,13 @@ export function useWalletBalances(organizationId: string | undefined, projectId:
           }
         })
 
-        // Generate colors
+        // Generate colors - using hardcoded HSL values like ExpensesByCategory
         const colors = [
-          'hsl(var(--chart-1))',
-          'hsl(var(--chart-2))',
-          'hsl(var(--chart-3))',
-          'hsl(var(--chart-4))',
-          'hsl(var(--chart-5))'
+          'hsl(110, 40%, 50%)',
+          'hsl(173, 58%, 39%)',
+          'hsl(197, 37%, 24%)',
+          'hsl(43, 74%, 66%)',
+          'hsl(0, 87%, 67%)'
         ]
 
         console.log('Wallet balances calculated:', walletBalances)

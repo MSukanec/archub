@@ -55,8 +55,8 @@ import { Input } from "@/components/ui/input";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
 import SidebarButton from "./SidebarButton";
-import CustomRestricted from "@/components/ui-custom/misc/CustomRestricted";
-import Plan from "@/components/ui-custom/misc/Plan";
+import CustomRestricted from "@/components/ui-custom/CustomRestricted";
+import Plan from "@/components/ui-custom/Plan";
 import { useProjectContext } from "@/context/projectContext";
 
 export function Sidebar() {

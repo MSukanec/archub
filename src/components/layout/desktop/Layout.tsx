@@ -7,7 +7,7 @@ import { useThemeStore } from "@/stores/themeStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useSidebarStore, useSecondarySidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
-import { MobileActionBar } from "@/components/ui-custom/mobile/MobileActionBar";
+import { MobileActionBar } from "@/components/layout/mobile/MobileActionBar";
 import { useMobileActionBar } from "@/components/layout/mobile/MobileActionBarContext";
 import { useMobile } from "@/hooks/use-mobile";
 

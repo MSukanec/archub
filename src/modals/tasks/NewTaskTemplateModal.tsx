@@ -2,10 +2,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useEffect } from "react";
-import { CustomModalLayout } from "@/components/ui-custom/modal/CustomModalLayout";
-import { CustomModalHeader } from "@/components/ui-custom/modal/CustomModalHeader";
-import { CustomModalBody } from "@/components/ui-custom/modal/CustomModalBody";
-import { CustomModalFooter } from "@/components/ui-custom/modal/CustomModalFooter";
+import { CustomModalLayout } from "@/components/modal/CustomModalLayout";
+import { CustomModalHeader } from "@/components/modal/CustomModalHeader";
+import { CustomModalBody } from "@/components/modal/CustomModalBody";
+import { CustomModalFooter } from "@/components/modal/CustomModalFooter";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -14,7 +14,7 @@ import { FileText, Package2, Settings } from "lucide-react";
 import { useCreateTaskTemplate, useUpdateTaskTemplate, type TaskTemplate } from "@/hooks/use-task-templates-admin";
 import { useTaskParametersAdmin } from "@/hooks/use-task-parameters-admin";
 import { useUnits } from "@/hooks/use-units";
-import { TemplateNameBuilder, type TaskTemplateParameter } from "@/components/ui-custom/misc/TemplateNameBuilder";
+import { TemplateNameBuilder, type TaskTemplateParameter } from "@/components/ui-custom/TemplateNameBuilder";
 import { type TaskCategoryAdmin, useTaskCategoriesAdmin } from "@/hooks/use-task-categories-admin";
 
 const formSchema = z.object({

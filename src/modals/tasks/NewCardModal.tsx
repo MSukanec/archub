@@ -2,10 +2,10 @@ import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout';
-import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader';
-import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody';
-import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter';
+import { CustomModalLayout } from '@/components/modal/CustomModalLayout';
+import { CustomModalHeader } from '@/components/modal/CustomModalHeader';
+import { CustomModalBody } from '@/components/modal/CustomModalBody';
+import { CustomModalFooter } from '@/components/modal/CustomModalFooter';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -13,7 +13,7 @@ import { useCreateKanbanCard } from '@/hooks/use-kanban';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useOrganizationMembers } from '@/hooks/use-organization-members';
 import { toast } from '@/hooks/use-toast';
-import UserSelector from '@/components/ui-custom/misc/UserSelector';
+import UserSelector from '@/components/ui-custom/UserSelector';
 
 const cardSchema = z.object({
   title: z.string().min(1, 'El título es requerido'),
