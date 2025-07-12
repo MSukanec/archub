@@ -27,6 +27,7 @@ import { useMobileAvatarMenuStore } from "../mobile/useMobileAvatarMenuStore";
 import { useMobile } from "@/hooks/use-mobile";
 import { ProjectSelector } from "@/components/navigation/ProjectSelector";
 import { useProjectContext } from "@/context/projectContext";
+import { useEffect } from "react";
 
 interface HeaderProps {
   icon?: React.ComponentType<any> | React.ReactNode;
@@ -64,7 +65,14 @@ export function Header({
   const { data: userData } = useCurrentUser();
   const { data: projects = [] } = useProjects(userData?.preferences?.last_organization_id);
   const { setSidebarContext, currentSidebarContext } = useNavigationStore();
-  const { selectedProjectId } = useProjectContext();
+  const { selectedProjectId, setSelectedProject } = useProjectContext();
+
+  // Initialize project context with user preference if not set
+  useEffect(() => {
+    if (selectedProjectId === null && userData?.preferences?.last_project_id) {
+      setSelectedProject(userData.preferences.last_project_id);
+    }
+  }, [userData?.preferences?.last_project_id, selectedProjectId, setSelectedProject]);
 
   // Organization selection mutation
   const selectOrganizationMutation = useMutation({
@@ -106,6 +114,8 @@ export function Header({
   });
 
   const handleProjectSelect = (projectId: string | null) => {
+    // Update both the project context and user preferences
+    setSelectedProject(projectId);
     selectProjectMutation.mutate(projectId);
   };
 
