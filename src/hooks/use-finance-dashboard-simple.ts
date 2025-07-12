@@ -533,16 +533,16 @@ export function useExpensesByCategory(organizationId: string | undefined, projec
 
         // Convert to array with percentages and colors
         const colors = [
-          'hsl(var(--chart-1))',
-          'hsl(var(--chart-2))',
-          'hsl(var(--chart-3))',
-          'hsl(var(--chart-4))',
-          'hsl(var(--chart-5))',
-          '#8884d8',
-          '#82ca9d',
-          '#ffc658',
-          '#ff7300',
-          '#0088fe'
+          "hsl(110, 40%, 50%)",
+          "hsl(173, 58%, 39%)",
+          "hsl(197, 37%, 24%)",
+          "hsl(43, 74%, 66%)",
+          "hsl(0, 87%, 67%)",
+          "hsl(270, 50%, 50%)",
+          "hsl(20, 70%, 50%)",
+          "hsl(60, 80%, 50%)",
+          "hsl(120, 60%, 40%)",
+          "hsl(300, 70%, 60%)"
         ]
 
         const result: ExpensesCategoryData[] = Array.from(categoryTotals.entries())

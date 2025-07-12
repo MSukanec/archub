@@ -79,7 +79,15 @@ export function WalletBalanceChart({ data, isLoading }: WalletBalanceChartProps)
           })}
         </Pie>
         <Tooltip content={<CustomTooltip />} />
-        <Legend />
+        <Legend 
+          verticalAlign="bottom" 
+          height={28}
+          formatter={(value, entry: any) => (
+            <span style={{ color: entry.color }} className="text-sm">
+              {entry.payload.wallet}
+            </span>
+          )}
+        />
       </PieChart>
     </ResponsiveContainer>
   )

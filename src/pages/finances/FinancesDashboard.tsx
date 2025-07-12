@@ -74,7 +74,7 @@ export default function FinancesDashboard() {
   // Show empty state if no movements exist
   if (!summaryLoading && (!financialSummary || financialSummary.totalMovements === 0)) {
     return (
-      <Layout headerProps={headerProps} isWide={true}>
+      <Layout headerProps={headerProps} wide={true}>
         <CustomEmptyState 
           icon={<DollarSign className="h-12 w-12" />}
           title="Sin movimientos financieros registrados"
@@ -96,7 +96,7 @@ export default function FinancesDashboard() {
   const currentProject = userData?.project;
 
   return (
-    <Layout headerProps={headerProps} isWide={true}>
+    <Layout headerProps={headerProps} wide={true}>
       <div className="space-y-6">
         {/* Header Row - Welcome Card (75%) + Movements Card (25%) */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-6">
