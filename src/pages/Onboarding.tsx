@@ -235,10 +235,14 @@ export default function SelectMode() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      console.log('User type updated successfully, navigating to dashboard');
       toast({
         title: "Modo actualizado",
         description: "Tu modo de uso se ha actualizado correctamente.",
       });
+      
+      // Navigate to dashboard
+      setSidebarContext('organization');
       navigate('/organization/dashboard');
     },
     onError: (error) => {
@@ -252,10 +256,25 @@ export default function SelectMode() {
   });
 
   const handleFinishOnboarding = () => {
-    if (isOnboarding) {
+    console.log('handleFinishOnboarding called', { 
+      isOnboarding, 
+      last_user_type: formData.last_user_type,
+      currentStep,
+      hasUserData: !!userData?.user_data?.first_name 
+    });
+    
+    // Si el usuario está en el paso 4 pero ya tiene datos básicos (nombre, discovery), 
+    // solo actualizar el tipo de usuario, no hacer onboarding completo
+    if (currentStep === 4 && userData?.user_data?.first_name && userData?.user_data?.discovered_by) {
+      console.log('User has basic data, just updating user type');
+      if (formData.last_user_type) {
+        updateUserTypeMutation.mutate(formData.last_user_type);
+      }
+    } else if (isOnboarding) {
+      console.log('Running full onboarding save');
       saveOnboardingMutation.mutate();
     } else {
-      // Just update the user type
+      console.log('Just updating user type');
       if (formData.last_user_type) {
         updateUserTypeMutation.mutate(formData.last_user_type);
       }
