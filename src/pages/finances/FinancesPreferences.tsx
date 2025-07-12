@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CustomMultiComboBox } from '@/components/ui-custom/misc/CustomMultiComboBox';
 import { HelpPopover } from '@/components/ui-custom/HelpPopover';
+import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useCurrencies, useOrganizationCurrencies } from '@/hooks/use-currencies';
@@ -34,7 +35,7 @@ export default function FinancesPreferences() {
 
   // Set sidebar context on component mount
   useEffect(() => {
-    setSidebarContext('finances');
+    setSidebarContext('organizacion');
   }, [setSidebarContext]);
 
   // Load existing organization preferences
@@ -254,15 +255,18 @@ export default function FinancesPreferences() {
   const availableSecondaryWallets = allWallets?.filter(w => w.id !== defaultWallet) || [];
 
   return (
-    <Layout headerProps={{ title: "Preferencias de Finanzas" }}>
+    <Layout headerProps={{ title: "Preferencias" }}>
       <div className="max-w-4xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="space-y-2">
-          <h1 className="text-2xl font-semibold">Preferencias de Finanzas</h1>
-          <p className="text-sm text-muted-foreground">
-            Configura las preferencias financieras de tu organización, incluyendo monedas y billeteras predeterminadas.
-          </p>
-        </div>
+        <FeatureIntroduction
+          icon={<Coins className="h-5 w-5" />}
+          title="Preferencias de la Organización"
+          features={[
+            "Configurar monedas predeterminadas y secundarias para movimientos financieros",
+            "Establecer billeteras por defecto para optimizar la gestión de flujo de caja",
+            "Personalizar las opciones disponibles al crear nuevos movimientos", 
+            "Administrar las preferencias globales que afectan a todos los proyectos"
+          ]}
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Left Column - Titles and Descriptions */}

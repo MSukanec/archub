@@ -210,6 +210,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: CheckSquare, label: 'Tareas', href: '/tasks' },
       { icon: Users, label: 'Miembros', href: '/organization/members' },
       { icon: Activity, label: 'Actividad', href: '/organization/activity' },
+      { icon: Settings, label: 'Preferencias', href: '/finances/preferences' },
     ],
     project: [
       { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },
@@ -249,9 +250,8 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => handleNavigationWithAnimation('/project/dashboard', 'project', 'right') },
       { type: 'divider' },
       { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
-
-      { icon: HandCoins, label: 'Compromisos de Pago', href: '/finances/installments' },
-      { icon: Settings, label: 'Preferencias de Finanzas', href: '/finances/preferences' },
+      { icon: CreditCard, label: 'Aportes', href: '/finances/installments' },
+      { icon: HandCoins, label: 'Compromisos', href: '/finances/committed' },
     ],
     commercialization: [
       { icon: Home, label: 'Resumen de Comercialización', href: '/commercialization/dashboard' },

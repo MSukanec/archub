@@ -119,6 +119,16 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 12, 2025. Navigation restructuring: Moved "Preferencias de Finanzas" to organization submenu as "Preferencias" - COMPLETED
+  • Relocated "Preferencias de Finanzas" from finances submenu to organization submenu (bottom position)
+  • Changed button label from "Preferencias de Finanzas" to simply "Preferencias" 
+  • Updated page header title from "Preferencias de Finanzas" to "Preferencias"
+  • Modified sidebar context from 'finances' to 'organizacion' for proper navigation highlighting
+  • Added FeatureIntroduction component explaining organization preferences functionality
+  • Removed old "Preferencias de Finanzas" title and description text
+  • Applied changes to both desktop SidebarSubmenu.tsx and mobile MobileMenu.tsx
+  • Enhanced page with features explanation: currency/wallet defaults, movement options, global preferences
+Changelog:
 - July 12, 2025. Complete CardDetailsModal field reorganization and modal positioning fix - COMPLETED
   • Fixed modal positioning by moving CardDetailsModal management from CustomKanban to OrganizationTasks parent level
   • Reorganized modal fields per user specification: CREADOR → Fecha (created_at) → TITULO → DESCRIPCION → ASIGNADO A

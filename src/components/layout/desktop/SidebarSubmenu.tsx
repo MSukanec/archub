@@ -45,7 +45,8 @@ import {
   HardHat,
   Brush,
   UserCircle,
-  HandCoins
+  HandCoins,
+  Settings
 } from "lucide-react";
 
 export function SidebarSubmenu() {
@@ -101,6 +102,7 @@ export function SidebarSubmenu() {
       { icon: CheckSquare, label: 'Tareas', href: '/tasks' },
       { icon: Users, label: 'Miembros', href: '/organization/members' },
       { icon: Activity, label: 'Actividad', href: '/organization/activity' },
+      { icon: Settings, label: 'Preferencias', href: '/finances/preferences' },
     ],
     
     'proyecto': [
@@ -131,9 +133,8 @@ export function SidebarSubmenu() {
     'finanzas': [
       { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard', requiresProject: true },
       { icon: DollarSign, label: 'Movimientos', href: '/finances/movements', requiresProject: true },
-
-      { icon: HandCoins, label: 'Compromisos de Pago', href: '/finances/installments', requiresProject: true },
-      { icon: FolderOpen, label: 'Preferencias de Finanzas', href: '/finances/preferences' },
+      { icon: CreditCard, label: 'Aportes', href: '/finances/installments', requiresProject: true },
+      { icon: HandCoins, label: 'Compromisos', href: '/finances/committed', requiresProject: true },
     ],
 
     'comercializacion': [
