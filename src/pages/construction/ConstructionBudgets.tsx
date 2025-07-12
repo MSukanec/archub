@@ -706,7 +706,7 @@ export default function ConstructionBudgets() {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                  <div className="flex items-center gap-3">
                     {/* Group by Rubro Switch */}
                     <div className="flex items-center gap-2">
                       <Switch
@@ -775,15 +775,15 @@ export default function ConstructionBudgets() {
                     />
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-20 sm:w-24">
+                    <div className="w-16 sm:w-20">
                       <Input
                         type="number"
                         value={quickQuantity}
                         onChange={(e) => setQuickQuantity(Number(e.target.value) || 1)}
-                        placeholder="Cant."
+                        placeholder="1"
                         min="1"
                         step="0.01"
-                        className="text-center text-sm"
+                        className="text-center h-10"
                         style={{
                           MozAppearance: 'textfield', // Firefox
                           WebkitAppearance: 'none', // Chrome/Safari
@@ -800,7 +800,7 @@ export default function ConstructionBudgets() {
                     <Button
                       onClick={handleQuickAddTask}
                       disabled={!quickTaskId || isAddingQuickTask}
-                      className="px-3 sm:px-4 whitespace-nowrap"
+                      className="px-3 sm:px-4 whitespace-nowrap h-10"
                       size="sm"
                     >
                       {isAddingQuickTask ? "Agregando..." : "Agregar Tarea"}
