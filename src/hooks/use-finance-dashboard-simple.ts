@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { format, subMonths, startOfMonth, endOfMonth, eachMonthOfInterval } from 'date-fns'
+import { format, subMonths, startOfMonth, endOfMonth, eachMonthOfInterval, startOfYear, endOfYear, subYears, subQuarters, startOfQuarter, endOfQuarter } from 'date-fns'
 import { es } from 'date-fns/locale'
 
 interface FinancialSummary {
@@ -26,9 +26,40 @@ interface WalletBalance {
   color: string
 }
 
-export function useFinancialSummary(organizationId: string | undefined, projectId: string | undefined) {
+// Helper function to get date range based on time period
+function getDateRange(timePeriod: string) {
+  const now = new Date()
+  
+  switch (timePeriod) {
+    case 'mes':
+      return {
+        start: startOfMonth(now),
+        end: endOfMonth(now)
+      }
+    case 'trimestre':
+      return {
+        start: startOfQuarter(now),
+        end: endOfQuarter(now)
+      }
+    case 'semestre':
+      return {
+        start: startOfMonth(subMonths(now, 5)),
+        end: endOfMonth(now)
+      }
+    case 'año':
+      return {
+        start: startOfYear(now),
+        end: endOfYear(now)
+      }
+    case 'desde-siempre':
+    default:
+      return null // No date filtering
+  }
+}
+
+export function useFinancialSummary(organizationId: string | undefined, projectId: string | undefined, timePeriod: string = 'desde-siempre') {
   return useQuery({
-    queryKey: ['financial-summary', organizationId, projectId],
+    queryKey: ['financial-summary', organizationId, projectId, timePeriod],
     queryFn: async (): Promise<FinancialSummary> => {
       if (!organizationId || !supabase) {
         return {
@@ -51,6 +82,14 @@ export function useFinancialSummary(organizationId: string | undefined, projectI
 
         if (projectId) {
           movementsQuery = movementsQuery.eq('project_id', projectId)
+        }
+
+        // Apply date filtering if needed
+        const dateRange = getDateRange(timePeriod)
+        if (dateRange) {
+          movementsQuery = movementsQuery
+            .gte('movement_date', dateRange.start.toISOString())
+            .lte('movement_date', dateRange.end.toISOString())
         }
 
         const { data: movements, error } = await movementsQuery
@@ -136,9 +175,9 @@ export function useFinancialSummary(organizationId: string | undefined, projectI
   })
 }
 
-export function useMonthlyFlowData(organizationId: string | undefined, projectId: string | undefined) {
+export function useMonthlyFlowData(organizationId: string | undefined, projectId: string | undefined, timePeriod: string = 'desde-siempre') {
   return useQuery({
-    queryKey: ['monthly-flow', organizationId, projectId],
+    queryKey: ['monthly-flow', organizationId, projectId, timePeriod],
     queryFn: async (): Promise<MonthlyFlowData[]> => {
       if (!organizationId || !supabase) return []
 
@@ -219,9 +258,9 @@ export function useMonthlyFlowData(organizationId: string | undefined, projectId
   })
 }
 
-export function useWalletBalances(organizationId: string | undefined, projectId: string | undefined) {
+export function useWalletBalances(organizationId: string | undefined, projectId: string | undefined, timePeriod: string = 'desde-siempre') {
   return useQuery({
-    queryKey: ['wallet-balances', organizationId, projectId],
+    queryKey: ['wallet-balances', organizationId, projectId, timePeriod],
     queryFn: async (): Promise<WalletBalance[]> => {
       if (!organizationId || !supabase) return []
 
@@ -229,11 +268,19 @@ export function useWalletBalances(organizationId: string | undefined, projectId:
         // Get movements data
         let movementsQuery = supabase
           .from('movements')
-          .select('amount, type_id, wallet_id')
+          .select('amount, type_id, wallet_id, movement_date')
           .eq('organization_id', organizationId)
 
         if (projectId) {
           movementsQuery = movementsQuery.eq('project_id', projectId)
+        }
+
+        // Apply date filtering if needed
+        const dateRange = getDateRange(timePeriod)
+        if (dateRange) {
+          movementsQuery = movementsQuery
+            .gte('movement_date', dateRange.start.toISOString())
+            .lte('movement_date', dateRange.end.toISOString())
         }
 
         const { data: movements, error } = await movementsQuery
@@ -319,9 +366,9 @@ export function useWalletBalances(organizationId: string | undefined, projectId:
   })
 }
 
-export function useRecentMovements(organizationId: string | undefined, projectId: string | undefined, limit: number = 5) {
+export function useRecentMovements(organizationId: string | undefined, projectId: string | undefined, limit: number = 5, timePeriod: string = 'desde-siempre') {
   return useQuery({
-    queryKey: ['recent-movements', organizationId, projectId, limit],
+    queryKey: ['recent-movements', organizationId, projectId, limit, timePeriod],
     queryFn: async () => {
       if (!organizationId || !supabase) return []
 
@@ -336,6 +383,14 @@ export function useRecentMovements(organizationId: string | undefined, projectId
 
         if (projectId) {
           movementsQuery = movementsQuery.eq('project_id', projectId)
+        }
+
+        // Apply date filtering if needed
+        const dateRange = getDateRange(timePeriod)
+        if (dateRange) {
+          movementsQuery = movementsQuery
+            .gte('movement_date', dateRange.start.toISOString())
+            .lte('movement_date', dateRange.end.toISOString())
         }
 
         const { data: movements, error } = await movementsQuery

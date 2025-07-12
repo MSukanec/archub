@@ -107,23 +107,6 @@ export default function FinancesDashboard() {
           >
             <Card>
               <CardContent className="p-4 md:p-6">
-                {/* Header with time period selector */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex-1" />
-                  <Select value={timePeriod} onValueChange={setTimePeriod}>
-                    <SelectTrigger className="w-40">
-                      <SelectValue placeholder="Período" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="desde-siempre">DESDE SIEMPRE</SelectItem>
-                      <SelectItem value="este-mes">Este mes</SelectItem>
-                      <SelectItem value="trimestre">Trimestre</SelectItem>
-                      <SelectItem value="semestre">Semestre</SelectItem>
-                      <SelectItem value="año">Año</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
                 <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6">
                   {/* Financial Icon */}
                   <div className="flex-shrink-0">
@@ -136,14 +119,28 @@ export default function FinancesDashboard() {
 
                   {/* Financial Summary Info */}
                   <div className="flex-1">
-                    <motion.h1
-                      className="text-2xl md:text-4xl font-black text-foreground mb-1"
-                      initial={{ scale: 0.8 }}
-                      animate={{ scale: 1 }}
-                      transition={{ delay: 0.2, duration: 0.3 }}
-                    >
-                      Resumen de Finanzas
-                    </motion.h1>
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-4 mb-1">
+                      <motion.h1
+                        className="text-2xl md:text-4xl font-black text-foreground"
+                        initial={{ scale: 0.8 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: 0.2, duration: 0.3 }}
+                      >
+                        Resumen de Finanzas
+                      </motion.h1>
+                      <Select value={timePeriod} onValueChange={setTimePeriod}>
+                        <SelectTrigger className="w-40">
+                          <SelectValue placeholder="Período" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="desde-siempre">Desde siempre</SelectItem>
+                          <SelectItem value="año">Año</SelectItem>
+                          <SelectItem value="semestre">Semestre</SelectItem>
+                          <SelectItem value="trimestre">Trimestre</SelectItem>
+                          <SelectItem value="mes">Mes</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                     <p className="text-base md:text-lg text-muted-foreground mb-2 md:mb-3">
                       {currentProject ? (
                         <>
