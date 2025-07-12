@@ -58,7 +58,7 @@ export function Step3Discovery() {
   const { formData, updateFormData, goNextStep, goPrevStep } = useOnboardingStore();
   const { data: userData } = useCurrentUser();
 
-  // Load existing user data if available (only once when userData loads)
+  // Load existing user data if available
   useEffect(() => {
     if (userData?.user_data) {
       console.log('Step3Discovery - Loading existing data:', {
@@ -68,19 +68,35 @@ export function Step3Discovery() {
         team_size: userData.user_data.team_size
       });
       
-      // Only update if we don't have values yet in the form
-      if (!formData.discovered_by && userData.user_data.discovered_by) {
-        updateFormData({
-          discovered_by: userData.user_data.discovered_by,
-          discovered_by_other_text: userData.user_data.discovered_by_other_text || '',
-          main_use: userData.user_data.main_use || '',
-          user_role: userData.user_data.user_role || '',
-          user_role_other: userData.user_data.user_role_other || '',
-          team_size: userData.user_data.team_size || '',
-        });
+      // Update form data with existing values (overwrite form state with DB values)
+      const updateData: any = {};
+      
+      if (userData.user_data.discovered_by) {
+        updateData.discovered_by = userData.user_data.discovered_by;
+        updateData.discovered_by_other_text = userData.user_data.discovered_by_other_text || '';
+      }
+      
+      if (userData.user_data.main_use) {
+        updateData.main_use = userData.user_data.main_use;
+        updateData.main_use_other = userData.user_data.main_use_other || '';
+      }
+      
+      if (userData.user_data.user_role) {
+        updateData.user_role = userData.user_data.user_role;
+        updateData.user_role_other = userData.user_data.user_role_other || '';
+      }
+      
+      if (userData.user_data.team_size) {
+        updateData.team_size = userData.user_data.team_size;
+      }
+      
+      // Only update if we have data to update
+      if (Object.keys(updateData).length > 0) {
+        console.log('Step3Discovery - Updating form with:', updateData);
+        updateFormData(updateData);
       }
     }
-  }, [userData?.user_data]);
+  }, [userData?.user_data, updateFormData]);
 
   const handleNext = () => {
     if (formData.discovered_by && (formData.discovered_by !== 'Otro' || formData.discovered_by_other_text)) {
