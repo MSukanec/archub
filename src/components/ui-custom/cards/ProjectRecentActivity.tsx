@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { FileText, Construction, DollarSign } from 'lucide-react'
+import { FileText, Construction, DollarSign, Activity } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useQuery } from '@tanstack/react-query'
@@ -95,9 +95,12 @@ export function ProjectRecentActivity({ projectId }: ProjectRecentActivityProps)
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Actividad Reciente</CardTitle>
+      <Card className="bg-[var(--card-bg)] border-[var(--card-border)]">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-2">
+            <Activity className="h-5 w-5 text-[var(--accent)]" />
+            <CardTitle className="text-foreground">Actividad Reciente</CardTitle>
+          </div>
           <p className="text-sm text-muted-foreground">
             Últimas actividades del proyecto
           </p>
@@ -120,23 +123,13 @@ export function ProjectRecentActivity({ projectId }: ProjectRecentActivityProps)
     )
   }
 
-  const getActivityBadge = (type: string) => {
-    switch (type) {
-      case 'document':
-        return <Badge variant="secondary" className="bg-blue-100 text-blue-800">Documento</Badge>
-      case 'site_log':
-        return <Badge variant="secondary" className="bg-orange-100 text-orange-800">Bitácora</Badge>
-      case 'movement':
-        return <Badge variant="secondary" className="bg-purple-100 text-purple-800">Finanzas</Badge>
-      default:
-        return <Badge variant="outline">Actividad</Badge>
-    }
-  }
-
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Actividad Reciente</CardTitle>
+    <Card className="bg-[var(--card-bg)] border-[var(--card-border)]">
+      <CardHeader className="pb-4">
+        <div className="flex items-center gap-2">
+          <Activity className="h-5 w-5 text-[var(--accent)]" />
+          <CardTitle className="text-foreground">Actividad Reciente</CardTitle>
+        </div>
         <p className="text-sm text-muted-foreground">
           Últimas actividades del proyecto
         </p>
@@ -144,25 +137,25 @@ export function ProjectRecentActivity({ projectId }: ProjectRecentActivityProps)
       <CardContent>
         {!recentActivity || recentActivity.length === 0 ? (
           <div className="text-center py-8">
-            <div className="text-muted-foreground text-sm">
-              No hay actividad reciente en este proyecto
-            </div>
+            <Activity className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <h3 className="font-medium mb-2 text-foreground">Sin actividad reciente</h3>
+            <p className="text-sm text-muted-foreground">
+              La actividad del proyecto aparecerá aquí
+            </p>
           </div>
         ) : (
           <div className="space-y-4">
             {recentActivity.map((activity) => (
-              <div key={`${activity.type}-${activity.id}`} className="flex items-start space-x-3">
+              <div key={`${activity.type}-${activity.id}`} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-accent/5 transition-colors">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={activity.creator?.avatar_url} />
-                  <AvatarFallback className="text-xs">
+                  <AvatarFallback className="text-xs bg-[var(--accent)] text-[var(--accent-foreground)]">
                     {activity.creator?.full_name?.charAt(0) || 'U'}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <activity.icon className="h-4 w-4 text-muted-foreground" />
-                    <p className="text-sm font-medium truncate">{activity.title}</p>
-                    {getActivityBadge(activity.type)}
+                    <p className="text-sm font-medium truncate text-foreground">{activity.title}</p>
                   </div>
                   {activity.description && (
                     <p className="text-xs text-muted-foreground truncate">
@@ -173,6 +166,7 @@ export function ProjectRecentActivity({ projectId }: ProjectRecentActivityProps)
                     {format(activity.date, "d 'de' MMMM 'a las' HH:mm", { locale: es })}
                   </p>
                 </div>
+                <activity.icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
               </div>
             ))}
           </div>

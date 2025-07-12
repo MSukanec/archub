@@ -97,13 +97,13 @@ export default function ProjectDashboard() {
   return (
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
-        {/* Welcome Card with Dynamic Greeting */}
+        {/* Welcome Card with Project Info */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <Card>
+          <Card className="bg-[var(--card-bg)] border-[var(--card-border)]">
             <CardContent className="p-4 md:p-6">
               <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6">
                 {/* Project Icon */}
@@ -115,7 +115,7 @@ export default function ProjectDashboard() {
                   </Avatar>
                 </div>
 
-                {/* Greeting and Project Info */}
+                {/* Project Info */}
                 <div className="flex-1">
                   <motion.h1
                     className="text-2xl md:text-4xl font-black text-foreground mb-1"
@@ -123,11 +123,11 @@ export default function ProjectDashboard() {
                     animate={{ scale: 1 }}
                     transition={{ delay: 0.2, duration: 0.3 }}
                   >
-                    {greeting}, {userName}
+                    {currentProject?.name || 'Proyecto'}
                   </motion.h1>
                   <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-4">
                     <p className="text-base md:text-lg text-muted-foreground">
-                      Resumen del proyecto <span className="font-semibold text-foreground">{currentProject?.name}</span>
+                      Resumen del proyecto
                     </p>
                     {currentProject?.status && (
                       <Badge variant="outline" className="w-fit">
@@ -154,14 +154,14 @@ export default function ProjectDashboard() {
         {/* Statistics Cards */}
         <ProjectStatsCards stats={stats} isLoading={statsLoading} />
 
-        {/* Activity Chart and Quick Actions */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ProjectActivityChart data={activityData || []} isLoading={activityLoading} />
-          <ProjectQuickActions />
-        </div>
+        {/* Activity Chart - Full Width */}
+        <ProjectActivityChart data={activityData || []} isLoading={activityLoading} />
 
-        {/* Recent Activity */}
-        <ProjectRecentActivity projectId={projectId} />
+        {/* Quick Actions and Recent Activity */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ProjectQuickActions />
+          <ProjectRecentActivity projectId={projectId} />
+        </div>
       </div>
     </Layout>
   );
