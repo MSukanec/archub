@@ -8,9 +8,10 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { useState, useEffect, Fragment } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { Calculator, Plus, Trash2, Building2, Edit, FileText, BarChart3, Settings } from 'lucide-react'
+import { Calculator, Plus, Trash2, Building2, Edit, FileText, BarChart3, Settings, CheckSquare, Filter, Target } from 'lucide-react'
 // Removed CustomTable import as we now use BudgetTable
 import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState'
+import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { BudgetTable } from '@/components/ui-custom/BudgetTable'
 import { NewBudgetModal } from '@/modals/budget/NewBudgetModal'
 import NewBudgetTaskModal from '@/modals/budget/NewBudgetTaskModal'
@@ -616,6 +617,34 @@ export default function ConstructionBudgets() {
   return (
     <Layout wide={true} headerProps={headerProps}>
       <div className="space-y-6">
+        {/* Feature Introduction */}
+        <FeatureIntroduction
+          title="Gestión de Presupuestos"
+          icon={<Calculator className="w-6 h-6" />}
+          features={[
+            {
+              icon: <CheckSquare className="w-4 h-4" />,
+              title: "Presupuestos Detallados",
+              description: "Crea y gestiona presupuestos con tareas específicas, cantidades y costos detallados por proyecto."
+            },
+            {
+              icon: <Filter className="w-4 h-4" />,
+              title: "Organización por Rubros",
+              description: "Agrupa tareas por categorías para una mejor visualización y análisis de costos por área."
+            },
+            {
+              icon: <Target className="w-4 h-4" />,
+              title: "Búsqueda Inteligente",
+              description: "Encuentra rápidamente tareas del catálogo o crea nuevas tareas personalizadas para tu presupuesto."
+            },
+            {
+              icon: <BarChart3 className="w-4 h-4" />,
+              title: "Control de Costos",
+              description: "Monitorea el progreso y los totales de tu presupuesto en tiempo real con actualizaciones automáticas."
+            }
+          ]}
+        />
+
         {filteredBudgets.length === 0 ? (
           <CustomEmptyState
             icon={<Calculator className="w-12 h-12 text-muted-foreground" />}
@@ -639,17 +668,17 @@ export default function ConstructionBudgets() {
 
             {/* Quick Add Task Section - Consolidated */}
             {selectedBudget && (
-              <Card className="mb-4 border rounded-lg bg-card text-card-foreground shadow-sm">
+              <Card className="mb-4">
                 <CardContent className="p-4">
                 {/* First row: Budget Controls */}
-                <div className="flex items-center justify-between w-full mb-4">
-                  <div className="flex items-center gap-4 flex-1">
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-1 min-w-0">
                     {/* Budget Selector */}
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm font-medium text-muted-foreground">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full">
+                      <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
                         Presupuesto:
                       </span>
-                      <div className="min-w-[400px]">
+                      <div className="w-full sm:max-w-md">
                         <Select value={selectedBudgetId} onValueChange={(value) => {
                           console.log('Budget selector changed to:', value);
                           console.log('User data available:', !!userData?.user?.id);
@@ -677,7 +706,7 @@ export default function ConstructionBudgets() {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                     {/* Group by Rubro Switch */}
                     <div className="flex items-center gap-2">
                       <Switch
@@ -695,30 +724,32 @@ export default function ConstructionBudgets() {
                       </Label>
                     </div>
                     
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0"
-                      onClick={() => {
-                        if (selectedBudget) {
-                          setEditingBudget(selectedBudget)
-                          setNewBudgetModalOpen(true)
-                        }
-                      }}
-                      disabled={!selectedBudget}
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                      onClick={() => selectedBudget && handleDeleteBudget(selectedBudget)}
-                      disabled={!selectedBudget}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                        onClick={() => {
+                          if (selectedBudget) {
+                            setEditingBudget(selectedBudget)
+                            setNewBudgetModalOpen(true)
+                          }
+                        }}
+                        disabled={!selectedBudget}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                        onClick={() => selectedBudget && handleDeleteBudget(selectedBudget)}
+                        disabled={!selectedBudget}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
 
@@ -726,8 +757,8 @@ export default function ConstructionBudgets() {
                 <div className="border-b border-border mb-4"></div>
 
                 {/* Second row: Task Search and Add */}
-                <div className="flex items-center gap-3">
-                  <div className="flex-1">
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="flex-1 min-w-0">
                     <TaskSearchCombo
                       value={quickTaskId}
                       onValueChange={setQuickTaskId}
@@ -743,46 +774,47 @@ export default function ConstructionBudgets() {
                       onCreateTask={() => setCustomTaskModalOpen(true)}
                     />
                   </div>
-                  <div className="w-32">
-                    <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-2">
+                    <div className="w-20 sm:w-24">
                       <Input
                         type="number"
                         value={quickQuantity}
                         onChange={(e) => setQuickQuantity(Number(e.target.value) || 1)}
-                        placeholder="Cantidad"
+                        placeholder="Cant."
                         min="1"
                         step="0.01"
-                        className="text-center"
+                        className="text-center text-sm"
                         style={{
                           MozAppearance: 'textfield', // Firefox
                           WebkitAppearance: 'none', // Chrome/Safari
                         }}
                         onWheel={(e) => e.preventDefault()} // Disable mouse wheel
                       />
-                      {quickTaskId && getUnitName(quickTasks.find(t => t.id === quickTaskId)?.unit_id) && (
-                        <span className="text-xs text-muted-foreground whitespace-nowrap">
-                          {getUnitName(quickTasks.find(t => t.id === quickTaskId)?.unit_id)}
-                        </span>
-                      )}
                     </div>
+                    {quickTaskId && getUnitName(quickTasks.find(t => t.id === quickTaskId)?.unit_id) && (
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        {getUnitName(quickTasks.find(t => t.id === quickTaskId)?.unit_id)}
+                      </span>
+                    )}
+                    
+                    <Button
+                      onClick={handleQuickAddTask}
+                      disabled={!quickTaskId || isAddingQuickTask}
+                      className="px-3 sm:px-4 whitespace-nowrap"
+                      size="sm"
+                    >
+                      {isAddingQuickTask ? "Agregando..." : "Agregar Tarea"}
+                    </Button>
                   </div>
-                  
-                  <Button
-                    onClick={handleQuickAddTask}
-                    disabled={!quickTaskId || isAddingQuickTask}
-                    className="px-4"
-                  >
-                    {isAddingQuickTask ? "Agregando..." : "Agregar Tarea"}
-                  </Button>
                 </div>
                 </CardContent>
               </Card>
             )}
 
             {/* Budget Table Card - Clean without extra controls */}
-            <Card className="border rounded-lg bg-card text-card-foreground shadow-sm overflow-hidden">
+            <Card className="overflow-hidden">
               {/* Budget Tasks Table */}
-              <div className="p-4">
+              <CardContent className="p-4">
                 {selectedBudget ? (
                   <BudgetTaskTable budgetId={selectedBudget.id} />
                 ) : (
@@ -790,7 +822,7 @@ export default function ConstructionBudgets() {
                     Selecciona un presupuesto para ver sus tareas
                   </div>
                 )}
-              </div>
+              </CardContent>
             </Card>
           </>
         )}
