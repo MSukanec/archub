@@ -8,6 +8,7 @@ import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
 import { CustomTable } from '@/components/ui-custom/misc/CustomTable'
 import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState'
+import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -719,6 +720,32 @@ export default function FinancesInstallments() {
           </div>
         )
       }
+    },
+    {
+      key: "actions",
+      label: "Acciones",
+      width: "14.3%",
+      render: (item: any) => {
+        if (item.isTotal) {
+          return <div className="text-sm text-muted-foreground">-</div>
+        }
+        
+        return (
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                // Navigate to client detail or manage client installments
+                console.log('View client details:', item.contact_id)
+              }}
+              className="h-8 w-8 p-0"
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+          </div>
+        )
+      }
     }
   ]
 
@@ -914,7 +941,7 @@ export default function FinancesInstallments() {
   ]
 
   const headerProps = {
-    title: "Aportes",
+    title: "Compromisos de Pago",
     showSearch: true,
     searchValue,
     onSearchChange: setSearchValue,
@@ -924,7 +951,7 @@ export default function FinancesInstallments() {
         className="h-8 px-3 text-sm"
         onClick={() => setShowModal(true)}
       >
-        Agregar Aporte
+        Agregar Compromiso
       </Button>
     )]
   }
@@ -942,28 +969,17 @@ export default function FinancesInstallments() {
   return (
     <Layout headerProps={headerProps} wide={true}>
       <div className="space-y-6">
-        {/* Summary Card */}
-        {installments.length > 0 && (
-          <div className="bg-card border rounded-lg p-6">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center justify-center w-12 h-12 bg-green-100 rounded-lg">
-                <Receipt className="w-6 h-6 text-green-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold">Total Aportado</h3>
-                <p className="text-2xl font-bold text-green-600">
-                  US$ {Math.abs(totalContributedDollarized).toLocaleString('es-AR', {
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0
-                  })}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {installments.length} aporte{installments.length !== 1 ? 's' : ''} registrado{installments.length !== 1 ? 's' : ''}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Feature Introduction */}
+        <FeatureIntroduction
+          icon={<Receipt className="h-6 w-6" />}
+          title="Gestión de Compromisos de Pago"
+          features={[
+            { icon: <Receipt className="h-4 w-4" />, title: "Compromisos Detallados", description: "Registro detallado de compromisos financieros de clientes e inversores" },
+            { icon: <Receipt className="h-4 w-4" />, title: "Multi-moneda", description: "Seguimiento de aportes y pagos con múltiples monedas y cotizaciones" },
+            { icon: <Receipt className="h-4 w-4" />, title: "Análisis USD", description: "Cálculo automático de equivalencias en USD para análisis financiero" },
+            { icon: <Receipt className="h-4 w-4" />, title: "Resúmenes", description: "Resúmenes por cliente con porcentajes de cumplimiento y montos restantes" }
+          ]}
+        />
 
         {/* Contact Summary Table (New simplified table) */}
         {clientSummary.length > 0 && (
@@ -1008,8 +1024,8 @@ export default function FinancesInstallments() {
         {filteredInstallments.length > 0 ? (
           <div className="space-y-4">
             <div>
-              <h3 className="text-lg font-semibold">Detalle de Aportes</h3>
-              <p className="text-sm text-muted-foreground">Todos los aportes registrados en el proyecto</p>
+              <h3 className="text-lg font-semibold">Detalle de Compromisos</h3>
+              <p className="text-sm text-muted-foreground">Todos los compromisos de pago registrados en el proyecto</p>
             </div>
             <CustomTable
               data={filteredInstallments}
@@ -1026,17 +1042,17 @@ export default function FinancesInstallments() {
           </div>
         ) : installments.length === 0 ? (
           <CustomEmptyState
-            title="Aún no hay aportes registrados"
-            description="Comienza registrando el primer aporte de un inversor al proyecto"
+            title="Aún no hay compromisos registrados"
+            description="Comienza registrando el primer compromiso de pago de un cliente al proyecto"
             action={
               <Button onClick={() => setShowModal(true)} className="mt-4">
-                Agregar Primer Aporte
+                Agregar Primer Compromiso
               </Button>
             }
           />
         ) : (
           <CustomEmptyState
-            title="No se encontraron aportes"
+            title="No se encontraron compromisos"
             description="Intenta con otros términos de búsqueda"
           />
         )}

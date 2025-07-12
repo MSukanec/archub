@@ -250,7 +250,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { type: 'divider' },
       { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
       { icon: CreditCard, label: 'Compromisos', href: '/finances/commited' },
-      { icon: HandCoins, label: 'Aportes', href: '/finances/installments' },
+      { icon: HandCoins, label: 'Compromisos de Pago', href: '/finances/installments' },
       { icon: Settings, label: 'Preferencias de Finanzas', href: '/finances/preferences' },
     ],
     commercialization: [

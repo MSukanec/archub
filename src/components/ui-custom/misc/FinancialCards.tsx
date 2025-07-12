@@ -32,7 +32,7 @@ export const FinancialCards = ({ balances, defaultCurrency }: FinancialCardsProp
     }).format(amount)
   }
 
-  const renderCard = (balance: CurrencyBalance) => (
+  const renderCard = (balance: CurrencyBalance, showCurrencySelector = false) => (
     <Card key={balance.currency} className="bg-[var(--card-bg)] border-[var(--card-border)]">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium text-[var(--card-fg)] flex items-center gap-2">
@@ -42,6 +42,24 @@ export const FinancialCards = ({ balances, defaultCurrency }: FinancialCardsProp
       </CardHeader>
       <CardContent className="pt-0">
         <div className="space-y-2">
+          {/* Currency Selector for Mobile - inside card */}
+          {showCurrencySelector && (
+            <div className="mb-3 pb-2 border-b border-[var(--card-border)]">
+              <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
+                <SelectTrigger className="w-full h-8">
+                  <SelectValue placeholder="Seleccionar moneda" />
+                </SelectTrigger>
+                <SelectContent>
+                  {balances.map((balance) => (
+                    <SelectItem key={balance.currency} value={balance.currency}>
+                      {balance.currency}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+          
           <div className="flex justify-between items-center">
             <span className="text-xs text-[var(--muted-fg)]">Ingresos:</span>
             <span className="text-xs font-medium text-green-600">
@@ -76,29 +94,13 @@ export const FinancialCards = ({ balances, defaultCurrency }: FinancialCardsProp
   }
 
   if (isMobile) {
-    // Mobile: Single card with currency selector
+    // Mobile: Single card with currency selector inside
     const selectedBalance = balances.find(b => b.currency === selectedCurrency) || balances[0]
     
     return (
-      <div className="mb-6 space-y-3">
-        {/* Currency Selector */}
-        <div className="w-full">
-          <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Seleccionar moneda" />
-            </SelectTrigger>
-            <SelectContent>
-              {balances.map((balance) => (
-                <SelectItem key={balance.currency} value={balance.currency}>
-                  {balance.currency}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        
-        {/* Single Card */}
-        {selectedBalance && renderCard(selectedBalance)}
+      <div className="mb-6">
+        {/* Single Card with selector inside */}
+        {selectedBalance && renderCard(selectedBalance, true)}
       </div>
     )
   }

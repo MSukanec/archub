@@ -132,7 +132,7 @@ export function SidebarSubmenu() {
       { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard', requiresProject: true },
       { icon: DollarSign, label: 'Movimientos', href: '/finances/movements', requiresProject: true },
       { icon: CreditCard, label: 'Compromisos', href: '/finances/commited', requiresProject: true },
-      { icon: HandCoins, label: 'Aportes', href: '/finances/installments', requiresProject: true },
+      { icon: HandCoins, label: 'Compromisos de Pago', href: '/finances/installments', requiresProject: true },
       { icon: FolderOpen, label: 'Preferencias de Finanzas', href: '/finances/preferences' },
     ],
 
