@@ -23,10 +23,10 @@ export function Step2FinancialSetup() {
   } = useOnboardingStore();
 
   // Local states for form validation
-  const [defaultCurrency, setDefaultCurrency] = useState(formData.default_currency_id);
-  const [secondaryCurrencies, setSecondaryCurrencies] = useState<string[]>(formData.secondary_currency_ids);
-  const [defaultWallet, setDefaultWallet] = useState(formData.default_wallet_id);
-  const [secondaryWallets, setSecondaryWallets] = useState<string[]>(formData.secondary_wallet_ids);
+  const [defaultCurrency, setDefaultCurrency] = useState(formData.default_currency_id || '');
+  const [secondaryCurrencies, setSecondaryCurrencies] = useState<string[]>(formData.secondary_currency_ids || []);
+  const [defaultWallet, setDefaultWallet] = useState(formData.default_wallet_id || '');
+  const [secondaryWallets, setSecondaryWallets] = useState<string[]>(formData.secondary_wallet_ids || []);
 
   // Available options for secondary selections (exclude defaults)
   const availableSecondaryCurrencies = allCurrencies?.filter(c => c.id !== defaultCurrency) || [];
@@ -116,11 +116,11 @@ export function Step2FinancialSetup() {
                     value: currency.id,
                     label: `${currency.name} (${currency.symbol})`
                   }))}
-                  selectedValues={secondaryCurrencies}
-                  onSelectionChange={setSecondaryCurrencies}
+                  values={secondaryCurrencies}
+                  onValuesChange={setSecondaryCurrencies}
                   placeholder="Selecciona monedas adicionales"
                   searchPlaceholder="Buscar monedas..."
-                  noResultsText="No se encontraron monedas"
+                  emptyText="No se encontraron monedas"
                 />
               </div>
             </div>
@@ -169,11 +169,11 @@ export function Step2FinancialSetup() {
                     value: wallet.id,
                     label: wallet.name
                   }))}
-                  selectedValues={secondaryWallets}
-                  onSelectionChange={setSecondaryWallets}
+                  values={secondaryWallets}
+                  onValuesChange={setSecondaryWallets}
                   placeholder="Selecciona billeteras adicionales"
                   searchPlaceholder="Buscar billeteras..."
-                  noResultsText="No se encontraron billeteras"
+                  emptyText="No se encontraron billeteras"
                 />
               </div>
             </div>
