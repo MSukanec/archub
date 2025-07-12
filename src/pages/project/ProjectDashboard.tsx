@@ -9,6 +9,8 @@ import { useMobile } from '@/hooks/use-mobile'
 import { ProjectStatsCards } from '@/components/ui-custom/cards/ProjectStatsCards'
 import { ProjectActivityChart } from '@/components/ui-custom/charts/ProjectActivityChart'
 import ProjectHeroCard from '@/components/ui-custom/ProjectHeroCard'
+import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState'
+import { Button } from '@/components/ui/button'
 
 export default function ProjectDashboard() {
   const { userData } = useCurrentUser()
@@ -20,8 +22,18 @@ export default function ProjectDashboard() {
   const organizationId = userData?.preferences?.last_organization_id
 
   // Fetch project stats and activity
-  const { data: stats, isLoading: statsLoading } = useProjectStats(projectId)
+  const { data: stats, isLoading: statsLoading, error: statsError } = useProjectStats(projectId)
   const { data: activityData, isLoading: activityLoading } = useProjectActivity(projectId)
+
+  // Debug logs to understand the issue
+  console.log('Dashboard debug:', { 
+    projectId, 
+    organizationId, 
+    stats, 
+    statsLoading, 
+    statsError,
+    userData: userData?.preferences 
+  })
 
   // Set sidebar context
   useEffect(() => {
@@ -40,13 +52,15 @@ export default function ProjectDashboard() {
   if (!currentProject && !statsLoading) {
     return (
       <Layout headerProps={headerProps} wide>
-        <div className="text-center py-12">
-          <FolderOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-          <h3 className="font-medium mb-2">No hay proyecto seleccionado</h3>
-          <p className="text-sm text-muted-foreground">
-            Selecciona un proyecto para ver el resumen
-          </p>
-        </div>
+        <CustomEmptyState
+          title="No hay proyecto seleccionado"
+          description="Selecciona un proyecto desde el selector del header para ver el resumen del proyecto."
+          action={
+            <Button onClick={() => window.location.href = "/organization/projects"}>
+              Ver Proyectos
+            </Button>
+          }
+        />
       </Layout>
     )
   }
