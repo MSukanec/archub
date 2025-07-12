@@ -162,56 +162,72 @@ export default function Onboarding() {
 
         if (orgPrefError) throw orgPrefError;
 
-        // Save organization currencies
+        // Save organization currencies - use insert instead of upsert to avoid conflict issues
         if (formData.default_currency_id) {
           const { error: currencyError } = await supabase
             .from('organization_currencies')
-            .upsert({
+            .insert({
               organization_id: userData.organization.id,
               currency_id: formData.default_currency_id,
               is_default: true,
-            }, { onConflict: 'organization_id,currency_id' });
+              is_active: true,
+              created_at: new Date().toISOString()
+            });
 
-          if (currencyError) throw currencyError;
+          if (currencyError && currencyError.code !== '23505') { // Ignore duplicate key errors
+            throw currencyError;
+          }
         }
 
         // Save secondary currencies
         for (const currencyId of formData.secondary_currency_ids) {
           const { error: secCurrencyError } = await supabase
             .from('organization_currencies')
-            .upsert({
+            .insert({
               organization_id: userData.organization.id,
               currency_id: currencyId,
               is_default: false,
-            }, { onConflict: 'organization_id,currency_id' });
+              is_active: true,
+              created_at: new Date().toISOString()
+            });
 
-          if (secCurrencyError) throw secCurrencyError;
+          if (secCurrencyError && secCurrencyError.code !== '23505') { // Ignore duplicate key errors
+            throw secCurrencyError;
+          }
         }
 
-        // Save organization wallets
+        // Save organization wallets - use insert instead of upsert
         if (formData.default_wallet_id) {
           const { error: walletError } = await supabase
             .from('organization_wallets')
-            .upsert({
+            .insert({
               organization_id: userData.organization.id,
               wallet_id: formData.default_wallet_id,
               is_default: true,
-            }, { onConflict: 'organization_id,wallet_id' });
+              is_active: true,
+              created_at: new Date().toISOString()
+            });
 
-          if (walletError) throw walletError;
+          if (walletError && walletError.code !== '23505') { // Ignore duplicate key errors
+            throw walletError;
+          }
         }
 
         // Save secondary wallets
         for (const walletId of formData.secondary_wallet_ids) {
           const { error: secWalletError } = await supabase
             .from('organization_wallets')
-            .upsert({
+            .insert({
               organization_id: userData.organization.id,
               wallet_id: walletId,
               is_default: false,
-            }, { onConflict: 'organization_id,wallet_id' });
+              is_active: true,
+              created_at: new Date().toISOString()
+            });
 
-          if (secWalletError) throw secWalletError;
+          if (secWalletError && secWalletError.code !== '23505') { // Ignore duplicate key errors
+            throw secWalletError;
+          }
         }
       }
 
@@ -227,8 +243,8 @@ export default function Onboarding() {
         description: "Configuración inicial completada. Ahora elige tu modo de uso.",
       });
       
-      // Redirect to organization dashboard after successful onboarding
-      navigate('/organization/dashboard');
+      // Redirect to select-mode after successful onboarding
+      navigate('/select-mode');
       resetOnboarding();
     },
     onError: (error) => {
