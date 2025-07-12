@@ -4,7 +4,7 @@
 
 :root {
   /* Layout */
-  --layout-bg: hsl(0, 0%, 90%);
+  --layout-bg: hsl(60, 8%, 92%);
   --layout-text: hsl(0, 0%, 45%);
   --layout-border: hsl(0, 0%, 45%);
 
@@ -31,7 +31,7 @@
   --secondary-sidebar-button-hover-fg: hsl(0, 0%, 97%);
 
   /* Legacy support (will be removed) */
-  --menues-bg: hsl(0, 0%, 97%);
+  --menues-bg: hsl(60, 8%, 92%);
   --menues-fg: hsl(0, 0%, 45%);
   --menues-secondary-fg: hsl(0, 0%, 50%);
   --menues-border: hsl(0, 0%, 85%);
@@ -41,7 +41,7 @@
   --menues-active-fg: hsl(0, 0%, 100%);
 
   /* Cards */
-  --card-bg: hsl(0, 0%, 97%);
+  --card-bg: hsl(60, 8%, 95%);
   --card-fg: hsl(0, 0%, 35%);
   --card-text: hsl(0, 0%, 35%);
   --card-border: hsl(0, 0%, 85%);
@@ -126,16 +126,12 @@
   --table-header-bg: hsl(0, 0%, 35%);
   --table-header-fg: hsl(0, 0%, 100%);
   --table-header-border: hsl(0, 0%, 85%);
-  --table-row-bg: hsl(0, 0%, 97%);
+  --table-row-bg: hsl(60, 8%, 95%);
   --table-row-fg: hsl(0, 0%, 35%);
   --table-row-border: hsl(0, 0%, 90%);
   --table-row-hover-bg: hsl(0, 0%, 98%);
 
-  /* Movement Row Gradients */
-  --movement-income-bg: linear-gradient(to right, hsl(76, 100%, 40%), hsl(76, 100%, 40%));
-  --movement-expense-bg: linear-gradient(to right, hsl(0, 70%, 50%), hsl(0, 20%, 96%));
-  --movement-income-border: hsl(90, 50%, 50%);
-  --movement-expense-border: hsl(0, 70%, 50%);
+
 
   /* Borders and Rings */
   --border-default: hsl(240, 6%, 90%);
@@ -285,11 +281,7 @@
   --table-row-border: hsl(0, 0%, 22%);
   --table-row-hover-bg: hsl(0, 0%, 15%);
 
-  /* Movement Row Gradients */
-  --movement-income-bg: linear-gradient(to right, hsl(90, 50%, 50%), hsl(90, 50%, 50%));
-  --movement-expense-bg: linear-gradient(to right, hsl(0, 70%, 40%), hsl(0, 70%, 40%));
-  --movement-income-border: hsl(90, 50%, 50%);
-  --movement-expense-border: hsl(0, 70%, 40%);
+
 
   /* Text */
   --text-default: hsl(0, 0%, 98%);
