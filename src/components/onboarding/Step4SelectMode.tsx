@@ -4,8 +4,7 @@ import { CustomRestricted } from "@/components/ui-custom/misc/CustomRestricted";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { Building, Package, Hammer, Eye, CheckCircle, Loader2, ArrowLeft } from "lucide-react";
 import { HelpPopover } from "@/components/ui-custom/HelpPopover";
-import { useState, useEffect } from "react";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useState } from "react";
 
 interface ModeOption {
   type: 'professional' | 'provider' | 'worker' | 'visitor';
@@ -70,15 +69,6 @@ interface Step3SelectModeProps {
 export function Step4SelectMode({ isOnboarding = true, onFinish, isLoading = false }: Step3SelectModeProps) {
   const { formData, updateFormData, goPrevStep } = useOnboardingStore();
   const [selectedMode, setSelectedMode] = useState<string | null>(null);
-  const { data: userData } = useCurrentUser();
-
-  // Load existing user data when component mounts
-  useEffect(() => {
-    if (userData?.preferences?.last_user_type) {
-      setSelectedMode(userData.preferences.last_user_type);
-      updateFormData({ last_user_type: userData.preferences.last_user_type });
-    }
-  }, [userData, updateFormData]);
 
   const handleModeSelect = (modeType: ModeOption['type']) => {
     setSelectedMode(modeType);
