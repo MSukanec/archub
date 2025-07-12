@@ -5,7 +5,8 @@ import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CheckSquare, Plus, Kanban, Edit, Trash2, List, Search, Filter, X } from 'lucide-react';
-import { useKanbanBoards, useKanbanLists, useKanbanCards, useMoveKanbanCard, useUpdateKanbanBoard, useDeleteKanbanBoard, useDeleteKanbanList, useUpdateLastKanbanBoard } from '@/hooks/use-kanban';
+import { CardDetailsModal } from '@/modals/tasks/CardDetailsModal';
+import { useKanbanBoards, useKanbanLists, useKanbanCards, useMoveKanbanCard, useUpdateKanbanBoard, useDeleteKanbanBoard, useDeleteKanbanList, useDeleteKanbanCard, useUpdateLastKanbanBoard } from '@/hooks/use-kanban';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useKanbanStore } from '@/stores/kanbanStore';
@@ -23,6 +24,7 @@ function TasksContent() {
   const [showNewListModal, setShowNewListModal] = useState(false);
   const [showEditBoardModal, setShowEditBoardModal] = useState(false);
   const [editingBoard, setEditingBoard] = useState<any>(null);
+  const [selectedCard, setSelectedCard] = useState<any>(null);
   const { currentBoardId, setCurrentBoardId } = useKanbanStore();
   const { setActions, setShowActionBar } = useMobileActionBar();
   
@@ -38,6 +40,7 @@ function TasksContent() {
   const updateBoardMutation = useUpdateKanbanBoard();
   const deleteBoardMutation = useDeleteKanbanBoard();
   const deleteListMutation = useDeleteKanbanList();
+  const deleteCardMutation = useDeleteKanbanCard();
   const updateLastBoardMutation = useUpdateLastKanbanBoard();
 
   // Initialize board selection based on saved preference or first available board
@@ -109,6 +112,15 @@ function TasksContent() {
     });
   };
 
+  const handleDeleteList = async (listId: string) => {
+    await deleteListMutation.mutateAsync(listId);
+  };
+
+  const handleDeleteCard = async (cardId: string) => {
+    if (!currentBoardId) return;
+    await deleteCardMutation.mutateAsync({ cardId, boardId: currentBoardId });
+  };
+
   const handleCardMove = async (cardId: string, sourceListId: string, destListId: string, destIndex: number) => {
     if (!currentBoardId) return;
 
@@ -130,9 +142,7 @@ function TasksContent() {
     updateLastBoardMutation.mutate(boardId);
   };
 
-  const handleDeleteList = (listId: string, boardId?: string) => {
-    deleteListMutation.mutate(listId);
-  };
+
 
   // Current board for display
   const currentBoard = boards.find(board => board.id === currentBoardId);
@@ -343,6 +353,8 @@ function TasksContent() {
             onCardMove={handleCardMove}
             onCreateList={() => setShowNewListModal(true)}
             onDeleteList={handleDeleteList}
+            onDeleteCard={handleDeleteCard}
+            onCardEdit={setSelectedCard}
             loading={listsLoading || cardsLoading}
           />
         )}
@@ -366,6 +378,15 @@ function TasksContent() {
           boardId={currentBoardId}
           open={showNewListModal}
           onClose={() => setShowNewListModal(false)}
+        />
+      )}
+
+      {/* Card Details Modal - OUTSIDE Layout to fix z-index issues */}
+      {selectedCard && (
+        <CardDetailsModal
+          card={selectedCard}
+          open={!!selectedCard}
+          onClose={() => setSelectedCard(null)}
         />
       )}
     </Layout>

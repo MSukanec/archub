@@ -22,6 +22,7 @@ import type { KanbanCard } from '@/hooks/use-kanban';
 const cardSchema = z.object({
   title: z.string().min(1, 'El título es requerido'),
   description: z.string().optional(),
+  created_by: z.string().min(1, 'El creador es requerido'),
   assigned_to: z.string().optional(),
   due_date: z.string().optional(),
 });
@@ -51,6 +52,7 @@ export function CardDetailsModal({ open, onClose, card }: CardDetailsModalProps)
     defaultValues: {
       title: '',
       description: '',
+      created_by: '',
       assigned_to: '',
       due_date: ''
     }
@@ -62,6 +64,7 @@ export function CardDetailsModal({ open, onClose, card }: CardDetailsModalProps)
       reset({
         title: card.title || '',
         description: card.description || '',
+        created_by: card.created_by || '',
         assigned_to: card.assigned_to || '',
         due_date: card.due_date || ''
       });
@@ -83,6 +86,7 @@ export function CardDetailsModal({ open, onClose, card }: CardDetailsModalProps)
         id: card.id,
         title: data.title,
         description: data.description || undefined,
+        created_by: data.created_by,
         assigned_to: data.assigned_to || undefined,
         due_date: data.due_date || undefined,
         list_id: card.list_id
@@ -136,6 +140,36 @@ export function CardDetailsModal({ open, onClose, card }: CardDetailsModalProps)
                     placeholder="Detalles adicionales sobre la tarea..."
                     rows={3}
                   />
+                </div>
+
+                <div className="col-span-1">
+                  <Label htmlFor="created_by">Creador <span className="text-red-500">*</span></Label>
+                  <Select 
+                    value={watch('created_by')} 
+                    onValueChange={(value) => setValue('created_by', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar creador" />
+                    </SelectTrigger>
+                    <SelectContent className="z-[9999]">
+                      {organizationMembers?.map((member) => (
+                        <SelectItem key={member.id} value={member.user_id}>
+                          <div className="flex items-center gap-2">
+                            <Avatar className="h-5 w-5">
+                              {member.avatar_url && (
+                                <AvatarImage src={member.avatar_url} />
+                              )}
+                              <AvatarFallback className="text-xs">
+                                {member.full_name?.charAt(0).toUpperCase() || 'U'}
+                              </AvatarFallback>
+                            </Avatar>
+                            {member.full_name || member.email || 'Usuario'}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.created_by && <p className="text-xs text-destructive mt-1">{errors.created_by.message}</p>}
                 </div>
 
                 <div className="col-span-1">

@@ -11,7 +11,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState';
 import { NewCardModal } from '@/modals/tasks/NewCardModal';
 import { NewListModal } from '@/modals/tasks/NewListModal';
-import { CardDetailsModal } from '@/modals/tasks/CardDetailsModal';
+
 import { useOrganizationMembers } from '@/hooks/use-organization-members';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { TaskListWithCompleted } from '@/components/ui-custom/misc/TaskListWithCompleted';
@@ -26,13 +26,13 @@ interface CustomKanbanProps {
   onCreateList?: () => void;
   onDeleteList?: (listId: string) => void;
   onDeleteCard?: (cardId: string) => void;
+  onCardEdit?: (card: KanbanCard) => void;
   loading?: boolean;
 }
 
-export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, onDeleteList, onDeleteCard, loading }: CustomKanbanProps) {
+export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, onDeleteList, onDeleteCard, onCardEdit, loading }: CustomKanbanProps) {
   const [newCardListId, setNewCardListId] = useState<string | null>(null);
   const [editingListId, setEditingListId] = useState<string | null>(null);
-  const [selectedCard, setSelectedCard] = useState<KanbanCard | null>(null);
   const [completedAccordionState, setCompletedAccordionState] = useState<Record<string, boolean>>({});
   
   const { data: userData } = useCurrentUser();
@@ -262,7 +262,7 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
                                           className={`p-3 cursor-pointer hover:shadow-sm transition-shadow relative group ${
                                             snapshot.isDragging ? 'shadow-md rotate-1' : ''
                                           }`}
-                                          onClick={() => setSelectedCard(card)}
+                                          onClick={() => onCardEdit?.(card)}
                                         >
                                           {/* Hover Action Buttons */}
                                           <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -272,7 +272,7 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
                                               className="h-6 w-6 p-0 bg-white/90 shadow-sm hover:bg-white"
                                               onClick={(e) => {
                                                 e.stopPropagation();
-                                                setSelectedCard(card);
+                                                onCardEdit?.(card);
                                               }}
                                             >
                                               <Edit className="h-3 w-3" />
@@ -406,7 +406,7 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
                                                       className={`p-3 cursor-pointer hover:shadow-sm transition-shadow relative group ${
                                                         snapshot.isDragging ? 'shadow-md rotate-1' : ''
                                                       }`}
-                                                      onClick={() => setSelectedCard(card)}
+                                                      onClick={() => onCardEdit?.(card)}
                                                     >
                                                       {/* Hover Action Buttons */}
                                                       <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -416,7 +416,7 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
                                                           className="h-6 w-6 p-0 bg-white/90 shadow-sm hover:bg-white"
                                                           onClick={(e) => {
                                                             e.stopPropagation();
-                                                            setSelectedCard(card);
+                                                            onCardEdit?.(card);
                                                           }}
                                                         >
                                                           <Edit className="h-3 w-3" />
@@ -563,13 +563,7 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
         />
       )}
 
-      {selectedCard && (
-        <CardDetailsModal
-          card={selectedCard}
-          open={!!selectedCard}
-          onClose={() => setSelectedCard(null)}
-        />
-      )}
+
     </>
   );
 }
