@@ -8,6 +8,8 @@ import { useNavigationStore } from "@/stores/navigationStore";
 import { useToast } from "@/hooks/use-toast";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { useThemeStore } from "@/stores/themeStore";
+import { useAuthStore } from "@/stores/authStore";
+import { AuthModal } from "@/components/auth/AuthModal";
 import { Step1UserData } from "@/components/onboarding/Step1UserData";
 import { Step2FinancialSetup } from "@/components/onboarding/Step2FinancialSetup";
 import { Step3Discovery } from "@/components/onboarding/Step3Discovery";
@@ -15,6 +17,7 @@ import { Step3Discovery } from "@/components/onboarding/Step3Discovery";
 
 export default function Onboarding() {
   const [, navigate] = useLocation();
+  const { user, loading: authLoading, initialized } = useAuthStore();
   const { data: userData, isLoading: userLoading } = useCurrentUser();
   const { setSidebarContext } = useNavigationStore();
   const { toast } = useToast();
@@ -26,6 +29,23 @@ export default function Onboarding() {
     resetOnboarding, 
     setCurrentStep 
   } = useOnboardingStore();
+
+  // Basic auth check without onboarding redirection
+  if (!initialized || authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-white"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <AuthModal open={true} onOpenChange={() => {}} />
+      </div>
+    );
+  }
 
   // This is now always onboarding (3 steps only)
   const totalSteps = 3;

@@ -51,11 +51,11 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         currentLocation: location 
       });
       
-      // Always redirect to onboarding if not completed (regardless of current route)
-      if (!onboardingCompleted) {
+      // Only redirect if not already on the target route to prevent loops
+      if (!onboardingCompleted && location !== '/onboarding') {
         console.log('User needs to complete onboarding, redirecting to /onboarding');
         navigate('/onboarding');
-      } else if (!hasPersonalData) {
+      } else if (!hasPersonalData && location !== '/onboarding') {
         // Edge case: onboarding marked complete but missing basic data
         console.log('Onboarding completed but missing personal data, redirecting to /onboarding');
         navigate('/onboarding');
