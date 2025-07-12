@@ -34,6 +34,10 @@ export default function FinancesDashboard() {
   const { data: monthlyFlow, isLoading: flowLoading } = useMonthlyFlowData(organizationId, projectId)
   const { data: walletBalances, isLoading: walletsLoading } = useWalletBalances(organizationId, projectId)
   const { data: recentMovements, isLoading: recentLoading } = useRecentMovements(organizationId, projectId, 5)
+  
+  // Calculate movements from last 30 days
+  const movementsLast30Days = financialSummary ? 
+    (financialSummary.totalIncome || 0) + Math.abs(financialSummary.totalExpenses || 0) : 0
 
   const headerProps = {
     title: "Resumen de Finanzas",
@@ -82,77 +86,111 @@ export default function FinancesDashboard() {
   return (
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
-        {/* Welcome Card - Financial Summary */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Card>
-            <CardContent className="p-4 md:p-6">
-              <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6">
-                {/* Financial Icon */}
-                <div className="flex-shrink-0">
-                  <Avatar className="h-12 w-12 md:h-16 md:w-16 border-2 border-border">
-                    <AvatarFallback className="text-sm md:text-lg font-bold text-[var(--accent-foreground)] bg-[var(--accent)]">
-                      <DollarSign className="h-6 w-6 md:h-8 md:w-8" />
-                    </AvatarFallback>
-                  </Avatar>
-                </div>
+        {/* Header Row - Welcome Card (75%) + Movements Card (25%) */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Welcome Card - Financial Summary (75% width) */}
+          <motion.div
+            className="lg:col-span-3"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Card>
+              <CardContent className="p-4 md:p-6">
+                <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6">
+                  {/* Financial Icon */}
+                  <div className="flex-shrink-0">
+                    <Avatar className="h-12 w-12 md:h-16 md:w-16 border-2 border-border">
+                      <AvatarFallback className="text-sm md:text-lg font-bold text-[var(--accent-foreground)] bg-[var(--accent)]">
+                        <DollarSign className="h-6 w-6 md:h-8 md:w-8" />
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
 
-                {/* Financial Summary Info */}
-                <div className="flex-1">
-                  <motion.h1
-                    className="text-2xl md:text-4xl font-black text-foreground mb-1"
-                    initial={{ scale: 0.8 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.2, duration: 0.3 }}
-                  >
-                    Resumen de Finanzas
-                  </motion.h1>
-                  <p className="text-base md:text-lg text-muted-foreground mb-2 md:mb-3">
-                    {currentProject ? (
-                      <>
-                        Proyecto{" "}
-                        <span className="font-semibold text-foreground">
-                          {currentProject.name}
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        Organización{" "}
-                        <span className="font-semibold text-foreground">
-                          {currentOrganization?.name || "Sin organización"}
-                        </span>
-                      </>
-                    )}
-                  </p>
+                  {/* Financial Summary Info */}
+                  <div className="flex-1">
+                    <motion.h1
+                      className="text-2xl md:text-4xl font-black text-foreground mb-1"
+                      initial={{ scale: 0.8 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.2, duration: 0.3 }}
+                    >
+                      Resumen de Finanzas
+                    </motion.h1>
+                    <p className="text-base md:text-lg text-muted-foreground mb-2 md:mb-3">
+                      {currentProject ? (
+                        <>
+                          Proyecto{" "}
+                          <span className="font-semibold text-foreground">
+                            {currentProject.name}
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          Organización{" "}
+                          <span className="font-semibold text-foreground">
+                            {currentOrganization?.name || "Sin organización"}
+                          </span>
+                        </>
+                      )}
+                    </p>
 
-                  <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <FileText className="h-4 w-4" />
-                      <span>
-                        {summaryLoading ? '...' : (financialSummary?.totalMovements || 0)} movimientos registrados
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <TrendingUp className="h-4 w-4" />
-                      <span className="text-green-600">
-                        {summaryLoading ? '...' : formatCurrency(financialSummary?.totalIncome || 0)} ingresos
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <TrendingDown className="h-4 w-4" />
-                      <span className="text-red-600">
-                        {summaryLoading ? '...' : formatCurrency(financialSummary?.totalExpenses || 0)} egresos
-                      </span>
+                    <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <FileText className="h-4 w-4" />
+                        <span>
+                          {summaryLoading ? '...' : (financialSummary?.totalMovements || 0)} movimientos registrados
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <TrendingUp className="h-4 w-4" />
+                        <span className="text-green-600">
+                          {summaryLoading ? '...' : formatCurrency(financialSummary?.totalIncome || 0)} ingresos
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <TrendingDown className="h-4 w-4" />
+                        <span className="text-red-600">
+                          {summaryLoading ? '...' : formatCurrency(financialSummary?.totalExpenses || 0)} egresos
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Movements Summary Card (25% width) */}
+          <motion.div
+            className="lg:col-span-1"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <Card className="h-full">
+              <CardContent className="p-4 md:p-6 h-full flex flex-col">
+                {/* Accent Line */}
+                <div className="w-full h-1 bg-[var(--accent)] rounded-full mb-4"></div>
+                
+                {/* Icon */}
+                <div className="flex items-center gap-2 mb-3">
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground font-medium">
+                    Movimientos (30 días)
+                  </span>
+                </div>
+                
+                {/* Amount */}
+                <div className="flex-1 flex flex-col justify-center">
+                  <div className="text-xl md:text-2xl font-bold text-foreground">
+                    {summaryLoading ? '...' : formatCurrency(movementsLast30Days)}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
 
         {/* Métricas Principales - Desktop */}
         <div className="hidden md:grid grid-cols-4 gap-4">
