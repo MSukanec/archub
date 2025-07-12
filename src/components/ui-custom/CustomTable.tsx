@@ -312,7 +312,7 @@ export function CustomTable<T = any>({
             <div
               key={index}
               className={cn(
-                "p-3 border rounded-lg mb-2 bg-background hover:bg-muted/40 transition-colors cursor-pointer",
+                "p-3 border border-[var(--card-border)] rounded-lg mb-2 bg-[var(--card-bg)] hover:bg-[var(--card-hover-bg)] transition-colors cursor-pointer",
                 getRowClassName?.(item)
               )}
               onClick={() => onCardClick?.(item)}
