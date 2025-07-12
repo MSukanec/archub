@@ -3,14 +3,13 @@ import { useQueryClient } from '@tanstack/react-query'
 import { CustomModalLayout } from '@/components/ui-custom/modal/CustomModalLayout'
 import { CustomModalHeader } from '@/components/ui-custom/modal/CustomModalHeader'
 import { CustomModalBody } from '@/components/ui-custom/modal/CustomModalBody'
-import { Button } from '@/components/ui/button'
+import { CustomModalFooter } from '@/components/ui-custom/modal/CustomModalFooter'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/lib/supabase'
 import { useQuery } from '@tanstack/react-query'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Edit } from 'lucide-react'
 
 interface EditClientCommitmentModalProps {
   open: boolean
@@ -97,7 +96,7 @@ export function EditClientCommitmentModal({
           committed_amount: parseFloat(committedAmount)
         })
         .eq('project_id', projectId)
-        .eq('contact_id', clientData.contact_id)
+        .eq('client_id', clientData.contact_id)
 
       if (error) throw error
 
@@ -178,8 +177,8 @@ export function EditClientCommitmentModal({
                   <SelectValue placeholder="Selecciona una moneda" />
                 </SelectTrigger>
                 <SelectContent>
-                  {currencies.map((currency) => (
-                    <SelectItem key={currency.id} value={currency.id}>
+                  {currencies.map((currency, index) => (
+                    <SelectItem key={`currency-${currency.id}-${index}`} value={currency.id}>
                       {currency.code} - {currency.name}
                     </SelectItem>
                   ))}
@@ -209,18 +208,14 @@ export function EditClientCommitmentModal({
           </CustomModalBody>
         ),
         footer: (
-          <div className="flex items-center justify-end gap-3 p-6 border-t border-border">
-            <Button variant="outline" onClick={handleClose} disabled={isLoading}>
-              Cancelar
-            </Button>
-            <Button 
-              onClick={handleSave} 
-              disabled={isLoading || !currencyId || !committedAmount}
-              className="min-w-[100px]"
-            >
-              {isLoading ? "Guardando..." : "Guardar"}
-            </Button>
-          </div>
+          <CustomModalFooter
+            onCancel={handleClose}
+            onSubmit={handleSave}
+            isLoading={isLoading}
+            saveDisabled={isLoading || !currencyId || !committedAmount}
+            submitText="Guardar"
+            cancelText="Cancelar"
+          />
         )
       }}
     </CustomModalLayout>
