@@ -124,9 +124,13 @@ Changelog:
   • Removed Balance por Billetera chart from second row as requested, changed layout back to 3 columns
   • Fixed expense data query to filter movements by EGRESO type and use subcategory_id for proper categorization
   • Enhanced useExpensesByCategory hook to search for movements containing "egreso" in name and group by subcategory
-  • Changed FinancesDashboard layout to isWide={true} for better space utilization on large screens
+  • Changed FinancesDashboard layout to wide={true} for better space utilization on large screens
   • Integrated new chart into finance dashboard between metrics column and financial flow chart
   • Applied consistent chart styling and responsive design patterns throughout the new visualization
+  • Fixed chart colors to use hardcoded HSL values instead of CSS variables for proper color display
+  • Standardized both pie charts with identical layout: percentages inside chart, legend below, h-64 height
+  • Enhanced Balance General amount to use var(--chart-neutral) color matching its mini chart line
+  • Optimized chart spacing and positioning for consistent visual appearance across both charts
 - July 12, 2025. Fixed MiniTrendChart hardcoded line visualization and optimized MonthlyFlowChart spacing - COMPLETED
   • Removed problematic onboarding fields (user_role and team_size) preventing database enum constraint violations
   • Added comprehensive icon integration to finance dashboard cards: TrendingUp, Calendar, Wallet, Clock, DollarSign
