@@ -58,10 +58,22 @@ export function MonthlyFlowChart({ data, isLoading }: MonthlyFlowChartProps) {
     <ResponsiveContainer width="100%" height={380}>
       <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 20 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid-text)" />
-        <XAxis dataKey="month" tick={{ fill: 'var(--chart-grid-text)' }} />
-        <YAxis tickFormatter={formatCurrency} tick={{ fill: 'var(--chart-grid-text)' }} />
+        <XAxis 
+          dataKey="month" 
+          tick={{ fill: 'var(--chart-grid-text)', fontSize: 12 }}
+          axisLine={{ stroke: 'var(--chart-grid-text)' }}
+          tickLine={{ stroke: 'var(--chart-grid-text)' }}
+        />
+        <YAxis 
+          tickFormatter={formatCurrency} 
+          tick={{ fill: 'var(--chart-grid-text)', fontSize: 12 }}
+          axisLine={{ stroke: 'var(--chart-grid-text)' }}
+          tickLine={{ stroke: 'var(--chart-grid-text)' }}
+        />
         <Tooltip content={<CustomTooltip />} />
-        <Legend />
+        <Legend 
+          wrapperStyle={{ fontSize: '12px' }}
+        />
         <Line 
           type="monotone" 
           dataKey="income" 

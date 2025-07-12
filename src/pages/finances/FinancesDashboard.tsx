@@ -46,6 +46,7 @@ export default function FinancesDashboard() {
   const incomeTrend = monthlyFlow?.map(month => ({ value: month.income || 0 })) || []
   const expensesTrend = monthlyFlow?.map(month => ({ value: Math.abs(month.expenses || 0) })) || []
   const balanceTrend = monthlyFlow?.map(month => ({ value: month.net || 0 })) || []
+  const movementsTrend = monthlyFlow?.map(month => ({ value: (month.income || 0) + Math.abs(month.expenses || 0) })) || []
   
   // Calculate movements from last 30 days
   const movementsLast30Days = financialSummary ? 
@@ -283,8 +284,14 @@ export default function FinancesDashboard() {
           >
             <Card className="h-full relative overflow-hidden">
               <CardContent className="p-4 h-full flex flex-col">
-                {/* Accent Line at top */}
-                <div className="w-full h-1 bg-[var(--accent)] rounded-full mb-6"></div>
+                {/* Mini Chart */}
+                <div className="mb-4">
+                  <MiniTrendChart 
+                    data={movementsTrend} 
+                    color="var(--chart-neutral)" 
+                    isLoading={summaryLoading} 
+                  />
+                </div>
                 
                 {/* Spacer to push content down */}
                 <div className="flex-1"></div>
