@@ -119,6 +119,12 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 12, 2025. Finance dashboard enhanced with mini-chart metrics and time period filtering - COMPLETED
+  • Eliminated double lines from metric cards: removed accent lines, kept only mini trend charts for clean visualization
+  • Added time period selector in summary card top-right corner with options: DESDE SIEMPRE, Este mes, Trimestre, Semestre, Año
+  • Integrated timePeriod filter into all data hooks to control entire dashboard visualization
+  • Cards now show: mini chart at top + spacer + icon/text/amount at bottom (consistent with movement card design)
+  • Time period selector affects all charts and metrics throughout the finance dashboard
 - July 12, 2025. Finance dashboard restructured with three-column layout: metrics column + two charts - COMPLETED
   • Eliminated old card of movements from second row as requested
   • Reorganized layout: first row (summary 75% + movements 25%), second row (3-column: metrics stack + 2 charts)

@@ -1,5 +1,6 @@
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DollarSign, TrendingUp, TrendingDown, FileText, Calendar, CreditCard, User, ArrowUpDown, Plus, Building } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useFinancialSummary, useMonthlyFlowData, useWalletBalances, useRecentMovements } from '@/hooks/use-finance-dashboard-simple'
@@ -13,8 +14,8 @@ import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState'
 import { motion } from 'framer-motion'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-
 import { Button } from '@/components/ui/button'
+import { useState } from 'react'
 
 // Function to get organization initials
 const getOrganizationInitials = (name: string) => {
@@ -30,11 +31,14 @@ export default function FinancesDashboard() {
   const { data: userData } = useCurrentUser()
   const organizationId = userData?.preferences?.last_organization_id
   const projectId = userData?.preferences?.last_project_id
+  
+  // Time period filter state
+  const [timePeriod, setTimePeriod] = useState('desde-siempre')
 
-  const { data: financialSummary, isLoading: summaryLoading } = useFinancialSummary(organizationId, projectId)
-  const { data: monthlyFlow, isLoading: flowLoading } = useMonthlyFlowData(organizationId, projectId)
-  const { data: walletBalances, isLoading: walletsLoading } = useWalletBalances(organizationId, projectId)
-  const { data: recentMovements, isLoading: recentLoading } = useRecentMovements(organizationId, projectId, 5)
+  const { data: financialSummary, isLoading: summaryLoading } = useFinancialSummary(organizationId, projectId, timePeriod)
+  const { data: monthlyFlow, isLoading: flowLoading } = useMonthlyFlowData(organizationId, projectId, timePeriod)
+  const { data: walletBalances, isLoading: walletsLoading } = useWalletBalances(organizationId, projectId, timePeriod)
+  const { data: recentMovements, isLoading: recentLoading } = useRecentMovements(organizationId, projectId, 5, timePeriod)
   
   // Generate mini trend data from monthly flow for each metric
   const incomeTrend = monthlyFlow?.map(month => ({ value: month.income || 0 })) || []
@@ -103,6 +107,23 @@ export default function FinancesDashboard() {
           >
             <Card>
               <CardContent className="p-4 md:p-6">
+                {/* Header with time period selector */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex-1" />
+                  <Select value={timePeriod} onValueChange={setTimePeriod}>
+                    <SelectTrigger className="w-40">
+                      <SelectValue placeholder="Período" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="desde-siempre">DESDE SIEMPRE</SelectItem>
+                      <SelectItem value="este-mes">Este mes</SelectItem>
+                      <SelectItem value="trimestre">Trimestre</SelectItem>
+                      <SelectItem value="semestre">Semestre</SelectItem>
+                      <SelectItem value="año">Año</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
                 <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6">
                   {/* Financial Icon */}
                   <div className="flex-shrink-0">
@@ -206,9 +227,6 @@ export default function FinancesDashboard() {
             {/* Card de Ingresos */}
             <Card className="flex-1 relative overflow-hidden">
               <CardContent className="p-4 h-full flex flex-col">
-                {/* Accent Line at top */}
-                <div className="w-full h-1 bg-green-500 rounded-full mb-4"></div>
-                
                 {/* Mini Chart */}
                 <div className="mb-4">
                   <MiniTrendChart 
@@ -239,9 +257,6 @@ export default function FinancesDashboard() {
             {/* Card de Egresos */}
             <Card className="flex-1 relative overflow-hidden">
               <CardContent className="p-4 h-full flex flex-col">
-                {/* Accent Line at top */}
-                <div className="w-full h-1 bg-red-500 rounded-full mb-4"></div>
-                
                 {/* Mini Chart */}
                 <div className="mb-4">
                   <MiniTrendChart 
@@ -272,9 +287,6 @@ export default function FinancesDashboard() {
             {/* Card de Balance */}
             <Card className="flex-1 relative overflow-hidden">
               <CardContent className="p-4 h-full flex flex-col">
-                {/* Accent Line at top */}
-                <div className="w-full h-1 bg-[var(--accent)] rounded-full mb-4"></div>
-                
                 {/* Mini Chart */}
                 <div className="mb-4">
                   <MiniTrendChart 
