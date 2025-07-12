@@ -219,7 +219,15 @@ export function Step2FinancialSetup() {
           />
         </div>
 
-        <div className="flex justify-end pt-4">
+        <div className="flex justify-between pt-4">
+          <Button 
+            onClick={goPrevStep}
+            variant="outline"
+            className="px-8"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Volver
+          </Button>
           <Button 
             onClick={handleNext}
             disabled={!isValid}

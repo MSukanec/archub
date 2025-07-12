@@ -119,6 +119,14 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 12, 2025. Fixed SelectMode double-click issue and onboarding navigation problems - COMPLETED
+  • Eliminated function duplication handleFinishOnboarding that caused initialization error
+  • Simplified SelectMode to execute mutation directly without intermediate state (selectedMode)
+  • Removed unnecessary two-step logic (selection + confirmation) for single-click operation
+  • Added "Volver" button to Step2FinancialSetup with ArrowLeft icon and proper spacing
+  • Verified ProtectedRoute correctly redirects users with onboarding_completed=FALSE to /onboarding
+  • Cleaned up unused imports and variables for production-ready code quality
+  • SelectMode now works with single click and properly updates user_type in database
 - July 12, 2025. MultiComboBox component creation and onboarding system enhancement - COMPLETED
   • Created new MultiComboBox component in src/components/ui-custom/MultiComboBox.tsx matching Select styling exactly
   • Enhanced onboarding from 3 to 4 steps: 1) Personal data → 2) Organization & Financial setup → 3) Discovery → 4) Mode selection
