@@ -119,6 +119,13 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 12, 2025. Fixed onboarding enum field compatibility and completed mobile finance dashboard layout - COMPLETED
+  • Fixed user_role enum values: removed special characters (/ symbols) from role options like "Arquitecto/a" → "Arquitecto"
+  • Fixed team_size enum values: replaced EN DASH (–) with standard hyphen (-) in "2–5 personas" → "2-5 personas"
+  • Completed mobile finance dashboard layout restructure: icon left + title inline right, organization info below
+  • Added full-width period selector at bottom of summary card in mobile view
+  • Mobile metrics cards now stack vertically (grid-cols-1) with proper Card/CardContent structure and mini charts
+  • All hardcoded colors replaced with CSS variables: var(--chart-positive/negative/neutral)
 - July 12, 2025. Finance dashboard enhanced with mini-chart metrics and time period filtering - COMPLETED
   • Eliminated double lines from metric cards: removed accent lines, kept only mini trend charts for clean visualization
   • Added time period selector in summary card top-right corner with options: DESDE SIEMPRE, Este mes, Trimestre, Semestre, Año

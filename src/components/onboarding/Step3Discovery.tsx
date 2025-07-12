@@ -35,16 +35,16 @@ const mainUseOptions = [
 
 // User role options (enum user_role)
 const userRoleOptions = [
-  'Arquitecto/a',
-  'Ingeniero/a',
+  'Arquitecto',
+  'Ingeniero',
   'Maestro Mayor de Obras',
-  'Constructor/a',
+  'Constructor',
   'Desarrollador inmobiliario',
   'Estudiante',
   'Docente',
-  'Investigador/a',
-  'Consultor/a',
-  'Propietario/a',
+  'Investigador',
+  'Consultor',
+  'Propietario',
   'Inversión inmobiliaria',
   'Otro'
 ];
@@ -52,8 +52,8 @@ const userRoleOptions = [
 // Team size options (enum team_size)
 const teamSizeOptions = [
   'Solo yo',
-  '2–5 personas',
-  '6–15 personas',
+  '2-5 personas',
+  '6-15 personas',
   'Más de 15 personas'
 ];
 
