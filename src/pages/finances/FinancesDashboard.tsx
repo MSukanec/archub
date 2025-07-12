@@ -3,9 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DollarSign, TrendingUp, TrendingDown, FileText, Calendar, CreditCard, User, ArrowUpDown, Plus, Building, Wallet, Clock } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { useFinancialSummary, useMonthlyFlowData, useWalletBalances, useRecentMovements } from '@/hooks/use-finance-dashboard-simple'
+import { useFinancialSummary, useMonthlyFlowData, useWalletBalances, useRecentMovements, useExpensesByCategory } from '@/hooks/use-finance-dashboard-simple'
 import { MonthlyFlowChart } from '@/components/graphics/MonthlyFlowChart'
 import { WalletBalanceChart } from '@/components/graphics/WalletBalanceChart'
+import { ExpensesByCategoryChart } from '@/components/graphics/ExpensesByCategoryChart'
 import { MiniTrendChart } from '@/components/graphics/MiniTrendChart'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -39,6 +40,7 @@ export default function FinancesDashboard() {
   const { data: monthlyFlow, isLoading: flowLoading } = useMonthlyFlowData(organizationId, projectId, timePeriod)
   const { data: walletBalances, isLoading: walletsLoading } = useWalletBalances(organizationId, projectId, timePeriod)
   const { data: recentMovements, isLoading: recentLoading } = useRecentMovements(organizationId, projectId, 5, timePeriod)
+  const { data: expensesByCategory, isLoading: categoriesLoading } = useExpensesByCategory(organizationId, projectId, timePeriod)
   
   // Generate mini trend data from monthly flow for each metric
   const incomeTrend = monthlyFlow?.map(month => ({ value: month.income || 0 })) || []
@@ -305,7 +307,7 @@ export default function FinancesDashboard() {
         </div>
 
         {/* Segunda Fila: Métricas en columna + Gráficos */}
-        <div className="hidden md:grid grid-cols-3 gap-4 lg:gap-6">
+        <div className="hidden md:grid grid-cols-4 gap-4 lg:gap-6">
           {/* Columna de Métricas Verticales */}
           <div className="flex flex-col gap-4 lg:gap-6 h-full">
             {/* Card de Ingresos */}
@@ -399,8 +401,24 @@ export default function FinancesDashboard() {
             </Card>
           </div>
 
+          {/* Gráfico de Egresos por Categoría */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <TrendingDown className="h-5 w-5" />
+                Egresos por Categoría
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Distribución de gastos por tipo de categoría
+              </p>
+            </CardHeader>
+            <CardContent className="pb-2">
+              <ExpensesByCategoryChart data={expensesByCategory || []} isLoading={categoriesLoading} />
+            </CardContent>
+          </Card>
+
           {/* Gráfico de Flujo Financiero */}
-          <Card className="lg:col-span-2">
+          <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <TrendingUp className="h-5 w-5" />
@@ -415,6 +433,21 @@ export default function FinancesDashboard() {
             </CardContent>
           </Card>
 
+          {/* Gráfico de Balance por Billetera */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Wallet className="h-5 w-5" />
+                Balance por Billetera
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Distribución de fondos entre billeteras
+              </p>
+            </CardHeader>
+            <CardContent className="pb-2">
+              <WalletBalanceChart data={walletBalances || []} isLoading={walletsLoading} />
+            </CardContent>
+          </Card>
 
         </div>
 

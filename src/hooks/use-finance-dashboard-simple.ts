@@ -443,3 +443,107 @@ export function useRecentMovements(organizationId: string | undefined, projectId
     enabled: !!organizationId
   })
 }
+
+interface ExpensesCategoryData {
+  category: string
+  amount: number
+  percentage: number
+  color: string
+}
+
+export function useExpensesByCategory(organizationId: string | undefined, projectId: string | undefined, timePeriod: string = 'desde-siempre') {
+  return useQuery({
+    queryKey: ['expenses-by-category', organizationId, projectId, timePeriod],
+    queryFn: async (): Promise<ExpensesCategoryData[]> => {
+      if (!organizationId || !supabase) return []
+
+      try {
+        // Base query for movements
+        let movementsQuery = supabase
+          .from('movements')
+          .select(`
+            amount,
+            type_id,
+            category_id,
+            subcategory_id
+          `)
+          .eq('organization_id', organizationId)
+          .lt('amount', 0) // Only expenses (negative amounts)
+
+        if (projectId) {
+          movementsQuery = movementsQuery.eq('project_id', projectId)
+        }
+
+        // Apply date filtering if needed
+        const dateRange = getDateRange(timePeriod)
+        if (dateRange) {
+          movementsQuery = movementsQuery
+            .gte('movement_date', dateRange.start.toISOString())
+            .lte('movement_date', dateRange.end.toISOString())
+        }
+
+        const { data: movements, error } = await movementsQuery
+
+        if (error) throw error
+        if (!movements || movements.length === 0) return []
+
+        // Get unique category IDs
+        const categoryIds = Array.from(new Set(movements.map(m => m.category_id).filter(Boolean)))
+        
+        // Get movement concept categories
+        const { data: categories } = await supabase
+          .from('movement_concept_categories')
+          .select('id, name')
+          .in('id', categoryIds)
+
+        // Create lookup map
+        const categoriesMap = new Map()
+        categories?.forEach(category => {
+          categoriesMap.set(category.id, category.name)
+        })
+
+        // Group by category and sum amounts
+        const categoryTotals = new Map<string, number>()
+        let totalExpenses = 0
+
+        movements.forEach((movement: any) => {
+          const categoryName = categoriesMap.get(movement.category_id) || 'Sin Categoría'
+          const amount = Math.abs(movement.amount) // Convert to positive for display
+          
+          categoryTotals.set(categoryName, (categoryTotals.get(categoryName) || 0) + amount)
+          totalExpenses += amount
+        })
+
+        // Convert to array with percentages and colors
+        const colors = [
+          'hsl(var(--chart-1))',
+          'hsl(var(--chart-2))',
+          'hsl(var(--chart-3))',
+          'hsl(var(--chart-4))',
+          'hsl(var(--chart-5))',
+          '#8884d8',
+          '#82ca9d',
+          '#ffc658',
+          '#ff7300',
+          '#0088fe'
+        ]
+
+        const result: ExpensesCategoryData[] = Array.from(categoryTotals.entries())
+          .map(([category, amount], index) => ({
+            category,
+            amount,
+            percentage: totalExpenses > 0 ? (amount / totalExpenses) * 100 : 0,
+            color: colors[index % colors.length]
+          }))
+          .sort((a, b) => b.amount - a.amount) // Sort by amount descending
+          .filter(item => item.amount > 0) // Only include positive amounts
+
+        return result
+      } catch (error) {
+        console.error('Error in useExpensesByCategory:', error)
+        return []
+      }
+    },
+    enabled: !!organizationId
+  })
+}
