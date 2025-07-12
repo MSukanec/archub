@@ -119,15 +119,36 @@ export default function FinancesDashboard() {
 
                   {/* Financial Summary Info */}
                   <div className="flex-1">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-4 mb-1">
+                    {/* Mobile: Icon inline with title, desktop: title and selector inline */}
+                    <div className="flex items-center gap-3 mb-1">
                       <motion.h1
-                        className="text-2xl md:text-4xl font-black text-foreground"
+                        className="text-xl md:text-4xl font-black text-foreground flex-1"
                         initial={{ scale: 0.8 }}
                         animate={{ scale: 1 }}
                         transition={{ delay: 0.2, duration: 0.3 }}
                       >
                         Resumen de Finanzas
                       </motion.h1>
+                      
+                      {/* Desktop: selector inline */}
+                      <div className="hidden md:block">
+                        <Select value={timePeriod} onValueChange={setTimePeriod}>
+                          <SelectTrigger className="w-40">
+                            <SelectValue placeholder="Período" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="desde-siempre">Desde siempre</SelectItem>
+                            <SelectItem value="año">Año</SelectItem>
+                            <SelectItem value="semestre">Semestre</SelectItem>
+                            <SelectItem value="trimestre">Trimestre</SelectItem>
+                            <SelectItem value="mes">Mes</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    
+                    {/* Mobile: selector below title */}
+                    <div className="md:hidden mb-3">
                       <Select value={timePeriod} onValueChange={setTimePeriod}>
                         <SelectTrigger className="w-40">
                           <SelectValue placeholder="Período" />
@@ -168,13 +189,13 @@ export default function FinancesDashboard() {
                       </div>
                       <div className="flex items-center gap-1">
                         <TrendingUp className="h-4 w-4" />
-                        <span className="text-green-600">
+                        <span style={{ color: 'var(--chart-positive)' }}>
                           {summaryLoading ? '...' : formatCurrency(financialSummary?.totalIncome || 0)} ingresos
                         </span>
                       </div>
                       <div className="flex items-center gap-1">
                         <TrendingDown className="h-4 w-4" />
-                        <span className="text-red-600">
+                        <span style={{ color: 'var(--chart-negative)' }}>
                           {summaryLoading ? '...' : formatCurrency(financialSummary?.totalExpenses || 0)} egresos
                         </span>
                       </div>
@@ -328,51 +349,94 @@ export default function FinancesDashboard() {
 
         </div>
 
-        {/* Métricas Principales - Mobile (Compactas) */}
-        <div className="md:hidden grid grid-cols-2 gap-4">
-          <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm min-h-[80px]">
-            <div className="flex items-center justify-between mb-1">
-              <TrendingUp className="h-4 w-4 text-green-600" />
-            </div>
-            <div className="space-y-0.5">
-              <div className="text-xl font-bold text-green-600">
+        {/* Métricas Principales - Mobile (Una columna) */}
+        <div className="md:hidden grid grid-cols-1 gap-4">
+          <Card className="relative overflow-hidden">
+            <CardContent className="p-4 h-full flex flex-col">
+              {/* Mini Chart */}
+              <div className="mb-4">
+                <MiniTrendChart 
+                  data={incomeTrend} 
+                  color="var(--chart-positive)" 
+                  isLoading={flowLoading} 
+                />
+              </div>
+              
+              {/* Spacer to push content down */}
+              <div className="flex-1"></div>
+              
+              {/* Icon and Title Section - positioned lower */}
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingUp className="h-4 w-4" style={{ color: 'var(--chart-positive)' }} />
+                <span className="text-sm text-muted-foreground">
+                  Ingresos Totales
+                </span>
+              </div>
+              
+              {/* Amount - smaller size like reference */}
+              <div className="text-lg font-bold" style={{ color: 'var(--chart-positive)' }}>
                 {summaryLoading ? '...' : formatCurrency(financialSummary?.totalIncome || 0)}
               </div>
-              <div className="text-xs text-gray-500 font-medium leading-tight">
-                Ingresos Totales
-              </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm min-h-[80px]">
-            <div className="flex items-center justify-between mb-1">
-              <TrendingDown className="h-4 w-4 text-red-600" />
-            </div>
-            <div className="space-y-0.5">
-              <div className="text-xl font-bold text-red-600">
+          <Card className="relative overflow-hidden">
+            <CardContent className="p-4 h-full flex flex-col">
+              {/* Mini Chart */}
+              <div className="mb-4">
+                <MiniTrendChart 
+                  data={expensesTrend} 
+                  color="var(--chart-negative)" 
+                  isLoading={flowLoading} 
+                />
+              </div>
+              
+              {/* Spacer to push content down */}
+              <div className="flex-1"></div>
+              
+              {/* Icon and Title Section - positioned lower */}
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingDown className="h-4 w-4" style={{ color: 'var(--chart-negative)' }} />
+                <span className="text-sm text-muted-foreground">
+                  Egresos Totales
+                </span>
+              </div>
+              
+              {/* Amount - smaller size like reference */}
+              <div className="text-lg font-bold" style={{ color: 'var(--chart-negative)' }}>
                 {summaryLoading ? '...' : formatCurrency(financialSummary?.totalExpenses || 0)}
               </div>
-              <div className="text-xs text-gray-500 font-medium leading-tight">
-                Egresos Totales
-              </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm min-h-[80px]">
-            <div className="flex items-center justify-between mb-1">
-              <DollarSign className="h-4 w-4 text-gray-500" />
-            </div>
-            <div className="space-y-0.5">
-              <div className={`text-xl font-bold ${getBalanceColor(financialSummary?.balance || 0)}`}>
+          <Card className="relative overflow-hidden">
+            <CardContent className="p-4 h-full flex flex-col">
+              {/* Mini Chart */}
+              <div className="mb-4">
+                <MiniTrendChart 
+                  data={balanceTrend} 
+                  color="var(--chart-neutral)" 
+                  isLoading={flowLoading} 
+                />
+              </div>
+              
+              {/* Spacer to push content down */}
+              <div className="flex-1"></div>
+              
+              {/* Icon and Title Section - positioned lower */}
+              <div className="flex items-center gap-2 mb-2">
+                <DollarSign className="h-4 w-4" style={{ color: 'var(--chart-neutral)' }} />
+                <span className="text-sm text-muted-foreground">
+                  Balance General
+                </span>
+              </div>
+              
+              {/* Amount - smaller size like reference */}
+              <div className="text-lg font-bold" style={getBalanceColor(financialSummary?.balance || 0)}>
                 {summaryLoading ? '...' : formatCurrency(financialSummary?.balance || 0)}
               </div>
-              <div className="text-xs text-gray-500 font-medium leading-tight">
-                Balance General
-              </div>
-            </div>
-          </div>
-
-
+            </CardContent>
+          </Card>
         </div>
 
 
