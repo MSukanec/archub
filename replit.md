@@ -119,6 +119,15 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 12, 2025. ProjectClients page restructured with two-column layout matching OrganizationMembers design - COMPLETED
+  • Rebuilt ProjectClients page layout to match GESTIÓN DE MIEMBROS two-column desktop structure
+  • Left column displays section description with title, explanation text, and client count summary card
+  • Right column shows individual client cards with same styling and spacing as member cards
+  • Removed wrapping Card component around client list for cleaner presentation
+  • Integrated CustomEmptyState within right column instead of separate section for better visual flow
+  • Maintained FeatureIntroduction component at top and all existing functionality
+  • Applied consistent grid layout: lg:col-span-4 for description, lg:col-span-8 for content
+  • Empty state now properly aligned within two-column structure instead of appearing disconnected below
 - July 11, 2025. Profile page plan section background fix and ProjectClients page enhancement with FeatureIntroduction and CustomEmptyState - COMPLETED
   • Fixed Profile page plan section to use --card-bg and --card-border CSS variables instead of transparent background
   • Plan section now matches FeatureIntroduction component styling with proper theme-aware background

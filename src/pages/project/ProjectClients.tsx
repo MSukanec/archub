@@ -375,65 +375,63 @@ export default function ProjectClients() {
                   )
                 })}
               </div>
-            ) : null}
+            ) : (
+              /* Custom Empty State - Inside right column when no clients */
+              <CustomEmptyState
+                icon={<Users className="w-16 h-16 text-muted-foreground/50" />}
+                title="No hay clientes agregados"
+                description="Comienza agregando el primer cliente al proyecto desde tus contactos organizacionales."
+                action={
+                  <Dialog open={showAddClientModal} onOpenChange={setShowAddClientModal}>
+                    <DialogTrigger asChild>
+                      <Button>
+                        <UserPlus className="w-4 h-4 mr-2" />
+                        Agregar Primer Cliente
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Agregar Cliente al Proyecto</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Seleccionar Contacto</label>
+                          <Select value={selectedContactId} onValueChange={setSelectedContactId}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecciona un contacto" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {availableContacts.map(contact => {
+                                const displayName = contact.company_name || 
+                                                 `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
+                                return (
+                                  <SelectItem key={contact.id} value={contact.id}>
+                                    {displayName}
+                                  </SelectItem>
+                                )
+                              })}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex justify-end gap-2">
+                          <Button variant="outline" onClick={() => setShowAddClientModal(false)}>
+                            Cancelar
+                          </Button>
+                          <Button 
+                            onClick={handleAddClient} 
+                            disabled={!selectedContactId || addClientMutation.isPending}
+                          >
+                            {addClientMutation.isPending ? 'Agregando...' : 'Agregar'}
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                }
+              />
+            )}
           </div>
         </div>
-
-        {/* Custom Empty State - Only show when no clients (outside the two-column layout) */}
-        {(!projectClients || projectClients.length === 0) && (
-          <CustomEmptyState
-            icon={<Users className="w-16 h-16 text-muted-foreground/50" />}
-            title="No hay clientes agregados"
-            description="Comienza agregando el primer cliente al proyecto desde tus contactos organizacionales."
-            action={
-              <Dialog open={showAddClientModal} onOpenChange={setShowAddClientModal}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <UserPlus className="w-4 h-4 mr-2" />
-                    Agregar Primer Cliente
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>Agregar Cliente al Proyecto</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Seleccionar Contacto</label>
-                      <Select value={selectedContactId} onValueChange={setSelectedContactId}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona un contacto" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {availableContacts.map(contact => {
-                            const displayName = contact.company_name || 
-                                             `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
-                            return (
-                              <SelectItem key={contact.id} value={contact.id}>
-                                {displayName}
-                              </SelectItem>
-                            )
-                          })}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="flex justify-end gap-2">
-                      <Button variant="outline" onClick={() => setShowAddClientModal(false)}>
-                        Cancelar
-                      </Button>
-                      <Button 
-                        onClick={handleAddClient} 
-                        disabled={!selectedContactId || addClientMutation.isPending}
-                      >
-                        {addClientMutation.isPending ? 'Agregando...' : 'Agregar'}
-                      </Button>
-                    </div>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            }
-          />
-        )}
       </div>
       
       {/* Dangerous Confirmation Modal */}
