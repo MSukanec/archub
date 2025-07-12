@@ -783,7 +783,7 @@ export default function ConstructionBudgets() {
                         placeholder="1"
                         min="1"
                         step="0.01"
-                        className="text-center h-10"
+                        className="text-center"
                         style={{
                           MozAppearance: 'textfield', // Firefox
                           WebkitAppearance: 'none', // Chrome/Safari
@@ -800,7 +800,7 @@ export default function ConstructionBudgets() {
                     <Button
                       onClick={handleQuickAddTask}
                       disabled={!quickTaskId || isAddingQuickTask}
-                      className="px-3 sm:px-4 whitespace-nowrap h-10"
+                      className="px-3 sm:px-4 whitespace-nowrap"
                       size="sm"
                     >
                       {isAddingQuickTask ? "Agregando..." : "Agregar Tarea"}
