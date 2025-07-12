@@ -73,7 +73,13 @@ export function EditClientCommitmentModal({
         throw error
       }
       
-      const mappedCurrencies = data?.map(item => item.currencies) || []
+      // Map the currencies correctly - the structure is nested
+      const mappedCurrencies = data?.map(item => ({
+        id: item.currencies.id,
+        name: item.currencies.name,
+        code: item.currencies.code,
+        symbol: item.currencies.symbol
+      })) || []
       console.log('Mapped currencies:', mappedCurrencies)
       return mappedCurrencies
     },
@@ -218,11 +224,6 @@ export function EditClientCommitmentModal({
                 min="0"
                 step="0.01"
               />
-              {currencyId && (
-                <div className="text-xs text-muted-foreground">
-                  {currencies.find(c => c.id === currencyId)?.symbol} {parseFloat(committedAmount || '0').toLocaleString('es-AR')}
-                </div>
-              )}
             </div>
           </CustomModalBody>
         ),
