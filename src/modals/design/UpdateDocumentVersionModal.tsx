@@ -171,7 +171,6 @@ export function UpdateDocumentVersionModal({
 
   const removeFile = () => {
     setSelectedFile(null);
-    // Reset input
     const fileInput = document.getElementById('file-upload') as HTMLInputElement;
     if (fileInput) fileInput.value = '';
   };
@@ -202,8 +201,7 @@ export function UpdateDocumentVersionModal({
             </DialogDescription>
           </DialogHeader>
           
-          <div className="py-4">
-          <div className="space-y-6">
+          <div className="py-4 space-y-6">
             {/* Current Version Info */}
             <div className="p-4 bg-muted/50 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
