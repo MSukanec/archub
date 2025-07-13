@@ -79,6 +79,7 @@ export default function DesignDocumentation() {
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [selectedItem, setSelectedItem] = useState<{type: 'folder' | 'group'; id: string; name: string} | null>(null);
   const [expandedFolderIds, setExpandedFolderIds] = useState<string[]>([]);
+  const [expandedGroupIds, setExpandedGroupIds] = useState<string[]>([]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { setActions, setShowActionBar } = useMobileActionBar();
@@ -116,6 +117,16 @@ export default function DesignDocumentation() {
       
       // Si es una subcarpeta, simplemente la agregamos
       return [...prev, folderId];
+    });
+  };
+
+  // Función para manejar la expansión/contracción del acordeón de grupos
+  const toggleGroupExpansion = (groupId: string) => {
+    setExpandedGroupIds(prev => {
+      if (prev.includes(groupId)) {
+        return prev.filter(id => id !== groupId);
+      }
+      return [...prev, groupId];
     });
   };
 
@@ -604,59 +615,34 @@ export default function DesignDocumentation() {
   );
 
   const renderHierarchicalStructure = () => {
-    const renderDocument = (document: any) => (
-      <Card key={document.id} className="ml-8 bg-muted/30">
-        <CardHeader className="pb-3 flex items-center">
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-2">
-              <FileText className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm font-medium">{document.name}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Badge variant="outline" className="text-xs">
-                {document.file_type}
-              </Badge>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => window.open(document.file_url, '_blank')}
-                className="h-6 w-6 p-0"
-              >
-                <Pencil className="w-3 h-3" />
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-      </Card>
-    );
 
     const renderGroup = (group: any) => {
       const groupDocuments = documents.filter(d => d.group_id === group.id);
+      const isGroupExpanded = expandedGroupIds.includes(group.id);
+      
       return (
         <div key={group.id} className="space-y-2">
           <Card className="ml-6 bg-muted/20">
-            <CardHeader className="pb-2 flex items-center">
-              <div className="flex items-center justify-between w-full">
+            <CardHeader 
+              className="py-4 flex items-center cursor-pointer justify-center"
+              onClick={() => toggleGroupExpansion(group.id)}
+            >
+              <div className="flex items-center justify-between w-full h-full">
                 <div className="flex items-center gap-2">
+                  {isGroupExpanded ? (
+                    <ChevronUp className="w-4 h-4 text-muted-foreground" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                  )}
                   <Package className="w-4 h-4 text-muted-foreground" />
                   <span className="text-sm font-medium">{group.name}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Button
-                    size="sm"
-                    onClick={() => {
-                      setSelectedGroupId(group.id);
-                      setShowUploadModal(true);
-                    }}
-                    className="h-6 px-2 text-xs"
-                  >
-                    <Upload className="w-3 h-3 mr-1" />
-                    Subir Documentos
-                  </Button>
-                  <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       setEditingGroup(group);
                       setShowGroupModal(true);
                     }}
@@ -667,22 +653,72 @@ export default function DesignDocumentation() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => setGroupToDelete(group)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setGroupToDelete(group);
+                    }}
                     className="h-6 w-6 p-0 text-destructive hover:text-destructive"
                   >
                     <Trash2 className="w-3 h-3" />
                   </Button>
+                  <Button
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedGroupId(group.id);
+                      setShowUploadModal(true);
+                    }}
+                    className="h-6 px-2 text-xs"
+                  >
+                    <Upload className="w-3 h-3 mr-1" />
+                    Subir Documentos
+                  </Button>
                 </div>
               </div>
             </CardHeader>
+            
+            {/* Contenido expandido del grupo - documentos */}
+            {isGroupExpanded && (
+              <>
+                <div className="border-t border-border" />
+                <CardContent className="py-4">
+                  {groupDocuments.length > 0 ? (
+                    <div className="space-y-2">
+                      {groupDocuments.map((document) => (
+                        <Card key={document.id} className="bg-muted/30">
+                          <CardHeader className="py-3 flex items-center">
+                            <div className="flex items-center justify-between w-full">
+                              <div className="flex items-center gap-2">
+                                <FileText className="w-4 h-4 text-muted-foreground" />
+                                <span className="text-sm font-medium">{document.name}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Badge variant="outline" className="text-xs">
+                                  {document.file_type}
+                                </Badge>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => window.open(document.file_url, '_blank')}
+                                  className="h-6 w-6 p-0"
+                                >
+                                  <Pencil className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          </CardHeader>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-2">
+                      No hay documentos en este grupo
+                    </p>
+                  )}
+                </CardContent>
+              </>
+            )}
           </Card>
-          
-          {/* Documentos del grupo */}
-          {groupDocuments.length > 0 && (
-            <div className="space-y-2">
-              {groupDocuments.map(renderDocument)}
-            </div>
-          )}
         </div>
       );
     };
@@ -776,7 +812,6 @@ export default function DesignDocumentation() {
                 {/* Grupos dentro de la carpeta */}
                 {folderGroups.length > 0 && (
                   <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-muted-foreground">Grupos de revisión</h4>
                     {folderGroups.map(renderGroup)}
                   </div>
                 )}
