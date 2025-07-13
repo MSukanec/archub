@@ -78,7 +78,7 @@ export default function DesignDocumentation() {
   const [folderToDelete, setFolderToDelete] = useState<any>(null);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [selectedItem, setSelectedItem] = useState<{type: 'folder' | 'group'; id: string; name: string} | null>(null);
-  const [expandedFolderId, setExpandedFolderId] = useState<string | null>(null);
+  const [expandedFolderIds, setExpandedFolderIds] = useState<string[]>([]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { setActions, setShowActionBar } = useMobileActionBar();
@@ -98,7 +98,11 @@ export default function DesignDocumentation() {
 
   // Función para manejar la expansión/contracción del acordeón
   const toggleFolderExpansion = (folderId: string) => {
-    setExpandedFolderId(expandedFolderId === folderId ? null : folderId);
+    setExpandedFolderIds(prev => 
+      prev.includes(folderId) 
+        ? prev.filter(id => id !== folderId)
+        : [...prev, folderId]
+    );
   };
 
   // Filter folders based on search - only show parent folders
@@ -534,10 +538,9 @@ export default function DesignDocumentation() {
 
       {/* Card de control de visualización */}
       <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
+        <CardHeader className="py-4">
+          <div className="flex items-center justify-between h-full">
             <div className="flex items-center gap-2">
-              <FolderOpen className="w-5 h-5 text-accent" />
               <h3 className="text-lg font-semibold">Documentación</h3>
             </div>
             <div className="flex items-center gap-3">
@@ -672,7 +675,7 @@ export default function DesignDocumentation() {
 
     const renderFolder = (folder: any, isSubfolder = false) => {
       const folderGroups = groups.filter(g => g.folder_id === folder.id);
-      const isExpanded = expandedFolderId === folder.id;
+      const isExpanded = expandedFolderIds.includes(folder.id);
       
       return (
         <div key={folder.id} className="space-y-2">
@@ -683,7 +686,7 @@ export default function DesignDocumentation() {
             >
               <div className="flex items-center justify-between w-full h-full">
                 <div className="flex items-center gap-2">
-                  <FolderOpen className={`${isSubfolder ? 'w-4 h-4' : 'w-5 h-5'} text-accent`} />
+                  <FolderOpen className={`${isSubfolder ? 'w-4 h-4' : 'w-5 h-5'} text-foreground`} />
                   <span className={`${isSubfolder ? 'text-sm' : 'text-base'} font-medium`}>{folder.name}</span>
                 </div>
                 <div className="flex items-center gap-1">
