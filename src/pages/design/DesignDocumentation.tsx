@@ -512,6 +512,225 @@ export default function DesignDocumentation() {
     return null;
   };
 
+  const renderSingleColumnLayout = () => (
+    <div className="space-y-6">
+      <FeatureIntroduction
+        title="Gestión de Documentos"
+        description="Organiza y gestiona todos los documentos de tu proyecto"
+        icon={<FileText className="h-5 w-5" />}
+        features={[
+          "Organización jerárquica en carpetas y grupos documentales",
+          "Subida múltiple de archivos con versiones automáticas",
+          "Control de estados y visibilidad de documentos",
+          "Historial completo de versiones y cambios"
+        ]}
+      />
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <FolderOpen className="w-5 h-5 text-accent" />
+              <h3 className="text-lg font-semibold">Documentación</h3>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowFolderModal(true)}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Nueva Carpeta
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {renderHierarchicalStructure()}
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  const renderHierarchicalStructure = () => {
+    const renderDocument = (document: any) => (
+      <Card key={document.id} className="ml-8 bg-muted/30">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <FileText className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm font-medium">{document.name}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Badge variant="outline" className="text-xs">
+                {document.file_type}
+              </Badge>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => window.open(document.file_url, '_blank')}
+                className="h-6 w-6 p-0"
+              >
+                <Edit3 className="w-3 h-3" />
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
+    );
+
+    const renderGroup = (group: any) => {
+      const groupDocuments = documents.filter(d => d.group_id === group.id);
+      return (
+        <div key={group.id} className="space-y-2">
+          <Card className="ml-6 bg-muted/20">
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Package className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">{group.name}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Badge variant="outline" className="text-xs">
+                    {groupDocuments.length}
+                  </Badge>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedGroupId(group.id);
+                      setShowUploadModal(true);
+                    }}
+                    className="h-6 w-6 p-0"
+                  >
+                    <Plus className="w-3 h-3" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setEditingGroup(group);
+                      setShowGroupModal(true);
+                    }}
+                    className="h-6 w-6 p-0"
+                  >
+                    <Edit3 className="w-3 h-3" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setGroupToDelete(group)}
+                    className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+          </Card>
+          
+          {/* Documentos del grupo */}
+          {groupDocuments.length > 0 && (
+            <div className="space-y-2">
+              {groupDocuments.map(renderDocument)}
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    const renderFolder = (folder: any, isSubfolder = false) => {
+      const folderGroups = groups.filter(g => g.folder_id === folder.id);
+      
+      return (
+        <div key={folder.id} className="space-y-2">
+          <Card className={`${isSubfolder ? 'ml-4 bg-muted/10' : ''}`}>
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <FolderOpen className={`${isSubfolder ? 'w-4 h-4' : 'w-5 h-5'} text-accent`} />
+                  <span className={`${isSubfolder ? 'text-sm' : 'text-base'} font-medium`}>{folder.name}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Badge variant="secondary" className="text-xs">
+                    {folderGroups.length}
+                  </Badge>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setSubfolderParent({id: folder.id, name: folder.name});
+                      setShowFolderModal(true);
+                    }}
+                    className="h-6 w-6 p-0"
+                  >
+                    <Plus className="w-3 h-3" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setEditingFolder(folder);
+                      setShowFolderModal(true);
+                    }}
+                    className="h-6 w-6 p-0"
+                  >
+                    <Edit3 className="w-3 h-3" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setFolderToDelete(folder);
+                      setShowDeleteConfirmation(true);
+                    }}
+                    className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+          </Card>
+          
+          {/* Subcarpetas */}
+          {getSubfolders(folder.id).length > 0 && (
+            <div className="space-y-2">
+              {getSubfolders(folder.id).map((subfolder) => renderFolder(subfolder, true))}
+            </div>
+          )}
+          
+          {/* Grupos dentro de la carpeta */}
+          {folderGroups.length > 0 && (
+            <div className="space-y-2">
+              {folderGroups.map(renderGroup)}
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    if (filteredFolders.length === 0) {
+      return (
+        <CustomEmptyState
+          icon={<FolderOpen className="h-12 w-12 text-muted-foreground" />}
+          title="No hay carpetas"
+          description="Crea tu primera carpeta para organizar documentos"
+          action={
+            <Button onClick={() => setShowFolderModal(true)} size="sm">
+              <Plus className="h-4 w-4 mr-2" />
+              Crear Primera Carpeta
+            </Button>
+          }
+        />
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        {filteredFolders.map((folder) => renderFolder(folder))}
+      </div>
+    );
+  };
+
   const renderTwoColumnLayout = () => (
     <div className="space-y-6">
       <FeatureIntroduction
@@ -666,9 +885,7 @@ export default function DesignDocumentation() {
 
   return (
     <Layout headerProps={headerProps} wide={true}>
-      {viewMode === 'folders' && renderTwoColumnLayout()}
-      {viewMode === 'groups' && renderGroupsView()}
-      {viewMode === 'documents' && renderDocumentsView()}
+      {renderSingleColumnLayout()}
 
       {/* Upload Modal */}
       <NewDocumentUploadModal

@@ -119,17 +119,16 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- July 13, 2025. Redesigned DOCUMENTACIÓN page with two-column layout and enhanced folder navigation - COMPLETED
-  • Restructured page with two-column layout: 25% navigation (left), 75% details (right) replacing 50/50 split
+- July 13, 2025. Redesigned DOCUMENTACIÓN page with hierarchical single-column layout - COMPLETED
+  • Restructured page to single-column layout with complete hierarchical display: carpetas → subcarpetas → grupos → archivos
   • Added wide layout prop for better space utilization on documentation management page
-  • Enhanced folder/subfolder display with proper Card components and borders instead of plain text elements
-  • Implemented interactive selection system - clicking items in left column updates right column content
-  • Added comprehensive action buttons to folder cards: create subfolder, edit, delete with proper icon sizing
-  • Created hierarchical display with proper indentation: folders → subcarpetas → grupos with visual depth
-  • Enhanced folder cards with CardHeader structure, badges showing group count, and action button clusters
-  • Added selection highlighting with bg-accent/20 for active folder/group selection states
-  • Integrated edit and delete functionality for both folders and groups directly from navigation tree
-  • Right panel dynamically shows folder details, group listings, or document management based on left selection
+  • Enhanced folder/subfolder display with proper Card components and borders with visual depth using ml-4, ml-6, ml-8 margins
+  • Implemented complete hierarchy in one view: folders (base level), subcarpetas (ml-4), grupos (ml-6), documentos (ml-8)
+  • Added comprehensive action buttons to all levels: create subfolder, edit, delete with proper icon sizing
+  • Created visual differentiation using background opacity: folders (no bg), subcarpetas (bg-muted/10), grupos (bg-muted/20), documentos (bg-muted/30)
+  • Enhanced cards with CardHeader structure, badges showing counts, and action button clusters
+  • Integrated edit and delete functionality for folders, groups, and documents directly from hierarchy tree
+  • Complete document management within hierarchical structure with upload, view, and management capabilities
 - July 12, 2025. Added FeatureIntroduction components to ASISTENCIA and BITÁCORA pages with comprehensive functionality overviews - COMPLETED
   • Added FeatureIntroduction component to ConstructionAttendance.tsx explaining attendance control functionality
   • Enhanced ASISTENCIA page with 4 key feature descriptions: visual calendar attendance tracking, worker type filtering, productivity statistics, and flexible period control
