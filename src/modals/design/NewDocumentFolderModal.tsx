@@ -38,7 +38,7 @@ export function NewDocumentFolderModal({ open, onClose }: NewDocumentFolderModal
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      created_by: userData?.user?.id || '',
+      created_by: userData?.id || '',
       name: '',
     },
   });
@@ -47,7 +47,7 @@ export function NewDocumentFolderModal({ open, onClose }: NewDocumentFolderModal
   useEffect(() => {
     if (open) {
       form.reset({
-        created_by: userData?.user?.id || '',
+        created_by: userData?.id || '',
         name: '',
       });
     }
@@ -55,7 +55,10 @@ export function NewDocumentFolderModal({ open, onClose }: NewDocumentFolderModal
 
   const handleSubmit = async (values: FormData) => {
     try {
-      await createFolderMutation.mutateAsync(values.name);
+      await createFolderMutation.mutateAsync({
+        name: values.name,
+        created_by: values.created_by
+      });
       toast({
         title: "Carpeta creada",
         description: "La carpeta ha sido creada exitosamente."

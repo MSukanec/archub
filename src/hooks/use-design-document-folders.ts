@@ -47,18 +47,18 @@ export function useCreateDesignDocumentFolder() {
   const organizationId = userData?.preferences?.last_organization_id;
 
   return useMutation({
-    mutationFn: async (folderName: string): Promise<DesignDocumentFolder> => {
-      if (!projectId || !organizationId || !userData?.user?.id) {
-        throw new Error('Missing project, organization or user data');
+    mutationFn: async (folderData: { name: string; created_by: string }): Promise<DesignDocumentFolder> => {
+      if (!projectId || !organizationId) {
+        throw new Error('Missing project or organization data');
       }
 
       const { data, error } = await supabase
         .from('design_document_folders')
         .insert({
-          name: folderName,
+          name: folderData.name,
           project_id: projectId,
           organization_id: organizationId,
-          created_by: userData.user.id,
+          created_by: folderData.created_by,
         })
         .select()
         .single();
