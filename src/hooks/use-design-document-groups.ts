@@ -13,9 +13,15 @@ export interface DesignDocumentGroup {
   created_at: string;
   updated_at?: string;
   document_count?: number;
+  version?: number;
   folder?: {
     id: string;
     name: string;
+  };
+  creator?: {
+    id: string;
+    full_name: string;
+    avatar_url?: string;
   };
 }
 
@@ -36,6 +42,11 @@ export function useDesignDocumentGroups(folderId?: string) {
           folder:design_document_folders!design_document_groups_folder_id_fkey (
             id,
             name
+          ),
+          creator:users!design_document_groups_created_by_fkey (
+            id,
+            full_name,
+            avatar_url
           )
         `);
 

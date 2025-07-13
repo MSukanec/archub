@@ -1,4 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useQueryClient } from '@tanstack/react-query';
 import { Layout } from '@/components/layout/desktop/Layout';
@@ -9,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext';
@@ -628,14 +631,33 @@ export default function DesignDocumentation() {
               onClick={() => toggleGroupExpansion(group.id)}
             >
               <div className="flex items-center justify-between w-full h-full">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3 flex-1">
                   {isGroupExpanded ? (
                     <ChevronUp className="w-4 h-4 text-muted-foreground" />
                   ) : (
                     <ChevronDown className="w-4 h-4 text-muted-foreground" />
                   )}
-                  <Package className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">{group.name}</span>
+                  
+                  {/* Avatar y información del creador */}
+                  <div className="flex items-center gap-2">
+                    <Avatar className="w-6 h-6">
+                      <AvatarImage src={group.creator?.avatar_url || ""} />
+                      <AvatarFallback className="text-xs">
+                        {group.creator?.full_name?.charAt(0) || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm font-medium">{group.creator?.full_name || 'Usuario'}</span>
+                  </div>
+                  
+                  {/* Versión */}
+                  <Badge variant="outline" className="text-xs">
+                    v{group.version || '1.0'}
+                  </Badge>
+                  
+                  {/* Fecha formateada */}
+                  <span className="text-xs text-muted-foreground">
+                    {format(new Date(group.created_at), 'dd MMM yyyy', { locale: es })}
+                  </span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Button
