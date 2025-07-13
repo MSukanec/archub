@@ -7,6 +7,7 @@ import { Layout } from '@/components/layout/desktop/Layout';
 import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState';
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
 import { DocumentGroupCard } from '@/components/ui-custom/DocumentGroupCard';
+import { CustomTable } from '@/components/ui-custom/CustomTable';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -141,6 +142,57 @@ export default function DesignDocumentation() {
       folder.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [folders, searchTerm]);
+
+  // Definir columnas para CustomTable de documentos
+  const documentColumns = [
+    {
+      key: 'name',
+      label: 'Nombre',
+      render: (document: any) => (
+        <div className="flex items-center gap-3">
+          <FileText className="w-4 h-4 text-accent flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium truncate">{document.name}</p>
+            <p className="text-xs text-muted-foreground">
+              {document.file_name && `${document.file_name} | `}
+              {document.created_at && new Date(document.created_at).toLocaleDateString()}
+            </p>
+          </div>
+        </div>
+      ),
+      sortable: true,
+      sortType: 'string' as const
+    },
+    {
+      key: 'status',
+      label: 'Estado',
+      render: (document: any) => (
+        <Badge variant="outline" className="text-xs justify-center">
+          {document.status || 'pendiente'}
+        </Badge>
+      ),
+      width: '20%'
+    },
+    {
+      key: 'actions',
+      label: 'Acciones',
+      render: (document: any) => (
+        <div className="flex items-center gap-1 justify-center">
+          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Ver documento">
+            <Eye className="w-3 h-3" />
+          </Button>
+          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Editar documento">
+            <Edit3 className="w-3 h-3" />
+          </Button>
+          <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive" title="Eliminar documento">
+            <Trash2 className="w-3 h-3" />
+          </Button>
+        </div>
+      ),
+      sortable: false,
+      width: '20%'
+    }
+  ];
 
   // Function to get subfolders of a parent folder
   const getSubfolders = (parentId: string) => {
@@ -503,45 +555,16 @@ export default function DesignDocumentation() {
               </Button>
             </div>
           ) : (
-            <div className="border border-border rounded-md bg-card">
-              {groupDocuments.map((document, index) => (
-                <div 
-                  key={document.id} 
-                  className={`flex items-center justify-between p-3 hover:bg-muted/50 ${
-                    index !== groupDocuments.length - 1 ? 'border-b border-border' : ''
-                  }`}
-                >
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <FileText className="w-4 h-4 text-accent flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">
-                        {document.name}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {document.created_at && new Date(document.created_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    {document.file_name && (
-                      <div className="px-2 py-1 bg-muted rounded text-xs font-medium text-muted-foreground max-w-[120px] truncate">
-                        {document.file_name}
-                      </div>
-                    )}
-                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Ver documento">
-                      <Eye className="w-3 h-3" />
-                    </Button>
-                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Editar documento">
-                      <Edit3 className="w-3 h-3" />
-                    </Button>
-                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive" title="Eliminar documento">
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
-                  </div>
+            <CustomTable
+              columns={documentColumns}
+              data={groupDocuments}
+              emptyState={
+                <div className="text-center py-8">
+                  <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-sm text-muted-foreground">No hay documentos en este grupo</p>
                 </div>
-              ))}
-            </div>
+              }
+            />
           )}
         </div>
       );
@@ -712,47 +735,15 @@ export default function DesignDocumentation() {
               <>
                 <div className="border-t border-border" />
                 <CardContent className="py-4">
-                  {groupDocuments.length > 0 ? (
-                    <div className="border border-border rounded-md bg-card">
-                      {groupDocuments.map((document, index) => (
-                        <div 
-                          key={document.id} 
-                          className={`flex items-center justify-between p-3 hover:bg-muted/50 ${
-                            index !== groupDocuments.length - 1 ? 'border-b border-border' : ''
-                          }`}
-                        >
-                          <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <FileText className="w-4 h-4 text-accent flex-shrink-0" />
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium truncate">
-                                {document.name}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {document.file_name && `${document.file_name} | `}
-                                {document.created_at && new Date(document.created_at).toLocaleDateString()}
-                              </p>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center gap-2 flex-shrink-0">
-                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Ver documento">
-                              <Eye className="w-3 h-3" />
-                            </Button>
-                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Editar documento">
-                              <Edit3 className="w-3 h-3" />
-                            </Button>
-                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive" title="Eliminar documento">
-                              <Trash2 className="w-3 h-3" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground text-center py-2">
-                      No hay documentos en este grupo
-                    </p>
-                  )}
+                  <CustomTable
+                    columns={documentColumns}
+                    data={groupDocuments}
+                    emptyState={
+                      <p className="text-sm text-muted-foreground text-center py-2">
+                        No hay documentos en este grupo
+                      </p>
+                    }
+                  />
                 </CardContent>
               </>
             )}
@@ -1005,55 +996,11 @@ export default function DesignDocumentation() {
           }
         />
       ) : (
-        <div className="border border-border rounded-md bg-card">
-          {/* Header de tabla */}
-          <div className="flex items-center justify-between px-3 py-2 bg-muted/30 border-b border-border">
-            <div className="flex-1">
-              <span className="text-sm font-medium text-muted-foreground">Nombre</span>
-            </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <span className="text-sm font-medium text-muted-foreground w-20">Estado</span>
-              <span className="text-sm font-medium text-muted-foreground w-20">Acciones</span>
-            </div>
-          </div>
-          
-          {filteredDocuments.map((doc, index) => (
-            <div 
-              key={doc.id} 
-              className={`flex items-center justify-between p-3 hover:bg-muted/50 ${
-                index !== filteredDocuments.length - 1 ? 'border-b border-border' : ''
-              }`}
-            >
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <FileText className="w-4 h-4 text-accent flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">
-                    {doc.name}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {doc.file_name && `${doc.file_name} | `}
-                    {doc.created_at && new Date(doc.created_at).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <Badge variant="outline" className="text-xs w-20 justify-center">{doc.status}</Badge>
-                <div className="flex items-center gap-1 w-20 justify-center">
-                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Ver documento">
-                    <Eye className="w-3 h-3" />
-                  </Button>
-                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Editar documento">
-                    <Edit3 className="w-3 h-3" />
-                  </Button>
-                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive" title="Eliminar documento">
-                    <Trash2 className="w-3 h-3" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <CustomTable
+          columns={documentColumns}
+          data={filteredDocuments}
+          defaultSort={{ key: 'name', direction: 'asc' }}
+        />
       )}
     </div>
   );
