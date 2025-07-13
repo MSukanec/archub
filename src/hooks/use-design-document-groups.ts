@@ -38,7 +38,6 @@ export function useDesignDocumentGroups(folderId?: string) {
             name
           )
         `)
-        .eq('project_id', projectId)
         .eq('organization_id', organizationId);
 
       if (folderId) {
@@ -95,7 +94,6 @@ export function useCreateDesignDocumentGroup() {
           name: groupData.name,
           description: groupData.description,
           folder_id: groupData.folder_id,
-          project_id: projectId,
           organization_id: organizationId,
           created_by: userData.user.id,
         })

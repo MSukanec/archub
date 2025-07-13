@@ -17,6 +17,7 @@ import { useDesignDocumentGroups, useDeleteDesignDocumentGroup } from '@/hooks/u
 import { useDesignDocuments } from '@/hooks/use-design-documents';
 import { NewDocumentUploadModal } from '@/modals/design/NewDocumentUploadModal';
 import { NewDocumentGroupModal } from '@/modals/design/NewDocumentGroupModal';
+import { NewDocumentFolderModal } from '@/modals/design/NewDocumentFolderModal';
 import { 
   FileText, 
   FolderOpen,
@@ -59,6 +60,7 @@ export default function DesignDocumentation() {
   const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([]);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showGroupModal, setShowGroupModal] = useState(false);
+  const [showFolderModal, setShowFolderModal] = useState(false);
   const [editingGroup, setEditingGroup] = useState(null);
   const [groupToDelete, setGroupToDelete] = useState(null);
   const { toast } = useToast();
@@ -131,25 +133,7 @@ export default function DesignDocumentation() {
     setBreadcrumbs([]);
   };
 
-  // Create new folder
-  const createNewFolder = async () => {
-    const folderName = prompt('Nombre de la nueva carpeta:');
-    if (folderName?.trim()) {
-      try {
-        await createFolderMutation.mutateAsync(folderName.trim());
-        toast({
-          title: "Carpeta creada",
-          description: `La carpeta "${folderName}" ha sido creada exitosamente.`
-        });
-      } catch (error: any) {
-        toast({
-          title: "Error",
-          description: error.message || "No se pudo crear la carpeta",
-          variant: "destructive"
-        });
-      }
-    }
-  };
+
 
   // Handle group deletion
   const handleDeleteGroup = async () => {
@@ -190,12 +174,11 @@ export default function DesignDocumentation() {
     }
   }, [isMobile, setActions, setShowActionBar]);
 
-  const headerProps = {
-    title: "Documentación",
-    showSearch: true,
-    searchValue: searchTerm,
-    onSearchChange: setSearchTerm,
-    actions: [
+  const getHeaderActions = () => {
+    const actions = [];
+    
+    // Primary action: Upload Documents
+    actions.push(
       <Button 
         key="upload"
         onClick={() => setShowUploadModal(true)} 
@@ -204,8 +187,34 @@ export default function DesignDocumentation() {
       >
         <Upload className="h-4 w-4 mr-2" />
         Subir Documentos
-      </Button>,
-    ],
+      </Button>
+    );
+
+    // Secondary action: New Folder (only in folders view)
+    if (viewMode === 'folders') {
+      actions.push(
+        <Button 
+          key="new-folder"
+          onClick={() => setShowFolderModal(true)} 
+          variant="outline"
+          size="sm"
+          className="h-8 px-3 text-sm font-medium"
+        >
+          <FolderPlus className="h-4 w-4 mr-2" />
+          Nueva Carpeta
+        </Button>
+      );
+    }
+
+    return actions;
+  };
+
+  const headerProps = {
+    title: "Documentación",
+    showSearch: true,
+    searchValue: searchTerm,
+    onSearchChange: setSearchTerm,
+    actions: getHeaderActions(),
     breadcrumbs: breadcrumbs.length > 0 ? [
       {
         name: "Documentación",
@@ -229,20 +238,9 @@ export default function DesignDocumentation() {
         ]}
       />
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h3 className="text-lg font-semibold">Carpetas</h3>
-          <Badge variant="secondary">{filteredFolders.length}</Badge>
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={createNewFolder}
-          className="h-8 px-3"
-        >
-          <FolderPlus className="h-4 w-4 mr-2" />
-          Nueva Carpeta
-        </Button>
+      <div className="flex items-center gap-2">
+        <h3 className="text-lg font-semibold">Carpetas</h3>
+        <Badge variant="secondary">{filteredFolders.length}</Badge>
       </div>
 
       {filteredFolders.length === 0 ? (
@@ -251,7 +249,7 @@ export default function DesignDocumentation() {
           title="No hay carpetas"
           description="Crea tu primera carpeta para organizar documentos"
           action={
-            <Button onClick={createNewFolder} size="sm">
+            <Button onClick={() => setShowFolderModal(true)} size="sm">
               <FolderPlus className="h-4 w-4 mr-2" />
               Crear Primera Carpeta
             </Button>
@@ -416,6 +414,12 @@ export default function DesignDocumentation() {
         }}
         editingGroup={editingGroup}
         defaultFolderId={selectedFolderId}
+      />
+
+      {/* Folder Modal */}
+      <NewDocumentFolderModal
+        open={showFolderModal}
+        onClose={() => setShowFolderModal(false)}
       />
 
       {/* Delete Group Confirmation */}
