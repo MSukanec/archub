@@ -35,25 +35,31 @@ export function NewDocumentFolderModal({ open, onClose }: NewDocumentFolderModal
   const { data: members = [] } = useOrganizationMembers(organizationId);
   const createFolderMutation = useCreateDesignDocumentFolder();
 
+  // Debug logs
+  console.log('NewDocumentFolderModal - userData:', userData);
+  console.log('NewDocumentFolderModal - members:', members);
+  console.log('NewDocumentFolderModal - organizationId:', organizationId);
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      created_by: userData?.id || '',
+      created_by: userData?.user?.id || '',
       name: '',
     },
   });
 
   // Reset form when modal opens/closes
   useEffect(() => {
-    if (open) {
+    if (open && userData?.user?.id) {
       form.reset({
-        created_by: userData?.id || '',
+        created_by: userData.user.id,
         name: '',
       });
     }
   }, [open, userData, form]);
 
   const handleSubmit = async (values: FormData) => {
+    console.log('handleSubmit called with values:', values);
     try {
       await createFolderMutation.mutateAsync({
         name: values.name,
@@ -67,6 +73,7 @@ export function NewDocumentFolderModal({ open, onClose }: NewDocumentFolderModal
       form.reset();
       onClose();
     } catch (error: any) {
+      console.error('Error creating folder:', error);
       toast({
         title: "Error",
         description: error.message || "No se pudo crear la carpeta",
@@ -76,6 +83,7 @@ export function NewDocumentFolderModal({ open, onClose }: NewDocumentFolderModal
   };
 
   const handleCancel = () => {
+    console.log('handleCancel called');
     form.reset();
     onClose();
   };
@@ -105,7 +113,12 @@ export function NewDocumentFolderModal({ open, onClose }: NewDocumentFolderModal
                       <FormLabel>Creado por <span className="text-[var(--accent)]">*</span></FormLabel>
                       <FormControl>
                         <UserSelector
-                          users={members}
+                          users={members.map(member => ({
+                            id: member.user_id,
+                            full_name: member.full_name,
+                            email: member.email,
+                            avatar_url: member.avatar_url
+                          }))}
                           value={field.value}
                           onChange={field.onChange}
                           placeholder="Selecciona el creador"
