@@ -8,6 +8,7 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useDesignDocumentFolders, useCreateDesignDocumentFolder } from '@/hooks/use-design-document-folders';
 import { useDesignDocumentGroups } from '@/hooks/use-design-document-groups';
 import { useCreateDesignDocument } from '@/hooks/use-design-documents';
+import { useOrganizationMembers } from '@/hooks/use-organization-members';
 import { supabase } from '@/lib/supabase';
 import { CustomModalLayout } from '@/components/modal/CustomModalLayout';
 import { CustomModalHeader } from '@/components/modal/CustomModalHeader';
@@ -22,6 +23,7 @@ import { ComboBox } from '@/components/ui-custom/ComboBox';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import UserSelector from '@/components/ui-custom/UserSelector';
 import { 
   Upload, 
   X, 
@@ -32,6 +34,7 @@ import {
 } from 'lucide-react';
 
 const formSchema = z.object({
+  created_by: z.string().min(1, 'El creador es requerido'),
   folder_id: z.string().min(1, 'La carpeta es requerida'),
   group_id: z.string().optional(), // Ya no es requerido
   status: z.enum(['pendiente', 'en_revision', 'aprobado', 'rechazado']),
@@ -56,6 +59,7 @@ export function NewDocumentUploadModal({
 }: NewDocumentUploadModalProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
+  const { data: members = [] } = useOrganizationMembers();
   const queryClient = useQueryClient();
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [fileNames, setFileNames] = useState<{ [key: number]: string }>({});
@@ -71,6 +75,7 @@ export function NewDocumentUploadModal({
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      created_by: '',
       folder_id: defaultFolderId || '',
       group_id: defaultGroupId || '',
       status: 'pendiente',
@@ -92,6 +97,7 @@ export function NewDocumentUploadModal({
   useEffect(() => {
     if (open) {
       form.reset({
+        created_by: userData?.user?.id || '',
         folder_id: defaultFolderId || '',
         group_id: defaultGroupId || '',
         status: 'pendiente',
@@ -102,7 +108,7 @@ export function NewDocumentUploadModal({
       setFileNames({});
       setUploadProgress(0);
     }
-  }, [open, defaultFolderId, defaultGroupId, form]);
+  }, [open, defaultFolderId, defaultGroupId, form, userData]);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
@@ -256,6 +262,7 @@ export function NewDocumentUploadModal({
             group_id: groupId,
             status: values.status,
             visibility: values.visibility,
+            created_by: values.created_by,
           });
 
           setUploadProgress(Math.round(((index + 1) / totalFiles) * 100));
@@ -317,6 +324,26 @@ export function NewDocumentUploadModal({
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
                 
+                {/* Creado por */}
+                <FormField
+                  control={form.control}
+                  name="created_by"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Creado por <span className="text-[var(--accent)]">*</span></FormLabel>
+                      <FormControl>
+                        <UserSelector
+                          users={members}
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder="Selecciona el creador del documento"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 {/* Carpeta */}
                 <FormField
                   control={form.control}
@@ -367,28 +394,6 @@ export function NewDocumentUploadModal({
                             ))}
                           </SelectContent>
                         </Select>
-                      </FormControl>
-                      <FormMessage />
-                      <p className="text-sm text-muted-foreground">
-                        Si no seleccionas un grupo, se generará automáticamente una nueva entrega.
-                      </p>
-                    </FormItem>
-                  )}
-                />
-
-                {/* Descripción de la entrega */}
-                <FormField
-                  control={form.control}
-                  name="group_description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Descripción de esta entrega (opcional)</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Descripción que se aplicará a la entrega generada automáticamente"
-                          rows={2}
-                          {...field}
-                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -469,6 +474,25 @@ export function NewDocumentUploadModal({
                     </div>
                   </div>
                 )}
+
+                {/* Descripción de la entrega */}
+                <FormField
+                  control={form.control}
+                  name="group_description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Descripción (opcional)</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Descripción que se aplicará a la entrega generada automáticamente"
+                          rows={2}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 {/* Progreso de subida */}
                 {isUploading && (
