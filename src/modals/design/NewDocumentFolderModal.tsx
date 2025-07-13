@@ -156,14 +156,21 @@ export function NewDocumentFolderModal({ open, onClose }: NewDocumentFolderModal
             <Button 
               type="button" 
               variant="outline" 
-              onClick={handleCancel}
+              onClick={() => {
+                console.log('Cancel button clicked');
+                handleCancel();
+              }}
               disabled={isLoading}
             >
               Cancelar
             </Button>
             <Button 
-              type="submit" 
-              form="folder-form"
+              type="button"
+              onClick={() => {
+                console.log('Save button clicked');
+                console.log('Form values:', form.getValues());
+                form.handleSubmit(handleSubmit)();
+              }}
               disabled={isLoading}
             >
               {isLoading ? 'Creando...' : 'Guardar'}
