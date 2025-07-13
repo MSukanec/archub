@@ -134,6 +134,16 @@ function Router() {
             <ProjectClients />
           </ProtectedRoute>
         </Route>
+        <Route path="/project/documentation">
+          <ProtectedRoute>
+            <DesignDocumentation />
+          </ProtectedRoute>
+        </Route>
+        <Route path="/project/gallery">
+          <ProtectedRoute>
+            <ConstructionGallery />
+          </ProtectedRoute>
+        </Route>
 
         {/* Design Routes */}
         <Route path="/design/dashboard">
@@ -146,11 +156,7 @@ function Router() {
             <DesignTimeline />
           </ProtectedRoute>
         </Route>
-        <Route path="/design/documentation">
-          <ProtectedRoute>
-            <DesignDocumentation />
-          </ProtectedRoute>
-        </Route>
+
 
         {/* Construction Routes */}
         <Route path="/construction/dashboard">
@@ -178,11 +184,7 @@ function Router() {
             <ConstructionMaterials />
           </ProtectedRoute>
         </Route>
-        <Route path="/construction/gallery">
-          <ProtectedRoute>
-            <ConstructionGallery />
-          </ProtectedRoute>
-        </Route>
+
 
         {/* Finances Routes */}
         <Route path="/finances">

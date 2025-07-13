@@ -109,11 +109,12 @@ export function SidebarSubmenu() {
       { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard', requiresProject: true },
       { icon: NotebookPen, label: 'Datos Básicos', href: '/project/basic-data', requiresProject: true },
       { icon: Users, label: 'Clientes', href: '/project/clients', requiresProject: true },
+      { icon: FileImage, label: 'Documentación', href: '/project/documentation', requiresProject: true },
+      { icon: Images, label: 'Galería', href: '/project/gallery', requiresProject: true },
     ],
 
     'diseno': [
       { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard', requiresProject: true },
-      { icon: FileImage, label: 'Documentación', href: '/design/documentation', requiresProject: true },
       { icon: Calendar, label: 'Cronograma', href: '/design/timeline', restricted: 'coming_soon', requiresProject: true },
       { icon: Layout, label: 'Tablero', href: '/design/board', restricted: 'coming_soon', requiresProject: true },
       { icon: Calculator, label: 'Cómputo', href: '/design/compute', restricted: 'coming_soon', requiresProject: true },
@@ -127,7 +128,6 @@ export function SidebarSubmenu() {
       { icon: Package, label: 'Materiales', href: '/construction/materials', requiresProject: true },
       { icon: FileText, label: 'Bitácora', href: '/construction/logs', requiresProject: true },
       { icon: Users, label: 'Asistencia', href: '/construction/personnel', requiresProject: true },
-      { icon: Images, label: 'Galería', href: '/construction/gallery', requiresProject: true },
     ],
 
     'finanzas': [

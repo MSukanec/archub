@@ -119,6 +119,16 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 13, 2025. Major navigation restructure: moved DOCUMENTACIÓN and GALERÍA pages from DISEÑO to PROYECTOS sidebar - COMPLETED
+  • Moved DOCUMENTACIÓN page from design sidebar to project sidebar (positioned below CLIENTES button)
+  • Moved GALERÍA page from construction sidebar to project sidebar (positioned below DOCUMENTACIÓN)
+  • Updated desktop SidebarSubmenu.tsx navigation structure for both design and project contexts
+  • Updated mobile MobileMenu.tsx navigation with same organizational changes
+  • Changed all routes from /design/documentation and /construction/gallery to /project/documentation and /project/gallery
+  • Updated App.tsx routing configuration to reflect new URL structure
+  • Both pages now accessible directly from project context instead of nested in design/construction sections
+  • Enhanced project sidebar with comprehensive document and media management capabilities
+  • Maintained all existing functionality while improving information architecture accessibility
 - July 13, 2025. Fixed UserSelector in document upload modal and enhanced file display design - COMPLETED
   • Fixed critical bug: UserSelector in NewDocumentUploadModal now receives organizationId parameter correctly
   • Enhanced useOrganizationMembers hook integration to load organization members properly
