@@ -119,6 +119,17 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 13, 2025. Redesigned DOCUMENTACIÓN page with two-column layout and enhanced folder navigation - COMPLETED
+  • Restructured page with two-column layout: 25% navigation (left), 75% details (right) replacing 50/50 split
+  • Added wide layout prop for better space utilization on documentation management page
+  • Enhanced folder/subfolder display with proper Card components and borders instead of plain text elements
+  • Implemented interactive selection system - clicking items in left column updates right column content
+  • Added comprehensive action buttons to folder cards: create subfolder, edit, delete with proper icon sizing
+  • Created hierarchical display with proper indentation: folders → subcarpetas → grupos with visual depth
+  • Enhanced folder cards with CardHeader structure, badges showing group count, and action button clusters
+  • Added selection highlighting with bg-accent/20 for active folder/group selection states
+  • Integrated edit and delete functionality for both folders and groups directly from navigation tree
+  • Right panel dynamically shows folder details, group listings, or document management based on left selection
 - July 12, 2025. Added FeatureIntroduction components to ASISTENCIA and BITÁCORA pages with comprehensive functionality overviews - COMPLETED
   • Added FeatureIntroduction component to ConstructionAttendance.tsx explaining attendance control functionality
   • Enhanced ASISTENCIA page with 4 key feature descriptions: visual calendar attendance tracking, worker type filtering, productivity statistics, and flexible period control

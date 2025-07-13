@@ -264,60 +264,117 @@ export default function DesignDocumentation() {
 
   const renderNavigationTree = () => {
     const renderFolder = (folder: any, isSubfolder = false) => (
-      <div key={folder.id} className="space-y-1">
-        <div 
-          className={`flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors hover:bg-muted/50 ${
+      <div key={folder.id} className="space-y-2">
+        <Card 
+          className={`cursor-pointer transition-colors hover:bg-muted/50 ${
             selectedItem?.type === 'folder' && selectedItem?.id === folder.id ? 'bg-accent/20' : ''
           }`}
           onClick={() => setSelectedItem({type: 'folder', id: folder.id, name: folder.name})}
         >
-          <div className="flex items-center gap-2">
-            <FolderOpen className={`${isSubfolder ? 'w-4 h-4' : 'w-5 h-5'} text-accent`} />
-            <span className={`${isSubfolder ? 'text-sm' : 'text-base'} font-medium`}>{folder.name}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Badge variant="secondary" className="text-xs">
-              {groups.filter(g => g.folder_id === folder.id).length}
-            </Badge>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                setSubfolderParent({id: folder.id, name: folder.name});
-                setShowFolderModal(true);
-              }}
-              className="h-6 w-6 p-0"
-            >
-              <Plus className="w-3 h-3" />
-            </Button>
-          </div>
-        </div>
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <FolderOpen className={`${isSubfolder ? 'w-4 h-4' : 'w-5 h-5'} text-accent`} />
+                <span className={`${isSubfolder ? 'text-sm' : 'text-base'} font-medium`}>{folder.name}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Badge variant="secondary" className="text-xs">
+                  {groups.filter(g => g.folder_id === folder.id).length}
+                </Badge>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSubfolderParent({id: folder.id, name: folder.name});
+                    setShowFolderModal(true);
+                  }}
+                  className="h-6 w-6 p-0"
+                >
+                  <Plus className="w-3 h-3" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setEditingFolder(folder);
+                    setShowFolderModal(true);
+                  }}
+                  className="h-6 w-6 p-0"
+                >
+                  <Edit3 className="w-3 h-3" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setFolderToDelete(folder);
+                    setShowDeleteConfirmation(true);
+                  }}
+                  className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                >
+                  <Trash2 className="w-3 h-3" />
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+        </Card>
         
         {/* Subcarpetas */}
         {getSubfolders(folder.id).length > 0 && (
-          <div className="ml-4 space-y-1">
+          <div className="ml-4 space-y-2">
             {getSubfolders(folder.id).map((subfolder) => renderFolder(subfolder, true))}
           </div>
         )}
         
         {/* Grupos dentro de la carpeta */}
         {groups.filter(g => g.folder_id === folder.id).map((group) => (
-          <div 
+          <Card 
             key={group.id}
-            className={`flex items-center justify-between p-2 ml-6 rounded-md cursor-pointer transition-colors hover:bg-muted/50 ${
+            className={`ml-6 cursor-pointer transition-colors hover:bg-muted/50 ${
               selectedItem?.type === 'group' && selectedItem?.id === group.id ? 'bg-accent/20' : ''
             }`}
             onClick={() => setSelectedItem({type: 'group', id: group.id, name: group.name})}
           >
-            <div className="flex items-center gap-2">
-              <Package className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm">{group.name}</span>
-            </div>
-            <Badge variant="outline" className="text-xs">
-              {documents.filter(d => d.group_id === group.id).length}
-            </Badge>
-          </div>
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Package className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">{group.name}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Badge variant="outline" className="text-xs">
+                    {documents.filter(d => d.group_id === group.id).length}
+                  </Badge>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditingGroup(group);
+                      setShowGroupModal(true);
+                    }}
+                    className="h-6 w-6 p-0"
+                  >
+                    <Edit3 className="w-3 h-3" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setGroupToDelete(group);
+                    }}
+                    className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+          </Card>
         ))}
       </div>
     );
@@ -469,9 +526,9 @@ export default function DesignDocumentation() {
         ]}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Columna Izquierda - Navegación */}
-        <Card>
+        <Card className="lg:col-span-1">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -494,7 +551,7 @@ export default function DesignDocumentation() {
         </Card>
 
         {/* Columna Derecha - Detalles */}
-        <Card>
+        <Card className="lg:col-span-3">
           <CardHeader>
             <h3 className="text-lg font-semibold">Detalles</h3>
           </CardHeader>
@@ -608,7 +665,7 @@ export default function DesignDocumentation() {
   );
 
   return (
-    <Layout headerProps={headerProps}>
+    <Layout headerProps={headerProps} wide={true}>
       {viewMode === 'folders' && renderTwoColumnLayout()}
       {viewMode === 'groups' && renderGroupsView()}
       {viewMode === 'documents' && renderDocumentsView()}
