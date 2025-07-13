@@ -119,16 +119,16 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- July 13, 2025. Implemented accordion-style folder cards with single-expansion behavior - COMPLETED
-  • Converted folder cards into interactive accordions with click-to-expand functionality
-  • Added ChevronDown/ChevronUp icons to indicate expansion state
-  • Implemented single-accordion rule: only one folder can be expanded at a time
-  • Accordion header shows folder icon, name, and action buttons (Edit, Delete, Chevron)
-  • Expanded state shows CustomEmptyState with full-width action buttons stacked vertically
-  • "Nueva Subcarpeta" button styled as outline/secondary, "Subir Documentos" as primary
-  • Subcarpetas and grupos de revisión sections appear below action buttons when content exists
-  • Added proper event handling with stopPropagation to prevent accordion toggle on button clicks
-  • Maintained hierarchical structure with proper margins and backgrounds for subcarpetas
+- July 13, 2025. Enhanced documentation accordion interface with visual improvements and consistency - COMPLETED
+  • Implemented accordion-style folder cards with single-expansion behavior and click-to-expand functionality
+  • Added ChevronDown/ChevronUp icons to indicate expansion state with single-accordion rule
+  • Enhanced visual hierarchy with border divider line between header and content when expanded (matching bitácoras page design)
+  • Fixed perfect vertical centering of card content to match FeatureIntroduction component consistency
+  • Subcarpetas now occupy 100% width within parent card containers (removed lateral margins)
+  • Added empty space with "Subir Documentos" button to both main folders and subcarpetas for consistent functionality
+  • Eliminated "Subcarpetas" title for cleaner interface - subcarpetas display directly without section header
+  • Maintained hierarchical structure with proper event handling and stopPropagation for accordion behavior
+  • All folders (main and sub) now have identical empty space areas indicating document upload capability
 - July 13, 2025. Complete UI improvements for DOCUMENTACIÓN page - COMPLETED
   • Removed "Nueva Carpeta" button from header actions for cleaner interface
   • Made inline "Nueva Carpeta" button primary (green) style matching "Subir Documentos" button
