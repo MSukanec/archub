@@ -77,6 +77,34 @@ export function useCreateDesignDocumentFolder() {
   });
 }
 
+export function useUpdateDesignDocumentFolder() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (folderData: { id: string; name: string; created_by: string }): Promise<DesignDocumentFolder> => {
+      const { data, error } = await supabase
+        .from('design_document_folders')
+        .update({
+          name: folderData.name,
+          created_by: folderData.created_by,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', folderData.id)
+        .select()
+        .single();
+
+      if (error) {
+        throw new Error(`Error updating folder: ${error.message}`);
+      }
+
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['design-document-folders'] });
+    }
+  });
+}
+
 export function useDeleteDesignDocumentFolder() {
   const queryClient = useQueryClient();
 

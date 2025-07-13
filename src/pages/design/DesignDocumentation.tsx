@@ -526,27 +526,23 @@ export default function DesignDocumentation() {
         ]}
       />
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <FolderOpen className="w-5 h-5 text-accent" />
-              <h3 className="text-lg font-semibold">Documentación</h3>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowFolderModal(true)}
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Nueva Carpeta
-            </Button>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <FolderOpen className="w-5 h-5 text-accent" />
+            <h3 className="text-lg font-semibold">Documentación</h3>
           </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {renderHierarchicalStructure()}
-        </CardContent>
-      </Card>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowFolderModal(true)}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Nueva Carpeta
+          </Button>
+        </div>
+        {renderHierarchicalStructure()}
+      </div>
     </div>
   );
 

@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useOrganizationMembers } from '@/hooks/use-organization-members';
-import { useCreateDesignDocumentFolder } from '@/hooks/use-design-document-folders';
+import { useCreateDesignDocumentFolder, useUpdateDesignDocumentFolder } from '@/hooks/use-design-document-folders';
 import { CustomModalLayout } from '@/components/modal/CustomModalLayout';
 import { CustomModalHeader } from '@/components/modal/CustomModalHeader';
 import { CustomModalBody } from '@/components/modal/CustomModalBody';
@@ -28,14 +28,22 @@ interface NewDocumentFolderModalProps {
   onClose: () => void;
   parentId?: string;
   parentName?: string;
+  editingFolder?: {
+    id: string;
+    name: string;
+    created_by: string;
+  };
 }
 
-export function NewDocumentFolderModal({ open, onClose, parentId, parentName }: NewDocumentFolderModalProps) {
+export function NewDocumentFolderModal({ open, onClose, parentId, parentName, editingFolder }: NewDocumentFolderModalProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.preferences?.last_organization_id;
   const { data: members = [] } = useOrganizationMembers(organizationId);
   const createFolderMutation = useCreateDesignDocumentFolder();
+  const updateFolderMutation = useUpdateDesignDocumentFolder();
+  
+  const isEditing = !!editingFolder;
 
   // Debug logs
   console.log('NewDocumentFolderModal - userData:', userData);
@@ -54,32 +62,44 @@ export function NewDocumentFolderModal({ open, onClose, parentId, parentName }: 
   useEffect(() => {
     if (open && userData?.user?.id) {
       form.reset({
-        created_by: userData.user.id,
-        name: '',
+        created_by: editingFolder?.created_by || userData.user.id,
+        name: editingFolder?.name || '',
       });
     }
-  }, [open, userData, form]);
+  }, [open, userData, form, editingFolder]);
 
   const handleSubmit = async (values: FormData) => {
     console.log('handleSubmit called with values:', values);
     try {
-      await createFolderMutation.mutateAsync({
-        name: values.name,
-        created_by: values.created_by,
-        parent_id: parentId
-      });
-      toast({
-        title: parentId ? "Subcarpeta creada" : "Carpeta creada",
-        description: parentId ? "La subcarpeta ha sido creada exitosamente." : "La carpeta ha sido creada exitosamente."
-      });
+      if (isEditing) {
+        await updateFolderMutation.mutateAsync({
+          id: editingFolder!.id,
+          name: values.name,
+          created_by: values.created_by
+        });
+        toast({
+          title: "Carpeta actualizada",
+          description: "La carpeta ha sido actualizada exitosamente."
+        });
+      } else {
+        await createFolderMutation.mutateAsync({
+          name: values.name,
+          created_by: values.created_by,
+          parent_id: parentId
+        });
+        toast({
+          title: parentId ? "Subcarpeta creada" : "Carpeta creada",
+          description: parentId ? "La subcarpeta ha sido creada exitosamente." : "La carpeta ha sido creada exitosamente."
+        });
+      }
       
       form.reset();
       onClose();
     } catch (error: any) {
-      console.error('Error creating folder:', error);
+      console.error('Error processing folder:', error);
       toast({
         title: "Error",
-        description: error.message || "No se pudo crear la carpeta",
+        description: error.message || (isEditing ? "No se pudo actualizar la carpeta" : "No se pudo crear la carpeta"),
         variant: "destructive"
       });
     }
@@ -91,14 +111,21 @@ export function NewDocumentFolderModal({ open, onClose, parentId, parentName }: 
     onClose();
   };
 
-  const isLoading = createFolderMutation.isPending;
+  const isLoading = createFolderMutation.isPending || updateFolderMutation.isPending;
+
+  const getModalTitle = () => {
+    if (isEditing) {
+      return "Editar Carpeta";
+    }
+    return parentId ? `Nueva Subcarpeta${parentName ? ` en ${parentName}` : ''}` : "Nueva Carpeta";
+  };
 
   return (
     <CustomModalLayout open={open} onClose={onClose}>
       {{
         header: (
           <CustomModalHeader
-            title={parentId ? `Nueva Subcarpeta${parentName ? ` en ${parentName}` : ''}` : "Nueva Carpeta"}
+            title={getModalTitle()}
             onClose={onClose}
           />
         ),
