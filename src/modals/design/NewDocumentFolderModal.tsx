@@ -152,23 +152,12 @@ export function NewDocumentFolderModal({ open, onClose }: NewDocumentFolderModal
           </CustomModalBody>
         ),
         footer: (
-          <CustomModalFooter>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={handleCancel}
-              disabled={isLoading}
-            >
-              Cancelar
-            </Button>
-            <Button 
-              type="button"
-              onClick={form.handleSubmit(handleSubmit)}
-              disabled={isLoading}
-            >
-              {isLoading ? 'Creando...' : 'Guardar'}
-            </Button>
-          </CustomModalFooter>
+          <CustomModalFooter
+            onCancel={handleCancel}
+            onSave={form.handleSubmit(handleSubmit)}
+            saveText="Guardar"
+            isLoading={isLoading}
+          />
         )
       }}
     </CustomModalLayout>
