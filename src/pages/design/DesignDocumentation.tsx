@@ -946,7 +946,7 @@ export default function DesignDocumentation() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h3 className="text-lg font-semibold">Grupos Documentales</h3>
+          <h3 className="text-lg font-semibold">Grupos de Revisión</h3>
           <Badge variant="secondary">{filteredGroups.length}</Badge>
         </div>
         <Button
@@ -963,7 +963,7 @@ export default function DesignDocumentation() {
       {filteredGroups.length === 0 ? (
         <CustomEmptyState
           icon={<Archive className="h-12 w-12 text-muted-foreground" />}
-          title="No hay grupos documentales"
+          title="No hay grupos de revisión"
           description="Crea tu primer grupo para organizar documentos relacionados"
           action={
             <Button onClick={() => setShowGroupModal(true)} size="sm">

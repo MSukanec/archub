@@ -30,47 +30,40 @@ export function DocumentGroupCard({
 
   return (
     <Card className="w-full">
-      <CardHeader className="pb-3">
+      <CardHeader className="py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-md bg-accent/10">
-              <FolderOpen className="w-5 h-5 text-accent" />
-            </div>
-            <div>
-              <CardTitle className="text-lg">{group.name}</CardTitle>
-              <CardDescription className="text-sm">
-                {group.description || 'Sin descripción'}
-              </CardDescription>
+          <div className="flex items-center gap-3 flex-1">
+            <FolderOpen className="w-5 h-5 text-accent flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              {/* Primera línea: Nombre + Versión */}
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-semibold truncate">{group.name}</h3>
+                <Badge variant="outline" className="text-xs flex-shrink-0">v1</Badge>
+              </div>
+              
+              {/* Segunda línea: Creador + Tiempo */}
+              <div className="flex items-center gap-1 mt-1">
+                <span className="text-sm text-muted-foreground">
+                  Creado por {group.created_by || 'Usuario'}
+                </span>
+                <span className="text-sm text-muted-foreground">•</span>
+                <span className="text-sm text-muted-foreground">
+                  {formatDistanceToNow(new Date(group.created_at), { 
+                    addSuffix: true, 
+                    locale: es 
+                  })}
+                </span>
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="text-xs">
+          
+          {/* Botones de acción a la derecha */}
+          <div className="flex items-center gap-1 flex-shrink-0">
+            <Badge variant="secondary" className="text-xs mr-2">
               <FileText className="w-3 h-3 mr-1" />
               {group.document_count || 0} archivo{(group.document_count || 0) !== 1 ? 's' : ''}
             </Badge>
-
-          </div>
-        </div>
-      </CardHeader>
-
-      <CardContent className="pt-0">
-        <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1">
-              <Calendar className="w-4 h-4" />
-              <span>
-                {formatDistanceToNow(new Date(group.created_at), { 
-                  addSuffix: true, 
-                  locale: es 
-                })}
-              </span>
-            </div>
-            <div className="flex items-center gap-1">
-              <User className="w-4 h-4" />
-              <span>Creado por {group.created_by}</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-1">
+            
             {onEdit && (
               <Button
                 variant="ghost"
@@ -80,6 +73,7 @@ export function DocumentGroupCard({
                   onEdit(group);
                 }}
                 className="h-8 w-8 p-0"
+                title="Editar grupo"
               >
                 <Edit3 className="w-4 h-4" />
               </Button>
@@ -93,15 +87,14 @@ export function DocumentGroupCard({
                   onDelete(group);
                 }}
                 className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                title="Eliminar grupo"
               >
                 <Trash2 className="w-4 h-4" />
               </Button>
             )}
           </div>
         </div>
-
-
-      </CardContent>
+      </CardHeader>
     </Card>
   );
 }
