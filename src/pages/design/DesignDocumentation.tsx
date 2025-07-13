@@ -34,7 +34,8 @@ import {
   ChevronRight,
   Home,
   Edit3,
-  Trash2
+  Trash2,
+  Package
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -70,6 +71,7 @@ export default function DesignDocumentation() {
   const [editingFolder, setEditingFolder] = useState<any>(null);
   const [folderToDelete, setFolderToDelete] = useState<any>(null);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<{type: 'folder' | 'group'; id: string; name: string} | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { setActions, setShowActionBar } = useMobileActionBar();
@@ -260,7 +262,200 @@ export default function DesignDocumentation() {
     ] : undefined
   };
 
-  const renderFoldersView = () => (
+  const renderNavigationTree = () => {
+    const renderFolder = (folder: any, isSubfolder = false) => (
+      <div key={folder.id} className="space-y-1">
+        <div 
+          className={`flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors hover:bg-muted/50 ${
+            selectedItem?.type === 'folder' && selectedItem?.id === folder.id ? 'bg-accent/20' : ''
+          }`}
+          onClick={() => setSelectedItem({type: 'folder', id: folder.id, name: folder.name})}
+        >
+          <div className="flex items-center gap-2">
+            <FolderOpen className={`${isSubfolder ? 'w-4 h-4' : 'w-5 h-5'} text-accent`} />
+            <span className={`${isSubfolder ? 'text-sm' : 'text-base'} font-medium`}>{folder.name}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Badge variant="secondary" className="text-xs">
+              {groups.filter(g => g.folder_id === folder.id).length}
+            </Badge>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSubfolderParent({id: folder.id, name: folder.name});
+                setShowFolderModal(true);
+              }}
+              className="h-6 w-6 p-0"
+            >
+              <Plus className="w-3 h-3" />
+            </Button>
+          </div>
+        </div>
+        
+        {/* Subcarpetas */}
+        {getSubfolders(folder.id).length > 0 && (
+          <div className="ml-4 space-y-1">
+            {getSubfolders(folder.id).map((subfolder) => renderFolder(subfolder, true))}
+          </div>
+        )}
+        
+        {/* Grupos dentro de la carpeta */}
+        {groups.filter(g => g.folder_id === folder.id).map((group) => (
+          <div 
+            key={group.id}
+            className={`flex items-center justify-between p-2 ml-6 rounded-md cursor-pointer transition-colors hover:bg-muted/50 ${
+              selectedItem?.type === 'group' && selectedItem?.id === group.id ? 'bg-accent/20' : ''
+            }`}
+            onClick={() => setSelectedItem({type: 'group', id: group.id, name: group.name})}
+          >
+            <div className="flex items-center gap-2">
+              <Package className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm">{group.name}</span>
+            </div>
+            <Badge variant="outline" className="text-xs">
+              {documents.filter(d => d.group_id === group.id).length}
+            </Badge>
+          </div>
+        ))}
+      </div>
+    );
+
+    return (
+      <div className="space-y-2">
+        {filteredFolders.length === 0 ? (
+          <div className="text-center py-8">
+            <FolderOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-sm text-muted-foreground mb-4">No hay carpetas</p>
+            <Button onClick={() => setShowFolderModal(true)} size="sm">
+              <FolderPlus className="h-4 w-4 mr-2" />
+              Crear Primera Carpeta
+            </Button>
+          </div>
+        ) : (
+          filteredFolders.map((folder) => renderFolder(folder))
+        )}
+      </div>
+    );
+  };
+
+  const renderDetailsPanel = () => {
+    if (!selectedItem) {
+      return (
+        <div className="text-center py-16">
+          <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-semibold mb-2">Selecciona un elemento</h3>
+          <p className="text-sm text-muted-foreground">
+            Selecciona una carpeta o grupo de la izquierda para ver sus documentos
+          </p>
+        </div>
+      );
+    }
+
+    if (selectedItem.type === 'folder') {
+      const folderGroups = groups.filter(g => g.folder_id === selectedItem.id);
+      return (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 mb-4">
+            <FolderOpen className="w-5 h-5 text-accent" />
+            <h3 className="text-lg font-semibold">{selectedItem.name}</h3>
+          </div>
+          
+          {folderGroups.length === 0 ? (
+            <div className="text-center py-8">
+              <Package className="h-8 w-8 text-muted-foreground mx-auto mb-4" />
+              <p className="text-sm text-muted-foreground mb-4">No hay grupos en esta carpeta</p>
+              <Button 
+                onClick={() => {
+                  setSelectedFolderId(selectedItem.id);
+                  setShowGroupModal(true);
+                }}
+                size="sm"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Crear Primer Grupo
+              </Button>
+            </div>
+          ) : (
+            <div className="grid gap-2">
+              {folderGroups.map((group) => (
+                <DocumentGroupCard 
+                  key={group.id}
+                  group={group}
+                  onEdit={() => {
+                    setEditingGroup(group);
+                    setShowGroupModal(true);
+                  }}
+                  onDelete={() => setGroupToDelete(group)}
+                  onSelect={() => setSelectedItem({type: 'group', id: group.id, name: group.name})}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    if (selectedItem.type === 'group') {
+      const groupDocuments = documents.filter(d => d.group_id === selectedItem.id);
+      return (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Package className="w-5 h-5 text-accent" />
+            <h3 className="text-lg font-semibold">{selectedItem.name}</h3>
+          </div>
+          
+          {groupDocuments.length === 0 ? (
+            <div className="text-center py-8">
+              <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-4" />
+              <p className="text-sm text-muted-foreground mb-4">No hay documentos en este grupo</p>
+              <Button 
+                onClick={() => {
+                  setSelectedGroupId(selectedItem.id);
+                  setShowUploadModal(true);
+                }}
+                size="sm"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Subir Documentos
+              </Button>
+            </div>
+          ) : (
+            <div className="grid gap-2">
+              {groupDocuments.map((document) => (
+                <Card key={document.id} className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <FileText className="w-5 h-5 text-accent" />
+                      <div>
+                        <p className="font-medium">{document.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {document.created_at && new Date(document.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <Edit3 className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    return null;
+  };
+
+  const renderTwoColumnLayout = () => (
     <div className="space-y-6">
       <FeatureIntroduction
         title="Gestión de Documentos"
@@ -274,138 +469,40 @@ export default function DesignDocumentation() {
         ]}
       />
 
-      <div className="flex items-center gap-2">
-        <h3 className="text-lg font-semibold">Carpetas</h3>
-        <Badge variant="secondary">{filteredFolders.length}</Badge>
-      </div>
-
-      {filteredFolders.length === 0 ? (
-        <CustomEmptyState
-          icon={<FolderOpen className="h-12 w-12 text-muted-foreground" />}
-          title="No hay carpetas"
-          description="Crea tu primera carpeta para organizar documentos"
-          action={
-            <Button onClick={() => setShowFolderModal(true)} size="sm">
-              <FolderPlus className="h-4 w-4 mr-2" />
-              Crear Primera Carpeta
-            </Button>
-          }
-        />
-      ) : (
-        <div className="grid gap-4">
-          {filteredFolders.map((folder) => (
-            <div key={folder.id} className="space-y-2">
-              <Card className="cursor-pointer hover:bg-muted/50 transition-colors">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3" onClick={() => navigateToFolder(folder.id, folder.name)}>
-                      <div className="flex items-center justify-center w-10 h-10 rounded-md bg-accent/10">
-                        <FolderOpen className="w-5 h-5 text-accent" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-lg">{folder.name}</CardTitle>
-                        <CardDescription>
-                          {groups.filter(g => g.folder_id === folder.id).length} grupo{groups.filter(g => g.folder_id === folder.id).length !== 1 ? 's' : ''}
-                        </CardDescription>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSubfolderParent({id: folder.id, name: folder.name});
-                          setShowFolderModal(true);
-                        }}
-                        className="h-8 px-3 text-sm"
-                      >
-                        <FolderPlus className="w-4 h-4 mr-2" />
-                        Nueva Subcarpeta
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditingFolder(folder);
-                          setShowFolderModal(true);
-                        }}
-                        className="h-8 w-8 p-0"
-                      >
-                        <Edit3 className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setFolderToDelete(folder);
-                          setShowDeleteConfirmation(true);
-                        }}
-                        className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-              </Card>
-              
-              {/* Subcarpetas */}
-              {getSubfolders(folder.id).length > 0 && (
-                <div className="ml-8 space-y-2">
-                  {getSubfolders(folder.id).map((subfolder) => (
-                    <Card key={subfolder.id} className="cursor-pointer hover:bg-muted/50 transition-colors">
-                      <CardHeader className="pb-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3" onClick={() => navigateToFolder(subfolder.id, subfolder.name)}>
-                            <div className="flex items-center justify-center w-8 h-8 rounded-md bg-accent/10">
-                              <FolderOpen className="w-4 h-4 text-accent" />
-                            </div>
-                            <div>
-                              <CardTitle className="text-base">{subfolder.name}</CardTitle>
-                              <CardDescription className="text-sm">
-                                {groups.filter(g => g.folder_id === subfolder.id).length} grupo{groups.filter(g => g.folder_id === subfolder.id).length !== 1 ? 's' : ''}
-                              </CardDescription>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setEditingFolder(subfolder);
-                                setShowFolderModal(true);
-                              }}
-                              className="h-8 w-8 p-0"
-                            >
-                              <Edit3 className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setFolderToDelete(subfolder);
-                                setShowDeleteConfirmation(true);
-                              }}
-                              className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </CardHeader>
-                    </Card>
-                  ))}
-                </div>
-              )}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Columna Izquierda - Navegación */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg font-semibold">Carpetas</h3>
+                <Badge variant="secondary">{filteredFolders.length}</Badge>
+              </div>
+              <Button 
+                onClick={() => setShowFolderModal(true)} 
+                size="sm"
+                variant="outline"
+              >
+                <FolderPlus className="h-4 w-4 mr-2" />
+                Nueva Carpeta
+              </Button>
             </div>
-          ))}
-        </div>
-      )}
+          </CardHeader>
+          <CardContent>
+            {renderNavigationTree()}
+          </CardContent>
+        </Card>
+
+        {/* Columna Derecha - Detalles */}
+        <Card>
+          <CardHeader>
+            <h3 className="text-lg font-semibold">Detalles</h3>
+          </CardHeader>
+          <CardContent>
+            {renderDetailsPanel()}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 
@@ -512,7 +609,7 @@ export default function DesignDocumentation() {
 
   return (
     <Layout headerProps={headerProps}>
-      {viewMode === 'folders' && renderFoldersView()}
+      {viewMode === 'folders' && renderTwoColumnLayout()}
       {viewMode === 'groups' && renderGroupsView()}
       {viewMode === 'documents' && renderDocumentsView()}
 
