@@ -21,6 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { FolderComboBox } from '@/components/ui-custom/FolderComboBox';
+import UserSelector from '@/components/ui-custom/UserSelector';
 import { FileText, Upload, X, File } from 'lucide-react';
 
 const formSchema = z.object({
@@ -314,29 +315,23 @@ export function NewDesignDocumentModal({
               name="created_by"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Creado por <span className="text-[var(--accent)]">*</span></FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecciona el creador" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {organizationMembers.map((member) => (
-                        <SelectItem key={member.user_id} value={member.user_id}>
-                          <div className="flex items-center gap-2">
-                            <Avatar className="h-6 w-6">
-                              <AvatarImage src={member.avatar_url} />
-                              <AvatarFallback className="text-xs">
-                                {member.full_name.split(' ').map(n => n[0]).join('')}
-                              </AvatarFallback>
-                            </Avatar>
-                            <span>{member.full_name}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormControl>
+                    <UserSelector
+                      users={organizationMembers.map(member => ({
+                        id: member.user_id,
+                        full_name: member.full_name,
+                        email: member.email,
+                        avatar_url: member.avatar_url,
+                        first_name: member.first_name,
+                        last_name: member.last_name
+                      }))}
+                      value={field.value}
+                      onChange={field.onChange}
+                      label="Creado por"
+                      placeholder="Selecciona el creador"
+                      required={true}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
