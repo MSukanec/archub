@@ -98,11 +98,25 @@ export default function DesignDocumentation() {
 
   // Función para manejar la expansión/contracción del acordeón
   const toggleFolderExpansion = (folderId: string) => {
-    setExpandedFolderIds(prev => 
-      prev.includes(folderId) 
-        ? prev.filter(id => id !== folderId)
-        : [...prev, folderId]
-    );
+    setExpandedFolderIds(prev => {
+      // Si la carpeta ya está expandida, la cerramos
+      if (prev.includes(folderId)) {
+        return prev.filter(id => id !== folderId);
+      }
+      
+      // Si es una carpeta padre (no tiene parent_id), cerramos todas las otras carpetas padre
+      const folder = folders.find(f => f.id === folderId);
+      if (folder && !folder.parent_id) {
+        // Encontrar todas las carpetas padre para cerrarlas
+        const parentFolderIds = folders.filter(f => !f.parent_id).map(f => f.id);
+        // Mantener solo las subcarpetas expandidas, cerrar otras carpetas padre
+        const newExpanded = prev.filter(id => !parentFolderIds.includes(id));
+        return [...newExpanded, folderId];
+      }
+      
+      // Si es una subcarpeta, simplemente la agregamos
+      return [...prev, folderId];
+    });
   };
 
   // Filter folders based on search - only show parent folders

@@ -476,23 +476,14 @@ export function NewDocumentUploadModal({
           </CustomModalBody>
         ),
         footer: (
-          <CustomModalFooter>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={handleCancel}
-              disabled={isUploading}
-            >
-              Cancelar
-            </Button>
-            <Button 
-              type="submit" 
-              onClick={form.handleSubmit(handleSubmit)}
-              disabled={isUploading || selectedFiles.length === 0}
-            >
-              {isUploading ? 'Subiendo...' : 'Subir Documentos'}
-            </Button>
-          </CustomModalFooter>
+          <CustomModalFooter
+            onCancel={handleCancel}
+            onSubmit={form.handleSubmit(handleSubmit)}
+            submitText={isUploading ? 'Subiendo...' : 'Subir Documentos'}
+            cancelText="Cancelar"
+            submitDisabled={isUploading || selectedFiles.length === 0}
+            cancelDisabled={isUploading}
+          />
         )
       }}
     </CustomModalLayout>
