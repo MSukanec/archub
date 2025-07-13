@@ -10,6 +10,7 @@ export interface DesignDocumentFolder {
   created_by: string;
   created_at: string;
   updated_at?: string;
+  parent_id?: string;
 }
 
 export function useDesignDocumentFolders() {
@@ -47,7 +48,7 @@ export function useCreateDesignDocumentFolder() {
   const organizationId = userData?.preferences?.last_organization_id;
 
   return useMutation({
-    mutationFn: async (folderData: { name: string; created_by: string }): Promise<DesignDocumentFolder> => {
+    mutationFn: async (folderData: { name: string; created_by: string; parent_id?: string }): Promise<DesignDocumentFolder> => {
       if (!projectId || !organizationId) {
         throw new Error('Missing project or organization data');
       }
@@ -59,6 +60,7 @@ export function useCreateDesignDocumentFolder() {
           project_id: projectId,
           organization_id: organizationId,
           created_by: folderData.created_by,
+          parent_id: folderData.parent_id || null,
         })
         .select()
         .single();

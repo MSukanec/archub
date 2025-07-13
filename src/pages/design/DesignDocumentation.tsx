@@ -63,6 +63,7 @@ export default function DesignDocumentation() {
   const [showFolderModal, setShowFolderModal] = useState(false);
   const [editingGroup, setEditingGroup] = useState(null);
   const [groupToDelete, setGroupToDelete] = useState(null);
+  const [subfolderParent, setSubfolderParent] = useState<{id: string; name: string} | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { setActions, setShowActionBar } = useMobileActionBar();
@@ -273,12 +274,17 @@ export default function DesignDocumentation() {
                     </div>
                   </div>
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
-                    onClick={() => navigateToFolder(folder.id, folder.name)}
-                    className="h-8 w-8 p-0"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSubfolderParent({id: folder.id, name: folder.name});
+                      setShowFolderModal(true);
+                    }}
+                    className="h-8 px-3 text-sm"
                   >
-                    <ChevronRight className="w-4 h-4" />
+                    <FolderPlus className="w-4 h-4 mr-2" />
+                    Nueva Subcarpeta
                   </Button>
                 </div>
               </CardHeader>
@@ -418,7 +424,12 @@ export default function DesignDocumentation() {
       {/* Folder Modal */}
       <NewDocumentFolderModal
         open={showFolderModal}
-        onClose={() => setShowFolderModal(false)}
+        onClose={() => {
+          setShowFolderModal(false);
+          setSubfolderParent(null);
+        }}
+        parentId={subfolderParent?.id}
+        parentName={subfolderParent?.name}
       />
 
       {/* Delete Group Confirmation */}

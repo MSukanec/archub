@@ -26,9 +26,11 @@ type FormData = z.infer<typeof formSchema>;
 interface NewDocumentFolderModalProps {
   open: boolean;
   onClose: () => void;
+  parentId?: string;
+  parentName?: string;
 }
 
-export function NewDocumentFolderModal({ open, onClose }: NewDocumentFolderModalProps) {
+export function NewDocumentFolderModal({ open, onClose, parentId, parentName }: NewDocumentFolderModalProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.preferences?.last_organization_id;
@@ -63,11 +65,12 @@ export function NewDocumentFolderModal({ open, onClose }: NewDocumentFolderModal
     try {
       await createFolderMutation.mutateAsync({
         name: values.name,
-        created_by: values.created_by
+        created_by: values.created_by,
+        parent_id: parentId
       });
       toast({
-        title: "Carpeta creada",
-        description: "La carpeta ha sido creada exitosamente."
+        title: parentId ? "Subcarpeta creada" : "Carpeta creada",
+        description: parentId ? "La subcarpeta ha sido creada exitosamente." : "La carpeta ha sido creada exitosamente."
       });
       
       form.reset();
@@ -95,7 +98,7 @@ export function NewDocumentFolderModal({ open, onClose }: NewDocumentFolderModal
       {{
         header: (
           <CustomModalHeader
-            title="Nueva Carpeta"
+            title={parentId ? `Nueva Subcarpeta${parentName ? ` en ${parentName}` : ''}` : "Nueva Carpeta"}
             onClose={onClose}
           />
         ),
