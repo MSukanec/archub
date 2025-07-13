@@ -696,7 +696,9 @@ export default function DesignDocumentation() {
             
             {/* Contenido expandido */}
             {isExpanded && (
-              <CardContent className="pt-0">
+              <>
+                <div className="border-t border-border" />
+                <CardContent className="pt-4">
                 {/* Subcarpetas - se muestran primero */}
                 {getSubfolders(folder.id).length > 0 && (
                   <div className="mb-4 space-y-2">
@@ -732,6 +734,7 @@ export default function DesignDocumentation() {
                   </div>
                 )}
               </CardContent>
+              </>
             )}
           </Card>
         </div>
