@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext';
 import { useMobile } from '@/hooks/use-mobile';
@@ -38,7 +39,9 @@ import {
   Edit3,
   Trash2,
   Package,
-  Pencil
+  Pencil,
+  List,
+  Grid
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -529,21 +532,56 @@ export default function DesignDocumentation() {
         ]}
       />
 
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <FolderOpen className="w-5 h-5 text-accent" />
-            <h3 className="text-lg font-semibold">Documentación</h3>
+      {/* Card de control de visualización */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <FolderOpen className="w-5 h-5 text-accent" />
+              <h3 className="text-lg font-semibold">Documentación</h3>
+            </div>
+            <div className="flex items-center gap-3">
+              <Select value={viewMode} onValueChange={(value: ViewMode) => setViewMode(value)}>
+                <SelectTrigger className="w-48">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="folders">
+                    <div className="flex items-center gap-2">
+                      <FolderOpen className="w-4 h-4" />
+                      <span>Carpetas</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="groups">
+                    <div className="flex items-center gap-2">
+                      <Package className="w-4 h-4" />
+                      <span>Grupos de Revisión</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="documents">
+                    <div className="flex items-center gap-2">
+                      <FileText className="w-4 h-4" />
+                      <span>Archivos</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                onClick={() => setShowFolderModal(true)}
+                size="sm"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Nueva Carpeta
+              </Button>
+            </div>
           </div>
-          <Button
-            onClick={() => setShowFolderModal(true)}
-            size="sm"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Nueva Carpeta
-          </Button>
-        </div>
-        {renderHierarchicalStructure()}
+        </CardHeader>
+      </Card>
+
+      <div className="space-y-4">
+        {viewMode === 'folders' && renderHierarchicalStructure()}
+        {viewMode === 'groups' && renderGroupsView()}
+        {viewMode === 'documents' && renderDocumentsView()}
       </div>
     </div>
   );
