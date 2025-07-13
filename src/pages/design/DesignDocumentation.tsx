@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext';
 import { useMobile } from '@/hooks/use-mobile';
 import { NewDesignDocumentModal } from '@/modals/design/NewDesignDocumentModal';
+import { useDesignDocumentFolders } from '@/hooks/use-design-document-folders';
 import { 
   FileText, 
   FolderOpen,
@@ -50,7 +51,7 @@ interface DesignDocument {
   project_id: string;
   organization_id: string;
   design_phase_id?: string;
-  folder: string;
+  folder_id: string;
   status: string;
   visibility?: string;
   created_by: string;
@@ -78,6 +79,9 @@ export default function DesignDocumentation() {
   // Get project and organization IDs
   const projectId = userData?.preferences?.last_project_id;
   const organizationId = userData?.preferences?.last_organization_id;
+
+  // Get folders for name resolution
+  const { data: folders = [] } = useDesignDocumentFolders();
 
   // Documents query - gets ALL documents including versions
   const { data: documents = [], isLoading, error } = useQuery({
@@ -151,15 +155,22 @@ export default function DesignDocumentation() {
 
   // Group documents by folder - includes all versions
   const groupedDocuments = useMemo(() => {
-    const groups: Record<string, DesignDocument[]> = {};
+    const groups: Record<string, { name: string; documents: DesignDocument[] }> = {};
     
     filteredDocuments.forEach(doc => {
-      if (!groups[doc.folder]) groups[doc.folder] = [];
-      groups[doc.folder].push(doc);
+      const folderKey = doc.folder_id || 'sin-carpeta';
+      if (!groups[folderKey]) {
+        const folder = folders.find(f => f.id === doc.folder_id);
+        groups[folderKey] = {
+          name: folder ? folder.name : 'Sin carpeta',
+          documents: []
+        };
+      }
+      groups[folderKey].documents.push(doc);
     });
     
     return groups;
-  }, [filteredDocuments, viewByPhase]);
+  }, [filteredDocuments, folders]);
 
   // Mobile Action Bar setup
   React.useEffect(() => {
@@ -305,11 +316,11 @@ export default function DesignDocumentation() {
         />
       ) : (
         <div className="space-y-6">
-          {Object.entries(groupedDocuments).map(([folderName, documents]) => (
+          {Object.entries(groupedDocuments).map(([folderId, folderData]) => (
             <DocumentFolderCard
-              key={folderName}
-              folder={folderName}
-              documents={documents}
+              key={folderId}
+              folder={folderData.name}
+              documents={folderData.documents}
               projectId={projectId!}
               organizationId={organizationId!}
               onEdit={handleEdit}

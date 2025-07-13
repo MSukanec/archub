@@ -20,12 +20,13 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { FolderComboBox } from '@/components/ui-custom/FolderComboBox';
 import { FileText, Upload, X, File } from 'lucide-react';
 
 const formSchema = z.object({
   file_name: z.string().min(1, 'El nombre es requerido'),
   description: z.string().optional(),
-  folder: z.string().min(1, 'La carpeta es requerida'),
+  folder_id: z.string().min(1, 'La carpeta es requerida'),
   status: z.enum(['pendiente', 'en_revision', 'aprobado', 'rechazado']),
   visibility: z.enum(['public', 'private']).optional(),
   design_phase_id: z.string().optional(),
@@ -46,7 +47,7 @@ interface DesignDocument {
   project_id: string;
   organization_id: string;
   design_phase_id?: string;
-  folder: string;
+  folder_id: string;
   status: string;
   visibility?: string;
   created_by: string;
@@ -84,7 +85,7 @@ export function NewDesignDocumentModal({
     defaultValues: {
       file_name: '',
       description: '',
-      folder: '',
+      folder_id: '',
       status: 'pendiente',
       visibility: 'public',
       design_phase_id: '',
@@ -98,7 +99,7 @@ export function NewDesignDocumentModal({
       form.reset({
         file_name: editingDocument.file_name || '',
         description: editingDocument.description || '',
-        folder: editingDocument.folder,
+        folder_id: editingDocument.folder_id || '',
         status: editingDocument.status as any,
         visibility: editingDocument.visibility as any || 'public',
         design_phase_id: editingDocument.design_phase_id || '',
@@ -108,7 +109,7 @@ export function NewDesignDocumentModal({
       form.reset({
         file_name: '',
         description: '',
-        folder: '',
+        folder_id: '',
         status: 'pendiente',
         visibility: 'public',
         design_phase_id: '',
@@ -187,12 +188,12 @@ export function NewDesignDocumentModal({
 
       // If editing an existing document, calculate the next version number
       if (editingDocument) {
-        // Get the highest version number for documents with the same file_name, folder, and design_phase_id
+        // Get the highest version number for documents with the same file_name, folder_id, and design_phase_id
         const { data: existingVersions, error: versionError } = await supabase!
           .from('design_documents')
           .select('version_number')
           .eq('file_name', values.file_name)
-          .eq('folder', values.folder)
+          .eq('folder_id', values.folder_id)
           .eq('project_id', userData.preferences.last_project_id)
           .eq('organization_id', userData.organization.id);
 
@@ -215,7 +216,7 @@ export function NewDesignDocumentModal({
         project_id: userData.preferences.last_project_id,
         organization_id: userData.organization.id,
         design_phase_id: values.design_phase_id || null,
-        folder: values.folder,
+        folder_id: values.folder_id,
         status: values.status,
         visibility: values.visibility || 'public',
         created_by: values.created_by,
@@ -341,111 +342,9 @@ export function NewDesignDocumentModal({
               )}
             />
 
-            {/* 2. Fase de Diseño */}
-            <FormField
-              control={form.control}
-              name="design_phase_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Fase de Diseño</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecciona una fase (opcional)" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="">Sin fase asignada</SelectItem>
-                      {designPhases.map((phase) => (
-                        <SelectItem key={phase.id} value={phase.id}>
-                          <span className="flex items-center gap-2">
-                            {phase.name}
-                            {phase.organization_id === null && (
-                              <span className="text-xs text-muted-foreground">(Por defecto)</span>
-                            )}
-                          </span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* 3. Carpeta */}
-            <FormField
-              control={form.control}
-              name="folder"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Carpeta</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="Nombre de la carpeta" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* 4. Nombre del documento */}
-            <FormField
-              control={form.control}
-              name="file_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nombre</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="Nombre del documento" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* 5. Descripción */}
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descripción</FormLabel>
-                  <FormControl>
-                    <Textarea {...field} placeholder="Descripción del documento" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* 6. Estado */}
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Estado</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecciona un estado" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="pendiente">Pendiente</SelectItem>
-                      <SelectItem value="en_revision">En Revisión</SelectItem>
-                      <SelectItem value="aprobado">Aprobado</SelectItem>
-                      <SelectItem value="rechazado">Rechazado</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* 7. File Upload Section */}
+            {/* 2. Archivo */}
             <div className="space-y-3">
-              <Label>Archivo</Label>
+              <Label>Archivo <span className="text-[var(--accent)]">*</span></Label>
               <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
                 {selectedFile ? (
                   <div className="space-y-3">
@@ -495,6 +394,80 @@ export function NewDesignDocumentModal({
                 )}
               </div>
             </div>
+
+            {/* 3. Carpeta */}
+            <FormField
+              control={form.control}
+              name="folder_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Carpeta <span className="text-[var(--accent)]">*</span></FormLabel>
+                  <FormControl>
+                    <FolderComboBox
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      placeholder="Seleccionar o crear carpeta..."
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* 4. Nombre del documento */}
+            <FormField
+              control={form.control}
+              name="file_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nombre <span className="text-[var(--accent)]">*</span></FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Nombre del documento" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* 5. Descripción */}
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descripción</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} placeholder="Descripción del documento" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* 6. Estado */}
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Estado <span className="text-[var(--accent)]">*</span></FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona un estado" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="pendiente">Pendiente</SelectItem>
+                      <SelectItem value="en_revision">En Revisión</SelectItem>
+                      <SelectItem value="aprobado">Aprobado</SelectItem>
+                      <SelectItem value="rechazado">Rechazado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
               </form>
             </Form>
           </CustomModalBody>
