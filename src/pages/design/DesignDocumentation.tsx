@@ -58,7 +58,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
-type ViewMode = 'folders' | 'groups' | 'documents';
+type ViewMode = 'folders' | 'documents';
 
 interface BreadcrumbItem {
   name: string;
@@ -503,7 +503,7 @@ export default function DesignDocumentation() {
               </Button>
             </div>
           ) : (
-            <div className="border border-border rounded-md bg-background">
+            <div className="border border-border rounded-md bg-card">
               {groupDocuments.map((document, index) => (
                 <div 
                   key={document.id} 
@@ -598,12 +598,6 @@ export default function DesignDocumentation() {
                       <span>Carpetas</span>
                     </div>
                   </SelectItem>
-                  <SelectItem value="groups">
-                    <div className="flex items-center gap-2">
-                      <Package className="w-4 h-4" />
-                      <span>Grupos de Revisión</span>
-                    </div>
-                  </SelectItem>
                   <SelectItem value="documents">
                     <div className="flex items-center gap-2">
                       <FileText className="w-4 h-4" />
@@ -626,7 +620,6 @@ export default function DesignDocumentation() {
 
       <div className="space-y-4">
         {viewMode === 'folders' && renderHierarchicalStructure()}
-        {viewMode === 'groups' && renderGroupsView()}
         {viewMode === 'documents' && renderDocumentsView()}
       </div>
     </div>
@@ -720,7 +713,7 @@ export default function DesignDocumentation() {
                 <div className="border-t border-border" />
                 <CardContent className="py-4">
                   {groupDocuments.length > 0 ? (
-                    <div className="border border-border rounded-md bg-background">
+                    <div className="border border-border rounded-md bg-card">
                       {groupDocuments.map((document, index) => (
                         <div 
                           key={document.id} 
@@ -1012,7 +1005,7 @@ export default function DesignDocumentation() {
           }
         />
       ) : (
-        <div className="border border-border rounded-md bg-background">
+        <div className="border border-border rounded-md bg-card">
           {/* Header de tabla */}
           <div className="flex items-center justify-between px-3 py-2 bg-muted/30 border-b border-border">
             <div className="flex-1">
