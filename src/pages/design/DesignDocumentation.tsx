@@ -701,7 +701,7 @@ export default function DesignDocumentation() {
                 {getSubfolders(folder.id).length > 0 && (
                   <div className="mb-4 space-y-2">
                     <h4 className="text-sm font-medium text-muted-foreground">Subcarpetas</h4>
-                    <div className="ml-4 space-y-2">
+                    <div className="space-y-2">
                       {getSubfolders(folder.id).map((subfolder) => renderFolder(subfolder, true))}
                     </div>
                   </div>
