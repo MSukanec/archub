@@ -700,22 +700,15 @@ export default function DesignDocumentation() {
             >
               <div className="flex items-center justify-between w-full h-full">
                 <div className="flex items-center gap-2">
+                  {isExpanded ? (
+                    <ChevronUp className="w-4 h-4 text-muted-foreground" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                  )}
                   <FolderOpen className={`${isSubfolder ? 'w-4 h-4' : 'w-5 h-5'} text-foreground`} />
                   <span className={`${isSubfolder ? 'text-sm' : 'text-base'} font-medium`}>{folder.name}</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSubfolderParent({id: folder.id, name: folder.name});
-                      setShowFolderModal(true);
-                    }}
-                    className="h-6 w-6 p-0"
-                  >
-                    <Plus className="w-3 h-3" />
-                  </Button>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -740,11 +733,30 @@ export default function DesignDocumentation() {
                   >
                     <Trash2 className="w-3 h-3" />
                   </Button>
-                  {isExpanded ? (
-                    <ChevronUp className="w-4 h-4 text-muted-foreground" />
-                  ) : (
-                    <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                  )}
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSubfolderParent({id: folder.id, name: folder.name});
+                      setShowFolderModal(true);
+                    }}
+                    className="h-6 px-2 text-xs"
+                  >
+                    Crear Subcarpeta
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedFolderId(folder.id);
+                      setShowUploadModal(true);
+                    }}
+                    className="h-6 px-2 text-xs"
+                  >
+                    <Upload className="w-3 h-3 mr-1" />
+                    Subir Documentos
+                  </Button>
                 </div>
               </div>
             </CardHeader>
@@ -761,26 +773,9 @@ export default function DesignDocumentation() {
                   </div>
                 )}
                 
-                {/* Empty space para subir documentos - disponible para todas las carpetas */}
-                <div className="flex flex-col items-center justify-center py-4 border-2 border-dashed border-muted rounded-lg">
-                  <FolderOpen className="h-6 w-6 text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground mb-3">Sube documentos a esta carpeta</p>
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedFolderId(folder.id);
-                      setShowUploadModal(true);
-                    }}
-                    size="sm"
-                  >
-                    <Upload className="w-4 h-4 mr-2" />
-                    Subir Documentos
-                  </Button>
-                </div>
-                
                 {/* Grupos dentro de la carpeta */}
                 {folderGroups.length > 0 && (
-                  <div className="mt-4 space-y-2">
+                  <div className="space-y-2">
                     <h4 className="text-sm font-medium text-muted-foreground">Grupos de revisión</h4>
                     {folderGroups.map(renderGroup)}
                   </div>
