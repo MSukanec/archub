@@ -102,7 +102,7 @@ export function NewDocumentFolderModal({ open, onClose }: NewDocumentFolderModal
         body: (
           <CustomModalBody columns={1}>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4" id="folder-form">
                 
                 {/* Creado por */}
                 <FormField
@@ -163,10 +163,10 @@ export function NewDocumentFolderModal({ open, onClose }: NewDocumentFolderModal
             </Button>
             <Button 
               type="submit" 
-              onClick={form.handleSubmit(handleSubmit)}
+              form="folder-form"
               disabled={isLoading}
             >
-              {isLoading ? 'Creando...' : 'Crear Carpeta'}
+              {isLoading ? 'Creando...' : 'Guardar'}
             </Button>
           </CustomModalFooter>
         )
