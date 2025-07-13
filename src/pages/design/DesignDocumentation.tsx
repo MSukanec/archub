@@ -607,7 +607,7 @@ export default function DesignDocumentation() {
                   <SelectItem value="documents">
                     <div className="flex items-center gap-2">
                       <FileText className="w-4 h-4" />
-                      <span>Archivos</span>
+                      <span>Documentos</span>
                     </div>
                   </SelectItem>
                 </SelectContent>
@@ -735,17 +735,13 @@ export default function DesignDocumentation() {
                                 {document.name}
                               </p>
                               <p className="text-xs text-muted-foreground">
+                                {document.file_name && `${document.file_name} | `}
                                 {document.created_at && new Date(document.created_at).toLocaleDateString()}
                               </p>
                             </div>
                           </div>
                           
                           <div className="flex items-center gap-2 flex-shrink-0">
-                            {document.file_name && (
-                              <div className="px-2 py-1 bg-muted rounded text-xs font-medium text-muted-foreground max-w-[120px] truncate">
-                                {document.file_name}
-                              </div>
-                            )}
                             <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Ver documento">
                               <Eye className="w-3 h-3" />
                             </Button>
@@ -1017,6 +1013,17 @@ export default function DesignDocumentation() {
         />
       ) : (
         <div className="border border-border rounded-md bg-background">
+          {/* Header de tabla */}
+          <div className="flex items-center justify-between px-3 py-2 bg-muted/30 border-b border-border">
+            <div className="flex-1">
+              <span className="text-sm font-medium text-muted-foreground">Nombre</span>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <span className="text-sm font-medium text-muted-foreground w-20">Estado</span>
+              <span className="text-sm font-medium text-muted-foreground w-20">Acciones</span>
+            </div>
+          </div>
+          
           {filteredDocuments.map((doc, index) => (
             <div 
               key={doc.id} 
@@ -1031,27 +1038,25 @@ export default function DesignDocumentation() {
                     {doc.name}
                   </p>
                   <p className="text-xs text-muted-foreground">
+                    {doc.file_name && `${doc.file_name} | `}
                     {doc.created_at && new Date(doc.created_at).toLocaleDateString()}
                   </p>
                 </div>
               </div>
               
               <div className="flex items-center gap-2 flex-shrink-0">
-                {doc.file_name && (
-                  <div className="px-2 py-1 bg-muted rounded text-xs font-medium text-muted-foreground max-w-[120px] truncate">
-                    {doc.file_name}
-                  </div>
-                )}
-                <Badge variant="outline" className="text-xs">{doc.status}</Badge>
-                <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Ver documento">
-                  <Eye className="w-3 h-3" />
-                </Button>
-                <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Editar documento">
-                  <Edit3 className="w-3 h-3" />
-                </Button>
-                <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive" title="Eliminar documento">
-                  <Trash2 className="w-3 h-3" />
-                </Button>
+                <Badge variant="outline" className="text-xs w-20 justify-center">{doc.status}</Badge>
+                <div className="flex items-center gap-1 w-20 justify-center">
+                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Ver documento">
+                    <Eye className="w-3 h-3" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Editar documento">
+                    <Edit3 className="w-3 h-3" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive" title="Eliminar documento">
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                </div>
               </div>
             </div>
           ))}
