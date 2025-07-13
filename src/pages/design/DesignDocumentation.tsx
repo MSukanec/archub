@@ -640,7 +640,7 @@ export default function DesignDocumentation() {
         <div key={folder.id} className="space-y-2">
           <Card className={`${isSubfolder ? 'bg-muted/10' : ''}`}>
             <CardHeader 
-              className="pb-2 flex items-center cursor-pointer min-h-[60px]"
+              className="py-4 flex items-center cursor-pointer justify-center"
               onClick={() => toggleFolderExpansion(folder.id)}
             >
               <div className="flex items-center justify-between w-full h-full">
