@@ -638,12 +638,12 @@ export default function DesignDocumentation() {
       
       return (
         <div key={folder.id} className="space-y-2">
-          <Card className={`${isSubfolder ? 'ml-4 bg-muted/10' : ''}`}>
+          <Card className={`${isSubfolder ? 'bg-muted/10' : ''}`}>
             <CardHeader 
-              className="pb-2 flex items-center cursor-pointer"
+              className="pb-2 flex items-center cursor-pointer min-h-[60px]"
               onClick={() => toggleFolderExpansion(folder.id)}
             >
-              <div className="flex items-center justify-between w-full">
+              <div className="flex items-center justify-between w-full h-full">
                 <div className="flex items-center gap-2">
                   <FolderOpen className={`${isSubfolder ? 'w-4 h-4' : 'w-5 h-5'} text-accent`} />
                   <span className={`${isSubfolder ? 'text-sm' : 'text-base'} font-medium`}>{folder.name}</span>
@@ -701,7 +701,9 @@ export default function DesignDocumentation() {
                 {getSubfolders(folder.id).length > 0 && (
                   <div className="mb-4 space-y-2">
                     <h4 className="text-sm font-medium text-muted-foreground">Subcarpetas</h4>
-                    {getSubfolders(folder.id).map((subfolder) => renderFolder(subfolder, true))}
+                    <div className="ml-4 space-y-2">
+                      {getSubfolders(folder.id).map((subfolder) => renderFolder(subfolder, true))}
+                    </div>
                   </div>
                 )}
                 
