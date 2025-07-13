@@ -41,6 +41,7 @@ A. Comportamientos obligatorios
 6. Asegurate de que el modal NUNCA este dentro del Layout de la página.
 7. CustomModalLayout espera children, no envies content.
 8. Asegurate de que no haya errores de select item.
+9. El CustomModalFooter espera props específicas como onCancel y onSave o onSubmit.
 
 B. Estilo visual
 

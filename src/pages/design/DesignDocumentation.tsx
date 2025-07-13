@@ -330,7 +330,6 @@ export default function DesignDocumentation() {
                 setShowGroupModal(true);
               }}
               onDelete={(group) => setGroupToDelete(group)}
-              onViewDocuments={(group) => navigateToGroup(group.id, group.name)}
             />
           ))}
         </div>
