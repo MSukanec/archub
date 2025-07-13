@@ -44,7 +44,8 @@ import {
   Package,
   Pencil,
   List,
-  Grid
+  Grid,
+  Eye
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -502,28 +503,39 @@ export default function DesignDocumentation() {
               </Button>
             </div>
           ) : (
-            <div className="space-y-2">
-              {groupDocuments.map((document) => (
-                <div key={document.id} className="flex items-center justify-between p-3 border border-border rounded-md bg-background/50">
-                  <div className="flex items-center gap-3">
-                    <FileText className="w-4 h-4 text-muted-foreground" />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">
+            <div className="border border-border rounded-md bg-background">
+              {groupDocuments.map((document, index) => (
+                <div 
+                  key={document.id} 
+                  className={`flex items-center justify-between p-3 hover:bg-muted/50 ${
+                    index !== groupDocuments.length - 1 ? 'border-b border-border' : ''
+                  }`}
+                >
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <FileText className="w-4 h-4 text-accent flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">
                         {document.name}
-                        {document.file_name && (
-                          <span className="text-muted-foreground ml-1">({document.file_name})</span>
-                        )}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {document.created_at && new Date(document.created_at).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                  
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {document.file_name && (
+                      <div className="px-2 py-1 bg-muted rounded text-xs font-medium text-muted-foreground max-w-[120px] truncate">
+                        {document.file_name}
+                      </div>
+                    )}
+                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Ver documento">
+                      <Eye className="w-3 h-3" />
+                    </Button>
+                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Editar documento">
                       <Edit3 className="w-3 h-3" />
                     </Button>
-                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive">
+                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive" title="Eliminar documento">
                       <Trash2 className="w-3 h-3" />
                     </Button>
                   </div>

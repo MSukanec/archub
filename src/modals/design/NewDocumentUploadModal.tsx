@@ -59,16 +59,9 @@ export function NewDocumentUploadModal({
 }: NewDocumentUploadModalProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
-  const { data: members = [], isLoading: membersLoading } = useOrganizationMembers(
+  const { data: members = [] } = useOrganizationMembers(
     userData?.preferences?.last_organization_id
   );
-  
-  console.log('NewDocumentUploadModal - Hook data:', { 
-    userData: userData?.user?.id, 
-    organizationId: userData?.preferences?.last_organization_id,
-    members, 
-    membersLoading 
-  });
   const queryClient = useQueryClient();
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [fileNames, setFileNames] = useState<{ [key: number]: string }>({});
@@ -340,27 +333,20 @@ export function NewDocumentUploadModal({
                 <FormField
                   control={form.control}
                   name="created_by"
-                  render={({ field }) => {
-                    console.log('NewDocumentUploadModal - UserSelector render:', { 
-                      members, 
-                      fieldValue: field.value,
-                      membersLength: members?.length || 0
-                    });
-                    return (
-                      <FormItem>
-                        <FormLabel>Creado por <span className="text-[var(--accent)]">*</span></FormLabel>
-                        <FormControl>
-                          <UserSelector
-                            users={members}
-                            value={field.value}
-                            onChange={field.onChange}
-                            placeholder="Selecciona el creador del documento"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    );
-                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Creado por <span className="text-[var(--accent)]">*</span></FormLabel>
+                      <FormControl>
+                        <UserSelector
+                          users={members}
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder="Selecciona el creador del documento"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
 
                 {/* Carpeta */}

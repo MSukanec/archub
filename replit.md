@@ -119,6 +119,17 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 13, 2025. Fixed UserSelector in document upload modal and enhanced file display design - COMPLETED
+  • Fixed critical bug: UserSelector in NewDocumentUploadModal now receives organizationId parameter correctly
+  • Enhanced useOrganizationMembers hook integration to load organization members properly
+  • Improved form reset conditions to only execute when userData and members are available
+  • Redesigned file display within groups: replaced cards with clean table-style list layout
+  • Added proper file format with icon, name, date, and file name badge showing real filename
+  • Enhanced file actions: added Eye icon for viewing, Edit3 for editing, and Trash2 for deleting
+  • Files now display as bordered list items with hover effects and proper spacing
+  • Implemented filename badges showing actual file names next to document display names
+  • Fixed file visualization to be more intuitive: "Document Name" with "(real_file.pdf)" badge
+  • Cleaned up debugging logs for production-ready code quality
 - July 13, 2025. Enhanced documentation accordion interface with visual improvements and consistency - COMPLETED
   • Implemented accordion-style folder cards with single-expansion behavior and click-to-expand functionality
   • Added ChevronDown/ChevronUp icons to indicate expansion state with single-accordion rule
