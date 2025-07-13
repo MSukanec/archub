@@ -90,94 +90,107 @@ export function NewDocumentFolderModal({ open, onClose }: NewDocumentFolderModal
 
   const isLoading = createFolderMutation.isPending;
 
+  if (!open) return null;
+
   return (
-    <CustomModalLayout open={open} onClose={onClose}>
-      {{
-        header: (
-          <CustomModalHeader
-            title="Nueva Carpeta"
-            onClose={onClose}
-          />
-        ),
-        body: (
-          <CustomModalBody columns={1}>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4" id="folder-form">
-                
-                {/* Creado por */}
-                <FormField
-                  control={form.control}
-                  name="created_by"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Creado por <span className="text-[var(--accent)]">*</span></FormLabel>
-                      <FormControl>
-                        <UserSelector
-                          users={members.map(member => ({
-                            id: member.user_id,
-                            full_name: member.full_name,
-                            email: member.email,
-                            avatar_url: member.avatar_url
-                          }))}
-                          value={field.value}
-                          onChange={field.onChange}
-                          placeholder="Selecciona el creador"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+      {/* Overlay */}
+      <div
+        className="absolute inset-0 bg-black/85"
+        onClick={onClose}
+      />
 
-                {/* Nombre */}
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nombre de la carpeta <span className="text-[var(--accent)]">*</span></FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Ej: Planos arquitectónicos, Documentos legales, etc."
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+      {/* Modal */}
+      <div className="relative z-10 w-full max-w-lg mx-4 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg shadow-2xl">
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b border-[var(--card-border)]">
+          <h2 className="text-lg font-medium text-[var(--card-fg)]">Nueva Carpeta</h2>
+          <button 
+            onClick={onClose}
+            className="text-[var(--text-muted)] hover:text-[var(--card-fg)]"
+          >
+            ×
+          </button>
+        </div>
 
-              </form>
-            </Form>
-          </CustomModalBody>
-        ),
-        footer: (
-          <CustomModalFooter>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => {
-                console.log('Cancel button clicked');
-                handleCancel();
-              }}
-              disabled={isLoading}
-            >
-              Cancelar
-            </Button>
-            <Button 
-              type="button"
-              onClick={() => {
-                console.log('Save button clicked');
-                console.log('Form values:', form.getValues());
-                form.handleSubmit(handleSubmit)();
-              }}
-              disabled={isLoading}
-            >
-              {isLoading ? 'Creando...' : 'Guardar'}
-            </Button>
-          </CustomModalFooter>
-        )
-      }}
-    </CustomModalLayout>
+        {/* Body */}
+        <div className="p-4">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+              
+              {/* Creado por */}
+              <FormField
+                control={form.control}
+                name="created_by"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Creado por <span className="text-[var(--accent)]">*</span></FormLabel>
+                    <FormControl>
+                      <UserSelector
+                        users={members.map(member => ({
+                          id: member.user_id,
+                          full_name: member.full_name,
+                          email: member.email,
+                          avatar_url: member.avatar_url
+                        }))}
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Selecciona el creador"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Nombre */}
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nombre de la carpeta <span className="text-[var(--accent)]">*</span></FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="Ej: Planos arquitectónicos, Documentos legales, etc."
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+            </form>
+          </Form>
+        </div>
+
+        {/* Footer */}
+        <div className="flex justify-end gap-2 p-4 border-t border-[var(--card-border)]">
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={() => {
+              console.log('Cancel button clicked - simple modal');
+              handleCancel();
+            }}
+            disabled={isLoading}
+          >
+            Cancelar
+          </Button>
+          <Button 
+            type="button"
+            onClick={() => {
+              console.log('Save button clicked - simple modal');
+              console.log('Form values:', form.getValues());
+              form.handleSubmit(handleSubmit)();
+            }}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Creando...' : 'Guardar'}
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }
