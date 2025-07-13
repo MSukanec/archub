@@ -119,7 +119,7 @@ export function NewDocumentGroupModal({
       {{
         header: (
           <CustomModalHeader
-            title={editingGroup ? 'Editar Grupo' : 'Nueva Entrega'}
+            title={editingGroup ? 'Editar Entrega' : 'Nueva Entrega'}
             onClose={onClose}
           />
         ),
@@ -215,7 +215,7 @@ export function NewDocumentGroupModal({
               onClick={form.handleSubmit(handleSubmit)}
               disabled={isLoading}
             >
-              {isLoading ? 'Guardando...' : (editingGroup ? 'Actualizar' : 'Crear Grupo')}
+              {isLoading ? 'Guardando...' : (editingGroup ? 'Actualizar Entrega' : 'Crear Entrega')}
             </Button>
           </CustomModalFooter>
         )
