@@ -177,19 +177,6 @@ export default function DesignDocumentation() {
   const getHeaderActions = () => {
     const actions = [];
     
-    // Primary action: Upload Documents
-    actions.push(
-      <Button 
-        key="upload"
-        onClick={() => setShowUploadModal(true)} 
-        size="sm"
-        className="h-8 px-3 text-sm font-medium"
-      >
-        <Upload className="h-4 w-4 mr-2" />
-        Subir Documentos
-      </Button>
-    );
-
     // Secondary action: New Folder (only in folders view)
     if (viewMode === 'folders') {
       actions.push(
@@ -205,6 +192,19 @@ export default function DesignDocumentation() {
         </Button>
       );
     }
+
+    // Primary action: Upload Documents
+    actions.push(
+      <Button 
+        key="upload"
+        onClick={() => setShowUploadModal(true)} 
+        size="sm"
+        className="h-8 px-3 text-sm font-medium"
+      >
+        <Upload className="h-4 w-4 mr-2" />
+        Subir Documentos
+      </Button>
+    );
 
     return actions;
   };

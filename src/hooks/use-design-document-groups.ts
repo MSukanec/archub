@@ -37,8 +37,7 @@ export function useDesignDocumentGroups(folderId?: string) {
             id,
             name
           )
-        `)
-        .eq('organization_id', organizationId);
+        `);
 
       if (folderId) {
         query = query.eq('folder_id', folderId);

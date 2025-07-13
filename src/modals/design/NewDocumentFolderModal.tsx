@@ -31,7 +31,8 @@ interface NewDocumentFolderModalProps {
 export function NewDocumentFolderModal({ open, onClose }: NewDocumentFolderModalProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
-  const { data: members = [] } = useOrganizationMembers();
+  const organizationId = userData?.preferences?.last_organization_id;
+  const { data: members = [] } = useOrganizationMembers(organizationId);
   const createFolderMutation = useCreateDesignDocumentFolder();
 
   const form = useForm<FormData>({
