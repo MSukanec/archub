@@ -328,9 +328,6 @@ export default function DesignDocumentation() {
                   <span className="text-sm font-medium">{group.name}</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Badge variant="outline" className="text-xs">
-                    {documents.filter(d => d.group_id === group.id).length}
-                  </Badge>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -499,13 +496,28 @@ export default function DesignDocumentation() {
     <div className="space-y-6">
       <FeatureIntroduction
         title="Gestión de Documentos"
-        description="Organiza y gestiona todos los documentos de tu proyecto"
         icon={<FileText className="h-5 w-5" />}
         features={[
-          "Organización jerárquica en carpetas y grupos documentales",
-          "Subida múltiple de archivos con versiones automáticas",
-          "Control de estados y visibilidad de documentos",
-          "Historial completo de versiones y cambios"
+          {
+            icon: <FolderOpen className="h-4 w-4" />,
+            title: "Organización jerárquica",
+            description: "Carpetas y grupos documentales para estructurar tu proyecto"
+          },
+          {
+            icon: <Upload className="h-4 w-4" />,
+            title: "Subida múltiple de archivos",
+            description: "Sube varios archivos a la vez con versiones automáticas"
+          },
+          {
+            icon: <Archive className="h-4 w-4" />,
+            title: "Control de estados",
+            description: "Gestiona la visibilidad y estado de cada documento"
+          },
+          {
+            icon: <History className="h-4 w-4" />,
+            title: "Historial completo",
+            description: "Mantén un registro de todas las versiones y cambios"
+          }
         ]}
       />
 
@@ -531,8 +543,8 @@ export default function DesignDocumentation() {
   const renderHierarchicalStructure = () => {
     const renderDocument = (document: any) => (
       <Card key={document.id} className="ml-8 bg-muted/30">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
+        <CardHeader className="pb-3 flex items-center">
+          <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-2">
               <FileText className="w-4 h-4 text-muted-foreground" />
               <span className="text-sm font-medium">{document.name}</span>
@@ -547,7 +559,7 @@ export default function DesignDocumentation() {
                 onClick={() => window.open(document.file_url, '_blank')}
                 className="h-6 w-6 p-0"
               >
-                <Edit3 className="w-3 h-3" />
+                <Pencil className="w-3 h-3" />
               </Button>
             </div>
           </div>
@@ -560,26 +572,23 @@ export default function DesignDocumentation() {
       return (
         <div key={group.id} className="space-y-2">
           <Card className="ml-6 bg-muted/20">
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
+            <CardHeader className="pb-2 flex items-center">
+              <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-2">
                   <Package className="w-4 h-4 text-muted-foreground" />
                   <span className="text-sm font-medium">{group.name}</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Badge variant="outline" className="text-xs">
-                    {groupDocuments.length}
-                  </Badge>
                   <Button
-                    variant="ghost"
                     size="sm"
                     onClick={() => {
                       setSelectedGroupId(group.id);
                       setShowUploadModal(true);
                     }}
-                    className="h-6 w-6 p-0"
+                    className="h-6 px-2 text-xs"
                   >
-                    <Plus className="w-3 h-3" />
+                    <Upload className="w-3 h-3 mr-1" />
+                    Subir Documentos
                   </Button>
                   <Button
                     variant="ghost"
@@ -621,26 +630,35 @@ export default function DesignDocumentation() {
       return (
         <div key={folder.id} className="space-y-2">
           <Card className={`${isSubfolder ? 'ml-4 bg-muted/10' : ''}`}>
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
+            <CardHeader className="pb-2 flex items-center">
+              <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-2">
                   <FolderOpen className={`${isSubfolder ? 'w-4 h-4' : 'w-5 h-5'} text-accent`} />
                   <span className={`${isSubfolder ? 'text-sm' : 'text-base'} font-medium`}>{folder.name}</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Badge variant="secondary" className="text-xs">
-                    {folderGroups.length}
-                  </Badge>
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     onClick={() => {
                       setSubfolderParent({id: folder.id, name: folder.name});
                       setShowFolderModal(true);
                     }}
-                    className="h-6 w-6 p-0"
+                    className="h-6 px-2 text-xs"
                   >
-                    <Plus className="w-3 h-3" />
+                    <Plus className="w-3 h-3 mr-1" />
+                    Nueva Subcarpeta
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      setSelectedFolderId(folder.id);
+                      setShowUploadModal(true);
+                    }}
+                    className="h-6 px-2 text-xs"
+                  >
+                    <Upload className="w-3 h-3 mr-1" />
+                    Subir Documentos
                   </Button>
                   <Button
                     variant="ghost"
@@ -651,7 +669,7 @@ export default function DesignDocumentation() {
                     }}
                     className="h-6 w-6 p-0"
                   >
-                    <Edit3 className="w-3 h-3" />
+                    <Pencil className="w-3 h-3" />
                   </Button>
                   <Button
                     variant="ghost"
