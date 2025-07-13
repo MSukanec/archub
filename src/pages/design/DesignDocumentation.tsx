@@ -12,12 +12,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext';
 import { useMobile } from '@/hooks/use-mobile';
-import { useDesignDocumentFolders, useCreateDesignDocumentFolder } from '@/hooks/use-design-document-folders';
+import { useDesignDocumentFolders, useCreateDesignDocumentFolder, useDeleteDesignDocumentFolder } from '@/hooks/use-design-document-folders';
 import { useDesignDocumentGroups, useDeleteDesignDocumentGroup } from '@/hooks/use-design-document-groups';
 import { useDesignDocuments } from '@/hooks/use-design-documents';
 import { NewDocumentUploadModal } from '@/modals/design/NewDocumentUploadModal';
 import { NewDocumentGroupModal } from '@/modals/design/NewDocumentGroupModal';
 import { NewDocumentFolderModal } from '@/modals/design/NewDocumentFolderModal';
+import { DangerousConfirmationModal } from '@/components/ui-custom/DangerousConfirmationModal';
 import { 
   FileText, 
   FolderOpen,
@@ -31,7 +32,9 @@ import {
   FolderPlus,
   Search,
   ChevronRight,
-  Home
+  Home,
+  Edit3,
+  Trash2
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -64,6 +67,9 @@ export default function DesignDocumentation() {
   const [editingGroup, setEditingGroup] = useState(null);
   const [groupToDelete, setGroupToDelete] = useState(null);
   const [subfolderParent, setSubfolderParent] = useState<{id: string; name: string} | null>(null);
+  const [editingFolder, setEditingFolder] = useState<any>(null);
+  const [folderToDelete, setFolderToDelete] = useState<any>(null);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { setActions, setShowActionBar } = useMobileActionBar();
@@ -79,13 +85,21 @@ export default function DesignDocumentation() {
   const { data: documents = [] } = useDesignDocuments(selectedGroupId);
   const createFolderMutation = useCreateDesignDocumentFolder();
   const deleteGroupMutation = useDeleteDesignDocumentGroup();
+  const deleteFolderMutation = useDeleteDesignDocumentFolder();
 
-  // Filter folders based on search
+  // Filter folders based on search - only show parent folders
   const filteredFolders = useMemo(() => {
     return folders.filter(folder =>
+      !folder.parent_id && 
       folder.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [folders, searchTerm]);
+
+  // Function to get subfolders of a parent folder
+  const getSubfolders = (parentId: string) => {
+    if (!folders) return [];
+    return folders.filter(folder => folder.parent_id === parentId);
+  };
 
   // Filter groups based on search
   const filteredGroups = useMemo(() => {
@@ -134,24 +148,45 @@ export default function DesignDocumentation() {
     setBreadcrumbs([]);
   };
 
-
-
-  // Handle group deletion
-  const handleDeleteGroup = async () => {
-    if (!groupToDelete) return;
-
-    try {
-      await deleteGroupMutation.mutateAsync(groupToDelete.id);
-      toast({
-        title: "Grupo eliminado",
-        description: "El grupo documental ha sido eliminado exitosamente."
+  const handleDeleteFolder = () => {
+    if (folderToDelete) {
+      deleteFolderMutation.mutate(folderToDelete.id, {
+        onSuccess: () => {
+          toast({
+            title: "Éxito",
+            description: "Carpeta eliminada correctamente",
+          });
+          setFolderToDelete(null);
+          setShowDeleteConfirmation(false);
+        },
+        onError: (error) => {
+          toast({
+            title: "Error",
+            description: "No se pudo eliminar la carpeta",
+            variant: "destructive",
+          });
+        },
       });
-      setGroupToDelete(null);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "No se pudo eliminar el grupo",
-        variant: "destructive"
+    }
+  };
+
+  const handleDeleteGroup = () => {
+    if (groupToDelete) {
+      deleteGroupMutation.mutate(groupToDelete.id, {
+        onSuccess: () => {
+          toast({
+            title: "Éxito",
+            description: `Grupo "${groupToDelete.name}" eliminado correctamente`,
+          });
+          setGroupToDelete(null);
+        },
+        onError: (error) => {
+          toast({
+            title: "Error",
+            description: "No se pudo eliminar el grupo",
+            variant: "destructive",
+          });
+        },
       });
     }
   };
@@ -259,36 +294,115 @@ export default function DesignDocumentation() {
       ) : (
         <div className="grid gap-4">
           {filteredFolders.map((folder) => (
-            <Card key={folder.id} className="cursor-pointer hover:bg-muted/50 transition-colors">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-md bg-accent/10">
-                      <FolderOpen className="w-5 h-5 text-accent" />
+            <div key={folder.id} className="space-y-2">
+              <Card className="cursor-pointer hover:bg-muted/50 transition-colors">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3" onClick={() => navigateToFolder(folder.id, folder.name)}>
+                      <div className="flex items-center justify-center w-10 h-10 rounded-md bg-accent/10">
+                        <FolderOpen className="w-5 h-5 text-accent" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg">{folder.name}</CardTitle>
+                        <CardDescription>
+                          {groups.filter(g => g.folder_id === folder.id).length} grupo{groups.filter(g => g.folder_id === folder.id).length !== 1 ? 's' : ''}
+                        </CardDescription>
+                      </div>
                     </div>
-                    <div>
-                      <CardTitle className="text-lg">{folder.name}</CardTitle>
-                      <CardDescription>
-                        {groups.filter(g => g.folder_id === folder.id).length} grupo{groups.filter(g => g.folder_id === folder.id).length !== 1 ? 's' : ''}
-                      </CardDescription>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSubfolderParent({id: folder.id, name: folder.name});
+                          setShowFolderModal(true);
+                        }}
+                        className="h-8 px-3 text-sm"
+                      >
+                        <FolderPlus className="w-4 h-4 mr-2" />
+                        Nueva Subcarpeta
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingFolder(folder);
+                          setShowFolderModal(true);
+                        }}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Edit3 className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setFolderToDelete(folder);
+                          setShowDeleteConfirmation(true);
+                        }}
+                        className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSubfolderParent({id: folder.id, name: folder.name});
-                      setShowFolderModal(true);
-                    }}
-                    className="h-8 px-3 text-sm"
-                  >
-                    <FolderPlus className="w-4 h-4 mr-2" />
-                    Nueva Subcarpeta
-                  </Button>
+                </CardHeader>
+              </Card>
+              
+              {/* Subcarpetas */}
+              {getSubfolders(folder.id).length > 0 && (
+                <div className="ml-8 space-y-2">
+                  {getSubfolders(folder.id).map((subfolder) => (
+                    <Card key={subfolder.id} className="cursor-pointer hover:bg-muted/50 transition-colors">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3" onClick={() => navigateToFolder(subfolder.id, subfolder.name)}>
+                            <div className="flex items-center justify-center w-8 h-8 rounded-md bg-accent/10">
+                              <FolderOpen className="w-4 h-4 text-accent" />
+                            </div>
+                            <div>
+                              <CardTitle className="text-base">{subfolder.name}</CardTitle>
+                              <CardDescription className="text-sm">
+                                {groups.filter(g => g.folder_id === subfolder.id).length} grupo{groups.filter(g => g.folder_id === subfolder.id).length !== 1 ? 's' : ''}
+                              </CardDescription>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingFolder(subfolder);
+                                setShowFolderModal(true);
+                              }}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Edit3 className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setFolderToDelete(subfolder);
+                                setShowDeleteConfirmation(true);
+                              }}
+                              className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </CardHeader>
+                    </Card>
+                  ))}
                 </div>
-              </CardHeader>
-            </Card>
+              )}
+            </div>
           ))}
         </div>
       )}
@@ -427,9 +541,11 @@ export default function DesignDocumentation() {
         onClose={() => {
           setShowFolderModal(false);
           setSubfolderParent(null);
+          setEditingFolder(null);
         }}
         parentId={subfolderParent?.id}
         parentName={subfolderParent?.name}
+        editingFolder={editingFolder}
       />
 
       {/* Delete Group Confirmation */}
@@ -449,6 +565,19 @@ export default function DesignDocumentation() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Delete Folder Confirmation */}
+      <DangerousConfirmationModal
+        open={showDeleteConfirmation}
+        onClose={() => {
+          setShowDeleteConfirmation(false);
+          setFolderToDelete(null);
+        }}
+        onConfirm={() => handleDeleteFolder()}
+        itemName={folderToDelete?.name || ''}
+        itemType="carpeta"
+        warningMessage="Esta acción eliminará permanentemente la carpeta y todos sus grupos documentales asociados."
+      />
     </Layout>
   );
 }

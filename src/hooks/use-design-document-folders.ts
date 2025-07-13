@@ -76,3 +76,24 @@ export function useCreateDesignDocumentFolder() {
     }
   });
 }
+
+export function useDeleteDesignDocumentFolder() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (folderId: string): Promise<void> => {
+      const { error } = await supabase
+        .from('design_document_folders')
+        .delete()
+        .eq('id', folderId);
+
+      if (error) {
+        throw new Error(`Error deleting folder: ${error.message}`);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['design-document-folders'] });
+      queryClient.invalidateQueries({ queryKey: ['design-document-groups'] });
+    }
+  });
+}
