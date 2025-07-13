@@ -59,7 +59,16 @@ export function NewDocumentUploadModal({
 }: NewDocumentUploadModalProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
-  const { data: members = [] } = useOrganizationMembers();
+  const { data: members = [], isLoading: membersLoading } = useOrganizationMembers(
+    userData?.preferences?.last_organization_id
+  );
+  
+  console.log('NewDocumentUploadModal - Hook data:', { 
+    userData: userData?.user?.id, 
+    organizationId: userData?.preferences?.last_organization_id,
+    members, 
+    membersLoading 
+  });
   const queryClient = useQueryClient();
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [fileNames, setFileNames] = useState<{ [key: number]: string }>({});
@@ -95,7 +104,7 @@ export function NewDocumentUploadModal({
 
   // Reset form when modal opens/closes
   useEffect(() => {
-    if (open) {
+    if (open && userData && members.length > 0) {
       // Find current user's member ID in the organization
       const currentUserMember = members.find(member => member.user_id === userData?.user?.id);
       
