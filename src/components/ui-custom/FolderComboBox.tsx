@@ -70,18 +70,22 @@ export function FolderComboBox({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant="outline"
+        <div
           role="combobox"
           aria-expanded={open}
-          className={cn("w-full justify-between", className)}
-          disabled={disabled || isLoading}
+          className={cn(
+            "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer",
+            className
+          )}
+          onClick={() => !disabled && !isLoading && setOpen(!open)}
         >
-          {selectedFolder ? selectedFolder.name : placeholder}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
+          <span className={selectedFolder ? "text-foreground" : "text-muted-foreground"}>
+            {selectedFolder ? selectedFolder.name : placeholder}
+          </span>
+          <ChevronsUpDown className="h-4 w-4 opacity-50" />
+        </div>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0" align="start">
+      <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start" style={{ zIndex: 9999 }}>
         <Command>
           <CommandInput 
             placeholder="Buscar o crear carpeta..." 
