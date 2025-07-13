@@ -35,7 +35,8 @@ import {
   Home,
   Edit3,
   Trash2,
-  Package
+  Package,
+  Pencil
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -215,22 +216,6 @@ export default function DesignDocumentation() {
   const getHeaderActions = () => {
     const actions = [];
     
-    // Secondary action: New Folder (only in folders view)
-    if (viewMode === 'folders') {
-      actions.push(
-        <Button 
-          key="new-folder"
-          onClick={() => setShowFolderModal(true)} 
-          variant="outline"
-          size="sm"
-          className="h-8 px-3 text-sm font-medium"
-        >
-          <FolderPlus className="h-4 w-4 mr-2" />
-          Nueva Carpeta
-        </Button>
-      );
-    }
-
     // Primary action: Upload Documents
     actions.push(
       <Button 
@@ -278,20 +263,18 @@ export default function DesignDocumentation() {
                 <span className={`${isSubfolder ? 'text-sm' : 'text-base'} font-medium`}>{folder.name}</span>
               </div>
               <div className="flex items-center gap-1">
-                <Badge variant="secondary" className="text-xs">
-                  {groups.filter(g => g.folder_id === folder.id).length}
-                </Badge>
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   onClick={(e) => {
                     e.stopPropagation();
                     setSubfolderParent({id: folder.id, name: folder.name});
                     setShowFolderModal(true);
                   }}
-                  className="h-6 w-6 p-0"
+                  className="h-6 px-2 text-xs"
                 >
-                  <Plus className="w-3 h-3" />
+                  <Plus className="w-3 h-3 mr-1" />
+                  Crear Subcarpeta
                 </Button>
                 <Button
                   variant="ghost"
@@ -303,7 +286,7 @@ export default function DesignDocumentation() {
                   }}
                   className="h-6 w-6 p-0"
                 >
-                  <Edit3 className="w-3 h-3" />
+                  <Pencil className="w-3 h-3" />
                 </Button>
                 <Button
                   variant="ghost"
@@ -358,7 +341,7 @@ export default function DesignDocumentation() {
                     }}
                     className="h-6 w-6 p-0"
                   >
-                    <Edit3 className="w-3 h-3" />
+                    <Pencil className="w-3 h-3" />
                   </Button>
                   <Button
                     variant="ghost"
@@ -533,9 +516,8 @@ export default function DesignDocumentation() {
             <h3 className="text-lg font-semibold">Documentación</h3>
           </div>
           <Button
-            variant="ghost"
-            size="sm"
             onClick={() => setShowFolderModal(true)}
+            size="sm"
           >
             <Plus className="w-4 h-4 mr-2" />
             Nueva Carpeta
@@ -608,7 +590,7 @@ export default function DesignDocumentation() {
                     }}
                     className="h-6 w-6 p-0"
                   >
-                    <Edit3 className="w-3 h-3" />
+                    <Pencil className="w-3 h-3" />
                   </Button>
                   <Button
                     variant="ghost"

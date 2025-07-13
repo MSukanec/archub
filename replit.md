@@ -119,6 +119,14 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 13, 2025. Complete UI improvements for DOCUMENTACIÓN page - COMPLETED
+  • Removed "Nueva Carpeta" button from header actions for cleaner interface
+  • Made inline "Nueva Carpeta" button primary (green) style matching "Subir Documentos" button
+  • Removed "0" badge displays from folder and group cards for cleaner visual appearance
+  • Changed all edit buttons to use Pencil icon instead of Edit3 for consistency with CustomTable components
+  • Updated "Crear Subcarpeta" button to secondary style with text label instead of icon-only
+  • Enhanced button consistency across folder management interface
+  • Improved visual hierarchy with primary actions (Nueva Carpeta, Subir Documentos) in accent color
 - July 13, 2025. Redesigned DOCUMENTACIÓN page with hierarchical single-column layout - COMPLETED
   • Restructured page to single-column layout with complete hierarchical display: carpetas → subcarpetas → grupos → archivos
   • Added wide layout prop for better space utilization on documentation management page
