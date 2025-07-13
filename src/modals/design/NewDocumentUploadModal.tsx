@@ -331,20 +331,27 @@ export function NewDocumentUploadModal({
                 <FormField
                   control={form.control}
                   name="created_by"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Creado por <span className="text-[var(--accent)]">*</span></FormLabel>
-                      <FormControl>
-                        <UserSelector
-                          users={members}
-                          value={field.value}
-                          onChange={field.onChange}
-                          placeholder="Selecciona el creador del documento"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  render={({ field }) => {
+                    console.log('NewDocumentUploadModal - UserSelector render:', { 
+                      members, 
+                      fieldValue: field.value,
+                      membersLength: members?.length || 0
+                    });
+                    return (
+                      <FormItem>
+                        <FormLabel>Creado por <span className="text-[var(--accent)]">*</span></FormLabel>
+                        <FormControl>
+                          <UserSelector
+                            users={members}
+                            value={field.value}
+                            onChange={field.onChange}
+                            placeholder="Selecciona el creador del documento"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
                 />
 
                 {/* Carpeta */}

@@ -502,29 +502,32 @@ export default function DesignDocumentation() {
               </Button>
             </div>
           ) : (
-            <div className="grid gap-2">
+            <div className="space-y-2">
               {groupDocuments.map((document) => (
-                <Card key={document.id} className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <FileText className="w-5 h-5 text-accent" />
-                      <div>
-                        <p className="font-medium">{document.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {document.created_at && new Date(document.created_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                        <Edit3 className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive">
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                <div key={document.id} className="flex items-center justify-between p-3 border border-border rounded-md bg-background/50">
+                  <div className="flex items-center gap-3">
+                    <FileText className="w-4 h-4 text-muted-foreground" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">
+                        {document.name}
+                        {document.file_name && (
+                          <span className="text-muted-foreground ml-1">({document.file_name})</span>
+                        )}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {document.created_at && new Date(document.created_at).toLocaleDateString()}
+                      </p>
                     </div>
                   </div>
-                </Card>
+                  <div className="flex items-center gap-1">
+                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                      <Edit3 className="w-3 h-3" />
+                    </Button>
+                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive">
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </div>
+                </div>
               ))}
             </div>
           )}
