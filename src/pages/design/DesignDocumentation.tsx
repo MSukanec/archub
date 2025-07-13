@@ -654,6 +654,18 @@ export default function DesignDocumentation() {
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
+                      setSubfolderParent({id: folder.id, name: folder.name});
+                      setShowFolderModal(true);
+                    }}
+                    className="h-6 w-6 p-0"
+                  >
+                    <Plus className="w-3 h-3" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
                       setEditingFolder(folder);
                       setShowFolderModal(true);
                     }}
@@ -685,46 +697,30 @@ export default function DesignDocumentation() {
             {/* Contenido expandido */}
             {isExpanded && (
               <CardContent className="pt-0">
-                <CustomEmptyState
-                  icon={<FolderOpen className="h-8 w-8 text-muted-foreground" />}
-                  title="Gestiona esta carpeta"
-                  description="Crea subcarpetas o sube documentos para organizar tu proyecto"
-                  action={
-                    <div className="flex flex-col gap-2 w-full max-w-xs">
-                      <Button
-                        variant="outline"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSubfolderParent({id: folder.id, name: folder.name});
-                          setShowFolderModal(true);
-                        }}
-                        className="w-full"
-                      >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Nueva Subcarpeta
-                      </Button>
-                      <Button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedFolderId(folder.id);
-                          setShowUploadModal(true);
-                        }}
-                        className="w-full"
-                      >
-                        <Upload className="w-4 h-4 mr-2" />
-                        Subir Documentos
-                      </Button>
-                    </div>
-                  }
-                />
-                
-                {/* Subcarpetas */}
+                {/* Subcarpetas - se muestran primero */}
                 {getSubfolders(folder.id).length > 0 && (
-                  <div className="mt-4 space-y-2">
+                  <div className="mb-4 space-y-2">
                     <h4 className="text-sm font-medium text-muted-foreground">Subcarpetas</h4>
                     {getSubfolders(folder.id).map((subfolder) => renderFolder(subfolder, true))}
                   </div>
                 )}
+                
+                {/* Empty space más pequeño - solo botón de subir documentos */}
+                <div className="flex flex-col items-center justify-center py-4 border-2 border-dashed border-muted rounded-lg">
+                  <FolderOpen className="h-6 w-6 text-muted-foreground mb-2" />
+                  <p className="text-sm text-muted-foreground mb-3">Sube documentos a esta carpeta</p>
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedFolderId(folder.id);
+                      setShowUploadModal(true);
+                    }}
+                    size="sm"
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    Subir Documentos
+                  </Button>
+                </div>
                 
                 {/* Grupos dentro de la carpeta */}
                 {folderGroups.length > 0 && (
