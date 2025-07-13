@@ -720,31 +720,43 @@ export default function DesignDocumentation() {
                 <div className="border-t border-border" />
                 <CardContent className="py-4">
                   {groupDocuments.length > 0 ? (
-                    <div className="space-y-2">
-                      {groupDocuments.map((document) => (
-                        <Card key={document.id} className="bg-muted/30">
-                          <CardHeader className="py-3 flex items-center">
-                            <div className="flex items-center justify-between w-full">
-                              <div className="flex items-center gap-2">
-                                <FileText className="w-4 h-4 text-muted-foreground" />
-                                <span className="text-sm font-medium">{document.name}</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Badge variant="outline" className="text-xs">
-                                  {document.file_type}
-                                </Badge>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => window.open(document.file_url, '_blank')}
-                                  className="h-6 w-6 p-0"
-                                >
-                                  <Pencil className="w-3 h-3" />
-                                </Button>
-                              </div>
+                    <div className="border border-border rounded-md bg-background">
+                      {groupDocuments.map((document, index) => (
+                        <div 
+                          key={document.id} 
+                          className={`flex items-center justify-between p-3 hover:bg-muted/50 ${
+                            index !== groupDocuments.length - 1 ? 'border-b border-border' : ''
+                          }`}
+                        >
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <FileText className="w-4 h-4 text-accent flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">
+                                {document.name}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {document.created_at && new Date(document.created_at).toLocaleDateString()}
+                              </p>
                             </div>
-                          </CardHeader>
-                        </Card>
+                          </div>
+                          
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            {document.file_name && (
+                              <div className="px-2 py-1 bg-muted rounded text-xs font-medium text-muted-foreground max-w-[120px] truncate">
+                                {document.file_name}
+                              </div>
+                            )}
+                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Ver documento">
+                              <Eye className="w-3 h-3" />
+                            </Button>
+                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Editar documento">
+                              <Edit3 className="w-3 h-3" />
+                            </Button>
+                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive" title="Eliminar documento">
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        </div>
                       ))}
                     </div>
                   ) : (
@@ -1004,31 +1016,44 @@ export default function DesignDocumentation() {
           }
         />
       ) : (
-        <div className="grid gap-4">
-          {filteredDocuments.map((doc) => (
-            <Card key={doc.id}>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <FileText className="w-5 h-5 text-muted-foreground" />
-                    <div>
-                      <CardTitle className="text-base">{doc.name}</CardTitle>
-                      <CardDescription>{doc.file_type}</CardDescription>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline">{doc.status}</Badge>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => window.open(doc.file_url, '_blank')}
-                    >
-                      Ver
-                    </Button>
-                  </div>
+        <div className="border border-border rounded-md bg-background">
+          {filteredDocuments.map((doc, index) => (
+            <div 
+              key={doc.id} 
+              className={`flex items-center justify-between p-3 hover:bg-muted/50 ${
+                index !== filteredDocuments.length - 1 ? 'border-b border-border' : ''
+              }`}
+            >
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <FileText className="w-4 h-4 text-accent flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">
+                    {doc.name}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {doc.created_at && new Date(doc.created_at).toLocaleDateString()}
+                  </p>
                 </div>
-              </CardHeader>
-            </Card>
+              </div>
+              
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {doc.file_name && (
+                  <div className="px-2 py-1 bg-muted rounded text-xs font-medium text-muted-foreground max-w-[120px] truncate">
+                    {doc.file_name}
+                  </div>
+                )}
+                <Badge variant="outline" className="text-xs">{doc.status}</Badge>
+                <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Ver documento">
+                  <Eye className="w-3 h-3" />
+                </Button>
+                <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Editar documento">
+                  <Edit3 className="w-3 h-3" />
+                </Button>
+                <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive" title="Eliminar documento">
+                  <Trash2 className="w-3 h-3" />
+                </Button>
+              </div>
+            </div>
           ))}
         </div>
       )}
