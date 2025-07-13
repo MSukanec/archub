@@ -32,6 +32,8 @@ import {
   FolderPlus,
   Search,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   Home,
   Edit3,
   Trash2,
@@ -73,6 +75,7 @@ export default function DesignDocumentation() {
   const [folderToDelete, setFolderToDelete] = useState<any>(null);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [selectedItem, setSelectedItem] = useState<{type: 'folder' | 'group'; id: string; name: string} | null>(null);
+  const [expandedFolderId, setExpandedFolderId] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { setActions, setShowActionBar } = useMobileActionBar();
@@ -89,6 +92,11 @@ export default function DesignDocumentation() {
   const createFolderMutation = useCreateDesignDocumentFolder();
   const deleteGroupMutation = useDeleteDesignDocumentGroup();
   const deleteFolderMutation = useDeleteDesignDocumentFolder();
+
+  // Función para manejar la expansión/contracción del acordeón
+  const toggleFolderExpansion = (folderId: string) => {
+    setExpandedFolderId(expandedFolderId === folderId ? null : folderId);
+  };
 
   // Filter folders based on search - only show parent folders
   const filteredFolders = useMemo(() => {
@@ -626,11 +634,15 @@ export default function DesignDocumentation() {
 
     const renderFolder = (folder: any, isSubfolder = false) => {
       const folderGroups = groups.filter(g => g.folder_id === folder.id);
+      const isExpanded = expandedFolderId === folder.id;
       
       return (
         <div key={folder.id} className="space-y-2">
           <Card className={`${isSubfolder ? 'ml-4 bg-muted/10' : ''}`}>
-            <CardHeader className="pb-2 flex items-center">
+            <CardHeader 
+              className="pb-2 flex items-center cursor-pointer"
+              onClick={() => toggleFolderExpansion(folder.id)}
+            >
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-2">
                   <FolderOpen className={`${isSubfolder ? 'w-4 h-4' : 'w-5 h-5'} text-accent`} />
@@ -638,32 +650,10 @@ export default function DesignDocumentation() {
                 </div>
                 <div className="flex items-center gap-1">
                   <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setSubfolderParent({id: folder.id, name: folder.name});
-                      setShowFolderModal(true);
-                    }}
-                    className="h-6 px-2 text-xs"
-                  >
-                    <Plus className="w-3 h-3 mr-1" />
-                    Nueva Subcarpeta
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      setSelectedFolderId(folder.id);
-                      setShowUploadModal(true);
-                    }}
-                    className="h-6 px-2 text-xs"
-                  >
-                    <Upload className="w-3 h-3 mr-1" />
-                    Subir Documentos
-                  </Button>
-                  <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       setEditingFolder(folder);
                       setShowFolderModal(true);
                     }}
@@ -674,7 +664,8 @@ export default function DesignDocumentation() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       setFolderToDelete(folder);
                       setShowDeleteConfirmation(true);
                     }}
@@ -682,24 +673,69 @@ export default function DesignDocumentation() {
                   >
                     <Trash2 className="w-3 h-3" />
                   </Button>
+                  {isExpanded ? (
+                    <ChevronUp className="w-4 h-4 text-muted-foreground" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                  )}
                 </div>
               </div>
             </CardHeader>
+            
+            {/* Contenido expandido */}
+            {isExpanded && (
+              <CardContent className="pt-0">
+                <CustomEmptyState
+                  icon={<FolderOpen className="h-8 w-8 text-muted-foreground" />}
+                  title="Gestiona esta carpeta"
+                  description="Crea subcarpetas o sube documentos para organizar tu proyecto"
+                  action={
+                    <div className="flex flex-col gap-2 w-full max-w-xs">
+                      <Button
+                        variant="outline"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSubfolderParent({id: folder.id, name: folder.name});
+                          setShowFolderModal(true);
+                        }}
+                        className="w-full"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Nueva Subcarpeta
+                      </Button>
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedFolderId(folder.id);
+                          setShowUploadModal(true);
+                        }}
+                        className="w-full"
+                      >
+                        <Upload className="w-4 h-4 mr-2" />
+                        Subir Documentos
+                      </Button>
+                    </div>
+                  }
+                />
+                
+                {/* Subcarpetas */}
+                {getSubfolders(folder.id).length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    <h4 className="text-sm font-medium text-muted-foreground">Subcarpetas</h4>
+                    {getSubfolders(folder.id).map((subfolder) => renderFolder(subfolder, true))}
+                  </div>
+                )}
+                
+                {/* Grupos dentro de la carpeta */}
+                {folderGroups.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    <h4 className="text-sm font-medium text-muted-foreground">Grupos de revisión</h4>
+                    {folderGroups.map(renderGroup)}
+                  </div>
+                )}
+              </CardContent>
+            )}
           </Card>
-          
-          {/* Subcarpetas */}
-          {getSubfolders(folder.id).length > 0 && (
-            <div className="space-y-2">
-              {getSubfolders(folder.id).map((subfolder) => renderFolder(subfolder, true))}
-            </div>
-          )}
-          
-          {/* Grupos dentro de la carpeta */}
-          {folderGroups.length > 0 && (
-            <div className="space-y-2">
-              {folderGroups.map(renderGroup)}
-            </div>
-          )}
         </div>
       );
     };

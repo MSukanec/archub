@@ -119,6 +119,16 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 13, 2025. Implemented accordion-style folder cards with single-expansion behavior - COMPLETED
+  • Converted folder cards into interactive accordions with click-to-expand functionality
+  • Added ChevronDown/ChevronUp icons to indicate expansion state
+  • Implemented single-accordion rule: only one folder can be expanded at a time
+  • Accordion header shows folder icon, name, and action buttons (Edit, Delete, Chevron)
+  • Expanded state shows CustomEmptyState with full-width action buttons stacked vertically
+  • "Nueva Subcarpeta" button styled as outline/secondary, "Subir Documentos" as primary
+  • Subcarpetas and grupos de revisión sections appear below action buttons when content exists
+  • Added proper event handling with stopPropagation to prevent accordion toggle on button clicks
+  • Maintained hierarchical structure with proper margins and backgrounds for subcarpetas
 - July 13, 2025. Complete UI improvements for DOCUMENTACIÓN page - COMPLETED
   • Removed "Nueva Carpeta" button from header actions for cleaner interface
   • Made inline "Nueva Carpeta" button primary (green) style matching "Subir Documentos" button
