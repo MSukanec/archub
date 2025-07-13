@@ -622,7 +622,7 @@ export default function DesignDocumentation() {
       
       return (
         <div key={group.id} className="space-y-2">
-          <Card className="ml-6 bg-muted/20">
+          <Card className="bg-muted/20">
             <CardHeader 
               className="py-4 flex items-center cursor-pointer justify-center"
               onClick={() => toggleGroupExpansion(group.id)}
@@ -638,6 +638,18 @@ export default function DesignDocumentation() {
                   <span className="text-sm font-medium">{group.name}</span>
                 </div>
                 <div className="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedGroupId(group.id);
+                      setShowUploadModal(true);
+                    }}
+                    className="h-6 w-6 p-0"
+                  >
+                    <Upload className="w-3 h-3" />
+                  </Button>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -660,18 +672,6 @@ export default function DesignDocumentation() {
                     className="h-6 w-6 p-0 text-destructive hover:text-destructive"
                   >
                     <Trash2 className="w-3 h-3" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedGroupId(group.id);
-                      setShowUploadModal(true);
-                    }}
-                    className="h-6 px-2 text-xs"
-                  >
-                    <Upload className="w-3 h-3 mr-1" />
-                    Subir Documentos
                   </Button>
                 </div>
               </div>
@@ -750,6 +750,30 @@ export default function DesignDocumentation() {
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
+                      setSelectedFolderId(folder.id);
+                      setShowUploadModal(true);
+                    }}
+                    className="h-6 w-6 p-0"
+                  >
+                    <Upload className="w-3 h-3" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSubfolderParent({id: folder.id, name: folder.name});
+                      setShowFolderModal(true);
+                    }}
+                    className="h-6 w-6 p-0"
+                  >
+                    <Plus className="w-3 h-3" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
                       setEditingFolder(folder);
                       setShowFolderModal(true);
                     }}
@@ -768,30 +792,6 @@ export default function DesignDocumentation() {
                     className="h-6 w-6 p-0 text-destructive hover:text-destructive"
                   >
                     <Trash2 className="w-3 h-3" />
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSubfolderParent({id: folder.id, name: folder.name});
-                      setShowFolderModal(true);
-                    }}
-                    className="h-6 px-2 text-xs"
-                  >
-                    Crear Subcarpeta
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedFolderId(folder.id);
-                      setShowUploadModal(true);
-                    }}
-                    className="h-6 px-2 text-xs"
-                  >
-                    <Upload className="w-3 h-3 mr-1" />
-                    Subir Documentos
                   </Button>
                 </div>
               </div>
