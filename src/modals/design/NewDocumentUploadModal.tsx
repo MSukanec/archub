@@ -58,6 +58,7 @@ export function NewDocumentUploadModal({
   const { data: userData } = useCurrentUser();
   const queryClient = useQueryClient();
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [fileNames, setFileNames] = useState<{ [key: number]: string }>({});
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [selectedFolderId, setSelectedFolderId] = useState<string>('');
@@ -98,6 +99,7 @@ export function NewDocumentUploadModal({
         group_description: '',
       });
       setSelectedFiles([]);
+      setFileNames({});
       setUploadProgress(0);
     }
   }, [open, defaultFolderId, defaultGroupId, form]);
@@ -105,10 +107,38 @@ export function NewDocumentUploadModal({
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     setSelectedFiles(files);
+    
+    // Initialize file names with filename without extension as default
+    const newFileNames: { [key: number]: string } = {};
+    files.forEach((file, index) => {
+      newFileNames[index] = file.name.replace(/\.[^/.]+$/, ''); // Remove extension
+    });
+    setFileNames(newFileNames);
   };
 
   const removeFile = (index: number) => {
     setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+    setFileNames(prev => {
+      const newFileNames = { ...prev };
+      delete newFileNames[index];
+      // Reindex remaining files
+      const reindexed: { [key: number]: string } = {};
+      Object.entries(newFileNames).forEach(([key, value], newIndex) => {
+        if (parseInt(key) > index) {
+          reindexed[newIndex] = value;
+        } else if (parseInt(key) < index) {
+          reindexed[parseInt(key)] = value;
+        }
+      });
+      return reindexed;
+    });
+  };
+
+  const updateFileName = (index: number, name: string) => {
+    setFileNames(prev => ({
+      ...prev,
+      [index]: name
+    }));
   };
 
   const createFolder = async (folderName: string) => {
@@ -213,11 +243,12 @@ export function NewDocumentUploadModal({
             groupId
           );
 
-          const documentName = file.name.replace(/\.[^/.]+$/, ''); // Remove extension
+          // Use custom name from user input or fallback to filename without extension
+          const customName = fileNames[index] || file.name.replace(/\.[^/.]+$/, '');
 
           await createDocumentMutation.mutateAsync({
-            name: documentName,
-            file_name: file.name,
+            name: customName, // User-provided name
+            file_name: file.name, // Original filename
             file_path: uploadResult.path,
             file_url: uploadResult.url,
             file_type: file.type,
@@ -247,6 +278,7 @@ export function NewDocumentUploadModal({
 
       form.reset();
       setSelectedFiles([]);
+      setFileNames({});
       onClose();
     } catch (error: any) {
       console.error('Error uploading documents:', error);
@@ -392,28 +424,46 @@ export function NewDocumentUploadModal({
                   </div>
                 </div>
 
-                {/* Lista de archivos seleccionados */}
+                {/* Lista de archivos seleccionados con nombres personalizables */}
                 {selectedFiles.length > 0 && (
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <h4 className="text-sm font-medium">Archivos seleccionados:</h4>
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       {selectedFiles.map((file, index) => (
-                        <div key={index} className="flex items-center justify-between p-2 bg-muted rounded-lg">
-                          <div className="flex items-center space-x-2">
-                            <File className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-sm">{file.name}</span>
-                            <Badge variant="secondary" className="text-xs">
-                              {(file.size / 1024 / 1024).toFixed(2)} MB
-                            </Badge>
+                        <div key={index} className="space-y-2 p-3 bg-muted rounded-lg">
+                          {/* File info header */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                              <File className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm text-muted-foreground">
+                                Archivo: {file.name}
+                              </span>
+                              <Badge variant="secondary" className="text-xs">
+                                {(file.size / 1024 / 1024).toFixed(2)} MB
+                              </Badge>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeFile(index)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
                           </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeFile(index)}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
+                          
+                          {/* Custom name input */}
+                          <div className="space-y-1">
+                            <label className="text-xs font-medium text-muted-foreground">
+                              Nombre para mostrar:
+                            </label>
+                            <Input
+                              placeholder="Ingrese el nombre que se mostrará para este documento"
+                              value={fileNames[index] || ''}
+                              onChange={(e) => updateFileName(index, e.target.value)}
+                              className="text-sm"
+                            />
+                          </div>
                         </div>
                       ))}
                     </div>
