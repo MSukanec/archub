@@ -96,8 +96,11 @@ export function NewDocumentUploadModal({
   // Reset form when modal opens/closes
   useEffect(() => {
     if (open) {
+      // Find current user's member ID in the organization
+      const currentUserMember = members.find(member => member.user_id === userData?.user?.id);
+      
       form.reset({
-        created_by: userData?.user?.id || '',
+        created_by: currentUserMember?.id || '',
         folder_id: defaultFolderId || '',
         group_id: defaultGroupId || '',
         status: 'pendiente',
@@ -108,7 +111,7 @@ export function NewDocumentUploadModal({
       setFileNames({});
       setUploadProgress(0);
     }
-  }, [open, defaultFolderId, defaultGroupId, form, userData]);
+  }, [open, defaultFolderId, defaultGroupId, form, userData, members]);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
