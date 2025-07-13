@@ -6,7 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useDesignDocumentFolders, useCreateDesignDocumentFolder } from '@/hooks/use-design-document-folders';
-import { useDesignDocumentGroups, useCreateDesignDocumentGroup } from '@/hooks/use-design-document-groups';
+import { useDesignDocumentGroups } from '@/hooks/use-design-document-groups';
 import { useCreateDesignDocument } from '@/hooks/use-design-documents';
 import { supabase } from '@/lib/supabase';
 import { CustomModalLayout } from '@/components/modal/CustomModalLayout';
@@ -28,16 +28,15 @@ import {
   File, 
   FileText, 
   FolderOpen, 
-  FolderPlus,
-  Plus 
+  FolderPlus
 } from 'lucide-react';
 
 const formSchema = z.object({
   folder_id: z.string().min(1, 'La carpeta es requerida'),
-  group_id: z.string().min(1, 'El grupo es requerido'),
+  group_id: z.string().optional(), // Ya no es requerido
   status: z.enum(['pendiente', 'en_revision', 'aprobado', 'rechazado']),
   visibility: z.enum(['public', 'private']).optional(),
-  group_description: z.string().optional(),
+  group_description: z.string().optional(), // Descripción para la nueva entrega
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -62,13 +61,10 @@ export function NewDocumentUploadModal({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [selectedFolderId, setSelectedFolderId] = useState<string>('');
-  const [isCreatingNewGroup, setIsCreatingNewGroup] = useState(false);
-  const [newGroupName, setNewGroupName] = useState('');
 
   const { data: folders = [] } = useDesignDocumentFolders();
   const { data: groups = [] } = useDesignDocumentGroups(selectedFolderId);
   const createFolderMutation = useCreateDesignDocumentFolder();
-  const createGroupMutation = useCreateDesignDocumentGroup();
   const createDocumentMutation = useCreateDesignDocument();
 
   const form = useForm<FormData>({
@@ -102,8 +98,6 @@ export function NewDocumentUploadModal({
         group_description: '',
       });
       setSelectedFiles([]);
-      setIsCreatingNewGroup(false);
-      setNewGroupName('');
       setUploadProgress(0);
     }
   }, [open, defaultFolderId, defaultGroupId, form]);
@@ -171,17 +165,40 @@ export function NewDocumentUploadModal({
     try {
       let groupId = values.group_id;
 
-      // Create new group if needed
-      if (isCreatingNewGroup && newGroupName.trim()) {
-        const newGroup = await createGroupMutation.mutateAsync({
-          name: newGroupName.trim(),
-          description: values.group_description,
-          folder_id: values.folder_id,
+      // Si no hay grupo seleccionado, generar uno automáticamente
+      if (!groupId) {
+        // Generar nombre automático usando RPC
+        const { data: generatedName, error: rpcError } = await supabase.rpc('generate_next_document_group_name', {
+          p_folder_id: values.folder_id
         });
+
+        if (rpcError) {
+          throw new Error(`Error generando nombre de entrega: ${rpcError.message}`);
+        }
+
+        // Crear nueva entrega con nombre generado
+        const { data: newGroup, error: groupError } = await supabase
+          .from('design_document_groups')
+          .insert({
+            folder_id: values.folder_id,
+            name: generatedName,
+            description: values.group_description || '',
+            created_by: userData.user.id,
+            organization_id: userData.organization.id,
+            project_id: userData.preferences.last_project_id,
+          })
+          .select()
+          .single();
+
+        if (groupError) {
+          throw new Error(`Error creando entrega: ${groupError.message}`);
+        }
+
         groupId = newGroup.id;
+        
         toast({
-          title: "Grupo creado",
-          description: `El grupo "${newGroup.name}" ha sido creado exitosamente.`
+          title: "Entrega generada",
+          description: `Se ha creado la entrega "${generatedName}" automáticamente.`
         });
       }
 
@@ -224,6 +241,10 @@ export function NewDocumentUploadModal({
         description: `Se han subido ${totalFiles} archivo${totalFiles !== 1 ? 's' : ''} exitosamente.`
       });
 
+      // Invalidar cache para refrescar datos
+      queryClient.invalidateQueries({ queryKey: ['design-document-groups'] });
+      queryClient.invalidateQueries({ queryKey: ['design-documents'] });
+
       form.reset();
       setSelectedFiles([]);
       onClose();
@@ -238,12 +259,6 @@ export function NewDocumentUploadModal({
       setIsUploading(false);
       setUploadProgress(0);
     }
-  };
-
-  const handleCancel = () => {
-    form.reset();
-    setSelectedFiles([]);
-    onClose();
   };
 
   const folderOptions = folders.map(folder => ({
@@ -302,72 +317,46 @@ export function NewDocumentUploadModal({
                   name="group_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Grupo/Entrega <span className="text-[var(--accent)]">*</span></FormLabel>
+                      <FormLabel>Grupo/Entrega (opcional)</FormLabel>
                       <FormControl>
-                        <div className="space-y-2">
-                          {!isCreatingNewGroup ? (
-                            <div className="flex gap-2">
-                              <Select 
-                                onValueChange={field.onChange} 
-                                value={field.value}
-                                disabled={!selectedFolderId}
-                              >
-                                <SelectTrigger className="flex-1">
-                                  <SelectValue placeholder="Selecciona un grupo existente" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {groupOptions.map((group) => (
-                                    <SelectItem key={group.value} value={group.value}>
-                                      {group.label}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setIsCreatingNewGroup(true)}
-                                disabled={!selectedFolderId}
-                              >
-                                <Plus className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          ) : (
-                            <div className="space-y-2">
-                              <div className="flex gap-2">
-                                <Input
-                                  placeholder="Nombre del nuevo grupo"
-                                  value={newGroupName}
-                                  onChange={(e) => setNewGroupName(e.target.value)}
-                                  className="flex-1"
-                                />
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => {
-                                    setIsCreatingNewGroup(false);
-                                    setNewGroupName('');
-                                  }}
-                                >
-                                  <X className="h-4 w-4" />
-                                </Button>
-                              </div>
-                              <FormField
-                                control={form.control}
-                                name="group_description"
-                                render={({ field }) => (
-                                  <Textarea
-                                    placeholder="Descripción del grupo (opcional)"
-                                    rows={2}
-                                    {...field}
-                                  />
-                                )}
-                              />
-                            </div>
-                          )}
-                        </div>
+                        <Select 
+                          onValueChange={field.onChange} 
+                          value={field.value}
+                          disabled={!selectedFolderId}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecciona un grupo existente o se generará uno automáticamente" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {groupOptions.map((group) => (
+                              <SelectItem key={group.value} value={group.value}>
+                                {group.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                      <p className="text-sm text-muted-foreground">
+                        Si no seleccionas un grupo, se generará automáticamente una nueva entrega.
+                      </p>
+                    </FormItem>
+                  )}
+                />
+
+                {/* Descripción de la entrega */}
+                <FormField
+                  control={form.control}
+                  name="group_description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Descripción de esta entrega (opcional)</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Descripción que se aplicará a la entrega generada automáticamente"
+                          rows={2}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -386,16 +375,19 @@ export function NewDocumentUploadModal({
                       onChange={handleFileSelect}
                       className="hidden"
                       id="file-upload"
-                      accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.xlsx,.xls,.ppt,.pptx"
+                      accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.gif,.bmp,.tiff,.svg,.dwg,.dxf,.skp,.3ds,.max,.obj,.fbx,.dae,.stl,.ply,.zip,.rar,.7z"
                     />
-                    <label htmlFor="file-upload" className="cursor-pointer">
-                      <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground">
-                        Haz clic para seleccionar archivos o arrastra y suelta
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        PDF, Word, Excel, Imágenes, PowerPoint
-                      </p>
+                    <label
+                      htmlFor="file-upload"
+                      className="cursor-pointer flex flex-col items-center justify-center space-y-2"
+                    >
+                      <Upload className="h-8 w-8 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">
+                        Haz clic aquí para seleccionar archivos
+                      </span>
+                      <span className="text-xs text-muted-foreground/70">
+                        Formatos soportados: PDF, DOC, XLS, PPT, imágenes, CAD, 3D, comprimidos
+                      </span>
                     </label>
                   </div>
                 </div>
@@ -403,73 +395,90 @@ export function NewDocumentUploadModal({
                 {/* Lista de archivos seleccionados */}
                 {selectedFiles.length > 0 && (
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">
-                      Archivos seleccionados ({selectedFiles.length})
-                    </label>
-                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                    <h4 className="text-sm font-medium">Archivos seleccionados:</h4>
+                    <div className="space-y-2">
                       {selectedFiles.map((file, index) => (
-                        <Card key={index} className="p-3">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <FileText className="h-4 w-4 text-muted-foreground" />
-                              <div>
-                                <p className="text-sm font-medium">{file.name}</p>
-                                <p className="text-xs text-muted-foreground">
-                                  {(file.size / 1024 / 1024).toFixed(2)} MB
-                                </p>
-                              </div>
-                            </div>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => removeFile(index)}
-                              className="h-8 w-8 p-0"
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
+                        <div key={index} className="flex items-center justify-between p-2 bg-muted rounded-lg">
+                          <div className="flex items-center space-x-2">
+                            <File className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm">{file.name}</span>
+                            <Badge variant="secondary" className="text-xs">
+                              {(file.size / 1024 / 1024).toFixed(2)} MB
+                            </Badge>
                           </div>
-                        </Card>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeFile(index)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
                       ))}
                     </div>
                   </div>
                 )}
 
-                {/* Estado */}
-                <FormField
-                  control={form.control}
-                  name="status"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Estado</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecciona un estado" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="pendiente">Pendiente</SelectItem>
-                          <SelectItem value="en_revision">En revisión</SelectItem>
-                          <SelectItem value="aprobado">Aprobado</SelectItem>
-                          <SelectItem value="rechazado">Rechazado</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Progress bar durante upload */}
+                {/* Progreso de subida */}
                 {isUploading && (
                   <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Subiendo archivos...</span>
-                      <span>{uploadProgress}%</span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Subiendo archivos...</span>
+                      <span className="text-sm text-muted-foreground">{uploadProgress}%</span>
                     </div>
                     <Progress value={uploadProgress} className="w-full" />
                   </div>
                 )}
+
+                {/* Estado y Visibilidad */}
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Estado</FormLabel>
+                        <FormControl>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecciona el estado" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pendiente">Pendiente</SelectItem>
+                              <SelectItem value="en_revision">En revisión</SelectItem>
+                              <SelectItem value="aprobado">Aprobado</SelectItem>
+                              <SelectItem value="rechazado">Rechazado</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="visibility"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Visibilidad</FormLabel>
+                        <FormControl>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecciona la visibilidad" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="public">Público</SelectItem>
+                              <SelectItem value="private">Privado</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
               </form>
             </Form>
@@ -477,12 +486,11 @@ export function NewDocumentUploadModal({
         ),
         footer: (
           <CustomModalFooter
-            onCancel={handleCancel}
+            onCancel={onClose}
             onSubmit={form.handleSubmit(handleSubmit)}
-            submitText={isUploading ? 'Subiendo...' : 'Subir Documentos'}
+            submitText={isUploading ? "Subiendo..." : "Subir Documentos"}
             cancelText="Cancelar"
-            submitDisabled={isUploading || selectedFiles.length === 0}
-            cancelDisabled={isUploading}
+            disabled={isUploading || selectedFiles.length === 0}
           />
         )
       }}
