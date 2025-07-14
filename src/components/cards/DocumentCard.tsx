@@ -88,9 +88,8 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document, onView, onEdit, o
           onClick: () => onDelete?.(document)
         }
       ]}
-      className="bg-transparent border border-[var(--input-border)] p-3"
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 bg-transparent border border-input rounded-lg p-3 mb-2">
         {/* File icon */}
         <div className="shrink-0">
           {getFileIcon(file_type || '')}
