@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { format, subDays, subWeeks, subMonths, eachDayOfInterval, eachWeekOfInterval, eachMonthOfInterval, startOfWeek, startOfMonth, endOfWeek, endOfMonth, getDay } from 'date-fns'
+import { format, subDays, subWeeks, subMonths, eachDayOfInterval, eachWeekOfInterval, eachMonthOfInterval, startOfWeek, startOfMonth, endOfWeek, endOfMonth, getDay, startOfQuarter, endOfQuarter, eachQuarterOfInterval } from 'date-fns'
 import { es } from 'date-fns/locale'
 
 interface SiteLogTimelineData {
@@ -32,22 +32,26 @@ export function useSiteLogTimeline(
       let intervals: Date[]
 
       switch (timePeriod) {
-        case 'days':
-          startDate = subDays(now, 6) // Last 7 days including today
-          intervals = eachDayOfInterval({ start: startDate, end: now })
-          break
-        case 'weeks':
+        case 'days': // Now shows weeks
           startDate = subWeeks(now, 6) // Last 7 weeks including current week
           intervals = eachWeekOfInterval({ start: startDate, end: now }, { weekStartsOn: 1 }) // Monday start
           break
-        case 'months':
+        case 'weeks': // Now shows months
           startDate = subMonths(now, 6) // Last 7 months including current month
           intervals = eachMonthOfInterval({ start: startDate, end: now })
           break
+        case 'months': // Now shows quarters
+          startDate = subMonths(now, 18) // Last 7 quarters (21 months back)
+          intervals = []
+          // Generate quarterly intervals manually
+          for (let i = 6; i >= 0; i--) {
+            const quarterDate = subMonths(now, i * 3)
+            intervals.push(startOfQuarter(quarterDate))
+          }
+          break
         default:
-          startDate = subDays(now, 6)
-          dateFormat = 'dd/MM'
-          intervals = eachDayOfInterval({ start: startDate, end: now })
+          startDate = subWeeks(now, 6)
+          intervals = eachWeekOfInterval({ start: startDate, end: now }, { weekStartsOn: 1 })
       }
       
       // Fetch site logs in the date range
@@ -140,14 +144,7 @@ export function useSiteLogTimeline(
         let relevantLogs: any[] = []
         let formattedDate: string
         
-        if (timePeriod === 'days') {
-          // For days, get logs for that specific day
-          const dateKey = format(intervalDate, 'yyyy-MM-dd')
-          const dayName = format(intervalDate, 'EEE', { locale: es }).toLowerCase()
-          const dayDate = format(intervalDate, 'dd/MM')
-          formattedDate = `${dayName} ${dayDate}`
-          relevantLogs = logsByDate[dateKey] || []
-        } else if (timePeriod === 'weeks') {
+        if (timePeriod === 'days') { // Now shows weeks
           // For weeks, get all logs within that week
           const weekStart = startOfWeek(intervalDate, { weekStartsOn: 1 })
           const weekEnd = endOfWeek(intervalDate, { weekStartsOn: 1 })
@@ -162,7 +159,7 @@ export function useSiteLogTimeline(
             const logDate = new Date(log.log_date)
             return logDate >= weekStart && logDate <= weekEnd
           })
-        } else { // months
+        } else if (timePeriod === 'weeks') { // Now shows months
           // For months, get all logs within that month
           const monthStart = startOfMonth(intervalDate)
           const monthEnd = endOfMonth(intervalDate)
@@ -172,6 +169,20 @@ export function useSiteLogTimeline(
           relevantLogs = (siteLogs || []).filter(log => {
             const logDate = new Date(log.log_date)
             return logDate >= monthStart && logDate <= monthEnd
+          })
+        } else { // months - now shows quarters
+          // For quarters
+          const quarterStart = startOfQuarter(intervalDate)
+          const quarterEnd = endOfQuarter(intervalDate)
+          const startMonth = format(quarterStart, 'MMM', { locale: es }).toLowerCase()
+          const endMonth = format(quarterEnd, 'MMM', { locale: es }).toLowerCase()
+          const year = format(intervalDate, 'yy')
+          formattedDate = `${startMonth}-${endMonth} ${year}`
+          
+          // Find all logs within this quarter
+          relevantLogs = (siteLogs || []).filter(log => {
+            const logDate = new Date(log.log_date)
+            return logDate >= quarterStart && logDate <= quarterEnd
           })
         }
 

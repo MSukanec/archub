@@ -25,9 +25,9 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
   
   const getTimePeriodLabel = (period: TimePeriod) => {
     switch (period) {
-      case 'days': return 'últimos 7 días'
-      case 'weeks': return 'últimas 7 semanas'
-      case 'months': return 'últimos 7 meses'
+      case 'days': return 'últimas 7 semanas'
+      case 'weeks': return 'últimos 7 meses'
+      case 'months': return 'últimos 7 trimestres'
       default: return 'período'
     }
   }
@@ -104,7 +104,7 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
                   onClick={() => onTimePeriodChange(period)}
                   className="text-xs"
                 >
-                  {period === 'days' ? 'DÍAS' : period === 'weeks' ? 'SEMANAS' : 'MESES'}
+                  {period === 'days' ? 'SEMANAS' : period === 'weeks' ? 'MESES' : 'TRIMESTRES'}
                 </Button>
               ))}
             </div>
@@ -119,7 +119,7 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
           {/* Custom timeline visualization */}
           <div className="relative w-full h-full">
             {/* Y-axis labels - only icons */}
-            <div className="absolute left-0 top-0 h-full flex flex-col justify-around py-4">
+            <div className="absolute left-0 top-0 h-full flex flex-col justify-around py-6">
               {displayCategories.map((category) => (
                 <div key={category.key} className="flex items-center justify-center w-6">
                   <category.icon className="w-4 h-4" style={{ color: category.color }} />
@@ -130,7 +130,7 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
             {/* Chart area */}
             <div className="ml-8 h-full relative">
               {/* Horizontal grid lines - aligned with icons */}
-              <div className="absolute inset-0 flex flex-col justify-around py-4">
+              <div className="absolute inset-0 flex flex-col justify-around py-6">
                 {displayCategories.map((_, index) => (
                   <div key={index} className="border-b border-dashed opacity-30 w-full" style={{ borderColor: 'var(--chart-grid-text)' }} />
                 ))}
@@ -146,14 +146,14 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
               {/* X-axis (dates) */}
               <div className="absolute bottom-0 left-0 right-0 flex justify-around px-0 pb-2">
                 {data.map((dayData, index) => (
-                  <div key={index} className="text-xs text-muted-foreground text-center min-w-0 flex-1">
+                  <div key={index} className="text-xs text-muted-foreground text-center min-w-0">
                     {dayData.date}
                   </div>
                 ))}
               </div>
 
-              {/* Data points - aligned with grid intersections */}
-              <div className="absolute inset-0 flex justify-around px-0 py-4">
+              {/* Data points - perfectly aligned with grid intersections */}
+              <div className="absolute inset-0 flex justify-around px-0 py-6">
                 {data.map((dayData, dayIndex) => (
                   <div key={dayIndex} className="flex flex-col justify-around h-full">
                     {displayCategories.map((category) => {
