@@ -1,0 +1,84 @@
+🚨 Necesito que reemplaces el archivo `ModalFactory.tsx` completo con el siguiente objetivo:
+
+---
+
+🎯 OBJETIVO:
+
+Unificar todo el sistema de modales bajo la lógica central de `FormModalLayout`. Cada modal debe retornar un objeto con la forma:
+
+```tsx
+{
+  viewPanel: JSX.Element,
+  editPanel: JSX.Element,
+  headerContent: JSX.Element,
+  footerContent: JSX.Element
+}
+🛠️ INSTRUCCIONES:
+
+Importá los modales que devuelven objetos (ya refactorizados): MemberFormModal, GalleryFormModal, BoardFormModal, CardFormModal.
+
+Hacé un switch(type) y llamá a cada modal como función (no como JSX), pasándole los props que necesita.
+
+Si el resultado (modalData) es null o no tiene editPanel, devolvé null.
+
+Si todo está bien, retorná un único <FormModalLayout /> con las props:
+
+tsx
+Copiar
+Editar
+<FormModalLayout
+  viewPanel={modalData.viewPanel}
+  editPanel={modalData.editPanel}
+  headerContent={modalData.headerContent}
+  footerContent={modalData.footerContent}
+  onClose={closeModal}
+/>
+📦 CÓDIGO QUE DEBE RESULTAR:
+
+tsx
+Copiar
+Editar
+import { useGlobalModalStore } from './useGlobalModalStore';
+import { FormModalLayout } from './FormModalLayout';
+import { MemberFormModal } from '../modals/MemberFormModal';
+import { GalleryFormModal } from '../modals/GalleryFormModal';
+import { BoardFormModal } from '../modals/BoardFormModal';
+import { CardFormModal } from '../modals/CardFormModal';
+
+export function ModalFactory() {
+  const { open, type, data, closeModal } = useGlobalModalStore();
+
+  if (!open) return null;
+
+  const getModalData = () => {
+    switch (type) {
+      case 'member':
+        return MemberFormModal({ editingMember: data?.editingMember, onClose: closeModal });
+      case 'gallery':
+        return GalleryFormModal({ modalData: data, onClose: closeModal });
+      case 'board':
+        return BoardFormModal({ modalData: data, onClose: closeModal });
+      case 'card':
+        return CardFormModal({ modalData: data, onClose: closeModal });
+      default:
+        return null;
+    }
+  };
+
+  const modalData = getModalData();
+
+  if (!modalData || !modalData.editPanel) return null;
+
+  return (
+    <FormModalLayout
+      viewPanel={modalData.viewPanel}
+      editPanel={modalData.editPanel}
+      headerContent={modalData.headerContent}
+      footerContent={modalData.footerContent}
+      onClose={closeModal}
+    />
+  );
+}
+✅ Asegurate de que los modales como GalleryFormModal ya estén refactorizados para devolver ese objeto. Este ModalFactory.tsx no debe renderizar modales directamente.
+
+Gracias.

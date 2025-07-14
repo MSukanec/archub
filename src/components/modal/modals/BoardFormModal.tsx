@@ -3,7 +3,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Kanban } from 'lucide-react';
-import { FormModalLayout } from '../form/FormModalLayout';
 import { FormModalHeader } from '../form/FormModalHeader';
 import { FormModalFooter } from '../form/FormModalFooter';
 import { useModalPanelStore } from '../form/modalPanelStore';
@@ -206,13 +205,10 @@ export function BoardFormModal({ modalData, onClose }: BoardFormModalProps) {
     />
   );
 
-  return (
-    <FormModalLayout
-      viewPanel={viewPanel}
-      editPanel={editPanel}
-      headerContent={headerContent}
-      footerContent={footerContent}
-      onClose={handleClose}
-    />
-  );
+  return {
+    viewPanel,
+    editPanel,
+    headerContent,
+    footerContent
+  };
 }

@@ -7,7 +7,6 @@ import { createClient } from '@supabase/supabase-js';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useToast } from '@/hooks/use-toast';
 import { uploadGalleryFiles, type GalleryFileInput } from '@/utils/uploadGalleryFiles';
-import { FormModalLayout } from '../form/FormModalLayout';
 import { FormModalHeader } from '../form/FormModalHeader';
 import { FormModalFooter } from '../form/FormModalFooter';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, Form } from '@/components/ui/form';
@@ -345,13 +344,10 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
     />
   );
 
-  return (
-    <FormModalLayout
-      viewPanel={viewPanel}
-      editPanel={editPanel}
-      headerContent={headerContent}
-      footerContent={footerContent}
-      onClose={handleClose}
-    />
-  );
+  return {
+    viewPanel,
+    editPanel,
+    headerContent,
+    footerContent
+  };
 }

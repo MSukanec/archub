@@ -10,17 +10,32 @@ export function ModalFactory() {
 
   if (!open) return null;
 
-  // Todos los modales ahora usan la nueva estructura unificada
-  switch (type) {
-    case 'member':
-      return <MemberFormModal editingMember={data?.editingMember} onClose={closeModal} />;
-    case 'gallery':
-      return <GalleryFormModal modalData={data} onClose={closeModal} />;
-    case 'board':
-      return <BoardFormModal modalData={data} onClose={closeModal} />;
-    case 'card':
-      return <CardFormModal modalData={data} onClose={closeModal} />;
-    default:
-      return null;
-  }
+  const getModalData = () => {
+    switch (type) {
+      case 'member':
+        return MemberFormModal({ editingMember: data?.editingMember, onClose: closeModal });
+      case 'gallery':
+        return GalleryFormModal({ modalData: data, onClose: closeModal });
+      case 'board':
+        return BoardFormModal({ modalData: data, onClose: closeModal });
+      case 'card':
+        return CardFormModal({ modalData: data, onClose: closeModal });
+      default:
+        return null;
+    }
+  };
+
+  const modalData = getModalData();
+
+  if (!modalData || !modalData.editPanel) return null;
+
+  return (
+    <FormModalLayout
+      viewPanel={modalData.viewPanel}
+      editPanel={modalData.editPanel}
+      headerContent={modalData.headerContent}
+      footerContent={modalData.footerContent}
+      onClose={closeModal}
+    />
+  );
 }
