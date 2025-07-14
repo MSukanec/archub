@@ -59,7 +59,7 @@ export function GalleryFormModal({ open, onClose, editingFile }: GalleryFormModa
 
   // Reset form when editing file changes or user data loads
   useEffect(() => {
-    if (userData?.user?.id) {
+    if (userData && organizationMembers) {
       if (editingFile) {
         reset({
           title: editingFile.title || '',
@@ -67,14 +67,24 @@ export function GalleryFormModal({ open, onClose, editingFile }: GalleryFormModa
           created_by: editingFile.created_by || userData.user.id,
         });
       } else {
+        // Seleccionar usuario actual por defecto en modo creación
+        const currentUserMember = organizationMembers?.find((member: any) => member.user_id === userData?.user?.id);
         reset({
           title: '',
           description: '',
-          created_by: userData.user.id,
+          created_by: currentUserMember?.id || userData.user.id,
         });
       }
     }
-  }, [editingFile, reset, userData]);
+  }, [editingFile, reset, userData, organizationMembers]);
+
+  // Efecto para autocompletar el título con el nombre del archivo
+  useEffect(() => {
+    if (files.length > 0 && !editingFile) {
+      const fileName = files[0].name.split('.').slice(0, -1).join('.'); // Remover extensión
+      form.setValue('title', fileName);
+    }
+  }, [files, form, editingFile]);
 
   const uploadMutation = useMutation({
     mutationFn: async (data: GalleryFormData) => {

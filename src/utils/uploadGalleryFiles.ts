@@ -22,52 +22,68 @@ export async function uploadGalleryFiles(
   }
 
   for (const { file, title, description } of files) {
-    // Generate unique filename first
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${crypto.randomUUID()}.${fileExt}`;
-    const filePath = `gallery/${fileName}`;
+    try {
+      // Validate file first
+      if (!file || file.size === 0) {
+        console.error('Archivo vacío o inválido');
+        continue;
+      }
 
-    // Upload file to storage first
-    const { error: uploadError } = await supabase.storage
-      .from('site-log-files')
-      .upload(filePath, file);
+      // Generate unique filename
+      const extension = file.name.split('.').pop();
+      const filePath = `${crypto.randomUUID()}.${extension}`;
 
-    if (uploadError) {
-      console.error('Storage upload error:', uploadError);
-      throw new Error(`Error al subir archivo: ${uploadError.message}`);
-    }
+      console.log('Subiendo archivo:', filePath, file);
 
-    // Get public URL
-    const { data: { publicUrl } } = supabase.storage
-      .from('site-log-files')
-      .getPublicUrl(filePath);
-
-    // Create database record with all required fields
-    const fileRecord = {
-      file_name: title,
-      file_type: file.type.startsWith('image/') ? 'image' : 'video',
-      file_size: file.size,
-      description: description || null,
-      created_by: createdBy,
-      organization_id: organizationId,
-      file_url: publicUrl,
-      file_path: filePath,
-      // No site_log_id for independent gallery uploads
-    };
-
-    const { data: dbFile, error: dbError } = await supabase
-      .from('site_log_files')
-      .insert(fileRecord)
-      .select()
-      .single();
-
-    if (dbError) {
-      console.error('Database error:', dbError);
-      // Cleanup uploaded file if database insertion fails
-      await supabase.storage
+      // First, create the database record to satisfy RLS
+      const { data: urlData } = supabase.storage
         .from('site-log-files')
-        .remove([filePath]);
-      throw new Error(`Error al crear registro en base de datos: ${dbError.message}`);
+        .getPublicUrl(filePath);
+
+      const fileType: 'image' | 'video' = file.type.startsWith('image/') ? 'image' : 'video';
+
+      const { error: dbError } = await supabase
+        .from('site_log_files')
+        .insert({
+          file_name: title,
+          file_type: fileType,
+          file_url: urlData.publicUrl,
+          file_path: filePath,
+          file_size: file.size,
+          description: description || null,
+          created_by: createdBy,
+          organization_id: organizationId,
+          visibility: 'organization',
+          // No site_log_id for independent gallery uploads
+        });
+
+      if (dbError) {
+        console.error('Error creating file record:', dbError);
+        throw dbError;
+      }
+
+      // Now upload to Supabase Storage - RLS should allow it
+      const { error: uploadError } = await supabase.storage
+        .from('site-log-files')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      if (uploadError) {
+        console.error('Error uploading file:', uploadError);
+        // Clean up database record if upload fails
+        await supabase
+          .from('site_log_files')
+          .delete()
+          .eq('file_path', filePath);
+        throw uploadError;
+      }
+
+      console.log('Archivo subido exitosamente:', filePath);
+    } catch (error) {
+      console.error('Error processing file:', file.name, error);
+      throw error;
     }
   }
 }
