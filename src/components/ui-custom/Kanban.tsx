@@ -8,17 +8,17 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Plus, MoreHorizontal, List, Edit, Trash2, CheckCircle, Circle, ChevronRight } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState';
+import { EmptySpace } from '@/components/ui-custom/EmptySpace';
 import { NewCardModal } from '@/modals/tasks/NewCardModal';
 import { NewListModal } from '@/modals/tasks/NewListModal';
 
 import { useOrganizationMembers } from '@/hooks/use-organization-members';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { TaskListWithCompleted } from '@/components/ui-custom/TaskListWithCompleted';
+import { KanbanList as KanbanListComponent } from '@/components/ui-custom/KanbanList';
 import { useToggleKanbanCardCompleted } from '@/hooks/use-kanban';
 import type { KanbanList, KanbanCard } from '@/hooks/use-kanban';
 
-interface CustomKanbanProps {
+interface KanbanProps {
   lists: KanbanList[];
   cards: KanbanCard[];
   boardId: string;
@@ -30,7 +30,7 @@ interface CustomKanbanProps {
   loading?: boolean;
 }
 
-export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, onDeleteList, onDeleteCard, onCardEdit, loading }: CustomKanbanProps) {
+export function Kanban({ lists, cards, boardId, onCardMove, onCreateList, onDeleteList, onDeleteCard, onCardEdit, loading }: KanbanProps) {
   const [newCardListId, setNewCardListId] = useState<string | null>(null);
   const [editingListId, setEditingListId] = useState<string | null>(null);
   const [completedAccordionState, setCompletedAccordionState] = useState<Record<string, boolean>>({});
@@ -60,7 +60,7 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
     return acc;
   }, {} as Record<string, KanbanCard[]>);
 
-  console.log('CustomKanban render:', {
+  console.log('Kanban render:', {
     listsCount: lists.length,
     cardsCount: cards.length,
     cardsByList,
@@ -124,7 +124,7 @@ export function CustomKanban({ lists, cards, boardId, onCardMove, onCreateList, 
 
   if (lists.length === 0) {
     return (
-      <CustomEmptyState
+      <EmptySpace
         icon={<List className="w-8 h-8 text-muted-foreground" />}
         title="No hay listas en este tablero"
         description="Crea tu primera lista para comenzar a organizar tareas"

@@ -119,13 +119,17 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- July 14, 2025. Component standardization and date input consistency fixes - COMPLETED
-  • Renamed CustomTable.tsx to Table.tsx with function and interface updates for simplified naming convention
-  • Updated all import references across 17+ files using automated bash commands for efficiency
-  • Fixed hardcoded date component in NUEVO PRESUPUESTO modal to use same pattern as NUEVO MOVIMIENTO modal
-  • Replaced Popover/Calendar date picker with Input type="date" for consistency across all modals
+- July 14, 2025. Complete component naming standardization across entire codebase - COMPLETED
+  • Renamed CustomTable.tsx → Table.tsx with CustomTable function → Table and CustomTableProps → TableProps
+  • Renamed TaskListWithCompleted.tsx → KanbanList.tsx with KanbanList function export
+  • Renamed CustomKanban.tsx → Kanban.tsx with CustomKanban function → Kanban and CustomKanbanProps → KanbanProps
+  • Renamed CustomEmptyState.tsx → EmptySpace.tsx with CustomEmptyState function → EmptySpace and CustomEmptyStateProps → EmptySpaceProps
+  • Updated 40+ import references across entire codebase using automated bash commands for efficiency
+  • Resolved naming conflict between Kanban component and Lucide-React Kanban icon using KanbanIcon alias
+  • Fixed hardcoded date component in NUEVO PRESUPUESTO modal to use Input type="date" pattern consistent with NUEVO MOVIMIENTO modal
   • Added proper local date parsing to avoid UTC timezone shifts in budget creation
   • Cleaned up unused imports (Calendar, Popover, format, date-fns) from budget modal
+  • All UI components now follow simplified naming convention without "Custom" prefix for cleaner codebase organization
 - July 13, 2025. Enhanced CustomRestricted component and repositioned design button with restrictions - COMPLETED
   • Modified CustomRestricted component to display function names in tooltips (e.g., "Diseño - Función Bloqueada")
   • Added functionName prop to CustomRestricted interface for dynamic tooltip content

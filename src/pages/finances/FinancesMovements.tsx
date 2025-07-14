@@ -35,7 +35,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Table } from "@/components/ui-custom/Table";
-import { CustomEmptyState } from "@/components/ui-custom/CustomEmptyState";
+import { EmptySpace } from "@/components/ui-custom/EmptySpace";
 import { FinancialCards } from "@/components/ui-custom/FinancialCards";
 import { FeatureIntroduction } from "@/components/ui-custom/FeatureIntroduction";
 import MovementCard from "@/components/cards/MovementCard";
@@ -1169,7 +1169,7 @@ export default function Movements() {
           }
         }}
         emptyState={
-          <CustomEmptyState
+          <EmptySpace
             icon={<DollarSign className="h-12 w-12" />}
             title="No hay movimientos registrados"
             description="Crea el primer movimiento del proyecto"

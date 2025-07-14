@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/layout/desktop/Layout';
-import { CustomKanban } from '@/components/ui-custom/CustomKanban';
-import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState';
+import { Kanban } from '@/components/ui-custom/Kanban';
+import { EmptySpace } from '@/components/ui-custom/EmptySpace';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CheckSquare, Plus, Kanban, Edit, Trash2, List, Search, Filter, X } from 'lucide-react';
+import { CheckSquare, Plus, Kanban as KanbanIcon, Edit, Trash2, List, Search, Filter, X } from 'lucide-react';
 import { CardDetailsModal } from '@/modals/tasks/CardDetailsModal';
 import { useKanbanBoards, useKanbanLists, useKanbanCards, useMoveKanbanCard, useUpdateKanbanBoard, useDeleteKanbanBoard, useDeleteKanbanList, useDeleteKanbanCard, useUpdateLastKanbanBoard } from '@/hooks/use-kanban';
 import { useToast } from '@/hooks/use-toast';
@@ -201,7 +201,7 @@ function TasksContent() {
     );
   }
 
-  // Empty state with CustomEmptyState
+  // Empty state with EmptySpace
   if (boards.length === 0) {
     const emptyHeaderProps = {
       title: "Tareas",
@@ -225,8 +225,8 @@ function TasksContent() {
 
     return (
       <Layout headerProps={emptyHeaderProps} wide={true}>
-        <CustomEmptyState
-          icon={<Kanban className="w-8 h-8 text-muted-foreground" />}
+        <EmptySpace
+          icon={<KanbanIcon className="w-8 h-8 text-muted-foreground" />}
           title="Aún no hay tareas!"
           description="Crea tu primer tablero para comenzar a organizar tareas"
           action={
@@ -256,7 +256,7 @@ function TasksContent() {
           icon={<CheckSquare className="w-5 h-5" />}
           features={[
             {
-              icon: <Kanban className="w-5 h-5" />,
+              icon: <KanbanIcon className="w-5 h-5" />,
               title: "Tableros Kanban organizados",
               description: "Gestiona tus tareas con un sistema visual tipo Kanban donde puedes organizar las tareas en listas personalizables como 'Por hacer', 'En progreso' y 'Completadas', facilitando el seguimiento del flujo de trabajo."
             },
@@ -346,7 +346,7 @@ function TasksContent() {
         )}
       
         {selectedBoard && (
-          <CustomKanban 
+          <Kanban 
             lists={lists}
             cards={cards}
             boardId={currentBoardId || ''}

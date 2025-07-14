@@ -14,7 +14,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { CustomEmptyState } from "@/components/ui-custom/CustomEmptyState";
+import { EmptySpace } from "@/components/ui-custom/EmptySpace";
 import { FeatureIntroduction } from "@/components/ui-custom/FeatureIntroduction";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -501,7 +501,7 @@ export default function ConstructionLogs() {
 
 
         {filteredSiteLogs.length === 0 ? (
-          <CustomEmptyState
+          <EmptySpace
             icon={<FileText className="w-12 h-12 text-muted-foreground" />}
             title={searchValue || filterByType !== 'all' || favoritesOnly || publicOnly ? "No se encontraron entradas" : "No hay entradas de bitácora"}
             description={searchValue || filterByType !== 'all' || favoritesOnly || publicOnly 

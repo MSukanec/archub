@@ -20,7 +20,7 @@ import { es } from 'date-fns/locale'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useLocation } from 'wouter'
 import { NewProjectModal } from '@/modals/project/NewProjectModal'
-import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState'
+import { EmptySpace } from '@/components/ui-custom/EmptySpace'
 import ModernProjectCard from '@/components/cards/ModernProjectCard'
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
@@ -404,7 +404,7 @@ export default function OrganizationProjects() {
             )}
           </>
         ) : (
-          <CustomEmptyState
+          <EmptySpace
             icon={<Folder className="w-12 h-12" />}
             title={searchValue || filterByStatus !== 'all' ? "No se encontraron proyectos" : "No hay proyectos creados"}
             description={searchValue || filterByStatus !== 'all' 

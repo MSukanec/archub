@@ -1,7 +1,7 @@
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Building, FileText, Users, Package, Calculator, Clock } from 'lucide-react'
-import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState'
+import { EmptySpace } from '@/components/ui-custom/EmptySpace'
 
 export default function ConstructionDashboard() {
   const headerProps = {
@@ -134,7 +134,7 @@ export default function ConstructionDashboard() {
               <CardTitle className="text-lg">Actividad Reciente</CardTitle>
             </CardHeader>
             <CardContent>
-              <CustomEmptyState 
+              <EmptySpace 
                 title="Sin actividad registrada"
                 description="Comienza registrando entradas en la bitácora de obra para ver la actividad aquí."
                 action={
@@ -154,7 +154,7 @@ export default function ConstructionDashboard() {
               <CardTitle className="text-lg">Presupuestos</CardTitle>
             </CardHeader>
             <CardContent>
-              <CustomEmptyState 
+              <EmptySpace 
                 title="Sin presupuestos creados"
                 description="Crea presupuestos para organizar y controlar los costos de tu proyecto."
                 action={
