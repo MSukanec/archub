@@ -3,18 +3,17 @@ import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { UserPlus, User, Mail, Phone, Building2, MapPin, FileText, Link, Unlink, Search } from "lucide-react";
+import { UserPlus, User, Mail, Phone, Building2, MapPin, FileText, Search, Check, X, Link, Unlink } from "lucide-react";
 
-import { CustomModalLayout } from "../legacy/CustomModalLayout";
-import { CustomModalHeader } from "../legacy/CustomModalHeader";
-import { CustomModalBody } from "../legacy/CustomModalBody";
-import { CustomModalFooter } from "../legacy/CustomModalFooter";
-import { Button } from "@/components/ui/button";
+import { FormModalLayout } from "../form/FormModalLayout";
+import { FormModalHeader } from "../form/FormModalHeader";
+import { FormModalFooter } from "../form/FormModalFooter";
+import { useModalPanelStore } from "../form/modalPanelStore";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
@@ -71,87 +70,133 @@ interface ContactFormModalProps {
 }
 
 export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) {
-  const { toast } = useToast();
-  const { user, organization } = useCurrentUser();
+  const { editingContact, isEditing = false } = modalData || {};
+  const { currentPanel, setPanel } = useModalPanelStore();
+  const { data: userData } = useCurrentUser();
   const { data: contactTypes } = useContactTypes();
-  
-  const editingContact = modalData?.editingContact;
-  const isEditing = modalData?.isEditing || false;
-
+  const { toast } = useToast();
   const [isLinkingUser, setIsLinkingUser] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState<any>(null);
-  
-  const { data: searchResults } = useSearchUsers(searchTerm, {
-    enabled: isLinkingUser && searchTerm.length > 2
-  });
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<CreateContactForm>({
     resolver: zodResolver(createContactSchema),
     defaultValues: {
-      first_name: editingContact?.first_name || "",
-      last_name: editingContact?.last_name || "",
-      email: editingContact?.email || "",
-      phone: editingContact?.phone || "",
-      contact_type_id: editingContact?.contact_type_id || "",
-      company_name: editingContact?.company_name || "",
-      location: editingContact?.location || "",
-      notes: editingContact?.notes || "",
-      linked_user_id: editingContact?.linked_user_id || "",
-    },
+      first_name: editingContact?.first_name || '',
+      last_name: editingContact?.last_name || '',
+      email: editingContact?.email || '',
+      phone: editingContact?.phone || '',
+      contact_type_id: editingContact?.contact_type_id || '',
+      company_name: editingContact?.company_name || '',
+      location: editingContact?.location || '',
+      notes: editingContact?.notes || '',
+      linked_user_id: editingContact?.linked_user_id || '',
+    }
   });
+
+  const { data: searchResults } = useSearchUsers(searchTerm);
+
+  React.useEffect(() => {
+    if (editingContact) {
+      form.reset({
+        first_name: editingContact.first_name || '',
+        last_name: editingContact.last_name || '',
+        email: editingContact.email || '',
+        phone: editingContact.phone || '',
+        contact_type_id: editingContact.contact_type_id || '',
+        company_name: editingContact.company_name || '',
+        location: editingContact.location || '',
+        notes: editingContact.notes || '',
+        linked_user_id: editingContact.linked_user_id || '',
+      });
+      setPanel('edit');
+    } else {
+      form.reset({
+        first_name: '',
+        last_name: '',
+        email: '',
+        phone: '',
+        contact_type_id: '',
+        company_name: '',
+        location: '',
+        notes: '',
+        linked_user_id: '',
+      });
+      setPanel('edit');
+    }
+  }, [editingContact, form, setPanel]);
 
   const createContactMutation = useMutation({
     mutationFn: async (data: CreateContactForm) => {
-      if (!organization?.id) throw new Error("No organization found");
-
-      const contactData = {
-        ...data,
-        organization_id: organization.id,
-        linked_user_id: selectedUser?.id || data.linked_user_id || null,
-      };
+      if (!userData?.organization?.id) {
+        throw new Error('Organization ID not found');
+      }
 
       if (isEditing && editingContact) {
-        const { error } = await supabase
-          .from("contacts")
-          .update(contactData)
-          .eq("id", editingContact.id);
-        
-        if (error) throw error;
-        return { ...editingContact, ...contactData };
-      } else {
-        const { data: contact, error } = await supabase
-          .from("contacts")
-          .insert([contactData])
+        const { data: updatedContact, error } = await supabase
+          .from('contacts')
+          .update({
+            first_name: data.first_name,
+            last_name: data.last_name || null,
+            email: data.email || null,
+            phone: data.phone || null,
+            contact_type_id: data.contact_type_id || null,
+            company_name: data.company_name || null,
+            location: data.location || null,
+            notes: data.notes || null,
+            linked_user_id: data.linked_user_id || null,
+          })
+          .eq('id', editingContact.id)
           .select()
           .single();
-        
+
         if (error) throw error;
-        return contact;
+        return updatedContact;
+      } else {
+        const { data: newContact, error } = await supabase
+          .from('contacts')
+          .insert({
+            organization_id: userData.organization.id,
+            first_name: data.first_name,
+            last_name: data.last_name || null,
+            email: data.email || null,
+            phone: data.phone || null,
+            contact_type_id: data.contact_type_id || null,
+            company_name: data.company_name || null,
+            location: data.location || null,
+            notes: data.notes || null,
+            linked_user_id: data.linked_user_id || null,
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+        return newContact;
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["contacts"] });
-      queryClient.invalidateQueries({ queryKey: ["organization-contacts"] });
-      
+      queryClient.invalidateQueries({ queryKey: ['contacts'] });
       toast({
         title: isEditing ? "Contacto actualizado" : "Contacto creado",
-        description: isEditing ? "El contacto ha sido actualizado correctamente." : "El contacto ha sido agregado correctamente.",
+        description: isEditing 
+          ? "El contacto ha sido actualizado exitosamente" 
+          : "El nuevo contacto ha sido agregado a tu organización",
       });
-      
-      onClose();
+      handleClose();
     },
     onError: (error: any) => {
-      console.error("Error al crear/actualizar contacto:", error);
       toast({
         title: "Error",
         description: error.message || "Hubo un error al procesar el contacto",
         variant: "destructive",
       });
-    },
+    }
   });
 
   const handleClose = () => {
+    form.reset();
+    setPanel('view');
     setIsLinkingUser(false);
     setSelectedUser(null);
     setSearchTerm("");
@@ -174,9 +219,38 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
     form.setValue("linked_user_id", "");
   };
 
+  const viewPanel = (
+    <>
+      <div>
+        <h4 className="font-medium">Nombre completo</h4>
+        <p className="text-muted-foreground mt-1">
+          {editingContact ? `${editingContact.first_name} ${editingContact.last_name || ''}`.trim() : 'Sin nombre'}
+        </p>
+      </div>
+      
+      {editingContact?.email && (
+        <div>
+          <h4 className="font-medium">Email</h4>
+          <p className="text-muted-foreground mt-1">{editingContact.email}</p>
+        </div>
+      )}
+      
+      {editingContact?.phone && (
+        <div>
+          <h4 className="font-medium">Teléfono</h4>
+          <p className="text-muted-foreground mt-1">{editingContact.phone}</p>
+        </div>
+      )}
+      
+      {editingContact?.company_name && (
+        <div>
+          <h4 className="font-medium">Empresa</h4>
+          <p className="text-muted-foreground mt-1">{editingContact.company_name}</p>
+        </div>
+      )}
+    </>
+  );
 
-
-  // Edit Panel Content
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -246,8 +320,8 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
             name="contact_type_id"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tipo de Contacto</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <FormLabel>Tipo de contacto</FormLabel>
+                <Select value={field.value} onValueChange={field.onChange}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar tipo" />
@@ -279,58 +353,59 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="location"
+            render={({ field }) => (
+              <FormItem className="col-span-2">
+                <FormLabel>Ubicación</FormLabel>
+                <FormControl>
+                  <Input placeholder="Ciudad, país" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="notes"
+            render={({ field }) => (
+              <FormItem className="col-span-2">
+                <FormLabel>Notas</FormLabel>
+                <FormControl>
+                  <Textarea 
+                    placeholder="Notas adicionales sobre el contacto" 
+                    {...field} 
+                    rows={3}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
-
-        <FormField
-          control={form.control}
-          name="location"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Ubicación</FormLabel>
-              <FormControl>
-                <Input placeholder="Ciudad, País" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="notes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Notas</FormLabel>
-              <FormControl>
-                <Textarea 
-                  placeholder="Notas adicionales sobre el contacto"
-                  rows={3}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
         {/* User Linking Section */}
         <div className="space-y-3">
-          <Label>Vincular Usuario</Label>
+          <FormLabel>Usuario vinculado</FormLabel>
+          
           {selectedUser || editingContact?.linked_user ? (
             <div className="flex items-center justify-between p-3 border rounded-lg">
               <div className="flex items-center gap-3">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={selectedUser?.avatar_url || editingContact?.linked_user?.avatar_url} />
+                  <AvatarImage src={(selectedUser || editingContact?.linked_user)?.avatar_url} />
                   <AvatarFallback>
-                    {(selectedUser?.full_name || editingContact?.linked_user?.full_name)?.[0]}
+                    {(selectedUser || editingContact?.linked_user)?.full_name?.[0]?.toUpperCase() || 'U'}
                   </AvatarFallback>
                 </Avatar>
                 <div>
                   <p className="text-sm font-medium">
-                    {selectedUser?.full_name || editingContact?.linked_user?.full_name}
+                    {(selectedUser || editingContact?.linked_user)?.full_name}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {selectedUser?.email || editingContact?.linked_user?.email}
+                    {(selectedUser || editingContact?.linked_user)?.email}
                   </p>
                 </div>
               </div>
@@ -344,55 +419,65 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
               </Button>
             </div>
           ) : (
-            <div className="space-y-2">
-              {!isLinkingUser ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsLinkingUser(true)}
-                  className="w-full"
-                >
-                  <Link className="h-4 w-4 mr-2" />
-                  Vincular Usuario
-                </Button>
-              ) : (
-                <div className="space-y-2">
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Buscar usuario por nombre o email..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setIsLinkingUser(false)}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsLinkingUser(true)}
+              className="w-full"
+            >
+              <Link className="h-4 w-4 mr-2" />
+              Vincular usuario existente
+            </Button>
+          )}
+
+          {/* User Search */}
+          {isLinkingUser && (
+            <div className="space-y-3 p-4 border rounded-lg bg-muted/20">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar usuario por nombre o email..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              
+              {searchResults && searchResults.length > 0 && (
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {searchResults.map((user: any) => (
+                    <div
+                      key={user.id}
+                      className="flex items-center justify-between p-2 hover:bg-muted/50 rounded cursor-pointer"
+                      onClick={() => handleLinkUser(user.id)}
                     >
-                      Cancelar
-                    </Button>
-                  </div>
-                  {searchResults && searchResults.length > 0 && (
-                    <div className="border rounded-lg max-h-48 overflow-y-auto">
-                      {searchResults.map((user: any) => (
-                        <div
-                          key={user.id}
-                          className="flex items-center gap-3 p-2 hover:bg-muted cursor-pointer"
-                          onClick={() => handleLinkUser(user.id)}
-                        >
-                          <Avatar className="h-8 w-8">
-                            <AvatarImage src={user.avatar_url} />
-                            <AvatarFallback>{user.full_name?.[0]}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="text-sm font-medium">{user.full_name}</p>
-                            <p className="text-xs text-muted-foreground">{user.email}</p>
-                          </div>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-6 w-6">
+                          <AvatarImage src={user.avatar_url} />
+                          <AvatarFallback className="text-xs">
+                            {user.full_name?.[0]?.toUpperCase() || 'U'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="text-sm font-medium">{user.full_name}</p>
+                          <p className="text-xs text-muted-foreground">{user.email}</p>
                         </div>
-                      ))}
+                      </div>
+                      <Check className="h-4 w-4 text-green-600" />
                     </div>
-                  )}
+                  ))}
                 </div>
               )}
+              
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setIsLinkingUser(false)}
+                className="w-full"
+              >
+                <X className="h-4 w-4 mr-2" />
+                Cancelar búsqueda
+              </Button>
             </div>
           )}
         </div>
@@ -400,31 +485,47 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
     </Form>
   );
 
-  return (
-    <CustomModalLayout open={true} onClose={handleClose}>
-      {{
-        header: (
-          <CustomModalHeader
-            title={isEditing ? "Editar Contacto" : "Nuevo Contacto"}
-            description={isEditing ? "Modifica los detalles del contacto" : "Crea un nuevo contacto para tu organización"}
-            onClose={handleClose}
-          />
-        ),
-        body: (
-          <CustomModalBody columns={2}>
-            {editPanel}
-          </CustomModalBody>
-        ),
-        footer: (
-          <CustomModalFooter
-            onCancel={handleClose}
-            onSave={form.handleSubmit(onSubmit)}
-            cancelText="Cancelar"
-            saveText={isEditing ? "Actualizar" : "Crear Contacto"}
-            isLoading={createContactMutation.isPending}
-          />
-        )
+  const headerContent = (
+    <FormModalHeader
+      title={isEditing ? "Editar Contacto" : "Nuevo Contacto"}
+      icon={UserPlus}
+      leftActions={
+        currentPanel === 'edit' && isEditing ? (
+          <button
+            type="button"
+            onClick={() => setPanel('view')}
+            className="text-sm text-muted-foreground hover:text-foreground"
+          >
+            ← Volver
+          </button>
+        ) : undefined
+      }
+    />
+  );
+
+  const footerContent = (
+    <FormModalFooter
+      leftLabel="Cancelar"
+      onLeftClick={handleClose}
+      rightLabel={isEditing ? "Actualizar Contacto" : "Crear Contacto"}
+      onRightClick={() => {
+        if (currentPanel === 'view' && isEditing) {
+          setPanel('edit');
+        } else {
+          form.handleSubmit(onSubmit)();
+        }
       }}
-    </CustomModalLayout>
+      rightLoading={createContactMutation.isPending}
+    />
+  );
+
+  return (
+    <FormModalLayout
+      viewPanel={viewPanel}
+      editPanel={editPanel}
+      headerContent={headerContent}
+      footerContent={footerContent}
+      onClose={handleClose}
+    />
   );
 }
