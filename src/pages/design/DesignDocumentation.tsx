@@ -48,7 +48,8 @@ import {
   Pencil,
   List,
   Grid,
-  Eye
+  Eye,
+  Download
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -148,6 +149,45 @@ export default function DesignDocumentation() {
     });
   };
 
+  // Funciones para manejar acciones de documentos
+  const handleViewDocument = (document: any) => {
+    if (document.file_url) {
+      window.open(document.file_url, '_blank');
+    } else {
+      toast({
+        title: "Error",
+        description: "No se pudo encontrar el archivo para visualizar",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDownloadDocument = (document: any) => {
+    if (document.file_url) {
+      // Crear un enlace temporal para descargar el archivo
+      const link = window.document.createElement('a');
+      link.href = document.file_url;
+      link.download = document.file_name || document.name;
+      window.document.body.appendChild(link);
+      link.click();
+      window.document.body.removeChild(link);
+    } else {
+      toast({
+        title: "Error",
+        description: "No se pudo encontrar el archivo para descargar",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeleteDocument = (document: any) => {
+    // TODO: Implementar eliminación de documento
+    toast({
+      title: "Funcionalidad pendiente",
+      description: "La eliminación de documentos será implementada próximamente",
+    });
+  };
+
   // Filter folders based on search - only show parent folders
   const filteredFolders = useMemo(() => {
     return folders.filter(folder =>
@@ -191,13 +231,31 @@ export default function DesignDocumentation() {
       label: 'Acciones',
       render: (document: any) => (
         <div className="flex items-center gap-1 justify-center">
-          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Ver documento">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-7 w-7 p-0" 
+            title="Ver documento"
+            onClick={() => handleViewDocument(document)}
+          >
             <Eye className="w-3 h-3" />
           </Button>
-          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Editar documento">
-            <Edit3 className="w-3 h-3" />
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-7 w-7 p-0" 
+            title="Descargar documento"
+            onClick={() => handleDownloadDocument(document)}
+          >
+            <Download className="w-3 h-3" />
           </Button>
-          <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive" title="Eliminar documento">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-7 w-7 p-0 text-destructive" 
+            title="Eliminar documento"
+            onClick={() => handleDeleteDocument(document)}
+          >
             <Trash2 className="w-3 h-3" />
           </Button>
         </div>

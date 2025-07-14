@@ -45,6 +45,11 @@ interface DocumentUploadFormModalProps {
 export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFormModalProps) {
   const { defaultFolderId, defaultGroupId, editingGroup } = modalData || {};
   const isEditing = !!editingGroup;
+  
+  // Debug logging
+  console.log('DocumentUploadFormModal - modalData:', modalData);
+  console.log('DocumentUploadFormModal - editingGroup:', editingGroup);
+  console.log('DocumentUploadFormModal - isEditing:', isEditing);
   const { data: userData } = useCurrentUser();
   const { toast } = useToast();
   const queryClient = useQueryClient();
