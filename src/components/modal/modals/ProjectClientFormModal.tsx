@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { UserPlus } from 'lucide-react'
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader'
 import { FormModalFooter } from '@/components/modal/form/FormModalFooter'
+import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -34,10 +35,16 @@ export default function ProjectClientFormModal({ onClose }: ProjectClientFormMod
   const { data: userData } = useCurrentUser()
   const { toast } = useToast()
   const queryClient = useQueryClient()
+  const { setPanel } = useModalPanelStore()
   const [selectedContactId, setSelectedContactId] = useState<string>('')
 
   const projectId = userData?.preferences?.last_project_id
   const organizationId = userData?.organization?.id
+
+  // Initialize panel to edit mode when modal opens
+  useEffect(() => {
+    setPanel('edit')
+  }, [])
 
   // Get organization contacts
   const { data: organizationContacts } = useQuery({
