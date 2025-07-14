@@ -3,6 +3,8 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useQueryClient } from '@tanstack/react-query';
+import { useNavigationStore } from '@/stores/navigationStore';
+import { useLocation } from 'wouter';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
@@ -89,6 +91,8 @@ export default function DesignDocumentation() {
   const queryClient = useQueryClient();
   const { setActions, setShowActionBar } = useMobileActionBar();
   const isMobile = useMobile();
+  const { setSidebarContext } = useNavigationStore();
+  const [location] = useLocation();
 
   // Get project and organization IDs
   const projectId = userData?.preferences?.last_project_id;
@@ -101,6 +105,15 @@ export default function DesignDocumentation() {
   const createFolderMutation = useCreateDesignDocumentFolder();
   const deleteGroupMutation = useDeleteDesignDocumentGroup();
   const deleteFolderMutation = useDeleteDesignDocumentFolder();
+
+  // Set sidebar context based on current route
+  useEffect(() => {
+    if (location.includes('/project/')) {
+      setSidebarContext('project');
+    } else if (location.includes('/design/')) {
+      setSidebarContext('design');
+    }
+  }, [location, setSidebarContext]);
 
   // Función para manejar la expansión/contracción del acordeón
   const toggleFolderExpansion = (folderId: string) => {

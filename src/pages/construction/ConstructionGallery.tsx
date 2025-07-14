@@ -1,5 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { useNavigationStore } from '@/stores/navigationStore';
+import { useLocation } from 'wouter';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@supabase/supabase-js';
 import { Layout } from '@/components/layout/desktop/Layout';
@@ -75,6 +77,8 @@ export default function ConstructionGallery() {
   const { setActions, setShowActionBar } = useMobileActionBar();
   const isMobile = useMobile();
   const { openModal } = useGlobalModalStore();
+  const { setSidebarContext } = useNavigationStore();
+  const [location] = useLocation();
   
   // Modal states  
   const [editingFile, setEditingFile] = useState<GalleryFile | null>(null);
@@ -84,6 +88,15 @@ export default function ConstructionGallery() {
   const [searchTerm, setSearchTerm] = useState('');
   const [fileTypeFilter, setFileTypeFilter] = useState<string>('all');
   const [entryTypeFilter, setEntryTypeFilter] = useState<string>('all');
+
+  // Set sidebar context based on current route
+  useEffect(() => {
+    if (location.includes('/project/')) {
+      setSidebarContext('project');
+    } else if (location.includes('/construction/')) {
+      setSidebarContext('construction');
+    }
+  }, [location, setSidebarContext]);
 
   // Gallery files query
   const { data: galleryFiles = [], isLoading, error } = useQuery({

@@ -172,7 +172,7 @@ export default function ProjectBasicData() {
 
   // Set sidebar context on component mount
   useEffect(() => {
-    setSidebarContext('data');
+    setSidebarContext('project');
   }, [setSidebarContext]);
 
   // Populate form when data loads
@@ -202,7 +202,6 @@ export default function ProjectBasicData() {
         breadcrumb: [
           { label: "Organización", href: "/organization/dashboard" },
           { label: "Proyecto", href: "/project/dashboard" },
-          { label: "Datos", href: "/project/basic-data" },
           { label: "Datos Básicos" }
         ]
       }}

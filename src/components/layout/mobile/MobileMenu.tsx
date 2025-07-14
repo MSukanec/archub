@@ -217,7 +217,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: ArrowLeft, label: 'Volver a Organización', href: '#', onClick: () => handleNavigationWithAnimation('/organization/dashboard', 'organization', 'right') },
       { type: 'divider' },
       { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },
-      { icon: Database, label: 'Datos Básicos', href: '#', onClick: () => handleNavigationWithAnimation('/project/basic-data', 'data', 'left') },
+      { icon: Database, label: 'Datos Básicos', href: '/project/basic-data' },
       { icon: Users, label: 'Clientes', href: '/project/clients' },
       { icon: FileText, label: 'Documentación', href: '/project/documentation' },
       { icon: Images, label: 'Galería', href: '/project/gallery' },
@@ -261,12 +261,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: Users, label: 'Clientes interesados', href: '/commercialization/clientes' },
       { icon: FileText, label: 'Estadísticas de venta', href: '/commercialization/estadisticas' },
     ],
-    data: [
-      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => handleNavigationWithAnimation('/project/dashboard', 'project', 'right') },
-      { type: 'divider' },
-      { icon: Database, label: 'Resumen de Datos', href: '/project/basic-data' },
-      { icon: Database, label: 'Datos Básicos', href: '/project/basic-data' },
-    ],
+
     postsale: [
       { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => handleNavigationWithAnimation('/project/dashboard', 'project', 'right') },
       { type: 'divider' },
