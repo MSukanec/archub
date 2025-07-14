@@ -119,17 +119,16 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- July 14, 2025. Organization logo upload section and auto-save fixes implemented - COMPLETED
-  • Added logo upload section to organization basic data page replicating profile page structure
-  • Implemented file upload to organization-logo Supabase bucket with org-${orgId}/ prefix
-  • Added logo_url field to organizations table auto-save functionality
-  • Created uploadLogoMutation with proper file validation (image type, 5MB max size)
-  • Added Avatar component with organization initials fallback and logo display
-  • Fixed organization_data auto-save duplicate key error with proper insert/update logic
-  • Enhanced PhoneInput component: removed duplicate country codes, fixed flag display, eliminated hover effects
-  • Logo section positioned as first section in page matching profile page aesthetic exactly
-  • Complete upload workflow: file selection → validation → Supabase upload → URL update → UI refresh
-  • Toast notifications for successful uploads and error handling with descriptive messages
+- July 14, 2025. AvatarUploader component and organization improvements completed - COMPLETED
+  • Created reusable AvatarUploader component in src/components/ui-custom/ with automatic square cropping functionality
+  • Component features: file validation, 400x400 pixel square cropping, Supabase upload, progress states, fallback avatar with initials
+  • Replaced manual logo upload code in OrganizationBasicData.tsx with AvatarUploader component
+  • Fixed organization dashboard: removed hardcoded "ORGANIZACIÓN ACTIVA" text and "Plan Pro" badge
+  • Implemented real plan data display from organizations.plan_id relationship in database
+  • Added logo_url and plan fields to organization interface in useCurrentUser hook for proper TypeScript support
+  • Logo uploads now automatically crop rectangular images to perfect squares preventing distortion
+  • Enhanced organization avatar display with proper logo_url integration from archub_get_user RPC function
+  • AvatarUploader ready for reuse across profile page and any other avatar/image upload needs
 - July 14, 2025. Major component reorganization and application error fixes - COMPLETED
   • Renamed multiple components for cleaner naming: CustomTable→Table, CustomEmptyState→EmptyState, CustomPhoneInput→PhoneInput, CustomKanban→KanbanBox, TaskListWithCompleted→KanbanList
   • Updated all import references across 50+ files using automated bash commands for mass refactoring efficiency

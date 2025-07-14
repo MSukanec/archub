@@ -1,14 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
-import { Building2, FileText, Users, MapPin, Globe, Camera, Upload } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Building2, FileText, Users, MapPin, Globe } from 'lucide-react';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
+import { AvatarUploader } from '@/components/ui-custom/AvatarUploader';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { PhoneInput } from '@/components/ui-custom/PhoneInput';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useNavigationStore } from '@/stores/navigationStore';
@@ -82,11 +81,6 @@ export default function OrganizationBasicData() {
   const [email, setEmail] = useState('');
   const [website, setWebsite] = useState('');
   const [taxId, setTaxId] = useState('');
-  
-  // Logo upload states
-  const [showLogoUpload, setShowLogoUpload] = useState(false);
-  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Auto-save mutation for organization data
   const saveOrganizationMutation = useMutation({
@@ -221,87 +215,32 @@ export default function OrganizationBasicData() {
     }
   }, [organizationData]);
 
-  // Logo upload mutation
-  const uploadLogoMutation = useMutation({
-    mutationFn: async (file: File) => {
-      if (!organizationId || !supabase) throw new Error('No organization or supabase');
+  // Handle logo upload success
+  const handleLogoUploadSuccess = async (imageUrl: string) => {
+    if (!organizationId || !supabase) return;
 
-      setIsUploadingLogo(true);
+    // Update organization logo_url in database
+    const { error } = await supabase
+      .from('organizations')
+      .update({ logo_url: imageUrl })
+      .eq('id', organizationId);
 
-      // Upload to Supabase Storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('organization-logo')
-        .upload(`org-${organizationId}/${file.name}`, file, { upsert: true });
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from('organization-logo')
-        .getPublicUrl(`org-${organizationId}/${file.name}`);
-
-      const publicUrl = urlData.publicUrl;
-
-      // Update organization logo_url
-      const { error: updateError } = await supabase
-        .from('organizations')
-        .update({ logo_url: publicUrl })
-        .eq('id', organizationId);
-
-      if (updateError) throw updateError;
-
-      return publicUrl;
-    },
-    onSuccess: (publicUrl) => {
-      setLogoUrl(publicUrl);
-      setIsUploadingLogo(false);
-      setShowLogoUpload(false);
-      toast({
-        title: "Logo subido",
-        description: "El logo de la organización se ha actualizado correctamente",
-      });
-      
-      // Invalidate queries
-      queryClient.invalidateQueries({ queryKey: ['organization-info', organizationId] });
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-    },
-    onError: (error) => {
-      setIsUploadingLogo(false);
-      console.error('Error uploading logo:', error);
+    if (error) {
+      console.error('Error updating logo URL:', error);
       toast({
         title: "Error",
-        description: "No se pudo subir el logo. Inténtalo de nuevo.",
+        description: "No se pudo actualizar el logo en la base de datos",
         variant: "destructive"
       });
+      return;
     }
-  });
 
-  // Handle file selection
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        toast({
-          title: "Error",
-          description: "Solo se permiten archivos de imagen",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      // Validate file size (5MB max)
-      if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: "Error",
-          description: "El archivo es demasiado grande. Máximo 5MB.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      uploadLogoMutation.mutate(file);
-    }
+    // Update local state
+    setLogoUrl(imageUrl);
+    
+    // Invalidate queries to refresh data
+    queryClient.invalidateQueries({ queryKey: ['organization-info', organizationId] });
+    queryClient.invalidateQueries({ queryKey: ['current-user'] });
   };
 
   // Get organization initials for avatar fallback
@@ -354,7 +293,7 @@ export default function OrganizationBasicData() {
           {/* Left Column - Logo Description */}
           <div>
             <div className="flex items-center gap-2 mb-6">
-              <Camera className="h-5 w-5 text-[var(--accent)]" />
+              <Building2 className="h-5 w-5 text-[var(--accent)]" />
               <h2 className="text-lg font-semibold">Logo de la Organización</h2>
             </div>
             <p className="text-sm text-muted-foreground">
@@ -365,48 +304,16 @@ export default function OrganizationBasicData() {
 
           {/* Right Column - Logo Upload */}
           <div>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Logo</Label>
-                <div className="flex items-center gap-4">
-                  <Avatar className="w-16 h-16">
-                    <AvatarImage src={logoUrl} />
-                    <AvatarFallback className="text-lg font-medium">
-                      {getOrganizationInitials()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="space-y-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={isUploadingLogo}
-                    >
-                      {isUploadingLogo ? (
-                        <>
-                          <Upload className="w-3 h-3 mr-1 animate-spin" />
-                          Subiendo...
-                        </>
-                      ) : (
-                        "Cambiar"
-                      )}
-                    </Button>
-                    <p className="text-xs text-muted-foreground">
-                      Sube una imagen (JPG, PNG) - Máximo 5MB
-                    </p>
-                  </div>
-                </div>
-                
-                {/* Hidden file input */}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileSelect}
-                  className="hidden"
-                />
-              </div>
-            </div>
+            <AvatarUploader
+              currentImageUrl={logoUrl}
+              fallbackText={getOrganizationInitials()}
+              bucketName="organization-logo"
+              uploadPath={`org-${organizationId}/logo.jpg`}
+              onUploadSuccess={handleLogoUploadSuccess}
+              title="Logo de la organización"
+              description="Imagen que representa tu organización"
+              maxSizeMB={5}
+            />
           </div>
         </div>
 
