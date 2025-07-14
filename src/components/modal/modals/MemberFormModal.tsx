@@ -171,9 +171,8 @@ export function MemberFormModal({ editingMember }: MemberModalProps) {
   };
 
   const editPanel = (
-    <div className="space-y-6 p-6">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
           <FormField
             control={form.control}
             name="email"
@@ -219,7 +218,6 @@ export function MemberFormModal({ editingMember }: MemberModalProps) {
           />
         </form>
       </Form>
-    </div>
   );
 
   const headerContent = (

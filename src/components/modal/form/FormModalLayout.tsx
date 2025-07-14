@@ -3,6 +3,7 @@ import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useModalPanelStore } from "./modalPanelStore";
+import FormModalBody from "./FormModalBody";
 
 interface FormModalLayoutProps {
   viewPanel?: ReactNode;
@@ -67,8 +68,8 @@ export function FormModalLayout({
         )}
 
         {/* Current Panel Content */}
-        <div className="flex-1 overflow-y-auto">
-          {getCurrentPanel()}
+        <div className="flex-1 overflow-hidden">
+          <FormModalBody>{getCurrentPanel()}</FormModalBody>
         </div>
 
         {/* Footer */}

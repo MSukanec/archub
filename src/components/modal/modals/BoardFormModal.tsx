@@ -116,62 +116,60 @@ export function BoardFormModal({ modalData, onClose }: BoardFormModalProps) {
   };
 
   const viewPanel = (
-    <div className="p-6 space-y-4">
+    <>
       <div>
-        <h4 className="text-sm font-medium">Nombre del tablero</h4>
-        <p className="text-sm text-muted-foreground mt-1">{board?.name || 'Sin nombre'}</p>
+        <h4 className="font-medium">Nombre del tablero</h4>
+        <p className="text-muted-foreground mt-1">{board?.name || 'Sin nombre'}</p>
       </div>
       
       <div>
-        <h4 className="text-sm font-medium">Descripción</h4>
-        <p className="text-sm text-muted-foreground mt-1">
+        <h4 className="font-medium">Descripción</h4>
+        <p className="text-muted-foreground mt-1">
           {board?.description || 'Sin descripción'}
         </p>
       </div>
-    </div>
+    </>
   );
 
   const editPanel = (
-    <div className="space-y-6 p-6">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nombre del tablero</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    placeholder="Sin nombre"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nombre del tablero</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  placeholder="Sin nombre"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Descripción</FormLabel>
-                <FormControl>
-                  <Textarea
-                    {...field}
-                    placeholder="Sin descripción"
-                    rows={3}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </form>
-      </Form>
-    </div>
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descripción</FormLabel>
+              <FormControl>
+                <Textarea
+                  {...field}
+                  placeholder="Sin descripción"
+                  rows={3}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </form>
+    </Form>
   );
 
   const headerContent = (
