@@ -252,103 +252,104 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
   );
 
   const editPanel = (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {/* User Linking Section - FIRST POSITION */}
-        <div className="space-y-3">
-          <FormLabel>Vincular usuario existente</FormLabel>
-          
-          {selectedUser || editingContact?.linked_user ? (
-            <div className="flex items-center justify-between p-3 border rounded-lg">
-              <div className="flex items-center gap-3">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={(selectedUser || editingContact?.linked_user)?.avatar_url} />
-                  <AvatarFallback>
-                    {(selectedUser || editingContact?.linked_user)?.full_name?.[0]?.toUpperCase() || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="text-sm font-medium">
-                    {(selectedUser || editingContact?.linked_user)?.full_name}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {(selectedUser || editingContact?.linked_user)?.email}
-                  </p>
-                </div>
+    <div className="space-y-4">
+      {/* User Linking Section - FULL WIDTH OUTSIDE GRID */}
+      <div className="space-y-3">
+        <FormLabel>Vincular usuario existente</FormLabel>
+        
+        {selectedUser || editingContact?.linked_user ? (
+          <div className="flex items-center justify-between p-3 border rounded-lg">
+            <div className="flex items-center gap-3">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={(selectedUser || editingContact?.linked_user)?.avatar_url} />
+                <AvatarFallback>
+                  {(selectedUser || editingContact?.linked_user)?.full_name?.[0]?.toUpperCase() || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="text-sm font-medium">
+                  {(selectedUser || editingContact?.linked_user)?.full_name}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {(selectedUser || editingContact?.linked_user)?.email}
+                </p>
               </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={handleUnlinkUser}
-              >
-                <Unlink className="h-4 w-4" />
-              </Button>
             </div>
-          ) : (
             <Button
               type="button"
-              onClick={() => setIsLinkingUser(true)}
+              variant="ghost"
+              size="sm"
+              onClick={handleUnlinkUser}
+            >
+              <Unlink className="h-4 w-4" />
+            </Button>
+          </div>
+        ) : (
+          <Button
+            type="button"
+            onClick={() => setIsLinkingUser(true)}
+            className="w-full"
+          >
+            <Link className="h-4 w-4 mr-2" />
+            Vincular usuario existente
+          </Button>
+        )}
+
+        {/* User Search */}
+        {isLinkingUser && (
+          <div className="space-y-3 p-4 border rounded-lg bg-muted/20">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar usuario por nombre o email..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            
+            {searchResults && searchResults.length > 0 && (
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {searchResults.map((user: any) => (
+                  <div
+                    key={user.id}
+                    className="flex items-center justify-between p-2 hover:bg-muted/50 rounded cursor-pointer"
+                    onClick={() => handleLinkUser(user.id)}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-6 w-6">
+                        <AvatarImage src={user.avatar_url} />
+                        <AvatarFallback className="text-xs">
+                          {user.full_name?.[0]?.toUpperCase() || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-medium">{user.full_name}</p>
+                        <p className="text-xs text-muted-foreground">{user.email}</p>
+                      </div>
+                    </div>
+                    <Check className="h-4 w-4 text-green-600" />
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setIsLinkingUser(false)}
               className="w-full"
             >
-              <Link className="h-4 w-4 mr-2" />
-              Vincular usuario existente
+              <X className="h-4 w-4 mr-2" />
+              Cancelar búsqueda
             </Button>
-          )}
+          </div>
+        )}
+      </div>
 
-          {/* User Search */}
-          {isLinkingUser && (
-            <div className="space-y-3 p-4 border rounded-lg bg-muted/20">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar usuario por nombre o email..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              
-              {searchResults && searchResults.length > 0 && (
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {searchResults.map((user: any) => (
-                    <div
-                      key={user.id}
-                      className="flex items-center justify-between p-2 hover:bg-muted/50 rounded cursor-pointer"
-                      onClick={() => handleLinkUser(user.id)}
-                    >
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-6 w-6">
-                          <AvatarImage src={user.avatar_url} />
-                          <AvatarFallback className="text-xs">
-                            {user.full_name?.[0]?.toUpperCase() || 'U'}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="text-sm font-medium">{user.full_name}</p>
-                          <p className="text-xs text-muted-foreground">{user.email}</p>
-                        </div>
-                      </div>
-                      <Check className="h-4 w-4 text-green-600" />
-                    </div>
-                  ))}
-                </div>
-              )}
-              
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => setIsLinkingUser(false)}
-                className="w-full"
-              >
-                <X className="h-4 w-4 mr-2" />
-                Cancelar búsqueda
-              </Button>
-            </div>
-          )}
-        </div>
-
-        <div className="contents">
+      {/* FORM FIELDS IN GRID - 2 COLUMNS */}
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="contents">
           <FormField
             control={form.control}
             name="first_name"
@@ -479,9 +480,9 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
               </FormItem>
             )}
           />
-        </div>
-      </form>
-    </Form>
+        </form>
+      </Form>
+    </div>
   );
 
   const headerContent = (
