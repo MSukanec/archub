@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { FileText, CalendarDays, Users, Truck } from 'lucide-react'
 
 interface SiteLogTimelineData {
@@ -95,19 +96,16 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
           
           {/* Time period selector */}
           {onTimePeriodChange && (
-            <div className="flex gap-2">
-              {(['days', 'weeks', 'months'] as TimePeriod[]).map((period) => (
-                <Button
-                  key={period}
-                  variant={timePeriod === period ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => onTimePeriodChange(period)}
-                  className="text-xs"
-                >
-                  {period === 'days' ? 'SEMANAS' : period === 'weeks' ? 'MESES' : 'TRIMESTRES'}
-                </Button>
-              ))}
-            </div>
+            <Select value={timePeriod} onValueChange={onTimePeriodChange}>
+              <SelectTrigger className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="days">SEMANAS</SelectItem>
+                <SelectItem value="weeks">MESES</SelectItem>
+                <SelectItem value="months">TRIMESTRES</SelectItem>
+              </SelectContent>
+            </Select>
           )}
         </div>
         

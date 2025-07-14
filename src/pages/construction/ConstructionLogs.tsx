@@ -274,6 +274,7 @@ export default function ConstructionLogs() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['site-logs'] });
+      queryClient.invalidateQueries({ queryKey: ['sitelog-timeline'] });
       toast({
         title: "Entrada eliminada",
         description: "La entrada de bitácora ha sido eliminada correctamente",
@@ -308,6 +309,7 @@ export default function ConstructionLogs() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['site-logs'] });
+      queryClient.invalidateQueries({ queryKey: ['sitelog-timeline'] });
     },
     onError: (error) => {
       console.error('Error toggling favorite:', error);
@@ -619,14 +621,14 @@ export default function ConstructionLogs() {
                             <div className="space-y-2">
                               {siteLog.files && Array.isArray(siteLog.files) && siteLog.files.length > 0 ? (
                                 siteLog.files.map((file: any, index: number) => (
-                                  <Card key={index} className="p-2 bg-chart-1/10 border-chart-1/30">
+                                  <Card key={index} className="p-2" style={{ backgroundColor: 'rgba(168, 85, 247, 0.1)', borderColor: 'rgba(168, 85, 247, 0.3)' }}>
                                     <div className="flex items-center gap-2">
                                       {file.file_type?.startsWith('image/') ? (
-                                        <Image className="h-4 w-4 text-blue-600" />
+                                        <Image className="h-4 w-4" style={{ color: '#a855f7' }} />
                                       ) : (
-                                        <Video className="h-4 w-4 text-purple-600" />
+                                        <Video className="h-4 w-4" style={{ color: '#a855f7' }} />
                                       )}
-                                      <span className="text-xs text-gray-700 truncate">
+                                      <span className="text-xs text-muted-foreground truncate">
                                         {file.original_name}
                                       </span>
                                     </div>
