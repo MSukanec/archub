@@ -438,7 +438,7 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
 
   return (
     <FormModalLayout
-      columns={1}
+      columns={2}
       viewPanel={viewPanel}
       editPanel={editPanel}
       headerContent={headerContent}

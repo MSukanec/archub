@@ -521,7 +521,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
 
   return (
     <FormModalLayout
-      columns={1}
+      columns={2}
       viewPanel={viewPanel}
       editPanel={editPanel}
       headerContent={headerContent}
