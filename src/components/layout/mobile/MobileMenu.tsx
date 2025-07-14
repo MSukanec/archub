@@ -204,7 +204,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     organization: [
       { icon: ArrowRight, label: 'Ir al Proyecto', href: '#', onClick: () => handleNavigationWithAnimation('/project/dashboard', 'project', 'left') },
       { type: 'divider' },
-      { icon: Home, label: 'Resumen de la Organización', href: '/organization/dashboard' },
+      { icon: Home, label: 'Resumen de Organización', href: '/organization/dashboard' },
       { icon: FolderOpen, label: 'Proyectos', href: '/organization/projects' },
       { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
       { icon: CheckSquare, label: 'Tareas', href: '/tasks' },

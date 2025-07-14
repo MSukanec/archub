@@ -263,6 +263,7 @@ export default function OrganizationBasicData() {
       
       // Invalidate queries
       queryClient.invalidateQueries({ queryKey: ['organization-info', organizationId] });
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
     },
     onError: (error) => {
       setIsUploadingLogo(false);

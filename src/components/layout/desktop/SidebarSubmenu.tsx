@@ -96,7 +96,7 @@ export function SidebarSubmenu() {
     ],
     
     'organizacion': [
-      { icon: Home, label: 'Resumen de la Organización', href: '/organization/dashboard' },
+      { icon: Home, label: 'Resumen de Organización', href: '/organization/dashboard' },
       { icon: FolderOpen, label: 'Proyectos', href: '/organization/projects' },
       { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
       { icon: CheckSquare, label: 'Tareas', href: '/tasks' },

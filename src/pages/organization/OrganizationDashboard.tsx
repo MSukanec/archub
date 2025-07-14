@@ -70,7 +70,7 @@ export default function OrganizationDashboard() {
   const userName = userData?.user_data?.first_name || userData?.user?.full_name || "Usuario";
 
   const headerProps = {
-    title: "Resumen de la Organización",
+    title: "Resumen de Organización",
     showSearch: false,
     showFilters: false,
   };

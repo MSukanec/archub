@@ -32,6 +32,7 @@ interface UserData {
   organization: {
     id: string
     name: string
+    logo_url: string
     is_active: boolean
     is_system: boolean
     created_at: string
