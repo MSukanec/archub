@@ -258,6 +258,7 @@ export function MemberFormModal({ editingMember, onClose }: MemberModalProps) {
 
   return (
     <FormModalLayout
+      columns={1}
       viewPanel={viewPanel}
       editPanel={editPanel}
       headerContent={headerContent}
