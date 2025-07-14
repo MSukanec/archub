@@ -36,7 +36,27 @@ const movementFormSchema = z.object({
   wallet_id: z.string().min(1, 'Billetera es requerida')
 })
 
+const conversionFormSchema = z.object({
+  movement_date: z.date(),
+  created_by: z.string().min(1, 'Creador es requerido'),
+  description: z.string().optional(),
+  // Campos de origen (egreso)
+  currency_id_from: z.string().min(1, 'Moneda origen es requerida'),
+  wallet_id_from: z.string().min(1, 'Billetera origen es requerida'),
+  amount_from: z.number().min(0.01, 'Cantidad origen debe ser mayor a 0'),
+  // Campos de destino (ingreso)
+  currency_id_to: z.string().min(1, 'Moneda destino es requerida'),
+  wallet_id_to: z.string().min(1, 'Billetera destino es requerida'),
+  amount_to: z.number().min(0.01, 'Cantidad destino debe ser mayor a 0'),
+  // Campo informativo
+  exchange_rate: z.number().optional()
+}).refine((data) => data.currency_id_from !== data.currency_id_to, {
+  message: "Las monedas de origen y destino deben ser diferentes",
+  path: ["currency_id_to"]
+})
+
 type MovementForm = z.infer<typeof movementFormSchema>
+type ConversionForm = z.infer<typeof conversionFormSchema>
 
 interface MovementFormModalProps {
   editingMovement?: any
@@ -56,6 +76,9 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
   // Estados para la lógica jerárquica
   const [selectedTypeId, setSelectedTypeId] = React.useState('')
   const [selectedCategoryId, setSelectedCategoryId] = React.useState('')
+  
+  // Estado para detectar conversión
+  const [isConversion, setIsConversion] = React.useState(false)
 
   // Hooks jerárquicos para categorías y subcategorías
   const { data: categories } = useMovementConcepts('categories', selectedTypeId)
@@ -77,6 +100,22 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
     }
   })
 
+  const conversionForm = useForm<ConversionForm>({
+    resolver: zodResolver(conversionFormSchema),
+    defaultValues: {
+      movement_date: new Date(),
+      created_by: '',
+      description: '',
+      currency_id_from: '',
+      wallet_id_from: '',
+      amount_from: 0,
+      currency_id_to: '',
+      wallet_id_to: '',
+      amount_to: 0,
+      exchange_rate: undefined
+    }
+  })
+
   // Manejar envío con ENTER
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -85,11 +124,37 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
     }
   }
 
-  // Efecto para manejar la lógica jerárquica al seleccionar tipo
+  // Efecto para manejar la lógica jerárquica al seleccionar tipo y detectar conversión
   React.useEffect(() => {
     const typeId = form.watch('type_id')
     if (typeId !== selectedTypeId) {
       setSelectedTypeId(typeId)
+      
+      // Detectar si es conversión por view_mode
+      const selectedConcept = concepts?.find((concept: any) => concept.id === typeId)
+      const isConversionType = selectedConcept?.view_mode === 'conversion'
+      
+      // Si cambió a conversión, preservar creador y fecha
+      if (isConversionType && !isConversion) {
+        const currentCreator = form.getValues('created_by')
+        const currentDate = form.getValues('movement_date')
+        conversionForm.setValue('created_by', currentCreator)
+        if (currentDate) {
+          conversionForm.setValue('movement_date', currentDate)
+        }
+      }
+      // Si cambió desde conversión, preservar creador y fecha
+      else if (!isConversionType && isConversion) {
+        const currentCreator = conversionForm.getValues('created_by')
+        const currentDate = conversionForm.getValues('movement_date')
+        form.setValue('created_by', currentCreator)
+        if (currentDate) {
+          form.setValue('movement_date', currentDate)
+        }
+      }
+      
+      setIsConversion(isConversionType)
+      
       // Reset categoría y subcategoría cuando cambia el tipo
       if (typeId !== editingMovement?.type_id) {
         form.setValue('category_id', '')
@@ -97,7 +162,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
         setSelectedCategoryId('')
       }
     }
-  }, [form.watch('type_id')])
+  }, [form.watch('type_id'), concepts, isConversion])
 
   // Efecto para manejar la lógica jerárquica al seleccionar categoría
   React.useEffect(() => {
@@ -235,8 +300,85 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
     }
   })
 
+  const createConversionMutation = useMutation({
+    mutationFn: async (data: ConversionForm) => {
+      if (!userData?.organization?.id || !userData?.preferences?.last_project_id) {
+        throw new Error('Organization ID or Project ID not found')
+      }
+
+      // Generar UUID para el grupo de conversión
+      const conversionGroupId = crypto.randomUUID()
+
+      // Buscar tipos de egreso e ingreso
+      const egressType = concepts?.find((concept: any) => 
+        concept.name?.toLowerCase().includes('egreso')
+      )
+      const ingressType = concepts?.find((concept: any) => 
+        concept.name?.toLowerCase().includes('ingreso')
+      )
+
+      const baseMovementData = {
+        organization_id: userData.organization.id,
+        project_id: userData.preferences.last_project_id,
+        movement_date: data.movement_date.toISOString().split('T')[0],
+        created_by: data.created_by,
+        conversion_group_id: conversionGroupId
+      }
+
+      // Crear movimiento de egreso (origen)
+      const egressData = {
+        ...baseMovementData,
+        description: data.description || 'Conversión - Salida',
+        amount: data.amount_from,
+        currency_id: data.currency_id_from,
+        wallet_id: data.wallet_id_from,
+        type_id: egressType?.id || concepts?.find(c => c.name?.toLowerCase() === 'conversión')?.id,
+        exchange_rate: data.exchange_rate || null
+      }
+
+      // Crear movimiento de ingreso (destino)
+      const ingressData = {
+        ...baseMovementData,
+        description: data.description || 'Conversión - Entrada',
+        amount: data.amount_to,
+        currency_id: data.currency_id_to,
+        wallet_id: data.wallet_id_to,
+        type_id: ingressType?.id || concepts?.find(c => c.name?.toLowerCase() === 'conversión')?.id,
+        exchange_rate: data.exchange_rate || null
+      }
+
+      // Insertar ambos movimientos
+      const { data: results, error } = await supabase
+        .from('movements')
+        .insert([egressData, ingressData])
+        .select()
+
+      if (error) throw error
+      return results
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['movements'] })
+      toast({
+        title: 'Conversión creada',
+        description: 'La conversión ha sido creada correctamente',
+      })
+      onClose()
+    },
+    onError: (error) => {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: `Error al crear la conversión: ${error.message}`,
+      })
+    }
+  })
+
   const onSubmit = async (data: MovementForm) => {
     await createMovementMutation.mutateAsync(data)
+  }
+
+  const onSubmitConversion = async (data: ConversionForm) => {
+    await createConversionMutation.mutateAsync(data)
   }
 
   const handleClose = () => {
@@ -320,8 +462,254 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
 
   const editPanel = (
     <div className="space-y-4">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} onKeyDown={handleKeyDown} className="space-y-4">
+      {isConversion ? (
+        // FORMULARIO DE CONVERSIÓN
+        <Form {...conversionForm}>
+          <form onSubmit={conversionForm.handleSubmit(onSubmitConversion)} className="space-y-4">
+            {/* Fila 1: Creador | Fecha */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <FormField
+                control={conversionForm.control}
+                name="created_by"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Creador *</FormLabel>
+                    <FormControl>
+                      <UserSelector
+                        users={members || []}
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Seleccionar creador"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={conversionForm.control}
+                name="movement_date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Fecha *</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        value={field.value ? field.value.toISOString().split('T')[0] : ''}
+                        onChange={(e) => {
+                          const localDate = new Date(e.target.value + 'T00:00:00');
+                          field.onChange(localDate);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Descripción (full width) */}
+            <FormField
+              control={conversionForm.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descripción</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Descripción de la conversión..."
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Sección ORIGEN */}
+            <div className="space-y-3">
+              <h3 className="text-lg font-medium text-foreground border-b pb-2">💰 Datos de Origen (Egreso)</h3>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <FormField
+                  control={conversionForm.control}
+                  name="currency_id_from"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Moneda Origen *</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar..." />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {currencies?.map((orgCurrency) => (
+                            <SelectItem key={orgCurrency.currency?.id} value={orgCurrency.currency?.id || ''}>
+                              {orgCurrency.currency?.name || 'Sin nombre'} ({orgCurrency.currency?.symbol || '$'})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={conversionForm.control}
+                  name="wallet_id_from"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Billetera Origen *</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar..." />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {wallets?.map((wallet) => (
+                            <SelectItem key={wallet.wallet_id} value={wallet.wallet_id}>
+                              {wallet.wallets?.name || 'Sin nombre'}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={conversionForm.control}
+                  name="amount_from"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cantidad Origen *</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="0.00"
+                          value={field.value || ''}
+                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Sección DESTINO */}
+            <div className="space-y-3">
+              <h3 className="text-lg font-medium text-foreground border-b pb-2">💰 Datos de Destino (Ingreso)</h3>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <FormField
+                  control={conversionForm.control}
+                  name="currency_id_to"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Moneda Destino *</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar..." />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {currencies?.map((orgCurrency) => (
+                            <SelectItem key={orgCurrency.currency?.id} value={orgCurrency.currency?.id || ''}>
+                              {orgCurrency.currency?.name || 'Sin nombre'} ({orgCurrency.currency?.symbol || '$'})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={conversionForm.control}
+                  name="wallet_id_to"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Billetera Destino *</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar..." />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {wallets?.map((wallet) => (
+                            <SelectItem key={wallet.wallet_id} value={wallet.wallet_id}>
+                              {wallet.wallets?.name || 'Sin nombre'}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={conversionForm.control}
+                  name="amount_to"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cantidad Destino *</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="0.00"
+                          value={field.value || ''}
+                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Exchange Rate (opcional) */}
+            <FormField
+              control={conversionForm.control}
+              name="exchange_rate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cotización (opcional)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      step="0.0001"
+                      min="0"
+                      placeholder="Ej: 1.25"
+                      value={field.value || ''}
+                      onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </form>
+        </Form>
+      ) : (
+        // FORMULARIO NORMAL
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} onKeyDown={handleKeyDown} className="space-y-4">
           {/* Desktop: Grid Layout, Mobile: Single Column */}
           
           {/* Fila 1: Creador | Fecha */}
@@ -578,6 +966,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
           />
         </form>
       </Form>
+      )}
     </div>
   )
 
@@ -605,16 +994,20 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
       onLeftClick={handleClose}
       rightLabel={
         currentPanel === 'view' && editingMovement ? "Editar" :
-        editingMovement ? "Actualizar" : "Guardar"
+        editingMovement ? "Actualizar" : (isConversion ? "Crear Conversión" : "Guardar")
       }
       onRightClick={() => {
         if (currentPanel === 'view' && editingMovement) {
           setPanel('edit')
         } else {
-          form.handleSubmit(onSubmit)()
+          if (isConversion) {
+            conversionForm.handleSubmit(onSubmitConversion)()
+          } else {
+            form.handleSubmit(onSubmit)()
+          }
         }
       }}
-      rightLoading={isLoading}
+      rightLoading={isLoading || createConversionMutation.isPending}
     />
   )
 
