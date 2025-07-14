@@ -32,9 +32,9 @@ export function useSiteLogTimeline(
       let intervals: Date[]
 
       switch (timePeriod) {
-        case 'days': // Now shows weeks
-          startDate = subWeeks(now, 6) // Last 7 weeks including current week
-          intervals = eachWeekOfInterval({ start: startDate, end: now }, { weekStartsOn: 1 }) // Monday start
+        case 'days': // Now shows individual days
+          startDate = subDays(now, 6) // Last 7 days including today
+          intervals = eachDayOfInterval({ start: startDate, end: now })
           break
         case 'weeks': // Now shows months
           startDate = subMonths(now, 6) // Last 7 months including current month
@@ -144,20 +144,16 @@ export function useSiteLogTimeline(
         let relevantLogs: any[] = []
         let formattedDate: string
         
-        if (timePeriod === 'days') { // Now shows weeks
-          // For weeks, get all logs within that week
-          const weekStart = startOfWeek(intervalDate, { weekStartsOn: 1 })
-          const weekEnd = endOfWeek(intervalDate, { weekStartsOn: 1 })
-          const startDayName = format(weekStart, 'EEE', { locale: es }).toLowerCase()
-          const endDayName = format(weekEnd, 'EEE', { locale: es }).toLowerCase()
-          const startDate = format(weekStart, 'dd/MM')
-          const endDate = format(weekEnd, 'dd/MM')
-          formattedDate = `${startDayName} ${startDate} a ${endDayName} ${endDate}`
+        if (timePeriod === 'days') { // Now shows individual days
+          // For individual days - show day name and date
+          const dayName = format(intervalDate, 'EEE', { locale: es }).toLowerCase()
+          const dayDate = format(intervalDate, 'dd/MM')
+          formattedDate = `${dayName} ${dayDate}`
           
-          // Find all logs within this week
+          // Find logs for this specific day
+          const dateKey = format(intervalDate, 'yyyy-MM-dd')
           relevantLogs = (siteLogs || []).filter(log => {
-            const logDate = new Date(log.log_date)
-            return logDate >= weekStart && logDate <= weekEnd
+            return log.log_date === dateKey
           })
         } else if (timePeriod === 'weeks') { // Now shows months
           // For months, get all logs within that month

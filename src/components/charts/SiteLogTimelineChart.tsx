@@ -192,7 +192,7 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
                         >
                           {count > 0 && (
                             <div
-                              className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg border-2 border-white"
+                              className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg border-2 border-white"
                               style={{ backgroundColor: category.color }}
                             >
                               {count}
@@ -208,13 +208,15 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
           </div>
         </div>
 
-        {/* X-axis (dates) - BELOW the chart */}
-        <div className="flex justify-around px-8 pt-2">
-          {data.map((dayData, index) => (
-            <div key={index} className="text-xs text-muted-foreground text-center min-w-0">
-              {dayData.date}
-            </div>
-          ))}
+        {/* X-axis (dates) - BELOW the chart, perfectly aligned with vertical lines */}
+        <div className="relative">
+          <div className="ml-8 flex justify-around pt-2">
+            {data.map((dayData, index) => (
+              <div key={index} className="text-xs text-muted-foreground text-center flex-1">
+                {dayData.date}
+              </div>
+            ))}
+          </div>
         </div>
         
         {/* Legend with totals */}
