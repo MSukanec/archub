@@ -73,10 +73,10 @@ export function DocumentGroupCard({
                   console.log('DocumentGroupCard - onEdit clicked with group:', group);
                   onEdit(group);
                 }}
-                className="h-8 w-8 p-0 bg-red-500"
+                className="h-8 w-8 p-0"
                 title="Actualizar grupo"
               >
-                <RefreshCw className="w-4 h-4 text-white" />
+                <RefreshCw className="w-4 h-4" />
               </Button>
             )}
             {onDelete && (

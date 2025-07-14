@@ -31,6 +31,7 @@ import {
   FolderOpen,
   Calendar,
   Upload,
+  RefreshCw,
   History,
   Archive,
   Share2,
@@ -750,11 +751,12 @@ export default function DesignDocumentation() {
                     onClick={(e) => {
                       e.stopPropagation();
                       setSelectedGroupId(group.id);
-                      openModal('document-upload', { defaultGroupId: group.id });
+                      openModal('document-upload', { editingGroup: group });
                     }}
                     className="h-6 w-6 p-0"
+                    title="Actualizar grupo"
                   >
-                    <Upload className="w-3 h-3" />
+                    <RefreshCw className="w-3 h-3" />
                   </Button>
                   <Button
                     variant="ghost"
