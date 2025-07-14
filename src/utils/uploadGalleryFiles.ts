@@ -34,6 +34,7 @@ export async function uploadGalleryFiles(
       const filePath = `${crypto.randomUUID()}.${extension}`;
 
       console.log('Subiendo archivo:', filePath, file);
+      console.log('Upload params:', { projectId, organizationId, createdBy });
 
       // First, create the database record to satisfy RLS
       const { data: urlData } = supabase.storage
@@ -42,21 +43,24 @@ export async function uploadGalleryFiles(
 
       const fileType: 'image' | 'video' = file.type.startsWith('image/') ? 'image' : 'video';
 
+      const insertData = {
+        file_name: title,
+        file_type: fileType,
+        file_url: urlData.publicUrl,
+        file_path: filePath,
+        file_size: file.size,
+        description: description || null,
+        created_by: createdBy,
+        organization_id: organizationId,
+        project_id: projectId,
+        visibility: 'organization'
+      };
+
+      console.log('Insertando en DB:', insertData);
+
       const { error: dbError } = await supabase
         .from('site_log_files')
-        .insert({
-          file_name: title,
-          file_type: fileType,
-          file_url: urlData.publicUrl,
-          file_path: filePath,
-          file_size: file.size,
-          description: description || null,
-          created_by: createdBy, // Use created_by como en la tabla real
-          organization_id: organizationId,
-          project_id: projectId, // Agregado project_id
-          visibility: 'organization',
-          // No site_log_id for independent gallery uploads
-        });
+        .insert(insertData);
 
       if (dbError) {
         console.error('Error creating file record:', dbError);
