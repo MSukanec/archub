@@ -42,7 +42,7 @@ export function FormModalLayout({
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
       <div
         className={cn(
-          "bg-background border border-border shadow-xl",
+          "bg-[var(--card-bg)] border border-[var(--card-border)] shadow-xl",
           "w-full h-full rounded-none", // Mobile: full viewport
           "md:w-auto md:h-auto md:max-w-screen-2xl md:max-h-[90vh] md:rounded-lg md:mx-auto md:my-12", // Desktop: centered with max width
           "flex flex-col",
@@ -51,7 +51,7 @@ export function FormModalLayout({
       >
         {/* Header */}
         {headerContent && (
-          <div className="border-b border-border shrink-0">
+          <div className="border-b border-[var(--card-border)] shrink-0">
             <div className="flex items-center justify-between">
               <div className="flex-1">{headerContent}</div>
               <Button

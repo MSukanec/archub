@@ -15,7 +15,7 @@ export function FormModalHeader({
   className,
 }: FormModalHeaderProps) {
   return (
-    <div className={cn("flex items-center justify-between", className)}>
+    <div className={cn("p-2 flex items-center justify-between", className)}>
       <div className="flex items-center gap-2">
         {leftActions}
         {title && (
