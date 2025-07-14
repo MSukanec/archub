@@ -20,7 +20,7 @@ import { FeatureIntroduction } from "@/components/ui-custom/FeatureIntroduction"
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/hooks/use-organization-members";
 import { useSiteLogActivity } from "@/hooks/use-sitelog-activity";
-import { MemberActivityChart } from "@/components/charts/MemberActivityChart";
+import { ActivityChart } from "@/components/charts/ActivityChart";
 import { NewSiteLogModal } from "@/modals/construction/NewSiteLogModal";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
@@ -210,7 +210,7 @@ export default function ConstructionLogs() {
         slot3: {
           id: 'create-log',
           icon: <Plus className="h-6 w-6" />,
-          label: 'Nueva Entrada',
+          label: 'Nueva Bitácora',
           onClick: () => setShowNewSiteLogModal(true)
         },
         slot4: {
@@ -403,7 +403,7 @@ export default function ConstructionLogs() {
       onClick={() => setShowNewSiteLogModal(true)}
     >
       <Plus className="w-4 h-4 mr-2" />
-      Nueva Entrada
+      Nueva Bitácora
     </Button>
   ];
 
@@ -461,7 +461,7 @@ export default function ConstructionLogs() {
         />
 
         {/* Activity Chart */}
-        <MemberActivityChart 
+        <ActivityChart 
           data={siteLogActivityData} 
           isLoading={activityLoading}
           timePeriod={timePeriod}

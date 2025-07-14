@@ -99,8 +99,6 @@ const siteLogSchema = z.object({
   ]),
   weather: z.enum(['sunny', 'partly_cloudy', 'cloudy', 'rain', 'storm', 'snow', 'fog', 'windy', 'hail', 'none']).nullable(),
   comments: z.string().optional(),
-  is_public: z.boolean().default(true),
-  is_favorite: z.boolean().default(false),
   events: z.array(siteLogEventSchema).default([]),
   attendees: z.array(siteLogAttendeeSchema).default([]),
   equipment: z.array(siteLogEquipmentSchema).default([])
@@ -204,8 +202,6 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
       entry_type: 'avance_de_obra',
       weather: null,
       comments: '',
-      is_public: true,
-      is_favorite: false,
       events: [],
       attendees: [],
       equipment: []
@@ -223,9 +219,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
         created_by: creatorMember?.id || '',
         entry_type: editingSiteLog.entry_type as any,
         weather: editingSiteLog.weather as any,
-        comments: editingSiteLog.comments,
-        is_public: editingSiteLog.is_public,
-        is_favorite: editingSiteLog.is_favorite
+        comments: editingSiteLog.comments
       })
       
       // Load events and attendees for editing
@@ -317,8 +311,8 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
         entry_type: data.entry_type,
         weather: data.weather,
         comments: data.comments,
-        is_public: data.is_public,
-        is_favorite: data.is_favorite,
+        is_public: true, // Default to public
+        is_favorite: false, // Default to not favorite
         project_id: userData?.preferences?.last_project_id || '',
         organization_id: userData?.preferences?.last_organization_id || ''
       }
@@ -466,7 +460,6 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
               entry_type: data.entry_type,
               weather: data.weather,
               log_date: data.log_date.toISOString(),
-              is_public: data.is_public,
               events_count: events.length,
               attendees_count: attendees.length,
               equipment_count: equipmentList.length,
@@ -504,10 +497,10 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
       }, 100)
       
       toast({
-        title: editingSiteLog ? 'Entrada actualizada' : 'Entrada creada',
+        title: editingSiteLog ? 'Bitácora actualizada' : 'Bitácora creada',
         description: editingSiteLog ? 
-          'La entrada de bitácora ha sido actualizada correctamente' : 
-          'La nueva entrada de bitácora ha sido creada correctamente'
+          'La bitácora ha sido actualizada correctamente' : 
+          'La nueva bitácora ha sido creada correctamente'
       })
       form.reset()
       setFiles([])
@@ -518,7 +511,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
       console.error('Error en mutación:', error)
       toast({
         title: 'Error',
-        description: error.message || 'No se pudo guardar la entrada de bitácora',
+        description: error.message || 'No se pudo guardar la bitácora',
         variant: 'destructive'
       })
     }
@@ -558,7 +551,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
       queryClient.refetchQueries({ queryKey: ['personnel-attendance'] })
       
       toast({
-        title: 'Entrada eliminada',
+        title: 'Bitácora eliminada',
         description: 'La entrada de bitácora ha sido eliminada correctamente'
       })
       onClose()
@@ -617,7 +610,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
       {{
         header: (
           <CustomModalHeader
-            title={editingSiteLog ? 'Editar Entrada de Bitácora' : 'Nueva Entrada de Bitácora'}
+            title={editingSiteLog ? 'Editar Bitácora' : 'Nueva Bitácora'}
             description="Registra el progreso y eventos del proyecto"
             onClose={onClose}
           />
@@ -636,180 +629,135 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
                       </div>
                     </AccordionTrigger>
                     <AccordionContent className="space-y-3 pt-3">
-                      {/* Primera fila: Entrada Pública y Favorito */}
-                      <div className="grid grid-cols-1 gap-4">
-                        <FormField
-                          control={form.control}
-                          name="is_public"
-                          render={({ field }) => (
-                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                              <div className="space-y-0.5">
-                                <FormLabel className="text-sm font-medium">
-                                  Entrada Pública
-                                </FormLabel>
-                              </div>
+                      {/* 1. Creador */}
+                      <FormField
+                        control={form.control}
+                        name="created_by"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Creador
+                            </FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
                               <FormControl>
-                                <Switch
-                                  checked={field.value}
-                                  onCheckedChange={field.onChange}
-                                />
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Seleccionar creador" />
+                                </SelectTrigger>
                               </FormControl>
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={form.control}
-                          name="is_favorite"
-                          render={({ field }) => (
-                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                              <div className="space-y-0.5">
-                                <FormLabel className="text-sm font-medium">
-                                  Marcar como favorito
-                                </FormLabel>
-                              </div>
-                              <FormControl>
-                                <Switch
-                                  checked={field.value}
-                                  onCheckedChange={field.onChange}
-                                />
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-
-                      {/* Segunda fila: Fecha y Creador */}
-                      <div className="grid grid-cols-1 gap-4">
-                        <FormField
-                          control={form.control}
-                          name="log_date"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>
-                                Fecha del log
-                              </FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="date"
-                                  value={field.value ? field.value.toISOString().split('T')[0] : ''}
-                                  onChange={(e) => field.onChange(new Date(e.target.value))}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={form.control}
-                          name="created_by"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>
-                                Creador
-                              </FormLabel>
-                              <Select onValueChange={field.onChange} value={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Seleccionar creador" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {members?.map((member: any) => {
-                                    const displayName = member.full_name || member.email || 'Usuario sin nombre';
-                                    const avatarFallback = member.full_name?.charAt(0) || member.email?.charAt(0) || 'U';
-                                    
-                                    return (
-                                      <SelectItem key={member.id} value={member.id}>
-                                        <div className="flex items-center gap-2">
-                                          <Avatar className="h-6 w-6">
-                                            <AvatarImage src={member.avatar_url} />
-                                            <AvatarFallback>
-                                              {avatarFallback}
-                                            </AvatarFallback>
-                                          </Avatar>
-                                          <span>{displayName}</span>
-                                        </div>
-                                      </SelectItem>
-                                    );
-                                  })}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-
-                      {/* Tipo de entrada y Clima */}
-                      <div className="grid grid-cols-1 gap-4">
-                        <FormField
-                          control={form.control}
-                          name="entry_type"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>
-                                Tipo de entrada
-                              </FormLabel>
-                              <Select onValueChange={field.onChange} value={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Seleccionar tipo" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {entryTypes.map((type) => (
-                                    <SelectItem key={type.value} value={type.value}>
+                              <SelectContent>
+                                {members?.map((member: any) => {
+                                  const displayName = member.full_name || member.email || 'Usuario sin nombre';
+                                  const avatarFallback = member.full_name?.charAt(0) || member.email?.charAt(0) || 'U';
+                                  
+                                  return (
+                                    <SelectItem key={member.id} value={member.id}>
                                       <div className="flex items-center gap-2">
-                                        <span>{type.icon}</span>
-                                        <span>{type.label}</span>
+                                        <Avatar className="h-6 w-6">
+                                          <AvatarImage src={member.avatar_url} />
+                                          <AvatarFallback>
+                                            {avatarFallback}
+                                          </AvatarFallback>
+                                        </Avatar>
+                                        <span>{displayName}</span>
                                       </div>
                                     </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                                  );
+                                })}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                        <FormField
-                          control={form.control}
-                          name="weather"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>
-                                Clima (opcional)
-                              </FormLabel>
-                              <Select 
-                                onValueChange={(value) => field.onChange(value === 'none' ? null : value)} 
-                                value={field.value || 'none'}
-                              >
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Seleccionar clima" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="none">Sin especificar</SelectItem>
-                                  {weatherOptions.map((weather) => (
-                                    <SelectItem key={weather.value} value={weather.value}>
-                                      <div className="flex items-center gap-2">
-                                        <span>{weather.icon}</span>
-                                        <span>{weather.label}</span>
-                                      </div>
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
+                      {/* 2. Fecha */}
+                      <FormField
+                        control={form.control}
+                        name="log_date"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Fecha
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                type="date"
+                                value={field.value ? field.value.toISOString().split('T')[0] : ''}
+                                onChange={(e) => field.onChange(new Date(e.target.value))}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                      {/* Tercera fila: Comentarios */}
+                      {/* 3. Tipo de Entrada */}
+                      <FormField
+                        control={form.control}
+                        name="entry_type"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Tipo de Entrada
+                            </FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Seleccionar tipo" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {entryTypes.map((type) => (
+                                  <SelectItem key={type.value} value={type.value}>
+                                    <div className="flex items-center gap-2">
+                                      <span>{type.icon}</span>
+                                      <span>{type.label}</span>
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* 4. Clima */}
+                      <FormField
+                        control={form.control}
+                        name="weather"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Clima
+                            </FormLabel>
+                            <Select 
+                              onValueChange={(value) => field.onChange(value === 'none' ? null : value)} 
+                              value={field.value || 'none'}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Seleccionar clima" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="none">Sin especificar</SelectItem>
+                                {weatherOptions.map((weather) => (
+                                  <SelectItem key={weather.value} value={weather.value}>
+                                    <div className="flex items-center gap-2">
+                                      <span>{weather.icon}</span>
+                                      <span>{weather.label}</span>
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* 5. Comentarios */}
                       <FormField
                         control={form.control}
                         name="comments"

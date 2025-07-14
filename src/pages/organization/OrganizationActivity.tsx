@@ -14,7 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Table } from '@/components/ui-custom/Table';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
-import { MemberActivityChart } from '@/components/charts/MemberActivityChart';
+import { ActivityChart } from '@/components/charts/ActivityChart';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useUserActivity } from '@/hooks/use-user-activity';
@@ -294,7 +294,7 @@ export default function OrganizationActivity() {
         />
 
         {/* Activity Chart */}
-        <MemberActivityChart 
+        <ActivityChart 
           data={userActivityData} 
           isLoading={userActivityLoading}
           timePeriod={timePeriod}

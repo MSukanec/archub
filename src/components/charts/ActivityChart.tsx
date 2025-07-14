@@ -100,7 +100,7 @@ const CustomDot = (props: any) => {
   )
 }
 
-export function MemberActivityChart({ data, isLoading, timePeriod, onTimePeriodChange }: UserActivityChartProps) {
+export function ActivityChart({ data, isLoading, timePeriod, onTimePeriodChange }: UserActivityChartProps) {
   
   const getTimePeriodLabel = (period: TimePeriod) => {
     switch (period) {
