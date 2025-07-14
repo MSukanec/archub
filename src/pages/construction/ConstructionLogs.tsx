@@ -174,6 +174,8 @@ export default function ConstructionLogs() {
   const [siteLogToDelete, setSiteLogToDelete] = useState<any>(null);
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
   const [timePeriod, setTimePeriod] = useState<'days' | 'weeks' | 'months'>('days');
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   
   const isMobile = useMobile();
   const { setActions, setShowActionBar } = useMobileActionBar();
@@ -646,6 +648,10 @@ export default function ConstructionLogs() {
                                         src={file.file_url} 
                                         alt={file.file_name}
                                         className="w-16 h-16 object-cover rounded border-2 border-gray-200 hover:border-gray-300 transition-colors cursor-pointer"
+                                        onClick={() => {
+                                          setSelectedImage(file.file_url);
+                                          setShowImageModal(true);
+                                        }}
                                         onError={(e) => {
                                           e.currentTarget.style.display = 'none';
                                           e.currentTarget.nextElementSibling.style.display = 'flex';
@@ -653,12 +659,6 @@ export default function ConstructionLogs() {
                                       />
                                       <div className="w-16 h-16 flex items-center justify-center bg-gray-100 rounded border-2 border-gray-200" style={{ display: 'none' }}>
                                         <Image className="h-6 w-6 text-gray-400" />
-                                      </div>
-                                      <div className="absolute -bottom-6 left-0 right-0 text-xs text-muted-foreground text-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                        {file.file_name && file.file_name.length > 12 ? 
-                                          file.file_name.substring(0, 12) + '...' : 
-                                          file.file_name || 'Sin nombre'
-                                        }
                                       </div>
                                     </div>
                                   ) : (
@@ -812,6 +812,24 @@ export default function ConstructionLogs() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Modal para ver imagen en tamaño completo */}
+      <Dialog open={showImageModal} onOpenChange={setShowImageModal}>
+        <DialogContent className="max-w-4xl w-full max-h-[90vh] p-0">
+          <DialogHeader className="p-4 pb-2">
+            <DialogTitle>Vista previa de imagen</DialogTitle>
+          </DialogHeader>
+          <div className="flex items-center justify-center p-4 pt-0">
+            {selectedImage && (
+              <img 
+                src={selectedImage} 
+                alt="Vista previa" 
+                className="max-w-full max-h-[70vh] object-contain rounded"
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 }
