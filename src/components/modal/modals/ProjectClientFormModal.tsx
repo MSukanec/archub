@@ -157,31 +157,40 @@ export default function ProjectClientFormModal({ onClose }: ProjectClientFormMod
     <div className="space-y-4">
       <div className="space-y-2">
         <label className="text-sm font-medium">Seleccionar Contacto *</label>
-        <Select value={selectedContactId} onValueChange={setSelectedContactId}>
-          <SelectTrigger>
-            <SelectValue placeholder="Selecciona un contacto disponible" />
-          </SelectTrigger>
-          <SelectContent>
-            {availableContacts.length === 0 ? (
-              <SelectItem value="" disabled>
-                No hay contactos disponibles
-              </SelectItem>
-            ) : (
-              availableContacts.map(contact => {
-                const displayName = contact.company_name || 
-                                 `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
-                return (
-                  <SelectItem key={contact.id} value={contact.id}>
-                    {displayName}
-                  </SelectItem>
-                )
-              })
-            )}
-          </SelectContent>
-        </Select>
-        {availableContacts.length === 0 && (
+        {organizationContacts === undefined ? (
+          <div className="text-sm text-muted-foreground">Cargando contactos...</div>
+        ) : (
+          <Select value={selectedContactId} onValueChange={setSelectedContactId}>
+            <SelectTrigger>
+              <SelectValue placeholder="Selecciona un contacto disponible" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableContacts.length === 0 ? (
+                <SelectItem value="" disabled>
+                  No hay contactos disponibles
+                </SelectItem>
+              ) : (
+                availableContacts.map(contact => {
+                  const displayName = contact.company_name || 
+                                   `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
+                  return (
+                    <SelectItem key={contact.id} value={contact.id}>
+                      {displayName}
+                    </SelectItem>
+                  )
+                })
+              )}
+            </SelectContent>
+          </Select>
+        )}
+        {organizationContacts !== undefined && availableContacts.length === 0 && (
           <p className="text-xs text-muted-foreground">
             Todos los contactos disponibles ya están agregados como clientes del proyecto.
+          </p>
+        )}
+        {organizationContacts !== undefined && (
+          <p className="text-xs text-muted-foreground">
+            Contactos disponibles: {availableContacts.length} de {organizationContacts.length} total
           </p>
         )}
       </div>
