@@ -72,7 +72,7 @@ export function GalleryFormModal({ open, onClose, editingFile }: GalleryFormModa
         reset({
           title: '',
           description: '',
-          created_by: currentUserMember?.id || userData.user.id,
+          created_by: currentUserMember?.user_id || userData.user.id,
         });
       }
     }
@@ -99,11 +99,15 @@ export function GalleryFormModal({ open, onClose, editingFile }: GalleryFormModa
         entry_type: 'registro_general',
       }));
 
+      // Encontrar el user_id del miembro seleccionado
+      const selectedMember = organizationMembers?.find((member: any) => member.user_id === data.created_by);
+      const userIdToUse = selectedMember?.user_id || userData.user.id;
+
       return uploadGalleryFiles(
         galleryFiles,
         userData.preferences.last_project_id,
         userData.preferences.last_organization_id,
-        data.created_by
+        userIdToUse
       );
     },
     onSuccess: () => {

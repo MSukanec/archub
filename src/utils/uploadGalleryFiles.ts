@@ -51,7 +51,7 @@ export async function uploadGalleryFiles(
           file_path: filePath,
           file_size: file.size,
           description: description || null,
-          created_by: createdBy,
+          user_id: createdBy, // Use user_id like in bitácora
           organization_id: organizationId,
           visibility: 'organization',
           // No site_log_id for independent gallery uploads
