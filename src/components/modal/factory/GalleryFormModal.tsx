@@ -39,7 +39,7 @@ interface GalleryFormModalProps {
 }
 
 export function GalleryFormModal({ open, onClose, editingFile }: GalleryFormModalProps) {
-  const { data: userData } = useCurrentUser();
+  const { data: userData, isLoading: userLoading } = useCurrentUser();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [files, setFiles] = useState<File[]>([]);
@@ -50,26 +50,28 @@ export function GalleryFormModal({ open, onClose, editingFile }: GalleryFormModa
     defaultValues: {
       title: '',
       description: '',
-      created_by: userData?.user.id || '',
+      created_by: '',
     },
   });
 
   const { handleSubmit, reset, formState: { isSubmitting } } = form;
 
-  // Reset form when editing file changes
+  // Reset form when editing file changes or user data loads
   useEffect(() => {
-    if (editingFile) {
-      reset({
-        title: editingFile.title || '',
-        description: editingFile.description || '',
-        created_by: editingFile.created_by || userData?.user.id || '',
-      });
-    } else {
-      reset({
-        title: '',
-        description: '',
-        created_by: userData?.user.id || '',
-      });
+    if (userData?.user?.id) {
+      if (editingFile) {
+        reset({
+          title: editingFile.title || '',
+          description: editingFile.description || '',
+          created_by: editingFile.created_by || userData.user.id,
+        });
+      } else {
+        reset({
+          title: '',
+          description: '',
+          created_by: userData.user.id,
+        });
+      }
     }
   }, [editingFile, reset, userData]);
 
@@ -154,7 +156,7 @@ export function GalleryFormModal({ open, onClose, editingFile }: GalleryFormModa
     uploadMutation.mutate(data);
   };
 
-  if (!open) return null;
+  if (!open || userLoading) return null;
 
   const modalContent = (
     <div className="space-y-6 p-4">
@@ -170,12 +172,12 @@ export function GalleryFormModal({ open, onClose, editingFile }: GalleryFormModa
                   <FormControl>
                     <UserSelector
                       users={organizationMembers?.map(member => ({
-                        id: member.user.id,
-                        full_name: member.user.full_name || `${member.user_data?.first_name || ''} ${member.user_data?.last_name || ''}`.trim(),
-                        email: member.user.email,
-                        avatar_url: member.user.avatar_url,
-                        first_name: member.user_data?.first_name,
-                        last_name: member.user_data?.last_name
+                        id: member.user_id,
+                        full_name: member.full_name,
+                        email: member.email,
+                        avatar_url: member.avatar_url,
+                        first_name: member.full_name.split(' ')[0] || '',
+                        last_name: member.full_name.split(' ').slice(1).join(' ') || ''
                       })) || []}
                       value={field.value}
                       onChange={field.onChange}
