@@ -7,7 +7,7 @@ import { FormModalLayout } from '../form/FormModalLayout';
 import { FormModalHeader } from '../form/FormModalHeader';
 import { FormModalFooter } from '../form/FormModalFooter';
 import { useModalPanelStore } from '../form/modalPanelStore';
-import { Label } from '@/components/ui/label';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useCreateKanbanBoard, useUpdateKanbanBoard } from '@/hooks/use-kanban';
@@ -38,13 +38,9 @@ export function BoardFormModal({ modalData, onClose }: BoardFormModalProps) {
   const createBoardMutation = useCreateKanbanBoard();
   const updateBoardMutation = useUpdateKanbanBoard();
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = React.useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors, isSubmitting }
-  } = useForm<BoardFormData>({
+  const form = useForm<BoardFormData>({
     resolver: zodResolver(boardSchema),
     defaultValues: {
       name: board?.name || '',
@@ -53,14 +49,23 @@ export function BoardFormModal({ modalData, onClose }: BoardFormModalProps) {
   });
 
   React.useEffect(() => {
-    reset({
-      name: board?.name || '',
-      description: board?.description || ''
-    });
-  }, [board, reset]);
+    if (board) {
+      form.reset({
+        name: board.name || '',
+        description: board.description || ''
+      });
+      setPanel('edit');
+    } else {
+      form.reset({
+        name: '',
+        description: ''
+      });
+      setPanel('edit');
+    }
+  }, [board, form, setPanel]);
 
   const handleClose = () => {
-    reset();
+    form.reset();
     setPanel('view');
     onClose();
   };
@@ -113,12 +118,12 @@ export function BoardFormModal({ modalData, onClose }: BoardFormModalProps) {
   const viewPanel = (
     <div className="p-6 space-y-4">
       <div>
-        <Label className="text-sm font-medium">Nombre del tablero</Label>
+        <h4 className="text-sm font-medium">Nombre del tablero</h4>
         <p className="text-sm text-muted-foreground mt-1">{board?.name || 'Sin nombre'}</p>
       </div>
       
       <div>
-        <Label className="text-sm font-medium">Descripción</Label>
+        <h4 className="text-sm font-medium">Descripción</h4>
         <p className="text-sm text-muted-foreground mt-1">
           {board?.description || 'Sin descripción'}
         </p>
@@ -127,32 +132,45 @@ export function BoardFormModal({ modalData, onClose }: BoardFormModalProps) {
   );
 
   const editPanel = (
-    <div className="p-6">
-      <form id="board-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div>
-          <Label htmlFor="name">Nombre del tablero *</Label>
-          <Input 
-            id="name"
-            {...register('name')}
-            placeholder="Cosas para Hacer"
-            className="mt-1"
+    <div className="space-y-6 p-6">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nombre del tablero</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    placeholder="Sin nombre"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          {errors.name && (
-            <p className="text-sm text-destructive mt-1">{errors.name.message}</p>
-          )}
-        </div>
 
-        <div>
-          <Label htmlFor="description">Descripción (opcional)</Label>
-          <Textarea 
-            id="description"
-            {...register('description')}
-            placeholder="Describe el propósito de este tablero..."
-            rows={3}
-            className="mt-1"
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Descripción</FormLabel>
+                <FormControl>
+                  <Textarea
+                    {...field}
+                    placeholder="Sin descripción"
+                    rows={3}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
-      </form>
+        </form>
+      </Form>
     </div>
   );
 
@@ -183,13 +201,10 @@ export function BoardFormModal({ modalData, onClose }: BoardFormModalProps) {
         if (currentPanel === 'view' && isEditing) {
           setPanel('edit');
         } else {
-          const form = document.getElementById('board-form') as HTMLFormElement;
-          if (form) {
-            form.requestSubmit();
-          }
+          form.handleSubmit(onSubmit)();
         }
       }}
-      rightLoading={isSubmitting}
+      rightLoading={isLoading}
     />
   );
 
