@@ -1,5 +1,5 @@
 import React from 'react';
-import { NewGalleryModal } from '@/modals/construction/NewGalleryModal';
+import { GalleryFormModal } from './GalleryFormModal';
 import { useGlobalModalStore } from './useGlobalModalStore';
 
 // TODO: Replace these placeholders with actual modals when they exist
@@ -13,6 +13,8 @@ export function ModalFactory() {
 
   if (!open || !type) return null;
 
+  console.log('ModalFactory rendering:', { open, type, data });
+
   switch (type) {
     case 'movement':
       return <MovementModal open={open} onClose={closeModal} data={data} />;
@@ -21,7 +23,8 @@ export function ModalFactory() {
     case 'contact':
       return <ContactModal open={open} onClose={closeModal} data={data} />;
     case 'gallery':
-      return <NewGalleryModal open={open} onClose={closeModal} editingFile={data?.editingFile} />;
+      console.log('Rendering GalleryFormModal with props:', { open, editingFile: data?.editingFile });
+      return <GalleryFormModal open={open} onClose={closeModal} editingFile={data?.editingFile} />;
     default:
       return null;
   }
