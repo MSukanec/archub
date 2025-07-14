@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Building2, ImageIcon, FileText, Users, MapPin, Phone, Mail, Globe } from 'lucide-react';
+import { Building2, FileText, Users, MapPin, Globe } from 'lucide-react';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
@@ -80,9 +80,23 @@ export default function OrganizationBasicData() {
   const [website, setWebsite] = useState('');
   const [taxId, setTaxId] = useState('');
 
-  // Auto-save mutation for organization data
-  const saveOrganizationDataMutation = useMutation({
-    mutationFn: async (dataToSave: any) => {
+  // Track if we're saving
+  const { isSaving } = useDebouncedAutoSave(
+    { 
+      name: organizationName,
+      slug,
+      description,
+      address,
+      city,
+      state,
+      country,
+      postal_code: postalCode,
+      phone,
+      email,
+      website,
+      tax_id: taxId
+    },
+    async (dataToSave) => {
       if (!organizationId || !supabase) return;
 
       // Update organization name in organizations table
@@ -125,21 +139,13 @@ export default function OrganizationBasicData() {
 
         if (error) throw error;
       }
-    },
-    onSuccess: () => {
-      console.log('Auto-save completed successfully');
+
+      // Invalidate queries
       queryClient.invalidateQueries({ queryKey: ['organization-data', organizationId] });
       queryClient.invalidateQueries({ queryKey: ['organization-info', organizationId] });
     },
-    onError: (error) => {
-      console.error('Auto-save failed:', error);
-      toast({
-        title: "Error al guardar",
-        description: "No se pudieron guardar los cambios automáticamente",
-        variant: "destructive"
-      });
-    }
-  });
+    1000
+  );
 
   // Initialize form data when data is loaded
   useEffect(() => {
@@ -164,236 +170,243 @@ export default function OrganizationBasicData() {
     }
   }, [organizationData]);
 
-  // Set up auto-save for all fields
-  useDebouncedAutoSave(
-    { name: organizationName },
-    (data) => saveOrganizationDataMutation.mutate(data),
-    1000
-  );
-
-  useDebouncedAutoSave(
-    { slug },
-    (data) => saveOrganizationDataMutation.mutate(data),
-    1000
-  );
-
-  useDebouncedAutoSave(
-    { description },
-    (data) => saveOrganizationDataMutation.mutate(data),
-    1000
-  );
-
-  useDebouncedAutoSave(
-    { address, city, state, country, postal_code: postalCode },
-    (data) => saveOrganizationDataMutation.mutate(data),
-    1000
-  );
-
-  useDebouncedAutoSave(
-    { phone, email, website, tax_id: taxId },
-    (data) => saveOrganizationDataMutation.mutate(data),
-    1000
-  );
-
   // Set sidebar context
   useEffect(() => {
     setSidebarContext('organizacion');
   }, [setSidebarContext]);
 
   return (
-    <Layout wide={false}>
+    <Layout 
+      headerProps={{ 
+        title: "Datos Básicos",
+        breadcrumb: [
+          { label: "Organización", href: "/organization/dashboard" },
+          { label: "Datos Básicos" }
+        ]
+      }}
+    >
       <div className="space-y-6">
+        {/* FeatureIntroduction */}
         <FeatureIntroduction
-          icon={<Building2 className="w-5 h-5 text-accent" />}
-          title="Datos Básicos de la Organización"
-          description="Gestiona la información principal y configuración de tu organización"
+          title="Datos Básicos"
+          icon={<Building2 className="w-5 h-5" />}
           features={[
-            "Información general y datos de contacto",
-            "Dirección y ubicación física",
-            "Configuración fiscal y datos legales",
-            "Personalización de slug y descripción"
+            {
+              icon: <FileText className="w-5 h-5" />,
+              title: "Información completa de la organización",
+              description: "Centraliza toda la información fundamental de tu organización en un solo lugar. Desde nombre y descripción hasta datos fiscales, mantén todos los datos organizados y actualizados automáticamente."
+            },
+            {
+              icon: <Users className="w-5 h-5" />,
+              title: "Datos de contacto integrados",
+              description: "Almacena la información de contacto de la organización. Teléfonos, emails y sitio web siempre disponibles para todo el equipo cuando los necesiten."
+            },
+            {
+              icon: <MapPin className="w-5 h-5" />,
+              title: "Ubicación y datos legales",
+              description: "Define la ubicación exacta de la organización y los datos fiscales. Esta información se usa automáticamente en documentos oficiales y comunicaciones."
+            }
           ]}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left Column - Basic Information */}
-          <div className="space-y-6">
-            {/* Organization Info Section */}
-            <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-4">
-              <div className="flex items-center gap-2 mb-4">
-                <Building2 className="w-4 h-4 text-accent" />
-                <h3 className="font-medium text-[var(--card-fg)]">Información General</h3>
-              </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="organizationName">Nombre de la Organización</Label>
-                  <Input
-                    id="organizationName"
-                    type="text"
-                    value={organizationName}
-                    onChange={(e) => setOrganizationName(e.target.value)}
-                    placeholder="Ingresa el nombre de tu organización"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="slug">Slug (URL amigable)</Label>
-                  <Input
-                    id="slug"
-                    type="text"
-                    value={slug}
-                    onChange={(e) => setSlug(e.target.value)}
-                    placeholder="mi-organizacion"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="description">Descripción</Label>
-                  <Textarea
-                    id="description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Descripción de tu organización..."
-                    rows={3}
-                  />
-                </div>
-              </div>
+        {/* Two Column Layout - Section descriptions left, content right */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column - Información Básica */}
+          <div>
+            <div className="flex items-center gap-2 mb-6">
+              <FileText className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Información Básica</h2>
             </div>
+            <p className="text-sm text-muted-foreground">
+              Datos fundamentales de la organización que se usarán en todo el sistema. Estos campos son la base para proyectos, documentos y comunicaciones.
+              {isSaving && <span className="block text-[var(--accent)] mt-2">Guardando...</span>}
+            </p>
+          </div>
 
-            {/* Contact Information Section */}
-            <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-4">
-              <div className="flex items-center gap-2 mb-4">
-                <Users className="w-4 h-4 text-accent" />
-                <h3 className="font-medium text-[var(--card-fg)]">Información de Contacto</h3>
+          {/* Right Column - Información Básica Content */}
+          <div>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="organization-name">Nombre de la Organización</Label>
+                <Input 
+                  id="organization-name"
+                  placeholder="Ej: Constructora López SA"
+                  value={organizationName}
+                  onChange={(e) => setOrganizationName(e.target.value)}
+                />
               </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="phone">Teléfono</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+54 11 1234-5678"
-                  />
-                </div>
 
-                <div>
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="contacto@miorganizacion.com"
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="slug">Slug (URL amigable)</Label>
+                <Input 
+                  id="slug"
+                  placeholder="Ej: constructora-lopez"
+                  value={slug}
+                  onChange={(e) => setSlug(e.target.value)}
+                />
+              </div>
 
-                <div>
-                  <Label htmlFor="website">Sitio Web</Label>
-                  <Input
-                    id="website"
-                    type="url"
-                    value={website}
-                    onChange={(e) => setWebsite(e.target.value)}
-                    placeholder="https://www.miorganizacion.com"
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="description">Descripción</Label>
+                <Textarea 
+                  id="description"
+                  placeholder="Descripción de la organización..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={3}
+                />
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Right Column - Address and Legal */}
-          <div className="space-y-6">
-            {/* Address Section */}
-            <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-4">
-              <div className="flex items-center gap-2 mb-4">
-                <MapPin className="w-4 h-4 text-accent" />
-                <h3 className="font-medium text-[var(--card-fg)]">Dirección</h3>
+        <hr className="border-t border-[var(--section-divider)] my-8" />
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column - Información de Contacto */}
+          <div>
+            <div className="flex items-center gap-2 mb-6">
+              <Users className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Información de Contacto</h2>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Datos de contacto de la organización. Esta información estará disponible para todo el equipo y se usará en comunicaciones oficiales.
+            </p>
+          </div>
+
+          {/* Right Column - Información de Contacto Content */}
+          <div>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="phone">Teléfono</Label>
+                <Input 
+                  id="phone"
+                  placeholder="Ej: +54 11 1234-5678"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                />
               </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="address">Dirección</Label>
-                  <Input
-                    id="address"
-                    type="text"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    placeholder="Av. Corrientes 1234"
-                  />
-                </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="city">Ciudad</Label>
-                    <Input
-                      id="city"
-                      type="text"
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
-                      placeholder="Buenos Aires"
-                    />
-                  </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input 
+                  id="email"
+                  type="email"
+                  placeholder="Ej: contacto@constructora.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
 
-                  <div>
-                    <Label htmlFor="state">Provincia/Estado</Label>
-                    <Input
-                      id="state"
-                      type="text"
-                      value={state}
-                      onChange={(e) => setState(e.target.value)}
-                      placeholder="CABA"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="country">País</Label>
-                    <Input
-                      id="country"
-                      type="text"
-                      value={country}
-                      onChange={(e) => setCountry(e.target.value)}
-                      placeholder="Argentina"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="postalCode">Código Postal</Label>
-                    <Input
-                      id="postalCode"
-                      type="text"
-                      value={postalCode}
-                      onChange={(e) => setPostalCode(e.target.value)}
-                      placeholder="C1043"
-                    />
-                  </div>
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="website">Sitio Web</Label>
+                <Input 
+                  id="website"
+                  type="url"
+                  placeholder="Ej: https://www.constructora.com"
+                  value={website}
+                  onChange={(e) => setWebsite(e.target.value)}
+                />
               </div>
             </div>
+          </div>
+        </div>
 
-            {/* Legal Information Section */}
-            <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-4">
-              <div className="flex items-center gap-2 mb-4">
-                <FileText className="w-4 h-4 text-accent" />
-                <h3 className="font-medium text-[var(--card-fg)]">Información Legal</h3>
+        <hr className="border-t border-[var(--section-divider)] my-8" />
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column - Ubicación */}
+          <div>
+            <div className="flex items-center gap-2 mb-6">
+              <MapPin className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Ubicación de la Organización</h2>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Dirección completa de la sede principal. Esta información se usa para documentación oficial, entregas y comunicaciones.
+            </p>
+          </div>
+
+          {/* Right Column - Ubicación Content */}
+          <div>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="address">Dirección</Label>
+                <Input 
+                  id="address"
+                  placeholder="Ej: Av. Corrientes 1234"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                />
               </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="taxId">CUIT/CUIL/ID Fiscal</Label>
-                  <Input
-                    id="taxId"
-                    type="text"
-                    value={taxId}
-                    onChange={(e) => setTaxId(e.target.value)}
-                    placeholder="20-12345678-9"
-                  />
-                </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="city">Ciudad</Label>
+                <Input 
+                  id="city"
+                  placeholder="Ej: Buenos Aires"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="state">Provincia/Estado</Label>
+                <Input 
+                  id="state"
+                  placeholder="Ej: Buenos Aires"
+                  value={state}
+                  onChange={(e) => setState(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="country">País</Label>
+                <Input 
+                  id="country"
+                  placeholder="Ej: Argentina"
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="postal-code">Código Postal</Label>
+                <Input 
+                  id="postal-code"
+                  placeholder="Ej: C1043AAX"
+                  value={postalCode}
+                  onChange={(e) => setPostalCode(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <hr className="border-t border-[var(--section-divider)] my-8" />
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column - Información Legal */}
+          <div>
+            <div className="flex items-center gap-2 mb-6">
+              <Globe className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Información Legal</h2>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Datos fiscales y legales de la organización. Esta información se usa en facturación, contratos y documentación oficial.
+            </p>
+          </div>
+
+          {/* Right Column - Información Legal Content */}
+          <div>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="tax-id">CUIT/CUIL/ID Fiscal</Label>
+                <Input 
+                  id="tax-id"
+                  placeholder="Ej: 20-12345678-9"
+                  value={taxId}
+                  onChange={(e) => setTaxId(e.target.value)}
+                />
               </div>
             </div>
           </div>
