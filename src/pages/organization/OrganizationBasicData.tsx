@@ -217,30 +217,47 @@ export default function OrganizationBasicData() {
 
   // Handle logo upload success
   const handleLogoUploadSuccess = async (imageUrl: string) => {
-    if (!organizationId || !supabase) return;
-
-    // Update organization logo_url in database
-    const { error } = await supabase
-      .from('organizations')
-      .update({ logo_url: imageUrl })
-      .eq('id', organizationId);
-
-    if (error) {
-      console.error('Error updating logo URL:', error);
-      toast({
-        title: "Error",
-        description: "No se pudo actualizar el logo en la base de datos",
-        variant: "destructive"
-      });
+    console.log('Logo upload success callback called with URL:', imageUrl);
+    
+    if (!organizationId || !supabase) {
+      console.error('Missing organizationId or supabase in callback');
       return;
     }
 
-    // Update local state
-    setLogoUrl(imageUrl);
-    
-    // Invalidate queries to refresh data
-    queryClient.invalidateQueries({ queryKey: ['organization-info', organizationId] });
-    queryClient.invalidateQueries({ queryKey: ['current-user'] });
+    try {
+      // Update organization logo_url in database
+      const { error } = await supabase
+        .from('organizations')
+        .update({ logo_url: imageUrl })
+        .eq('id', organizationId);
+
+      if (error) {
+        console.error('Error updating logo URL:', error);
+        toast({
+          title: "Error",
+          description: "No se pudo actualizar el logo en la base de datos",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      console.log('Logo URL updated successfully in database');
+
+      // Update local state
+      setLogoUrl(imageUrl);
+      
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['organization-info', organizationId] });
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      
+      toast({
+        title: "Logo actualizado",
+        description: "El logo de la organización se ha actualizado correctamente",
+      });
+      
+    } catch (error) {
+      console.error('Unexpected error in logo upload callback:', error);
+    }
   };
 
   // Get organization initials for avatar fallback

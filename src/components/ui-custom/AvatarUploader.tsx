@@ -35,7 +35,7 @@ export function AvatarUploader({
 
   // Function to resize and crop image to square
   const resizeImageToSquare = (file: File): Promise<File> => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d')!;
       const img = new Image();
@@ -45,6 +45,10 @@ export function AvatarUploader({
         const size = 400;
         canvas.width = size;
         canvas.height = size;
+        
+        // Fill with white background first (important for JPEGs)
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, size, size);
         
         // Calculate dimensions to crop to square (center crop)
         const minDimension = Math.min(img.width, img.height);
@@ -58,16 +62,22 @@ export function AvatarUploader({
           0, 0, size, size  // destination rectangle (canvas)
         );
         
-        // Convert canvas to blob
+        // Convert canvas to blob with higher quality
         canvas.toBlob((blob) => {
           if (blob) {
-            const squareFile = new File([blob], file.name, {
+            const squareFile = new File([blob], file.name.replace(/\.[^/.]+$/, '') + '.jpg', {
               type: 'image/jpeg',
               lastModified: Date.now(),
             });
             resolve(squareFile);
+          } else {
+            reject(new Error('Failed to create blob from canvas'));
           }
-        }, 'image/jpeg', 0.9);
+        }, 'image/jpeg', 0.95);
+      };
+      
+      img.onerror = () => {
+        reject(new Error('Failed to load image'));
       };
       
       img.src = URL.createObjectURL(file);
@@ -111,12 +121,19 @@ export function AvatarUploader({
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
+      // Get public URL with timestamp to avoid cache issues
       const { data: urlData } = supabase.storage
         .from(bucketName)
         .getPublicUrl(uploadPath);
 
-      const publicUrl = urlData.publicUrl;
+      // Add timestamp to avoid browser caching issues
+      const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+
+      console.log('Upload completed successfully:', {
+        uploadPath,
+        publicUrl,
+        bucketName
+      });
 
       // Call success callback
       onUploadSuccess(publicUrl);
