@@ -42,8 +42,8 @@ import MovementCard from "@/components/cards/MovementCard";
 import ConversionCard from "@/components/cards/ConversionCard";
 import { transformMovementToCard } from "@/utils/movementCardAdapter";
 
-import { NewMovementModal } from "@/modals/finances/NewMovementModal";
 import ImportMovementsModal from "@/modals/finances/ImportMovementsModal";
+import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMovements, useToggleMovementFavorite } from "@/hooks/use-movements";
 import { useOrganizationDefaultCurrency } from "@/hooks/use-currencies";
@@ -125,9 +125,8 @@ interface ConversionGroup {
 
 export default function Movements() {
   const [searchValue, setSearchValue] = useState("");
-  const [showNewMovementModal, setShowNewMovementModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
-  const [editingMovement, setEditingMovement] = useState<Movement | null>(null);
+  const { openModal } = useGlobalModalStore();
   const [deletingMovement, setDeletingMovement] = useState<Movement | null>(
     null,
   );
@@ -161,7 +160,7 @@ export default function Movements() {
           id: 'create',
           icon: <Plus className="h-6 w-6" />,
           label: 'Nuevo Movimiento',
-          onClick: () => setShowNewMovementModal(true),
+          onClick: () => openModal('movement'),
           variant: 'primary'
         },
         slot4: {
@@ -330,8 +329,7 @@ export default function Movements() {
   });
 
   const handleEdit = (movement: Movement) => {
-    setEditingMovement(movement);
-    setShowNewMovementModal(true);
+    openModal('movement', { editingMovement: movement });
   };
 
   const handleEditConversion = (conversionGroup: ConversionGroup) => {
@@ -347,8 +345,7 @@ export default function Movements() {
       _conversionData: conversionGroup
     };
     
-    setEditingMovement(conversionMovement as any);
-    setShowNewMovementModal(true);
+    openModal('movement', { editingMovement: conversionMovement as any });
   };
 
   const handleDelete = (movement: Movement) => {
@@ -1062,10 +1059,7 @@ export default function Movements() {
       </Button>,
       <Button
         key="new-movement"
-        onClick={() => {
-          setEditingMovement(null);
-          setShowNewMovementModal(true);
-        }}
+        onClick={() => openModal('movement')}
         className="h-8"
       >
         <Plus className="mr-2 h-4 w-4" />
@@ -1175,10 +1169,7 @@ export default function Movements() {
             description="Crea el primer movimiento del proyecto"
             action={
               <Button
-                onClick={() => {
-                  setEditingMovement(null);
-                  setShowNewMovementModal(true);
-                }}
+                onClick={() => openModal('movement')}
                 className="mt-4"
               >
                 <Plus className="h-4 w-4 mr-2" />
@@ -1189,17 +1180,7 @@ export default function Movements() {
         }
       />
 
-      {/* New Movement Modal */}
-      {showNewMovementModal && (
-        <NewMovementModal
-          open={showNewMovementModal}
-          onClose={() => {
-            setShowNewMovementModal(false);
-            setEditingMovement(null);
-          }}
-          editingMovement={editingMovement}
-        />
-      )}
+      {/* Modal Factory will handle the movement modal */}
 
       {/* Import Movements Modal */}
       <ImportMovementsModal
