@@ -227,11 +227,6 @@ function Router() {
         </Route>
 
         {/* Other Routes */}
-        <Route path="/tasks">
-          <ProtectedRoute>
-            <OrganizationTasks />
-          </ProtectedRoute>
-        </Route>
         <Route path="/changelog">
           <ProtectedRoute>
             <Changelog />

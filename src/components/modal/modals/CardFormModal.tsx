@@ -228,7 +228,7 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
   return (
     <>
       {headerContent}
-      <div className="p-4 overflow-y-auto text-sm space-y-4">
+      <div className="p-2 overflow-y-auto text-sm space-y-4">
         {editPanel}
       </div>
       {footerContent}
