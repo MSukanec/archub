@@ -289,13 +289,13 @@ export function TestFormModal({ open, onClose }: TestFormModalProps) {
       case 'subform':
         return (
           <FormModalFooter
-            leftActions={
-              <Button variant="outline" onClick={() => setPanel('edit')}>
+            leftButton={
+              <Button variant="secondary" className="w-full" onClick={() => setPanel('edit')}>
                 Cancelar
               </Button>
             }
-            rightActions={
-              <Button onClick={() => setPanel('edit')}>
+            rightButton={
+              <Button className="w-full" onClick={() => setPanel('edit')}>
                 <Save className="h-4 w-4 mr-2" />
                 Guardar Evento
               </Button>
@@ -305,44 +305,32 @@ export function TestFormModal({ open, onClose }: TestFormModalProps) {
       case 'edit':
         return (
           <FormModalFooter
-            leftActions={
-              <Button variant="outline" onClick={() => setPanel('view')}>
+            leftButton={
+              <Button variant="secondary" className="w-full" onClick={() => setPanel('view')}>
                 Cancelar Edición
               </Button>
             }
-            rightActions={
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setPanel('subform')}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Agregar Evento
-                </Button>
-                <Button onClick={() => setPanel('view')}>
-                  <Save className="h-4 w-4 mr-2" />
-                  Guardar Cambios
-                </Button>
-              </div>
+            rightButton={
+              <Button className="w-full" onClick={() => setPanel('view')}>
+                <Save className="h-4 w-4 mr-2" />
+                Guardar Cambios
+              </Button>
             }
           />
         );
       default:
         return (
           <FormModalFooter
-            leftActions={
+            leftButton={
               <Button variant="secondary" className="w-full" onClick={handleClose}>
                 Cancelar
               </Button>
             }
-            rightActions={
-              <div className="flex gap-2 w-full">
-                <Button variant="outline" className="flex-1" onClick={() => setPanel('edit')}>
-                  <Edit3 className="h-4 w-4 mr-2" />
-                  Editar
-                </Button>
-                <Button className="flex-1" onClick={() => setPanel('subform')}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Agregar Evento
-                </Button>
-              </div>
+            rightButton={
+              <Button className="w-full" onClick={() => setPanel('edit')}>
+                <Edit3 className="h-4 w-4 mr-2" />
+                Editar
+              </Button>
             }
           />
         );
