@@ -9,8 +9,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Plus, MoreHorizontal, List, Edit, Trash2, CheckCircle, Circle, ChevronRight } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
-import { NewCardModal } from '@/modals/tasks/NewCardModal';
 import { NewListModal } from '@/modals/tasks/NewListModal';
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
 import { useOrganizationMembers } from '@/hooks/use-organization-members';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -30,9 +30,9 @@ interface KanbanBoxProps {
 }
 
 export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onDeleteList, onDeleteCard, onCardEdit, loading }: KanbanBoxProps) {
-  const [newCardListId, setNewCardListId] = useState<string | null>(null);
   const [editingListId, setEditingListId] = useState<string | null>(null);
   const [completedAccordionState, setCompletedAccordionState] = useState<Record<string, boolean>>({});
+  const { openModal } = useGlobalModalStore();
   
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
@@ -222,7 +222,7 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
                         <div className="p-3">
                           {/* Add Card Button - Always show first */}
                           <Button
-                            onClick={() => setNewCardListId(list.id)}
+                            onClick={() => openModal('card', { listId: list.id })}
                             className="w-full mb-2 h-8 justify-start"
                           >
                             <Plus className="h-3 w-3 mr-2" />
@@ -561,14 +561,6 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
       </DragDropContext>
 
       {/* Modals */}
-      {newCardListId && (
-        <NewCardModal
-          listId={newCardListId}
-          open={!!newCardListId}
-          onClose={() => setNewCardListId(null)}
-        />
-      )}
-      
       {editingListId && (
         <NewListModal
           boardId={boardId}

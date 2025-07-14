@@ -3,6 +3,7 @@ import { useGlobalModalStore } from './useGlobalModalStore';
 import { MemberFormModal } from '../modals/MemberFormModal';
 import { GalleryFormModal } from '../modals/GalleryFormModal';
 import { BoardFormModal } from '../modals/BoardFormModal';
+import { CardFormModal } from '../modals/CardFormModal';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
@@ -15,6 +16,8 @@ export function ModalFactory() {
         return <GalleryFormModal />;
       case 'board':
         return <BoardFormModal modalData={data} onClose={closeModal} />;
+      case 'card':
+        return <CardFormModal modalData={data} onClose={closeModal} />;
       default:
         return null;
     }
