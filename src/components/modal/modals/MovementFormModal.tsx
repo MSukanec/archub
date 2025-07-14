@@ -116,7 +116,29 @@ function MovementFormModalFunction({ modalData, onClose }: MovementFormModalProp
     if (defaultCurrency && !editingMovement) {
       form.setValue('currency_id', defaultCurrency.id)
     }
-  }, [currentUser, defaultCurrency, editingMovement, form])
+    // Set default wallet if available
+    const defaultWallet = wallets?.find(w => w.is_default)
+    if (defaultWallet && !editingMovement) {
+      form.setValue('wallet_id', defaultWallet.wallets?.id || '')
+    }
+  }, [currentUser, defaultCurrency, wallets, editingMovement, form])
+
+  // Also set values when form is reset
+  useEffect(() => {
+    if (currentUser && defaultCurrency && !editingMovement) {
+      const defaultWallet = wallets?.find(w => w.is_default)
+      form.reset({
+        movement_date: new Date(),
+        amount: 0,
+        exchange_rate: undefined,
+        description: '',
+        created_by: currentUser.id,
+        type_id: '',
+        currency_id: defaultCurrency.id,
+        wallet_id: defaultWallet?.wallets?.id || ''
+      })
+    }
+  }, [currentUser, defaultCurrency, wallets, editingMovement, form])
 
   // Set values when editing
   useEffect(() => {
@@ -200,7 +222,7 @@ function MovementFormModalFunction({ modalData, onClose }: MovementFormModalProp
   )
 
   const editPanel = (
-    <FormModalBody columns={1}>
+    <div className="p-6">
       <Form {...form}>
         <form 
           onSubmit={form.handleSubmit(onSubmit)}
@@ -387,7 +409,7 @@ function MovementFormModalFunction({ modalData, onClose }: MovementFormModalProp
           />
         </form>
       </Form>
-    </FormModalBody>
+    </div>
   )
 
   const headerContent = (
@@ -399,10 +421,10 @@ function MovementFormModalFunction({ modalData, onClose }: MovementFormModalProp
 
   const footerContent = (
     <FormModalFooter
-      onCancel={onClose}
-      onSubmit={() => form.handleSubmit(onSubmit)()}
-      submitText={editingMovement ? "Actualizar" : "Guardar"}
-      isLoading={isLoading}
+      leftLabel="Cancelar"
+      onLeftClick={onClose}
+      rightLabel={editingMovement ? "Actualizar" : "Guardar"}
+      onRightClick={() => form.handleSubmit(onSubmit)()}
     />
   )
 
